@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -65,7 +45,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
  */
 @DatatypeDef(name="SampledDataDt") 
 public class SampledDataDt
-        extends  BaseIdentifiableElement         implements ICompositeDatatype  {
+        extends  BaseIdentifiableElement         implements ICompositeDatatype
+{
 
 	/**
 	 * Constructor
@@ -173,32 +154,6 @@ public class SampledDataDt
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
      * </p> 
 	 */
-	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>origin</b> (Zero value and units)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
-     * </p> 
-	 */
-	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>origin</b> (Zero value and units)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
-     * </p> 
-	 */
 	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -214,6 +169,32 @@ public class SampledDataDt
 	 */
 	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.PathSpecification;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -50,7 +49,6 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -60,7 +58,6 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -70,13 +67,12 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.QualifiedDateParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
@@ -1242,7 +1238,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public Patient getPatientWithDOB(@RequiredParam(name = "dob") QualifiedDateParam theDob) {
+		public Patient getPatientWithDOB(@RequiredParam(name = "dob") DateParam theDob) {
 			Patient next = getIdToPatient().get("1");
 			if (theDob.getComparator() != null) {
 				next.addIdentifier().setValue(theDob.getComparator().getCode());
@@ -1255,12 +1251,12 @@ public class ResfulServerMethodTest {
 
 		@Search()
 		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringDt theString,
-				@IncludeParam(allow = { "include1", "include2", "include3" }) List<PathSpecification> theIncludes) {
+				@IncludeParam(allow = { "include1", "include2", "include3" }) List<Include> theIncludes) {
 			Patient next = getIdToPatient().get("1");
 
 			next.addCommunication().setText(theString.getValue());
 
-			for (PathSpecification line : theIncludes) {
+			for (Include line : theIncludes) {
 				next.addAddress().addLine(line.getValue());
 			}
 

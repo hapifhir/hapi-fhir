@@ -1,11 +1,48 @@
-<web-app 
-	xmlns="http://java.sun.com/xml/ns/javaee" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	version="3.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5">
 
 	<!-- 
-	Nothing needs to be here, since the servlet class contains
-	annotations describing its mapping.
-	 -->
+		The following entries are all here to enable the tester web application, and
+		are not actually a part of the underlying FHIR server. 
+	 -->     
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+			/WEB-INF/hapi-fhir-tester-application-context.xml
+			/WEB-INF/hapi-fhir-tester-config.xml
+		</param-value>
+	</context-param>
+	<servlet>
+		<servlet-name>spring</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				/WEB-INF/hapi-fhir-tester-application-context.xml
+				/WEB-INF/hapi-fhir-tester-config.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/tester/*</url-pattern>
+	</servlet-mapping>     
 
+	<!-- 
+		The following entries are for the actual underlying FHIR server. 
+	 -->     
+	<servlet>
+		<servlet-name>fhir</servlet-name>
+		<servlet-class>ca.uhn.example.servlet.ExampleRestfulServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>fhir</servlet-name>
+		<url-pattern>/fhir/*</url-pattern>
+	</servlet-mapping>     
+
+     
 </web-app>

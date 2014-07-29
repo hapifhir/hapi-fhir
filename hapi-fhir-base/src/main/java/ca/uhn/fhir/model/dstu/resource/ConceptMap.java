@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -100,7 +80,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map", type="token")
+	@SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -121,7 +101,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token")
+	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token"  )
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -142,7 +122,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string")
+	@SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -163,7 +143,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string")
+	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string"  )
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -184,7 +164,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string")
+	@SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string"  )
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -205,7 +185,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token")
+	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -226,7 +206,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date")
+	@SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -247,7 +227,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map", type="reference")
+	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map", type="reference"  )
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -274,7 +254,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="ConceptMap.target", description="", type="reference")
+	@SearchParamDefinition(name="target", path="ConceptMap.target", description="", type="reference"  )
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -301,7 +281,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map", type="token")
+	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map", type="token"  )
 	public static final String SP_SYSTEM = "system";
 
 	/**
@@ -322,7 +302,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dependson", path="ConceptMap.concept.dependsOn.concept", description="", type="token")
+	@SearchParamDefinition(name="dependson", path="ConceptMap.concept.dependsOn.concept", description="", type="token"  )
 	public static final String SP_DEPENDSON = "dependson";
 
 	/**
@@ -343,7 +323,7 @@ public class ConceptMap extends BaseResource implements IResource {
 	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="", type="token")
+	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="", type="token"  )
 	public static final String SP_PRODUCT = "product";
 
 	/**
@@ -947,8 +927,8 @@ public class ConceptMap extends BaseResource implements IResource {
      * The date that the concept map status was last changed
      * </p> 
 	 */
-	public ConceptMap setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public ConceptMap setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -960,8 +940,8 @@ public class ConceptMap extends BaseResource implements IResource {
      * The date that the concept map status was last changed
      * </p> 
 	 */
-	public ConceptMap setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public ConceptMap setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

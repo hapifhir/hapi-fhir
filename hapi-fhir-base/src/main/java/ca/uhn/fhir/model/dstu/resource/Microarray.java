@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -94,7 +74,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.subject.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray", type="reference")
+	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -121,7 +101,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.identity</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray", type="string")
+	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray", type="string"  )
 	public static final String SP_GENE = "gene";
 
 	/**
@@ -142,7 +122,7 @@ public class Microarray extends BaseResource implements IResource {
 	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene", type="string")
+	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene", type="string"  )
 	public static final String SP_COORDINATE = "coordinate";
 
 	/**
@@ -332,8 +312,8 @@ public class Microarray extends BaseResource implements IResource {
      * Date when result of the microarray is updated
      * </p> 
 	 */
-	public Microarray setDateWithDayPrecision( Date theDate) {
-		myDate = new DateDt(theDate); 
+	public Microarray setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -345,8 +325,8 @@ public class Microarray extends BaseResource implements IResource {
      * Date when result of the microarray is updated
      * </p> 
 	 */
-	public Microarray setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateDt(theDate, thePrecision); 
+	public Microarray setDateWithDayPrecision( Date theDate) {
+		myDate = new DateDt(theDate); 
 		return this; 
 	}
 

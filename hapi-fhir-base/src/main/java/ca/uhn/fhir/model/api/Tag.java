@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.net.URI;
 

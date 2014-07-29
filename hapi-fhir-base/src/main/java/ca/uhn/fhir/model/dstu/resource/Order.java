@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -95,7 +75,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Order.date", description="", type="date")
+	@SearchParamDefinition(name="date", path="Order.date", description="", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -116,7 +96,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Order.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="Order.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -143,7 +123,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="Order.source", description="", type="reference")
+	@SearchParamDefinition(name="source", path="Order.source", description="", type="reference"  )
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -170,7 +150,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="Order.target", description="", type="reference")
+	@SearchParamDefinition(name="target", path="Order.target", description="", type="reference"  )
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -197,7 +177,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.authority</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="authority", path="Order.authority", description="", type="reference")
+	@SearchParamDefinition(name="authority", path="Order.authority", description="", type="reference"  )
 	public static final String SP_AUTHORITY = "authority";
 
 	/**
@@ -224,7 +204,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when_code", path="Order.when.code", description="", type="token")
+	@SearchParamDefinition(name="when_code", path="Order.when.code", description="", type="token"  )
 	public static final String SP_WHEN_CODE = "when_code";
 
 	/**
@@ -245,7 +225,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.when.schedule</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when", path="Order.when.schedule", description="", type="date")
+	@SearchParamDefinition(name="when", path="Order.when.schedule", description="", type="date"  )
 	public static final String SP_WHEN = "when";
 
 	/**
@@ -266,7 +246,7 @@ public class Order extends BaseResource implements IResource {
 	 * Path: <b>Order.detail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="detail", path="Order.detail", description="", type="reference")
+	@SearchParamDefinition(name="detail", path="Order.detail", description="", type="reference"  )
 	public static final String SP_DETAIL = "detail";
 
 	/**
@@ -500,8 +480,8 @@ public class Order extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Order setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Order setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -513,8 +493,8 @@ public class Order extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Order setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Order setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

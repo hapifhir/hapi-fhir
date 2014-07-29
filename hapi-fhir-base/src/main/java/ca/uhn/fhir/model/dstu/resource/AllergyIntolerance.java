@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -94,7 +74,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity", type="token")
+	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -115,7 +95,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity", type="reference")
+	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity", type="reference"  )
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -142,7 +122,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.", type="date")
+	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +143,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity", type="token")
+	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -184,7 +164,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about", type="reference")
+	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -211,7 +191,7 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 	 * Path: <b>AllergyIntolerance.recorder</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference")
+	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference"  )
 	public static final String SP_RECORDER = "recorder";
 
 	/**
@@ -539,8 +519,8 @@ public class AllergyIntolerance extends BaseResource implements IResource {
      * Date when the sensitivity was recorded
      * </p> 
 	 */
-	public AllergyIntolerance setRecordedDateWithSecondsPrecision( Date theDate) {
-		myRecordedDate = new DateTimeDt(theDate); 
+	public AllergyIntolerance setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -552,8 +532,8 @@ public class AllergyIntolerance extends BaseResource implements IResource {
      * Date when the sensitivity was recorded
      * </p> 
 	 */
-	public AllergyIntolerance setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
+	public AllergyIntolerance setRecordedDateWithSecondsPrecision( Date theDate) {
+		myRecordedDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

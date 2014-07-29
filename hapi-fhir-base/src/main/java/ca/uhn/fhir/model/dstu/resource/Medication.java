@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -94,7 +74,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Medication.code", description="", type="token")
+	@SearchParamDefinition(name="code", path="Medication.code", description="", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -115,7 +95,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Medication.name", description="", type="string")
+	@SearchParamDefinition(name="name", path="Medication.name", description="", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -136,7 +116,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.manufacturer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="", type="reference")
+	@SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="", type="reference"  )
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -163,7 +143,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.form</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="form", path="Medication.product.form", description="", type="token")
+	@SearchParamDefinition(name="form", path="Medication.product.form", description="", type="token"  )
 	public static final String SP_FORM = "form";
 
 	/**
@@ -184,7 +164,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.product.ingredient.item</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="", type="reference")
+	@SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="", type="reference"  )
 	public static final String SP_INGREDIENT = "ingredient";
 
 	/**
@@ -211,7 +191,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.container</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="container", path="Medication.package.container", description="", type="token")
+	@SearchParamDefinition(name="container", path="Medication.package.container", description="", type="token"  )
 	public static final String SP_CONTAINER = "container";
 
 	/**
@@ -232,7 +212,7 @@ public class Medication extends BaseResource implements IResource {
 	 * Path: <b>Medication.package.content.item</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="content", path="Medication.package.content.item", description="", type="reference")
+	@SearchParamDefinition(name="content", path="Medication.package.content.item", description="", type="reference"  )
 	public static final String SP_CONTENT = "content";
 
 	/**

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -99,7 +79,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.kind</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="kind", path="Supply.kind", description="", type="token")
+	@SearchParamDefinition(name="kind", path="Supply.kind", description="", type="token"  )
 	public static final String SP_KIND = "kind";
 
 	/**
@@ -120,7 +100,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -141,7 +121,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Supply.status", description="", type="token")
+	@SearchParamDefinition(name="status", path="Supply.status", description="", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -162,7 +142,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Supply.patient", description="", type="reference")
+	@SearchParamDefinition(name="patient", path="Supply.patient", description="", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -189,7 +169,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.supplier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="", type="reference")
+	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="", type="reference"  )
 	public static final String SP_SUPPLIER = "supplier";
 
 	/**
@@ -216,7 +196,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="", type="token")
+	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="", type="token"  )
 	public static final String SP_DISPENSEID = "dispenseid";
 
 	/**
@@ -237,7 +217,7 @@ public class Supply extends BaseResource implements IResource {
 	 * Path: <b>Supply.dispense.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="", type="token")
+	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="", type="token"  )
 	public static final String SP_DISPENSESTATUS = "dispensestatus";
 
 	/**
@@ -852,32 +832,6 @@ public class Supply extends BaseResource implements IResource {
      * The amount of supply that has been dispensed. Includes unit of measure.
      * </p> 
 	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount dispensed)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of supply that has been dispensed. Includes unit of measure.
-     * </p> 
-	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount dispensed)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of supply that has been dispensed. Includes unit of measure.
-     * </p> 
-	 */
 	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -893,6 +847,32 @@ public class Supply extends BaseResource implements IResource {
 	 */
 	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of supply that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount dispensed)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of supply that has been dispensed. Includes unit of measure.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 

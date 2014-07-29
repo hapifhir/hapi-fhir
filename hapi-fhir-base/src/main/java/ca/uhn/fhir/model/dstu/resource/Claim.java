@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -97,7 +77,7 @@ public class Claim extends BaseResource implements IResource {
 	 * Path: <b>Claim.number</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="number", path="Claim.number", description="", type="token")
+	@SearchParamDefinition(name="number", path="Claim.number", description="", type="token"  )
 	public static final String SP_NUMBER = "number";
 
 	/**
@@ -304,8 +284,8 @@ public class Claim extends BaseResource implements IResource {
      * The date when the enclosed suite of services were performed or completed
      * </p> 
 	 */
-	public Claim setServicedateWithDayPrecision( Date theDate) {
-		myServicedate = new DateDt(theDate); 
+	public Claim setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myServicedate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -317,8 +297,8 @@ public class Claim extends BaseResource implements IResource {
      * The date when the enclosed suite of services were performed or completed
      * </p> 
 	 */
-	public Claim setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myServicedate = new DateDt(theDate, thePrecision); 
+	public Claim setServicedateWithDayPrecision( Date theDate) {
+		myServicedate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -825,8 +805,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Patient setBirthdateWithDayPrecision( Date theDate) {
-		myBirthdate = new DateDt(theDate); 
+	public Patient setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthdate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -838,8 +818,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Patient setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthdate = new DateDt(theDate, thePrecision); 
+	public Patient setBirthdateWithDayPrecision( Date theDate) {
+		myBirthdate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -1558,8 +1538,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public CoverageSubscriber setBirthdateWithDayPrecision( Date theDate) {
-		myBirthdate = new DateDt(theDate); 
+	public CoverageSubscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthdate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1571,8 +1551,8 @@ public class Claim extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public CoverageSubscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthdate = new DateDt(theDate, thePrecision); 
+	public CoverageSubscriber setBirthdateWithDayPrecision( Date theDate) {
+		myBirthdate = new DateDt(theDate); 
 		return this; 
 	}
 

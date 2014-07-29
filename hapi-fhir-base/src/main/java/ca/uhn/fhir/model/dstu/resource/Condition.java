@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -101,7 +81,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token")
+	@SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -122,7 +102,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition", type="token")
+	@SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -143,7 +123,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.severity</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token")
+	@SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token"  )
 	public static final String SP_SEVERITY = "severity";
 
 	/**
@@ -164,7 +144,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.category</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token")
+	@SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token"  )
 	public static final String SP_CATEGORY = "category";
 
 	/**
@@ -185,7 +165,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.onset[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="onset", path="Condition.onset[x]", description="When the Condition started (if started on a date)", type="date")
+	@SearchParamDefinition(name="onset", path="Condition.onset[x]", description="When the Condition started (if started on a date)", type="date"  )
 	public static final String SP_ONSET = "onset";
 
 	/**
@@ -206,7 +186,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Condition.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="Condition.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -233,7 +213,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.encounter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="encounter", path="Condition.encounter", description="", type="reference")
+	@SearchParamDefinition(name="encounter", path="Condition.encounter", description="", type="reference"  )
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -260,7 +240,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.asserter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="asserter", path="Condition.asserter", description="", type="reference")
+	@SearchParamDefinition(name="asserter", path="Condition.asserter", description="", type="reference"  )
 	public static final String SP_ASSERTER = "asserter";
 
 	/**
@@ -287,7 +267,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.dateAsserted</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="", type="date")
+	@SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="", type="date"  )
 	public static final String SP_DATE_ASSERTED = "date-asserted";
 
 	/**
@@ -308,7 +288,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.evidence.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="", type="token")
+	@SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="", type="token"  )
 	public static final String SP_EVIDENCE = "evidence";
 
 	/**
@@ -329,7 +309,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.location.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Condition.location.code", description="", type="token")
+	@SearchParamDefinition(name="location", path="Condition.location.code", description="", type="token"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -350,7 +330,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-item", path="Condition.relatedItem.target", description="", type="reference")
+	@SearchParamDefinition(name="related-item", path="Condition.relatedItem.target", description="", type="reference"  )
 	public static final String SP_RELATED_ITEM = "related-item";
 
 	/**
@@ -377,7 +357,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.stage.summary</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="stage", path="Condition.stage.summary", description="", type="token")
+	@SearchParamDefinition(name="stage", path="Condition.stage.summary", description="", type="token"  )
 	public static final String SP_STAGE = "stage";
 
 	/**
@@ -398,7 +378,7 @@ public class Condition extends BaseResource implements IResource {
 	 * Path: <b>Condition.relatedItem.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="related-code", path="Condition.relatedItem.code", description="", type="token")
+	@SearchParamDefinition(name="related-code", path="Condition.relatedItem.code", description="", type="token"  )
 	public static final String SP_RELATED_CODE = "related-code";
 
 	/**
@@ -774,8 +754,8 @@ public class Condition extends BaseResource implements IResource {
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected
      * </p> 
 	 */
-	public Condition setDateAssertedWithDayPrecision( Date theDate) {
-		myDateAsserted = new DateDt(theDate); 
+	public Condition setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateAsserted = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -787,8 +767,8 @@ public class Condition extends BaseResource implements IResource {
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected
      * </p> 
 	 */
-	public Condition setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateAsserted = new DateDt(theDate, thePrecision); 
+	public Condition setDateAssertedWithDayPrecision( Date theDate) {
+		myDateAsserted = new DateDt(theDate); 
 		return this; 
 	}
 

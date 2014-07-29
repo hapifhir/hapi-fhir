@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -104,7 +84,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  Administration / Refusal Date", type="date")
+	@SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  Administration / Refusal Date", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -125,7 +105,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccinationProtocol.doseSequence</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="", type="number")
+	@SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="", type="number"  )
 	public static final String SP_DOSE_SEQUENCE = "dose-sequence";
 
 	/**
@@ -146,7 +126,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Immunization.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Immunization.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -167,7 +147,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference")
+	@SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -194,7 +174,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.lotNumber</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string")
+	@SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string"  )
 	public static final String SP_LOT_NUMBER = "lot-number";
 
 	/**
@@ -215,7 +195,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.manufacturer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference")
+	@SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference"  )
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -242,7 +222,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.performer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference")
+	@SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference"  )
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -269,7 +249,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.detail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="", type="reference")
+	@SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="", type="reference"  )
 	public static final String SP_REACTION = "reaction";
 
 	/**
@@ -296,7 +276,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.reaction.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="", type="date")
+	@SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="", type="date"  )
 	public static final String SP_REACTION_DATE = "reaction-date";
 
 	/**
@@ -317,7 +297,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.reason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="", type="token")
+	@SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="", type="token"  )
 	public static final String SP_REASON = "reason";
 
 	/**
@@ -338,7 +318,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.explanation.refusalReason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="refusal-reason", path="Immunization.explanation.refusalReason", description="Explanation of refusal / exemption", type="token")
+	@SearchParamDefinition(name="refusal-reason", path="Immunization.explanation.refusalReason", description="Explanation of refusal / exemption", type="token"  )
 	public static final String SP_REFUSAL_REASON = "refusal-reason";
 
 	/**
@@ -359,7 +339,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.refusedIndicator</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="refused", path="Immunization.refusedIndicator", description="", type="token")
+	@SearchParamDefinition(name="refused", path="Immunization.refusedIndicator", description="", type="token"  )
 	public static final String SP_REFUSED = "refused";
 
 	/**
@@ -380,7 +360,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.requester</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference")
+	@SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference"  )
 	public static final String SP_REQUESTER = "requester";
 
 	/**
@@ -407,7 +387,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Immunization.subject", description="The subject of the vaccination event / refusal", type="reference")
+	@SearchParamDefinition(name="subject", path="Immunization.subject", description="The subject of the vaccination event / refusal", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -434,7 +414,7 @@ public class Immunization extends BaseResource implements IResource {
 	 * Path: <b>Immunization.vaccineType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered", type="token")
+	@SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered", type="token"  )
 	public static final String SP_VACCINE_TYPE = "vaccine-type";
 
 	/**
@@ -724,8 +704,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine administered or was to be administered
      * </p> 
 	 */
-	public Immunization setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Immunization setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -737,8 +717,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine administered or was to be administered
      * </p> 
 	 */
-	public Immunization setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Immunization setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1099,8 +1079,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine batch expires
      * </p> 
 	 */
-	public Immunization setExpirationDateWithDayPrecision( Date theDate) {
-		myExpirationDate = new DateDt(theDate); 
+	public Immunization setExpirationDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpirationDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1112,8 +1092,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date vaccine batch expires
      * </p> 
 	 */
-	public Immunization setExpirationDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpirationDate = new DateDt(theDate, thePrecision); 
+	public Immunization setExpirationDateWithDayPrecision( Date theDate) {
+		myExpirationDate = new DateDt(theDate); 
 		return this; 
 	}
 
@@ -1231,32 +1211,6 @@ public class Immunization extends BaseResource implements IResource {
      * The quantity of vaccine product that was administered
      * </p> 
 	 */
-	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The quantity of vaccine product that was administered
-     * </p> 
-	 */
-	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The quantity of vaccine product that was administered
-     * </p> 
-	 */
 	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -1272,6 +1226,32 @@ public class Immunization extends BaseResource implements IResource {
 	 */
 	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of vaccine product that was administered
+     * </p> 
+	 */
+	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of vaccine administered)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The quantity of vaccine product that was administered
+     * </p> 
+	 */
+	public Immunization setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1537,6 +1517,22 @@ public class Immunization extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Gets the first repetition for <b>reason</b> (Why immunization occurred),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Reasons why a vaccine was administered
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ImmunizationReasonCodesEnum> getReasonFirstRep() {
+		if (getReason().size() == 0) {
+			addReason();
+		}
+		return getReason().get(0);
+	}
+
+	/**
 	 * Add a value for <b>reason</b> (Why immunization occurred)
 	 *
      * <p>
@@ -1711,8 +1707,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date of reaction to the immunization
      * </p> 
 	 */
-	public Reaction setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Reaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1724,8 +1720,8 @@ public class Immunization extends BaseResource implements IResource {
      * Date of reaction to the immunization
      * </p> 
 	 */
-	public Reaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Reaction setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

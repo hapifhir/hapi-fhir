@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -101,7 +81,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Location.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Location.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -122,7 +102,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string")
+	@SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -143,7 +123,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token")
+	@SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -164,7 +144,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.address</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string")
+	@SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string"  )
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -185,7 +165,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token")
+	@SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -206,7 +186,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b>Location.partOf</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference")
+	@SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference"  )
 	public static final String SP_PARTOF = "partof";
 
 	/**
@@ -233,7 +213,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token")
+	@SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token"  )
 	public static final String SP_NEAR = "near";
 
 	/**
@@ -254,7 +234,7 @@ public class Location extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token")
+	@SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token"  )
 	public static final String SP_NEAR_DISTANCE = "near-distance";
 
 	/**

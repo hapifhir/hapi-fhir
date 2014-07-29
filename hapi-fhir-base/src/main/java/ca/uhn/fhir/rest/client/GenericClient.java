@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -804,7 +805,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IQuery and(ICriterion theCriterion) {
+		public IQuery and(ICriterion<?> theCriterion) {
 			myCriterion.add((ICriterionInternal) theCriterion);
 			return this;
 		}
@@ -895,7 +896,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IQuery where(ICriterion theCriterion) {
+		public IQuery where(ICriterion<?> theCriterion) {
 			myCriterion.add((ICriterionInternal) theCriterion);
 			return this;
 		}

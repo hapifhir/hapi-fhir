@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -103,7 +83,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token")
+	@SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -124,7 +104,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string")
+	@SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -145,7 +125,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string")
+	@SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string"  )
 	public static final String SP_FAMILY = "family";
 
 	/**
@@ -166,7 +146,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name", type="string")
+	@SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name", type="string"  )
 	public static final String SP_GIVEN = "given";
 
 	/**
@@ -187,7 +167,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string")
+	@SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string"  )
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -208,7 +188,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.telecom</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="string")
+	@SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="string"  )
 	public static final String SP_TELECOM = "telecom";
 
 	/**
@@ -229,7 +209,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.address</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string")
+	@SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string"  )
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -250,7 +230,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.gender</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token")
+	@SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token"  )
 	public static final String SP_GENDER = "gender";
 
 	/**
@@ -271,7 +251,7 @@ public class Practitioner extends BaseResource implements IResource {
 	 * Path: <b>Practitioner.organization</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="organization", path="Practitioner.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference")
+	@SearchParamDefinition(name="organization", path="Practitioner.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference"  )
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -738,8 +718,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public Practitioner setBirthDateWithSecondsPrecision( Date theDate) {
-		myBirthDate = new DateTimeDt(theDate); 
+	public Practitioner setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -751,8 +731,8 @@ public class Practitioner extends BaseResource implements IResource {
      * The date and time of birth for the practitioner
      * </p> 
 	 */
-	public Practitioner setBirthDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthDate = new DateTimeDt(theDate, thePrecision); 
+	public Practitioner setBirthDateWithSecondsPrecision( Date theDate) {
+		myBirthDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -896,6 +876,22 @@ public class Practitioner extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Gets the first repetition for <b>role</b> (Roles which this practitioner may perform),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Roles which this practitioner is authorized to perform for the organization
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<PractitionerRoleEnum> getRoleFirstRep() {
+		if (getRole().size() == 0) {
+			addRole();
+		}
+		return getRole().get(0);
+	}
+
+	/**
 	 * Add a value for <b>role</b> (Roles which this practitioner may perform)
 	 *
      * <p>
@@ -969,6 +965,22 @@ public class Practitioner extends BaseResource implements IResource {
 		BoundCodeableConceptDt<PractitionerSpecialtyEnum> retVal = new BoundCodeableConceptDt<PractitionerSpecialtyEnum>(PractitionerSpecialtyEnum.VALUESET_BINDER, theValue);
 		getSpecialty().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>specialty</b> (Specific specialty of the practitioner),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific specialty of the practitioner
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<PractitionerSpecialtyEnum> getSpecialtyFirstRep() {
+		if (getSpecialty().size() == 0) {
+			addSpecialty();
+		}
+		return getSpecialty().get(0);
 	}
 
 	/**

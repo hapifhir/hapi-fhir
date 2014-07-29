@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -99,7 +79,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.symptom.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="symptom", path="AdverseReaction.symptom.code", description="One of the symptoms of the reaction", type="token")
+	@SearchParamDefinition(name="symptom", path="AdverseReaction.symptom.code", description="One of the symptoms of the reaction", type="token"  )
 	public static final String SP_SYMPTOM = "symptom";
 
 	/**
@@ -120,7 +100,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.exposure.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity", type="reference")
+	@SearchParamDefinition(name="substance", path="AdverseReaction.exposure.substance", description="The name or code of the substance that produces the sensitivity", type="reference"  )
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -147,7 +127,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="AdverseReaction.date", description="The date of the reaction", type="date")
+	@SearchParamDefinition(name="date", path="AdverseReaction.date", description="The date of the reaction", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -168,7 +148,7 @@ public class AdverseReaction extends BaseResource implements IResource {
 	 * Path: <b>AdverseReaction.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about", type="reference")
+	@SearchParamDefinition(name="subject", path="AdverseReaction.subject", description="The subject that the sensitivity is about", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -384,8 +364,8 @@ public class AdverseReaction extends BaseResource implements IResource {
      * The date (and possibly time) when the reaction began
      * </p> 
 	 */
-	public AdverseReaction setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public AdverseReaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -397,8 +377,8 @@ public class AdverseReaction extends BaseResource implements IResource {
      * The date (and possibly time) when the reaction began
      * </p> 
 	 */
-	public AdverseReaction setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public AdverseReaction setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -833,8 +813,8 @@ public class AdverseReaction extends BaseResource implements IResource {
      * Identifies the initial date of the exposure that is suspected to be related to the reaction
      * </p> 
 	 */
-	public Exposure setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Exposure setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -846,8 +826,8 @@ public class AdverseReaction extends BaseResource implements IResource {
      * Identifies the initial date of the exposure that is suspected to be related to the reaction
      * </p> 
 	 */
-	public Exposure setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Exposure setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

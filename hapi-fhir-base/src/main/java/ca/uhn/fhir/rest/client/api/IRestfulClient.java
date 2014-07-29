@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.client.api;
  */
 
 
-import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
 
 import ca.uhn.fhir.context.FhirContext;

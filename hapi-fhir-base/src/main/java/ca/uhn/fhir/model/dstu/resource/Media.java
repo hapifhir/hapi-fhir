@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -96,7 +76,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Media.type", description="", type="token")
+	@SearchParamDefinition(name="type", path="Media.type", description="", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -117,7 +97,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subtype</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subtype", path="Media.subtype", description="", type="token")
+	@SearchParamDefinition(name="subtype", path="Media.subtype", description="", type="token"  )
 	public static final String SP_SUBTYPE = "subtype";
 
 	/**
@@ -138,7 +118,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Media.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Media.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -159,7 +139,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Media.dateTime", description="", type="date")
+	@SearchParamDefinition(name="date", path="Media.dateTime", description="", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -180,7 +160,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Media.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="Media.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -207,7 +187,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.operator</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="operator", path="Media.operator", description="", type="reference")
+	@SearchParamDefinition(name="operator", path="Media.operator", description="", type="reference"  )
 	public static final String SP_OPERATOR = "operator";
 
 	/**
@@ -234,7 +214,7 @@ public class Media extends BaseResource implements IResource {
 	 * Path: <b>Media.view</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="view", path="Media.view", description="", type="token")
+	@SearchParamDefinition(name="view", path="Media.view", description="", type="token"  )
 	public static final String SP_VIEW = "view";
 
 	/**
@@ -561,8 +541,8 @@ public class Media extends BaseResource implements IResource {
      * When the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the end of the recording
      * </p> 
 	 */
-	public Media setDateTimeWithSecondsPrecision( Date theDate) {
-		myDateTime = new DateTimeDt(theDate); 
+	public Media setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -574,8 +554,8 @@ public class Media extends BaseResource implements IResource {
      * When the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the end of the recording
      * </p> 
 	 */
-	public Media setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new DateTimeDt(theDate, thePrecision); 
+	public Media setDateTimeWithSecondsPrecision( Date theDate) {
+		myDateTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 

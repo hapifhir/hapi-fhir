@@ -16,34 +16,10 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import java.math.BigDecimal;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -72,7 +48,8 @@ import ca.uhn.fhir.model.primitive.UriDt;
  */
 @DatatypeDef(name="QuantityDt") 
 public class QuantityDt
-        extends  BaseQuantityDt       implements ICompositeDatatype  , IQueryParameterType {
+        extends  BaseQuantityDt         implements ICompositeDatatype
+{
 
 	/**
 	 * Constructor
@@ -141,70 +118,6 @@ public class QuantityDt
 		setUnits(theUnits);
 	}
 
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
-		setCode((CodeDt) null);
-		setSystem((UriDt) null);
-		setUnits((StringDt) null);
-		setValue((DecimalDt) null);
-
-		if (theValue == null) {
-			return;
-		}
-		String[] parts = theValue.split("\\|");
-		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
-			if (parts[0].startsWith("<=")) {
-				setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
-				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith("<")) {
-				setComparator(QuantityCompararatorEnum.LESSTHAN);
-				setValue(new BigDecimal(parts[0].substring(1)));
-			} else if (parts[0].startsWith(">=")) {
-				setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
-				setValue(new BigDecimal(parts[0].substring(2)));
-			} else if (parts[0].startsWith(">")) {
-				setComparator(QuantityCompararatorEnum.GREATERTHAN);
-				setValue(new BigDecimal(parts[0].substring(1)));
-			} else {
-				setValue(new BigDecimal(parts[0]));
-			}
-		}
-		if (parts.length > 1 && StringUtils.isNotBlank(parts[1])) {
-			setSystem(parts[1]);
-		}
-		if (parts.length > 2 && StringUtils.isNotBlank(parts[2])) {
-			setUnits(parts[2]);
-		}
-
-	}
-
-	@Override
-	public String getValueAsQueryToken() {
-		StringBuilder b= new StringBuilder();
-		if (getComparator() != null) {
-			b.append(getComparator().getValue());
-		}
-		if (!getValue().isEmpty()) {
-			b.append(getValue().getValueAsString());
-		}
-		b.append('|');
-		if (!getSystem().isEmpty()) {
-		b.append(getSystem().getValueAsString());
-		}
-		b.append('|');
-		if (!getUnits().isEmpty()) {
-		b.append(getUnits().getValueAsString());
-		}
-		
-		return b.toString();
-	}
-	
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
-	}	
 
 	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
 	@Description(

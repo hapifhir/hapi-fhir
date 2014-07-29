@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -94,7 +74,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.subject.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file", type="reference")
+	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -121,7 +101,7 @@ public class GVFMeta extends BaseResource implements IResource {
 	 * Path: <b>GVFMeta.sourceFile</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource", type="string")
+	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource", type="string"  )
 	public static final String SP_FILE = "file";
 
 	/**
@@ -519,8 +499,8 @@ public class GVFMeta extends BaseResource implements IResource {
      * Date when the file is updated
      * </p> 
 	 */
-	public GVFMeta setFileDateWithDayPrecision( Date theDate) {
-		myFileDate = new DateDt(theDate); 
+	public GVFMeta setFileDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myFileDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -532,8 +512,8 @@ public class GVFMeta extends BaseResource implements IResource {
      * Date when the file is updated
      * </p> 
 	 */
-	public GVFMeta setFileDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myFileDate = new DateDt(theDate, thePrecision); 
+	public GVFMeta setFileDateWithDayPrecision( Date theDate) {
+		myFileDate = new DateDt(theDate); 
 		return this; 
 	}
 

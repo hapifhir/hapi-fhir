@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Upgrade Guide - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Upgrading to HAPI FHIR 0.5">
+
+			<macro name="toc">
+			</macro>
+			
+			<p>
+				As the HAPI FHIR API begins to mature, a number of minor changes to the way the library works
+				have been introduced. Mostly these changes are made in order to make a consistent API across functions.
+				This page outlines how to upgrade your code to work with HAPI 0.5.
+			</p>
+
+			<subsection name="Global Changes">
+			
+				<ul>
+					<li>
+						The 
+						IdDt
+						class, which is used to represent resource IDs has been vastly
+						improved so that I can store any form of ID, including a simple alphanumeric 
+						ID (1234), a relative ID (Patient/1234), a fully qualified ID (http://foo/Patient/1234) or
+						even a version specific ID (Patient/1234/_history/2). As a result, a number
+						of version specific fields/methods have been deprocated. In general, if you 
+						need to get or set (or otherwise specify) the ID of a resource, you can simply
+					</li>
+				</ul>
+				
+			</subsection>
+
+			
+			<subsection name="Changes to Server Code">
+			
+				<ul>
+					<li>
+						If your server implements <code>_include</code>: The PathSpecification 
+						class has been renamed to Include. Any RESTful methods which 
+						have a parameter of type PathSpecification should simply use the Include
+						type instead, which is identical.
+					</li>
+					<li>
+						A set of <b>search</b> operation value parameters has been created, which
+						have names that match the value types described in the FHIR specification. For
+						example, Patient's "identifier" search param is a "token" type. Previous examples
+						in the HAPI documentation used a type of IdentifierDt for this parameter. A new
+						class called TokenParam, as well as repeatable extensions called TokenOrListParam
+						and TokenAndListParam have been created and should be used instead. 
+						See the
+						<a href="./doc_rest_operations.html#type_search">RESTful Operations</a> search section
+						for information on these new types.
+					</li>
+				</ul>
+			
+			</subsection>
+			
+			<subsection name="Changes to Client Code">
+				
+				<ul>
+					<li>
+						Fluent/generic client search parameter types have been renamed from [type]Param to [type]ClientParam,
+						to avoid conflicts with server types. So, for example the TokenParam class that can be used
+						in fluent searches is now called TokenClientParam.					
+					</li>
+				</ul>
+				
+			</subsection>
+					
+		</section>
+		
+	</body>
+
+</document>

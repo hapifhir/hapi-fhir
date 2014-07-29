@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -103,7 +83,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -124,7 +104,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Encounter.status", description="", type="token")
+	@SearchParamDefinition(name="status", path="Encounter.status", description="", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -145,7 +125,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date")
+	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -166,7 +146,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Encounter.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="Encounter.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -193,7 +173,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.length</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number")
+	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number"  )
 	public static final String SP_LENGTH = "length";
 
 	/**
@@ -214,7 +194,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.indication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="indication", path="Encounter.indication", description="", type="reference")
+	@SearchParamDefinition(name="indication", path="Encounter.indication", description="", type="reference"  )
 	public static final String SP_INDICATION = "indication";
 
 	/**
@@ -241,7 +221,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Encounter.location.location", description="", type="reference")
+	@SearchParamDefinition(name="location", path="Encounter.location.location", description="", type="reference"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -268,7 +248,7 @@ public class Encounter extends BaseResource implements IResource {
 	 * Path: <b>Encounter.location.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="", type="date")
+	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="", type="date"  )
 	public static final String SP_LOCATION_PERIOD = "location-period";
 
 	/**
@@ -604,23 +584,6 @@ public class Encounter extends BaseResource implements IResource {
 	}
 
 	/**
-	 * Gets the value(s) for <b>type</b> (Specific type of encounter).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)
-     * </p> 
-	 */
-	public BoundCodeableConceptDt<EncounterTypeEnum> getTypeFirstRep() {
-		if (getType().size()==0) {
-			addType();
-		}
-		return getType().get(0);
-	}
-
-	/**
 	 * Sets the value(s) for <b>type</b> (Specific type of encounter)
 	 *
      * <p>
@@ -648,6 +611,22 @@ public class Encounter extends BaseResource implements IResource {
 		BoundCodeableConceptDt<EncounterTypeEnum> retVal = new BoundCodeableConceptDt<EncounterTypeEnum>(EncounterTypeEnum.VALUESET_BINDER, theValue);
 		getType().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>type</b> (Specific type of encounter),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<EncounterTypeEnum> getTypeFirstRep() {
+		if (getType().size() == 0) {
+			addType();
+		}
+		return getType().get(0);
 	}
 
 	/**
@@ -1173,6 +1152,22 @@ public class Encounter extends BaseResource implements IResource {
 		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
 		getType().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>type</b> (Role of participant in encounter),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> getTypeFirstRep() {
+		if (getType().size() == 0) {
+			addType();
+		}
+		return getType().get(0);
 	}
 
 	/**

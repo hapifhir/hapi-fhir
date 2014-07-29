@@ -30,7 +30,7 @@ import ${import};
  */
 @DatatypeDef(name="${className}") 
 public class ${className}
-        extends #{if}( ${className}=="ResourceReferenceDt" || ${className}=="IdentifierDt" || ${className}=="CodingDt" || ${className}=='QuantityDt') Base${className} #{else} BaseIdentifiableElement #{end} 
+        extends #{if}( ${className}=="ResourceReferenceDt" || ${className}=="IdentifierDt" || ${className}=="CodingDt" || ${className}=='QuantityDt') || ${className}=='HumanNameDt') Base${className} #{else} BaseIdentifiableElement #{end} 
         implements ICompositeDatatype
 {
 

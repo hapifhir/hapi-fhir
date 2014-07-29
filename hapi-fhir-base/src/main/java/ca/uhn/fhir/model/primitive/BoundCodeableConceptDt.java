@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.Collection;
 import java.util.HashSet;

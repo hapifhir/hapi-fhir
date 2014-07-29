@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -97,7 +77,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.device</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity", type="reference")
+	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity", type="reference"  )
 	public static final String SP_DEVICE = "device";
 
 	/**
@@ -124,7 +104,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity", type="token")
+	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -145,7 +125,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.medication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference")
+	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference"  )
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -172,7 +152,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference")
+	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -199,7 +179,7 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 * Path: <b>MedicationStatement.whenGiven</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration", type="date")
+	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration", type="date"  )
 	public static final String SP_WHEN_GIVEN = "when-given";
 
 	/**
@@ -949,32 +929,6 @@ public class MedicationStatement extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of therapeutic or other substance given at one administration event.
-     * </p> 
-	 */
-	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of therapeutic or other substance given at one administration event.
-     * </p> 
-	 */
 	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -990,6 +944,32 @@ public class MedicationStatement extends BaseResource implements IResource {
 	 */
 	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount administered in one dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public Dosage setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -99,7 +79,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token")
+	@SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -120,7 +100,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token")
+	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -141,7 +121,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.actual</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="actual", path="Group.actual", description="", type="token")
+	@SearchParamDefinition(name="actual", path="Group.actual", description="", type="token"  )
 	public static final String SP_ACTUAL = "actual";
 
 	/**
@@ -162,7 +142,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Group.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Group.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -183,7 +163,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.member</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="member", path="Group.member", description="", type="reference")
+	@SearchParamDefinition(name="member", path="Group.member", description="", type="reference"  )
 	public static final String SP_MEMBER = "member";
 
 	/**
@@ -210,7 +190,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="", type="token")
+	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="", type="token"  )
 	public static final String SP_CHARACTERISTIC = "characteristic";
 
 	/**
@@ -231,7 +211,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.value[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="", type="token")
+	@SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="", type="token"  )
 	public static final String SP_VALUE = "value";
 
 	/**
@@ -252,7 +232,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>Group.characteristic.exclude</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="", type="token")
+	@SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="", type="token"  )
 	public static final String SP_EXCLUDE = "exclude";
 
 	/**
@@ -273,7 +253,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>characteristic & value</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value", type="composite")
+	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value", type="composite"  , compositeOf={  "characteristic",  "value" }  )
 	public static final String SP_CHARACTERISTIC_VALUE = "characteristic-value";
 
 	/**
@@ -284,7 +264,7 @@ public class Group extends BaseResource implements IResource {
 	 * Path: <b>characteristic & value</b><br/>
 	 * </p>
 	 */
-	public static final CompositeClientParam CHARACTERISTIC_VALUE = new CompositeClientParam(SP_CHARACTERISTIC_VALUE);
+	public static final CompositeClientParam<TokenClientParam, TokenClientParam> CHARACTERISTIC_VALUE = new CompositeClientParam<TokenClientParam, TokenClientParam>(SP_CHARACTERISTIC_VALUE);
 
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	

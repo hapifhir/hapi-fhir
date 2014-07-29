@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -105,7 +85,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -126,7 +106,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DocumentReference.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="DocumentReference.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -153,7 +133,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="DocumentReference.type", description="", type="token")
+	@SearchParamDefinition(name="type", path="DocumentReference.type", description="", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -174,7 +154,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.class</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="class", path="DocumentReference.class", description="", type="token")
+	@SearchParamDefinition(name="class", path="DocumentReference.class", description="", type="token"  )
 	public static final String SP_CLASS = "class";
 
 	/**
@@ -195,7 +175,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="DocumentReference.author", description="", type="reference")
+	@SearchParamDefinition(name="author", path="DocumentReference.author", description="", type="reference"  )
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -222,7 +202,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.custodian</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="", type="reference")
+	@SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="", type="reference"  )
 	public static final String SP_CUSTODIAN = "custodian";
 
 	/**
@@ -249,7 +229,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.authenticator</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="", type="reference")
+	@SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="", type="reference"  )
 	public static final String SP_AUTHENTICATOR = "authenticator";
 
 	/**
@@ -276,7 +256,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.created</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="created", path="DocumentReference.created", description="", type="date")
+	@SearchParamDefinition(name="created", path="DocumentReference.created", description="", type="date"  )
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -297,7 +277,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.indexed</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="", type="date")
+	@SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="", type="date"  )
 	public static final String SP_INDEXED = "indexed";
 
 	/**
@@ -318,7 +298,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="DocumentReference.status", description="", type="token")
+	@SearchParamDefinition(name="status", path="DocumentReference.status", description="", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -339,7 +319,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.relatesTo.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="", type="reference")
+	@SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="", type="reference"  )
 	public static final String SP_RELATESTO = "relatesto";
 
 	/**
@@ -366,7 +346,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.relatesTo.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="", type="token")
+	@SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="", type="token"  )
 	public static final String SP_RELATION = "relation";
 
 	/**
@@ -380,27 +360,6 @@ public class DocumentReference extends BaseResource implements IResource {
 	public static final TokenClientParam RELATION = new TokenClientParam(SP_RELATION);
 
 	/**
-	 * Search parameter constant for <b>relationship</b>
-	 * <p>
-	 * Description: <b>Combination of relation and relatesTo</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>relatesto & relation</b><br/>
-	 * </p>
-	 */
-	@SearchParamDefinition(name="relationship", path="relatesto & relation", description="Combination of relation and relatesTo", type="composite")
-	public static final String SP_RELATIONSHIP = "relationship";
-
-	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>relationship</b>
-	 * <p>
-	 * Description: <b>Combination of relation and relatesTo</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>relatesto & relation</b><br/>
-	 * </p>
-	 */
-	public static final CompositeClientParam RELATIONSHIP = new CompositeClientParam(SP_RELATIONSHIP);
-
-	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
 	 * Description: <b></b><br/>
@@ -408,7 +367,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="DocumentReference.description", description="", type="string")
+	@SearchParamDefinition(name="description", path="DocumentReference.description", description="", type="string"  )
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -429,7 +388,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.confidentiality</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="confidentiality", path="DocumentReference.confidentiality", description="", type="token")
+	@SearchParamDefinition(name="confidentiality", path="DocumentReference.confidentiality", description="", type="token"  )
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
@@ -450,7 +409,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.primaryLanguage</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="language", path="DocumentReference.primaryLanguage", description="", type="token")
+	@SearchParamDefinition(name="language", path="DocumentReference.primaryLanguage", description="", type="token"  )
 	public static final String SP_LANGUAGE = "language";
 
 	/**
@@ -471,7 +430,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.format</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="format", path="DocumentReference.format", description="", type="token")
+	@SearchParamDefinition(name="format", path="DocumentReference.format", description="", type="token"  )
 	public static final String SP_FORMAT = "format";
 
 	/**
@@ -492,7 +451,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.size</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="size", path="DocumentReference.size", description="", type="number")
+	@SearchParamDefinition(name="size", path="DocumentReference.size", description="", type="number"  )
 	public static final String SP_SIZE = "size";
 
 	/**
@@ -513,7 +472,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="DocumentReference.location", description="", type="string")
+	@SearchParamDefinition(name="location", path="DocumentReference.location", description="", type="string"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -534,7 +493,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.event</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="event", path="DocumentReference.context.event", description="", type="token")
+	@SearchParamDefinition(name="event", path="DocumentReference.context.event", description="", type="token"  )
 	public static final String SP_EVENT = "event";
 
 	/**
@@ -555,7 +514,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.period</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="period", path="DocumentReference.context.period", description="", type="date")
+	@SearchParamDefinition(name="period", path="DocumentReference.context.period", description="", type="date"  )
 	public static final String SP_PERIOD = "period";
 
 	/**
@@ -576,7 +535,7 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * Path: <b>DocumentReference.context.facilityType</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="", type="token")
+	@SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="", type="token"  )
 	public static final String SP_FACILITY = "facility";
 
 	/**
@@ -588,6 +547,27 @@ public class DocumentReference extends BaseResource implements IResource {
 	 * </p>
 	 */
 	public static final TokenClientParam FACILITY = new TokenClientParam(SP_FACILITY);
+
+	/**
+	 * Search parameter constant for <b>relatesto-relation</b>
+	 * <p>
+	 * Description: <b>Combination of relation and relatesTo</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>relatesto & relation</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="relatesto-relation", path="relatesto & relation", description="Combination of relation and relatesTo", type="composite"  , compositeOf={  "relatesto",  "relation" }  )
+	public static final String SP_RELATESTO_RELATION = "relatesto-relation";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>relatesto-relation</b>
+	 * <p>
+	 * Description: <b>Combination of relation and relatesTo</b><br/>
+	 * Type: <b>composite</b><br/>
+	 * Path: <b>relatesto & relation</b><br/>
+	 * </p>
+	 */
+	public static final CompositeClientParam<ReferenceClientParam, TokenClientParam> RELATESTO_RELATION = new CompositeClientParam<ReferenceClientParam, TokenClientParam>(SP_RELATESTO_RELATION);
 
 
 	@Child(name="masterIdentifier", type=IdentifierDt.class, order=0, min=1, max=1)	
@@ -1207,8 +1187,8 @@ public class DocumentReference extends BaseResource implements IResource {
      * When the document was created
      * </p> 
 	 */
-	public DocumentReference setCreatedWithSecondsPrecision( Date theDate) {
-		myCreated = new DateTimeDt(theDate); 
+	public DocumentReference setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myCreated = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1220,8 +1200,8 @@ public class DocumentReference extends BaseResource implements IResource {
      * When the document was created
      * </p> 
 	 */
-	public DocumentReference setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myCreated = new DateTimeDt(theDate, thePrecision); 
+	public DocumentReference setCreatedWithSecondsPrecision( Date theDate) {
+		myCreated = new DateTimeDt(theDate); 
 		return this; 
 	}
 

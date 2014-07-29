@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -95,7 +75,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partstatus", path="AppointmentResponse.participantStatus", description="The overall status of the appointment", type="string")
+	@SearchParamDefinition(name="partstatus", path="AppointmentResponse.participantStatus", description="The overall status of the appointment", type="string"  )
 	public static final String SP_PARTSTATUS = "partstatus";
 
 	/**
@@ -116,7 +96,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.individual</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="AppointmentResponse.individual", description="The subject that the appointment response replies for", type="reference")
+	@SearchParamDefinition(name="subject", path="AppointmentResponse.individual", description="The subject that the appointment response replies for", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -143,7 +123,7 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	 * Path: <b>AppointmentResponse.appointment</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to", type="reference")
+	@SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to", type="reference"  )
 	public static final String SP_APPOINTMENT = "appointment";
 
 	/**
@@ -433,6 +413,22 @@ public class AppointmentResponse extends BaseResource implements IResource {
 		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
 		getParticipantType().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>participantType</b> (Role of participant in the appointment),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> getParticipantTypeFirstRep() {
+		if (getParticipantType().size() == 0) {
+			addParticipantType();
+		}
+		return getParticipantType().get(0);
 	}
 
 	/**
@@ -854,8 +850,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setRecordedDateWithSecondsPrecision( Date theDate) {
-		myRecordedDate = new DateTimeDt(theDate); 
+	public AppointmentResponse setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -867,8 +863,8 @@ public class AppointmentResponse extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public AppointmentResponse setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
+	public AppointmentResponse setRecordedDateWithSecondsPrecision( Date theDate) {
+		myRecordedDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

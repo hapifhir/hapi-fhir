@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -94,7 +74,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token")
+	@SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -115,7 +95,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.manufacturer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string")
+	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string"  )
 	public static final String SP_MANUFACTURER = "manufacturer";
 
 	/**
@@ -136,7 +116,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.model</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string")
+	@SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string"  )
 	public static final String SP_MODEL = "model";
 
 	/**
@@ -157,7 +137,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.owner</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference")
+	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference"  )
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -184,7 +164,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Device.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Device.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -205,7 +185,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference")
+	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -232,7 +212,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference")
+	@SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -259,7 +239,7 @@ public class Device extends BaseResource implements IResource {
 	 * Path: <b>Device.udi</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="udi", path="Device.udi", description="", type="string")
+	@SearchParamDefinition(name="udi", path="Device.udi", description="", type="string"  )
 	public static final String SP_UDI = "udi";
 
 	/**
@@ -675,8 +655,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public Device setExpiryWithDayPrecision( Date theDate) {
-		myExpiry = new DateDt(theDate); 
+	public Device setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -688,8 +668,8 @@ public class Device extends BaseResource implements IResource {
      * Date of expiry of this device (if applicable)
      * </p> 
 	 */
-	public Device setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpiry = new DateDt(theDate, thePrecision); 
+	public Device setExpiryWithDayPrecision( Date theDate) {
+		myExpiry = new DateDt(theDate); 
 		return this; 
 	}
 

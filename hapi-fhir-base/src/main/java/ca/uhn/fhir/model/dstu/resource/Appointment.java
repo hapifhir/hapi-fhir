@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -101,7 +81,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.start</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date")
+	@SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -122,7 +102,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="string")
+	@SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="string"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -143,7 +123,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.individual</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Appointment.participant.individual", description="The subject that the sensitivity is about", type="reference")
+	@SearchParamDefinition(name="subject", path="Appointment.participant.individual", description="The subject that the sensitivity is about", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -170,7 +150,7 @@ public class Appointment extends BaseResource implements IResource {
 	 * Path: <b>Appointment.participant.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment ", type="token")
+	@SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment ", type="token"  )
 	public static final String SP_PARTSTATUS = "partstatus";
 
 	/**
@@ -1000,8 +980,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setRecordedDateWithSecondsPrecision( Date theDate) {
-		myRecordedDate = new DateTimeDt(theDate); 
+	public Appointment setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1013,8 +993,8 @@ public class Appointment extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Appointment setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
+	public Appointment setRecordedDateWithSecondsPrecision( Date theDate) {
+		myRecordedDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1123,6 +1103,22 @@ public class Appointment extends BaseResource implements IResource {
 		BoundCodeableConceptDt<ParticipantTypeEnum> retVal = new BoundCodeableConceptDt<ParticipantTypeEnum>(ParticipantTypeEnum.VALUESET_BINDER, theValue);
 		getType().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>type</b> (Role of participant in the appointment),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeableConceptDt<ParticipantTypeEnum> getTypeFirstRep() {
+		if (getType().size() == 0) {
+			addType();
+		}
+		return getType().get(0);
 	}
 
 	/**

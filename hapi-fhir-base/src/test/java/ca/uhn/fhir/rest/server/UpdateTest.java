@@ -36,7 +36,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
@@ -279,7 +278,6 @@ public class UpdateTest {
 
 	public static class DiagnosticReportProvider implements IResourceProvider {
 		private TagList myLastTags;
-		private IdDt myLastVersion;
 
 		public TagList getLastTags() {
 			return myLastTags;
@@ -294,7 +292,6 @@ public class UpdateTest {
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersionAndNoResponse(@IdParam IdDt theId, @ResourceParam DiagnosticReport theDr) {
 			IdDt id = theId;
-			myLastVersion = id;
 			
 			if (theId.getValue().contains("AAAAAA")) {
 				IdDt id2 = new IdDt(id.getIdPart(), "002");
@@ -313,15 +310,15 @@ public class UpdateTest {
 		public Class<? extends IResource> getResourceType() {
 			return Observation.class;
 		}
+		
 		@Update()
-		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId, @ResourceParam DiagnosticOrder thePatient) {
+		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @ResourceParam DiagnosticOrder thePatient) {
 			/*
 			 * TODO: THIS METHOD IS NOT USED. It's the wrong type (DiagnosticOrder), so it should cause an exception on startup. Also we should detect if there are multiple resource params on an
 			 * update/create/etc method
 			 */
 			IdDt id = theId;
-			IdDt version = theVersionId;
-			return new MethodOutcome(id, version);
+			return new MethodOutcome(id);
 		}
 	}
 	
@@ -337,11 +334,10 @@ public class UpdateTest {
 
 		@Update()
 		public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
-			IdDt id = theId;
-			IdDt version = new IdDt(thePatient.getIdentifierFirstRep().getValue().getValue());
+			IdDt id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue().getValue());
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDetails("OODETAILS");
-			return new MethodOutcome(id, version, oo);
+			return new MethodOutcome(id,oo);
 		}
 
 	}

@@ -3,8 +3,6 @@ package ca.uhn.example.servlet;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.annotation.WebServlet;
-
 import ca.uhn.example.provider.OrganizationResourceProvider;
 import ca.uhn.example.provider.PatientResourceProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -13,10 +11,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 /**
- * In this example, we are using Servlet 3.0 annotations to define the URL pattern for this servlet, 
- * but we could also define this in a web.xml file.
+ * This servlet is the actual FHIR server itself
  */
-@WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
 public class ExampleRestfulServlet extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
@@ -45,6 +41,13 @@ public class ExampleRestfulServlet extends RestfulServer {
 		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator();
 		getFhirContext().setNarrativeGenerator(narrativeGen);
 
+		/*
+		 * Tells HAPI to use content types which are not technically FHIR compliant when a browser is detected as the
+		 * requesting client. This prevents browsers from trying to download resource responses instead of displaying them
+		 * inline which can be handy for troubleshooting.
+		 */
+		setUseBrowserFriendlyContentTypes(true);
+		
 	}
 
 }

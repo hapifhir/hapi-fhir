@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -112,7 +92,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile", type="token")
+	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -133,7 +113,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile", type="token")
+	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile", type="token"  )
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -154,7 +134,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile", type="string")
+	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -175,7 +155,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile", type="string")
+	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile", type="string"  )
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -196,7 +176,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile", type="string")
+	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile", type="string"  )
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -217,7 +197,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile", type="token")
+	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -238,7 +218,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date", type="date")
+	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -259,7 +239,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)", type="token")
+	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -280,7 +260,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.extensionDefn.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)", type="token")
+	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)", type="token"  )
 	public static final String SP_EXTENSION = "extension";
 
 	/**
@@ -301,7 +281,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code", type="reference")
+	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code", type="reference"  )
 	public static final String SP_VALUESET = "valueset";
 
 	/**
@@ -328,7 +308,7 @@ public class Profile extends BaseResource implements IResource {
 	 * Path: <b>Profile.structure.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile", type="token")
+	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -967,8 +947,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -980,8 +960,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Profile setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -2053,6 +2033,22 @@ public class Profile extends BaseResource implements IResource {
 		BoundCodeDt<PropertyRepresentationEnum> retVal = new BoundCodeDt<PropertyRepresentationEnum>(PropertyRepresentationEnum.VALUESET_BINDER, theValue);
 		getRepresentation().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>representation</b> (How this element is represented in instances),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Codes that define how this element is represented in instances, when the deviation varies from the normal case
+     * </p> 
+	 */
+	public BoundCodeDt<PropertyRepresentationEnum> getRepresentationFirstRep() {
+		if (getRepresentation().size() == 0) {
+			addRepresentation();
+		}
+		return getRepresentation().get(0);
 	}
 
 	/**
@@ -3565,6 +3561,22 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Gets the first repetition for <b>aggregation</b> (contained | referenced | bundled - how aggregated),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
+     * </p> 
+	 */
+	public BoundCodeDt<AggregationModeEnum> getAggregationFirstRep() {
+		if (getAggregation().size() == 0) {
+			addAggregation();
+		}
+		return getAggregation().get(0);
+	}
+
+	/**
 	 * Add a value for <b>aggregation</b> (contained | referenced | bundled - how aggregated)
 	 *
      * <p>
@@ -4552,6 +4564,22 @@ public class Profile extends BaseResource implements IResource {
 		BoundCodeDt<ResourceTypeEnum> retVal = new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER, theValue);
 		getTarget().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>target</b> (Types of resource (if a resource reference)),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Types of resource (if a resource is referenced)
+     * </p> 
+	 */
+	public BoundCodeDt<ResourceTypeEnum> getTargetFirstRep() {
+		if (getTarget().size() == 0) {
+			addTarget();
+		}
+		return getTarget().get(0);
 	}
 
 	/**

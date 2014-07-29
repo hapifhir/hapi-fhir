@@ -43,8 +43,13 @@ import ca.uhn.fhir.model.dstu.composite.RatioDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -503,7 +508,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="High, low, normal, etc.",
 		formalDefinition="The assessment made based on the result of the observation."
 	)
-	private CodeableConceptDt myInterpretation;
+	private BoundCodeableConceptDt<ObservationInterpretationCodesEnum> myInterpretation;
 	
 	@Child(name="comments", type=StringDt.class, order=3, min=0, max=1)	
 	@Description(
@@ -532,14 +537,14 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="registered | preliminary | final | amended +",
 		formalDefinition="The status of the result value"
 	)
-	private CodeDt myStatus;
+	private BoundCodeDt<ObservationStatusEnum> myStatus;
 	
 	@Child(name="reliability", type=CodeDt.class, order=7, min=1, max=1)	
 	@Description(
 		shortDefinition="ok | ongoing | early | questionable | calibrating | error +",
 		formalDefinition="An estimate of the degree to which quality issues have impacted on the value reported"
 	)
-	private CodeDt myReliability;
+	private BoundCodeDt<ObservationReliabilityEnum> myReliability;
 	
 	@Child(name="bodySite", type=CodeableConceptDt.class, order=8, min=0, max=1)	
 	@Description(
@@ -680,9 +685,9 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public CodeableConceptDt getInterpretation() {  
+	public BoundCodeableConceptDt<ObservationInterpretationCodesEnum> getInterpretation() {  
 		if (myInterpretation == null) {
-			myInterpretation = new CodeableConceptDt();
+			myInterpretation = new BoundCodeableConceptDt<ObservationInterpretationCodesEnum>(ObservationInterpretationCodesEnum.VALUESET_BINDER);
 		}
 		return myInterpretation;
 	}
@@ -695,8 +700,21 @@ public class Observation extends BaseResource implements IResource {
      * The assessment made based on the result of the observation.
      * </p> 
 	 */
-	public Observation setInterpretation(CodeableConceptDt theValue) {
+	public Observation setInterpretation(BoundCodeableConceptDt<ObservationInterpretationCodesEnum> theValue) {
 		myInterpretation = theValue;
+		return this;
+	}
+
+	/**
+	 * Sets the value(s) for <b>interpretation</b> (High, low, normal, etc.)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The assessment made based on the result of the observation.
+     * </p> 
+	 */
+	public Observation setInterpretation(ObservationInterpretationCodesEnum theValue) {
+		getInterpretation().setValueAsEnum(theValue);
 		return this;
 	}
 
@@ -811,8 +829,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssuedWithMillisPrecision( Date theDate) {
-		myIssued = new InstantDt(theDate); 
+	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -824,8 +842,8 @@ public class Observation extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Observation setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new InstantDt(theDate, thePrecision); 
+	public Observation setIssuedWithMillisPrecision( Date theDate) {
+		myIssued = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -840,9 +858,9 @@ public class Observation extends BaseResource implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public CodeDt getStatus() {  
+	public BoundCodeDt<ObservationStatusEnum> getStatus() {  
 		if (myStatus == null) {
-			myStatus = new CodeDt();
+			myStatus = new BoundCodeDt<ObservationStatusEnum>(ObservationStatusEnum.VALUESET_BINDER);
 		}
 		return myStatus;
 	}
@@ -855,25 +873,25 @@ public class Observation extends BaseResource implements IResource {
      * The status of the result value
      * </p> 
 	 */
-	public Observation setStatus(CodeDt theValue) {
+	public Observation setStatus(BoundCodeDt<ObservationStatusEnum> theValue) {
 		myStatus = theValue;
 		return this;
 	}
 
- 	/**
-	 * Sets the value for <b>status</b> (registered | preliminary | final | amended +)
+	/**
+	 * Sets the value(s) for <b>status</b> (registered | preliminary | final | amended +)
 	 *
      * <p>
      * <b>Definition:</b>
      * The status of the result value
      * </p> 
 	 */
-	public Observation setStatus( String theCode) {
-		myStatus = new CodeDt(theCode); 
-		return this; 
+	public Observation setStatus(ObservationStatusEnum theValue) {
+		getStatus().setValueAsEnum(theValue);
+		return this;
 	}
 
- 
+  
 	/**
 	 * Gets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +).
 	 * creating it if it does
@@ -884,9 +902,9 @@ public class Observation extends BaseResource implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public CodeDt getReliability() {  
+	public BoundCodeDt<ObservationReliabilityEnum> getReliability() {  
 		if (myReliability == null) {
-			myReliability = new CodeDt();
+			myReliability = new BoundCodeDt<ObservationReliabilityEnum>(ObservationReliabilityEnum.VALUESET_BINDER);
 		}
 		return myReliability;
 	}
@@ -899,25 +917,25 @@ public class Observation extends BaseResource implements IResource {
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public Observation setReliability(CodeDt theValue) {
+	public Observation setReliability(BoundCodeDt<ObservationReliabilityEnum> theValue) {
 		myReliability = theValue;
 		return this;
 	}
 
- 	/**
-	 * Sets the value for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
+	/**
+	 * Sets the value(s) for <b>reliability</b> (ok | ongoing | early | questionable | calibrating | error +)
 	 *
      * <p>
      * <b>Definition:</b>
      * An estimate of the degree to which quality issues have impacted on the value reported
      * </p> 
 	 */
-	public Observation setReliability( String theCode) {
-		myReliability = new CodeDt(theCode); 
-		return this; 
+	public Observation setReliability(ObservationReliabilityEnum theValue) {
+		getReliability().setValueAsEnum(theValue);
+		return this;
 	}
 
- 
+  
 	/**
 	 * Gets the value(s) for <b>bodySite</b> (Observed body part).
 	 * creating it if it does
@@ -1018,8 +1036,8 @@ public class Observation extends BaseResource implements IResource {
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public Observation setIdentifier( String theSystem,  String theValue) {
-		myIdentifier = new IdentifierDt(theSystem, theValue); 
+	public Observation setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
 		return this; 
 	}
 
@@ -1031,8 +1049,8 @@ public class Observation extends BaseResource implements IResource {
      * A unique identifier for the simple observation
      * </p> 
 	 */
-	public Observation setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
-		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
+	public Observation setIdentifier( String theSystem,  String theValue) {
+		myIdentifier = new IdentifierDt(theSystem, theValue); 
 		return this; 
 	}
 
@@ -1364,32 +1382,6 @@ public class Observation extends BaseResource implements IResource {
      * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
      * </p> 
 	 */
-	public ReferenceRange setLow( double theValue) {
-		myLow = new QuantityDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>low</b> (Low Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
-     * </p> 
-	 */
-	public ReferenceRange setLow( long theValue) {
-		myLow = new QuantityDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>low</b> (Low Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
-     * </p> 
-	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myLow = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -1418,6 +1410,32 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
 		myLow = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( double theValue) {
+		myLow = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>low</b> (Low Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * </p> 
+	 */
+	public ReferenceRange setLow( long theValue) {
+		myLow = new QuantityDt(theValue); 
 		return this; 
 	}
 
@@ -1473,32 +1491,6 @@ public class Observation extends BaseResource implements IResource {
      * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
      * </p> 
 	 */
-	public ReferenceRange setHigh( double theValue) {
-		myHigh = new QuantityDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>high</b> (High Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
-     * </p> 
-	 */
-	public ReferenceRange setHigh( long theValue) {
-		myHigh = new QuantityDt(theValue); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>high</b> (High Range, if relevant)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
-     * </p> 
-	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myHigh = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -1527,6 +1519,32 @@ public class Observation extends BaseResource implements IResource {
 	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
 		myHigh = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( double theValue) {
+		myHigh = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>high</b> (High Range, if relevant)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * </p> 
+	 */
+	public ReferenceRange setHigh( long theValue) {
+		myHigh = new QuantityDt(theValue); 
 		return this; 
 	}
 
@@ -1613,7 +1631,7 @@ public class Observation extends BaseResource implements IResource {
 		shortDefinition="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by",
 		formalDefinition="A code specifying the kind of relationship that exists with the target observation"
 	)
-	private CodeDt myType;
+	private BoundCodeDt<ObservationRelationshipTypeEnum> myType;
 	
 	@Child(name="target", order=1, min=1, max=1, type={
 		ca.uhn.fhir.model.dstu.resource.Observation.class	})
@@ -1644,9 +1662,9 @@ public class Observation extends BaseResource implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public CodeDt getType() {  
+	public BoundCodeDt<ObservationRelationshipTypeEnum> getType() {  
 		if (myType == null) {
-			myType = new CodeDt();
+			myType = new BoundCodeDt<ObservationRelationshipTypeEnum>(ObservationRelationshipTypeEnum.VALUESET_BINDER);
 		}
 		return myType;
 	}
@@ -1659,25 +1677,25 @@ public class Observation extends BaseResource implements IResource {
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public Related setType(CodeDt theValue) {
+	public Related setType(BoundCodeDt<ObservationRelationshipTypeEnum> theValue) {
 		myType = theValue;
 		return this;
 	}
 
- 	/**
-	 * Sets the value for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
+	/**
+	 * Sets the value(s) for <b>type</b> (has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by)
 	 *
      * <p>
      * <b>Definition:</b>
      * A code specifying the kind of relationship that exists with the target observation
      * </p> 
 	 */
-	public Related setType( String theCode) {
-		myType = new CodeDt(theCode); 
-		return this; 
+	public Related setType(ObservationRelationshipTypeEnum theValue) {
+		getType().setValueAsEnum(theValue);
+		return this;
 	}
 
- 
+  
 	/**
 	 * Gets the value(s) for <b>target</b> (Observation that is related to this one).
 	 * creating it if it does
@@ -1711,14 +1729,6 @@ public class Observation extends BaseResource implements IResource {
   
 
 	}
-
-	   public void setStatus(ObservationStatusEnum theFinal) {
-		      if (theFinal==null) {
-		         getStatus().setValue(null);
-		      }else {
-		         getStatus().setValue(theFinal.getCode());
-		      }
-		   }
 
 
 

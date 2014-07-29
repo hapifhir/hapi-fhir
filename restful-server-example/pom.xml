@@ -56,6 +56,16 @@
 	</dependencies>
 
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.1.1.v20140108</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	
 		<plugins>
 			<!-- 
 			Tell Maven which Java source version you want to use
@@ -98,7 +108,7 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
-
+    		
 		</plugins>
 	</build>
 

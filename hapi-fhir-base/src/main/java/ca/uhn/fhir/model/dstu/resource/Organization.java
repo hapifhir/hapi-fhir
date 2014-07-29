@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -99,7 +79,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string")
+	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -120,7 +100,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string")
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string"  )
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -141,7 +121,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token")
+	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -162,7 +142,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token")
+	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -183,7 +163,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.partOf</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference")
+	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference"  )
 	public static final String SP_PARTOF = "partof";
 
 	/**
@@ -210,7 +190,7 @@ public class Organization extends BaseResource implements IResource {
 	 * Path: <b>Organization.active</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token")
+	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token"  )
 	public static final String SP_ACTIVE = "active";
 
 	/**

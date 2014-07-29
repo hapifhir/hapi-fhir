@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.List;
 
@@ -95,7 +75,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token")
+	@SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -116,7 +96,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string")
+	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -137,7 +117,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string")
+	@SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string"  )
 	public static final String SP_PHONETIC = "phonetic";
 
 	/**
@@ -158,7 +138,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.telecom</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string")
+	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string"  )
 	public static final String SP_TELECOM = "telecom";
 
 	/**
@@ -179,7 +159,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.address</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string")
+	@SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string"  )
 	public static final String SP_ADDRESS = "address";
 
 	/**
@@ -200,7 +180,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.gender</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token")
+	@SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token"  )
 	public static final String SP_GENDER = "gender";
 
 	/**
@@ -221,7 +201,7 @@ public class RelatedPerson extends BaseResource implements IResource {
 	 * Path: <b>RelatedPerson.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference")
+	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**

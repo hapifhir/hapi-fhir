@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -93,7 +73,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis", type="reference")
+	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -120,7 +100,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated", type="date")
+	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -141,7 +121,7 @@ public class SequencingAnalysis extends BaseResource implements IResource {
 	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis", type="string")
+	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis", type="string"  )
 	public static final String SP_GENOME = "genome";
 
 	/**
@@ -287,8 +267,8 @@ public class SequencingAnalysis extends BaseResource implements IResource {
      * Date when result of the analysis is updated
      * </p> 
 	 */
-	public SequencingAnalysis setDateWithDayPrecision( Date theDate) {
-		myDate = new DateDt(theDate); 
+	public SequencingAnalysis setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -300,8 +280,8 @@ public class SequencingAnalysis extends BaseResource implements IResource {
      * Date when result of the analysis is updated
      * </p> 
 	 */
-	public SequencingAnalysis setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateDt(theDate, thePrecision); 
+	public SequencingAnalysis setDateWithDayPrecision( Date theDate) {
+		myDate = new DateDt(theDate); 
 		return this; 
 	}
 

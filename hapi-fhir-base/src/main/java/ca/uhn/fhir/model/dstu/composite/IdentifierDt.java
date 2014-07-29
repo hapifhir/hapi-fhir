@@ -16,44 +16,20 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 
 /**
  * HAPI/FHIR <b>IdentifierDt</b> Datatype
@@ -71,7 +47,8 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
  */
 @DatatypeDef(name="IdentifierDt") 
 public class IdentifierDt
-        extends  BaseIdentifiableElement         implements ICompositeDatatype  , IQueryParameterType {
+        extends  BaseIdentifierDt         implements ICompositeDatatype
+{
 
 	/**
 	 * Constructor
@@ -398,47 +375,5 @@ public class IdentifierDt
 
   
 
-	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
-	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
-	 */
-	public boolean matchesSystemAndValue(IdentifierDt theIdentifier) {
-		if (theIdentifier == null) {
-			return false;
-		}
-		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (getSystem().getValueAsString() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem().getValueAsString())) + '|' + ParameterUtil.escape(getValue().getValueAsString()); 
-		} else {
-			return ParameterUtil.escape(getValue().getValueAsString());
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter,'|');
-		if (barIndex != -1) {
-			setSystem(new UriDt(theParameter.substring(0, barIndex)));
-			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
-		} else {
-			setValue(ParameterUtil.unescape(theParameter));
-		}
-	}	
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return null;
-	}	
 
 }

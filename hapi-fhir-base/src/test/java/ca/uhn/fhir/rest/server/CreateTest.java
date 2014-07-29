@@ -1,8 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -11,9 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -28,22 +24,15 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
@@ -181,7 +170,6 @@ public class CreateTest {
 
 	public static class DiagnosticReportProvider implements IResourceProvider {
 		private TagList myLastTags;
-		private IdDt myLastVersion;
 
 		public TagList getLastTags() {
 			return myLastTags;
@@ -214,9 +202,8 @@ public class CreateTest {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam AdverseReaction thePatient) {
-			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
-			IdDt version = new IdDt(thePatient.getIdentifier().get(1).getValue().getValue());
-			return new MethodOutcome(id, version);
+			IdDt id = new IdDt("Patient", thePatient.getIdentifier().get(0).getValue().getValue(), thePatient.getIdentifier().get(1).getValue().getValue());
+			return new MethodOutcome(id);
 		}
 
 		@Search()

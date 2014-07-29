@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -97,7 +77,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.source</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="source", path="List.source", description="", type="reference")
+	@SearchParamDefinition(name="source", path="List.source", description="", type="reference"  )
 	public static final String SP_SOURCE = "source";
 
 	/**
@@ -124,7 +104,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.entry.item</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="item", path="List.entry.item", description="", type="reference")
+	@SearchParamDefinition(name="item", path="List.entry.item", description="", type="reference"  )
 	public static final String SP_ITEM = "item";
 
 	/**
@@ -151,7 +131,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.emptyReason</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="", type="token")
+	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="", type="token"  )
 	public static final String SP_EMPTY_REASON = "empty-reason";
 
 	/**
@@ -172,7 +152,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="List.date", description="", type="date")
+	@SearchParamDefinition(name="date", path="List.date", description="", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -193,7 +173,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="List.code", description="", type="token")
+	@SearchParamDefinition(name="code", path="List.code", description="", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -214,7 +194,7 @@ public class ListResource extends BaseResource implements IResource {
 	 * Path: <b>List.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="List.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="List.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -537,8 +517,8 @@ public class ListResource extends BaseResource implements IResource {
      * The date that the list was prepared
      * </p> 
 	 */
-	public ListResource setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public ListResource setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -550,8 +530,8 @@ public class ListResource extends BaseResource implements IResource {
      * The date that the list was prepared
      * </p> 
 	 */
-	public ListResource setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public ListResource setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -928,8 +908,8 @@ public class ListResource extends BaseResource implements IResource {
      * When this item was added to the list
      * </p> 
 	 */
-	public Entry setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Entry setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -941,8 +921,8 @@ public class ListResource extends BaseResource implements IResource {
      * When this item was added to the list
      * </p> 
 	 */
-	public Entry setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Entry setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

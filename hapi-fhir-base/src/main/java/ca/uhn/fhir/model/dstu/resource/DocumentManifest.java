@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -96,7 +76,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -117,7 +97,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -144,7 +124,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="DocumentManifest.type", description="", type="token")
+	@SearchParamDefinition(name="type", path="DocumentManifest.type", description="", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -165,7 +145,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.recipient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="", type="reference")
+	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="", type="reference"  )
 	public static final String SP_RECIPIENT = "recipient";
 
 	/**
@@ -192,7 +172,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="DocumentManifest.author", description="", type="reference")
+	@SearchParamDefinition(name="author", path="DocumentManifest.author", description="", type="reference"  )
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -219,7 +199,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.created</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="", type="date")
+	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="", type="date"  )
 	public static final String SP_CREATED = "created";
 
 	/**
@@ -240,7 +220,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="DocumentManifest.status", description="", type="token")
+	@SearchParamDefinition(name="status", path="DocumentManifest.status", description="", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -261,7 +241,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.supercedes</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="", type="reference")
+	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="", type="reference"  )
 	public static final String SP_SUPERSEDES = "supersedes";
 
 	/**
@@ -288,7 +268,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="DocumentManifest.description", description="", type="string")
+	@SearchParamDefinition(name="description", path="DocumentManifest.description", description="", type="string"  )
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -309,7 +289,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.confidentiality</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="", type="token")
+	@SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="", type="token"  )
 	public static final String SP_CONFIDENTIALITY = "confidentiality";
 
 	/**
@@ -330,7 +310,7 @@ public class DocumentManifest extends BaseResource implements IResource {
 	 * Path: <b>DocumentManifest.content</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="", type="reference")
+	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="", type="reference"  )
 	public static final String SP_CONTENT = "content";
 
 	/**
@@ -811,8 +791,8 @@ public class DocumentManifest extends BaseResource implements IResource {
      * When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc)
      * </p> 
 	 */
-	public DocumentManifest setCreatedWithSecondsPrecision( Date theDate) {
-		myCreated = new DateTimeDt(theDate); 
+	public DocumentManifest setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myCreated = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -824,8 +804,8 @@ public class DocumentManifest extends BaseResource implements IResource {
      * When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc)
      * </p> 
 	 */
-	public DocumentManifest setCreated( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myCreated = new DateTimeDt(theDate, thePrecision); 
+	public DocumentManifest setCreatedWithSecondsPrecision( Date theDate) {
+		myCreated = new DateTimeDt(theDate); 
 		return this; 
 	}
 

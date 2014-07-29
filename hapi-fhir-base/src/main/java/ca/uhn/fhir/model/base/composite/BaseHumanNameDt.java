@@ -20,6 +20,9 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -97,4 +100,12 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
 	}
 
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("family", getFamilyAsSingleString());
+		b.append("given", getGivenAsSingleString());
+		return b.toString();
+	}
+	
 }

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -106,7 +86,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date", type="date")
+	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date", type="date"  )
 	public static final String SP_DATEWRITTEN = "datewritten";
 
 	/**
@@ -127,7 +107,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.encounter</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference")
+	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference"  )
 	public static final String SP_ENCOUNTER = "encounter";
 
 	/**
@@ -154,7 +134,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity", type="token")
+	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -175,7 +155,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.medication</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name", type="reference")
+	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name", type="reference"  )
 	public static final String SP_MEDICATION = "medication";
 
 	/**
@@ -202,7 +182,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.patient</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference")
+	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference"  )
 	public static final String SP_PATIENT = "patient";
 
 	/**
@@ -229,7 +209,7 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 * Path: <b>MedicationPrescription.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription", type="token")
+	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -470,8 +450,8 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * The date (and perhaps time) when the prescription was written
      * </p> 
 	 */
-	public MedicationPrescription setDateWrittenWithSecondsPrecision( Date theDate) {
-		myDateWritten = new DateTimeDt(theDate); 
+	public MedicationPrescription setDateWritten( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateWritten = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -483,8 +463,8 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * The date (and perhaps time) when the prescription was written
      * </p> 
 	 */
-	public MedicationPrescription setDateWritten( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateWritten = new DateTimeDt(theDate, thePrecision); 
+	public MedicationPrescription setDateWrittenWithSecondsPrecision( Date theDate) {
+		myDateWritten = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1163,32 +1143,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * The amount of therapeutic or other substance given at one administration event.
      * </p> 
 	 */
-	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>doseQuantity</b> (Amount of medication per dose)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of therapeutic or other substance given at one administration event.
-     * </p> 
-	 */
-	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>doseQuantity</b> (Amount of medication per dose)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of therapeutic or other substance given at one administration event.
-     * </p> 
-	 */
 	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -1204,6 +1158,32 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 */
 	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myDoseQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of medication per dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>doseQuantity</b> (Amount of medication per dose)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of therapeutic or other substance given at one administration event.
+     * </p> 
+	 */
+	public DosageInstruction setDoseQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myDoseQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -1502,32 +1482,6 @@ public class MedicationPrescription extends BaseResource implements IResource {
      * The amount that is to be dispensed.
      * </p> 
 	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount of medication to supply per dispense)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount that is to be dispensed.
-     * </p> 
-	 */
-	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount of medication to supply per dispense)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount that is to be dispensed.
-     * </p> 
-	 */
 	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -1543,6 +1497,32 @@ public class MedicationPrescription extends BaseResource implements IResource {
 	 */
 	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of medication to supply per dispense)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount that is to be dispensed.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of medication to supply per dispense)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount that is to be dispensed.
+     * </p> 
+	 */
+	public Dispense setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -96,7 +76,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.issuer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference")
+	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference"  )
 	public static final String SP_ISSUER = "issuer";
 
 	/**
@@ -123,7 +103,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token")
+	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -144,7 +124,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token")
+	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -165,7 +145,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.plan</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token")
+	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token"  )
 	public static final String SP_PLAN = "plan";
 
 	/**
@@ -186,7 +166,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subplan</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier", type="token")
+	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier", type="token"  )
 	public static final String SP_SUBPLAN = "subplan";
 
 	/**
@@ -207,7 +187,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.group</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token")
+	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token"  )
 	public static final String SP_GROUP = "group";
 
 	/**
@@ -228,7 +208,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.dependent</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token")
+	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token"  )
 	public static final String SP_DEPENDENT = "dependent";
 
 	/**
@@ -249,7 +229,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.sequence</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token")
+	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token"  )
 	public static final String SP_SEQUENCE = "sequence";
 
 	/**
@@ -270,7 +250,7 @@ public class Coverage extends BaseResource implements IResource {
 	 * Path: <b>Coverage.subscriber.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber", type="token")
+	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber", type="token"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -949,8 +929,8 @@ public class Coverage extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Subscriber setBirthdateWithDayPrecision( Date theDate) {
-		myBirthdate = new DateDt(theDate); 
+	public Subscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myBirthdate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -962,8 +942,8 @@ public class Coverage extends BaseResource implements IResource {
      * The date of birth of the PolicyHolder
      * </p> 
 	 */
-	public Subscriber setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myBirthdate = new DateDt(theDate, thePrecision); 
+	public Subscriber setBirthdateWithDayPrecision( Date theDate) {
+		myBirthdate = new DateDt(theDate); 
 		return this; 
 	}
 

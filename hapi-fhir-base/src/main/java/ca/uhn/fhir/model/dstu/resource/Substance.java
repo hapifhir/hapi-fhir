@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -100,7 +80,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token")
+	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -121,7 +101,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -142,7 +122,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.expiry</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="", type="date")
+	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="", type="date"  )
 	public static final String SP_EXPIRY = "expiry";
 
 	/**
@@ -163,7 +143,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.instance.quantity</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="", type="number")
+	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="", type="number"  )
 	public static final String SP_QUANTITY = "quantity";
 
 	/**
@@ -184,7 +164,7 @@ public class Substance extends BaseResource implements IResource {
 	 * Path: <b>Substance.ingredient.substance</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="", type="reference")
+	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="", type="reference"  )
 	public static final String SP_SUBSTANCE = "substance";
 
 	/**
@@ -560,8 +540,8 @@ public class Substance extends BaseResource implements IResource {
      * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
      * </p> 
 	 */
-	public Instance setExpiryWithSecondsPrecision( Date theDate) {
-		myExpiry = new DateTimeDt(theDate); 
+	public Instance setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myExpiry = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -573,8 +553,8 @@ public class Substance extends BaseResource implements IResource {
      * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
      * </p> 
 	 */
-	public Instance setExpiry( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myExpiry = new DateTimeDt(theDate, thePrecision); 
+	public Instance setExpiryWithSecondsPrecision( Date theDate) {
+		myExpiry = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -617,32 +597,6 @@ public class Substance extends BaseResource implements IResource {
      * The amount of the substance
      * </p> 
 	 */
-	public Instance setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of the substance
-     * </p> 
-	 */
-	public Instance setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The amount of the substance
-     * </p> 
-	 */
 	public Instance setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
@@ -658,6 +612,32 @@ public class Substance extends BaseResource implements IResource {
 	 */
 	public Instance setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
 		myQuantity = new QuantityDt(theComparator, theValue, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>quantity</b> (Amount of substance in the package)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The amount of the substance
+     * </p> 
+	 */
+	public Instance setQuantity( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myQuantity = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 

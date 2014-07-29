@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -100,7 +80,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="type", path="Composition.type", description="", type="token")
+	@SearchParamDefinition(name="type", path="Composition.type", description="", type="token"  )
 	public static final String SP_TYPE = "type";
 
 	/**
@@ -121,7 +101,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.class</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="class", path="Composition.class", description="", type="token")
+	@SearchParamDefinition(name="class", path="Composition.class", description="", type="token"  )
 	public static final String SP_CLASS = "class";
 
 	/**
@@ -142,7 +122,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="Composition.date", description="", type="date")
+	@SearchParamDefinition(name="date", path="Composition.date", description="", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +143,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="Composition.subject", description="", type="reference")
+	@SearchParamDefinition(name="subject", path="Composition.subject", description="", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -190,7 +170,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.author</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="author", path="Composition.author", description="", type="reference")
+	@SearchParamDefinition(name="author", path="Composition.author", description="", type="reference"  )
 	public static final String SP_AUTHOR = "author";
 
 	/**
@@ -217,7 +197,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.attester.party</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="", type="reference")
+	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="", type="reference"  )
 	public static final String SP_ATTESTER = "attester";
 
 	/**
@@ -244,7 +224,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.event.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="context", path="Composition.event.code", description="", type="token")
+	@SearchParamDefinition(name="context", path="Composition.event.code", description="", type="token"  )
 	public static final String SP_CONTEXT = "context";
 
 	/**
@@ -265,7 +245,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="", type="token")
+	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="", type="token"  )
 	public static final String SP_SECTION_TYPE = "section-type";
 
 	/**
@@ -286,7 +266,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.section.content</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="", type="reference")
+	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="", type="reference"  )
 	public static final String SP_SECTION_CONTENT = "section-content";
 
 	/**
@@ -313,7 +293,7 @@ public class Composition extends BaseResource implements IResource {
 	 * Path: <b>Composition.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="", type="token")
+	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -535,8 +515,8 @@ public class Composition extends BaseResource implements IResource {
      * The composition editing time, when the composition was last logically changed by the author
      * </p> 
 	 */
-	public Composition setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Composition setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -548,8 +528,8 @@ public class Composition extends BaseResource implements IResource {
      * The composition editing time, when the composition was last logically changed by the author
      * </p> 
 	 */
-	public Composition setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Composition setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1115,6 +1095,22 @@ public class Composition extends BaseResource implements IResource {
 	}
 
 	/**
+	 * Gets the first repetition for <b>mode</b> (personal | professional | legal | official),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The type of attestation the authenticator offers
+     * </p> 
+	 */
+	public BoundCodeDt<CompositionAttestationModeEnum> getModeFirstRep() {
+		if (getMode().size() == 0) {
+			addMode();
+		}
+		return getMode().get(0);
+	}
+
+	/**
 	 * Add a value for <b>mode</b> (personal | professional | legal | official)
 	 *
      * <p>
@@ -1181,8 +1177,8 @@ public class Composition extends BaseResource implements IResource {
      * When composition was attested by the party
      * </p> 
 	 */
-	public Attester setTimeWithSecondsPrecision( Date theDate) {
-		myTime = new DateTimeDt(theDate); 
+	public Attester setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1194,8 +1190,8 @@ public class Composition extends BaseResource implements IResource {
      * When composition was attested by the party
      * </p> 
 	 */
-	public Attester setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTime = new DateTimeDt(theDate, thePrecision); 
+	public Attester setTimeWithSecondsPrecision( Date theDate) {
+		myTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 

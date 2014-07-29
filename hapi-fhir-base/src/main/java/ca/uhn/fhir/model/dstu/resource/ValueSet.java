@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -100,7 +80,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token")
+	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -121,7 +101,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.version</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token")
+	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token"  )
 	public static final String SP_VERSION = "version";
 
 	/**
@@ -142,7 +122,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string")
+	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -163,7 +143,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.publisher</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string")
+	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string"  )
 	public static final String SP_PUBLISHER = "publisher";
 
 	/**
@@ -184,7 +164,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.description</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string")
+	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string"  )
 	public static final String SP_DESCRIPTION = "description";
 
 	/**
@@ -205,7 +185,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token")
+	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -226,7 +206,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date")
+	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -247,7 +227,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token")
+	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token"  )
 	public static final String SP_SYSTEM = "system";
 
 	/**
@@ -268,7 +248,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.define.concept.code</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token")
+	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token"  )
 	public static final String SP_CODE = "code";
 
 	/**
@@ -289,7 +269,7 @@ public class ValueSet extends BaseResource implements IResource {
 	 * Path: <b>ValueSet.compose.include.system</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token")
+	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token"  )
 	public static final String SP_REFERENCE = "reference";
 
 	/**
@@ -942,8 +922,8 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public ValueSet setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public ValueSet setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -955,8 +935,8 @@ public class ValueSet extends BaseResource implements IResource {
      * The date that the value set status was last changed
      * </p> 
 	 */
-	public ValueSet setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public ValueSet setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 

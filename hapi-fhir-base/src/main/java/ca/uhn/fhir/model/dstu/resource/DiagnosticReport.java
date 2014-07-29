@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -100,7 +80,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.status</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token")
+	@SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token"  )
 	public static final String SP_STATUS = "status";
 
 	/**
@@ -121,7 +101,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.issued</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date")
+	@SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date"  )
 	public static final String SP_ISSUED = "issued";
 
 	/**
@@ -142,7 +122,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference")
+	@SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -169,7 +149,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.performer</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference")
+	@SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference"  )
 	public static final String SP_PERFORMER = "performer";
 
 	/**
@@ -196,7 +176,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.identifier</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token")
+	@SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token"  )
 	public static final String SP_IDENTIFIER = "identifier";
 
 	/**
@@ -217,7 +197,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report", type="token")
+	@SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report", type="token"  )
 	public static final String SP_SERVICE = "service";
 
 	/**
@@ -238,7 +218,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="DiagnosticReport.diagnostic[x]", description="The clinically relevant time of the report", type="date")
+	@SearchParamDefinition(name="date", path="DiagnosticReport.diagnostic[x]", description="The clinically relevant time of the report", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -259,7 +239,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.specimen</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference")
+	@SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference"  )
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -286,7 +266,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="name", path="DiagnosticReport.name", description="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)", type="token")
+	@SearchParamDefinition(name="name", path="DiagnosticReport.name", description="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)", type="token"  )
 	public static final String SP_NAME = "name";
 
 	/**
@@ -307,7 +287,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.result</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference")
+	@SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference"  )
 	public static final String SP_RESULT = "result";
 
 	/**
@@ -334,7 +314,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token")
+	@SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token"  )
 	public static final String SP_DIAGNOSIS = "diagnosis";
 
 	/**
@@ -355,7 +335,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.image.link</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="", type="reference")
+	@SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="", type="reference"  )
 	public static final String SP_IMAGE = "image";
 
 	/**
@@ -382,7 +362,7 @@ public class DiagnosticReport extends BaseResource implements IResource {
 	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="", type="reference")
+	@SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="", type="reference"  )
 	public static final String SP_REQUEST = "request";
 
 	/**
@@ -645,8 +625,8 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The date and/or time that this version of the report was released from the source diagnostic service
      * </p> 
 	 */
-	public DiagnosticReport setIssuedWithSecondsPrecision( Date theDate) {
-		myIssued = new DateTimeDt(theDate); 
+	public DiagnosticReport setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myIssued = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -658,8 +638,8 @@ public class DiagnosticReport extends BaseResource implements IResource {
      * The date and/or time that this version of the report was released from the source diagnostic service
      * </p> 
 	 */
-	public DiagnosticReport setIssued( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myIssued = new DateTimeDt(theDate, thePrecision); 
+	public DiagnosticReport setIssuedWithSecondsPrecision( Date theDate) {
+		myIssued = new DateTimeDt(theDate); 
 		return this; 
 	}
 

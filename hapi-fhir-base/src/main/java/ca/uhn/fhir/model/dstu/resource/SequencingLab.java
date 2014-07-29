@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -94,7 +74,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab", type="reference")
+	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -121,7 +101,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.specimen.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab", type="string")
+	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab", type="string"  )
 	public static final String SP_SPECIMEN = "specimen";
 
 	/**
@@ -142,7 +122,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.date</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded", type="date")
+	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -163,7 +143,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.organization</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab", type="string")
+	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab", type="string"  )
 	public static final String SP_ORGANIZATION = "organization";
 
 	/**
@@ -184,7 +164,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.class</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system", type="string")
+	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system", type="string"  )
 	public static final String SP_SYSTEM_CLASS = "system-class";
 
 	/**
@@ -205,7 +185,7 @@ public class SequencingLab extends BaseResource implements IResource {
 	 * Path: <b>SequencingLab.system.name</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system", type="string")
+	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system", type="string"  )
 	public static final String SP_SYSTEM_NAME = "system-name";
 
 	/**
@@ -444,8 +424,8 @@ public class SequencingLab extends BaseResource implements IResource {
      * Date when the result of the lab is uploaded
      * </p> 
 	 */
-	public SequencingLab setDateWithDayPrecision( Date theDate) {
-		myDate = new DateDt(theDate); 
+	public SequencingLab setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -457,8 +437,8 @@ public class SequencingLab extends BaseResource implements IResource {
      * Date when the result of the lab is uploaded
      * </p> 
 	 */
-	public SequencingLab setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateDt(theDate, thePrecision); 
+	public SequencingLab setDateWithDayPrecision( Date theDate) {
+		myDate = new DateDt(theDate); 
 		return this; 
 	}
 

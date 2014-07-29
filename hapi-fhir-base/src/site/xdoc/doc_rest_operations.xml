@@ -962,25 +962,6 @@
 
 			</subsection>
 
-			<subsection name="Adding Descriptions">
-
-				<p>
-					It is also possible to annotate search methods and/or parameters with
-					the 
-					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
-					annotation. This annotation allows you to add a description of the method 
-					and the individual parameters. These descriptions will be placed in the
-					server's metadata statement, which cam be helpful to anyone who is developing
-					software against your server.
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="searchWithDocs" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
-				</macro>
-
-			</subsection>
-
 			<subsection name="Named Queries (_query)">
 
 				<p>
@@ -1043,6 +1024,25 @@
 					<br />
 					<code>http://fhir.example.com/Patient?_identifier=urn:foo|123&amp;_sort=given</code>
 				</p>
+
+			</subsection>
+
+			<subsection name="Adding Descriptions">
+
+				<p>
+					It is also possible to annotate search methods and/or parameters with
+					the 
+					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
+					annotation. This annotation allows you to add a description of the method 
+					and the individual parameters. These descriptions will be placed in the
+					server's metadata statement, which can be helpful to anyone who is developing
+					software against your server.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="searchWithDocs" />
+					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
 
 			</subsection>
 			

@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -103,7 +83,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.subject</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="subject", path="ImagingStudy.subject", description="Who the study is about", type="reference")
+	@SearchParamDefinition(name="subject", path="ImagingStudy.subject", description="Who the study is about", type="reference"  )
 	public static final String SP_SUBJECT = "subject";
 
 	/**
@@ -130,7 +110,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.dateTime</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken", type="date")
+	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken", type="date"  )
 	public static final String SP_DATE = "date";
 
 	/**
@@ -151,7 +131,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.accessionNo</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="accession", path="ImagingStudy.accessionNo", description="The accession id for the image", type="token")
+	@SearchParamDefinition(name="accession", path="ImagingStudy.accessionNo", description="The accession id for the image", type="token"  )
 	public static final String SP_ACCESSION = "accession";
 
 	/**
@@ -172,7 +152,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token")
+	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token"  )
 	public static final String SP_STUDY = "study";
 
 	/**
@@ -193,7 +173,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token")
+	@SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token"  )
 	public static final String SP_SERIES = "series";
 
 	/**
@@ -214,7 +194,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.modality</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token")
+	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token"  )
 	public static final String SP_MODALITY = "modality";
 
 	/**
@@ -235,7 +215,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b></b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value", type="number")
+	@SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value", type="number"  )
 	public static final String SP_SIZE = "size";
 
 	/**
@@ -256,7 +236,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="", type="token")
+	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="", type="token"  )
 	public static final String SP_BODYSITE = "bodysite";
 
 	/**
@@ -277,7 +257,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="", type="token")
+	@SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="", type="token"  )
 	public static final String SP_UID = "uid";
 
 	/**
@@ -298,7 +278,7 @@ public class ImagingStudy extends BaseResource implements IResource {
 	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="", type="token")
+	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="", type="token"  )
 	public static final String SP_DICOM_CLASS = "dicom-class";
 
 	/**
@@ -484,8 +464,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public ImagingStudy setDateTimeWithSecondsPrecision( Date theDate) {
-		myDateTime = new DateTimeDt(theDate); 
+	public ImagingStudy setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -497,8 +477,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * Date and Time the study took place
      * </p> 
 	 */
-	public ImagingStudy setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new DateTimeDt(theDate, thePrecision); 
+	public ImagingStudy setDateTimeWithSecondsPrecision( Date theDate) {
+		myDateTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -807,6 +787,22 @@ public class ImagingStudy extends BaseResource implements IResource {
 		BoundCodeDt<ImagingModalityEnum> retVal = new BoundCodeDt<ImagingModalityEnum>(ImagingModalityEnum.VALUESET_BINDER, theValue);
 		getModality().add(retVal);
 		return retVal;
+	}
+
+	/**
+	 * Gets the first repetition for <b>modality</b> (All series.modality if actual acquisition modalities),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)
+     * </p> 
+	 */
+	public BoundCodeDt<ImagingModalityEnum> getModalityFirstRep() {
+		if (getModality().size() == 0) {
+			addModality();
+		}
+		return getModality().get(0);
 	}
 
 	/**
@@ -1740,8 +1736,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Series setDateTimeWithSecondsPrecision( Date theDate) {
-		myDateTime = new DateTimeDt(theDate); 
+	public Series setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDateTime = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1753,8 +1749,8 @@ public class ImagingStudy extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Series setDateTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDateTime = new DateTimeDt(theDate, thePrecision); 
+	public Series setDateTimeWithSecondsPrecision( Date theDate) {
+		myDateTime = new DateTimeDt(theDate); 
 		return this; 
 	}
 

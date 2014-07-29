@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import java.util.Date;
 import java.util.List;
@@ -98,7 +78,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.target</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="target", path="Provenance.target", description="", type="reference")
+	@SearchParamDefinition(name="target", path="Provenance.target", description="", type="reference"  )
 	public static final String SP_TARGET = "target";
 
 	/**
@@ -125,7 +105,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.start</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="start", path="Provenance.period.start", description="", type="date")
+	@SearchParamDefinition(name="start", path="Provenance.period.start", description="", type="date"  )
 	public static final String SP_START = "start";
 
 	/**
@@ -146,7 +126,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.period.end</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="end", path="Provenance.period.end", description="", type="date")
+	@SearchParamDefinition(name="end", path="Provenance.period.end", description="", type="date"  )
 	public static final String SP_END = "end";
 
 	/**
@@ -167,7 +147,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.location</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="location", path="Provenance.location", description="", type="reference")
+	@SearchParamDefinition(name="location", path="Provenance.location", description="", type="reference"  )
 	public static final String SP_LOCATION = "location";
 
 	/**
@@ -194,7 +174,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.reference</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="", type="token")
+	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="", type="token"  )
 	public static final String SP_PARTY = "party";
 
 	/**
@@ -215,7 +195,7 @@ public class Provenance extends BaseResource implements IResource {
 	 * Path: <b>Provenance.agent.type</b><br/>
 	 * </p>
 	 */
-	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="", type="token")
+	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="", type="token"  )
 	public static final String SP_PARTYTYPE = "partytype";
 
 	/**

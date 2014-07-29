@@ -384,8 +384,10 @@
 			<subsection name="Logging Requests and Responses">
 
 				<p>
-					The following example shows how to configure your client to
-					use a specific username and password in every request.
+					An interceptor is provided with HAPI FHIR which can be used to
+					log every transaction. The interceptor can be configured to be extremely
+					verbose (logging entire transactions including HTTP headers and payload bodies) 
+					or simply to log request URLs.
 				</p>
 
 				<macro name="snippet">

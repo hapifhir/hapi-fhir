@@ -48,6 +48,7 @@
 		<menu name="Welcome">
 			<item name="Welcome" href="index.html" />
 			<item name="Download" href="./download.html" />
+			<item name="Upgrade Guide" href="./doc_upgrading.html" />
 			<item name="Changelog" href="./changes-report.html" />
 		</menu>
 
@@ -61,6 +62,11 @@
 			<item name="Narrative Generator" href="./doc_narrative.html" />
 			<item name="Logging" href="./doc_logging.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
+		</menu>
+
+		<menu name="Community">
+			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
+			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 		</menu>
 
 		<menu name="JavaDocs">

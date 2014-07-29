@@ -16,26 +16,6 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.util.List;
 
 import ca.uhn.fhir.model.api.ICompositeDatatype;
@@ -48,7 +28,6 @@ import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.util.DatatypeUtil;
 
 /**
  * HAPI/FHIR <b>HumanNameDt</b> Datatype
@@ -66,7 +45,8 @@ import ca.uhn.fhir.util.DatatypeUtil;
  */
 @DatatypeDef(name="HumanNameDt") 
 public class HumanNameDt
-        extends  BaseHumanNameDt        implements ICompositeDatatype  {
+        extends  BaseHumanNameDt         implements ICompositeDatatype
+{
 
 	/**
 	 * Constructor
@@ -568,40 +548,5 @@ public class HumanNameDt
 
   
 
-	/**
-	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
-	 * 
-	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
-	 */
-	public String getFamilyAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
-	}
-
-	/**
-	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
-	 * 
-	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
-	 */
-	public String getGivenAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
-	}
-
-	/**
-	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
-	 * 
-	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
-	 */
-	public String getPrefixAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
-	}
-
-	/**
-	 * Returns all repetitions of {@link #Suffix() suffix} as a space separated string
-	 * 
-	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
-	 */
-	public String getSuffixAsSingleString() {
-		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
-	}
 
 }
