@@ -32,6 +32,8 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
 	 * debugging, but is generally not desirable in a production situation.
+	 * 
+	 * @deprecated Use the client logging interceptor to log requests and responses instead. See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html#req_resp_logging">here</a> for more information.
 	 */
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
 

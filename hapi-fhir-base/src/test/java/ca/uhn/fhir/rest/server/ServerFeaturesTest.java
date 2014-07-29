@@ -231,6 +231,14 @@ public class ServerFeaturesTest {
 
 		assertThat(responseContent, StringContains.containsString("\",\n"));
 
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON + "; pretty=true" + ", " + Constants.CT_FHIR_XML + "; pretty=true");
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
+
 	}
 	
 	@Test

@@ -500,7 +500,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			if (theRequestType == RequestType.PUT && versionId == null) {
-				String contentLocation = theRequest.getHeader("Content-Location");
+				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
 					versionId = new IdDt(contentLocation);
 				}

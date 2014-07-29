@@ -28,31 +28,39 @@ import java.util.Set;
 
 public class Constants {
 
-	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
-	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
-	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-
 	public static final String CHARSET_UTF_8 = "UTF-8";
 	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+
 	public static final String CT_FHIR_XML = "application/xml+fhir";
 	public static final String CT_HTML = "text/html";
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
 	public static final String CT_XML = "application/xml";
+	public static final String ENCODING_GZIP = "gzip";
 	public static final String FORMAT_JSON = "json";
 	public static final Set<String> FORMAT_VAL_JSON;
 	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
 	public static final Set<String> FORMAT_VAL_XML;
 	public static final String FORMAT_XML = "xml";
 	public static final String HEADER_ACCEPT = "Accept";
+	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_CATEGORY = "Category";
+	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
+	public static final String HEADER_LOCATION = "Location";
+	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -73,6 +81,7 @@ public class Constants {
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
+	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -87,15 +96,6 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
-	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
-	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
-	public static final String ENCODING_GZIP = "gzip";
-	public static final String HEADER_LOCATION = "Location";
-	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
-	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE";
-	public static final String HEADER_AUTHORIZATION = "Authorization";
-	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
-	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	
 
 	static {
