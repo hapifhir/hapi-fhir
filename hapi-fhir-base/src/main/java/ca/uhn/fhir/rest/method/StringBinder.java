@@ -42,12 +42,12 @@ final class StringBinder implements IParamBinder {
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public Object parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
 			return "";
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected");
+			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND) values for this param.");
 		}
 
 		return theParams.get(0).get(0);

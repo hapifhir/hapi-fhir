@@ -1,6 +1,10 @@
 package ca.uhn.fhir.rest.gclient;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+
+import java.util.Arrays;
+import java.util.List;
+
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 
 /*
@@ -66,7 +70,17 @@ public class TokenClientParam implements IParam {
 			public ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier) {
 				return new TokenCriterion(getParamName(), theIdentifier.getSystem().getValueAsString(), theIdentifier.getValue().getValue());
 			}
-		};
+
+			@Override
+			public ICriterion<TokenClientParam> identifiers(List<IdentifierDt> theIdentifiers) {
+				return new TokenCriterion(getParamName(), theIdentifiers);
+			}
+
+			@Override
+			public ICriterion<TokenClientParam> identifiers(IdentifierDt... theIdentifiers) {
+				return new TokenCriterion(getParamName(), Arrays.asList(theIdentifiers));
+			}
+};
 	}
 
 	public interface IMatches {
@@ -118,6 +132,27 @@ public class TokenClientParam implements IParam {
 		 * @return A criterion
 		 */
 		ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier);
+		
+		/**
+		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
+		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
+		 * 
+		 * @param theIdentifier
+		 *            The identifier
+		 * @return A criterion
+		 */
+		ICriterion<TokenClientParam> identifiers(List<IdentifierDt> theIdentifiers);
+
+		/**
+		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
+		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
+		 * 
+		 * @param theIdentifier
+		 *            The identifier
+		 * @return A criterion
+		 */
+		ICriterion<TokenClientParam> identifiers(IdentifierDt... theIdentifiers);
+
 	}
 
 }

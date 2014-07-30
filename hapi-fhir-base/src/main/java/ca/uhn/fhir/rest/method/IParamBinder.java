@@ -31,6 +31,6 @@ interface IParamBinder {
 	
 	List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException;
 
-	Object parse(List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+	Object parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
 
 }

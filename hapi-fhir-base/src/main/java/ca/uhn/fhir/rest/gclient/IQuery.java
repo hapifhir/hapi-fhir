@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.method.SearchStyleEnum;
 
 public interface IQuery extends IClientExecutable<IQuery,Bundle> {
 
@@ -35,4 +36,13 @@ public interface IQuery extends IClientExecutable<IQuery,Bundle> {
 
 	IQuery limitTo(int theLimitTo);
 
+	/**
+	 * Forces the query to perform the search using the given method (allowable methods are described in the 
+	 * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>)
+	 * 
+	 * @see SearchStyleEnum
+	 * @since 0.6
+	 */
+	IQuery usingStyle(SearchStyleEnum theStyle);
+	
 }

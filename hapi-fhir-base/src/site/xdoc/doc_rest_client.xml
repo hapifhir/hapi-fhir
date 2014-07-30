@@ -99,6 +99,30 @@
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
 				
+				<h4>Search - Multi-valued Parameters (ANY/OR)</h4>
+				<p>
+					To search for a set of possible values where <b>ANY</b> should be matched, 
+					you can provide multiple values to a parameter, as shown in the example below.
+					This leads to a URL resembling <code>?family=Smith,Smyth</code> 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchOr" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Multi-valued Parameters (ALL/AND)</h4>
+				<p>
+					To search for a set of possible values where <b>ALL</b> should be matched,
+					you can provide multiple instances of a marameter, as shown in the example below.
+					This leads to a URL resembling <code>?address=Toronto&amp;address=Ontario&amp;address=Canada</code> 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchOr" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+
 				<h4>Search - Paging</h4>
 				<p>
 					If the server supports paging results, the client has a page method
@@ -123,13 +147,26 @@
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>
 				
-				<h4>Search - Query Options</h4>
+				<h4>Search - Other Query Options</h4>
 				<p>
 					The fluent search also has methods for sorting, limiting, specifying
 					JSON encoding, etc.
 				</p>
 				<macro name="snippet">
 					<param name="id" value="searchAdv" />
+					<param name="file"
+						value="src/site/example/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Using HTTP POST or GET with _search</h4>
+				<p>
+					The FHIR specification allows several styles of search (HTTP POST, a GET with _search at the end of the URL, etc.)
+					The <code>usingStyle()</code> method controls which style to use. By default, GET style is used
+					unless the client detects that the request would result in a very long URL (over 8000 chars) in which
+					case the client automatically switches to POST.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchPost" />
 					<param name="file"
 						value="src/site/example/java/example/GenericClientExample.java" />
 				</macro>

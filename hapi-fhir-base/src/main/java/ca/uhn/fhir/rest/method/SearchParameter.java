@@ -184,7 +184,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 */
 	@Override
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
-		return myParamBinder.parse(theString);
+		return myParamBinder.parse(getName(), theString);
 	}
 
 	public void setCompositeTypes(Class<? extends IQueryParameterType>[] theCompositeTypes) {

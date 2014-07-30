@@ -46,7 +46,7 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public Object parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		String value = theParams.get(0).get(0);
 		if (StringUtils.isBlank(value)) {
 			return null;
@@ -58,7 +58,7 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 			return dt;
 		}
 		if (theParams.size() > 1 || theParams.get(0).size() > 1) {
-			throw new InvalidRequestException("Multiple values detected");
+			throw new InvalidRequestException("Multiple values detected for non-repeatable parameter '" + theName + "'. This server is not configured to allow multiple (AND/OR) values for this param.");
 		}
 
 		dt.setValueAsQueryToken(theParams.get(0).getQualifier(), value);

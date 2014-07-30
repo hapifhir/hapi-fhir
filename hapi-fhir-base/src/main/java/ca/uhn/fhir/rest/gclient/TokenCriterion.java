@@ -20,8 +20,11 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
 class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal {
@@ -31,15 +34,36 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 
 	public TokenCriterion(String theName, String theSystem, String theCode) {
 		myName = theName;
+		myValue=toValue(theSystem, theCode);
+	}
+
+	private String toValue(String theSystem, String theCode) {
 		String system = ParameterUtil.escape(theSystem);
 		String code = ParameterUtil.escape(theCode);
+		String value;
 		if (StringUtils.isNotBlank(system)) {
-			myValue = system + "|" + StringUtils.defaultString(code);
+			value = system + "|" + StringUtils.defaultString(code);
 		} else if (system == null) {
-			myValue = StringUtils.defaultString(code);
+			value = StringUtils.defaultString(code);
 		} else {
-			myValue = "|" + StringUtils.defaultString(code);
+			value = "|" + StringUtils.defaultString(code);
 		}
+		return value;
+	}
+
+	public TokenCriterion(String theParamName, List<IdentifierDt> theValue) {
+		myName=theParamName;
+		StringBuilder b = new StringBuilder();
+		for (IdentifierDt next : theValue) {
+			if (next.getSystem().isEmpty() && next.getValue().isEmpty()) {
+				continue;
+			}
+			if (b.length() > 0) {
+				b.append(',');
+			}
+			b.append(toValue(next.getSystem().getValueAsString(), next.getValue().getValue()));
+		}
+		myValue = b.toString();
 	}
 
 	@Override

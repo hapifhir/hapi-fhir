@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.gclient;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
 /*
@@ -28,8 +32,23 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 	private String myName;
 
 	public StringCriterion(String theName, String theValue) {
-		myValue = theValue;
 		myName=theName;
+		myValue = ParameterUtil.escape(theValue);
+	}
+
+	public StringCriterion(String theName, List<String> theValue) {
+		myName=theName;
+		StringBuilder b = new StringBuilder();
+		for (String next : theValue) {
+			if (StringUtils.isBlank(next)) {
+				continue;
+			}
+			if (b.length() > 0) {
+				b.append(',');
+			}
+			b.append(ParameterUtil.escape(next));
+		}
+		myValue = b.toString();
 	}
 
 	@Override
@@ -39,7 +58,7 @@ class StringCriterion<A extends IParam> implements ICriterion<A>, ICriterionInte
 
 	@Override
 	public String getParameterValue() {
-		return ParameterUtil.escape(myValue);
+		return myValue;
 	}
 
 }

@@ -20,6 +20,9 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -41,10 +44,8 @@ public class StringClientParam implements IParam {
 		return myParamName;
 	}
 
-
 	/**
-	 * The string matches the given value (servers will often, but are not required to) implement this as a left match,
-	 * meaning that a value of "smi" would match "smi" and "smith".
+	 * The string matches the given value (servers will often, but are not required to) implement this as a left match, meaning that a value of "smi" would match "smi" and "smith".
 	 */
 	public IStringMatch matches() {
 		return new StringMatches();
@@ -59,9 +60,27 @@ public class StringClientParam implements IParam {
 
 	public interface IStringMatch {
 
+		/**
+		 * Requests that resources be returned which match the given value
+		 */
 		ICriterion<StringClientParam> value(String theValue);
 
+		/**
+		 * Requests that resources be returned which match ANY of the given values (this is an OR search). Note that to specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion)
+		 * where} criteria with the same parameter.
+		 */
+		ICriterion<StringClientParam> values(List<String> theValues);
+
+		/**
+		 * Requests that resources be returned which match the given value
+		 */
 		ICriterion<StringClientParam> value(StringDt theValue);
+
+		/**
+		 * Requests that resources be returned which match ANY of the given values (this is an OR search). Note that to specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion)
+		 * where} criteria with the same parameter.
+		 */
+		ICriterion<?> values(String... theValues);
 
 	}
 
@@ -75,6 +94,16 @@ public class StringClientParam implements IParam {
 		public ICriterion<StringClientParam> value(StringDt theValue) {
 			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue.getValue());
 		}
+
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, theValue);
+		}
+
+		@Override
+		public ICriterion<?> values(String... theValues) {
+			return new StringCriterion<StringClientParam>(getParamName() + Constants.PARAMQUALIFIER_STRING_EXACT, Arrays.asList(theValues));
+		}
 	}
 
 	private class StringMatches implements IStringMatch {
@@ -87,6 +116,17 @@ public class StringClientParam implements IParam {
 		public ICriterion<StringClientParam> value(StringDt theValue) {
 			return new StringCriterion<StringClientParam>(getParamName(), theValue.getValue());
 		}
+
+		@Override
+		public ICriterion<StringClientParam> values(List<String> theValue) {
+			return new StringCriterion<StringClientParam>(getParamName(), theValue);
+		}
+
+		@Override
+		public ICriterion<?> values(String... theValues) {
+			return new StringCriterion<StringClientParam>(getParamName(), Arrays.asList(theValues));
+		}
+
 	}
 
 }

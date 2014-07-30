@@ -149,7 +149,7 @@ public class RestfulServer extends HttpServlet {
 
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
 		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
-			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Must be public");
+			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Class ust be public");
 		}
 	}
 

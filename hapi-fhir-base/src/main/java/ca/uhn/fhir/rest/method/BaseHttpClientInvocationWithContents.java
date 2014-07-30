@@ -22,15 +22,21 @@ package ca.uhn.fhir.rest.method;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -42,6 +48,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
@@ -53,6 +60,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final Bundle myBundle;
 	private final String myContents;
 	private boolean myContentsIsBundle;
+	private Map<String, List<String>> myParams;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super();
@@ -112,6 +120,18 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myContentsIsBundle = theIsBundle;
 	}
 
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlExtension = StringUtils.join(theUrlExtension, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = null;
+		myContentsIsBundle = false;
+		myParams = theParams;
+	}
+
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
@@ -145,30 +165,42 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			parser = myContext.newXmlParser();
 		}
 
-		String contents;
-		if (myTagList != null) {
-			contents = parser.encodeTagListToString(myTagList);
-			contentType = encoding.getResourceContentType();
-		} else if (myBundle != null) {
-			contents = parser.encodeBundleToString(myBundle);
-			contentType = encoding.getBundleContentType();
-		} else if (myResources != null) {
-			Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
-			contents = parser.encodeBundleToString(bundle);
-			contentType = encoding.getBundleContentType();
-		} else if (myContents != null) {
-			contents = myContents;
-			if (myContentsIsBundle) {
-				contentType = encoding.getBundleContentType();
-			} else {
-				contentType = encoding.getResourceContentType();
+		AbstractHttpEntity entity;
+		if (myParams != null) {
+			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+			for (Entry<String, List<String>> nextParam : myParams.entrySet()) {
+				parameters.add(new BasicNameValuePair(nextParam.getKey(), StringUtils.join(nextParam.getValue(), ',')));
+			}
+			try {
+				entity = new UrlEncodedFormEntity(parameters, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new InternalErrorException("Server does not support UTF-8 (should not happen)", e);
 			}
 		} else {
-			contents = parser.encodeResourceToString(myResource);
-			contentType = encoding.getResourceContentType();
+			String contents;
+			if (myTagList != null) {
+				contents = parser.encodeTagListToString(myTagList);
+				contentType = encoding.getResourceContentType();
+			} else if (myBundle != null) {
+				contents = parser.encodeBundleToString(myBundle);
+				contentType = encoding.getBundleContentType();
+			} else if (myResources != null) {
+				Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
+				contents = parser.encodeBundleToString(bundle);
+				contentType = encoding.getBundleContentType();
+			} else if (myContents != null) {
+				contents = myContents;
+				if (myContentsIsBundle) {
+					contentType = encoding.getBundleContentType();
+				} else {
+					contentType = encoding.getResourceContentType();
+				}
+			} else {
+				contents = parser.encodeResourceToString(myResource);
+				contentType = encoding.getResourceContentType();
+			}
+			entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
 		}
-
-		StringEntity entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
 
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);

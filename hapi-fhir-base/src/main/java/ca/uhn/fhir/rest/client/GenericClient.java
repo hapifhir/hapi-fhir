@@ -74,11 +74,13 @@ import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.method.HttpPostClientInvocation;
 import ca.uhn.fhir.rest.method.HttpSimpleGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
@@ -420,7 +422,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -442,7 +445,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myResource = parseResourceBody(myResourceBody);
 			}
 			myId = getPreferredId(myResource, myId);
-			
+
 			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
@@ -454,7 +457,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return invoke(params, binding, invocation);
 
 		}
-
 
 		@Override
 		public ICreateTyped resource(IResource theResource) {
@@ -483,7 +485,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 	}
-	
+
 	private class UpdateInternal extends BaseClientExecutable<IUpdateTyped, MethodOutcome> implements IUpdate, IUpdateTyped {
 
 		private IdDt myId;
@@ -498,10 +500,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myId == null) {
 				myId = myResource.getId();
 			}
-			if (myId==null || myId.hasIdPart() == false) {
+			if (myId == null || myId.hasIdPart() == false) {
 				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
 			}
-			
+
 			BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
@@ -533,8 +535,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
-			if (theId.hasIdPart()==false) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: "+theId.getValue());
+			if (theId.hasIdPart() == false) {
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
 			}
 			myId = theId;
 			return this;
@@ -546,9 +548,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new NullPointerException("theId can not be null");
 			}
 			if (isBlank(theId)) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: "+theId);
+				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
 			}
-			myId=new IdDt(theId);
+			myId = new IdDt(theId);
 			return this;
 		}
 
@@ -712,7 +714,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<OperationOutcome> {
 
 		@Override
-		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -739,7 +742,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, myResourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			return response;
 		}
@@ -754,7 +758,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
 			return new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources();
 		}
 	}
@@ -799,6 +804,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IResource> myResourceType;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 
+		private SearchStyleEnum mySearchStyle;
+
 		public SearchInternal() {
 			myResourceType = null;
 			myResourceName = null;
@@ -838,7 +845,36 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			BundleResponseHandler binding = new BundleResponseHandler(myResourceType);
-			HttpGetClientInvocation invocation = new HttpGetClientInvocation(params, myResourceName);
+
+			SearchStyleEnum searchStyle = mySearchStyle;
+			if (searchStyle == null) {
+				int length = 0;
+				for (Entry<String, List<String>> nextEntry : params.entrySet()) {
+					length += nextEntry.getKey().length();
+					for (String next : nextEntry.getValue()) {
+						length += next.length();
+					}
+				}
+
+				if (length < 5000) {
+					searchStyle = SearchStyleEnum.GET;
+				} else {
+					searchStyle = SearchStyleEnum.POST;
+				}
+			}
+
+			BaseHttpClientInvocation invocation;
+			switch (searchStyle) {
+			case GET:
+			default:
+				invocation = new HttpGetClientInvocation(params, myResourceName);
+				break;
+			case GET_WITH_SEARCH:
+				invocation = new HttpGetClientInvocation(params, myResourceName, Constants.PARAM_SEARCH);
+				break;
+			case POST:
+				invocation = new HttpPostClientInvocation(myContext, params, myResourceName, Constants.PARAM_SEARCH);
+			}
 
 			return invoke(params, binding, invocation);
 
@@ -901,6 +937,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IQuery usingStyle(SearchStyleEnum theStyle) {
+			mySearchStyle = theStyle;
+			return this;
+		}
+
 	}
 
 	private class SortInternal implements ISort {
@@ -947,7 +989,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
 
 		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -1013,6 +1056,5 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public IUpdate update() {
 		return new UpdateInternal();
 	}
-
 
 }

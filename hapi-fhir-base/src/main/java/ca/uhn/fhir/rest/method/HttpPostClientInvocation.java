@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
@@ -53,6 +54,11 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 
 	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
 		super(theContext,theContents, theIsBundle, theUrlExtension);
+	}
+
+
+	public HttpPostClientInvocation(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
+		super(theContext, theParams, theUrlExtension);
 	}
 
 

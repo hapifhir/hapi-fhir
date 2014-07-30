@@ -13,6 +13,7 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.method.SearchStyleEnum;
 
 public class GenericClientExample {
 
@@ -100,9 +101,24 @@ Bundle response = client.search()
   .forResource(Patient.class)
   .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
   .and(Patient.PROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
-  .andLogRequestAndResponse(true)
   .execute();
 //END SNIPPET: search
+
+//START SNIPPET: searchOr
+response = client.search()
+   .forResource(Patient.class)
+   .where(Patient.FAMILY.matches().values("Smith", "Smyth"))
+   .execute();
+//END SNIPPET: searchOr
+
+//START SNIPPET: searchAnd
+response = client.search()
+ .forResource(Patient.class)
+ .where(Patient.ADDRESS.matches().values("Toronto"))
+ .where(Patient.ADDRESS.matches().values("Ontario"))
+ .where(Patient.ADDRESS.matches().values("Canada"))
+ .execute();
+//END SNIPPET: searchAnd
 
 //START SNIPPET: searchAdv
 response = client.search()
@@ -116,6 +132,15 @@ response = client.search()
    .limitTo(123)
    .execute();
 //END SNIPPET: searchAdv
+
+//START SNIPPET: searchPost
+response = client.search()
+   .forResource("Patient")
+   .where(Patient.NAME.matches().value("Tester"))
+   .usingStyle(SearchStyleEnum.POST)
+   .execute();
+//END SNIPPET: searchPost
+
 
 //START SNIPPET: searchComposite
 response = client.search()
