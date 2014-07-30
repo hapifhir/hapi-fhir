@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.5-SNAPSHOT</version>
+		<version>0.5</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -16,12 +16,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.5</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.5</version>
 			<scope>test</scope>
 		</dependency>
 		
@@ -184,7 +184,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.5-SNAPSHOT</version>
+				<version>0.5</version>
 				<executions>
 					<execution>
 						<id>buildclient</id>
