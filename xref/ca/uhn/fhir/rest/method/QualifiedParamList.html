@@ -10,7 +10,7 @@
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
@@ -49,7 +49,7 @@
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  		<strong class="jxr_keyword">super</strong>(theCapacity);
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	}
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QualifiedParamList.html">QualifiedParamList</a>(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <a href="../../../../../ca/uhn/fhir/model/api/IQueryParameterOr.html">IQueryParameterOr</a> theNextOr) {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/QualifiedParamList.html">QualifiedParamList</a>(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, IQueryParameterOr&lt;?&gt; theNextOr) {
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  		<strong class="jxr_keyword">for</strong> (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  			<strong class="jxr_keyword">if</strong> (myQualifier==<strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  				myQualifier=next.getQueryParameterQualifier();

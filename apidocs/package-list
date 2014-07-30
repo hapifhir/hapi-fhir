@@ -1,6 +1,7 @@
 ca.uhn.fhir.context
 ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
+ca.uhn.fhir.model.base.composite
 ca.uhn.fhir.model.dstu.composite
 ca.uhn.fhir.model.dstu.resource
 ca.uhn.fhir.model.dstu.valueset
@@ -12,6 +13,7 @@ ca.uhn.fhir.rest.api
 ca.uhn.fhir.rest.client
 ca.uhn.fhir.rest.client.api
 ca.uhn.fhir.rest.client.exceptions
+ca.uhn.fhir.rest.client.interceptor
 ca.uhn.fhir.rest.gclient
 ca.uhn.fhir.rest.method
 ca.uhn.fhir.rest.param

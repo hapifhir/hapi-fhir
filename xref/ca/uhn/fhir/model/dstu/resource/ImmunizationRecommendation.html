@@ -26,7 +26,7 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * %%</em>
@@ -70,10 +70,10 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.DateTimeDt;
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IntegerDt;
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.StringDt;
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateParam;
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.NumberParam;
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceParam;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenParam;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateClientParam;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.NumberClientParam;
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceClientParam;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenClientParam;
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">/**</em>
@@ -107,7 +107,7 @@
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.subject"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.subject"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_SUBJECT = <span class="jxr_string">"subject"</span>;
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -118,7 +118,7 @@
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_SUBJECT);
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_SUBJECT);
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -134,7 +134,7 @@
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.vaccineType&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@SearchParamDefinition(name=<span class="jxr_string">"vaccine-type"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.vaccineType"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@SearchParamDefinition(name=<span class="jxr_string">"vaccine-type"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.vaccineType"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_VACCINE_TYPE = <span class="jxr_string">"vaccine-type"</span>;
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -145,7 +145,7 @@
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.vaccineType&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> VACCINE_TYPE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_VACCINE_TYPE);
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> VACCINE_TYPE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_VACCINE_TYPE);
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;identifier&lt;/b&gt;</em>
@@ -155,7 +155,7 @@
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.identifier&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 	@SearchParamDefinition(name=<span class="jxr_string">"identifier"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.identifier"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 	@SearchParamDefinition(name=<span class="jxr_string">"identifier"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.identifier"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_IDENTIFIER = <span class="jxr_string">"identifier"</span>;
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -166,7 +166,7 @@
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.identifier&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> IDENTIFIER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_IDENTIFIER);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> IDENTIFIER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_IDENTIFIER);
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;date&lt;/b&gt;</em>
@@ -176,7 +176,7 @@
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.date&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.date"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>)
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.date"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>  )
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_DATE = <span class="jxr_string">"date"</span>;
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -187,7 +187,7 @@
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.date&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L180" href="#L180">180</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a> DATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a>(SP_DATE);
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a> DATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a>(SP_DATE);
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;dose-number&lt;/b&gt;</em>
@@ -197,7 +197,7 @@
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.doseNumber&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	@SearchParamDefinition(name=<span class="jxr_string">"dose-number"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.doseNumber"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"number"</span>)
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	@SearchParamDefinition(name=<span class="jxr_string">"dose-number"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.doseNumber"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"number"</span>  )
 <a class="jxr_linenumber" name="L193" href="#L193">193</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_DOSE_NUMBER = <span class="jxr_string">"dose-number"</span>;
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -208,7 +208,7 @@
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.doseNumber&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/NumberParam.html">NumberParam</a> DOSE_NUMBER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/NumberParam.html">NumberParam</a>(SP_DOSE_NUMBER);
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/NumberClientParam.html">NumberClientParam</a> DOSE_NUMBER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/NumberClientParam.html">NumberClientParam</a>(SP_DOSE_NUMBER);
 <a class="jxr_linenumber" name="L204" href="#L204">204</a> 
 <a class="jxr_linenumber" name="L205" href="#L205">205</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;status&lt;/b&gt;</em>
@@ -218,7 +218,7 @@
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.forecastStatus&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 	@SearchParamDefinition(name=<span class="jxr_string">"status"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.forecastStatus"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 	@SearchParamDefinition(name=<span class="jxr_string">"status"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.forecastStatus"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_STATUS = <span class="jxr_string">"status"</span>;
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -229,7 +229,7 @@
 <a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.forecastStatus&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L224" href="#L224">224</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> STATUS = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_STATUS);
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> STATUS = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_STATUS);
 <a class="jxr_linenumber" name="L225" href="#L225">225</a> 
 <a class="jxr_linenumber" name="L226" href="#L226">226</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L227" href="#L227">227</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;dose-sequence&lt;/b&gt;</em>
@@ -239,7 +239,7 @@
 <a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.protocol.doseSequence&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L234" href="#L234">234</a> 	@SearchParamDefinition(name=<span class="jxr_string">"dose-sequence"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.protocol.doseSequence"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L234" href="#L234">234</a> 	@SearchParamDefinition(name=<span class="jxr_string">"dose-sequence"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.protocol.doseSequence"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_DOSE_SEQUENCE = <span class="jxr_string">"dose-sequence"</span>;
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 
 <a class="jxr_linenumber" name="L237" href="#L237">237</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -250,7 +250,7 @@
 <a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.protocol.doseSequence&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L245" href="#L245">245</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> DOSE_SEQUENCE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_DOSE_SEQUENCE);
+<a class="jxr_linenumber" name="L245" href="#L245">245</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> DOSE_SEQUENCE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_DOSE_SEQUENCE);
 <a class="jxr_linenumber" name="L246" href="#L246">246</a> 
 <a class="jxr_linenumber" name="L247" href="#L247">247</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L248" href="#L248">248</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;support&lt;/b&gt;</em>
@@ -260,7 +260,7 @@
 <a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.supportingImmunization&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L254" href="#L254">254</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L255" href="#L255">255</a> 	@SearchParamDefinition(name=<span class="jxr_string">"support"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.supportingImmunization"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L255" href="#L255">255</a> 	@SearchParamDefinition(name=<span class="jxr_string">"support"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.supportingImmunization"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L256" href="#L256">256</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_SUPPORT = <span class="jxr_string">"support"</span>;
 <a class="jxr_linenumber" name="L257" href="#L257">257</a> 
 <a class="jxr_linenumber" name="L258" href="#L258">258</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -271,7 +271,7 @@
 <a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.supportingImmunization&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> SUPPORT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_SUPPORT);
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> SUPPORT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_SUPPORT);
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L269" href="#L269">269</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -287,7 +287,7 @@
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.supportingPatientInformation&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L281" href="#L281">281</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L282" href="#L282">282</a> 	@SearchParamDefinition(name=<span class="jxr_string">"information"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.supportingPatientInformation"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L282" href="#L282">282</a> 	@SearchParamDefinition(name=<span class="jxr_string">"information"</span>, path=<span class="jxr_string">"ImmunizationRecommendation.recommendation.supportingPatientInformation"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L283" href="#L283">283</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_INFORMATION = <span class="jxr_string">"information"</span>;
 <a class="jxr_linenumber" name="L284" href="#L284">284</a> 
 <a class="jxr_linenumber" name="L285" href="#L285">285</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -298,7 +298,7 @@
 <a class="jxr_linenumber" name="L290" href="#L290">290</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;ImmunizationRecommendation.recommendation.supportingPatientInformation&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L293" href="#L293">293</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> INFORMATION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_INFORMATION);
+<a class="jxr_linenumber" name="L293" href="#L293">293</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> INFORMATION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_INFORMATION);
 <a class="jxr_linenumber" name="L294" href="#L294">294</a> 
 <a class="jxr_linenumber" name="L295" href="#L295">295</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L296" href="#L296">296</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -645,8 +645,8 @@
 <a class="jxr_linenumber" name="L637" href="#L637">637</a> <em class="jxr_javadoccomment">     * The date the immunization recommendation was created.</em>
 <a class="jxr_linenumber" name="L638" href="#L638">638</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L639" href="#L639">639</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L640" href="#L640">640</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">Recommendation</a> setDateWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L641" href="#L641">641</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L640" href="#L640">640</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">Recommendation</a> setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L641" href="#L641">641</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L642" href="#L642">642</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L643" href="#L643">643</a> 	}
 <a class="jxr_linenumber" name="L644" href="#L644">644</a> 
@@ -658,8 +658,8 @@
 <a class="jxr_linenumber" name="L650" href="#L650">650</a> <em class="jxr_javadoccomment">     * The date the immunization recommendation was created.</em>
 <a class="jxr_linenumber" name="L651" href="#L651">651</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L652" href="#L652">652</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L653" href="#L653">653</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">Recommendation</a> setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L654" href="#L654">654</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L653" href="#L653">653</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">Recommendation</a> setDateWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L654" href="#L654">654</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L655" href="#L655">655</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L656" href="#L656">656</a> 	}
 <a class="jxr_linenumber" name="L657" href="#L657">657</a> 
@@ -1083,8 +1083,8 @@
 <a class="jxr_linenumber" name="L1075" href="#L1075">1075</a> <em class="jxr_javadoccomment">     * Date recommendation</em>
 <a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">RecommendationDateCriterion</a> setValueWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 		myValue = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">RecommendationDateCriterion</a> setValue( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 		myValue = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 	}
 <a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 
@@ -1096,8 +1096,8 @@
 <a class="jxr_linenumber" name="L1088" href="#L1088">1088</a> <em class="jxr_javadoccomment">     * Date recommendation</em>
 <a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">RecommendationDateCriterion</a> setValue( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 		myValue = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/ImmunizationRecommendation.html">RecommendationDateCriterion</a> setValueWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 		myValue = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 	}
 <a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 

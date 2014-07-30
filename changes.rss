@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <title>HAPI FHIR Library: HAPI FHIR Changelog</title>
+  <title>HAPI FHIR - Core Library: HAPI FHIR Changelog</title>
   <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html" />
   <subtitle>These are the latest changes of the project.</subtitle>
-  <updated>2014-07-14T02:27:49Z</updated>
+  <updated>2014-07-30T02:28:04Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2014-07-14T02:27:49Z</dc:date>
+  <dc:date>2014-07-30T02:28:04Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
-    <title>0.3</title>
-    <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html#a0.3" />
+    <title>0.5</title>
+    <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html#a0.5" />
     <author>
       <name />
     </author>
-    <updated>2014-07-14T02:27:49Z</updated>
-    <published>2014-07-14T02:27:49Z</published>
-    <summary type="html">&lt;p&gt;This release corrects lots of bugs and introduces the fluent client mode&lt;/p&gt;&lt;p&gt;Version 0.3 is available with 0 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2014-07-14T02:27:49Z</dc:date>
+    <updated>2014-07-30T02:28:04Z</updated>
+    <published>2014-07-30T02:28:04Z</published>
+    <summary type="html">&lt;p&gt;Version 0.5 is available with 16 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2014-07-30T02:28:04Z</dc:date>
   </entry>
 </feed>
 

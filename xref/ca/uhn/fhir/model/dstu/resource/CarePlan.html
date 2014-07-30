@@ -26,7 +26,7 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * %%</em>
@@ -79,9 +79,9 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.DateTimeDt;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdrefDt;
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.StringDt;
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateParam;
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceParam;
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenParam;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateClientParam;
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceClientParam;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenClientParam;
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">/**</em>
@@ -115,7 +115,7 @@
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.patient&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	@SearchParamDefinition(name=<span class="jxr_string">"patient"</span>, path=<span class="jxr_string">"CarePlan.patient"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	@SearchParamDefinition(name=<span class="jxr_string">"patient"</span>, path=<span class="jxr_string">"CarePlan.patient"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_PATIENT = <span class="jxr_string">"patient"</span>;
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -126,7 +126,7 @@
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.patient&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> PATIENT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_PATIENT);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> PATIENT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_PATIENT);
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -142,7 +142,7 @@
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.concern&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@SearchParamDefinition(name=<span class="jxr_string">"condition"</span>, path=<span class="jxr_string">"CarePlan.concern"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@SearchParamDefinition(name=<span class="jxr_string">"condition"</span>, path=<span class="jxr_string">"CarePlan.concern"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_CONDITION = <span class="jxr_string">"condition"</span>;
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -153,7 +153,7 @@
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.concern&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> CONDITION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_CONDITION);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> CONDITION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_CONDITION);
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -169,7 +169,7 @@
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.period&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date"</span>, path=<span class="jxr_string">"CarePlan.period"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>)
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date"</span>, path=<span class="jxr_string">"CarePlan.period"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>  )
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_DATE = <span class="jxr_string">"date"</span>;
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -180,7 +180,7 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.period&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a> DATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a>(SP_DATE);
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a> DATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a>(SP_DATE);
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;participant&lt;/b&gt;</em>
@@ -190,7 +190,7 @@
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.participant.member&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	@SearchParamDefinition(name=<span class="jxr_string">"participant"</span>, path=<span class="jxr_string">"CarePlan.participant.member"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	@SearchParamDefinition(name=<span class="jxr_string">"participant"</span>, path=<span class="jxr_string">"CarePlan.participant.member"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_PARTICIPANT = <span class="jxr_string">"participant"</span>;
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> 
 <a class="jxr_linenumber" name="L188" href="#L188">188</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -201,7 +201,7 @@
 <a class="jxr_linenumber" name="L193" href="#L193">193</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.participant.member&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L196" href="#L196">196</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> PARTICIPANT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_PARTICIPANT);
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> PARTICIPANT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_PARTICIPANT);
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -217,7 +217,7 @@
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.simple.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitycode"</span>, path=<span class="jxr_string">"CarePlan.activity.simple.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitycode"</span>, path=<span class="jxr_string">"CarePlan.activity.simple.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ACTIVITYCODE = <span class="jxr_string">"activitycode"</span>;
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -228,7 +228,7 @@
 <a class="jxr_linenumber" name="L220" href="#L220">220</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.simple.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L221" href="#L221">221</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L223" href="#L223">223</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> ACTIVITYCODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_ACTIVITYCODE);
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> ACTIVITYCODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_ACTIVITYCODE);
 <a class="jxr_linenumber" name="L224" href="#L224">224</a> 
 <a class="jxr_linenumber" name="L225" href="#L225">225</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L226" href="#L226">226</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;activitydate&lt;/b&gt;</em>
@@ -238,7 +238,7 @@
 <a class="jxr_linenumber" name="L230" href="#L230">230</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.simple.timing[x]&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L231" href="#L231">231</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L232" href="#L232">232</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L233" href="#L233">233</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitydate"</span>, path=<span class="jxr_string">"CarePlan.activity.simple.timing[x]"</span>, description=<span class="jxr_string">"Specified date occurs within period specified by CarePlan.activity.timingSchedule"</span>, type=<span class="jxr_string">"date"</span>)
+<a class="jxr_linenumber" name="L233" href="#L233">233</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitydate"</span>, path=<span class="jxr_string">"CarePlan.activity.simple.timing[x]"</span>, description=<span class="jxr_string">"Specified date occurs within period specified by CarePlan.activity.timingSchedule"</span>, type=<span class="jxr_string">"date"</span>  )
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ACTIVITYDATE = <span class="jxr_string">"activitydate"</span>;
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> 
 <a class="jxr_linenumber" name="L236" href="#L236">236</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -249,7 +249,7 @@
 <a class="jxr_linenumber" name="L241" href="#L241">241</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.simple.timing[x]&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L242" href="#L242">242</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L243" href="#L243">243</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L244" href="#L244">244</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a> ACTIVITYDATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a>(SP_ACTIVITYDATE);
+<a class="jxr_linenumber" name="L244" href="#L244">244</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a> ACTIVITYDATE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a>(SP_ACTIVITYDATE);
 <a class="jxr_linenumber" name="L245" href="#L245">245</a> 
 <a class="jxr_linenumber" name="L246" href="#L246">246</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L247" href="#L247">247</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;activitydetail&lt;/b&gt;</em>
@@ -259,7 +259,7 @@
 <a class="jxr_linenumber" name="L251" href="#L251">251</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.detail&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L252" href="#L252">252</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L253" href="#L253">253</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitydetail"</span>, path=<span class="jxr_string">"CarePlan.activity.detail"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L254" href="#L254">254</a> 	@SearchParamDefinition(name=<span class="jxr_string">"activitydetail"</span>, path=<span class="jxr_string">"CarePlan.activity.detail"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L255" href="#L255">255</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ACTIVITYDETAIL = <span class="jxr_string">"activitydetail"</span>;
 <a class="jxr_linenumber" name="L256" href="#L256">256</a> 
 <a class="jxr_linenumber" name="L257" href="#L257">257</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -270,7 +270,7 @@
 <a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;CarePlan.activity.detail&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L263" href="#L263">263</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L264" href="#L264">264</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> ACTIVITYDETAIL = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_ACTIVITYDETAIL);
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> ACTIVITYDETAIL = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_ACTIVITYDETAIL);
 <a class="jxr_linenumber" name="L266" href="#L266">266</a> 
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L268" href="#L268">268</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -602,8 +602,8 @@
 <a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">     * Identifies the most recent date on which the plan has been revised.</em>
 <a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L596" href="#L596">596</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L597" href="#L597">597</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">CarePlan</a> setModifiedWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L598" href="#L598">598</a> 		myModified = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L597" href="#L597">597</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">CarePlan</a> setModified( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> 		myModified = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L599" href="#L599">599</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L600" href="#L600">600</a> 	}
 <a class="jxr_linenumber" name="L601" href="#L601">601</a> 
@@ -615,8 +615,8 @@
 <a class="jxr_linenumber" name="L607" href="#L607">607</a> <em class="jxr_javadoccomment">     * Identifies the most recent date on which the plan has been revised.</em>
 <a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L610" href="#L610">610</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">CarePlan</a> setModified( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L611" href="#L611">611</a> 		myModified = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L610" href="#L610">610</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">CarePlan</a> setModifiedWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> 		myModified = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L612" href="#L612">612</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L613" href="#L613">613</a> 	}
 <a class="jxr_linenumber" name="L614" href="#L614">614</a> 
@@ -1933,8 +1933,8 @@
 <a class="jxr_linenumber" name="L1925" href="#L1925">1925</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be consumed in a given day.</em>
 <a class="jxr_linenumber" name="L1926" href="#L1926">1926</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1927" href="#L1927">1927</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1928" href="#L1928">1928</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1929" href="#L1929">1929</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1928" href="#L1928">1928</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1929" href="#L1929">1929</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1930" href="#L1930">1930</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1931" href="#L1931">1931</a> 	}
 <a class="jxr_linenumber" name="L1932" href="#L1932">1932</a> 
@@ -1946,8 +1946,8 @@
 <a class="jxr_linenumber" name="L1938" href="#L1938">1938</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be consumed in a given day.</em>
 <a class="jxr_linenumber" name="L1939" href="#L1939">1939</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1940" href="#L1940">1940</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1941" href="#L1941">1941</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1942" href="#L1942">1942</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1941" href="#L1941">1941</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1942" href="#L1942">1942</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1943" href="#L1943">1943</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1944" href="#L1944">1944</a> 	}
 <a class="jxr_linenumber" name="L1945" href="#L1945">1945</a> 
@@ -1959,8 +1959,8 @@
 <a class="jxr_linenumber" name="L1951" href="#L1951">1951</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be consumed in a given day.</em>
 <a class="jxr_linenumber" name="L1952" href="#L1952">1952</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1953" href="#L1953">1953</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1954" href="#L1954">1954</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1955" href="#L1955">1955</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1954" href="#L1954">1954</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1955" href="#L1955">1955</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1956" href="#L1956">1956</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1957" href="#L1957">1957</a> 	}
 <a class="jxr_linenumber" name="L1958" href="#L1958">1958</a> 
@@ -1972,8 +1972,8 @@
 <a class="jxr_linenumber" name="L1964" href="#L1964">1964</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be consumed in a given day.</em>
 <a class="jxr_linenumber" name="L1965" href="#L1965">1965</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1966" href="#L1966">1966</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1967" href="#L1967">1967</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1968" href="#L1968">1968</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1967" href="#L1967">1967</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setDailyAmount( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1968" href="#L1968">1968</a> 		myDailyAmount = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1969" href="#L1969">1969</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1970" href="#L1970">1970</a> 	}
 <a class="jxr_linenumber" name="L1971" href="#L1971">1971</a> 
@@ -2042,8 +2042,8 @@
 <a class="jxr_linenumber" name="L2034" href="#L2034">2034</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be supplied.</em>
 <a class="jxr_linenumber" name="L2035" href="#L2035">2035</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2036" href="#L2036">2036</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2037" href="#L2037">2037</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L2038" href="#L2038">2038</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L2037" href="#L2037">2037</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L2038" href="#L2038">2038</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L2039" href="#L2039">2039</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2040" href="#L2040">2040</a> 	}
 <a class="jxr_linenumber" name="L2041" href="#L2041">2041</a> 
@@ -2055,8 +2055,8 @@
 <a class="jxr_linenumber" name="L2047" href="#L2047">2047</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be supplied.</em>
 <a class="jxr_linenumber" name="L2048" href="#L2048">2048</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2049" href="#L2049">2049</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2050" href="#L2050">2050</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L2051" href="#L2051">2051</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L2050" href="#L2050">2050</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L2051" href="#L2051">2051</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L2052" href="#L2052">2052</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2053" href="#L2053">2053</a> 	}
 <a class="jxr_linenumber" name="L2054" href="#L2054">2054</a> 
@@ -2068,8 +2068,8 @@
 <a class="jxr_linenumber" name="L2060" href="#L2060">2060</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be supplied.</em>
 <a class="jxr_linenumber" name="L2061" href="#L2061">2061</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2062" href="#L2062">2062</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2063" href="#L2063">2063</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L2064" href="#L2064">2064</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L2063" href="#L2063">2063</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L2064" href="#L2064">2064</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L2065" href="#L2065">2065</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2066" href="#L2066">2066</a> 	}
 <a class="jxr_linenumber" name="L2067" href="#L2067">2067</a> 
@@ -2081,8 +2081,8 @@
 <a class="jxr_linenumber" name="L2073" href="#L2073">2073</a> <em class="jxr_javadoccomment">     * Identifies the quantity expected to be supplied.</em>
 <a class="jxr_linenumber" name="L2074" href="#L2074">2074</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2075" href="#L2075">2075</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2076" href="#L2076">2076</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L2077" href="#L2077">2077</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L2076" href="#L2076">2076</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/CarePlan.html">ActivitySimple</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L2077" href="#L2077">2077</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L2078" href="#L2078">2078</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2079" href="#L2079">2079</a> 	}
 <a class="jxr_linenumber" name="L2080" href="#L2080">2080</a> 

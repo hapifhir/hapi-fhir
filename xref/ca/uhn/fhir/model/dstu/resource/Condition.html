@@ -26,7 +26,7 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * %%</em>
@@ -73,9 +73,9 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.CodeDt;
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.DateDt;
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.StringDt;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateParam;
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceParam;
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenParam;
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.DateClientParam;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceClientParam;
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.TokenClientParam;
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_javadoccomment">/**</em>
@@ -109,7 +109,7 @@
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	@SearchParamDefinition(name=<span class="jxr_string">"code"</span>, path=<span class="jxr_string">"Condition.code"</span>, description=<span class="jxr_string">"Code for the condition"</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	@SearchParamDefinition(name=<span class="jxr_string">"code"</span>, path=<span class="jxr_string">"Condition.code"</span>, description=<span class="jxr_string">"Code for the condition"</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_CODE = <span class="jxr_string">"code"</span>;
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -120,7 +120,7 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> CODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_CODE);
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> CODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_CODE);
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;status&lt;/b&gt;</em>
@@ -130,7 +130,7 @@
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.status&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	@SearchParamDefinition(name=<span class="jxr_string">"status"</span>, path=<span class="jxr_string">"Condition.status"</span>, description=<span class="jxr_string">"The status of the condition"</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	@SearchParamDefinition(name=<span class="jxr_string">"status"</span>, path=<span class="jxr_string">"Condition.status"</span>, description=<span class="jxr_string">"The status of the condition"</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_STATUS = <span class="jxr_string">"status"</span>;
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -141,7 +141,7 @@
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.status&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> STATUS = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_STATUS);
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> STATUS = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_STATUS);
 <a class="jxr_linenumber" name="L137" href="#L137">137</a> 
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;severity&lt;/b&gt;</em>
@@ -151,7 +151,7 @@
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.severity&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	@SearchParamDefinition(name=<span class="jxr_string">"severity"</span>, path=<span class="jxr_string">"Condition.severity"</span>, description=<span class="jxr_string">"The severity of the condition"</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	@SearchParamDefinition(name=<span class="jxr_string">"severity"</span>, path=<span class="jxr_string">"Condition.severity"</span>, description=<span class="jxr_string">"The severity of the condition"</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_SEVERITY = <span class="jxr_string">"severity"</span>;
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -162,7 +162,7 @@
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.severity&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> SEVERITY = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_SEVERITY);
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> SEVERITY = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_SEVERITY);
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;category&lt;/b&gt;</em>
@@ -172,7 +172,7 @@
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.category&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	@SearchParamDefinition(name=<span class="jxr_string">"category"</span>, path=<span class="jxr_string">"Condition.category"</span>, description=<span class="jxr_string">"The category of the condition"</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	@SearchParamDefinition(name=<span class="jxr_string">"category"</span>, path=<span class="jxr_string">"Condition.category"</span>, description=<span class="jxr_string">"The category of the condition"</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_CATEGORY = <span class="jxr_string">"category"</span>;
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -183,7 +183,7 @@
 <a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.category&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> CATEGORY = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_CATEGORY);
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> CATEGORY = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_CATEGORY);
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> 
 <a class="jxr_linenumber" name="L180" href="#L180">180</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;onset&lt;/b&gt;</em>
@@ -193,7 +193,7 @@
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.onset[x]&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	@SearchParamDefinition(name=<span class="jxr_string">"onset"</span>, path=<span class="jxr_string">"Condition.onset[x]"</span>, description=<span class="jxr_string">"When the Condition started (if started on a date)"</span>, type=<span class="jxr_string">"date"</span>)
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	@SearchParamDefinition(name=<span class="jxr_string">"onset"</span>, path=<span class="jxr_string">"Condition.onset[x]"</span>, description=<span class="jxr_string">"When the Condition started (if started on a date)"</span>, type=<span class="jxr_string">"date"</span>  )
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ONSET = <span class="jxr_string">"onset"</span>;
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -204,7 +204,7 @@
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.onset[x]&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a> ONSET = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a>(SP_ONSET);
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a> ONSET = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a>(SP_ONSET);
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> 
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;subject&lt;/b&gt;</em>
@@ -214,7 +214,7 @@
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L207" href="#L207">207</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"Condition.subject"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"Condition.subject"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_SUBJECT = <span class="jxr_string">"subject"</span>;
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -225,7 +225,7 @@
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L219" href="#L219">219</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_SUBJECT);
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_SUBJECT);
 <a class="jxr_linenumber" name="L221" href="#L221">221</a> 
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L223" href="#L223">223</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -241,7 +241,7 @@
 <a class="jxr_linenumber" name="L233" href="#L233">233</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.encounter&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L234" href="#L234">234</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L235" href="#L235">235</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L236" href="#L236">236</a> 	@SearchParamDefinition(name=<span class="jxr_string">"encounter"</span>, path=<span class="jxr_string">"Condition.encounter"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L236" href="#L236">236</a> 	@SearchParamDefinition(name=<span class="jxr_string">"encounter"</span>, path=<span class="jxr_string">"Condition.encounter"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L237" href="#L237">237</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ENCOUNTER = <span class="jxr_string">"encounter"</span>;
 <a class="jxr_linenumber" name="L238" href="#L238">238</a> 
 <a class="jxr_linenumber" name="L239" href="#L239">239</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -252,7 +252,7 @@
 <a class="jxr_linenumber" name="L244" href="#L244">244</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.encounter&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L245" href="#L245">245</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L246" href="#L246">246</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L247" href="#L247">247</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> ENCOUNTER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_ENCOUNTER);
+<a class="jxr_linenumber" name="L247" href="#L247">247</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> ENCOUNTER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_ENCOUNTER);
 <a class="jxr_linenumber" name="L248" href="#L248">248</a> 
 <a class="jxr_linenumber" name="L249" href="#L249">249</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L250" href="#L250">250</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -268,7 +268,7 @@
 <a class="jxr_linenumber" name="L260" href="#L260">260</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.asserter&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	@SearchParamDefinition(name=<span class="jxr_string">"asserter"</span>, path=<span class="jxr_string">"Condition.asserter"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 	@SearchParamDefinition(name=<span class="jxr_string">"asserter"</span>, path=<span class="jxr_string">"Condition.asserter"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L264" href="#L264">264</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_ASSERTER = <span class="jxr_string">"asserter"</span>;
 <a class="jxr_linenumber" name="L265" href="#L265">265</a> 
 <a class="jxr_linenumber" name="L266" href="#L266">266</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -279,7 +279,7 @@
 <a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.asserter&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L272" href="#L272">272</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L273" href="#L273">273</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L274" href="#L274">274</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> ASSERTER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_ASSERTER);
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> ASSERTER = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_ASSERTER);
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 
 <a class="jxr_linenumber" name="L276" href="#L276">276</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L277" href="#L277">277</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -295,7 +295,7 @@
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.dateAsserted&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L288" href="#L288">288</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L289" href="#L289">289</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date-asserted"</span>, path=<span class="jxr_string">"Condition.dateAsserted"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>)
+<a class="jxr_linenumber" name="L290" href="#L290">290</a> 	@SearchParamDefinition(name=<span class="jxr_string">"date-asserted"</span>, path=<span class="jxr_string">"Condition.dateAsserted"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"date"</span>  )
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_DATE_ASSERTED = <span class="jxr_string">"date-asserted"</span>;
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> 
 <a class="jxr_linenumber" name="L293" href="#L293">293</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -306,7 +306,7 @@
 <a class="jxr_linenumber" name="L298" href="#L298">298</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.dateAsserted&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L299" href="#L299">299</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L300" href="#L300">300</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L301" href="#L301">301</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a> DATE_ASSERTED = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateParam.html">DateParam</a>(SP_DATE_ASSERTED);
+<a class="jxr_linenumber" name="L301" href="#L301">301</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a> DATE_ASSERTED = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/DateClientParam.html">DateClientParam</a>(SP_DATE_ASSERTED);
 <a class="jxr_linenumber" name="L302" href="#L302">302</a> 
 <a class="jxr_linenumber" name="L303" href="#L303">303</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;evidence&lt;/b&gt;</em>
@@ -316,7 +316,7 @@
 <a class="jxr_linenumber" name="L308" href="#L308">308</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.evidence.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L309" href="#L309">309</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L310" href="#L310">310</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 	@SearchParamDefinition(name=<span class="jxr_string">"evidence"</span>, path=<span class="jxr_string">"Condition.evidence.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 	@SearchParamDefinition(name=<span class="jxr_string">"evidence"</span>, path=<span class="jxr_string">"Condition.evidence.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L312" href="#L312">312</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_EVIDENCE = <span class="jxr_string">"evidence"</span>;
 <a class="jxr_linenumber" name="L313" href="#L313">313</a> 
 <a class="jxr_linenumber" name="L314" href="#L314">314</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -327,7 +327,7 @@
 <a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.evidence.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L320" href="#L320">320</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L321" href="#L321">321</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> EVIDENCE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_EVIDENCE);
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> EVIDENCE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_EVIDENCE);
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> 
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L325" href="#L325">325</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;location&lt;/b&gt;</em>
@@ -337,7 +337,7 @@
 <a class="jxr_linenumber" name="L329" href="#L329">329</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.location.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L330" href="#L330">330</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L331" href="#L331">331</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 	@SearchParamDefinition(name=<span class="jxr_string">"location"</span>, path=<span class="jxr_string">"Condition.location.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 	@SearchParamDefinition(name=<span class="jxr_string">"location"</span>, path=<span class="jxr_string">"Condition.location.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L333" href="#L333">333</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_LOCATION = <span class="jxr_string">"location"</span>;
 <a class="jxr_linenumber" name="L334" href="#L334">334</a> 
 <a class="jxr_linenumber" name="L335" href="#L335">335</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -348,7 +348,7 @@
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.location.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L341" href="#L341">341</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L342" href="#L342">342</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> LOCATION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_LOCATION);
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> LOCATION = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_LOCATION);
 <a class="jxr_linenumber" name="L344" href="#L344">344</a> 
 <a class="jxr_linenumber" name="L345" href="#L345">345</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L346" href="#L346">346</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;related-item&lt;/b&gt;</em>
@@ -358,7 +358,7 @@
 <a class="jxr_linenumber" name="L350" href="#L350">350</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.relatedItem.target&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L351" href="#L351">351</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L352" href="#L352">352</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 	@SearchParamDefinition(name=<span class="jxr_string">"related-item"</span>, path=<span class="jxr_string">"Condition.relatedItem.target"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 	@SearchParamDefinition(name=<span class="jxr_string">"related-item"</span>, path=<span class="jxr_string">"Condition.relatedItem.target"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L354" href="#L354">354</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_RELATED_ITEM = <span class="jxr_string">"related-item"</span>;
 <a class="jxr_linenumber" name="L355" href="#L355">355</a> 
 <a class="jxr_linenumber" name="L356" href="#L356">356</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -369,7 +369,7 @@
 <a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.relatedItem.target&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> RELATED_ITEM = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_RELATED_ITEM);
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> RELATED_ITEM = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_RELATED_ITEM);
 <a class="jxr_linenumber" name="L365" href="#L365">365</a> 
 <a class="jxr_linenumber" name="L366" href="#L366">366</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -385,7 +385,7 @@
 <a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.stage.summary&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 	@SearchParamDefinition(name=<span class="jxr_string">"stage"</span>, path=<span class="jxr_string">"Condition.stage.summary"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> 	@SearchParamDefinition(name=<span class="jxr_string">"stage"</span>, path=<span class="jxr_string">"Condition.stage.summary"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L381" href="#L381">381</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_STAGE = <span class="jxr_string">"stage"</span>;
 <a class="jxr_linenumber" name="L382" href="#L382">382</a> 
 <a class="jxr_linenumber" name="L383" href="#L383">383</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -396,7 +396,7 @@
 <a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.stage.summary&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L390" href="#L390">390</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> STAGE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_STAGE);
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> STAGE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_STAGE);
 <a class="jxr_linenumber" name="L392" href="#L392">392</a> 
 <a class="jxr_linenumber" name="L393" href="#L393">393</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L394" href="#L394">394</a> <em class="jxr_javadoccomment">	 * Search parameter constant for &lt;b&gt;related-code&lt;/b&gt;</em>
@@ -406,7 +406,7 @@
 <a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.relatedItem.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	@SearchParamDefinition(name=<span class="jxr_string">"related-code"</span>, path=<span class="jxr_string">"Condition.relatedItem.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>)
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 	@SearchParamDefinition(name=<span class="jxr_string">"related-code"</span>, path=<span class="jxr_string">"Condition.relatedItem.code"</span>, description=<span class="jxr_string">""</span>, type=<span class="jxr_string">"token"</span>  )
 <a class="jxr_linenumber" name="L402" href="#L402">402</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_RELATED_CODE = <span class="jxr_string">"related-code"</span>;
 <a class="jxr_linenumber" name="L403" href="#L403">403</a> 
 <a class="jxr_linenumber" name="L404" href="#L404">404</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -417,7 +417,7 @@
 <a class="jxr_linenumber" name="L409" href="#L409">409</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Condition.relatedItem.code&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L410" href="#L410">410</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L411" href="#L411">411</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a> RELATED_CODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenParam.html">TokenParam</a>(SP_RELATED_CODE);
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a> RELATED_CODE = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/TokenClientParam.html">TokenClientParam</a>(SP_RELATED_CODE);
 <a class="jxr_linenumber" name="L413" href="#L413">413</a> 
 <a class="jxr_linenumber" name="L414" href="#L414">414</a> 
 <a class="jxr_linenumber" name="L415" href="#L415">415</a> 	@Child(name=<span class="jxr_string">"identifier"</span>, type=IdentifierDt.<strong class="jxr_keyword">class</strong>, order=0, min=0, max=Child.MAX_UNLIMITED)	
@@ -782,8 +782,8 @@
 <a class="jxr_linenumber" name="L774" href="#L774">774</a> <em class="jxr_javadoccomment">     * Estimated or actual date the condition/problem/diagnosis was first detected/suspected</em>
 <a class="jxr_linenumber" name="L775" href="#L775">775</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L776" href="#L776">776</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L777" href="#L777">777</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Condition.html">Condition</a> setDateAssertedWithDayPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L778" href="#L778">778</a> 		myDateAsserted = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
+<a class="jxr_linenumber" name="L777" href="#L777">777</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Condition.html">Condition</a> setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L778" href="#L778">778</a> 		myDateAsserted = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L779" href="#L779">779</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L780" href="#L780">780</a> 	}
 <a class="jxr_linenumber" name="L781" href="#L781">781</a> 
@@ -795,8 +795,8 @@
 <a class="jxr_linenumber" name="L787" href="#L787">787</a> <em class="jxr_javadoccomment">     * Estimated or actual date the condition/problem/diagnosis was first detected/suspected</em>
 <a class="jxr_linenumber" name="L788" href="#L788">788</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L789" href="#L789">789</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L790" href="#L790">790</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Condition.html">Condition</a> setDateAsserted( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L791" href="#L791">791</a> 		myDateAsserted = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L790" href="#L790">790</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Condition.html">Condition</a> setDateAssertedWithDayPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L791" href="#L791">791</a> 		myDateAsserted = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
 <a class="jxr_linenumber" name="L792" href="#L792">792</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L793" href="#L793">793</a> 	}
 <a class="jxr_linenumber" name="L794" href="#L794">794</a> 

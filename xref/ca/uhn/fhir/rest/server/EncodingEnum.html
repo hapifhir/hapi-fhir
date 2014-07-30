@@ -10,7 +10,7 @@
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
 <a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
@@ -35,7 +35,7 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">public</strong> enum <a href="../../../../../ca/uhn/fhir/rest/server/EncodingEnum.html">EncodingEnum</a> {
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, <span class="jxr_string">"text/xml"</span>, Constants.FORMAT_XML) {
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	XML(Constants.CT_FHIR_XML, Constants.CT_ATOM_XML, <span class="jxr_string">"application/xml"</span>, Constants.FORMAT_XML) {
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  		@Override
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  		<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/parser/IParser.html">IParser</a> newParser(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext) {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  			<strong class="jxr_keyword">return</strong> theContext.newXmlParser();

@@ -26,7 +26,7 @@
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #%L</em>
-<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR Library</em>
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> * Copyright (C) 2014 University Health Network</em>
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_comment"> * %%</em>
@@ -76,7 +76,7 @@
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.CodeDt;
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.DateTimeDt;
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.StringDt;
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceParam;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.gclient.ReferenceClientParam;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  <em class="jxr_javadoccomment">/**</em>
@@ -110,7 +110,7 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Specimen.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"Specimen.subject"</span>, description=<span class="jxr_string">"The subject of the specimen"</span>, type=<span class="jxr_string">"reference"</span>)
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	@SearchParamDefinition(name=<span class="jxr_string">"subject"</span>, path=<span class="jxr_string">"Specimen.subject"</span>, description=<span class="jxr_string">"The subject of the specimen"</span>, type=<span class="jxr_string">"reference"</span>  )
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> String SP_SUBJECT = <span class="jxr_string">"subject"</span>;
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<em class="jxr_javadoccomment">/**</em>
@@ -121,7 +121,7 @@
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> <em class="jxr_javadoccomment">	 * Path: &lt;b&gt;Specimen.subject&lt;/b&gt;&lt;br/&gt;</em>
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceParam.html">ReferenceParam</a>(SP_SUBJECT);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a> SUBJECT = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/rest/gclient/ReferenceClientParam.html">ReferenceClientParam</a>(SP_SUBJECT);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * Constant for fluent queries to be used to add include statements. Specifies</em>
@@ -518,8 +518,8 @@
 <a class="jxr_linenumber" name="L510" href="#L510">510</a> <em class="jxr_javadoccomment">     * Time when specimen was received for processing or testing</em>
 <a class="jxr_linenumber" name="L511" href="#L511">511</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L512" href="#L512">512</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Specimen</a> setReceivedTimeWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		myReceivedTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Specimen</a> setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		myReceivedTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L515" href="#L515">515</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L516" href="#L516">516</a> 	}
 <a class="jxr_linenumber" name="L517" href="#L517">517</a> 
@@ -531,8 +531,8 @@
 <a class="jxr_linenumber" name="L523" href="#L523">523</a> <em class="jxr_javadoccomment">     * Time when specimen was received for processing or testing</em>
 <a class="jxr_linenumber" name="L524" href="#L524">524</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L525" href="#L525">525</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Specimen</a> setReceivedTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L527" href="#L527">527</a> 		myReceivedTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Specimen</a> setReceivedTimeWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 		myReceivedTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L528" href="#L528">528</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L529" href="#L529">529</a> 	}
 <a class="jxr_linenumber" name="L530" href="#L530">530</a> 
@@ -1058,8 +1058,8 @@
 <a class="jxr_linenumber" name="L1050" href="#L1050">1050</a> <em class="jxr_javadoccomment">     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample</em>
 <a class="jxr_linenumber" name="L1051" href="#L1051">1051</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1052" href="#L1052">1052</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1053" href="#L1053">1053</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1054" href="#L1054">1054</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1055" href="#L1055">1055</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1056" href="#L1056">1056</a> 	}
 <a class="jxr_linenumber" name="L1057" href="#L1057">1057</a> 
@@ -1071,8 +1071,8 @@
 <a class="jxr_linenumber" name="L1063" href="#L1063">1063</a> <em class="jxr_javadoccomment">     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample</em>
 <a class="jxr_linenumber" name="L1064" href="#L1064">1064</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1065" href="#L1065">1065</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1066" href="#L1066">1066</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1067" href="#L1067">1067</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1068" href="#L1068">1068</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1069" href="#L1069">1069</a> 	}
 <a class="jxr_linenumber" name="L1070" href="#L1070">1070</a> 
@@ -1084,8 +1084,8 @@
 <a class="jxr_linenumber" name="L1076" href="#L1076">1076</a> <em class="jxr_javadoccomment">     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample</em>
 <a class="jxr_linenumber" name="L1077" href="#L1077">1077</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1078" href="#L1078">1078</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1079" href="#L1079">1079</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1080" href="#L1080">1080</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1081" href="#L1081">1081</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1082" href="#L1082">1082</a> 	}
 <a class="jxr_linenumber" name="L1083" href="#L1083">1083</a> 
@@ -1097,8 +1097,8 @@
 <a class="jxr_linenumber" name="L1089" href="#L1089">1089</a> <em class="jxr_javadoccomment">     * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample</em>
 <a class="jxr_linenumber" name="L1090" href="#L1090">1090</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1091" href="#L1091">1091</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1092" href="#L1092">1092</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Collection</a> setQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1093" href="#L1093">1093</a> 		myQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1094" href="#L1094">1094</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1095" href="#L1095">1095</a> 	}
 <a class="jxr_linenumber" name="L1096" href="#L1096">1096</a> 
@@ -1662,8 +1662,8 @@
 <a class="jxr_linenumber" name="L1654" href="#L1654">1654</a> <em class="jxr_javadoccomment">     * The capacity (volume or other measure) the container may contain.</em>
 <a class="jxr_linenumber" name="L1655" href="#L1655">1655</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1656" href="#L1656">1656</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1657" href="#L1657">1657</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1658" href="#L1658">1658</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1657" href="#L1657">1657</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1658" href="#L1658">1658</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1659" href="#L1659">1659</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1660" href="#L1660">1660</a> 	}
 <a class="jxr_linenumber" name="L1661" href="#L1661">1661</a> 
@@ -1675,8 +1675,8 @@
 <a class="jxr_linenumber" name="L1667" href="#L1667">1667</a> <em class="jxr_javadoccomment">     * The capacity (volume or other measure) the container may contain.</em>
 <a class="jxr_linenumber" name="L1668" href="#L1668">1668</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1669" href="#L1669">1669</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1670" href="#L1670">1670</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1671" href="#L1671">1671</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1670" href="#L1670">1670</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1671" href="#L1671">1671</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1672" href="#L1672">1672</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1673" href="#L1673">1673</a> 	}
 <a class="jxr_linenumber" name="L1674" href="#L1674">1674</a> 
@@ -1688,8 +1688,8 @@
 <a class="jxr_linenumber" name="L1680" href="#L1680">1680</a> <em class="jxr_javadoccomment">     * The capacity (volume or other measure) the container may contain.</em>
 <a class="jxr_linenumber" name="L1681" href="#L1681">1681</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1682" href="#L1682">1682</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1683" href="#L1683">1683</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1684" href="#L1684">1684</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1683" href="#L1683">1683</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1684" href="#L1684">1684</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1685" href="#L1685">1685</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1686" href="#L1686">1686</a> 	}
 <a class="jxr_linenumber" name="L1687" href="#L1687">1687</a> 
@@ -1701,8 +1701,8 @@
 <a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> <em class="jxr_javadoccomment">     * The capacity (volume or other measure) the container may contain.</em>
 <a class="jxr_linenumber" name="L1694" href="#L1694">1694</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1695" href="#L1695">1695</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setCapacity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 		myCapacity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1698" href="#L1698">1698</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1699" href="#L1699">1699</a> 	}
 <a class="jxr_linenumber" name="L1700" href="#L1700">1700</a> 
@@ -1771,8 +1771,8 @@
 <a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> <em class="jxr_javadoccomment">     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type</em>
 <a class="jxr_linenumber" name="L1764" href="#L1764">1764</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1765" href="#L1765">1765</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1766" href="#L1766">1766</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1766" href="#L1766">1766</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1768" href="#L1768">1768</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1769" href="#L1769">1769</a> 	}
 <a class="jxr_linenumber" name="L1770" href="#L1770">1770</a> 
@@ -1784,8 +1784,8 @@
 <a class="jxr_linenumber" name="L1776" href="#L1776">1776</a> <em class="jxr_javadoccomment">     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type</em>
 <a class="jxr_linenumber" name="L1777" href="#L1777">1777</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1778" href="#L1778">1778</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1779" href="#L1779">1779</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
-<a class="jxr_linenumber" name="L1780" href="#L1780">1780</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
+<a class="jxr_linenumber" name="L1779" href="#L1779">1779</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
+<a class="jxr_linenumber" name="L1780" href="#L1780">1780</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
 <a class="jxr_linenumber" name="L1781" href="#L1781">1781</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1782" href="#L1782">1782</a> 	}
 <a class="jxr_linenumber" name="L1783" href="#L1783">1783</a> 
@@ -1797,8 +1797,8 @@
 <a class="jxr_linenumber" name="L1789" href="#L1789">1789</a> <em class="jxr_javadoccomment">     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type</em>
 <a class="jxr_linenumber" name="L1790" href="#L1790">1790</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1791" href="#L1791">1791</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1792" href="#L1792">1792</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1793" href="#L1793">1793</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1792" href="#L1792">1792</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">double</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1793" href="#L1793">1793</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1794" href="#L1794">1794</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1795" href="#L1795">1795</a> 	}
 <a class="jxr_linenumber" name="L1796" href="#L1796">1796</a> 
@@ -1810,8 +1810,8 @@
 <a class="jxr_linenumber" name="L1802" href="#L1802">1802</a> <em class="jxr_javadoccomment">     * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type</em>
 <a class="jxr_linenumber" name="L1803" href="#L1803">1803</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1804" href="#L1804">1804</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1805" href="#L1805">1805</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theUnits) {
-<a class="jxr_linenumber" name="L1806" href="#L1806">1806</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theUnits); 
+<a class="jxr_linenumber" name="L1805" href="#L1805">1805</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Specimen.html">Container</a> setSpecimenQuantity( QuantityCompararatorEnum theComparator,  <strong class="jxr_keyword">long</strong> theValue,  String theSystem,  String theUnits) {
+<a class="jxr_linenumber" name="L1806" href="#L1806">1806</a> 		mySpecimenQuantity = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/QuantityDt.html">QuantityDt</a>(theComparator, theValue, theSystem, theUnits); 
 <a class="jxr_linenumber" name="L1807" href="#L1807">1807</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1808" href="#L1808">1808</a> 	}
 <a class="jxr_linenumber" name="L1809" href="#L1809">1809</a> 
