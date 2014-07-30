@@ -21,12 +21,34 @@
 			
 			<p>
 				Note that this is the home for the FHIR version of HAPI. If you are 
-				looking for HL7 v2 support, <a href="../">click here</a>.
+				looking for HL7 v2 support, <a href="http://hl7api.sourceforge.net">click here</a>.
 			</p>
+			
+			<subsection name="Demonstration/Test Page">
+			
+				<p>
+					A public test server is now operating at
+					<a href="http://fhirtest.uhn.ca">http://fhirtest.uhn.ca</a>. 
+					This server is built entirely using components of HAPI-FHIR
+					and demonstrates all of its capabilities.
+				</p>
+				
+			</subsection>
 			
 		</section>
 
 		<section name="Announcements">
+
+			<p>
+				<b>July 30, 2014 - HAPI FHIR 0.5 Released</b> - HAPI 0.5 has now been released.
+				This is surprisingly soon after the last release (and probably not a 
+				pace we will sustain) but we landed a number of big fixes and enhancements
+				over the last two weeks and it just didn't make sense to hold them.
+				See the <a href="./duc_upgrading.html">upgrading page</a> for information on 
+				API changes in this release.
+				<br/>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
 		
 			<p>
 				<b>July 14, 2014 - HAPI FHIR 0.4 Released</b> - The next release of HAPI has been
@@ -45,7 +67,7 @@
 				<br/>
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
-			
+
 		</section>
 
 		<section name="What is HAPI FHIR?">

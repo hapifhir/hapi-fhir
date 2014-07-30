@@ -52,6 +52,10 @@
 			<item name="Changelog" href="./changes-report.html" />
 		</menu>
 
+		<menu name="Test Server">
+			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
+		</menu>
+
 		<menu name="Documentation">
 			<item name="Introduction" href="./doc_intro.html" />
 			<item name="The Data Model" href="./doc_fhirobjects.html" />

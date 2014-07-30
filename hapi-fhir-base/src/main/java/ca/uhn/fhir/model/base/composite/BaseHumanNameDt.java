@@ -38,7 +38,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public abstract java.util.List<StringDt> getFamily();
 
 	/**
-	 * Returns all repetitions of {@link $ hash}getFamily() family name} as a space separated string
+	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
 	 * 
 	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
 	 */
@@ -56,7 +56,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public abstract java.util.List<StringDt> getGiven();
 
 	/**
-	 * Returns all repetitions of {@link $ hash}getGiven() given name} as a space separated string
+	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
 	 * 
 	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
 	 */
@@ -74,7 +74,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public abstract java.util.List<StringDt> getPrefix();
 
 	/**
-	 * Returns all repetitions of {@link $ hash}getPrefix() prefix name} as a space separated string
+	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
 	 * 
 	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
 	 */
@@ -92,7 +92,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public abstract java.util.List<StringDt> getSuffix();
 
 	/**
-	 * Returns all repetitions of {@link $ hash}Suffix() suffix} as a space separated string
+	 * Returns all repetitions of {@link #getSuffix() suffix} as a space separated string
 	 * 
 	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
 	 */

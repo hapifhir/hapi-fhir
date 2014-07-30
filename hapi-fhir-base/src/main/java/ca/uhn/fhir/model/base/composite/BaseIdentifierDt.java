@@ -74,9 +74,9 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 
 	
 	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#[[#]]#getValue() value}
-	 * and {@link IdentifierDt#[[#]]#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#[[#]]#getUse() use}) or any extensions. 
+	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
+	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
 	 */
 	public boolean matchesSystemAndValue(BaseIdentifierDt theIdentifier) {
 		if (theIdentifier == null) {

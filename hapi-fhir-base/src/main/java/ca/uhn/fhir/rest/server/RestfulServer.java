@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -66,7 +66,6 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
@@ -334,7 +333,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 * 
-	 * @see RestfulServer#setServerName(StringDt)
+	 * @see RestfulServer#setServerName(String)
 	 */
 	public String getServerName() {
 		return myServerName;
@@ -791,9 +790,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
-	 * 
-	 * @see RestfulServer#setServerName(StringDt)
+	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerName(String theServerName) {
 		myServerName = theServerName;

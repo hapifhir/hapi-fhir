@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.5" date="TBD">
+		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
 				having multiple ways of accomplishing the same thing. This means that a number of existing classes
 				have been deprocated in favour of new naming schemes.
