@@ -1,0 +1,133 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext">
+	</bean>
+
+	<bean id="authenticationEntryPoint"
+		class="ca.uhn.fhir.rest.server.sec.RestAuthenticationEntryPoint" />
+
+	<security:global-method-security pre-post-annotations="enabled" proxy-target-class="true" authentication-manager-ref="authenticationManager"/>
+
+	<security:http  auto-config="false" use-expressions="true"
+		disable-url-rewriting="true" entry-point-ref="authenticationEntryPoint" authentication-manager-ref="authenticationManager"
+		pattern="/**">
+		<security:intercept-url pattern="/**" access="hasRole('ROLE_USER')" />
+		<security:custom-filter before="PRE_AUTH_FILTER" ref="openIdConnectAuthenticationFilter" />
+	</security:http>
+
+	<!-- 
+	<bean id="authenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<property name="loginFormUrl" value="/openid_connect_login" />
+	</bean>
+ 	-->
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider ref="openIdConnectAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean
+		class="org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService"
+		id="staticIssuerService">
+		<property name="issuer"	value="http://uhnvesb01d.uhn.on.ca:25180/uhn-openid-connect-server/" />
+	</bean>
+
+	<bean id="openIdConnectAuthenticationFilter"
+		class="org.mitre.openid.connect.client.OIDCAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+
+		<property name="issuerService" ref="staticIssuerService" />
+		<property name="serverConfigurationService" ref="dynamicServerConfigurationService" />
+		<property name="clientConfigurationService" ref="dynamicClientConfigurationService" />
+		<property name="authRequestOptionsService" ref="staticAuthRequestOptionsService" />
+		<property name="authRequestUrlBuilder" ref="plainAuthRequestUrlBuilder" />
+
+	</bean>
+
+	<bean
+		class="org.mitre.openid.connect.client.service.impl.DynamicServerConfigurationService"
+		id="dynamicServerConfigurationService" />
+
+	<bean class="org.mitre.openid.connect.client.service.impl.DynamicRegistrationClientConfigurationService" id="dynamicClientConfigurationService">
+		<property name="template">
+			<bean class="org.mitre.oauth2.model.RegisteredClient">
+				<property name="clientName" value="Simple Web App" />
+				<property name="scope">
+					<set value-type="java.lang.String">
+						<value>openid</value>
+						<value>email</value>
+						<value>address</value>
+						<value>profile</value>
+						<value>phone</value>
+					</set>
+				</property>
+				<property name="tokenEndpointAuthMethod" value="SECRET_BASIC" />
+				<property name="redirectUris">
+					<set>
+						<value>http://localhost:8080/</value>
+					</set>
+				</property>
+			</bean>
+		</property>
+		<!-- 
+			Registered Client Service. Uncomment this to save dynamically registered clients out to a
+			file on disk (indicated by the filename property) or replace this with another implementation
+			of RegisteredClientService. This defaults to an in-memory implementation of RegisteredClientService
+			which will forget and re-register all clients on restart.
+		-->
+		<!--
+		<property name="registeredClientService">
+			<bean class="org.mitre.openid.connect.client.service.impl.JsonFileRegisteredClientService">
+				<constructor-arg name="filename" value="/tmp/simple-web-app-clients.json" />
+			</bean>
+		</property>
+		 -->
+	</bean>
+
+	<bean class="org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService" id="staticAuthRequestOptionsService">
+		<property name="options">
+			<map>
+				<!-- Entries in this map are sent as key-value parameters to the auth request -->
+				<!-- 
+				<entry key="display" value="page" />
+				<entry key="prompt" value="consent" />
+				-->
+			</map>
+		</property>
+	</bean>
+
+	<bean class="org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder" id="plainAuthRequestUrlBuilder" />
+
+	<bean id="openIdConnectAuthenticationProvider" class="org.mitre.openid.connect.client.OIDCAuthenticationProvider">
+		<property name="authoritiesMapper">
+			<bean class="org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper">
+				<property name="admins" ref="namedAdmins" />
+			</bean>
+		</property>
+	</bean>
+
+	<util:set id="namedAdmins" value-type="org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority">
+		<!-- 
+			This is an example of how to set up a user as an administrator: they'll be given ROLE_ADMIN in addition to ROLE_USER.
+			Note that having an administrator role on the IdP doesn't grant administrator access on this client.
+			
+			These are values from the demo "openid-connect-server-webapp" project of MITREid Connect.
+		-->
+		<bean class="org.mitre.openid.connect.client.SubjectIssuerGrantedAuthority">
+			<constructor-arg name="subject" value="90342.ASDFJWFA" />
+			<constructor-arg name="issuer" value="http://localhost:8080/openid-connect-server-webapp/" />
+		</bean>
+	</util:set>
+
+
+</beans>

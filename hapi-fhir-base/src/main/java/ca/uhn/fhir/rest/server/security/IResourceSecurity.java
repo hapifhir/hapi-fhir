@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.server.security;
 
 /*
  * #%L
@@ -25,8 +25,11 @@ import javax.servlet.http.HttpServletRequest;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.rest.server.security.ISecurityManager} instead
+ * Implementations of this interface provide authorization to incoming service calls
+ * 
  */
-public interface ISecurityManager {
-	public void authenticate(HttpServletRequest request) throws AuthenticationException;
+public interface IResourceSecurity {
+	
+	public ISecurityOutcome authenticate(HttpServletRequest request) throws AuthenticationException;
+	
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import java.text.ParseException;
+
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -22,23 +24,25 @@ import ca.uhn.fhir.rest.server.Constants;
  * #L%
  */
 
-
 /**
- * Represents an <b>HTTP 401 Client Unauthorized</b> response, which means that 
- * the client needs to provide credentials, or has provided invalid credentials. 
+ * Represents an <b>HTTP 401 Client Unauthorized</b> response, which means that the client needs to provide credentials, or has provided invalid credentials.
  */
 public class AuthenticationException extends BaseServerResponseException {
 
-    public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;
-    
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;
+
 	private static final long serialVersionUID = 1L;
 
-    public AuthenticationException() {
-        super(STATUS_CODE, "Client unauthorized");
-    }
+	public AuthenticationException() {
+		super(STATUS_CODE, "Client unauthorized");
+	}
 
-    public AuthenticationException(String theMessage) {
-        super(STATUS_CODE, theMessage);
-    }
+	public AuthenticationException(String theMessage) {
+		super(STATUS_CODE, theMessage);
+	}
+
+	public AuthenticationException(String theMessage, ParseException theCause) {
+		super(STATUS_CODE, theMessage, theCause);
+	}
 
 }
