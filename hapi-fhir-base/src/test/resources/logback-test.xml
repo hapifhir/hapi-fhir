@@ -7,8 +7,10 @@
 		</encoder>
 	</appender>
 
+<!-- 
 	<logger name="org.eclipse" additivity="false">
 	</logger>
+-->
 
 	<!-- 
 	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">

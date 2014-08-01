@@ -65,7 +65,7 @@ IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "ht
 annotationClient.registerInterceptor(loggingInterceptor);
 
 IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
-annotationClient.registerInterceptor(loggingInterceptor);
+genericClient.registerInterceptor(loggingInterceptor);
 //END SNIPPET: logging
 }
 

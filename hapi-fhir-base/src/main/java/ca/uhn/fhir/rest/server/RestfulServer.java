@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -81,7 +81,6 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
-
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
