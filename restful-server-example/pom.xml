@@ -17,7 +17,7 @@
 			<version>0.6-SNAPSHOT</version>
 		</dependency>
 
-		<!-- This dependency is used for the "test page" web app overlay -->
+		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
@@ -56,6 +56,12 @@
 	</dependencies>
 
 	<build>
+		
+		<!-- 
+		The following is not required for the application to build, but
+		allows you to test it by issuing "mvn jetty:run" from the command
+		line. 
+		-->
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -81,8 +87,8 @@
 			</plugin>
 			
 			<!-- 
-			The configuration here tells the WAR plugin to include the test
-			page overlay. You can omit it if you are not using that feature.
+			The configuration here tells the WAR plugin to include the FHIR Tester
+			overlay. You can omit it if you are not using that feature.
 			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

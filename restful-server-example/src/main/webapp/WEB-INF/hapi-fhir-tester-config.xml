@@ -8,20 +8,23 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
+	<!-- 
+	The following bean supplies any configuration to the
+	FHIR Tester application.
+	-->
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
 				<!-- Each value is a reference to one FHIR server -->
 				<!-- Format is:    [id],[name],[base URL] -->
-				<!-- The URL should be customized to match whatever URL this server will be deployed to -->
-				<value>example   , Restful Server Example               , http://localhost:8080/fhir</value>
+				<!-- The URL should be customized to match the base URL for the FHIR endpoint -->
+				<value>example , Restful Server Example , http://localhost:8080/fhir</value>
 			</list>
 		</property>
 	</bean>
 	
+	<!-- A FhirContext bean is also required -->
 	<bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext">
 	</bean>
-	
-	
 	
 </beans>
