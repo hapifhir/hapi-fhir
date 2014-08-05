@@ -135,7 +135,25 @@
 			<subsection name="Customizing the Overlay">
 			
 				<p>
-					
+					The most important customization required is to
+					set the FHIR server base URL in the 
+					<code>hapi-fhir-tester-config.xml</code>
+					configuration file created during the
+					previous step.
+				</p>
+				
+				<p>
+					Beyond this, the entire tester application is built
+					from a number of 
+					<a href="http://thymeleaf.org">Thymeleaf</a> 
+					template files, any of which can be replaced to
+					create your own look and feel. All of the templates
+					can be found in your built war (after running the Maven
+					build), or in the target directory's staging area, in 
+					<code>WEB-INF/templates</code>. By placing a file
+					with the same path/name in your <code>src/main/webapp/WEB-INF/templates</code>
+					directory you can replace the built in template
+					with your own file.
 				</p>
 				
 			</subsection>
