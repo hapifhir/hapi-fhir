@@ -1126,6 +1126,31 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			myObject = (T) myInstance;
+			
+			/*
+			 * Stitch together resource references
+			 */
+			
+			Map<String, IResource> idToResource = new HashMap<String, IResource>();
+			List<IResource> resources = myInstance.toListOfResources();
+			for (IResource next : resources) {
+				if (next.getId() != null && next.getId().isEmpty()==false) {
+					idToResource.put(next.getId().toUnqualifiedVersionless().getValue(), next);
+				}
+			}
+			
+			for (IResource next : resources) {
+				List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
+				for (ResourceReferenceDt nextRef : refs) {
+					if (nextRef.isEmpty()==false && nextRef.getReference() != null) {
+						IResource target = idToResource.get(nextRef.getReference().getValue());
+						if (target != null) {
+							nextRef.setResource(target);
+						}
+					}
+				}
+			}
+			
 		}
 
 	}
@@ -1361,25 +1386,6 @@ class ParserState<T> {
 			case INITIAL:
 				throw new DataFormatException("Unexpected attribute: " + theValue);
 			case REFERENCE:
-				// int lastSlash = theValue.lastIndexOf('/');
-				// if (lastSlash==-1) {
-				// myInstance.setResourceId(theValue);
-				// } else if (lastSlash==0) {
-				// myInstance.setResourceId(theValue.substring(1));
-				// }else {
-				// int secondLastSlash=theValue.lastIndexOf('/', lastSlash-1);
-				// String resourceTypeName;
-				// if (secondLastSlash==-1) {
-				// resourceTypeName=theValue.substring(0,lastSlash);
-				// }else {
-				// resourceTypeName=theValue.substring(secondLastSlash+1,lastSlash);
-				// }
-				// myInstance.setResourceId(theValue.substring(lastSlash+1));
-				// RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceTypeName);
-				// if(def!=null) {
-				// myInstance.setResourceType(def.getImplementingClass());
-				// }
-				// }
 				myInstance.setReference(theValue);
 				break;
 			}

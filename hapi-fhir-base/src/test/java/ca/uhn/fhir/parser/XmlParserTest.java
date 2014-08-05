@@ -413,6 +413,7 @@ public class XmlParserTest {
 
 	
 	
+	
 	@Test
 	public void testEncodeContainedResources() {
 

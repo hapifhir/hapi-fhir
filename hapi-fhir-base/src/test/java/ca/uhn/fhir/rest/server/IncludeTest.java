@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -43,6 +44,7 @@ public class IncludeTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeTest.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private static FhirContext ourCtx;
 
 	@Test
 	public void testNoIncludes() throws Exception {
@@ -52,7 +54,7 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
@@ -68,7 +70,7 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
@@ -85,7 +87,7 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		
 		ourLog.info(responseContent);
 		
@@ -102,6 +104,60 @@ public class IncludeTest {
 
 		
 	}
+	
+	@Test
+	public void testIIncludedResourcesNonContainedInExtension() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals(3, bundle.size());
+		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		
+		Patient p1 = (Patient) bundle.toListOfResources().get(0);
+		assertEquals(0,p1.getContained().getContainedResources().size());
+		
+		Patient p2 = (Patient) bundle.toListOfResources().get(1);
+		assertEquals(0,p2.getContained().getContainedResources().size());
+
+		
+	}
+	
+	
+	@Test
+	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=extInclude&_pretty=true&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals(3, bundle.size());
+		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		
+		Patient p1 = (Patient) bundle.toListOfResources().get(0);
+		assertEquals(0,p1.getContained().getContainedResources().size());
+		
+		Patient p2 = (Patient) bundle.toListOfResources().get(1);
+		assertEquals(0,p2.getContained().getContainedResources().size());
+
+		
+	}
+	
 
 	@Test
 	public void testTwoInclude() throws Exception {
@@ -111,7 +167,7 @@ public class IncludeTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
@@ -135,6 +191,8 @@ public class IncludeTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+		
+		ourCtx = new FhirContext();
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 
@@ -142,6 +200,7 @@ public class IncludeTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
+		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -175,6 +234,25 @@ public class IncludeTest {
 			p2.setId("p2");
 			p2.addIdentifier().setLabel("p2");
 			p2.getManagingOrganization().setResource(o1);
+
+			return Arrays.asList(p1, p2);
+		}
+
+		@Search(queryName = "extInclude")
+		public List<Patient> extInclude() {
+			Organization o1 = new Organization();
+			o1.getName().setValue("o1");
+			o1.setId("o1");
+
+			Patient p1 = new Patient();
+			p1.setId("p1");
+			p1.addIdentifier().setLabel("p1");
+			p1.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
+
+			Patient p2 = new Patient();
+			p2.setId("p2");
+			p2.addIdentifier().setLabel("p2");
+			p2.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			return Arrays.asList(p1, p2);
 		}
@@ -223,4 +301,23 @@ public class IncludeTest {
 
 	}
 
+	
+	public static void main(String[] args) {
+		
+		Organization org = new Organization();
+		org.setId("Organization/65546");
+		org.getName().setValue("Contained Test Organization");
+		
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getManagingOrganization().setResource(patient);
+		
+		
+		System.out.println(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		
+		patient.getManagingOrganization().getReference();
+		
+	}
+	
 }

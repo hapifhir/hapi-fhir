@@ -177,6 +177,31 @@
 				on your server.
 			</p>
 			
+			<subsection name="Enhancing the Generated Conformance Statement">
+			
+				<p>
+					If you have a need to add your own content (special extensions, etc.) to your
+					server's conformance statement, but still want to take advantage of HAPI's automatic
+					conformance generation, you may wish to extend 
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/server/provider/ServerConformanceProvider.html">ServerConformanceProvider</a>.
+				</p>
+
+				<p>
+					In your own class extending this class, you can override the <code>getServerConformance()</code> method
+					to provide your own implementation. In this method, call 
+					<code>super.getServerConformance()</code> to obtain the built-in conformance statement and then
+					add your own information to it.
+				</p>
+							
+				<p>
+					Note that if you are adding items during each invocation you should be aware that by default the
+					same instance is cached by ServerConformanceProvider. This can result in an ever-growing
+					conformance statement. You must call <code>setCache(false);</code> in
+					the constructor of your new conformance provider to avoid this behaviour.
+				</p>
+				
+			</subsection>
+			
 		</section>
 
 		<section name="Paging Responses">

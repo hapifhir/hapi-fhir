@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.security;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,11 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.hamcrest.core.StringContains;
 import org.junit.Test;
 import org.mitre.jose.keystore.JWKSetKeyStore;
-import org.mitre.jwt.signer.service.JwtSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.DefaultJwtSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
 import org.mitre.oauth2.model.RegisteredClient;
-import org.mitre.openid.connect.client.service.impl.DynamicRegistrationClientConfigurationService;
 import org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService;
 import org.mitre.openid.connect.client.service.impl.StaticServerConfigurationService;
 import org.mitre.openid.connect.config.ServerConfiguration;

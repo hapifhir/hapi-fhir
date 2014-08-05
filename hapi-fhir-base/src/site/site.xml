@@ -58,14 +58,16 @@
 
 		<menu name="Documentation">
 			<item name="Introduction" href="./doc_intro.html" />
-			<item name="The Data Model" href="./doc_fhirobjects.html" />
-			<item name="RESTful Server" href="./doc_rest_server.html" >
-				<item name="FHIR Tester App" href="./doc_server_tester.html" />
+			<item name="The Data Model" href="./doc_fhirobjects.html">
+				<item name="Extensions" href="./doc_extensions.html" />
+				<item name="Resource References" href="./doc_resource_references.html" />
 			</item>
 			<item name="RESTful Client" href="./doc_rest_client.html" />
-			<item name="RESTful Operations" href="./doc_rest_operations.html" />
-			<item name="Extensions" href="./doc_extensions.html" />
-			<item name="Narrative Generator" href="./doc_narrative.html" />
+			<item name="RESTful Server" href="./doc_rest_server.html" >
+				<item name="RESTful Operations" href="./doc_rest_operations.html" />
+				<item name="FHIR Tester App" href="./doc_server_tester.html" />
+				<item name="Narrative Generator" href="./doc_narrative.html" />
+			</item>
 			<item name="Logging" href="./doc_logging.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
 		</menu>
