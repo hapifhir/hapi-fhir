@@ -8,7 +8,16 @@
 	<body>
 		<release version="0.6" date="TBD">
 			<action type="add">
-				Allow generic client 
+				Allow generic client  ... OAUTH
+			</action>
+			<action type="fix">
+				Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University
+				Health Network for reporting!   
+			</action>
+			<action type="fix" issue="4">
+				Create method was incorrectly returning an HTTP 204 on sucessful completion, but
+				should be returning an HTTP 200 per the FHIR specification. Thanks to wanghaisheng 
+				for reporting! 
 			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
