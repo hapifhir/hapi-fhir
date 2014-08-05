@@ -19,6 +19,10 @@
 				should be returning an HTTP 200 per the FHIR specification. Thanks to wanghaisheng 
 				for reporting! 
 			</action>
+			<action type="fix">
+				FHIR Tester UI now correctly sends UTF-8 charset in responses so that message payloads containing
+				non US-ASCII characters will correctly display in the browser
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

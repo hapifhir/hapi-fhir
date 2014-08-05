@@ -5,6 +5,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -30,6 +34,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.HttpEntityWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -52,6 +57,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
+import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -59,6 +65,7 @@ import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
@@ -96,7 +103,8 @@ public class Controller {
 	public String actionConformance(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 		ResultType returnsResource = ResultType.RESOURCE;
 
 		long start = System.currentTimeMillis();
@@ -107,7 +115,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance");
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance", interceptor);
 
 		ourLog.info(logPrefix(theModel) + "Displayed conformance profile");
 
@@ -124,7 +132,8 @@ public class Controller {
 	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -150,7 +159,7 @@ public class Controller {
 			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
 
@@ -161,7 +170,8 @@ public class Controller {
 	public String actionGetTags(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		Class<? extends IResource> resType = null;
 		ResultType returnsResource = ResultType.TAGLIST;
@@ -202,7 +212,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		return "result";
 	}
@@ -229,7 +239,8 @@ public class Controller {
 	public String actionPage(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
@@ -253,7 +264,7 @@ public class Controller {
 
 		String outcomeDescription = "Bundle Page";
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		return "result";
 	}
@@ -262,7 +273,8 @@ public class Controller {
 	public String actionRead(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -297,7 +309,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		return "result";
 	}
@@ -306,7 +318,8 @@ public class Controller {
 	public String actionResource(final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		Conformance conformance = addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		String resourceName = theRequest.getResource();
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
@@ -372,6 +385,72 @@ public class Controller {
 		return "resource";
 	}
 
+	public static class CaptureInterceptor implements IClientInterceptor {
+
+		private HttpRequestBase myLastRequest;
+		private HttpResponse myLastResponse;
+		private String myResponseBody;
+
+		@Override
+		public void interceptRequest(HttpRequestBase theRequest) {
+			assert myLastRequest == null;
+			myLastRequest = theRequest;
+		}
+
+		@Override
+		public void interceptResponse(HttpResponse theResponse) throws IOException {
+			assert myLastResponse == null;
+			myLastResponse = theResponse;
+
+			HttpEntity respEntity = theResponse.getEntity();
+			if (respEntity != null) {
+				final byte[] bytes;
+				try {
+					bytes = IOUtils.toByteArray(respEntity.getContent());
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
+
+				myResponseBody = new String(bytes, "UTF-8");
+				theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+			}
+		}
+
+		public HttpRequestBase getLastRequest() {
+			return myLastRequest;
+		}
+
+		public HttpResponse getLastResponse() {
+			return myLastResponse;
+		}
+
+		private static class MyEntityWrapper extends HttpEntityWrapper {
+
+			private byte[] myBytes;
+
+			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
+				super(theWrappedEntity);
+				myBytes = theBytes;
+			}
+
+			@Override
+			public InputStream getContent() throws IOException {
+				return new ByteArrayInputStream(myBytes);
+			}
+
+			@Override
+			public void writeTo(OutputStream theOutstream) throws IOException {
+				theOutstream.write(myBytes);
+			}
+
+		}
+
+		public String getLastResponseBody() {
+			return myResponseBody;
+		}
+
+	}
+
 	@RequestMapping(value = { "/search" })
 	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
@@ -382,7 +461,8 @@ public class Controller {
 		clientCodeJsonWriter.write("action", "search");
 		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		IUntypedQuery search = client.search();
 		IQuery query;
@@ -463,7 +543,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		clientCodeJsonWriter.writeEnd();
 		clientCodeJsonWriter.close();
@@ -477,7 +557,8 @@ public class Controller {
 	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
@@ -507,7 +588,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction");
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction", interceptor);
 
 		return "result";
 	}
@@ -561,7 +642,8 @@ public class Controller {
 
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
@@ -623,7 +705,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
 
 		try {
 			if (validate) {
@@ -642,7 +724,8 @@ public class Controller {
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
 		addCommonParams(theRequest, theModel);
 
-		GenericClient client = theRequest.newClient(myCtx, myConfig);
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
 
 		String id = null;
 		Class<? extends IResource> type = null; // def.getImplementingClass();
@@ -675,7 +758,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription, interceptor);
 
 	}
 
@@ -1011,14 +1094,16 @@ public class Controller {
 		return retVal;
 	}
 
-	private void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription) {
+	private void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription,
+			CaptureInterceptor theInterceptor) {
 		try {
-			HttpRequestBase lastRequest = theClient.getLastRequest();
+			HttpRequestBase lastRequest = theInterceptor.getLastRequest();
+			HttpResponse lastResponse = theInterceptor.getLastResponse();
 			String requestBody = null;
 			String requestUrl = lastRequest != null ? lastRequest.getURI().toASCIIString() : null;
-			String action = theClient.getLastRequest() != null ? theClient.getLastRequest().getMethod() : null;
-			String resultStatus = theClient.getLastResponse() != null ? theClient.getLastResponse().getStatusLine().toString() : null;
-			String resultBody = StringUtils.defaultString(theClient.getLastResponseBody());
+			String action = lastRequest != null ? lastRequest.getMethod() : null;
+			String resultStatus = lastResponse != null ? lastResponse.getStatusLine().toString() : null;
+			String resultBody = StringUtils.defaultString(theInterceptor.getLastResponseBody());
 
 			if (lastRequest instanceof HttpEntityEnclosingRequest) {
 				HttpEntity entity = ((HttpEntityEnclosingRequest) lastRequest).getEntity();
@@ -1027,7 +1112,6 @@ public class Controller {
 				}
 			}
 
-			HttpResponse lastResponse = theClient.getLastResponse();
 			ContentType ct = lastResponse != null ? ContentType.get(lastResponse.getEntity()) : null;
 			String mimeType = ct != null ? ct.getMimeType() : null;
 			EncodingEnum ctEnum = EncodingEnum.forContentType(mimeType);

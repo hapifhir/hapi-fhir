@@ -31,23 +31,11 @@ public class JpaConformanceProvider extends ServerConformanceProvider {
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		super.setCache(false);
-
-//		for (IFhirResourceDao<?> nextResourceDao : theResourceDaos) {
-//			nextResourceDao.registerDaoListener(new IDaoListener() {
-//				@Override
-//				public void writeCompleted() {
-//					myCachedValue = null;
-//				}
-//			});
-//		}
 	}
 
 	@Override
 	public Conformance getServerConformance() {
 		Conformance retVal = myCachedValue;
-//		if (retVal != null) {
-//			return retVal;
-//		}
 
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 
