@@ -56,6 +56,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 		myImplementingClass = theImplementingClass;
 	}
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"[" + getName() + "]";
+	}
+
 	public void addExtension(RuntimeChildDeclaredExtensionDefinition theExtension) {
 		if (theExtension == null) {
 			throw new NullPointerException();

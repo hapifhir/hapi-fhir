@@ -181,7 +181,7 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			eventWriter.writeStartObject();
 
-			boolean deleted = nextEntry.getDeletedAt() !=null&&nextEntry.getDeletedAt().isEmpty()==false;
+			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
 			if (deleted) {
 				writeTagWithTextNode(eventWriter, "deleted", nextEntry.getDeletedAt());
 			}
@@ -227,11 +227,16 @@ public class JsonParser extends BaseParser implements IParser {
 		eventWriter.flush();
 	}
 
-	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName) throws IOException {
+	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef,
+			String theChildName) throws IOException {
 
 		switch (theChildDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
 			IPrimitiveDatatype<?> value = (IPrimitiveDatatype<?>) theValue;
+			if (isBlank(value.getValueAsString())) {
+				break;
+			}
+			
 			if (value instanceof IntegerDt) {
 				if (theChildName != null) {
 					theWriter.write(theChildName, ((IntegerDt) value).getValue());
@@ -333,7 +338,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
+	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
+			List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
 		for (BaseRuntimeChildDefinition nextChild : theChildren) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
@@ -372,14 +378,16 @@ public class JsonParser extends BaseParser implements IParser {
 				if (childDef == null) {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
-
+				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
+				
 				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
-					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
-					if (extDef.isModifier()) {
-						addToHeldExtensions(valueIdx, modifierExtensions, extDef, nextValue);
-					} else {
-						addToHeldExtensions(valueIdx, extensions, extDef, nextValue);
-					}
+					// Don't encode extensions
+//					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
+//					if (extDef.isModifier()) {
+//						addToHeldExtensions(valueIdx, modifierExtensions, extDef, nextValue);
+//					} else {
+//						addToHeldExtensions(valueIdx, extensions, extDef, nextValue);
+//					}
 				} else {
 
 					if (currentChildName == null || !currentChildName.equals(childName)) {
@@ -398,7 +406,7 @@ public class JsonParser extends BaseParser implements IParser {
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null);
 					}
 
-					if (nextValue instanceof ISupportsUndeclaredExtensions) {
+					if (nextValue instanceof ISupportsUndeclaredExtensions && primitive) {
 						List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
 						addToHeldExtensions(valueIdx, ext, extensions);
 
@@ -416,61 +424,41 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			if (extensions.size() > 0 || modifierExtensions.size() > 0) {
-				// Ignore extensions if we're encoding a resource, since they
-				// are handled one level up
-				if (currentChildName != null) {
-					theEventWriter.writeStartArray('_' + currentChildName);
+				theEventWriter.writeStartArray('_' + currentChildName);
 
-					for (int i = 0; i < valueIdx; i++) {
-						boolean haveContent = false;
-						if (extensions.size() > i && extensions.get(i) != null && extensions.get(i).isEmpty() == false) {
-							haveContent = true;
-							theEventWriter.writeStartObject();
-							theEventWriter.writeStartArray("extension");
-							for (HeldExtension nextExt : extensions.get(i)) {
-								nextExt.write(theResDef, theResource, theEventWriter);
-							}
-							theEventWriter.writeEnd();
-							theEventWriter.writeEnd();
+				for (int i = 0; i < valueIdx; i++) {
+					boolean haveContent = false;
+					if (extensions.size() > i && extensions.get(i) != null && extensions.get(i).isEmpty() == false) {
+						haveContent = true;
+						theEventWriter.writeStartObject();
+						theEventWriter.writeStartArray("extension");
+						for (HeldExtension nextExt : extensions.get(i)) {
+							nextExt.write(theResDef, theResource, theEventWriter);
 						}
-
-						if (!haveContent) {
-							// theEventWriter.writeEnd();
-							theEventWriter.writeNull();
-						}
+						theEventWriter.writeEnd();
+						theEventWriter.writeEnd();
 					}
 
-					// if (extensions.size() > 0) {
-					//
-					// theEventWriter.name(extType);
-					// theEventWriter.beginArray();
-					// for (ArrayList<HeldExtension> next : extensions) {
-					// if (next == null || next.isEmpty()) {
-					// theEventWriter.nullValue();
-					// } else {
-					// theEventWriter.beginArray();
-					// // next.write(theEventWriter);
-					// theEventWriter.endArray();
-					// }
-					// }
-					// for (int i = extensions.size(); i < valueIdx; i++) {
-					// theEventWriter.nullValue();
-					// }
-					// theEventWriter.endArray();
-					// }
-
-					theEventWriter.writeEnd();
+					if (!haveContent) {
+						// theEventWriter.writeEnd();
+						theEventWriter.writeNull();
+					}
 				}
+
+				theEventWriter.writeEnd();
 			}
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
+			BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
+		extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, resDef, theResDef, theResource);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions());
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
+			boolean theIsSubElementWithinResource) throws IOException {
 		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -491,9 +479,8 @@ public class JsonParser extends BaseParser implements IParser {
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
 			theEventWriter.write("contentType", bin.getContentType());
-			theEventWriter.write("content",bin.getContentAsBase64());
+			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {
-			extractAndWriteExtensionsAsDirectChild(theResource, theEventWriter, resDef, theResDef, theResource);
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef);
 		}
 		theEventWriter.writeEnd();
@@ -506,7 +493,7 @@ public class JsonParser extends BaseParser implements IParser {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
-		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null,false);
+		encodeResourceToJsonStreamWriter(resDef, theResource, eventWriter, null, false);
 		eventWriter.flush();
 	}
 
@@ -541,10 +528,10 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	/**
-	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
-	 * called _name): resource extensions, and extension extensions
+	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object called _name): resource extensions, and extension extensions
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IResource theResource) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
+			IResource theResource) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
@@ -895,7 +882,8 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) throws IOException {
+	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
+			List<HeldExtension> modifierExtensions) throws IOException {
 		if (extensions.isEmpty() == false) {
 			theEventWriter.writeStartArray("extension");
 			for (HeldExtension next : extensions) {
