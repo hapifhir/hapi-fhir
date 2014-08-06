@@ -57,6 +57,17 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
 
+/**
+ * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
+ * 
+ * <p>
+ * Note: This class is safe to extend, but it is important to note that the same instance of 
+ * {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value
+ * of <code>false</code>. This means that if you are adding anything to the returned
+ * conformance instance on each call you should call <code>setCache(false)</code> in 
+ * your provider constructor.
+ * </p>
+ */
 public class ServerConformanceProvider {
 
 	private volatile Conformance myConformance;
@@ -67,6 +78,11 @@ public class ServerConformanceProvider {
 		myRestfulServer = theRestfulServer;
 	}
 
+	/**
+	 * Actually create and return the conformance statement
+	 * 
+	 * See the class documentation for an important note if you are extending this class
+	 */
 	@Metadata
 	public Conformance getServerConformance() {
 		if (myConformance != null && myCache) {
@@ -246,6 +262,9 @@ public class ServerConformanceProvider {
 	/**
 	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
 	 * invocation.
+	 * <p>
+	 * See the class documentation for an important note if you are extending this class
+	 * </p>
 	 */
 	public void setCache(boolean theCache) {
 		myCache = theCache;

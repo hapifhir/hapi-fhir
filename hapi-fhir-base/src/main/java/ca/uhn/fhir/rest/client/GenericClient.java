@@ -821,10 +821,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public Bundle execute() {
 
 			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-			Map<String, List<String>> initial = createExtraParams();
-			if (initial != null) {
-				params.putAll(initial);
-			}
+//			Map<String, List<String>> initial = createExtraParams();
+//			if (initial != null) {
+//				params.putAll(initial);
+//			}
 
 			for (ICriterionInternal next : myCriterion) {
 				String parameterName = next.getParameterName();

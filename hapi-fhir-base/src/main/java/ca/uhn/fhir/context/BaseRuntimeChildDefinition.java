@@ -30,6 +30,11 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract IAccessor getAccessor();
 
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"[" + getElementName() + "]";
+	}
+
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
 
 	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType);

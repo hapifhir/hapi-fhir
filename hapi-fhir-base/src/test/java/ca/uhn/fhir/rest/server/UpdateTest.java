@@ -104,9 +104,10 @@ public class UpdateTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("location").getValue());
 
+		IOUtils.closeQuietly(status.getEntity().getContent());
 	}
 
 	@Test
@@ -118,18 +119,20 @@ public class UpdateTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog, Cat");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		assertEquals(2, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
 		assertEquals(new Tag("Cat"), ourReportProvider.getLastTags().get(1));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; label=\"aa\", Cat; label=\"bb\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		status = ourClient.execute(httpPost);
 		assertEquals(2, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag((String) null, "Dog", "aa"), ourReportProvider.getLastTags().get(0));
 		assertEquals(new Tag((String) null, "Cat", "bb"), ourReportProvider.getLastTags().get(1));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -142,9 +145,10 @@ public class UpdateTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -157,9 +161,10 @@ public class UpdateTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\";");
@@ -167,6 +172,7 @@ public class UpdateTest {
 		ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -179,16 +185,18 @@ public class UpdateTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		CloseableHttpResponse status = ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\";   ");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourClient.execute(httpPost);
+		status=ourClient.execute(httpPost);
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -208,9 +216,9 @@ public class UpdateTest {
 		// IOUtils.toString(status.getEntity().getContent());
 		// ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertNull(status.getEntity());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -224,10 +232,11 @@ public class UpdateTest {
 		httpPut.addHeader("Content-Location", "/Patient/001/_history/002");
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		CloseableHttpResponse results = ourClient.execute(httpPut);
-		assertEquals(400, results.getStatusLine().getStatusCode());
-		String responseContent = IOUtils.toString(results.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpPut);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 

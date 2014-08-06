@@ -83,6 +83,67 @@ public class JsonParserTest {
 		
 	}
 
+	@Test
+	public void testEncodeExtensionInCompositeElement() {
+		
+		Conformance c = new Conformance();
+		c.addRest().getSecurity().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"rest\":[{\"security\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}]}");
+		
+	}
+
+	@Test
+	public void testEncodeExtensionInPrimitiveElement() {
+		
+		Conformance c = new Conformance();
+		c.getAcceptUnknown().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"_acceptUnknown\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}]}");
+
+		// Now with a value
+		ourLog.info("---------------");
+		
+		c = new Conformance();
+		c.getAcceptUnknown().setValue(true);
+		c.getAcceptUnknown().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":true,\"_acceptUnknown\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}]}");
+
+	}
+
+	
+	
+	@Test
+	public void testEncodeExtensionInResourceElement() {
+		
+		Conformance c = new Conformance();
+//		c.addRest().getSecurity().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		c.addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
+		ourLog.info(encoded);
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
+		ourLog.info(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}");
+		
+	}
 	
 	@Test
 	public void testEncodeBinaryResource() {
@@ -387,7 +448,18 @@ public class JsonParserTest {
 		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
-	
+
+	@Test
+	public void testEncodeExtensionOnEmptyElement() throws Exception {
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.addTelecom().addUndeclaredExtension(false, "http://foo", new StringDt("AAA"));
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
+		assertThat(encoded, containsString("\"telecom\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		
+	}
+
 	
 	
 	@Test
@@ -402,11 +474,11 @@ public class JsonParserTest {
 		code.setDisplay("someDisplay");
 		code.addUndeclaredExtension(false, "urn:alt", new StringDt("alt name"));
 
-		String encoded = new FhirContext().newJsonParser().encodeResourceToString(valueSet);
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
 		assertThat(encoded, not(containsString("123456")));
-		assertThat(encoded, containsString("\"define\":{\"concept\":[{\"code\":\"someCode\",\"display\":\"someDisplay\"}],\"_concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}]}]}"));
+		assertEquals("{\"resourceType\":\"ValueSet\",\"define\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}", encoded);
 		
 	}
 
@@ -500,32 +572,8 @@ public class JsonParserTest {
 		given.addUndeclaredExtension(ext2);
 		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
-		//@formatter:off
-		assertThat(enc, containsString(("{" + 
-				"    \"resourceType\":\"Patient\"," + 
-				"    \"name\":[" + 
-				"        {" + 
-				"            \"family\":[" + 
-				"                \"Shmoe\"" + 
-				"            ]," + 
-				"            \"given\":[" + 
-				"                \"Joe\"" + 
-				"            ]" + 
-				"        }" + 
-				"    ]," + 
-				"    \"_name\":[" + 
-				"        {" + 
-				"            \"extension\":[" + 
-				"                {" + 
-				"                    \"url\":\"http://examples.com#givenext\"," + 
-				"                    \"valueString\":\"Hello\"" + 
-				"                }" + 
-				"            ]" + 
-				"        }" + 
-				"    ]" + 
-				"}").replaceAll(" +", "")));
-		//@formatter:on
-
+		assertEquals("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}", enc);
+		
 		IParser newJsonParser = new FhirContext().newJsonParser();
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
@@ -837,9 +885,7 @@ public class JsonParserTest {
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
 
-		fhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
-
-		IParser jsonParser = fhirCtx.newJsonParser();
+		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 

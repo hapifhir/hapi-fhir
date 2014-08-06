@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -343,6 +344,33 @@ public class GenericClientTest {
 	}
 	
 
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithClientEncodingAndPrettyPrintConfig() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.setPrettyPrint(true);
+		client.setEncoding(EncodingEnum.JSON);
+		
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.execute();
+		//@formatter:on
+
+		assertEquals("http://example.com/fhir/Patient?_format=json&_pretty=true", capt.getValue().getURI().toString());
+
+	}
+	
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByDate() throws Exception {
