@@ -115,7 +115,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					return ourYearMonthDayTimeMilliFormat.format(myValue);
 				}
 			}
-			throw new IllegalStateException("Invalid precition (this is a HAPI bug, shouldn't happen): " + myPrecision);
+			throw new IllegalStateException("Invalid precision (this is a HAPI bug, shouldn't happen): " + myPrecision);
 		}
 	}
 

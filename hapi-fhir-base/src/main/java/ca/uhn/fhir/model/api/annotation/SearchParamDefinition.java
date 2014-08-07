@@ -29,12 +29,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SearchParamDefinition {
 
+	/**
+	 * The name for this parameter
+	 */
 	String name();
 	
+	/**
+	 * The path for this parameter
+	 */
 	String path();
 	
+	/**
+	 * A description of this parameter
+	 */
 	String description() default "";
 	
+	/**
+	 * The type for this parameter, e.g. "string", or "token"
+	 */
 	String type() default "string";
 	
 	/**

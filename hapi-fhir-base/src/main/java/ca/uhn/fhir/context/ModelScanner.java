@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +55,6 @@ import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.CodeTableDef;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -257,16 +256,6 @@ class ModelScanner {
 			}
 		}
 
-		CodeTableDef codeTableDefinition = theClass.getAnnotation(CodeTableDef.class);
-		if (codeTableDefinition != null) {
-			if (ICodeEnum.class.isAssignableFrom(theClass)) {
-				@SuppressWarnings("unchecked")
-				Class<? extends ICodeEnum> resClass = (Class<? extends ICodeEnum>) theClass;
-				scanCodeTable(resClass, codeTableDefinition);
-			} else {
-				throw new ConfigurationException("Type contains a @" + CodeTableDef.class.getSimpleName() + " annotation but does not implement " + ICodeEnum.class.getCanonicalName() + ": " + theClass.getCanonicalName());
-			}
-		}
 
 		Block blockDefinition = theClass.getAnnotation(Block.class);
 		if (blockDefinition != null) {
@@ -279,7 +268,7 @@ class ModelScanner {
 			}
 		}
 
-		if (blockDefinition == null && codeTableDefinition == null && datatypeDefinition == null && resourceDefinition == null) {
+		if (blockDefinition == null && datatypeDefinition == null && resourceDefinition == null) {
 			throw new ConfigurationException("Resource type does not contain any valid HAPI-FHIR annotations: " + theClass.getCanonicalName());
 		}
 	}
@@ -287,8 +276,7 @@ class ModelScanner {
 	private void scanBlock(Class<? extends IResourceBlock> theClass, Block theBlockDefinition) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
-		String resourceName = theBlockDefinition.name(); // TODO: remove name
-		resourceName = theClass.getCanonicalName();
+		String resourceName = theClass.getCanonicalName();
 		if (isBlank(resourceName)) {
 			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
 		}
@@ -299,9 +287,6 @@ class ModelScanner {
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
 
-	private String scanCodeTable(Class<? extends ICodeEnum> theCodeType, CodeTableDef theCodeTableDefinition) {
-		return null; // TODO: implement
-	}
 
 	private void scanCompositeDatatype(Class<? extends ICompositeDatatype> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());

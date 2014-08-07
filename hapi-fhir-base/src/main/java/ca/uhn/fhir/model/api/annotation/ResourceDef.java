@@ -25,6 +25,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Class annotation which indicates a resource definition class
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.TYPE})
 public @interface ResourceDef {
@@ -34,8 +37,14 @@ public @interface ResourceDef {
 	 */
 	String name();
 
+	/**
+	 * Not currently used
+	 */
 	String id() default "";
 	
+	/**
+	 * The URL indicating the profile for this resource definition, if known
+	 */
 	String profile() default "";
 	
 }
