@@ -25,6 +25,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotation which may be placed on a resource/datatype definition, or a field, or
+ * a search parameter definition in order to provide documentation for that item.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD, ElementType.TYPE, ElementType.PARAMETER, ElementType.METHOD})
 public @interface Description {

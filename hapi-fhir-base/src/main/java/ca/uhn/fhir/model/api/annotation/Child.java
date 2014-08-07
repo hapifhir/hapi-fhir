@@ -27,6 +27,10 @@ import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IElement;
 
+/**
+ * Field annotation for fields within resource and datatype definitions, indicating 
+ * a child of that type.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.FIELD})
 public @interface Child {
@@ -42,14 +46,37 @@ public @interface Child {
 	 */
 	int MAX_UNLIMITED = -1;
 
+	/**
+	 * The name of this field, as it will appear in serialized versions of the message
+	 */
 	String name();
 	
+	/**
+	 * The order in which this field comes within its parent. The first field should have a 
+	 * value of 0, the second a value of 1, etc.
+	 */
 	int order() default ORDER_UNKNOWN;
 
+	/**
+	 * The minimum number of repetitions allowed for this child
+	 */
 	int min() default 0;
 
+	/**
+	 * The maximum number of repetitions allowed for this child. Should be
+	 * set to {@link #MAX_UNLIMITED} if there is no limit to the number of
+	 * repetitions.
+	 */
 	int max() default 1;
 
+	/**
+	 * Lists the allowable types for this field, if the field supports multiple
+	 * types (otherwise does not need to be populated).
+	 * <p>
+	 * For example, if this field supports either DateTimeDt or BooleanDt types,
+	 * those two classes should be supplied here.
+	 * </p>
+	 */
 	Class<? extends IElement>[] type() default {};
 
 	// Not implemented

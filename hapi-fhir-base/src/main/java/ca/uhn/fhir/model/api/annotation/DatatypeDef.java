@@ -28,6 +28,9 @@ import java.lang.annotation.Target;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 
+/**
+ * Class annotation to note a class which defines a datatype
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.TYPE})
 public @interface DatatypeDef {

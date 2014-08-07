@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.api.annotation;
+package ca.uhn.fhir.rest.annotation;
 
 /*
  * #%L
@@ -25,10 +25,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value= {ElementType.FIELD})
-public @interface IsIdentifier {
+import ca.uhn.fhir.model.api.TagList;
 
+/**
+ * Parameter annotation for the {@link TagList} parameter in a {@link GetTags},
+ * {@link AddTags}, or {@link DeleteTags} method.
+ * 
+ * @see GetTags
+ * @see AddTags
+ * @see DeleteTags
+ */
+@Target(value = ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TagListParam {
 	// nothing
-	
 }
