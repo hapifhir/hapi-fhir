@@ -28,6 +28,10 @@
 				(as is done correctly for non-composite elements) instead of inside of them. Thanks to David Hay of
 				Orion for reporting this!
 			</action>
+			<action type="add">
+				Contained/included resource instances received by a client are now automatically 
+				added to any ResourceReferenceDt instancea in other resources which reference them.
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
