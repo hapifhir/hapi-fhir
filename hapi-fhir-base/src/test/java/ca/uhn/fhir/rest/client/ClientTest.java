@@ -692,6 +692,8 @@ public class ClientTest {
 
 	}
 
+	
+		
 	@Test
 	public void testSearchByDateRange() throws Exception {
 

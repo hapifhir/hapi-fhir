@@ -58,6 +58,12 @@
 				update. This has no effect other than to switch between the HTTP 200 and HTTP 201 status codes on the
 				response, but this may be useful in some circumstances.
 			</action>
+			<action type="fix">
+				Annotation client search methods with a specific resource type (e.g. List&lt;Patient&gt; search())
+				won't return any resources that aren't of the correct type that are received in a response
+				bundle (generally these are referenced resources, so they are populated in the reference fields instead).
+				Thanks to Tahura Chaudhry of University Health Network for the unit test!
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
