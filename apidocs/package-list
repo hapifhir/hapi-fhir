@@ -20,4 +20,5 @@ ca.uhn.fhir.rest.param
 ca.uhn.fhir.rest.server
 ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.provider
+ca.uhn.fhir.rest.server.security
 ca.uhn.fhir.util
