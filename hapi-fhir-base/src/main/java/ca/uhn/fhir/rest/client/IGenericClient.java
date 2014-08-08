@@ -62,6 +62,8 @@ public interface IGenericClient {
 	 * @param theResource
 	 *            The resource to create
 	 * @return An outcome
+	 * @deprecated Use {@link #create() fluent method instead}. This method will be removed.
+	 * 
 	 */
 	MethodOutcome create(IResource theResource);
 

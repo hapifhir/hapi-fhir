@@ -27,8 +27,11 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceProvider.class);
 
 	@Autowired(required = true)
 	private FhirContext myContext;
@@ -140,6 +143,12 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 		startRequest(theRequest);
 		try {
 			return myDao.update(theResource, theId);
+		} catch (ResourceNotFoundException e) {
+			ourLog.info("Can't update resource with ID[" + theId.getValue() + "] because it doesn't exist, going to create it instead");
+			theResource.setId(theId);
+			MethodOutcome retVal = myDao.create(theResource);
+			retVal.setCreated(true);
+			return retVal;
 		} finally {
 			endRequest(theRequest);
 		}

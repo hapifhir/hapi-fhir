@@ -129,6 +129,11 @@
 			<artifactId>spring-context-support</artifactId>
 			<version>${spring_version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
 
 
 		<dependency>
@@ -167,8 +172,6 @@
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>

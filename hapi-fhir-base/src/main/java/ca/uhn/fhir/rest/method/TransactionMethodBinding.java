@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -104,11 +105,16 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		Object response= invokeServerMethod(theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 		
+		int offset = 0;
 		if (retVal.size() != resources.size()) {
-			throw new InternalErrorException("Transaction bundle contained " + resources.size() + " entries, but server method response contained " + retVal.size() + " entries (must be the same)");
+			if (retVal.size() > 0 && retVal.getResources(0, 1).get(0) instanceof OperationOutcome) {
+				offset = 1;
+			} else {
+				throw new InternalErrorException("Transaction bundle contained " + resources.size() + " entries, but server method response contained " + retVal.size() + " entries (must be the same)");
+			}
 		}
 		
-		List<IResource> retResources = retVal.getResources(0, retVal.size()); 
+		List<IResource> retResources = retVal.getResources(offset, retVal.size()); 
 		for (int i =0; i < resources.size(); i++) {
 			IdDt oldId = oldIds.get(i);
 			IResource newRes = retResources.get(i);
@@ -117,8 +123,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			}
 			
 			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.getId().equals(newRes.getId())) {
-					newRes.getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId.getId());
+				if (!oldId.equals(newRes.getId())) {
+					newRes.getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}

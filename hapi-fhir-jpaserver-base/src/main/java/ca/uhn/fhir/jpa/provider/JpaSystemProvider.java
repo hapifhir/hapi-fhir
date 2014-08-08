@@ -38,8 +38,7 @@ public class JpaSystemProvider extends BaseJpaProvider {
 	public List<IResource> transaction(HttpServletRequest theRequest, @TransactionParam List<IResource> theResources) {
 		startRequest(theRequest);
 		try {
-			myDao.transaction(theResources);
-			return theResources;
+			return myDao.transaction(theResources);
 		} finally {
 			endRequest(theRequest);
 		}

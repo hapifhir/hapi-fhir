@@ -1054,7 +1054,9 @@ public class RestfulServer extends HttpServlet {
 
 		for (IResource next : resourceList) {
 			if (next.getId() == null || next.getId().isEmpty()) {
-				throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+				if (!(next instanceof OperationOutcome)) {
+					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+				}	
 			}
 		}
 
