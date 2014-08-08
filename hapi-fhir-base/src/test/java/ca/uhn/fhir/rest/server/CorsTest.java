@@ -12,6 +12,8 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -26,6 +28,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.server.ResfulServerSelfReferenceTest.DummyPatientResourceProvider;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
@@ -54,6 +57,7 @@ public class CorsTest {
 		fh.setInitParameter("cors.logging.enabled", "true");
 		fh.setInitParameter("cors.allowed.origins", "*");
 		fh.setInitParameter("cors.allowed.headers", "x-fhir-starter,Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers");
+		fh.setInitParameter("cors.exposed.headers", "Location,Content-Location");
 		fh.setInitParameter("cors.allowed.methods", "GET,POST,PUT,DELETE,OPTIONS");
 
 		ServletContextHandler ch = new ServletContextHandler();
@@ -99,6 +103,20 @@ public class CorsTest {
 				Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
 				assertEquals(1, bundle.getEntries().size());
+			}
+			{
+				HttpPost httpOpt = new HttpPost(baseUri + "/Patient");
+				httpOpt.addHeader("Access-Control-Request-Method", "POST");
+				httpOpt.addHeader("Origin", "http://www.fhir-starter.com");
+				httpOpt.addHeader("Access-Control-Request-Headers", "accept, x-fhir-starter, content-type");
+				httpOpt.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(new Patient())));
+				HttpResponse status = ourClient.execute(httpOpt);
+				String responseContent = IOUtils.toString(status.getEntity().getContent());
+				IOUtils.closeQuietly(status.getEntity().getContent());
+				ourLog.info("Response: {}", status);
+				ourLog.info("Response was:\n{}", responseContent);
+				assertEquals("POST", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
+				assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
 			}
 		} finally {
 			server.stop();
