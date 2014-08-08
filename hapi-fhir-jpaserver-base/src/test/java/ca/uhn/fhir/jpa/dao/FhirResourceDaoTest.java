@@ -1385,6 +1385,29 @@ public class FhirResourceDaoTest {
 
 	}
 
+
+	@Test
+	public void testReadForcedIdVersionHistory() throws InterruptedException {
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testReadVorcedIdVersionHistory01");
+		p1.setId("testReadVorcedIdVersionHistory");
+		IdDt p1id = ourPatientDao.create(p1).getId();
+		assertEquals("testReadVorcedIdVersionHistory", p1id.getIdPart());
+
+		p1.addIdentifier("urn:system", "testReadVorcedIdVersionHistory02");
+		IdDt p1idv2 = ourPatientDao.update(p1, p1id).getId();
+		assertEquals("testReadVorcedIdVersionHistory", p1idv2.getIdPart());
+		
+		assertNotEquals(p1id.getValue(),  p1idv2.getValue());
+
+		Patient v1 = ourPatientDao.read(p1id);
+		assertEquals(1, v1.getIdentifier().size());
+		
+		Patient v2 = ourPatientDao.read(p1idv2);
+		assertEquals(2, v2.getIdentifier().size());
+
+	}
+
 	
 	@SuppressWarnings("unchecked")
 	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
