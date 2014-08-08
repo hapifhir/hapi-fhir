@@ -32,6 +32,12 @@
 				Contained/included resource instances received by a client are now automatically 
 				added to any ResourceReferenceDt instancea in other resources which reference them.
 			</action>
+			<action type="add">
+				Add documentation on how to use eBay CORS Filter to support Cross Origin Resource
+				Sharing (CORS) to server. CORS support that was built in to the server itself has
+				been removed, as it did not work correctly (and was reinventing a wheel that others
+				have done a great job inventing).
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

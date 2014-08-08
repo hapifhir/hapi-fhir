@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -102,20 +102,6 @@ public class RestfulServer extends HttpServlet {
 	private String myServerVersion = VersionUtil.getVersion();
 	private boolean myStarted;
 	private boolean myUseBrowserFriendlyContentTypes;
-	private String myCorsAllowDomain;
-
-	public String getCorsAllowDomain() {
-		return myCorsAllowDomain;
-	}
-
-	/**
-	 * If set to anything other than <code>null</code> (which is the default), the server will return CORS (Cross Origin Resource Sharing) headers with the given domain string.
-	 * <p>
-	 * A value of "*" indicates that the server allows access to all domains (which may be appropriate in development situations but is generally not appropriate in production)
-	 */
-	public void setCorsAllowDomain(String theCorsAllowDomain) {
-		myCorsAllowDomain = theCorsAllowDomain;
-	}
 
 	/**
 	 * Constructor
@@ -137,13 +123,6 @@ public class RestfulServer extends HttpServlet {
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
 		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
-
-		if (isNotBlank(myCorsAllowDomain)) {
-			theHttpResponse.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, myCorsAllowDomain);
-			theHttpResponse.addHeader(Constants.HEADER_CORS_ALLOW_METHODS, Constants.HEADERVALUE_CORS_ALLOW_METHODS_ALL);
-			theHttpResponse.addHeader(Constants.HEADER_CORS_EXPOSE_HEADERS, Constants.HEADER_CONTENT_LOCATION);
-		}
-
 	}
 
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {

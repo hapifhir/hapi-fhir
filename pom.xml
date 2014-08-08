@@ -79,7 +79,7 @@
 		<junit_version>4.11</junit_version>
 		<logback_version>1.1.1</logback_version>
 		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
-		<maven_site_plugin_version>3.3</maven_site_plugin_version>
+		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<mockito_version>1.9.5</mockito_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -87,6 +87,7 @@
 		<spring_version>4.0.1.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
 		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
+		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 	</properties>
 
 	<build>

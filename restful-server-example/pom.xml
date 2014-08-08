@@ -62,6 +62,21 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Used for CORS support -->
+		<dependency>
+			<groupId>org.ebaysf.web</groupId>
+			<artifactId>cors-filter</artifactId>
+			<version>1.0.1</version>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+
 	</dependencies>
 
 	<build>
