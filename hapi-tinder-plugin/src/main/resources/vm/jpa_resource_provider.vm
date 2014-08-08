@@ -29,6 +29,10 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			@Description(shortDefinition="The resource identity")
 			@OptionalParam(name="_id")
 			StringParam theId, 
+
+			@Description(shortDefinition="The resource language")
+			@OptionalParam(name="_language")
+			StringParam theResourceLanguage, 
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
 			@Description(shortDefinition="${param.description}")
@@ -70,7 +74,8 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add("_id", theId);					
+			paramMap.add("_id", theId);		
+			paramMap.add("_language", theResourceLanguage);			
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end

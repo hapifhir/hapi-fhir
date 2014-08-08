@@ -900,6 +900,47 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
+	public void testSearchLanguageParam() {
+		IdDt id1;
+		{
+			Patient patient = new Patient();
+			patient.getLanguage().setValue("en_CA");
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
+			id1 = ourPatientDao.create(patient).getId();
+		}
+		IdDt id2;
+		{
+			Patient patient = new Patient();
+			patient.getLanguage().setValue("en_US");
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("testSearchLanguageParam").addGiven("John");
+			id2 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_RES_LANGUAGE, new StringParam("en_CA"));
+			List<Patient> patients = toList(ourPatientDao.search(params));
+			assertEquals(1, patients.size());
+			assertEquals(id1.toUnqualifiedVersionless(), patients.get(0).getId().toUnqualifiedVersionless());
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_RES_LANGUAGE, new StringParam("en_US"));
+			List<Patient> patients = toList(ourPatientDao.search(params));
+			assertEquals(1, patients.size());
+			assertEquals(id2.toUnqualifiedVersionless(), patients.get(0).getId().toUnqualifiedVersionless());
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			params.put(Patient.SP_RES_LANGUAGE, new StringParam("en_GB"));
+			List<Patient> patients = toList(ourPatientDao.search(params));
+			assertEquals(0, patients.size());
+		}
+
+	}
+
+	@Test
 	public void testSearchStringParamWithNonNormalized() {
 		{
 			Patient patient = new Patient();

@@ -38,6 +38,10 @@
 				been removed, as it did not work correctly (and was reinventing a wheel that others
 				have done a great job inventing).
 			</action>
+			<action type="fix">
+				IResource interface did not expose the getLanguage/setLanguage methods from BaseResource,
+				so the resource language was difficult to access.
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

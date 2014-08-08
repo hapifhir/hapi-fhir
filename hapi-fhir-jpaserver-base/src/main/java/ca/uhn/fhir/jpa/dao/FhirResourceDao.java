@@ -440,7 +440,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			predicates.add(from.get("myId").in(pids));
-			createSort(builder, from, theParams.getSort(), orders,predicates);
+			createSort(builder, from, theParams.getSort(), orders, predicates);
 			if (orders.size() > 0) {
 				loadPids = new LinkedHashSet<Long>();
 				cq.multiselect(from.get("myId").as(Long.class));
@@ -454,7 +454,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				}
 
 				ourLog.info("Sort PID order is now: {}", loadPids);
-				
+
 				pids.clear();
 				pids.addAll(loadPids);
 			}
@@ -552,30 +552,30 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
-		if (theSort==null||isBlank(theSort.getParamName())) {
+		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
-		
+
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
 		if (param == null) {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
-		
+
 		String joinAttrName = "myParamsString";
 		String sortAttrName = "myValueExact";
 
 		switch (param.getParamType()) {
 		case STRING: {
-			From<?,?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
+			From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
 			Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
 			Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
-			thePredicates.add(theBuilder.or(p,pn));
+			thePredicates.add(theBuilder.or(p, pn));
 			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
 			break;
 		}
 		}
-		
+
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
@@ -612,6 +612,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : params.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			if (nextParamName.equals("_id")) {
+
 				if (nextParamEntry.getValue().isEmpty()) {
 					continue;
 				} else if (nextParamEntry.getValue().size() > 1) {
@@ -647,8 +648,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					} else {
 						pids.retainAll(joinPids);
 					}
-
 				}
+
+			} else if (nextParamName.equals("_language")) {
+
+				pids = addPredicateLanguage(pids, nextParamEntry.getValue());
+
 			} else {
 
 				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
@@ -1185,6 +1190,51 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
+		if (theList == null || theList.isEmpty()) {
+			return thePids;
+		}
+		if (theList.size() > 1) {
+			throw new InvalidRequestException("Language parameter can not have more than one AND value, found " + theList.size());
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		Set<String> values = new HashSet<String>();
+		for (IQueryParameterType next : theList.get(0)) {
+			if (next instanceof StringParam) {
+				String nextValue = ((StringParam) next).getValue();
+				if (isBlank(nextValue)) {
+					continue;
+				}
+				values.add(nextValue);
+			} else {
+				throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
+			}
+		}
+
+		if (values.isEmpty()) {
+			return thePids;
+		}
+
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
+		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
+
+		if (thePids.size() > 0) {
+			Predicate inPids = (from.get("myId").in(thePids));
+			cq.where(builder.and(masterCodePredicate, inPids));
+		} else {
+			cq.where(masterCodePredicate);
+		}
+
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		return new HashSet<Long>(q.getResultList());
+	}
+
 	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -1249,8 +1299,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		return retVal;
 	}
-
-	
 
 	private Predicate createPredicateDate(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, IQueryParameterType theParam) {
 		Predicate p;
@@ -1359,7 +1407,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			position.put(next, theResourceListToPopulate.size());
 			theResourceListToPopulate.add(null);
 		}
-		
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);

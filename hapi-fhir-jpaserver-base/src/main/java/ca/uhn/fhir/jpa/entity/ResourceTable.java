@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +23,23 @@ import org.hibernate.annotations.Index;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+//@formatter:off
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {})
 @Inheritance(strategy = InheritanceType.JOINED)
-@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", indexes = { @Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }) })
+@org.hibernate.annotations.Table(appliesTo = "HFJ_RESOURCE", 
+	indexes = { 
+		@Index(name = "IDX_RES_DATE", columnNames = { "RES_UPDATED" }), 
+		@Index(name = "IDX_RES_LANG", columnNames = { "RES_TYPE", "RES_LANGUAGE" }), 
+		@Index(name = "IDX_RES_PROFILE", columnNames = { "RES_PROFILE" }) 
+	})
+//@formatter:on
 public class ResourceTable extends BaseHasResource implements Serializable {
+	private static final int MAX_LANGUAGE_LENGTH = 20;
+	private static final int MAX_PROFILE_LENGTH = 200;
+
 	private static final long serialVersionUID = 1L;
 
 	static final int RESTYPE_LEN = 30;
@@ -83,6 +96,34 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	@Column(name = "RES_VER")
 	private long myVersion;
+
+	@Column(name = "RES_LANGUAGE", length=MAX_LANGUAGE_LENGTH, nullable=true)
+	private String myLanguage;
+
+	@Column(name = "RES_PROFILE", length=MAX_PROFILE_LENGTH,nullable=true)
+	private String myProfile;
+	
+	public String getLanguage() {
+		return myLanguage;
+	}
+
+	public void setLanguage(String theLanguage) {
+		if (defaultString(theLanguage).length()> MAX_LANGUAGE_LENGTH) {
+			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
+		}
+		myLanguage = theLanguage;
+	}
+
+	public String getProfile() {
+		return myProfile;
+	}
+
+	public void setProfile(String theProfile) {
+		if (defaultString(theProfile).length()> MAX_PROFILE_LENGTH) {
+			throw new UnprocessableEntityException("Profile name exceeds maximum length of " + MAX_PROFILE_LENGTH + " chars: " + theProfile);
+		}
+		myProfile = theProfile;
+	}
 
 	public ResourceTag addTag(TagDefinition theTag) {
 		ResourceTag tag = new ResourceTag(this, theTag);

@@ -1138,6 +1138,7 @@ public abstract class BaseFhirDao implements IDao {
 
 		} else {
 
+
 			stringParams = extractSearchParamStrings(entity, theResource);
 			numberParams = extractSearchParamNumber(entity, theResource);
 			quantityParams = extractSearchParamQuantity(entity, theResource);
@@ -1156,6 +1157,7 @@ public abstract class BaseFhirDao implements IDao {
 			populateResourceIntoEntity(theResource, entity);
 
 			entity.setUpdated(new Date());
+			entity.setLanguage(theResource.getLanguage().getValue());
 			entity.setParamsString(stringParams);
 			entity.setParamsStringPopulated(stringParams.isEmpty() == false);
 			entity.setParamsToken(tokenParams);

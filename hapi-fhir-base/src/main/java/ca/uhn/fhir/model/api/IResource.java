@@ -25,6 +25,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public interface IResource extends ICompositeElement {
@@ -46,9 +47,23 @@ public interface IResource extends ICompositeElement {
 	ContainedDt getContained();
 
 	/**
-	 * Returns the narrative block for this resource
+	 * Returns the ID of this resource. Note that this identifier is the URL (or a portion
+	 * of the URL) used to access this resource, and is not the same thing as any business
+	 * identifiers stored within the resource. For example, a Patient resource might
+	 * have any number of medical record numbers but these are not stored here.
+	 * <p>
+	 * This ID is specified as the "Logical ID" and "Version ID" in the FHIR specification, see 
+	 * <a href="http://www.hl7.org/implement/standards/fhir/resources.html#metadata">here</a>
+	 * </p>
 	 */
-	NarrativeDt getText();
+	IdDt getId();
+
+	/**
+	 * Gets the language of the resource itself - <b>NOTE that this language attribute
+	 * applies to the resource itself, it is not (for example) the language spoken by
+	 * a practitioner or patient</b>
+	 */
+	CodeDt getLanguage();
 
 	/**
 	 * Returns the metadata map for this object, creating it if neccesary.
@@ -65,26 +80,9 @@ public interface IResource extends ICompositeElement {
 	Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata();
 
 	/**
-	 * Sets the metadata map for this object. Metadata entries are used to
-	 * get/set feed bundle entries, such as the resource version, or the last
-	 * updated timestamp.
-	 * 
-	 * @throws NullPointerException
-	 *             The map must not be null
+	 * Returns the narrative block for this resource
 	 */
-	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
-
-	/**
-	 * Returns the ID of this resource. Note that this identifier is the URL (or a portion
-	 * of the URL) used to access this resource, and is not the same thing as any business
-	 * identifiers stored within the resource. For example, a Patient resource might
-	 * have any number of medical record numbers but these are not stored here.
-	 * <p>
-	 * This ID is specified as the "Logical ID" and "Version ID" in the FHIR specification, see 
-	 * <a href="http://www.hl7.org/implement/standards/fhir/resources.html#metadata">here</a>
-	 * </p>
-	 */
-	IdDt getId();
+	NarrativeDt getText();
 	
 	/**
 	 * Sets the ID of this resource. Note that this identifier is the URL (or a portion
@@ -97,5 +95,22 @@ public interface IResource extends ICompositeElement {
 	 * </p>
 	 */
 	void setId(IdDt theId);
+
+	/**
+	 * Sets the language of the resource itself - <b>NOTE that this language attribute
+	 * applies to the resource itself, it is not (for example) the language spoken by
+	 * a practitioner or patient</b>
+	 */
+	void setLanguage(CodeDt theLanguage);
+
+	/**
+	 * Sets the metadata map for this object. Metadata entries are used to
+	 * get/set feed bundle entries, such as the resource version, or the last
+	 * updated timestamp.
+	 * 
+	 * @throws NullPointerException
+	 *             The map must not be null
+	 */
+	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
 	
 }

@@ -145,13 +145,6 @@
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
 			<version>${ebay_cors_filter_version}</version>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		
 	</dependencies>

@@ -68,7 +68,6 @@ public class TestRestfulServer extends RestfulServer {
 		setServerConformanceProvider(confProvider);
 		
 		setUseBrowserFriendlyContentTypes(true);
-		setCorsAllowDomain("*");
 		
 		String baseUrl = System.getProperty("fhir.baseurl");
 		if (StringUtils.isBlank(baseUrl)) {

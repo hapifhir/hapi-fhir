@@ -28,6 +28,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -35,6 +36,19 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.ElementUtil;
 
 public abstract class BaseResource extends BaseElement implements IResource {
+
+	/**
+	 * Search parameter constant for <b>_language</b>
+	 */
+	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
+	public static final String SP_RES_LANGUAGE = "_language";
+
+
+	/**
+	 * Search parameter constant for <b>_id</b>
+	 */
+	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
+	public static final String SP_RES_ID = "_id";
 
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;
@@ -65,13 +79,10 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("id", getId().toUnqualified());
-		return b.toString();
-	}
-
 	public CodeDt getLanguage() {
+		if (myLanguage == null) {
+			myLanguage = new CodeDt();
+		}
 		return myLanguage;
 	}
 
@@ -107,6 +118,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		}
 	}
 
+	@Override
 	public void setLanguage(CodeDt theLanguage) {
 		myLanguage = theLanguage;
 	}
@@ -119,6 +131,13 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 	public void setText(NarrativeDt theText) {
 		myText = theText;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", getId().toUnqualified());
+		return b.toString();
 	}
 
 	/**

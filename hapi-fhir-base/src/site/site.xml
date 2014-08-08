@@ -65,9 +65,9 @@
 			<item name="RESTful Client" href="./doc_rest_client.html" />
 			<item name="RESTful Server" href="./doc_rest_server.html" >
 				<item name="RESTful Operations" href="./doc_rest_operations.html" />
-				<item name="FHIR Tester App" href="./doc_server_tester.html" />
 				<item name="Narrative Generator" href="./doc_narrative.html" />
 				<item name="CORS Support" href="./doc_cors.html" />
+				<item name="Web Testing UI" href="./doc_server_tester.html" />
 			</item>
 			<item name="Logging" href="./doc_logging.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
