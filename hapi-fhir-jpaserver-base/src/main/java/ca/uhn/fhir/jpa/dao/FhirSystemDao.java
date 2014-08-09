@@ -22,6 +22,8 @@ import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -35,7 +37,7 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public void transaction(List<IResource> theResources) {
+	public List<IResource> transaction(List<IResource> theResources) {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 		long start = System.currentTimeMillis();
 
@@ -150,7 +152,16 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Transaction completed in {}ms with {} creations and {} updates", new Object[] { delay, creations, updates });
 
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Transaction completed in "+delay+"ms with "+creations+" creations and "+updates+" updates");
+		
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		retVal.add(oo);
+		retVal.addAll(theResources);
+		
 		notifyWriteCompleted();
+		
+		return retVal;
 	}
 
 	@Override

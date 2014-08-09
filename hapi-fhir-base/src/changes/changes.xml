@@ -36,11 +36,33 @@
 				Add documentation on how to use eBay CORS Filter to support Cross Origin Resource
 				Sharing (CORS) to server. CORS support that was built in to the server itself has
 				been removed, as it did not work correctly (and was reinventing a wheel that others
-				have done a great job inventing).
+				have done a great job inventing). Thanks to Peter Bernhardt of Relay Health for all the assistance
+				in testing this!
 			</action>
 			<action type="fix">
 				IResource interface did not expose the getLanguage/setLanguage methods from BaseResource,
 				so the resource language was difficult to access.
+			</action>
+			<action type="fix">
+				JSON Parser now gives a more friendly error message if it tries to parse JSON with invalid use 
+				of single quotes
+			</action>
+			<action type="add">
+				Transaction server method is now allowed to return an OperationOutcome in addition to the
+				incoming resources. The public test server now does this in ordeer to return status information
+				about the transaction processing.
+			</action>
+			<action type="add">
+				Update method in the server can now flag (via a field on the MethodOutcome object being returned)
+				that the result was actually a creation, and Create method can indicate that it was actually an
+				update. This has no effect other than to switch between the HTTP 200 and HTTP 201 status codes on the
+				response, but this may be useful in some circumstances.
+			</action>
+			<action type="fix">
+				Annotation client search methods with a specific resource type (e.g. List&lt;Patient&gt; search())
+				won't return any resources that aren't of the correct type that are received in a response
+				bundle (generally these are referenced resources, so they are populated in the reference fields instead).
+				Thanks to Tahura Chaudhry of University Health Network for the unit test!
 			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">

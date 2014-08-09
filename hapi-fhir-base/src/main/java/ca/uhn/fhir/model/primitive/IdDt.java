@@ -162,15 +162,6 @@ public class IdDt extends BasePrimitive<String> {
 		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
 	}
 
-	/**
-	 * Returns a reference to <code>this</code> IdDt. It is generally not neccesary to use this method but it is
-	 * provided for consistency with the rest of the API.
-	 */
-	@Override
-	public IdDt getId() {
-		return this;
-	}
-
 	public String getIdPart() {
 		return myUnqualifiedId;
 	}

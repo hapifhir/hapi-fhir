@@ -606,6 +606,11 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
   outcome.addIssue().setDetails("One minor issue detected");
   retVal.setOperationOutcome(outcome);
   
+  // If your server supports creating resources during an update if they don't already exist
+  // (this is not mandatory and may not be desirable anyhow) you can flag in the response
+  // that this was a creation as follows:
+ // retVal.setCreated(true);
+  
   return retVal;
 }
 //END SNIPPET: update
@@ -863,15 +868,13 @@ public List<IResource> transaction(@TransactionParam List<IResource> theResource
       }
    }
 
-   /*
-    * According to the specification, a bundle must be returned. This bundle will contain
-    * all of the created/updated/deleted resources, including their new/updated identities.
-    * 
-    * The returned list must be the exact same size as the list of resources
-    * passed in, and it is acceptable to return the same list instance that was
-    * passed in. 
-    */
-   List<IResource> retVal = theResources;
+   // According to the specification, a bundle must be returned. This bundle will contain
+   // all of the created/updated/deleted resources, including their new/updated identities.
+   //
+   // The returned list must be the exact same size as the list of resources
+   // passed in, and it is acceptable to return the same list instance that was
+   // passed in. 
+   List<IResource> retVal = new ArrayList<IResource>(theResources);
    for (IResource next : theResources) {
       /*
        * Populate each returned resource with the new ID for that resource,
@@ -880,6 +883,12 @@ public List<IResource> transaction(@TransactionParam List<IResource> theResource
       IdDt newId = new IdDt("Patient", "1", "2"); 
       next.setId(newId);
    }
+
+   // If wanted, you may optionally also return an OperationOutcome resource
+   // If present, the OperationOutcome must come first in the returned list.
+   OperationOutcome oo = new OperationOutcome();
+   oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Completed successfully");
+   retVal.add(0, oo);
    
    return retVal;
 }

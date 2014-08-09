@@ -47,6 +47,7 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
+import javax.json.stream.JsonParsingException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -135,6 +136,10 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void assertObjectOfType(JsonValue theResourceTypeObj, ValueType theValueType, String thePosition) {
+		if (theResourceTypeObj == null) {
+			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
+		}
+		
 		if (theResourceTypeObj.getValueType() != theValueType) {
 			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
 		}
@@ -620,9 +625,18 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public <T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
-		JsonReader reader = Json.createReader(theReader);
-		JsonObject object = reader.readObject();
-
+		JsonReader reader;		
+		JsonObject object;
+		
+		try {
+			reader = Json.createReader(theReader);
+			object = reader.readObject();
+		} catch (JsonParsingException e) {
+			if (e.getMessage().startsWith("Unexpected char 39")) {
+				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
+			}
+			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
+		}
 		JsonValue resourceTypeObj = object.get("resourceType");
 		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 		String resourceType = ((JsonString) resourceTypeObj).getString();

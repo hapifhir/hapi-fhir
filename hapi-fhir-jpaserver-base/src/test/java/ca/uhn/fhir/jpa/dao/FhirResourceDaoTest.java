@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 public class FhirResourceDaoTest {
 
@@ -973,7 +974,8 @@ public class FhirResourceDaoTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
+				.setDisplay("testSearchTokenParamDisplay");
 		ourPatientDao.create(patient);
 
 		patient = new Patient();
@@ -1327,6 +1329,86 @@ public class FhirResourceDaoTest {
 
 	}
 
+	@Test
+	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testUpdateRejectsInvalidTypes");
+		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		IdDt p1id = ourPatientDao.create(p1).getId();
+
+		Organization p2 = new Organization();
+		p2.getName().setValue("testUpdateRejectsInvalidTypes");
+		try {
+			ourOrganizationDao.update(p2, new IdDt("Organization/" + p1id.getIdPart()));
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+		try {
+			ourOrganizationDao.update(p2, new IdDt("Patient/" + p1id.getIdPart()));
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testUpdateRejectsIdWhichPointsToForcedId() throws InterruptedException {
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testUpdateRejectsIdWhichPointsToForcedId01");
+		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");
+		p1.setId("ABABA");
+		IdDt p1id = ourPatientDao.create(p1).getId();
+		assertEquals("ABABA", p1id.getIdPart());
+
+		Patient p2 = new Patient();
+		p2.addIdentifier("urn:system", "testUpdateRejectsIdWhichPointsToForcedId02");
+		p2.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId02");
+		IdDt p2id = ourPatientDao.create(p2).getId();
+		long p1longId = p2id.getIdPartAsLong() - 1;
+		
+		try {
+			ourPatientDao.read(new IdDt("Patient/" + p1longId));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+		
+		try {
+			ourPatientDao.update(p1, new IdDt("Patient/" + p1longId));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
+	}
+
+
+	@Test
+	public void testReadForcedIdVersionHistory() throws InterruptedException {
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testReadVorcedIdVersionHistory01");
+		p1.setId("testReadVorcedIdVersionHistory");
+		IdDt p1id = ourPatientDao.create(p1).getId();
+		assertEquals("testReadVorcedIdVersionHistory", p1id.getIdPart());
+
+		p1.addIdentifier("urn:system", "testReadVorcedIdVersionHistory02");
+		IdDt p1idv2 = ourPatientDao.update(p1, p1id).getId();
+		assertEquals("testReadVorcedIdVersionHistory", p1idv2.getIdPart());
+		
+		assertNotEquals(p1id.getValue(),  p1idv2.getValue());
+
+		Patient v1 = ourPatientDao.read(p1id);
+		assertEquals(1, v1.getIdentifier().size());
+		
+		Patient v2 = ourPatientDao.read(p1idv2);
+		assertEquals(2, v2.getIdentifier().size());
+
+	}
+
+	
 	@SuppressWarnings("unchecked")
 	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
 		return (List<T>) theSearch.getResources(0, theSearch.size());

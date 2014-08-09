@@ -76,7 +76,7 @@
 		<init-param>
 			<description>A comma separated list non-standard response headers that will be exposed to XHR2 object.</description>
 			<param-name>cors.exposed.headers</param-name>
-			<param-value></param-value>
+			<param-value>Location,Content-Location</param-value>
 		</init-param>
 		<init-param>
 			<description>A flag that suggests if CORS is supported with cookies</description>

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.TimeUnit;
@@ -70,6 +69,31 @@ public class UpdateTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+
+	}
+	
+	
+	@Test
+	public void testUpdateWhichReturnsCreate() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001CREATE");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails().getValue());
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001CREATE/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 	
@@ -346,6 +370,10 @@ public class UpdateTest {
 			IdDt id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue().getValue());
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDetails("OODETAILS");
+			if (theId.getValueAsString().contains("CREATE")) {
+				return new MethodOutcome(id,oo, true);
+			}
+			
 			return new MethodOutcome(id,oo);
 		}
 

@@ -86,6 +86,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 
 import com.google.common.base.Function;
@@ -454,10 +455,10 @@ public abstract class BaseFhirDao implements IDao {
 					if (nextValue.getValue().isEmpty()) {
 						continue;
 					}
-					
+
 					if (new UriDt(UCUM_NS).equals(nextValue.getSystem())) {
 						if (isNotBlank(nextValue.getCode().getValue())) {
-							
+
 							Unit<? extends Quantity> unit = Unit.valueOf(nextValue.getCode().getValue());
 							javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);
 							double dayValue = dayConverter.convert(nextValue.getValue().getValue().doubleValue());
@@ -465,35 +466,28 @@ public abstract class BaseFhirDao implements IDao {
 							newValue.setSystem(UCUM_NS);
 							newValue.setCode(NonSI.DAY.toString());
 							newValue.setValue(dayValue);
-							nextValue=newValue;
+							nextValue = newValue;
 
 							/*
-							@SuppressWarnings("unchecked")
-							PhysicsUnit<? extends org.unitsofmeasurement.quantity.Quantity<?>> unit = (PhysicsUnit<? extends org.unitsofmeasurement.quantity.Quantity<?>>) UCUMFormat.getCaseInsensitiveInstance().parse(nextValue.getCode().getValue(), null);
-							if (unit.isCompatible(UCUM.DAY)) {
-								@SuppressWarnings("unchecked")
-								PhysicsUnit<org.unitsofmeasurement.quantity.Time> timeUnit = (PhysicsUnit<Time>) unit;
-								UnitConverter conv = timeUnit.getConverterTo(UCUM.DAY);
-								double dayValue = conv.convert(nextValue.getValue().getValue().doubleValue());
-								DurationDt newValue = new DurationDt();
-								newValue.setSystem(UCUM_NS);
-								newValue.setCode(UCUM.DAY.getSymbol());
-								newValue.setValue(dayValue);
-								nextValue=newValue;
-							}
-							*/
+							 * @SuppressWarnings("unchecked") PhysicsUnit<? extends org.unitsofmeasurement.quantity.Quantity<?>> unit = (PhysicsUnit<? extends
+							 * org.unitsofmeasurement.quantity.Quantity<?>>) UCUMFormat.getCaseInsensitiveInstance().parse(nextValue.getCode().getValue(), null); if (unit.isCompatible(UCUM.DAY)) {
+							 * 
+							 * @SuppressWarnings("unchecked") PhysicsUnit<org.unitsofmeasurement.quantity.Time> timeUnit = (PhysicsUnit<Time>) unit; UnitConverter conv =
+							 * timeUnit.getConverterTo(UCUM.DAY); double dayValue = conv.convert(nextValue.getValue().getValue().doubleValue()); DurationDt newValue = new DurationDt();
+							 * newValue.setSystem(UCUM_NS); newValue.setCode(UCUM.DAY.getSymbol()); newValue.setValue(dayValue); nextValue=newValue; }
+							 */
 						}
 					}
-					
+
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
-				}else				if (nextObject instanceof QuantityDt) {
+				} else if (nextObject instanceof QuantityDt) {
 					QuantityDt nextValue = (QuantityDt) nextObject;
 					if (nextValue.getValue().isEmpty()) {
 						continue;
 					}
-					
+
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
@@ -511,7 +505,6 @@ public abstract class BaseFhirDao implements IDao {
 
 		return retVal;
 	}
-
 
 	protected List<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamQuantity> retVal = new ArrayList<ResourceIndexedSearchParamQuantity>();
@@ -541,8 +534,9 @@ public abstract class BaseFhirDao implements IDao {
 					if (nextValue.getValue().isEmpty()) {
 						continue;
 					}
-					
-					ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(), nextValue.getUnits().getValue());
+
+					ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValue.getValue().getValue(), nextValue.getSystem().getValueAsString(),
+							nextValue.getUnits().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -560,7 +554,6 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
-	
 	protected List<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamString> retVal = new ArrayList<ResourceIndexedSearchParamString>();
 
@@ -631,7 +624,8 @@ public abstract class BaseFhirDao implements IDao {
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, normalizeString(nextContact.getValue().getValueAsString()), nextContact
+									.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -690,7 +684,8 @@ public abstract class BaseFhirDao implements IDao {
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 					if (!nextCC.getText().isEmpty()) {
-						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), normalizeString(nextCC.getText().getValue()), nextCC.getText().getValue());
+						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), normalizeString(nextCC.getText().getValue()), nextCC.getText()
+								.getValue());
 						nextEntity.setResource(theEntity);
 						retVal.add(nextEntity);
 					}
@@ -931,7 +926,7 @@ public abstract class BaseFhirDao implements IDao {
 			IResource resource = toResource(next);
 			retVal.add(resource);
 		}
-		
+
 		return retVal;
 	}
 
@@ -1105,6 +1100,14 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setPublished(new Date());
 		}
 
+		if (theResource != null) {
+			String resourceType = myContext.getResourceDefinition(theResource).getName();
+			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
+				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with ["
+						+ resourceType + "]");
+			}
+		}
+
 		if (theUpdateHistory) {
 			final ResourceHistoryTable historyEntry = entity.toHistory();
 			myEntityManager.persist(historyEntry);
@@ -1137,7 +1140,6 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setUpdated(new Date());
 
 		} else {
-
 
 			stringParams = extractSearchParamStrings(entity, theResource);
 			numberParams = extractSearchParamNumber(entity, theResource);
@@ -1253,6 +1255,4 @@ public abstract class BaseFhirDao implements IDao {
 		return InstantDt.withCurrentTime();
 	}
 
-	
-	
 }

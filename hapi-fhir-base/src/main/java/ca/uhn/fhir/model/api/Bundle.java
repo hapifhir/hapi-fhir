@@ -37,6 +37,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class Bundle extends BaseBundle /* implements IElement */{
@@ -103,6 +105,31 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return map.get(theId.toUnqualified());
 	}
 
+//	public static void main(String[] args) {
+//		
+//		FhirContext ctx = new FhirContext();
+//		String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" + 
+//				"   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" + 
+//				"      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" + 
+//				"   </extension>\n" + 
+//				"   <text>\n" + 
+//				"      <status value=\"generated\"/>\n" + 
+//				"      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" + 
+//				"   </text>\n" + 
+//				"   <identifier>\n" + 
+//				"      <use value=\"official\"/>\n" + 
+//				"      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" + 
+//				"      <system value=\"urn:cgta:hsp_ids\"/>\n" + 
+//				"      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" + 
+//				"   </identifier>\n" + 
+//				"   <name value=\"火星第五人民医院\"/>\n" + 
+//				"</Organization>";
+//		
+//		IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
+//		c.registerInterceptor(new LoggingInterceptor(true));
+//		c.update().resource(txt).withId("1665").execute();
+//	}
+//	
 	public List<BundleEntry> getEntries() {
 		if (myEntries == null) {
 			myEntries = new ArrayList<BundleEntry>();
@@ -248,13 +275,14 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 
+		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
+		if (title != null) {
+			entry.getTitle().setValue(title);
+		} else {
+			entry.getTitle().setValue(def.getName() + " " + StringUtils.defaultString(theResource.getId().getValue(), "(no ID)"));
+		}
+		
 		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
-			String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
-			if (title != null) {
-				entry.getTitle().setValue(title);
-			} else {
-				entry.getTitle().setValue(def.getName() + " " + theResource.getId().getValue());
-			}
 
 			StringBuilder b = new StringBuilder();
 			b.append(theServerBase);

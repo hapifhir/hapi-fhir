@@ -28,17 +28,70 @@ public class MethodOutcome {
 	private IdDt myId;
 	private OperationOutcome myOperationOutcome;
 	private IdDt myVersionId;
+	private Boolean myCreated;
 
+	/**
+	 * Constructor
+	 */
 	public MethodOutcome() {
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 */
 	public MethodOutcome(IdDt theId) {
 		myId = theId;
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 * 
+	 * @param theCreated
+	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
+	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 */
+	public MethodOutcome(IdDt theId, Boolean theCreated) {
+		myId = theId;
+		myCreated = theCreated;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 * 
+	 * @param theOperationOutcome
+	 *            The operation outcome to return with the response (or null for none)
+	 */
 	public MethodOutcome(IdDt theId, OperationOutcome theOperationOutcome) {
 		myId = theId;
 		myOperationOutcome = theOperationOutcome;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 * 
+	 * @param theOperationOutcome
+	 *            The operation outcome to return with the response (or null for none)
+	 * 
+	 * @param theCreated
+	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
+	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 */
+	public MethodOutcome(IdDt theId, OperationOutcome theOperationOutcome, Boolean theCreated) {
+		myId = theId;
+		myOperationOutcome = theOperationOutcome;
+		myCreated = theCreated;
 	}
 
 	/**
@@ -63,11 +116,9 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * Returns the {@link OperationOutcome} resource to return to the client or
-	 * <code>null</code> if none.
+	 * Returns the {@link OperationOutcome} resource to return to the client or <code>null</code> if none.
 	 * 
-	 * @return This method <b>will return null</b>, unlike many methods in the
-	 *         API.
+	 * @return This method <b>will return null</b>, unlike many methods in the API.
 	 */
 	public OperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
@@ -80,13 +131,32 @@ public class MethodOutcome {
 		return myVersionId;
 	}
 
+	public Boolean getCreated() {
+		return myCreated;
+	}
+
+	/**
+	 * If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called whether the
+	 * result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 * 
+	 * @param theCreated
+	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
+	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 */
+	public void setCreated(Boolean theCreated) {
+		myCreated = theCreated;
+	}
+
+	/**
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 */
 	public void setId(IdDt theId) {
 		myId = theId;
 	}
 
 	/**
-	 * Sets the {@link OperationOutcome} resource to return to the client. Set
-	 * to <code>null</code> (which is the default) if none.
+	 * Sets the {@link OperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
 	 */
 	public void setOperationOutcome(OperationOutcome theOperationOutcome) {
 		myOperationOutcome = theOperationOutcome;

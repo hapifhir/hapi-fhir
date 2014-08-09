@@ -84,6 +84,17 @@ public class JsonParserTest {
 	}
 
 	@Test
+	public void testParseSingleQuotes() {
+		try {
+			ourCtx.newJsonParser().parseBundle("{ 'resourceType': 'Bundle' }");
+			fail();
+		} catch (DataFormatException e) {
+			// Should be an error message about how single quotes aren't valid JSON
+			assertThat(e.getMessage(), containsString("double quote"));
+		}
+	}
+	
+	@Test
 	public void testEncodeExtensionInCompositeElement() {
 		
 		Conformance c = new Conformance();

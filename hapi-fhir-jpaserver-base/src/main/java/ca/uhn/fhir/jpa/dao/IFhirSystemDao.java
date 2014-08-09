@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public interface IFhirSystemDao extends IDao {
 
-	void transaction(List<IResource> theResources);
+	List<IResource> transaction(List<IResource> theResources);
 
 	IBundleProvider history(Date theDate);
 

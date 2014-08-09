@@ -67,8 +67,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			} else {
 				myDescription = StringUtils.defaultIfBlank(desc.shortDefinition(), null);
 			}
-
 		}
+		
+		
+		
+		
 	}
 
 	public String getDescription() {

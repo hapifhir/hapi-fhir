@@ -157,12 +157,20 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName()
 						+ " returned null, which is not allowed for create operation");
 			}
-			theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+			if (response.getCreated() == null || response.getCreated() == Boolean.TRUE) {
+				theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+			} else {
+				theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+			}
 			addLocationHeader(theRequest, theResponse, response);
 			break;
 
 		case UPDATE:
-			theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+			if (response.getCreated() == null || response.getCreated() == Boolean.FALSE) {
+				theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+			} else {
+				theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+			}
 			addLocationHeader(theRequest, theResponse, response);
 			break;
 

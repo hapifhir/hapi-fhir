@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.method;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,9 +49,12 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ReflectionUtil;
 
 abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
+
 	static {
 		HashSet<String> set = new HashSet<String>();
 		set.add(Constants.PARAM_FORMAT);
@@ -58,9 +62,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		set.add(Constants.PARAM_PRETTY);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
-
 	private MethodReturnTypeEnum myMethodReturnType;
+	private Class<?> myResourceListCollectionType;
 	private String myResourceName;
+
 	private Class<? extends IResource> myResourceType;
 
 	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
@@ -68,7 +73,17 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		Class<?> methodReturnType = theMethod.getReturnType();
 		if (Collection.class.isAssignableFrom(methodReturnType)) {
+
 			myMethodReturnType = MethodReturnTypeEnum.LIST_OF_RESOURCES;
+			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
+			if (collectionType != null) {
+				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
+					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
+							+ collectionType);
+				}
+			}
+			myResourceListCollectionType = collectionType;
+
 		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
@@ -76,7 +91,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
+					+ theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -118,7 +134,20 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			case BUNDLE:
 				return bundle;
 			case LIST_OF_RESOURCES:
-				return bundle.toListOfResources();
+				List<IResource> listOfResources;
+				if (myResourceListCollectionType != null) {
+					listOfResources = new ArrayList<IResource>();
+					for (IResource next : bundle.toListOfResources()) {
+						if (!myResourceListCollectionType.isAssignableFrom(next.getClass())) {
+							ourLog.debug("Not returning resource of type {} because it is not a subclass or instance of {}", next.getClass(), myResourceListCollectionType);
+							continue;
+						}
+						listOfResources.add(next);
+					}
+				} else {
+					listOfResources = bundle.toListOfResources();
+				}
+				return listOfResources;
 			case RESOURCE:
 				List<IResource> list = bundle.toListOfResources();
 				if (list.size() == 0) {
@@ -199,7 +228,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		IBundleProvider result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
 		case BUNDLE:
-			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, respondGzip);
+			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser,
+					narrativeMode, 0, count, null, respondGzip);
 			break;
 		case RESOURCE:
 			if (result.size() == 0) {
@@ -207,7 +237,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip,
+					theRequest.getFhirServerBase());
 			break;
 		}
 	}
@@ -223,7 +254,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, LIST_OF_RESOURCES, RESOURCE, BUNDLE_PROVIDER
+		BUNDLE, BUNDLE_PROVIDER, LIST_OF_RESOURCES, RESOURCE
 	}
 
 	public enum ReturnTypeEnum {

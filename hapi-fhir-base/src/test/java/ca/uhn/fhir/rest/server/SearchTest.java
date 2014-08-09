@@ -175,7 +175,7 @@ public class SearchTest {
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
-
+		
 		@Search
 		public List<Patient> findPatient(@OptionalParam(name = "_id") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();

@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -82,6 +83,24 @@ public class CompleteResourceProviderTest {
 
 	private static IFhirResourceDao<Questionnaire> questionnaireDao;
 
+	@Test
+	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExist");
+		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExist").execute();
+		assertEquals(true, outcome.getCreated().booleanValue());
+		IdDt p1Id = outcome.getId();
+
+		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExist/_history"));
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson().prettyPrint().execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+
+	}
+	
 	@Test
 	public void testCreateWithClientSuppliedId() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testCreateWithId01");
@@ -189,6 +208,34 @@ public class CompleteResourceProviderTest {
 
 	}
 
+	@Test
+	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
+		
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testUpdateRejectsInvalidTypes");
+		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		IdDt p1id = ourClient.create().resource(p1).execute().getId();
+
+		Organization p2 = new Organization();
+		p2.getName().setValue("testUpdateRejectsInvalidTypes");
+		try {
+			ourClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+		try {
+			ourClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+	}
+	
+	
 	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");

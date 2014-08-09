@@ -353,11 +353,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				entity = null;
 			}
 		}
-
+		
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
 				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
-				q.setParameter("RID", theId.getIdPartAsLong());
+				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getVersionIdPartAsLong());
 				entity = q.getSingleResult();
@@ -365,11 +365,24 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (entity == null) {
 				throw new ResourceNotFoundException(theId);
 			}
-		}
+		} 
 
+		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		
 		validateResourceType(entity);
 
 		return entity;
+	}
+
+	private void validateGivenIdIsAppropriateToRetrieveResource(IdDt theId, BaseHasResource entity) {
+		if (entity.getForcedId() != null) {
+			if (theId.isIdPartValidLong()) {
+				// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
+				// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer to the
+				// forced ID)
+				throw new ResourceNotFoundException(theId);
+			}
+		}
 	}
 
 	@Override
@@ -754,7 +767,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
-
+		
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
 
 		notifyWriteCompleted();
@@ -1433,6 +1446,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
+		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 		return entity;
 	}
 
