@@ -33,6 +33,27 @@
 
 		</section>
 
+		<section name="Using Snapshot Builds">
+			
+			<p>
+				Snapshot builds of HAPI are pre-release builds which can contain
+				fixes and new features not yet released in a formal release. To use 
+				snapshot builds of HAPI you may need to add a reference to the OSS snapshot
+				repository to your project pom.xml:
+			</p>
+			
+			<source><![CDATA[<repositories>
+	<repository>
+		<id>oss-snapshots</id>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+	</repository>
+</repositories>]]></source>
+			
+		</section>
+
 	</body>
 
 </document>
