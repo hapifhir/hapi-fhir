@@ -301,9 +301,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative before it is returned.
+	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative
+	 * before it is returned.
 	 * <p>
-	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g. "\n       \n       ") will be trimmed to a single space.
+	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g.
+	 * "\n       \n       ") will be trimmed to a single space.
 	 * </p>
 	 */
 	public boolean isCleanWhitespace() {
@@ -311,8 +313,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the
+	 * generator will suppress any generated exceptions, and simply return a default narrative indicating that no
+	 * narrative is available.
 	 */
 	public boolean isIgnoreFailures() {
 		return myIgnoreFailures;
@@ -429,9 +432,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative before it is returned.
+	 * If set to <code>true</code> (which is the default), most whitespace will be trimmed from the generated narrative
+	 * before it is returned.
 	 * <p>
-	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g. "\n       \n       ") will be trimmed to a single space.
+	 * Note that in order to preserve formatting, not all whitespace is trimmed. Repeated whitespace characters (e.g.
+	 * "\n       \n       ") will be trimmed to a single space.
 	 * </p>
 	 */
 	public void setCleanWhitespace(boolean theCleanWhitespace) {
@@ -439,8 +444,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	/**
-	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the generator will suppress any generated exceptions, and simply return a default narrative
-	 * indicating that no narrative is available.
+	 * If set to <code>true</code>, which is the default, if any failure occurs during narrative generation the
+	 * generator will suppress any generated exceptions, and simply return a default narrative indicating that no
+	 * narrative is available.
 	 */
 	public void setIgnoreFailures(boolean theIgnoreFailures) {
 		myIgnoreFailures = theIgnoreFailures;
@@ -458,9 +464,13 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		boolean inWhitespace = false;
 		boolean betweenTags = false;
 		boolean lastNonWhitespaceCharWasTagEnd = false;
+		boolean inPre = false;
 		for (int i = 0; i < theResult.length(); i++) {
 			char nextChar = theResult.charAt(i);
-			if (nextChar == '>') {
+			if (inPre) {
+				b.append(nextChar);
+				continue;
+			} else if (nextChar == '>') {
 				b.append(nextChar);
 				betweenTags = true;
 				lastNonWhitespaceCharWasTagEnd = true;
@@ -485,6 +495,17 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 					inWhitespace = false;
 					betweenTags = false;
 					lastNonWhitespaceCharWasTagEnd = false;
+					if (i + 3 < theResult.length()) {
+						char char1 = Character.toLowerCase(theResult.charAt(i + 1));
+						char char2 = Character.toLowerCase(theResult.charAt(i + 2));
+						char char3 = Character.toLowerCase(theResult.charAt(i + 3));
+						char char4 = Character.toLowerCase((i + 4 < theResult.length()) ? theResult.charAt(i + 4) : ' ');
+						if (char1 == 'p' && char2 == 'r' && char3 == 'e') {
+							inPre = true;
+						} else if (char1 == '/' && char2 == 'p' && char3 == 'r'&&char4=='e') {
+							inPre = false;
+						}
+					}
 				} else {
 					lastNonWhitespaceCharWasTagEnd = false;
 					if (inWhitespace) {
@@ -520,7 +541,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 			final IStandardExpression expression = expressionParser.parseExpression(configuration, theArguments, attributeValue);
 			final Object value = expression.execute(configuration, theArguments);
-			
+
 			theElement.removeAttribute(theAttributeName);
 			theElement.clearChildren();
 
@@ -539,7 +560,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 					nextClass = nextClass.getSuperclass();
 				} while (name == null && nextClass.equals(Object.class) == false);
 			}
-			
+
 			if (name == null) {
 				if (myIgnoreMissingTemplates) {
 					ourLog.debug("No narrative template available for type: {}", value.getClass());

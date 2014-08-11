@@ -64,6 +64,9 @@
 				bundle (generally these are referenced resources, so they are populated in the reference fields instead).
 				Thanks to Tahura Chaudhry of University Health Network for the unit test!
 			</action>
+			<action type="add">
+				Added narrative generator template for OperationOutcome resource
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

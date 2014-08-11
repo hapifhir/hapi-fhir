@@ -8,6 +8,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -21,7 +23,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
@@ -32,21 +33,46 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.test.jpasrv.DiagnosticReportResourceProvider;
-import ca.uhn.test.jpasrv.ObservationResourceProvider;
 import ca.uhn.test.jpasrv.OrganizationResourceProvider;
 import ca.uhn.test.jpasrv.PatientResourceProvider;
 import ca.uhn.test.jpasrv.QuestionnaireResourceProvider;
 
-public class OverlayTestApp {
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
-	@SuppressWarnings({ "unchecked" })
-	public static void main(String[] args) throws Exception {
+public class WebUiTest_ {
+
+	
+private static ClassPathXmlApplicationContext appCtx;
+
+
+
+//	@Test
+	public void homePage() throws Exception {
+		
+	    final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+	    final HtmlPage page = webClient.getPage("http://localhost:8888/");
+	    Assert.assertEquals("HtmlUnit - Welcome to HtmlUnit", page.getTitleText());
+
+	    final String pageAsXml = page.asXml();
+	    Assert.assertTrue(pageAsXml.contains("<body class=\"composite\">"));
+
+	    final String pageAsText = page.asText();
+	    Assert.assertTrue(pageAsText.contains("Support for the HTTP and HTTPS protocols"));
+
+	    webClient.closeAllWindows();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@BeforeClass
+	public static void beforeClass() throws Exception {
 		int myPort = 8888;
 		Server server = new Server(myPort);
 		
@@ -64,7 +90,7 @@ public class OverlayTestApp {
 
 	    
 	    
-		ClassPathXmlApplicationContext appCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
+		appCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
 		
 		IFhirResourceDao<Patient> patientDao = appCtx.getBean("myPatientDao", IFhirResourceDao.class);
 		PatientResourceProvider patientRp = new PatientResourceProvider();
@@ -82,9 +108,8 @@ public class OverlayTestApp {
 		DiagnosticReportResourceProvider diagnosticReportRp = new DiagnosticReportResourceProvider();
 		diagnosticReportRp.setDao(diagnosticReportDao);
 
-		IFhirResourceDao<Observation> observationDao = appCtx.getBean("myObservationDao", IFhirResourceDao.class);
-		ObservationResourceProvider observationRp = new ObservationResourceProvider();
-		observationRp.setDao(observationDao);
+		
+		
 		
 		IFhirSystemDao systemDao = appCtx.getBean("mySystemDao", IFhirSystemDao.class);
 		
@@ -95,7 +120,7 @@ public class OverlayTestApp {
 		IResourceProvider rp = diagnosticReportRp;
 		rp = new ProviderWithRequiredAndOptional();
 		
-		restServer.setResourceProviders(rp,patientRp, questionnaireRp, organizationRp,observationRp);
+		restServer.setResourceProviders(rp,patientRp, questionnaireRp, organizationRp);
 		restServer.setProviders(systemProvider);
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 		restServer.setImplementationDescription("This is a great server!!!!");
@@ -126,7 +151,7 @@ public class OverlayTestApp {
 			
 			Organization o1 = new Organization();
 			o1.getName().setValue("Some Org");
-			MethodOutcome create = client.create(o1);
+			MethodOutcome create = client.create().resource(o1).execute();
 			IdDt orgId = create.getId();
 			
 			Patient p1 = new Patient();
@@ -137,28 +162,24 @@ public class OverlayTestApp {
 			TagList list = new TagList();
 			list.addTag("http://hl7.org/fhir/tag", "urn:happytag", "This is a happy resource");
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
-			client.create(p1);
+			client.create().resource(p1).execute();
 			
-			List<IResource> resources = restServer.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(OverlayTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
-			client.transaction(resources);
+			List<IResource> resources = restServer.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(WebUiTest_.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
+			client.transaction().withResources(resources).execute();
 			
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			client.create(p1);
-			
-			client.setLogRequestAndResponse(true);
-			client.create(p1);
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
+			client.create().resource(p1).execute();
 
 		}
 	    
@@ -173,7 +194,7 @@ public class OverlayTestApp {
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
-				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_NAME) TokenOrListParam theNames,
 				@OptionalParam(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
 				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
 				) throws Exception {
@@ -184,7 +205,7 @@ public class OverlayTestApp {
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
-				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_NAME) TokenOrListParam theNames,
 				@OptionalParam(name=DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange,
 				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
 				) throws Exception {

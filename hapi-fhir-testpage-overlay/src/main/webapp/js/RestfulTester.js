@@ -63,7 +63,13 @@ function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
 function addSearchControls(theConformance, theSearchParamType, theSearchParamName, theSearchParamChain, theSearchParamTarget, theContainerRowNum, theRowNum) {
     
 	var addNameAndType = true;
-    if (theSearchParamType == 'token') {
+    if (theSearchParamType == 'id') {
+    	$('#search-param-rowopts-' + theContainerRowNum).append(
+    		$('<div />', { 'class': 'col-sm-3' }).append(
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'id', type: 'text', 'class': 'form-control' })
+		    )
+    	);
+    } else if (theSearchParamType == 'token') {
     	$('#search-param-rowopts-' + theContainerRowNum).append(
     		$('<div />', { 'class': 'col-sm-3' }).append(
 		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
@@ -92,12 +98,12 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
     	var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
     	for (var i = 0; i < qualifiers.length; i++) {
     		var nextLink = $('<a>' + qualifiers[i].name+'</a>');
-    		var nextName = qualifiers[i].name;
+    		var theSearchParamName = qualifiers[i].name;
     		var nextValue = qualifiers[i].value;
     		qualifierDropdown.append($('<li />').append(nextLink));
     		nextLink.click(function(){ 
     			qualifierInput.val(nextValue);
-    			matchesLabel.text(nextName);
+    			matchesLabel.text(theSearchParamName);
     		});
     	}
 
@@ -173,6 +179,19 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 //		);
 
 		var params = new Array();
+		{
+		var param = new Object();
+		param.type = 'id';
+		param.chain = '';
+		param.name = theSearchParamName;
+		param.documentation = 'The resource identity';
+		param.target = new Array();
+		params[theSearchParamName] = param;
+		select.append(
+			$('<option />', { value: theSearchParamName }).text(param.name + ' - ' + param.documentation)														
+		);
+		}
+		
     	for (var chainIdx = 0; chainIdx < theSearchParamChain.length; chainIdx++) {
     		var nextChain = theSearchParamChain[chainIdx];
     		var found = false;

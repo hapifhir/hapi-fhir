@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,6 +12,16 @@
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR TestPage Overlay</name>
+
+	<repositories>
+		<repository>
+			<id>oss-snapshots</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -63,6 +72,12 @@
 			<version>${hamcrest_version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<version>2.16-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Database -->
 		<dependency>
@@ -79,8 +94,7 @@
 			<version>${derby_version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> 
-			<version>2.3.2</version> </dependency> -->
+		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> <version>2.3.2</version> </dependency> -->
 
 		<!-- Spring -->
 		<dependency>
@@ -200,11 +214,9 @@
 						</goals>
 						<configuration>
 							<target>
-								<copy todir="${project.build.directory}/${project.build.finalName}/css" flatten="true"
-									failonerror="true">
+								<copy todir="${project.build.directory}/${project.build.finalName}/css" flatten="true" failonerror="true">
 									<resources>
-										<file
-											file="${basedir}/../hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css" />
+										<file file="${basedir}/../hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css" />
 									</resources>
 								</copy>
 							</target>

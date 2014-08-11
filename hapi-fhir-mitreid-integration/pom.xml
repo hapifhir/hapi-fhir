@@ -9,149 +9,28 @@
 	</parent>
 
 	<groupId>ca.uhn.hapi.fhir</groupId>
-	<artifactId>hapi-fhir-base</artifactId>
+	<artifactId>hapi-fhir-mitreid-integration</artifactId>
 	<packaging>jar</packaging>
-	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
- 
-	<name>HAPI FHIR - Core Library</name>
-
-	<distributionManagement>
-		<site>
-			<id>git.server</id>
-			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
-		</site>
-
-		<!-- <site> <id>hl7api.sf.net</id> <url>scp://shell.sourceforge.net/home/project-web/hl7api/htdocs/hapi-fhir</url> </site> -->
-	</distributionManagement>
+	<name>HAPI FHIR - MitreID Integration Module</name>
 
 	<dependencies>
 
-		<!-- JSON -->
-		<!-- <dependency> <groupId>com.google.code.gson</groupId> <artifactId>gson</artifactId> <version>2.2.4</version> </dependency> -->
 		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-
-		<!-- XML -->
-		<dependency>
-			<groupId>org.codehaus.woodstox</groupId>
-			<artifactId>woodstox-core-asl</artifactId>
-			<version>4.2.0</version>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>0.6-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Only required for OpenID Connect Support -->
-		<!-- 
 		<dependency>
 			<groupId>org.mitre</groupId>
 			<artifactId>openid-connect-client</artifactId>
 			<version>${mitreid-connect-version}</version>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 		    <groupId>org.springframework.security.oauth</groupId>
 		    <artifactId>spring-security-oauth2</artifactId>
 		    <version>2.0.2.RELEASE</version>
-			<optional>true</optional>
-		</dependency>
-		 -->
-		<!-- 
-		 -->
-		 
-		<!-- Only required for narrative generator support -->
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-			<version>${thymeleaf-version}</version>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- Only required for CORS support -->
-		<dependency>
-			<groupId>org.ebaysf.web</groupId>
-			<artifactId>cors-filter</artifactId>
-			<version>${ebay_cors_filter_version}</version>
-			<optional>true</optional>
-			<!-- 
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-			-->
-		</dependency>
-  
-		<!-- General -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.9</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
-		</dependency>
-
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j_version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>jcl-over-slf4j</artifactId>
-		    <version>${slf4j_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback_version}</version>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- Client -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.3.3</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpcore</artifactId>
-			<version>4.3.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring_version}</version>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Server -->
@@ -218,38 +97,6 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<version>2.4</version>
-			<classifier>jdk15</classifier>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.json-lib</groupId>
-			<artifactId>json-lib</artifactId>
-			<version>2.4</version>
-			<classifier>jdk15-sources</classifier>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>directory-naming</groupId>
-			<artifactId>naming-java</artifactId>
-			<version>0.8</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>

@@ -115,7 +115,6 @@ public class CorsTest {
 				IOUtils.closeQuietly(status.getEntity().getContent());
 				ourLog.info("Response: {}", status);
 				ourLog.info("Response was:\n{}", responseContent);
-				assertEquals("POST", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
 				assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
 			}
 		} finally {

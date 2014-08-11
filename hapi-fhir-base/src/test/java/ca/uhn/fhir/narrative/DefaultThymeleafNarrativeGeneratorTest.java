@@ -20,11 +20,13 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -41,14 +43,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		gen.setUseHapiServerConformanceNarrative(true);
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(false);
-		
-		myCtx=new FhirContext();
+
+		myCtx = new FhirContext();
 		myCtx.setNarrativeGenerator(gen);
 	}
 
-	
-	
-	
 	@Test
 	public void testGeneratePatient() throws DataFormatException {
 		Patient value = new Patient();
@@ -62,7 +61,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 		String output = gen.generateNarrative(value).getDiv().getValueAsString();
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
-		
+
 		String title = gen.generateTitle(value);
 		assertEquals("joe john BLOW (123456)", title);
 		ourLog.info(title);
@@ -73,7 +72,6 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		ourLog.info(title);
 
 	}
-
 
 	@Test
 	public void testGenerateEncounter() throws DataFormatException {
@@ -97,24 +95,22 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		enc.addIdentifier("urn:visits", "1234567");
 		enc.setName("Some Test Org");
 		enc.addAddress().addLine("123 Fake St").setCity("Toronto").setState("ON").setCountry("Canada").setZip("12345");
-		
+
 		String title = gen.generateTitle(enc);
 		assertEquals("Some Test Org", title);
 		ourLog.info(title);
 
 	}
 
-	
 	@Test
 	public void testGenerateServerConformance() throws DataFormatException {
 		Conformance value = myCtx.newXmlParser().parseResource(Conformance.class, new InputStreamReader(getClass().getResourceAsStream("/server-conformance-statement.xml")));
-		
+
 		String output = gen.generateNarrative(value).getDiv().getValueAsString();
 
 		ourLog.info(output);
 	}
 
-	
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();
@@ -127,7 +123,39 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		String output = gen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value).getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output,StringContains.containsString(value.getName().getText().getValue()));
+		assertThat(output, StringContains.containsString(value.getName().getText().getValue()));
+	}
+
+	@Test
+	public void testGenerateOperationOutcome() {
+		//@formatter:off
+		String parse = "<OperationOutcome xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <issue>\n" + 
+				"      <severity value=\"error\"/>\n" + 
+				"      <details value=\"ca.uhn.fhir.rest.server.exceptions.InternalErrorException: Failed to call access method&#xa;&#xa;ca.uhn.fhir.rest.server.exceptions.InternalErrorException: Failed to call access method&#xa;&#x9;at ca.uhn.fhir.rest.method.BaseMethodBinding.invokeServerMethod(BaseMethodBinding.java:199)&#xa;&#x9;at ca.uhn.fhir.rest.method.HistoryMethodBinding.invokeServer(HistoryMethodBinding.java:162)&#xa;&#x9;at ca.uhn.fhir.rest.method.BaseResourceReturningMethodBinding.invokeServer(BaseResourceReturningMethodBinding.java:228)&#xa;&#x9;at ca.uhn.fhir.rest.method.HistoryMethodBinding.invokeServer(HistoryMethodBinding.java:1)&#xa;&#x9;at ca.uhn.fhir.rest.server.RestfulServer.handleRequest(RestfulServer.java:534)&#xa;&#x9;at ca.uhn.fhir.rest.server.RestfulServer.doGet(RestfulServer.java:141)&#xa;&#x9;at javax.servlet.http.HttpServlet.service(HttpServlet.java:687)&#xa;&#x9;at javax.servlet.http.HttpServlet.service(HttpServlet.java:790)&#xa;&#x9;at org.apache.catalina.core.StandardWrapper.service(StandardWrapper.java:1682)&#xa;&#x9;at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:344)&#xa;&#x9;at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:214)&#xa;&#x9;at org.ebaysf.web.cors.CORSFilter.handleNonCORS(CORSFilter.java:437)&#xa;&#x9;at org.ebaysf.web.cors.CORSFilter.doFilter(CORSFilter.java:172)&#xa;&#x9;at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:256)&#xa;&#x9;at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:214)&#xa;&#x9;at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:316)&#xa;&#x9;at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:160)&#xa;&#x9;at org.apache.catalina.core.StandardPipeline.doInvoke(StandardPipeline.java:734)&#xa;&#x9;at org.apache.catalina.core.StandardPipeline.invoke(StandardPipeline.java:673)&#xa;&#x9;at com.sun.enterprise.web.WebPipeline.invoke(WebPipeline.java:99)&#xa;&#x9;at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:174)&#xa;&#x9;at org.apache.catalina.connector.CoyoteAdapter.doService(CoyoteAdapter.java:357)&#xa;&#x9;at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:260)&#xa;&#x9;at com.sun.enterprise.v3.services.impl.ContainerMapper.service(ContainerMapper.java:188)&#xa;&#x9;at org.glassfish.grizzly.http.server.HttpHandler.runService(HttpHandler.java:191)&#xa;&#x9;at org.glassfish.grizzly.http.server.HttpHandler.doHandle(HttpHandler.java:168)&#xa;&#x9;at org.glassfish.grizzly.http.server.HttpServerFilter.handleRead(HttpServerFilter.java:189)&#xa;&#x9;at org.glassfish.grizzly.filterchain.ExecutorResolver$9.execute(ExecutorResolver.java:119)&#xa;&#x9;at org.glassfish.grizzly.filterchain.DefaultFilterChain.executeFilter(DefaultFilterChain.java:288)&#xa;&#x9;at org.glassfish.grizzly.filterchain.DefaultFilterChain.executeChainPart(DefaultFilterChain.java:206)&#xa;&#x9;at org.glassfish.grizzly.filterchain.DefaultFilterChain.execute(DefaultFilterChain.java:136)&#xa;&#x9;at org.glassfish.grizzly.filterchain.DefaultFilterChain.process(DefaultFilterChain.java:114)&#xa;&#x9;at org.glassfish.grizzly.ProcessorExecutor.execute(ProcessorExecutor.java:77)&#xa;&#x9;at org.glassfish.grizzly.nio.transport.TCPNIOTransport.fireIOEvent(TCPNIOTransport.java:838)&#xa;&#x9;at org.glassfish.grizzly.strategies.AbstractIOStrategy.fireIOEvent(AbstractIOStrategy.java:113)&#xa;&#x9;at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.run0(WorkerThreadIOStrategy.java:115)&#xa;&#x9;at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy.access$100(WorkerThreadIOStrategy.java:55)&#xa;&#x9;at org.glassfish.grizzly.strategies.WorkerThreadIOStrategy$WorkerThreadRunnable.run(WorkerThreadIOStrategy.java:135)&#xa;&#x9;at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.doWork(AbstractThreadPool.java:564)&#xa;&#x9;at org.glassfish.grizzly.threadpool.AbstractThreadPool$Worker.run(AbstractThreadPool.java:544)&#xa;&#x9;at java.lang.Thread.run(Thread.java:722)&#xa;Caused by: java.lang.reflect.InvocationTargetException&#xa;&#x9;at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)&#xa;&#x9;at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)&#xa;&#x9;at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)&#xa;&#x9;at java.lang.reflect.Method.invoke(Method.java:601)&#xa;&#x9;at ca.uhn.fhir.rest.method.BaseMethodBinding.invokeServerMethod(BaseMethodBinding.java:194)&#xa;&#x9;... 40 more&#xa;Caused by: java.lang.NumberFormatException: For input string: &quot;3cb9a027-9e02-488d-8d01-952553d6be4e&quot;&#xa;&#x9;at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)&#xa;&#x9;at java.lang.Long.parseLong(Long.java:441)&#xa;&#x9;at java.lang.Long.parseLong(Long.java:483)&#xa;&#x9;at ca.uhn.fhir.model.primitive.IdDt.getIdPartAsLong(IdDt.java:194)&#xa;&#x9;at ca.uhn.fhir.jpa.provider.JpaResourceProvider.getHistoryForResourceInstance(JpaResourceProvider.java:81)&#xa;&#x9;... 45 more&#xa;\"/>\n" + 
+				"   </issue>\n" + 
+				"   <issue>\n" + 
+				"      <severity value=\"warning\"/>\n" + 
+				"      <details value=\"YThis is a warning\"/>\n" + 
+				"   </issue>\n" + 
+				"</OperationOutcome>";
+		//@formatter:on
+
+		OperationOutcome oo = myCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
+
+//		String output = gen.generateTitle(oo);
+//		ourLog.info(output);
+//		assertEquals("Operation Outcome (2 issues)", output);
+
+		String nar = gen.generateNarrative(null, oo).getDiv().getValueAsString();
+		ourLog.info(nar);
+
+//		oo = new OperationOutcome();
+//		oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("AA");
+//		output = gen.generateTitle(oo);
+//		ourLog.info(output);
+//		assertEquals("Operation Outcome (fatal)", output);
+
 	}
 
 	@Test
@@ -166,10 +194,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
 		String title = gen.generateTitle(value);
-//		ourLog.info(title);
+		// ourLog.info(title);
 		assertEquals("Some & Diagnostic Report - final - 3 observations", title);
 
-		
 		// Now try it with the parser
 
 		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
