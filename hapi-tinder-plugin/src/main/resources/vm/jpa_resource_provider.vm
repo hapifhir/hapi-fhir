@@ -13,6 +13,7 @@ import ca.uhn.fhir.model.dstu.composite.*;
 import ca.uhn.fhir.model.dstu.resource.*;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.api.SortSpec;
 
 
 public class ${className}ResourceProvider extends JpaResourceProvider<${className}> {
@@ -69,7 +70,10 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 #end
 				#{if}($searchParamsReference.empty == false), #{end}"*"
 			}) 
-			Set<Include> theIncludes			
+			Set<Include> theIncludes,
+			
+			@Sort 
+			SortSpec theSort			
 	) {
 		startRequest(theServletRequest);
 		try {
@@ -81,8 +85,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 #end
 
 			paramMap.setIncludes(theIncludes);
-
-
+			paramMap.setSort(theSort);
 		
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;
