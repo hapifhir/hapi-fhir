@@ -97,6 +97,7 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
+	public static final String TAG_SCHEME_PROFILE = "http://hl7.org/fhir/tag/profile	";
 	
 
 	static {

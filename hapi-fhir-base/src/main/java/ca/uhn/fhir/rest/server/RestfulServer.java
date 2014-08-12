@@ -55,6 +55,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -846,15 +847,33 @@ public class RestfulServer extends HttpServlet {
 				addedResources.addAll(addedResourcesThisPass);
 				
 			} while (references.isEmpty() == false);
-			bundle.addResource(next, theContext, theServerBase);
+			
+			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
+			addProfileToBundleEntry(theContext, next, entry);
+			
 		}
 
+		/*
+		 * Actually add the resources to the bundle
+		 */
 		for (IResource next : addedResources) {
-			bundle.addResource(next, theContext, theServerBase);
+			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
+			addProfileToBundleEntry(theContext, next, entry);
 		}
 
 		bundle.getTotalResults().setValue(theTotalResults);
 		return bundle;
+	}
+
+	private static void addProfileToBundleEntry(FhirContext theContext, IResource next, BundleEntry entry) {
+		ArrayList<Tag> profileTags = entry.getCategories().getTagsWithScheme(Constants.TAG_SCHEME_PROFILE);
+		if (profileTags.isEmpty()) {
+			RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(next);
+			String profile = nextDef.getResourceProfile();
+			if (isNotBlank(profile)) {
+				entry.addCategory(new Tag(Constants.TAG_SCHEME_PROFILE, profile, null));
+			}
+		}
 	}
 
 	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {

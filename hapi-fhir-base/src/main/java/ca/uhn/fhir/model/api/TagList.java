@@ -48,4 +48,14 @@ public class TagList extends ArrayList<Tag> {
 		return null;
 	}
 
+	public ArrayList<Tag> getTagsWithScheme(String theScheme) {
+		ArrayList<Tag> retVal = new ArrayList<Tag>();
+		for (Tag next : this) {
+			if (theScheme.equals(next.getScheme())) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
+	}
+
 }
