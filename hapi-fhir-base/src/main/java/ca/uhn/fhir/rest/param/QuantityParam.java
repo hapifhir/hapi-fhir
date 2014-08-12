@@ -146,7 +146,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	public String getQueryParameterQualifier() {
-		return null;
+		return super.getQueryParameterQualifier();
 	}
 
 	public UriDt getSystem() {

@@ -49,10 +49,12 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	public String getQueryParameterQualifier() {
-		if (isExact()) {
+		if (getMissing() != null) {
+			return super.getQueryParameterQualifier();
+		}else if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else {
-			return super.getQueryParameterQualifier();
+			return null;
 		}
 	}
 

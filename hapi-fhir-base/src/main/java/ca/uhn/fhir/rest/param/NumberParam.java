@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
-public class NumberParam implements IQueryParameterType {
+public class NumberParam extends BaseParam implements IQueryParameterType {
 
 	private QuantityDt myQuantity = new QuantityDt();
 
@@ -71,7 +71,8 @@ public class NumberParam implements IQueryParameterType {
 	
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		if (isBlank(theValue)) {
+		super.setValueAsQueryToken(theQualifier, theValue);
+		if (getMissing() != null && isBlank(theValue)) {
 			return;
 		}
 		if (theValue.startsWith("<=")) {
@@ -94,6 +95,10 @@ public class NumberParam implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
+		if (getMissing() != null) {
+			return super.getQueryParameterQualifier();
+		}
+		
 		StringBuilder b = new StringBuilder();
 		if (myQuantity.getComparator().isEmpty() == false) {
 			b.append(myQuantity.getComparator().getValue());
@@ -106,7 +111,7 @@ public class NumberParam implements IQueryParameterType {
 
 	@Override
 	public String getQueryParameterQualifier() {
-		return null;
+		return super.getQueryParameterQualifier();
 	}
 
 }

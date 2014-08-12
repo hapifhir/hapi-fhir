@@ -78,7 +78,7 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 	public IBundleProvider getHistoryForResourceInstance(HttpServletRequest theRequest, @IdParam IdDt theId, @Since Date theDate) {
 		startRequest(theRequest);
 		try {
-			return myDao.history(theId.getIdPartAsLong(), theDate);
+			return myDao.history(theId, theDate);
 		} finally {
 			endRequest(theRequest);
 		}

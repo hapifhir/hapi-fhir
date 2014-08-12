@@ -22,7 +22,7 @@ public class BaseParam implements IQueryParameterType {
 	
 	@Override
 	public String getQueryParameterQualifier() {
-		if (myMissing) {
+		if (myMissing != null) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
 		return null;

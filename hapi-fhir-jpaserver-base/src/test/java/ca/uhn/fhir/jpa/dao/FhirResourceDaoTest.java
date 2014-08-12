@@ -621,6 +621,30 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
+	public void testHistoryByForcedId() {
+		IdDt idv1;
+		IdDt idv2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "testHistoryByForcedId");
+			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedId");
+			patient.setId("Patient/testHistoryByForcedId");
+			idv1 = ourPatientDao.create(patient).getId();
+			
+			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedIdName2");
+			idv2 = ourPatientDao.update(patient, idv1.toUnqualifiedVersionless()).getId();
+		}
+
+		List<Patient> patients = toList(ourPatientDao.history(idv1.toVersionless(), null));
+		assertTrue(patients.size() == 2);
+		// Newest first
+		assertEquals("Patient/testHistoryByForcedId/_history/2", patients.get(0).getId().toUnqualified().getValue());
+		assertEquals("Patient/testHistoryByForcedId/_history/1", patients.get(1).getId().toUnqualified().getValue());
+	}
+
+	
+	
+	@Test
 	public void testSearchByIdParam() {
 		IdDt id1;
 		{

@@ -49,29 +49,29 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	public TokenParam(String theSystem, String theValue, boolean theText) {
 		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException("theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+			throw new IllegalArgumentException(
+					"theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
 		}
 		setSystem(theSystem);
 		setValue(theValue);
 		setText(theText);
 	}
 
-
 	/**
-	 * Constructor which copies the {@link CodingDt#getSystem() system} and {@link CodingDt#getCode() code} from a {@link CodingDt} 
-	 * instance and adds it as a parameter
+	 * Constructor which copies the {@link CodingDt#getSystem() system} and {@link CodingDt#getCode() code} from a {@link CodingDt} instance and adds it as a parameter
 	 * 
-	 * @param theCodingDt The coding
+	 * @param theCodingDt
+	 *            The coding
 	 */
 	public TokenParam(CodingDt theCodingDt) {
 		this(toSystemValue(theCodingDt.getSystem()), theCodingDt.getCode().getValue());
 	}
 
 	/**
-	 * Constructor which copies the {@link IdentifierDt#getSystem() system} and {@link IdentifierDt#getValue() value} from a {@link IdentifierDt} 
-	 * instance and adds it as a parameter
+	 * Constructor which copies the {@link IdentifierDt#getSystem() system} and {@link IdentifierDt#getValue() value} from a {@link IdentifierDt} instance and adds it as a parameter
 	 * 
-	 * @param theCodingDt The coding
+	 * @param theCodingDt
+	 *            The coding
 	 */
 	public TokenParam(IdentifierDt theIdentifierDt) {
 		this(toSystemValue(theIdentifierDt.getSystem()), theIdentifierDt.getValue().getValue());
@@ -83,7 +83,9 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	public String getQueryParameterQualifier() {
-		if (isText()) {
+		if (getMissing() != null) {
+			return super.getQueryParameterQualifier();
+		} else if (isText()) {
 			return Constants.PARAMQUALIFIER_TOKEN_TEXT;
 		} else {
 			return null;
@@ -103,8 +105,10 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 */
 	@Override
 	public String getValueAsQueryToken() {
-		if (getSystem() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue()); 
+		if (getMissing() != null) {
+			return super.getValueAsQueryToken();
+		} else if (getSystem() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
 		} else {
 			return ParameterUtil.escape(getValue());
 		}
@@ -118,11 +122,9 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return StringUtils.isEmpty(myValue);
 	}
 
-
 	public boolean isText() {
 		return myText;
-	}	
-
+	}
 
 	public void setSystem(String theSystem) {
 		mySystem = theSystem;
@@ -141,7 +143,12 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 */
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter,'|');
+		super.setValueAsQueryToken(theQualifier, theParameter);
+		if (getMissing() != null) {
+			return;
+		}
+		
+		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 		if (barIndex != -1) {
 			setSystem(theParameter.substring(0, barIndex));
 			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
@@ -150,7 +157,6 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		}
 	}
 
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -158,6 +164,9 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		builder.append("value", getValue());
 		if (myText) {
 			builder.append("text", myText);
+		}
+		if (getMissing() != null) {
+			builder.append("missing", getMissing());
 		}
 		return builder.toString();
 	}

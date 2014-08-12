@@ -231,7 +231,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
 		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
-		countQuery.setParameter("PID", theId.getIdPartAsLong());
+		countQuery.setParameter("PID", translateForcedIdToPid(theId));
 		countQuery.setParameter("RESTYPE", resourceType);
 		countQuery.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
 		if (theSince != null) {
@@ -269,7 +269,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "")
 						+ " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
-				q.setParameter("PID", theId.getIdPartAsLong());
+				q.setParameter("PID", translateForcedIdToPid(theId));
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
 				if (theSince != null) {
