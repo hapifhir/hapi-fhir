@@ -34,6 +34,12 @@ public class BaseDateTimeDtTest {
 		assertEquals(TemporalPrecisionEnum.YEAR, dt.getPrecision());
 	}
 
+	@Test()
+	public void testParseMalformatted() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt("20120102");
+		assertEquals("2012-01-02",dt.getValueAsString());
+	}
+
 	@Test
 	public void testParseMonth() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();

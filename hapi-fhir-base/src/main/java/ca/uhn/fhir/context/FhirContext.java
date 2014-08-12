@@ -179,7 +179,7 @@ public class FhirContext {
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newJsonParser() {
@@ -192,7 +192,7 @@ public class FhirContext {
 	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more information on how to define this interface.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theClientType
@@ -210,8 +210,9 @@ public class FhirContext {
 	/**
 	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against a compliant server, but does not have methods defining the specific
 	 * functionality required (as is the case with {@link #newRestfulClient(Class, String) non-generic clients}).
+	 * 
 	 * <p>
-	 * In most cases it is preferable to use the non-generic clients instead of this mechanism, but not always.
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theServerBase
@@ -227,10 +228,10 @@ public class FhirContext {
 	}
 
 	/**
-	 * Create and return a new JSON parser.
+	 * Create and return a new XML parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This class is cheap</b> to create, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newXmlParser() {

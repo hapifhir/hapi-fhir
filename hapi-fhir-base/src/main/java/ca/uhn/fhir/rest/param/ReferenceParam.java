@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	private String myChain;
+	private BaseParam myBase=new BaseParam();
 
 	public ReferenceParam() {
 	}
@@ -58,6 +59,10 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	@Override
 	public String getQueryParameterQualifier() {
+		if (myBase.getMissing()!=null) {
+			return myBase.getQueryParameterQualifier();
+		}
+		
 		StringBuilder b = new StringBuilder();
 		if (isNotBlank(getResourceType())) {
 			b.append(':');
@@ -75,6 +80,9 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
+		if (myBase.getMissing()!=null) {
+			return myBase.getValueAsQueryToken();
+		}
 		return getIdPart();
 	}
 
@@ -91,6 +99,13 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		myBase.setValueAsQueryToken(theQualifier, theValue);
+		if (myBase.getMissing()!=null) {
+			myChain=null;
+			setValue(null);
+			return;
+		}
+		
 		String q = theQualifier;
 		String resourceType = null;
 		if (isNotBlank(q)) {

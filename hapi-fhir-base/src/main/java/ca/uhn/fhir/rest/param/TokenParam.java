@@ -33,7 +33,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class TokenParam implements IQueryParameterType {
+public class TokenParam extends BaseParam implements IQueryParameterType {
 
 	private String mySystem;
 	private boolean myText;

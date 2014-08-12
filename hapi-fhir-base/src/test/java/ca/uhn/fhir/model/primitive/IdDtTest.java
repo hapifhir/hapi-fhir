@@ -35,7 +35,6 @@ public class IdDtTest {
 	public void testBigDecimalIds() {
 		
 		IdDt id = new IdDt(new BigDecimal("123"));
-		assertEquals(id.asBigDecimal(), new BigDecimal("123"));
 		assertEquals(id.getIdPartAsBigDecimal(), new BigDecimal("123"));
 		
 	}

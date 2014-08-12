@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -165,13 +166,19 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		myValue = theValue;
 	}
 
+	private Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
+	private Pattern ourYearDashMonthPattern = Pattern.compile("[0-9]{4}-[0-9]{2}");
+	private Pattern ourYearDashMonthDashDayPattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
+	private Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
+	private Pattern ourYearMonthDayPattern = Pattern.compile("[0-9]{4}[0-9]{2}[0-9]{2}");
+	
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		try {
 			if (theValue == null) {
 				myValue = null;
 				clearTimeZone();
-			} else if (theValue.length() == 4) {
+			} else if (theValue.length() == 4 && ourYearPattern.matcher(theValue).matches()) {
 				if (isPrecisionAllowed(YEAR)) {
 					setValue((ourYearFormat).parse(theValue));
 					setPrecision(YEAR);
@@ -179,7 +186,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
 				}
-			} else if (theValue.length() == 7) {
+			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
 				// E.g. 1984-01 (this is valid according to the spec)
 				if (isPrecisionAllowed(MONTH)) {
 					setValue((ourYearMonthFormat).parse(theValue));
@@ -188,16 +195,16 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
 				}
-			} else if (theValue.length() == 8) {
+			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
 				//Eg. 19840101 (allow this just to be lenient)
 				if (isPrecisionAllowed(DAY)) {
 					setValue((ourYearMonthDayNoDashesFormat).parse(theValue));
-					setPrecision(MONTH);
+					setPrecision(DAY);
 					clearTimeZone();
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
-			} else if (theValue.length() == 10) {
+			} else if (theValue.length() == 10 && ourYearDashMonthDashDayPattern.matcher(theValue).matches()) {
 				// E.g. 1984-01-01 (this is valid according to the spec)
 				if (isPrecisionAllowed(DAY)) {
 					setValue((ourYearMonthDayFormat).parse(theValue));

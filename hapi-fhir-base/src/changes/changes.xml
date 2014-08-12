@@ -49,7 +49,7 @@
 			</action>
 			<action type="add">
 				Transaction server method is now allowed to return an OperationOutcome in addition to the
-				incoming resources. The public test server now does this in ordeer to return status information
+				incoming resources. The public test server now does this in order to return status information
 				about the transaction processing.
 			</action>
 			<action type="add">
@@ -66,6 +66,11 @@
 			</action>
 			<action type="add">
 				Added narrative generator template for OperationOutcome resource
+			</action>
+			<action type="fix">
+				Date/time types did not correctly parse values in the format "yyyymmdd" (although the FHIR-defined format
+				is "yyyy-mm-dd" anyhow, and this is correctly handled). Thanks to Jeffrey Ting of Systems Made Simple
+				for reporting! 
 			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">

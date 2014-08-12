@@ -581,13 +581,13 @@ public class RestfulServer extends HttpServlet {
 	 */
 	private int escapedLength(String theServletPath) {
 		int delta = 0;
-		for(int i =0;i<theServletPath.length();i++) {
+		for (int i = 0; i < theServletPath.length(); i++) {
 			char next = theServletPath.charAt(i);
 			if (next == ' ') {
 				delta = delta + 2;
 			}
 		}
-		return theServletPath.length()+delta;
+		return theServletPath.length() + delta;
 	}
 
 	/**
@@ -812,34 +812,47 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			List<ResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
-			for (ResourceReferenceDt nextRef : references) {
-				IResource nextRes = nextRef.getResource();
-				if (nextRes != null) {
-					if (nextRes.getId().hasIdPart()) {
-						IdDt id = nextRes.getId().toVersionless();
-						if (id.hasResourceType()==false) {
-							String resName = theContext.getResourceDefinition(nextRes).getName();
-							id = id.withResourceType(resName);
+			do {
+				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
+				
+				for (ResourceReferenceDt nextRef : references) {
+					IResource nextRes = nextRef.getResource();
+					if (nextRes != null) {
+						if (nextRes.getId().hasIdPart()) {
+							IdDt id = nextRes.getId().toVersionless();
+							if (id.hasResourceType() == false) {
+								String resName = theContext.getResourceDefinition(nextRes).getName();
+								id = id.withResourceType(resName);
+							}
+
+							if (!addedResourceIds.contains(id)) {
+								addedResourceIds.add(id);
+								addedResourcesThisPass.add(nextRes);
+							}
+
+							nextRef.setResource(null);
+							nextRef.setReference(id);
 						}
-						
-						if (!addedResourceIds.contains(id)) {
-							addedResourceIds.add(id);
-							addedResources.add(nextRes);
-						}
-						
-						nextRef.setResource(null);
-						nextRef.setReference(id);
 					}
 				}
-			}
-			
+				
+				// Linked resources may themselves have linked resources
+				references = new ArrayList<ResourceReferenceDt>();
+				for (IResource iResource : addedResourcesThisPass) {
+					List<ResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, ResourceReferenceDt.class);
+					references.addAll(newReferences);
+				}
+				
+				addedResources.addAll(addedResourcesThisPass);
+				
+			} while (references.isEmpty() == false);
 			bundle.addResource(next, theContext, theServerBase);
 		}
 
 		for (IResource next : addedResources) {
 			bundle.addResource(next, theContext, theServerBase);
 		}
-		
+
 		bundle.getTotalResults().setValue(theTotalResults);
 		return bundle;
 	}
@@ -1056,7 +1069,7 @@ public class RestfulServer extends HttpServlet {
 			if (next.getId() == null || next.getId().isEmpty()) {
 				if (!(next instanceof OperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-				}	
+				}
 			}
 		}
 
@@ -1110,8 +1123,7 @@ public class RestfulServer extends HttpServlet {
 			String fullId = theResource.getId().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId);
 		}
-		
-		
+
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
 			if (isNotBlank(bin.getContentType())) {
@@ -1122,9 +1134,9 @@ public class RestfulServer extends HttpServlet {
 			if (bin.getContent() == null || bin.getContent().length == 0) {
 				return;
 			}
-			
+
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
-			
+
 			theHttpResponse.setContentLength(bin.getContent().length);
 			ServletOutputStream oos = theHttpResponse.getOutputStream();
 			oos.write(bin.getContent());
@@ -1189,7 +1201,5 @@ public class RestfulServer extends HttpServlet {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
 	}
-
-
 
 }

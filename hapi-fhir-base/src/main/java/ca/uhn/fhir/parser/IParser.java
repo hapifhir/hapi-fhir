@@ -74,7 +74,7 @@ public interface IParser {
 	 *            specify a class which extends a built-in type (e.g. a custom
 	 *            type extending the default Patient class)
 	 * @param theReader
-	 *            The reader to parse inpou from
+	 *            The reader to parse input from. Note that the Reader will not be closed by the parser upon completion.
 	 * @return A parsed resource
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not
@@ -98,8 +98,28 @@ public interface IParser {
 	 */
 	<T extends IResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
 
+	/**
+	 * Parses a resource
+	 * 
+	 * @param theReader
+	 *            The reader to parse input from. Note that the Reader will not be closed by the parser upon completion.
+	 * @return A parsed resource
+	 * @throws DataFormatException
+	 *             If the resource can not be parsed because the data is not
+	 *             recognized or invalid for any reason
+	 */
 	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
 
+	/**
+	 * Parses a resource
+	 * 
+	 * @param theString
+	 *            The string to parse
+	 * @return A parsed resource
+	 * @throws DataFormatException
+	 *             If the resource can not be parsed because the data is not
+	 *             recognized or invalid for any reason
+	 */
 	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	/**

@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class StringParam implements IQueryParameterType {
+public class StringParam extends BaseParam implements IQueryParameterType {
 
 	private boolean myExact;
 	private String myValue;
@@ -52,7 +52,7 @@ public class StringParam implements IQueryParameterType {
 		if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else {
-			return null;
+			return super.getQueryParameterQualifier();
 		}
 	}
 

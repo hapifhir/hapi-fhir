@@ -80,6 +80,7 @@ public class Constants {
 	public static final String PARAM_SORT_DESC = "_sort:desc";
 	public static final String PARAM_TAGS = "_tags";
 	public static final String PARAM_VALIDATE = "_validate";
+	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final int STATUS_HTTP_200_OK = 200;

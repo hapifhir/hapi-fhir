@@ -25,6 +25,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.ElementUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -157,6 +161,34 @@ public class IncludeTest {
 
 		
 	}
+
+	@Test
+	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=declaredExtInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		
+		ourLog.info(responseContent);
+		
+		assertEquals(4, bundle.size());
+		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
+		assertEquals(new IdDt("Organization/o2"), bundle.toListOfResources().get(3).getId().toUnqualifiedVersionless());
+		
+		Patient p1 = (Patient) bundle.toListOfResources().get(0);
+		assertEquals(0,p1.getContained().getContainedResources().size());
+		
+		Patient p2 = (Patient) bundle.toListOfResources().get(1);
+		assertEquals(0,p2.getContained().getContainedResources().size());
+
+		
+	}
+
 	
 
 	@Test
@@ -214,6 +246,32 @@ public class IncludeTest {
 
 	}
 
+	@ResourceDef(name="Patient")
+	public static class ExtPatient extends Patient
+	{
+		@Child(name="secondOrg")
+		@Extension(url="http://foo#secondOrg", definedLocally = false, isModifier = false)
+		private ResourceReferenceDt mySecondOrg;
+
+		@Override
+		public boolean isEmpty() {
+			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
+		}
+
+		public ResourceReferenceDt getSecondOrg() {
+			if (mySecondOrg==null) {
+				mySecondOrg= new ResourceReferenceDt();
+			}
+			return mySecondOrg;
+		}
+
+		public void setSecondOrg(ResourceReferenceDt theSecondOrg) {
+			mySecondOrg = theSecondOrg;
+		}
+		
+	}
+	
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -238,6 +296,7 @@ public class IncludeTest {
 			return Arrays.asList(p1, p2);
 		}
 
+		
 		@Search(queryName = "extInclude")
 		public List<Patient> extInclude() {
 			Organization o1 = new Organization();
@@ -257,6 +316,31 @@ public class IncludeTest {
 			return Arrays.asList(p1, p2);
 		}
 
+		@Search(queryName = "declaredExtInclude")
+		public List<ExtPatient> declaredExtInclude() {
+			Organization o1 = new Organization();
+			o1.getName().setValue("o1");
+			o1.setId("o1");
+
+			Organization o2 = new Organization();
+			o2.getName().setValue("o2");
+			o2.setId("o2");
+			o1.getPartOf().setResource(o2);
+			
+			ExtPatient p1 = new ExtPatient();
+			p1.setId("p1");
+			p1.addIdentifier().setLabel("p1");
+			p1.getSecondOrg().setResource(o1);
+
+			ExtPatient p2 = new ExtPatient();
+			p2.setId("p2");
+			p2.addIdentifier().setLabel("p2");
+			p2.getSecondOrg().setResource(o1);
+
+			return Arrays.asList(p1, p2);
+		}
+
+		
 		@Search(queryName = "containedInclude")
 		public List<Patient> containedInclude() {
 			Organization o1 = new Organization();

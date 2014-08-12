@@ -34,6 +34,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 public abstract class BaseRuntimeElementCompositeDefinition<T extends ICompositeElement> extends BaseRuntimeElementDefinition<T> {
 
 	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<BaseRuntimeChildDefinition>();
+	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
 	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
 
 	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass) {
@@ -65,6 +66,10 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		return myChildren;
 	}
 
+	public List<BaseRuntimeChildDefinition> getChildrenAndExtension() {
+		return myChildrenAndExtensions;
+	}
+
 	@Override
 	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
@@ -90,5 +95,12 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 
 		myChildren = Collections.unmodifiableList(myChildren);
 		myNameToChild = Collections.unmodifiableMap(myNameToChild);
+		
+		List<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
+		children.addAll(myChildren);
+		children.addAll(getExtensionsModifier());
+		children.addAll(getExtensionsNonModifier());
+		myChildrenAndExtensions=Collections.unmodifiableList(children);
 	}
+
 }

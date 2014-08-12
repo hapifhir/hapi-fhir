@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class DateParam extends DateTimeDt implements IQueryParameterType, IQueryParameterOr<DateParam> {
 
 	private QuantityCompararatorEnum myComparator;
+	private BaseParam myBase=new BaseParam();
 
 	/**
 	 * Constructor
@@ -78,11 +79,17 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 
 	@Override
 	public String getQueryParameterQualifier() {
+		if (myBase.getMissing()!=null) {
+			return myBase.getQueryParameterQualifier();
+		}
 		return null;
 	}
 
 	@Override
 	public String getValueAsQueryToken() {
+		if (myBase.getMissing()!=null) {
+			return myBase.getValueAsQueryToken();
+		}
 		if (myComparator != null && getValue() != null) {
 			return myComparator.getCode() + getValueAsString();
 		} else if (myComparator == null && getValue() != null) {
@@ -112,6 +119,13 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
+		myBase.setValueAsQueryToken(theQualifier, theValue);
+		if (myBase.getMissing()!=null) {
+			setValue(null);
+			myComparator=null;
+			return;
+		}
+
 		if (theValue.length() < 2) {
 			throw new DataFormatException("Invalid qualified date parameter: " + theValue);
 		}
@@ -141,8 +155,10 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 
 	@Override
 	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+		myBase.setMissing(null);
 		myComparator = null;
 		setValueAsString(null);
+		
 		if (theParameters.size() == 1) {
 			setValueAsString(theParameters.get(0));
 		} else if (theParameters.size() > 1) {
@@ -159,6 +175,9 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 			b.append(myComparator.getCode());
 		}
 		b.append(getValueAsString());
+		if (myBase.getMissing()!=null) {
+			b.append(" missing=").append(myBase.getMissing());
+		}
 		b.append("]");
 		return b.toString();
 	}

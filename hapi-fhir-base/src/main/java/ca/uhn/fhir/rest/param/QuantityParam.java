@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
-public class QuantityParam implements IQueryParameterType {
+public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	private boolean myApproximate;
 	private QuantityDt myQuantity = new QuantityDt();
@@ -131,6 +131,7 @@ public class QuantityParam implements IQueryParameterType {
 	}
 
 	private void clear() {
+		setMissing(null);
 		myQuantity.setComparator((BoundCodeDt<QuantityCompararatorEnum>) null);
 		myQuantity.setCode((CodeDt) null);
 		myQuantity.setSystem((UriDt) null);
@@ -162,6 +163,10 @@ public class QuantityParam implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
+		if (super.getMissing()!=null) {
+			return super.getValueAsQueryToken();
+		}
+		
 		StringBuilder b = new StringBuilder();
 		if (myQuantity.getComparator() != null) {
 			b.append(ParameterUtil.escape(myQuantity.getComparator().getValue()));
@@ -248,6 +253,11 @@ public class QuantityParam implements IQueryParameterType {
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
 		clear();
 
+		super.setValueAsQueryToken(theQualifier, theValue);
+		if (getMissing()!=null) {
+			return;
+		}
+		
 		if (theValue == null) {
 			return;
 		}
@@ -290,6 +300,9 @@ public class QuantityParam implements IQueryParameterType {
 		b.append("value", myQuantity.getValue().getValueAsString());
 		b.append("system", myQuantity.getSystem().getValueAsString());
 		b.append("units", myQuantity.getUnits().getValueAsString());
+		if (getMissing()!=null) {
+			b.append("missing", getMissing());
+		}
 		return b.toString();
 	}
 

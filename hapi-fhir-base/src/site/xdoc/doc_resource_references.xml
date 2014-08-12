@@ -70,23 +70,21 @@
 		<section name="References in Server Code">
 		
 			<p>
-				In server code, you may wish to return "contained" resources. A simple way to do this
-				is to add these resources directly to the reference field and ensure that the resource
-				has no ID populated. When this condition is detected, HAPI will automatically create a local
-				reference ID and add the resource to the "contained" section when it encodes the resource. 
+				In server code, you will often want to return a resource which contains
+				a link to another resource. Generally these "linked" resources are
+				not actually included in the response, but rather a link to the
+				resource is included and the client may request that resource directly
+				(by ID) if it is needed.  
 			</p>
 			
 			<p>
 				The following example shows a Patient resource being created which will have a
-				contained resource as its managing organization when encoded from a server:
+				link to its managing organization when encoded from a server:
 			</p>
-			<source><![CDATA[Organization containedOrg = new Organization();
-containedOrg.getName().setValue("Contained Test Organization");
-
-Patient patient = new Patient();
+			<source><![CDATA[Patient patient = new Patient();
 patient.setId("Patient/1333");
 patient.addIdentifier("urn:mrns", "253345");
-patient.getManagingOrganization().setResource(patient);]]></source>
+patient.getManagingOrganization().setReference("Organization/124362");]]></source>
 			
 			<subsection name="Handling Includes (_include) in a Bundle">
 				
@@ -109,6 +107,21 @@ patient.getManagingOrganization().setResource(patient);]]></source>
 				</p>
 				<source><![CDATA[Organization org = new Organization();
 org.setId("Organization/65546");
+org.getName().setValue("Contained Test Organization");
+
+Patient patient = new Patient();
+patient.setId("Patient/1333");
+patient.addIdentifier("urn:mrns", "253345");
+patient.getManagingOrganization().setResource(patient);]]></source>
+
+				<p>
+					On the other hand, if the linked resource
+					does not have an ID set, the linked resource will
+					be included in the returned bundle as a "contained" resource. In this
+					case, HAPI itself will define a local reference ID (e.g. "#001").
+				</p>
+				<source><![CDATA[Organization org = new Organization();
+// org.setId("Organization/65546");
 org.getName().setValue("Contained Test Organization");
 
 Patient patient = new Patient();
