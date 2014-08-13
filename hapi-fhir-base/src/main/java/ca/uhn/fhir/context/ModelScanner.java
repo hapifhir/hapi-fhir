@@ -569,6 +569,9 @@ class ModelScanner {
 				throw new ConfigurationException("The following resource types have the same ID of '" + resourceId + "' - " + theClass.getCanonicalName() + " and " + myIdToResourceDefinition.get(resourceId).getImplementingClass().getCanonicalName());
 			}
 		}
+		
+		String profile = resourceDefinition.profile();
+		
 
 		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
@@ -606,7 +609,6 @@ class ModelScanner {
 		}
 
 		for (Entry<Field, SearchParamDefinition> nextEntry : compositeFields.entrySet()) {
-			Field nextField = nextEntry.getKey();
 			SearchParamDefinition searchParam = nextEntry.getValue();
 			
 			List<RuntimeSearchParam> compositeOf = new ArrayList<RuntimeSearchParam>();

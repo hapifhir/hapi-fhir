@@ -119,7 +119,36 @@ public class SearchTest {
 		assertEquals("8302-2", p.getName().getCoding().get(1).getCode().getValue());
 		
 	}
+	
+	@Test
+	public void testSpecificallyNamedQueryGetsPrecedence() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort+"/Patient?AAA=123");
+		
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
 
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("AAA", p.getIdentifierFirstRep().getValue().getValue());
+
+		// Now the named query
+		
+		httpGet = new HttpGet("http://localhost:" + ourPort+"/Patient?_query=findPatientByAAA&AAA=123");
+		
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		p = bundle.getResources(Patient.class).get(0);
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
+	}
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -186,6 +215,28 @@ public class SearchTest {
 			if (theParam != null) {
 				patient.addName().addFamily("id" + theParam.getValue());
 			}
+			retVal.add(patient);
+			return retVal;
+		}
+
+		@Search
+		public List<Patient> findPatientByAAA01(@OptionalParam(name = "AAA") StringParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = new Patient();
+			patient.setId("1");
+			patient.addIdentifier("system", "AAA");
+			retVal.add(patient);
+			return retVal;
+		}
+
+		@Search(queryName="findPatientByAAA")
+		public List<Patient> findPatientByAAA02Named(@OptionalParam(name = "AAA") StringParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = new Patient();
+			patient.setId("1");
+			patient.addIdentifier("system", "AAANamed");
 			retVal.add(patient);
 			return retVal;
 		}

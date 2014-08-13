@@ -68,10 +68,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				myDescription = StringUtils.defaultIfBlank(desc.shortDefinition(), null);
 			}
 		}
-		
-		
-		
-		
+
 	}
 
 	public String getDescription() {
@@ -180,7 +177,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
 				}
-				
+
 			} else {
 				if (qualifiedParamNames.contains(name)) {
 					methodParamsTemp.add(name);
@@ -203,6 +200,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				}
 			} else {
 				ourLog.trace("Query name does not match {}", myQueryName);
+				return false;
+			}
+		} else {
+			String[] queryNameValues = theRequest.getParameters().get(Constants.PARAM_QUERY);
+			if (queryNameValues != null && StringUtils.isNotBlank(queryNameValues[0])) {
+				ourLog.trace("Query has name");
 				return false;
 			}
 		}

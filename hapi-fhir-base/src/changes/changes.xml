@@ -76,6 +76,10 @@
 				Server now adds a profile tag to returned results if the resource being returned
 				doesn't already have one			
 			</action>
+			<action type="fix">
+				Server search method for an unnamed query gets called if the client requests a named query
+				with the same parameter list. Thanks to Neal Acharya of University Health Network for reporting!			
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
