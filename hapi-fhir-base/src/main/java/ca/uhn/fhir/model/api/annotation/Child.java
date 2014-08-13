@@ -42,9 +42,16 @@ public @interface Child {
 	int ORDER_UNKNOWN = -1;
 	
 	/**
-	 * COnstant value to supply for {@link #max()} to indicate '*' (no maximum)
+	 * Constant value to supply for {@link #max()} to indicate '*' (no maximum)
 	 */
 	int MAX_UNLIMITED = -1;
+
+	/**
+	 * Constant value to supply for {@link #order()} to indicate that this child should replace the
+	 * entry in the superclass with the same name. This may be used to indicate to parsers that
+	 *   
+	 */
+	int REPLACE_PARENT = -2;
 
 	/**
 	 * The name of this field, as it will appear in serialized versions of the message

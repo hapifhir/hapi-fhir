@@ -7,6 +7,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -23,7 +24,16 @@ public class MyPatient extends Patient {
 	@Extension(url="http://example.com/dontuse#importantDates", definedLocally=false, isModifier=true)
 	@Description(shortDefinition="Some dates of note for the patient")
 	private List<DateTimeDt> myImportantDates;
-
+	
+	@Child(name="managingOrganization", order=Child.REPLACE_PARENT, min=0, max=1, type={
+			ca.uhn.fhir.model.dstu.resource.Organization.class	})
+		@Description(
+			shortDefinition="Organization that is the custodian of the patient record",
+			formalDefinition="Organization that is the custodian of the patient record"
+		)
+	private ResourceReferenceDt myManagingOrganization;
+	
+	
 	@Override
 	public boolean isEmpty() {
 		return super.isEmpty() && myPetName.isEmpty();

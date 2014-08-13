@@ -36,7 +36,13 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		Validate.notEmpty(theUrl, "URL must be populated");
 		Validate.notNull(theValue, "Value must not be null");
 		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);
-		getUndeclaredExtensions().add(retVal);
+		if (theIsModifier) {
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(retVal);
+		} else {
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(retVal);
+		}
 		return retVal;
 	}
 
@@ -45,7 +51,13 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		Validate.notEmpty(theUrl, "URL must be populated");
 
 		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
-		getUndeclaredExtensions().add(retVal);
+		if (theIsModifier) {
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(retVal);
+		} else {
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(retVal);
+		}
 		return retVal;
 	}
 
@@ -53,9 +65,11 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	public void addUndeclaredExtension(ExtensionDt theExtension) {
 		Validate.notNull(theExtension, "Extension can not be null");
 		if (theExtension.isModifier()) {
-			getUndeclaredModifierExtensions().add(theExtension);
+			getUndeclaredModifierExtensions();
+			myUndeclaredModifierExtensions.add(theExtension);
 		} else {
-			getUndeclaredExtensions().add(theExtension);
+			getUndeclaredExtensions();
+			myUndeclaredExtensions.add(theExtension);
 		}
 	}
 
@@ -76,7 +90,7 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		if (myUndeclaredExtensions == null) {
 			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
 		}
-		return myUndeclaredExtensions;
+		return Collections.unmodifiableList(myUndeclaredExtensions);
 	}
 
 	@Override
@@ -96,12 +110,12 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		if (myUndeclaredModifierExtensions == null) {
 			myUndeclaredModifierExtensions = new ArrayList<ExtensionDt>();
 		}
-		return myUndeclaredModifierExtensions;
+		return Collections.unmodifiableList(myUndeclaredModifierExtensions);
 	}
 
 	/**
-	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
-	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
+	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all content in this superclass instance is empty per the semantics of
+	 * {@link #isEmpty()}.
 	 */
 	protected boolean isBaseEmpty() {
 		if (myUndeclaredExtensions != null) {

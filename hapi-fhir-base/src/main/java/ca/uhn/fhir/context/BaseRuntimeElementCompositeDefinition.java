@@ -62,6 +62,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 		return retVal;
 	}
 
+	public BaseRuntimeChildDefinition getChildByName(String theName){
+		BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);
+		return retVal;
+	}
+
 	public List<BaseRuntimeChildDefinition> getChildren() {
 		return myChildren;
 	}

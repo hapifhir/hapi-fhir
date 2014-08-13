@@ -109,17 +109,6 @@ public class JsonParser extends BaseParser implements IParser {
 		myContext = theContext;
 	}
 
-	private void addToHeldExtensions(int valueIdx, ArrayList<ArrayList<HeldExtension>> list, RuntimeChildDeclaredExtensionDefinition theDef, IElement theValue) {
-		list.ensureCapacity(valueIdx);
-		while (list.size() <= valueIdx) {
-			list.add(null);
-		}
-		if (list.get(valueIdx) == null) {
-			list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
-		}
-		list.get(valueIdx).add(new HeldExtension(theDef, theValue));
-	}
-
 	private void addToHeldExtensions(int valueIdx, List<ExtensionDt> ext, ArrayList<ArrayList<HeldExtension>> list) {
 		if (ext.size() > 0) {
 			list.ensureCapacity(valueIdx);
