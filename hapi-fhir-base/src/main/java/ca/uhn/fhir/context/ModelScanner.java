@@ -308,6 +308,11 @@ class ModelScanner {
 		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
 
 		LinkedList<Class<? extends ICompositeElement>> classes = new LinkedList<Class<? extends ICompositeElement>>();
+		
+		/*
+		 * We scan classes for annotated fields in the class but also all of its
+		 * superclasses
+		 */
 		Class<? extends ICompositeElement> current = theClass;
 		do {
 			classes.push(current);
@@ -365,8 +370,20 @@ class ModelScanner {
 
 			Description descriptionAnnotation = next.getAnnotation(Description.class);
 
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
+			Extension extensionAttr = next.getAnnotation(Extension.class);
+			if (extensionAttr != null) {
+				orderMap = theOrderToExtensionDef;
+			}
+			
 			String elementName = childAnnotation.name();
 			int order = childAnnotation.order();
+			if (order == Child.REPLACE_PARENT) {
+				if (true) continue; // TODO: finish implementing
+				for (Entry<Integer, BaseRuntimeDeclaredChildDefinition> nextEntry : orderMap.entrySet()) {
+					
+				}
+			}
 			if (order < 0 && order != Child.ORDER_UNKNOWN) {
 				throw new ConfigurationException("Invalid order '" + order + "' on @Child for field '" + next.getName() + "' on target type: " + theClass);
 			}
@@ -375,13 +392,6 @@ class ModelScanner {
 			}
 			int min = childAnnotation.min();
 			int max = childAnnotation.max();
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
-
-			Extension extensionAttr = next.getAnnotation(Extension.class);
-			if (extensionAttr != null) {
-				orderMap = theOrderToExtensionDef;
-			}
-
 			/*
 			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict wityh any
 			 * given IDs and can be figured out later

@@ -393,6 +393,15 @@ function setResource(target, resourceName) {
 	}
 }
 
+function updateSort(value) {
+	$('#search_sort').val(value);
+	if (value == '') {
+		$('#search_sort_button').text('Default Sort');				
+	} else {
+		$('#search_sort_button').text(value);
+	}
+}
+
 $( document ).ready(function() {
 	addSearchParamRow();
 });	

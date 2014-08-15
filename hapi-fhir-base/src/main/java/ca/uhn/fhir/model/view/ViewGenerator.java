@@ -15,10 +15,16 @@ import ca.uhn.fhir.model.api.IResource;
 
 public class ViewGenerator {
 
-	public <T extends IResource> T newView(FhirContext theContext, IResource theResource, Class<T> theTargetType) {
+	private FhirContext myCtx;
+
+	public ViewGenerator(FhirContext theFhirContext) {
+		myCtx=theFhirContext;
+	}
+
+	public <T extends IResource> T newView(IResource theResource, Class<T> theTargetType) {
 		Class<? extends IResource> sourceType = theResource.getClass();
-		RuntimeResourceDefinition sourceDef = theContext.getResourceDefinition(theResource);
-		RuntimeResourceDefinition targetDef = theContext.getResourceDefinition(theTargetType);
+		RuntimeResourceDefinition sourceDef = myCtx.getResourceDefinition(theResource);
+		RuntimeResourceDefinition targetDef = myCtx.getResourceDefinition(theTargetType);
 
 		if (sourceType.equals(theTargetType)) {
 			@SuppressWarnings("unchecked")
@@ -45,14 +51,19 @@ public class ViewGenerator {
 			List<BaseRuntimeChildDefinition> targetChildren = theTargetDef.getChildren();
 			for (BaseRuntimeChildDefinition nextChild : targetChildren) {
 
-				BaseRuntimeChildDefinition sourceChildEquivalent = theSourceDef.getChildByNameOrThrowDataFormatException(nextChild.getElementName());
+				String elementName = nextChild.getElementName();
+				if (nextChild.getValidChildNames().size() > 1) {
+					elementName = nextChild.getValidChildNames().iterator().next();
+				}
+				
+				BaseRuntimeChildDefinition sourceChildEquivalent = theSourceDef.getChildByNameOrThrowDataFormatException(elementName);
 				if (sourceChildEquivalent == null) {
 					continue;
 				}
 
-				List<? extends IElement> sourceValues = sourceChildEquivalent.getAccessor().getValues(theTarget);
+				List<? extends IElement> sourceValues = sourceChildEquivalent.getAccessor().getValues(theSource);
 				for (IElement nextElement : sourceValues) {
-					nextChild.getMutator().addValue(theTargetDef, nextElement);
+					nextChild.getMutator().addValue(theTarget, nextElement);
 				}
 			}
 			

@@ -158,7 +158,8 @@ class ParserState<T> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically
+	 * intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -238,7 +239,8 @@ class ParserState<T> {
 				myInstance.setScheme(theValue);
 			} else if ("value".equals(theName)) {
 				/*
-				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values instead of one like everything else.
+				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values
+				 * instead of one like everything else.
 				 */
 				switch (myCatState) {
 				case STATE_LABEL:
@@ -669,11 +671,7 @@ class ParserState<T> {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);
 				ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) getCurrentElement();
-				if (theIsModifier) {
-					elem.getUndeclaredModifierExtensions().add(newExtension);
-				} else {
-					elem.getUndeclaredExtensions().add(newExtension);
-				}
+				elem.addUndeclaredExtension(newExtension);
 				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);
 				push(newState);
 			} else {
@@ -1126,23 +1124,23 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			myObject = (T) myInstance;
-			
+
 			/*
 			 * Stitch together resource references
 			 */
-			
+
 			Map<String, IResource> idToResource = new HashMap<String, IResource>();
 			List<IResource> resources = myInstance.toListOfResources();
 			for (IResource next : resources) {
-				if (next.getId() != null && next.getId().isEmpty()==false) {
+				if (next.getId() != null && next.getId().isEmpty() == false) {
 					idToResource.put(next.getId().toUnqualifiedVersionless().getValue(), next);
 				}
 			}
-			
+
 			for (IResource next : resources) {
 				List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
 				for (ResourceReferenceDt nextRef : refs) {
-					if (nextRef.isEmpty()==false && nextRef.getReference() != null) {
+					if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
 						IResource target = idToResource.get(nextRef.getReference().getValue());
 						if (target != null) {
 							nextRef.setResource(target);
@@ -1150,7 +1148,7 @@ class ParserState<T> {
 					}
 				}
 			}
-			
+
 		}
 
 	}

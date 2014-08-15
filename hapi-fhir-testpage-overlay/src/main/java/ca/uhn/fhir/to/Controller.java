@@ -51,6 +51,8 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestQuery;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -325,6 +327,7 @@ public class Controller {
 		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
 
 		TreeSet<String> includes = new TreeSet<String>();
+		TreeSet<String> sortParams = new TreeSet<String>();
 		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<List<String>>();
@@ -334,6 +337,11 @@ public class Controller {
 					for (StringDt next : nextRes.getSearchInclude()) {
 						if (next.isEmpty() == false) {
 							includes.add(next.getValue());
+						}
+					}
+					for (RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getType().getValueAsEnum() != SearchParamTypeEnum.COMPOSITE) {
+							sortParams.add(next.getName().getValue());
 						}
 					}
 					if (nextRes.getSearchParam().size() > 0) {
@@ -370,6 +378,7 @@ public class Controller {
 		theModel.put("queries", queries);
 		theModel.put("haveSearchParams", haveSearchParams);
 		theModel.put("queryIncludes", queryIncludes);
+		theModel.put("sortParams", sortParams);
 
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();

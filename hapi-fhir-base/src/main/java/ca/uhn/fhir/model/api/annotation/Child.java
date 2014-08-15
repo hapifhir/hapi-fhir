@@ -48,8 +48,9 @@ public @interface Child {
 
 	/**
 	 * Constant value to supply for {@link #order()} to indicate that this child should replace the
-	 * entry in the superclass with the same name. This may be used to indicate to parsers that
-	 *   
+	 * entry in the superclass with the same name (and take its {@link Child#order() order} value 
+	 * in the process). This is useful if you wish to redefine an existing field in a resource/type
+	 * definition in order to constrain/extend it.
 	 */
 	int REPLACE_PARENT = -2;
 

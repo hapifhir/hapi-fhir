@@ -33,6 +33,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
@@ -295,6 +296,10 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
+	}
+
+	public ViewGenerator newViewGenerator() {
+		return new ViewGenerator(this);
 	}
 
 }

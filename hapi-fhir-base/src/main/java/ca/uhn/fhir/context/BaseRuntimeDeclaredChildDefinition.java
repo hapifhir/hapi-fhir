@@ -37,7 +37,8 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.util.BeanUtils;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRuntimeDeclaredChildDefinition.class);
+	private Boolean ourUseMethodAccessors;
 	private final IAccessor myAccessor;
 	private final String myElementName;
 	private final Field myField;
@@ -69,39 +70,61 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		if (theDescriptionAnnotation != null) {
 			myShortDefinition = theDescriptionAnnotation.shortDefinition();
 			myFormalDefinition = theDescriptionAnnotation.formalDefinition();
-		}else {
-			myShortDefinition=null;
-			myFormalDefinition=null;
+		} else {
+			myShortDefinition = null;
+			myFormalDefinition = null;
 		}
-		
+
 		// TODO: handle lists (max>0), and maybe max=0?
 
-		Class<?> declaringClass = myField.getDeclaringClass();
-		final Class<?> targetReturnType = myField.getType();
-		try {
-			String elementName = myElementName;
-			if ("class".equals(elementName.toLowerCase())) {
-				elementName = "classElement"; // because getClass() is reserved
+		// TODO: finish implementing field level accessors/mutators
+		if (ourUseMethodAccessors == null) {
+			try {
+				myField.setAccessible(true);
+				ourUseMethodAccessors = true;
+			} catch (SecurityException e) {
+				ourLog.info("Can not use field accessors/mutators, going to use methods instead");
+				ourUseMethodAccessors = false;
 			}
-			final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
-			if (accessor==null) {
-				throw new ConfigurationException("Could not find bean accessor/getter for property " + elementName + " on class " + declaringClass.getCanonicalName());
-			}
+		}
 
-			final Method mutator = findMutator(declaringClass, targetReturnType, elementName);
-			if (mutator==null) {
-				throw new ConfigurationException("Could not find bean mutator/setter for property " + elementName + " on class " + declaringClass.getCanonicalName() + " (expected return type " + targetReturnType.getCanonicalName() + ")");
-			}
-			
-			if (List.class.isAssignableFrom(targetReturnType)) {
-				myAccessor = new ListAccessor(accessor);
-				myMutator = new ListMutator(mutator);
+		if (ourUseMethodAccessors == false) {
+			if (List.class.equals(myField.getType())) {
+				// TODO: verify that generic type is IElement
+				myAccessor = new FieldListAccessor();
+				myMutator = new FieldListMutator();
 			} else {
-				myAccessor = new PlainAccessor(accessor);
-				myMutator = new PlainMutator(targetReturnType, mutator);
+				myAccessor = new FieldPlainAccessor();
+				myMutator = new FieldPlainMutator();
 			}
-		} catch (NoSuchFieldException e) {
-			throw new ConfigurationException(e);
+		} else {
+			Class<?> declaringClass = myField.getDeclaringClass();
+			final Class<?> targetReturnType = myField.getType();
+			try {
+				String elementName = myElementName;
+				if ("class".equals(elementName.toLowerCase())) {
+					elementName = "classElement"; // because getClass() is reserved
+				}
+				final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
+				if (accessor == null) {
+					throw new ConfigurationException("Could not find bean accessor/getter for property " + elementName + " on class " + declaringClass.getCanonicalName());
+				}
+
+				final Method mutator = findMutator(declaringClass, targetReturnType, elementName);
+				if (mutator == null) {
+					throw new ConfigurationException("Could not find bean mutator/setter for property " + elementName + " on class " + declaringClass.getCanonicalName() + " (expected return type " + targetReturnType.getCanonicalName() + ")");
+				}
+
+				if (List.class.isAssignableFrom(targetReturnType)) {
+					myAccessor = new ListAccessor(accessor);
+					myMutator = new ListMutator(mutator);
+				} else {
+					myAccessor = new PlainAccessor(accessor);
+					myMutator = new PlainMutator(targetReturnType, mutator);
+				}
+			} catch (NoSuchFieldException e) {
+				throw new ConfigurationException(e);
+			}
 		}
 
 	}
@@ -157,6 +180,77 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			return null;
 		} catch (SecurityException e) {
 			throw new ConfigurationException("Failed to scan class '" + theDeclaringClass + "' because of a security exception", e);
+		}
+	}
+
+	private final class FieldPlainMutator implements IMutator {
+		@Override
+		public void addValue(Object theTarget, IElement theValue) {
+			try {
+				myField.set(theTarget, theValue);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			}
+		}
+	}
+
+	private final class FieldPlainAccessor implements IAccessor {
+		@Override
+		public List<? extends IElement> getValues(Object theTarget) {
+			try {
+				Object values = myField.get(theTarget);
+				if (values == null) {
+					return Collections.emptyList();
+				}
+				@SuppressWarnings("unchecked")
+				List<? extends IElement> retVal = (List<? extends IElement>) Collections.singletonList(values);
+				return retVal;
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			}
+		}
+	}
+
+	private final class FieldListMutator implements IMutator {
+		@Override
+		public void addValue(Object theTarget, IElement theValue) {
+			try {
+				@SuppressWarnings("unchecked")
+				List<IElement> existingList = (List<IElement>) myField.get(theTarget);
+				if (existingList == null) {
+					existingList = new ArrayList<IElement>(2);
+					myField.set(theTarget, existingList);
+				}
+				existingList.add(theValue);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			}
+		}
+	}
+
+	private final class FieldListAccessor implements IAccessor {
+		@SuppressWarnings("unchecked")
+		@Override
+		public List<? extends IElement> getValues(Object theTarget) {
+			@SuppressWarnings("unchecked")
+			List<? extends IElement> retVal;
+			try {
+				retVal = (List<? extends IElement>) myField.get(theTarget);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			}
+			if (retVal == null) {
+				retVal = Collections.emptyList();
+			}
+			return retVal;
 		}
 	}
 
