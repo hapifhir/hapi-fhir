@@ -26,7 +26,7 @@ public class MyPatient extends Patient {
 	private List<DateTimeDt> myImportantDates;
 	
 	@Child(name="managingOrganization", order=Child.REPLACE_PARENT, min=0, max=1, type={
-			ca.uhn.fhir.model.dstu.resource.Organization.class	})
+			MyOrganization.class	})
 		@Description(
 			shortDefinition="Organization that is the custodian of the patient record",
 			formalDefinition="Organization that is the custodian of the patient record"

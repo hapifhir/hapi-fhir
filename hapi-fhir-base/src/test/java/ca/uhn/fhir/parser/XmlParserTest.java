@@ -545,6 +545,7 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
+		
 	}
 
 	@Test
