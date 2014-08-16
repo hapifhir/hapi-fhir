@@ -204,8 +204,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				if (values == null) {
 					return Collections.emptyList();
 				}
-				@SuppressWarnings("unchecked")
-				List<? extends IElement> retVal = (List<? extends IElement>) Collections.singletonList(values);
+				List<? extends IElement> retVal = (List<? extends IElement>) Collections.singletonList((IElement)values);
 				return retVal;
 			} catch (IllegalArgumentException e) {
 				throw new ConfigurationException("Failed to get value", e);

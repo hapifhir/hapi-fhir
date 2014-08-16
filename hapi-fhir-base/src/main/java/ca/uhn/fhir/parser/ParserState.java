@@ -474,6 +474,12 @@ class ParserState<T> {
 					metadata.put(ResourceMetadataKeyEnum.VERSION_ID, linkSelf);
 				}
 			}
+			if (!myEntry.getLinkAlternate().isEmpty()) {
+				ResourceMetadataKeyEnum.LINK_ALTERNATE.put(myEntry.getResource(), myEntry.getLinkAlternate().getValue());
+			}
+			if (!myEntry.getLinkSearch().isEmpty()) {
+				ResourceMetadataKeyEnum.LINK_SEARCH.put(myEntry.getResource(), myEntry.getLinkSearch().getValue());
+			}
 
 		}
 

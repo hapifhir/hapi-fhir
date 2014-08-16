@@ -57,6 +57,7 @@
 
 	<modules>
 		<module>hapi-fhir-base</module>
+		<module>hapi-fhir-base/examples</module>
 		<module>hapi-tinder-plugin</module>
 		<module>hapi-tinder-test</module>
 		<module>hapi-fhir-structures-dstu</module>

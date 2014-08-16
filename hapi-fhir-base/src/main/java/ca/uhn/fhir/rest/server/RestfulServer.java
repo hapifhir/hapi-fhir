@@ -866,7 +866,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	private static void addProfileToBundleEntry(FhirContext theContext, IResource next, BundleEntry entry) {
-		ArrayList<Tag> profileTags = entry.getCategories().getTagsWithScheme(Constants.TAG_SCHEME_PROFILE);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Constants.TAG_SCHEME_PROFILE);
 		if (profileTags.isEmpty()) {
 			RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(next);
 			String profile = nextDef.getResourceProfile();

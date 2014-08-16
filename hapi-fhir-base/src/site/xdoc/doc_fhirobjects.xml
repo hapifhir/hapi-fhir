@@ -31,7 +31,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="datatypes" />
-				<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+				<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 			</macro>
 
 			<subsection name="Navigating Structures">
@@ -45,7 +45,7 @@
 			
 				<macro name="snippet">
 					<param name="id" value="nonNull" />
-					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 				</macro>
 
 			</subsection>
@@ -65,7 +65,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="codes" />
-					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 				</macro>
 
 			</subsection>
@@ -87,7 +87,7 @@
 			
 				<macro name="snippet">
 					<param name="id" value="namesHard" />
-					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 				</macro>
 			
 				<p>
@@ -97,7 +97,7 @@
 			
 				<macro name="snippet">
 					<param name="id" value="namesEasy" />
-					<param name="file" value="src/site/example/java/example/FhirDataModel.java" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 				</macro>
 			
 			</subsection>

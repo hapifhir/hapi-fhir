@@ -47,7 +47,7 @@
 			<macro name="snippet">
 				<param name="id" value="simple" />
 				<param name="file"
-					value="src/site/example/java/example/GenericClientExample.java" />
+					value="examples/src/main/java/example/GenericClientExample.java" />
 			</macro>
 			
 			<p> 
@@ -84,7 +84,7 @@
 				<macro name="snippet">
 					<param name="id" value="create" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 						
@@ -96,7 +96,7 @@
 				<macro name="snippet">
 					<param name="id" value="search" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Multi-valued Parameters (ANY/OR)</h4>
@@ -108,7 +108,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchOr" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Multi-valued Parameters (ALL/AND)</h4>
@@ -120,7 +120,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchOr" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Paging</h4>
@@ -131,7 +131,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchPaging" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Composite Parameters</h4>
@@ -144,7 +144,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchComposite" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Other Query Options</h4>
@@ -155,7 +155,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchAdv" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Using HTTP POST or GET with _search</h4>
@@ -168,7 +168,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchPost" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 			</subsection>			
@@ -181,7 +181,7 @@
 				<macro name="snippet">
 					<param name="id" value="delete" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 
@@ -198,7 +198,7 @@
 				<macro name="snippet">
 					<param name="id" value="update" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 
@@ -210,7 +210,7 @@
 				<macro name="snippet">
 					<param name="id" value="conformance" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 			
@@ -221,7 +221,7 @@
 				<macro name="snippet">
 					<param name="id" value="transaction" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 			
@@ -295,7 +295,7 @@
 				<macro name="snippet">
 					<param name="id" value="provider" />
 					<param name="file"
-						value="src/site/example/java/example/IRestfulClient.java" />
+						value="examples/src/main/java/example/IRestfulClient.java" />
 				</macro>
 
 				<p>
@@ -321,7 +321,7 @@
 				<macro name="snippet">
 					<param name="id" value="client" />
 					<param name="file"
-						value="src/site/example/java/example/ExampleRestfulClient.java" />
+						value="examples/src/main/java/example/ExampleRestfulClient.java" />
 				</macro>
 
 			</subsection>
@@ -343,7 +343,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="clientConfig" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -359,7 +359,7 @@
 				<macro name="snippet">
 					<param name="id" value="client" />
 					<param name="file"
-						value="src/site/example/java/example/CompleteExampleClient.java" />
+						value="examples/src/main/java/example/CompleteExampleClient.java" />
 				</macro>
 				
 			</subsection>
@@ -412,7 +412,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="security" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -429,7 +429,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="logging" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -443,7 +443,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="logging" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 			
 			</subsection>

@@ -28,7 +28,7 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="resourceExtension" />
-				<param name="file" value="src/site/example/java/example/Extensions.java" />
+				<param name="file" value="examples/src/main/java/example/Extensions.java" />
 			</macro>
 			
 			<p>
@@ -36,7 +36,7 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="resourceStringExtension" />
-				<param name="file" value="src/site/example/java/example/Extensions.java" />
+				<param name="file" value="examples/src/main/java/example/Extensions.java" />
 			</macro>
 			
 			<subsection name="Sub-Extensions">
@@ -48,7 +48,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="subExtension" />
-					<param name="file" value="src/site/example/java/example/Extensions.java" />
+					<param name="file" value="examples/src/main/java/example/Extensions.java" />
 				</macro>
 			
 			</subsection>
@@ -61,7 +61,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="parseExtension" />
-					<param name="file" value="src/site/example/java/example/Extensions.java" />
+					<param name="file" value="examples/src/main/java/example/Extensions.java" />
 				</macro>
 			
 			</subsection>
@@ -78,7 +78,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="patientDef" />
-					<param name="file" value="src/site/example/java/example/MyPatient.java" />
+					<param name="file" value="examples/src/main/java/example/MyPatient.java" />
 				</macro>
 
 				<p>
@@ -88,7 +88,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="patientUse" />
-					<param name="file" value="src/site/example/java/example/MyPatientUse.java" />
+					<param name="file" value="examples/src/main/java/example/MyPatientUse.java" />
 				</macro>
 			
 				<p>
@@ -121,7 +121,7 @@
 			
 				<macro name="snippet">
 					<param name="id" value="patientParse" />
-					<param name="file" value="src/site/example/java/example/MyPatientUse.java" />
+					<param name="file" value="examples/src/main/java/example/MyPatientUse.java" />
 				</macro>
 
 			<subsection name="Documentation">

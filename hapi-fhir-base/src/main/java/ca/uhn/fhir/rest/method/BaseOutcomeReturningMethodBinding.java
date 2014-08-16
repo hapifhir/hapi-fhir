@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -39,7 +37,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -54,9 +51,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
-	private static final String LABEL = "label=\"";
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
-	private static final String SCHEME = "scheme=\"";
 
 	private boolean myReturnVoid;
 
@@ -118,7 +113,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			TagList tagList = new TagList();
 			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
 				String nextTagComplete = enumeration.nextElement();
-				parseTagValue(tagList, nextTagComplete);
+				MethodUtil.parseTagValue(tagList, nextTagComplete);
 			}
 			if (tagList.isEmpty() == false) {
 				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
@@ -218,19 +213,25 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		// getMethod().in
 	}
 
-	static void parseTagValue(TagList tagList, String nextTagComplete) {
-		StringBuilder next = new StringBuilder(nextTagComplete);
-		parseTagValue(tagList, nextTagComplete, next);
+	public boolean isReturnVoid() {
+		return myReturnVoid;
 	}
 
-	/**
-	 * @throws IOException
-	 */
-	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
-		IParser parser = encoding.newParser(getContext());
-		IResource resource = parser.parseResource(theRequest.getServletRequest().getReader());
-		return resource;
+	private void addLocationHeader(Request theRequest, HttpServletResponse theResponse, MethodOutcome response) {
+		StringBuilder b = new StringBuilder();
+		b.append(theRequest.getFhirServerBase());
+		b.append('/');
+		b.append(getResourceName());
+		b.append('/');
+		b.append(response.getId().getIdPart());
+		if (response.getId().hasVersionIdPart()) {
+			b.append("/" + Constants.PARAM_HISTORY + "/");
+			b.append(response.getId().getVersionIdPart());
+		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+			b.append("/" + Constants.PARAM_HISTORY + "/");
+			b.append(response.getVersionId().getValue());
+		}
+		theResponse.addHeader(Constants.HEADER_LOCATION, b.toString());
 	}
 
 	/*
@@ -257,99 +258,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * encoding.newParser(getContext()); parser.encodeResourceToWriter(outcome, writer); } } finally { writer.close(); } // getMethod().in }
 	 */
 
-	public boolean isReturnVoid() {
-		return myReturnVoid;
-	}
-
-	private void addLocationHeader(Request theRequest, HttpServletResponse theResponse, MethodOutcome response) {
-		StringBuilder b = new StringBuilder();
-		b.append(theRequest.getFhirServerBase());
-		b.append('/');
-		b.append(getResourceName());
-		b.append('/');
-		b.append(response.getId().getIdPart());
-		if (response.getId().hasVersionIdPart()) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getId().getVersionIdPart());
-		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getVersionId().getValue());
-		}
-		theResponse.addHeader(Constants.HEADER_LOCATION, b.toString());
-	}
-
-	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
-		int firstSemicolon = theBuffer.indexOf(";");
-		int deleteTo;
-		if (firstSemicolon == -1) {
-			firstSemicolon = theBuffer.indexOf(",");
-			if (firstSemicolon == -1) {
-				firstSemicolon = theBuffer.length();
-				deleteTo = theBuffer.length();
-			} else {
-				deleteTo = firstSemicolon;
-			}
-		} else {
-			deleteTo = firstSemicolon + 1;
-		}
-
-		String term = theBuffer.substring(0, firstSemicolon);
-		String scheme = null;
-		String label = null;
-		if (isBlank(term)) {
-			return;
-		}
-
-		theBuffer.delete(0, deleteTo);
-		while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
-			theBuffer.deleteCharAt(0);
-		}
-
-		while (theBuffer.length() > 0) {
-			boolean foundSomething = false;
-			if (theBuffer.length() > SCHEME.length() && theBuffer.substring(0, SCHEME.length()).equals(SCHEME)) {
-				int closeIdx = theBuffer.indexOf("\"", SCHEME.length());
-				scheme = theBuffer.substring(SCHEME.length(), closeIdx);
-				theBuffer.delete(0, closeIdx + 1);
-				foundSomething = true;
-			}
-			if (theBuffer.length() > LABEL.length() && theBuffer.substring(0, LABEL.length()).equals(LABEL)) {
-				int closeIdx = theBuffer.indexOf("\"", LABEL.length());
-				label = theBuffer.substring(LABEL.length(), closeIdx);
-				theBuffer.delete(0, closeIdx + 1);
-				foundSomething = true;
-			}
-			// TODO: support enc2231-string as described in
-			// http://tools.ietf.org/html/draft-johnston-http-category-header-02
-			// TODO: support multiple tags in one header as described in
-			// http://hl7.org/implement/standards/fhir/http.html#tags
-
-			while (theBuffer.length() > 0 && (theBuffer.charAt(0) == ' ' || theBuffer.charAt(0) == ';')) {
-				theBuffer.deleteCharAt(0);
-			}
-
-			if (!foundSomething) {
-				break;
-			}
-		}
-
-		if (theBuffer.length() > 0 && theBuffer.charAt(0) == ',') {
-			theBuffer.deleteCharAt(0);
-			while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
-				theBuffer.deleteCharAt(0);
-			}
-			theTagList.add(new Tag(scheme, term, label));
-			parseTagValue(theTagList, theCompleteHeaderValue, theBuffer);
-		} else {
-			theTagList.add(new Tag(scheme, term, label));
-		}
-
-		if (theBuffer.length() > 0) {
-			ourLog.warn("Ignoring extra text at the end of " + Constants.HEADER_CATEGORY + " tag '" + theBuffer.toString() + "' - Complete tag value was: " + theCompleteHeaderValue);
-		}
-
-	}
-
 	protected abstract void addParametersForServerRequest(Request theRequest, Object[] theParams);
 
 	/**
@@ -365,6 +273,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * For servers, this method will match only incoming requests that match the given operation, or which have no operation in the URL if this method returns null.
 	 */
 	protected abstract String getMatchingOperation();
+
+	/**
+	 * @throws IOException
+	 */
+	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
+		IParser parser = encoding.newParser(getContext());
+		IResource resource = parser.parseResource(theRequest.getServletRequest().getReader());
+		return resource;
+	}
 
 	protected abstract Set<RequestType> provideAllowableRequestTypes();
 
@@ -424,5 +342,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 	}
+
 
 }

@@ -270,9 +270,11 @@ public class GenericClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		Header[] headers = new Header[2];
-		headers[0] = new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT");
-		headers[1] = new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333");
+		Header[] headers = new Header[] {
+				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),				
+				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"")
+		};
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 	
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
@@ -289,6 +291,13 @@ public class GenericClientTest {
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
+		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(response);
+		assertNotNull(tags);
+		assertEquals(1,tags.size());
+		assertEquals("http://foo/tagdefinition.html", tags.get(0).getTerm());
+		assertEquals("http://hl7.org/fhir/tag",tags.get(0).getScheme());
+		assertEquals("Some tag",tags.get(0).getLabel());
+		
 	}
 	
 	@SuppressWarnings("unused")

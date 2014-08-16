@@ -70,7 +70,7 @@
 	
 				<macro name="snippet">
 					<param name="id" value="creatingContext" />
-					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
 				</macro>
 
 			</subsection>
@@ -93,7 +93,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="parseMsg" />
-					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
 				</macro>
 
 			</subsection>
@@ -107,7 +107,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="encodeMsg" />
-					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
 				</macro>
 				
 				<!-- ****** The section below on fluent references the snippet above
@@ -147,7 +147,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="encodeMsgFluent" />
-					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
 				</macro>
 			
 			</subsection>
@@ -160,7 +160,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="encodeMsgJson" />
-					<param name="file" value="src/site/example/java/example/FhirContextIntro.java" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
 				</macro>
 
 				<p>

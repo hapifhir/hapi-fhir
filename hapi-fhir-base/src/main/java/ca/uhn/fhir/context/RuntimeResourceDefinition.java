@@ -60,8 +60,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private List<RuntimeSearchParam> mySearchParams;
 	private String myId;
 
-	public RuntimeResourceDefinition(Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
-		super(theResourceAnnotation.name(), theClass);
+	public RuntimeResourceDefinition(String theResourceName, Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
+		super(theResourceName, theClass);
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
 	}

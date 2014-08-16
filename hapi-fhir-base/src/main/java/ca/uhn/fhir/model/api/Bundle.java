@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class Bundle extends BaseBundle /* implements IElement */{
 
@@ -269,8 +270,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		BundleEntry entry = addEntry();
 		entry.setResource(theResource);
 
-		entry.setResource(theResource);
-
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 
 		String title = ResourceMetadataKeyEnum.TITLE.get(theResource);
@@ -312,6 +311,24 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			String qualifiedId = b.toString();
 			entry.getLinkSelf().setValue(qualifiedId);
 			
+//			String resourceType = theContext.getResourceDefinition(theResource).getName();
+			
+			String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
+			if (isNotBlank(linkSearch)) {
+				if (!UrlUtil.isAbsolute(linkSearch)) {
+					linkSearch = (theServerBase + "/" + linkSearch);
+				}
+				entry.getLinkSearch().setValue(linkSearch);
+			}
+			
+			String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
+			if (isNotBlank(linkAlternate)) {
+				if (!UrlUtil.isAbsolute(linkAlternate)) {
+					linkSearch = (theServerBase + "/" + linkAlternate);
+				}
+				entry.getLinkAlternate().setValue(linkSearch);
+			}
+			
 		}
 
 		InstantDt published = ResourceMetadataKeyEnum.PUBLISHED.get(theResource);
@@ -346,9 +363,9 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return entry;
 	}
 
-	public static Bundle withResources(ArrayList<IResource> theUploadBundle, FhirContext theContext, String theServerBase) {
+	public static Bundle withResources(List<IResource> theResources, FhirContext theContext, String theServerBase) {
 		Bundle retVal = new Bundle();
-		for (IResource next : theUploadBundle) {
+		for (IResource next : theResources) {
 			retVal.addResource(next, theContext, theServerBase);
 		}
 		return retVal;

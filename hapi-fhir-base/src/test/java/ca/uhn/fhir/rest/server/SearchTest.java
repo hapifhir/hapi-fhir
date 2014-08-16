@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -26,9 +27,11 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -149,6 +152,29 @@ public class SearchTest {
 		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
 	}
 	
+	@Test
+	public void testReturnLinks() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort+"/Patient?_query=findWithLinks");
+		
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
+		assertEquals("http://foo/Patient?_id=1", bundle.getEntries().get(0).getLinkSearch().getValue());
+		assertEquals("http://localhost:" + ourPort+"/Patient/9988", bundle.getEntries().get(0).getLinkAlternate().getValue());
+		
+		assertEquals("http://foo/Patient?_id=1", ResourceMetadataKeyEnum.LINK_SEARCH.get(p));
+		assertEquals("http://localhost:" + ourPort+"/Patient/9988", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
+		
+		
+	}
+
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -237,6 +263,19 @@ public class SearchTest {
 			Patient patient = new Patient();
 			patient.setId("1");
 			patient.addIdentifier("system", "AAANamed");
+			retVal.add(patient);
+			return retVal;
+		}
+
+		@Search(queryName="findWithLinks")
+		public List<Patient> findWithLinks() {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = new Patient();
+			patient.setId("1");
+			patient.addIdentifier("system", "AAANamed");
+			ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, ("http://foo/Patient?_id=1"));
+			ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, ("Patient/9988"));
 			retVal.add(patient);
 			return retVal;
 		}

@@ -197,6 +197,52 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		}
 	};
 	
+	/**
+	 * If present and populated with a string, provides the "search link" (the link
+	 * element in the bundle entry with <code>rel="search"</code>). Server implementations
+	 * may populate this with a complete URL, in which case the URL will be
+	 * placed as-is in the bundle. They may alternately specify a
+	 * resource relative URL (e.g. "Patient?name=tester") in which case the
+	 * server will convert this to an absolute URL at runtime.  
+	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> LINK_SEARCH = new ResourceMetadataKeyEnum<String>("LINK_SEARCH") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_SEARCH);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(LINK_SEARCH, theObject);
+		}
+	};
+
+	/**
+	 * If present and populated with a string, provides the "alternate link" (the link
+	 * element in the bundle entry with <code>rel="alternate"</code>). Server implementations
+	 * may populate this with a complete URL, in which case the URL will be
+	 * placed as-is in the bundle. They may alternately specify a
+	 * resource relative URL (e.g. "Patient/1243") in which case the
+	 * server will convert this to an absolute URL at runtime.  
+	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> LINK_ALTERNATE = new ResourceMetadataKeyEnum<String>("LINK_ALTERNATE") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_ALTERNATE);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(LINK_ALTERNATE, theObject);
+		}
+	};
+	
 	private final String myValue;
 
 	public ResourceMetadataKeyEnum(String theValue) {

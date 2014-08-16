@@ -585,24 +585,36 @@ class ModelScanner {
 	private String scanResource(Class<? extends IResource> theClass, ResourceDef resourceDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
+		boolean primaryNameProvider = true;
 		String resourceName = resourceDefinition.name();
 		if (isBlank(resourceName)) {
-			throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name: " + theClass.getCanonicalName());
-		}
-
-		if (myNameToResourceDefinitions.containsKey(resourceName)) {
-			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
-				// throw new
-				// ConfigurationException("Detected duplicate element name '" +
-				// resourceName + "' in types '" + theClass.getCanonicalName() +
-				// "' and '"
-				// +
-				// myNameToResourceDefinitions.get(resourceName).getImplementingClass()
-				// + "'");
-			} else {
-				return resourceName;
+			Class<?> parent = theClass.getSuperclass();
+			primaryNameProvider=false;
+			while (parent.equals(Object.class)==false && isBlank(resourceName)) {
+				ResourceDef nextDef = parent.getAnnotation(ResourceDef.class);
+				if (nextDef != null) {
+					resourceName = nextDef.name();
+				}
+				parent = parent.getSuperclass();
+			}
+			if (isBlank(resourceName)) {
+				throw new ConfigurationException("Resource type @" + ResourceDef.class.getSimpleName() + " annotation contains no resource name(): " + theClass.getCanonicalName() + " - This is only allowed for types that extend other resource types ");
 			}
 		}
+
+//		if (myNameToResourceDefinitions.containsKey(resourceName)) {
+//			if (!myNameToResourceDefinitions.get(resourceName).getImplementingClass().equals(theClass)) {
+//				// throw new
+//				// ConfigurationException("Detected duplicate element name '" +
+//				// resourceName + "' in types '" + theClass.getCanonicalName() +
+//				// "' and '"
+//				// +
+//				// myNameToResourceDefinitions.get(resourceName).getImplementingClass()
+//				// + "'");
+//			} else {
+//				return resourceName;
+//			}
+//		}
 
 		String resourceId = resourceDefinition.id();
 		if (isBlank(resourceId)) {
@@ -619,10 +631,11 @@ class ModelScanner {
 
 		String profile = resourceDefinition.profile();
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(theClass, resourceDefinition);
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(resourceName, theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		myNameToResourceDefinitions.put(resourceName, resourceDef);
-
+		if (primaryNameProvider) {
+			myNameToResourceDefinitions.put(resourceName, resourceDef);
+		}
 		scanCompositeElementForChildren(theClass, resourceDef);
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);

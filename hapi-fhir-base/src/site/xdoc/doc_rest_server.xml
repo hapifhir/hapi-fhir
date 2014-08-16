@@ -57,7 +57,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="provider" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProvider.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProvider.java" />
 				</macro>
 
 			</subsection>
@@ -88,7 +88,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="servlet" />
-					<param name="file" value="src/site/example/java/example/ExampleRestfulServlet.java" />
+					<param name="file" value="examples/src/main/java/example/ExampleRestfulServlet.java" />
 				</macro>
 
 				<a name="plain_providers"/>
@@ -120,7 +120,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="plainProvider" />
-					<param name="file" value="src/site/example/java/example/ExampleProviders.java" />
+					<param name="file" value="examples/src/main/java/example/ExampleProviders.java" />
 				</macro>
 			
 				<p>
@@ -136,7 +136,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="plainProviderServer" />
-					<param name="file" value="src/site/example/java/example/ExampleProviders.java" />
+					<param name="file" value="examples/src/main/java/example/ExampleProviders.java" />
 				</macro>
 			
 			</subsection>
@@ -258,7 +258,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="provider" />
-					<param name="file" value="src/site/example/java/example/PagingServer.java" />
+					<param name="file" value="examples/src/main/java/example/PagingServer.java" />
 				</macro>
 			
 			</subsection>			
@@ -290,7 +290,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="provider" />
-					<param name="file" value="src/site/example/java/example/PagingPatientProvider.java" />
+					<param name="file" value="examples/src/main/java/example/PagingPatientProvider.java" />
 				</macro>
 			
 			</subsection>
@@ -323,7 +323,7 @@
 			
 				<macro name="snippet">
 					<param name="id" value="underlyingReq" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 			
 			
@@ -358,6 +358,41 @@
 		
 		</section>
 		
+		<section name="Populating Resource Metadata">
+		
+			<p>
+				Server operations will often return a resource or a bundle of resources. These
+				types will contain one or more resource instances, but also specify a set of 
+				metadata describing that resource.   
+			</p>
+			
+			<p>
+				For example, resources have a "published" and "updated" date, referring to 
+				the date/time the resource was originally created and the date/time the 
+				resource was last updated respectively. For operations which return a single
+				resource, these values are returned via HTTP headers. For operations which
+				return a bundle, these values are returned via elements within the 
+				bundle's "entry" tag. 	
+			</p>
+			
+			<p>
+				Bundles may also contain a set of links, such as an "alternate" link to
+				a resource, or a "search" link.
+			</p>
+			
+			<p>
+				Populating these metadata elements is done via the
+				<code><a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/IResource.html#getResourceMetadata()">IResource#getResourceMetadata()</a></code>
+				method. The following example shows how to set various metadata elements on 
+				a resource being returned.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="serverMethod" />
+				<param name="file" value="examples/src/main/java/example/ServerMetadataExamples.java" />
+			</macro>
+				
+		</section>
+
 		<section name="A Complete Example">
 		
 			<p>
