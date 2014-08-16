@@ -3,9 +3,9 @@
   <title>HAPI FHIR - Core Library: HAPI FHIR Changelog</title>
   <link rel="alternate" href="http://jamesagnew.github.io/hapi-fhir//changes-report.html" />
   <subtitle>These are the latest changes of the project.</subtitle>
-  <updated>2014-08-16T22:06:48Z</updated>
+  <updated>2014-08-16T22:13:04Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2014-08-16T22:06:48Z</dc:date>
+  <dc:date>2014-08-16T22:13:04Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
     <title>0.6</title>
@@ -13,10 +13,10 @@
     <author>
       <name />
     </author>
-    <updated>2014-08-16T22:06:48Z</updated>
-    <published>2014-08-16T22:06:48Z</published>
+    <updated>2014-08-16T22:13:04Z</updated>
+    <published>2014-08-16T22:13:04Z</published>
     <summary type="html">&lt;p&gt;Version 0.6 is available with 17 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2014-08-16T22:06:48Z</dc:date>
+    <dc:date>2014-08-16T22:13:04Z</dc:date>
   </entry>
 </feed>
 
