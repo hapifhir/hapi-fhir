@@ -75,7 +75,7 @@ public class TransactionClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
 
-		client.searchWithParam(resources);
+		client.transaction(resources);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
@@ -92,6 +92,47 @@ public class TransactionClientTest {
 		assertTrue(bundle.getEntries().get(1).getId().isEmpty());
 
 	}
+
+	
+	@Test
+	public void testSimpleTransactionWithBundleParam() throws Exception {
+		Patient patient = new Patient();
+		patient.setId(new IdDt("Patient/testPersistWithSimpleLinkP01"));
+		patient.addIdentifier("urn:system", "testPersistWithSimpleLinkP01");
+		patient.addName().addFamily("Tester").addGiven("Joe");
+
+		Observation obs = new Observation();
+		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO01");
+		obs.setSubject(new ResourceReferenceDt("Patient/testPersistWithSimpleLinkP01"));
+
+		Bundle transactionBundle = Bundle.withResources(Arrays.asList((IResource)patient, obs), ctx, "http://foo");
+		
+		IBundleClient client = ctx.newRestfulClient(IBundleClient.class, "http://foo");
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(createBundle()), Charset.forName("UTF-8")));
+
+		client.transaction(transactionBundle);
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		assertEquals("http://foo/", post.getURI().toString());
+
+		Bundle bundle = ctx.newXmlParser().parseBundle(new InputStreamReader(post.getEntity().getContent()));
+		ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
+		
+		assertEquals(2, bundle.size());
+		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getId().getValue());
+		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntries().get(0).getLinkSelf().getValue());
+		assertEquals(null, bundle.getEntries().get(0).getLinkAlternate().getValue());
+
+		assertTrue(bundle.getEntries().get(1).getId().isEmpty());
+
+	}
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionClientTest.class);
 	private String createBundle() {
 		return ctx.newXmlParser().encodeBundleToString(new Bundle());
@@ -100,7 +141,15 @@ public class TransactionClientTest {
 	private interface IClient extends IBasicClient {
 
 		@Transaction
-		public List<IResource> searchWithParam(@TransactionParam List<IResource> theResources);
+		public List<IResource> transaction(@TransactionParam List<IResource> theResources);
+
+	
+	}
+
+	private interface IBundleClient extends IBasicClient {
+
+		@Transaction
+		public List<IResource> transaction(@TransactionParam Bundle theResources);
 
 	
 	}

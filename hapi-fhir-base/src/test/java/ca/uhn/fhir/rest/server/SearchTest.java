@@ -232,7 +232,7 @@ public class SearchTest {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 		
 		@Search
-		public List<Patient> findPatient(@OptionalParam(name = "_id") StringParam theParam) {
+		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient patient = new Patient();
@@ -246,7 +246,7 @@ public class SearchTest {
 		}
 
 		@Search
-		public List<Patient> findPatientByAAA01(@OptionalParam(name = "AAA") StringParam theParam) {
+		public List<Patient> findPatientByAAA01(@RequiredParam(name = "AAA") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient patient = new Patient();

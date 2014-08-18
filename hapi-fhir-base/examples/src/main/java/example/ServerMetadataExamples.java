@@ -34,7 +34,7 @@ public class ServerMetadataExamples {
       String linkAlternate = "Patient/7736";
       ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, linkAlternate);
       String linkSearch = "Patient?name=smith&name=john";
-      ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, linkSearch);
+      ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, linkSearch);
       
       // Set the published and updated dates
       InstantDt pubDate = new InstantDt("2011-02-22");

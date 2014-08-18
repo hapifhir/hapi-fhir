@@ -1202,6 +1202,11 @@
 			</macro>
 			
 			<p>
+				Transaction methods require one parameter annotated with @TransactionParam, and that
+				parameter may be of type List&lt;IResource&gt; or Bundle.
+			</p>
+			
+			<p>
 				Example URL to invoke this method:
 				<br />
 				<code>POST http://fhir.example.com/</code><br/>

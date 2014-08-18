@@ -38,40 +38,56 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class TransactionParamBinder implements IParameter {
 
+	private boolean myParamIsBundle;
+
 	public TransactionParamBinder() {
 	}
-	
+
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 		Bundle resource = (Bundle) theRequestContents;
-		
+		if (myParamIsBundle) {
+			return resource;
+		}
+
 		ArrayList<IResource> retVal = new ArrayList<IResource>();
 		for (BundleEntry next : resource.getEntries()) {
 			if (next.getResource() != null) {
 				retVal.add(next.getResource());
 			}
 		}
-		
+
 		return retVal;
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + TransactionParam.class.getName() + " but can not be a collection of collections");
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but can not be a collection of collections");
 		}
-		if (theInnerCollectionType.equals(List.class)==false) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()+">");
-		}
-		if (theParameterType.equals(IResource.class)==false) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()+">");
+		if (theParameterType.equals(Bundle.class)) {
+			myParamIsBundle=true;
+			if (theInnerCollectionType!=null) {
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()
+						+ "> or Bundle");
+			}
+		} else {
+			myParamIsBundle=false;
+			if (theInnerCollectionType.equals(List.class) == false) {
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()
+						+ "> or Bundle");
+			}
+			if (theParameterType.equals(IResource.class) == false) {
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()
+						+ "> or Bundle");
+			}
 		}
 	}
-	
+
 }

@@ -83,6 +83,10 @@
 			<action type="fix">
 				Category header (for tags) is correctly read in client for "read" operation
 			</action>
+			<action type="add">
+				Transaction method in server can now have parameter type Bundle instead of
+				List&lt;IResource&gt;
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
