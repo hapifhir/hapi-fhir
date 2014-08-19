@@ -110,6 +110,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 			ourLog.info("Loading profiles...");
 			ProfileParser pp = new ProfileParser();
 			for (ProfileFileDefinition next : resourceProfileFiles) {
+				ourLog.info("Parsing file: {}", next.profileFile);
 				pp.parseSingleProfile(new File(next.profileFile), next.profileSourceUrl);
 			}
 			
@@ -182,6 +183,10 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
+		ProfileParser pp = new ProfileParser();
+			pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
+
+		
 		 ValueSetGenerator vsp = new ValueSetGenerator();
 //		 vsp.setDirectory("src/test/resources/vs/");
 		 vsp.parse();
@@ -194,8 +199,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 		 dtp.writeAll(new File(dtOutputDir), "ca.uhn.fhir.model.dstu");
 		
 		 ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		 rp.setBaseResourceNames(Arrays.asList("observation"));
+		 rp.setBaseResourceNames(Arrays.asList("patient"));
 		 rp.parse();
+		 
 //		 rp.bindValueSets(vsp);
 		
 		 String rpOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/resource";

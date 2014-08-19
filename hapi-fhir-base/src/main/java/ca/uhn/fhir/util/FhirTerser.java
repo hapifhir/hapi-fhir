@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -167,6 +168,10 @@ public class FhirTerser {
 		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
+//		if (theElement.isEmpty()) {
+//			return;
+//		}
+		
 		switch (theDefinition.getChildType()) {
 		case PRIMITIVE_XHTML:
 		case PRIMITIVE_DATATYPE:
@@ -187,7 +192,9 @@ public class FhirTerser {
 						if (nextValue.isEmpty()) {
 							continue;
 						}
-						BaseRuntimeElementDefinition<?> childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+						BaseRuntimeElementDefinition<?> childElementDef;
+						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+						
 						if (childElementDef == null) {
 							StringBuilder b = new StringBuilder();
 							b.append("Found value of type[");
