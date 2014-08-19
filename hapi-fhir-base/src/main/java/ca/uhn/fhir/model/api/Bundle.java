@@ -44,11 +44,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 	private volatile transient Map<IdDt, IResource> myIdToEntries;
 
-	//@formatter:off
-	/* ****************************************************
-	 * NB: add any new fields to the isEmpty() method!!!
-	 *****************************************************/
-	//@formatter:on
 	private List<BundleEntry> myEntries;
 	private StringDt myBundleId;
 	private StringDt myLinkBase;
@@ -61,6 +56,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
 	private InstantDt myUpdated;
+	private TagList myCategories;
 
 	/**
 	 * Returns true if this bundle contains zero entries
@@ -68,6 +64,16 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	@Override
 	public boolean isEmpty() {
 		return getEntries().isEmpty();
+	}
+
+	public Tag addCategory() {
+		Tag retVal = new Tag();
+		getCategories().add(retVal);
+		return retVal;
+	}
+
+	public void addCategory(Tag theTag) {
+		getCategories().add(theTag);
 	}
 
 	/**
@@ -82,12 +88,15 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	/**
 	 * Retrieves a resource from a bundle given its logical ID.
 	 * <p>
-	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
-	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been populated. It will cache its results for fast performance, but that means that
-	 * modifications to the bundle after this method is called may not be accurately reflected.
+	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of
+	 * <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
+	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been
+	 * populated. It will cache its results for fast performance, but that means that modifications to the bundle after
+	 * this method is called may not be accurately reflected.
 	 * </p>
 	 * 
-	 * @param theId The resource ID
+	 * @param theId
+	 *            The resource ID
 	 * @return Returns the resource with the given ID, or <code>null</code> if none is found
 	 */
 	public IResource getResourceById(IdDt theId) {
@@ -104,31 +113,43 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return map.get(theId.toUnqualified());
 	}
 
-//	public static void main(String[] args) {
-//		
-//		FhirContext ctx = new FhirContext();
-//		String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" + 
-//				"   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" + 
-//				"      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" + 
-//				"   </extension>\n" + 
-//				"   <text>\n" + 
-//				"      <status value=\"generated\"/>\n" + 
-//				"      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" + 
-//				"   </text>\n" + 
-//				"   <identifier>\n" + 
-//				"      <use value=\"official\"/>\n" + 
-//				"      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" + 
-//				"      <system value=\"urn:cgta:hsp_ids\"/>\n" + 
-//				"      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" + 
-//				"   </identifier>\n" + 
-//				"   <name value=\"火星第五人民医院\"/>\n" + 
-//				"</Organization>";
-//		
-//		IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
-//		c.registerInterceptor(new LoggingInterceptor(true));
-//		c.update().resource(txt).withId("1665").execute();
-//	}
-//	
+	// public static void main(String[] args) {
+	//
+	// FhirContext ctx = new FhirContext();
+	// String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" +
+	// "   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" +
+	// "      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" +
+	// "   </extension>\n" +
+	// "   <text>\n" +
+	// "      <status value=\"generated\"/>\n" +
+	// "      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" +
+	// "   </text>\n" +
+	// "   <identifier>\n" +
+	// "      <use value=\"official\"/>\n" +
+	// "      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" +
+	// "      <system value=\"urn:cgta:hsp_ids\"/>\n" +
+	// "      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" +
+	// "   </identifier>\n" +
+	// "   <name value=\"火星第五人民医院\"/>\n" +
+	// "</Organization>";
+	//
+	// IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
+	// c.registerInterceptor(new LoggingInterceptor(true));
+	// c.update().resource(txt).withId("1665").execute();
+	// }
+	//
+
+	public TagList getCategories() {
+		if (myCategories == null) {
+			myCategories = new TagList();
+		}
+		return myCategories;
+	}
+
+	public void setCategories(TagList theCategories) {
+		myCategories = theCategories;
+	}
+
 	public List<BundleEntry> getEntries() {
 		if (myEntries == null) {
 			myEntries = new ArrayList<BundleEntry>();
@@ -264,7 +285,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	 * 
 	 * @param theResource
 	 *            The resource to add
-	 *  @return Returns the newly created bundle entry that was added to the bundle
+	 * @return Returns the newly created bundle entry that was added to the bundle
 	 */
 	public BundleEntry addResource(IResource theResource, FhirContext theContext, String theServerBase) {
 		BundleEntry entry = addEntry();
@@ -278,7 +299,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		} else {
 			entry.getTitle().setValue(def.getName() + " " + StringUtils.defaultString(theResource.getId().getValue(), "(no ID)"));
 		}
-		
+
 		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
 
 			StringBuilder b = new StringBuilder();
@@ -310,9 +331,9 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 			String qualifiedId = b.toString();
 			entry.getLinkSelf().setValue(qualifiedId);
-			
-//			String resourceType = theContext.getResourceDefinition(theResource).getName();
-			
+
+			// String resourceType = theContext.getResourceDefinition(theResource).getName();
+
 			String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
 			if (isNotBlank(linkSearch)) {
 				if (!UrlUtil.isAbsolute(linkSearch)) {
@@ -320,7 +341,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 				}
 				entry.getLinkSearch().setValue(linkSearch);
 			}
-			
+
 			String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
 			if (isNotBlank(linkAlternate)) {
 				if (!UrlUtil.isAbsolute(linkAlternate)) {
@@ -328,7 +349,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 				}
 				entry.getLinkAlternate().setValue(linkSearch);
 			}
-			
+
 		}
 
 		InstantDt published = ResourceMetadataKeyEnum.PUBLISHED.get(theResource);

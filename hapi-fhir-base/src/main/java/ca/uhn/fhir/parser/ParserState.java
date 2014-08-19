@@ -20,8 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +66,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.IModelVisitor;
 
 class ParserState<T> {
 
@@ -628,6 +628,8 @@ class ParserState<T> {
 				push(new AtomPrimitiveState(myInstance.getUpdated()));
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
+			} else if ("category".equals(theLocalPart)) {
+				push(new AtomCategoryState(myInstance.getCategories().addTag()));
 			} else if ("deleted-entry".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceURI)) {
 				push(new AtomDeletedEntryState(myInstance, myResourceType));
 			} else {
@@ -908,7 +910,7 @@ class ParserState<T> {
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
-					((IIdentifiableElement) myInstance).setId(new IdDt(theValue));
+					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else if (myInstance instanceof IResource) {
 					((IResource) myInstance).setId(new IdDt(theValue));
 				}
@@ -1255,20 +1257,32 @@ class ParserState<T> {
 				myObject = (T) myInstance;
 			}
 
-			for (ResourceReferenceDt nextRef : myResourceReferences) {
-				String ref = nextRef.getReference().getValue();
-				if (isNotBlank(ref)) {
-					if (ref.startsWith("#")) {
-						IResource target = myContainedResources.get(ref.substring(1));
-						if (target != null) {
-							nextRef.setResource(target);
-						} else {
-							ourLog.warn("Resource contains unknown local ref: " + ref);
+			myContext.newTerser().visit(myInstance, new IModelVisitor() {
+				
+				@Override
+				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+					acceptElement(theNextExt.getValue(), null, null);
+				}
+				
+				@Override
+				public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+					if (theElement instanceof ResourceReferenceDt) {
+						ResourceReferenceDt nextRef = (ResourceReferenceDt)theElement;
+						String ref = nextRef.getReference().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IResource target = myContainedResources.get(ref.substring(1));
+								if (target != null) {
+									nextRef.setResource(target);
+								} else {
+									ourLog.warn("Resource contains unknown local ref: " + ref);
+								}
+							}
 						}
 					}
 				}
-			}
-
+			});
+			
 		}
 
 	}

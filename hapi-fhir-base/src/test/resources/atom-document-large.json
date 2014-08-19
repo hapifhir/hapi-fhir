@@ -25,6 +25,11 @@
     }
   ],
   "updated" : "2014-03-22T15:37:12Z",
+  "category" : [{
+    "term" : "http://term",
+    "label" : "label",
+    "scheme" : "http://scheme"
+  }],
   "totalResults" : "356",
   "entry" : [
     {

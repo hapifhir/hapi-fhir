@@ -27,8 +27,9 @@
 				There are two types of clients provided by HAPI: Generic and Annotation-driven.
 				The generic client (introduced in HAPI-FHIR 0.3) is much simpler to create
 				and generally provides the faster way to get started. The annotation-driven
-				client is more powerful and can rely on code generation to give better
-				compile-time checking. 
+				client can rely on code generation and static binding to specific operations to 
+				give better	compile-time checking against servers with a specific set of capabilities
+				exposed. 
 			</p>
 
 		</section>
@@ -75,21 +76,13 @@
 					such as <code>encodedJson()</code> or <code>encodedXml()</code>.
 				</p>
 			</subsection>
-
-			<subsection name="Type - Create">
-				<p>
-					The following example shows how to perform a create
-					operation using the generic client:
-				</p>
-				<macro name="snippet">
-					<param name="id" value="create" />
-					<param name="file"
-						value="examples/src/main/java/example/GenericClientExample.java" />
-				</macro>
-			</subsection>			
 						
 			<subsection name="Type - Search/Query">
 				
+				<p>
+					Searching for resources is probably the most common initial scenario for
+					client applications, so we'll start the demonstration there.
+				</p>
 				<p>
 					The following example shows how to query using the generic client:
 				</p>
@@ -171,6 +164,18 @@
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
+			</subsection>			
+
+			<subsection name="Type - Create">
+				<p>
+					The following example shows how to perform a create
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="create" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
 			</subsection>			
 
 			<subsection name="Instance - Delete">

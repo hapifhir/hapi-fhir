@@ -87,6 +87,10 @@
 				Transaction method in server can now have parameter type Bundle instead of
 				List&lt;IResource&gt;
 			</action>
+			<action type="add">
+				HAPI parsers now use field access to get/set values instead of method accessors and mutators.
+				This should give a small performance boost.
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

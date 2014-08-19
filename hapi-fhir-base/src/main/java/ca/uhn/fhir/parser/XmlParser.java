@@ -144,6 +144,8 @@ public class XmlParser extends BaseParser implements IParser {
 				eventWriter.writeEndElement();
 			}
 
+			writeCategories(eventWriter, theBundle.getCategories());
+
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
 				boolean deleted = false;
 				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
@@ -182,15 +184,7 @@ public class XmlParser extends BaseParser implements IParser {
 				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
-				if (nextEntry.getCategories() != null) {
-					for (Tag next : nextEntry.getCategories()) {
-						eventWriter.writeStartElement("category");
-						eventWriter.writeAttribute("term", defaultString(next.getTerm()));
-						eventWriter.writeAttribute("label", defaultString(next.getLabel()));
-						eventWriter.writeAttribute("scheme", defaultString(next.getScheme()));
-						eventWriter.writeEndElement();
-					}
-				}
+				writeCategories(eventWriter, nextEntry.getCategories());
 
 				if (!nextEntry.getLinkSelf().isEmpty()) {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
@@ -221,6 +215,18 @@ public class XmlParser extends BaseParser implements IParser {
 			eventWriter.close();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	private void writeCategories(XMLStreamWriter eventWriter,  TagList categories) throws XMLStreamException {
+		if (categories != null) {
+			for (Tag next : categories) {
+				eventWriter.writeStartElement("category");
+				eventWriter.writeAttribute("term", defaultString(next.getTerm()));
+				eventWriter.writeAttribute("label", defaultString(next.getLabel()));
+				eventWriter.writeAttribute("scheme", defaultString(next.getScheme()));
+				eventWriter.writeEndElement();
+			}
 		}
 	}
 
