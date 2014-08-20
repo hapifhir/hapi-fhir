@@ -564,7 +564,7 @@ public class JsonParserTest {
 
 		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
+		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"reference\":\"Organization/123\"}"));
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");

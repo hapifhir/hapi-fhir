@@ -848,8 +848,8 @@ public class RestfulServer extends HttpServlet {
 				
 			} while (references.isEmpty() == false);
 			
-			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
-			addProfileToBundleEntry(theContext, next, entry);
+			bundle.addResource(next, theContext, theServerBase);
+//			addProfileToBundleEntry(theContext, next, entry);
 			
 		}
 
@@ -857,25 +857,27 @@ public class RestfulServer extends HttpServlet {
 		 * Actually add the resources to the bundle
 		 */
 		for (IResource next : addedResources) {
-			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
-			addProfileToBundleEntry(theContext, next, entry);
+			bundle.addResource(next, theContext, theServerBase);
+//			addProfileToBundleEntry(theContext, next, entry);
 		}
 
 		bundle.getTotalResults().setValue(theTotalResults);
 		return bundle;
 	}
 
+	/*
 	private static void addProfileToBundleEntry(FhirContext theContext, IResource next, BundleEntry entry) {
-		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Constants.TAG_SCHEME_PROFILE);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
 		if (profileTags.isEmpty()) {
 			RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(next);
 			String profile = nextDef.getResourceProfile();
 			if (isNotBlank(profile)) {
-				entry.addCategory(new Tag(Constants.TAG_SCHEME_PROFILE, profile, null));
+				entry.addCategory(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
 			}
 		}
 	}
-
+	*/
+	
 	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);

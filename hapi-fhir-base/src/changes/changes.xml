@@ -7,9 +7,11 @@
 	</properties>
 	<body>
 		<release version="0.6" date="TBD">
+			<!-- 
 			<action type="add">
 				Allow generic client  ... OAUTH
 			</action>
+			-->
 			<action type="fix">
 				Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University
 				Health Network for reporting!   
@@ -72,10 +74,6 @@
 				is "yyyy-mm-dd" anyhow, and this is correctly handled). Thanks to Jeffrey Ting of Systems Made Simple
 				for reporting! 
 			</action>
-			<action type="add">
-				Server now adds a profile tag to returned results if the resource being returned
-				doesn't already have one			
-			</action>
 			<action type="fix">
 				Server search method for an unnamed query gets called if the client requests a named query
 				with the same parameter list. Thanks to Neal Acharya of University Health Network for reporting!			
@@ -90,6 +88,11 @@
 			<action type="add">
 				HAPI parsers now use field access to get/set values instead of method accessors and mutators.
 				This should give a small performance boost.
+			</action>
+			<action type="fix">
+				JSON parser encodes resource references incorrectly, using the name "resource" instead
+				of the name "reference" for the actual reference. Thanks to
+				Ricky Nguyen for reporting and tracking down the issue!
 			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">

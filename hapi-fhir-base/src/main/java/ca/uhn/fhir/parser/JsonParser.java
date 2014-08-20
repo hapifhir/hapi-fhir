@@ -297,10 +297,10 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			if (StringUtils.isNotBlank(reference)) {
-				theWriter.write("resource", reference);
+				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
 			if (referenceDt.getDisplay().isEmpty() == false) {
-				theWriter.write("display", referenceDt.getDisplay().getValueAsString());
+				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplay().getValueAsString());
 			}
 			theWriter.writeEnd();
 			break;
