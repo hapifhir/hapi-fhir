@@ -21,13 +21,19 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 /**
- * Exception for use when a response is received or being sent that
- * does not correspond to any other exception type. An HTTP status code
- * must be provided, and will be provided to the caller in the case of a 
- * server implementation.
+ * Exception for use when a response is received or being sent that does not correspond to any other exception type. An HTTP status code must be provided, and will be provided to the caller in the
+ * case of a server implementation.
  */
 public class UnclassifiedServerFailureException extends BaseServerResponseException {
 
+	/**
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
+	 * @param theMessage
+	 *            The message to add to the status line
+	 */
 	public UnclassifiedServerFailureException(int theStatusCode, String theMessage) {
 		super(theStatusCode, theMessage);
 	}

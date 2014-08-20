@@ -341,6 +341,83 @@
 		</section>
 		-->
 
+		<section name="Exception/Error Handling">
+		
+			<p>
+				Within your RESTful operations, you will generally be returning
+				resources or bundles of resources under normal operation. During
+				execution you may also need to propagate errors back to the client
+				for a variety of reasons.  
+			</p>
+			
+			<subsection name="Automatic Exception Handling">
+				<p>
+					By default, HAPI generates appropriate error responses for a several
+					built-in conditions. For example, if the user makes a request for
+					a resource type that does not exist, or tries to perform a search
+					using an invalid parameter, HAPI will automatically generate
+					an <code>HTTP 400 Invalid Request</code>, and provide an 
+					OperationOutcome resource as response containing details about
+					the error.
+				</p>
+				
+				<p>
+					Similarly, if your method implementation throws any exceptions 
+					(checked or unchecked) instead
+					of returning normally, the server will usually* automatically
+					generate an <code>HTTP 500 Internal Error</code> and generate
+					an OperationOutcome with details about the exception.
+				</p>
+				
+				<p>
+					<i>* Note that certain exception types will generate other response
+					codes, as explained below.</i> 
+				</p>
+			</subsection>
+			
+			<subsection name="Generating Specific HTTP Error Responses">
+				<p>
+					In many cases, you will want to respond to client requests
+					with a specific HTTP error code (and possibly your own error message
+					too). Sometimes this is a requirement of the FHIR specification
+					(e.g. the "validate" operation requires a response of 
+					<code>HTTP 422 Unprocessable Entity</code> if the validation fails).
+					Sometimes this is simply a requirement of your specific application 
+					(e.g. you want to provide application specific HTTP status codes for
+					certain types of errors)
+				</p>
+				
+				<p>
+					To customize the error that is returned by HAPI's server methods, you 
+					must throw an exception which extends HAPI's 
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>
+					class. Various exceptions which extend this class will generate
+					a different HTTP status code. 
+				</p>
+				<p>
+					For example, the 
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/server/exceptions/ResourceNotFoundException.html">ResourceNotFoundException</a>
+					causes HAPI to return an <code>HTTP 404 Resource Not Found</code>. A complete list
+					of available exceptions is available
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/server/exceptions/package-summary.html">here</a>.
+				</p>
+				<p>
+					If you wish to return an HTTP status code for which there is no
+					pre-defined exception, you may throw the
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html">UnclassifiedServerFailureException</a>,
+					which allows you to return any status code you wish.
+				</p>
+			</subsection>
+			<subsection name="Returning an OperationOutcome for Errors">
+				<p>
+					By default, HAPI will automatically generate an OperationOutcome
+					which contains details about the exception that was thrown. You may 
+					wish to provide your own OperationOutcome instead. In this
+					case, you may pass one into the constructor of the
+					exception you are throwing.
+				</p>
+			</subsection>
+		</section>
 
 		<section name="Using the Server">
 		

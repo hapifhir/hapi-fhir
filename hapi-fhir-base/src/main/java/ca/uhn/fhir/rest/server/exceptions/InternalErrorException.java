@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -43,6 +44,17 @@ public class InternalErrorException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 	
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public InternalErrorException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(theMessage, theOperationOutcome);
+	}
 
 	public InternalErrorException(String theMessage) {
 		super(STATUS_CODE, theMessage);

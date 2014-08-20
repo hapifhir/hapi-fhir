@@ -547,21 +547,29 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
-			OperationOutcome oo = new OperationOutcome();
-			Issue issue = oo.addIssue();
-			issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
-
+			OperationOutcome oo=null;
 			int statusCode = 500;
-			if (e instanceof InternalErrorException) {
-				ourLog.error("Failure during REST processing", e);
-				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
-			} else if (e instanceof BaseServerResponseException) {
-				ourLog.warn("Failure during REST processing: {}", e.toString());
+			
+			if (e instanceof BaseServerResponseException) {
+				oo = ((BaseServerResponseException) e).getOperationOutcome();
 				statusCode = ((BaseServerResponseException) e).getStatusCode();
-				issue.getDetails().setValue(e.getMessage());
-			} else {
-				ourLog.error("Failure during REST processing", e);
-				issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+			}
+			
+			if (oo == null) {
+				oo = new OperationOutcome();
+				Issue issue = oo.addIssue();
+				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
+				if (e instanceof InternalErrorException) {
+					ourLog.error("Failure during REST processing", e);
+					issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+				} else if (e instanceof BaseServerResponseException) {
+					ourLog.warn("Failure during REST processing: {}", e.toString());
+					statusCode = ((BaseServerResponseException) e).getStatusCode();
+					issue.getDetails().setValue(e.getMessage());
+				} else {
+					ourLog.error("Failure during REST processing", e);
+					issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+				}
 			}
 
 			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
@@ -815,7 +823,7 @@ public class RestfulServer extends HttpServlet {
 			List<ResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
-				
+
 				for (ResourceReferenceDt nextRef : references) {
 					IResource nextRes = nextRef.getResource();
 					if (nextRes != null) {
@@ -836,21 +844,21 @@ public class RestfulServer extends HttpServlet {
 						}
 					}
 				}
-				
+
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<ResourceReferenceDt>();
 				for (IResource iResource : addedResourcesThisPass) {
 					List<ResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, ResourceReferenceDt.class);
 					references.addAll(newReferences);
 				}
-				
+
 				addedResources.addAll(addedResourcesThisPass);
-				
+
 			} while (references.isEmpty() == false);
-			
+
 			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
 			addProfileToBundleEntry(theContext, next, entry);
-			
+
 		}
 
 		/*
