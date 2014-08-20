@@ -17,22 +17,19 @@ import ca.uhn.fhir.rest.method.SearchStyleEnum;
 
 public class GenericClientExample {
 
-@SuppressWarnings("unused")
 public static void simpleExample() {
 // START SNIPPET: simple
 FhirContext ctx = new FhirContext();
-String serverBase = "http://fhir.healthintersections.com.au/open";
+String serverBase = "http://fhirtest.uhn.ca/base";
 IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
-// Read a patient
-Patient patient = client.read(Patient.class, "1");
+// Perform a search
+Bundle results = client.search()
+      .forResource(Patient.class)
+      .where(Patient.FAMILY.matches().value("duck"))
+      .execute();
 
-// Change the patient and update it to the server
-patient.getNameFirstRep().getFamilyFirstRep().setValue("Jones");
-client.update("1", patient);
-
-// Return the version history for that patient
-Bundle versions = client.history(Patient.class, "1",null,null);
+System.out.println("Found " + results.size() + " patients named 'duck'");
 // END SNIPPET: simple	
 }
 
@@ -177,7 +174,7 @@ List<IResource> response = client.transaction()
 }
 
 	public static void main(String[] args) {
-		// nothing
+		simpleExample();
 	}
 
 }

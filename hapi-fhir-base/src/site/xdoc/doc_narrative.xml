@@ -28,7 +28,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="simple" />
-				<param name="file" value="src/site/example/java/example/Narrative.java" />
+				<param name="file" value="examples/src/main/java/example/Narrative.java" />
 			</macro>
 
 		</section>			
@@ -64,7 +64,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="example1" />
-					<param name="file" value="src/site/example/java/example/Narrative.java" />
+					<param name="file" value="examples/src/main/java/example/Narrative.java" />
 				</macro>
 				
 				<p>
@@ -163,7 +163,7 @@ humanname.narrative=classpath:ca/uhn/fhir/narrative/HumanNameDt.html]]></source>
 
 			<macro name="snippet">
 				<param name="id" value="gen" />
-				<param name="file" value="src/site/example/java/example/NarrativeGenerator.java" />
+				<param name="file" value="examples/src/main/java/example/NarrativeGenerator.java" />
 			</macro>
 		
 		</section>

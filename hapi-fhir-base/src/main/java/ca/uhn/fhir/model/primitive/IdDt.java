@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs,
@@ -251,6 +252,14 @@ public class IdDt extends BasePrimitive<String> {
 
 	public boolean hasVersionIdPart() {
 		return isNotBlank(getVersionIdPart());
+	}
+
+	/**
+	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or
+	 * "https://"
+	 */
+	public boolean isAbsolute() {
+		return UrlUtil.isAbsolute(getValue());
 	}
 
 	/**

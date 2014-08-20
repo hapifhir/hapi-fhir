@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-@ResourceDef(name="Patient")
+@ResourceDef()
 public class MyPatient extends Patient {
 	
 	@Child(name="petName")	

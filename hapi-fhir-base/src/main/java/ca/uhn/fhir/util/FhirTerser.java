@@ -37,6 +37,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -108,31 +109,69 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b>
-	 * and are either of the exact type specified, or are a subclass of that type.
+	 * Visit all elements in a given resource
+	 * 
+	 * @param theResource The resource to visit
+	 * @param theVisitor The visitor
+	 */
+	public void visit(IResource theResource, IModelVisitor theVisitor) {
+		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		visit(theResource, null, def, theVisitor);
+	}
+
+	/**
+	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b> and are
+	 * either of the exact type specified, or are a subclass of that type.
 	 * <p>
-	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within
-	 * the message. Specifying a type of {@link IResource} would return the resource itself, as well as any contained resources. 
-	 * </p>  
-	 * @param theResourceT The resource instance to search. Must not be null.
-	 * @param theType The type to search for. Must not be null.
+	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within the
+	 * message. Specifying a type of {@link IResource} would return the resource itself, as well as any contained
+	 * resources.
+	 * </p>
+	 * 
+	 * @param theResourceT
+	 *            The resource instance to search. Must not be null.
+	 * @param theType
+	 *            The type to search for. Must not be null.
 	 * @return
 	 */
-	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(IResource theResource, Class<T> theType) {
-		ArrayList<T> retVal = new ArrayList<T>();
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(IResource theResource, final Class<T> theType) {
+		final ArrayList<T> retVal = new ArrayList<T>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		getAllChildElementsOfType(theResource, def, theType, retVal);
+		visit(theResource, null, def, new IModelVisitor() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				if (theElement.isEmpty()) {
+					return;
+				}
+
+				if (theElement != null && theType.isAssignableFrom(theElement.getClass())) {
+					retVal.add((T) theElement);
+				}
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+				if (theType.isAssignableFrom(theNextExt.getClass())) {
+					retVal.add((T) theNextExt);
+				}
+				if (theNextExt.getValue() != null && theType.isAssignableFrom(theNextExt.getValue().getClass())) {
+					retVal.add((T) theNextExt.getValue());
+				}
+			}
+		});
 		return retVal;
 	}
 
-	private <T extends IElement> void getAllChildElementsOfType(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, Class<T> theType, ArrayList<T> theList) {
-		if (theElement.isEmpty()) {
-			return;
-		}
-		
-		addIfCorrectType(theElement, theType, theList);
-		addUndeclaredExtensions(theElement, theType, theList);
+	private <T extends IElement> void visit(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
+		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
+//		if (theElement.isEmpty()) {
+//			return;
+//		}
+		
 		switch (theDefinition.getChildType()) {
 		case PRIMITIVE_XHTML:
 		case PRIMITIVE_DATATYPE:
@@ -153,7 +192,9 @@ public class FhirTerser {
 						if (nextValue.isEmpty()) {
 							continue;
 						}
-						BaseRuntimeElementDefinition<?> childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+						BaseRuntimeElementDefinition<?> childElementDef;
+						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+						
 						if (childElementDef == null) {
 							StringBuilder b = new StringBuilder();
 							b.append("Found value of type[");
@@ -171,7 +212,7 @@ public class FhirTerser {
 							}
 							throw new DataFormatException(b.toString());
 						}
-						getAllChildElementsOfType(nextValue, childElementDef, theType, theList);
+						visit(nextValue, nextChild, childElementDef, theCallback);
 					}
 				}
 			}
@@ -181,7 +222,7 @@ public class FhirTerser {
 			ContainedDt value = (ContainedDt) theElement;
 			for (IResource next : value.getContainedResources()) {
 				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
-				getAllChildElementsOfType(next, def, theType, theList);
+				visit(next, null, def, theCallback);
 			}
 			break;
 		}
@@ -192,21 +233,13 @@ public class FhirTerser {
 		}
 	}
 
-	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, Class<T> theType, ArrayList<T> theList) {
+	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition, IModelVisitor theCallback) {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
-			ISupportsUndeclaredExtensions elem = (ISupportsUndeclaredExtensions) theElement;
-			for (ExtensionDt nextExt : elem.getUndeclaredExtensions()) {
-				addIfCorrectType(nextExt, theType, theList);
-				addIfCorrectType(nextExt.getValue(), theType, theList);
-				addUndeclaredExtensions(nextExt, theType, theList);
+			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
+			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
+				theCallback.acceptUndeclaredExtension(containingElement, theChildDefinition, theDefinition, nextExt);
+				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends IElement> void addIfCorrectType(IElement theElement, Class<T> theType, ArrayList<T> theList) {
-		if (theElement != null && theType.isAssignableFrom(theElement.getClass())) {
-			theList.add((T) theElement);
 		}
 	}
 

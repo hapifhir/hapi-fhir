@@ -20,11 +20,11 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -52,9 +52,9 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	public TransactionMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(null, theMethod, theConetxt, theProvider);
-		
+
 		myTransactionParamIndex = -1;
-				int index=0;
+		int index = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParamBinder) {
 				myTransactionParamIndex = index;
@@ -62,7 +62,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			index++;
 		}
 
-		if (myTransactionParamIndex==-1) {
+		if (myTransactionParamIndex == -1) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @" + TransactionParam.class + " annotation");
 		}
 	}
@@ -71,7 +71,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return RestfulOperationSystemEnum.TRANSACTION;
 	}
-
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
@@ -95,16 +94,24 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	@SuppressWarnings("unchecked")
 	@Override
 	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		List<IResource> resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
-		
-		List<IdDt> oldIds= new ArrayList<IdDt>();
-		for (IResource next : resources) {
-			oldIds.add(next.getId());
+		// Grab the IDs of all of the resources in the transaction
+		List<IResource> resources;
+		if (theMethodParams[myTransactionParamIndex] instanceof Bundle) {
+			resources = ((Bundle) theMethodParams[myTransactionParamIndex]).toListOfResources();
+		} else {
+			resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
 		}
 		
-		Object response= invokeServerMethod(theMethodParams);
+		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
+		for (IResource next : resources) {
+			oldIds.put(next, next.getId());
+		}
+
+		// Call the server implementation method
+		Object response = invokeServerMethod(theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
-		
+
+		/*
 		int offset = 0;
 		if (retVal.size() != resources.size()) {
 			if (retVal.size() > 0 && retVal.getResources(0, 1).get(0) instanceof OperationOutcome) {
@@ -113,24 +120,30 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 				throw new InternalErrorException("Transaction bundle contained " + resources.size() + " entries, but server method response contained " + retVal.size() + " entries (must be the same)");
 			}
 		}
+		 */
 		
-		List<IResource> retResources = retVal.getResources(offset, retVal.size()); 
-		for (int i =0; i < resources.size(); i++) {
-			IdDt oldId = oldIds.get(i);
+		List<IResource> retResources = retVal.getResources(0, retVal.size());
+		for (int i = 0; i < retResources.size(); i++) {
+			IdDt oldId = oldIds.get(retResources.get(i));
 			IResource newRes = retResources.get(i);
 			if (newRes.getId() == null || newRes.getId().isEmpty()) {
-				throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
+				if (!(newRes instanceof OperationOutcome)) {
+					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
+				}
 			}
-			
+
 			if (oldId != null && !oldId.isEmpty()) {
 				if (!oldId.equals(newRes.getId())) {
 					newRes.getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}
-		
+
 		return retVal;
-	}
+
+		
+		
+			}
 
 	@Override
 	protected Object parseRequestObject(Request theRequest) throws IOException {
@@ -147,11 +160,15 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		@SuppressWarnings("unchecked")
-		List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
 		FhirContext context = getContext();
-		
-		return createTransactionInvocation(resources, context);
+		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
+			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
+			return createTransactionInvocation(bundle, context);
+		} else {
+			@SuppressWarnings("unchecked")
+			List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
+			return createTransactionInvocation(resources, context);
+		}
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {

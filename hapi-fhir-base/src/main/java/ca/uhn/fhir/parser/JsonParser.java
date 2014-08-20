@@ -166,6 +166,8 @@ public class JsonParser extends BaseParser implements IParser {
 		if (linkStarted) {
 			eventWriter.writeEnd();
 		}
+		
+		writeCategories(eventWriter, theBundle.getCategories());
 
 		writeOptionalTagWithTextNode(eventWriter, "totalResults", theBundle.getTotalResults());
 
@@ -193,17 +195,7 @@ public class JsonParser extends BaseParser implements IParser {
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
-			if (nextEntry.getCategories() != null && nextEntry.getCategories().size() > 0) {
-				eventWriter.writeStartArray("category");
-				for (Tag next : nextEntry.getCategories()) {
-					eventWriter.writeStartObject();
-					eventWriter.write("term", defaultString(next.getTerm()));
-					eventWriter.write("label", defaultString(next.getLabel()));
-					eventWriter.write("scheme", defaultString(next.getScheme()));
-					eventWriter.writeEnd();
-				}
-				eventWriter.writeEnd();
-			}
+			writeCategories(eventWriter, nextEntry.getCategories());
 
 			writeAuthor(nextEntry, eventWriter);
 
@@ -219,6 +211,20 @@ public class JsonParser extends BaseParser implements IParser {
 
 		eventWriter.writeEnd();
 		eventWriter.flush();
+	}
+
+	private void writeCategories(JsonGenerator eventWriter, TagList categories) {
+		if (categories != null && categories.size() > 0) {
+			eventWriter.writeStartArray("category");
+			for (Tag next : categories) {
+				eventWriter.writeStartObject();
+				eventWriter.write("term", defaultString(next.getTerm()));
+				eventWriter.write("label", defaultString(next.getLabel()));
+				eventWriter.write("scheme", defaultString(next.getScheme()));
+				eventWriter.writeEnd();
+			}
+			eventWriter.writeEnd();
+		}
 	}
 
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef,
@@ -291,10 +297,10 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			if (StringUtils.isNotBlank(reference)) {
-				theWriter.write("resource", reference);
+				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
 			if (referenceDt.getDisplay().isEmpty() == false) {
-				theWriter.write("display", referenceDt.getDisplay().getValueAsString());
+				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplay().getValueAsString());
 			}
 			theWriter.writeEnd();
 			break;

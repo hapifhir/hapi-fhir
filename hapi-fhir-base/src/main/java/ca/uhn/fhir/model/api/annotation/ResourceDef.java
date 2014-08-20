@@ -35,7 +35,7 @@ public @interface ResourceDef {
 	/**
 	 * The name of the resource (e.g. "Patient" or "DiagnosticReport")
 	 */
-	String name();
+	String name() default "";
 
 	/**
 	 * Not currently used

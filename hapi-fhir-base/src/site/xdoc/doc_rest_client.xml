@@ -27,8 +27,9 @@
 				There are two types of clients provided by HAPI: Generic and Annotation-driven.
 				The generic client (introduced in HAPI-FHIR 0.3) is much simpler to create
 				and generally provides the faster way to get started. The annotation-driven
-				client is more powerful and can rely on code generation to give better
-				compile-time checking. 
+				client can rely on code generation and static binding to specific operations to 
+				give better	compile-time checking against servers with a specific set of capabilities
+				exposed. 
 			</p>
 
 		</section>
@@ -47,7 +48,7 @@
 			<macro name="snippet">
 				<param name="id" value="simple" />
 				<param name="file"
-					value="src/site/example/java/example/GenericClientExample.java" />
+					value="examples/src/main/java/example/GenericClientExample.java" />
 			</macro>
 			
 			<p> 
@@ -75,28 +76,20 @@
 					such as <code>encodedJson()</code> or <code>encodedXml()</code>.
 				</p>
 			</subsection>
-
-			<subsection name="Type - Create">
-				<p>
-					The following example shows how to perform a create
-					operation using the generic client:
-				</p>
-				<macro name="snippet">
-					<param name="id" value="create" />
-					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
-				</macro>
-			</subsection>			
 						
 			<subsection name="Type - Search/Query">
 				
+				<p>
+					Searching for resources is probably the most common initial scenario for
+					client applications, so we'll start the demonstration there.
+				</p>
 				<p>
 					The following example shows how to query using the generic client:
 				</p>
 				<macro name="snippet">
 					<param name="id" value="search" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Multi-valued Parameters (ANY/OR)</h4>
@@ -108,7 +101,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchOr" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Multi-valued Parameters (ALL/AND)</h4>
@@ -120,7 +113,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchOr" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Paging</h4>
@@ -131,7 +124,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchPaging" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Composite Parameters</h4>
@@ -144,7 +137,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchComposite" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
 				<h4>Search - Other Query Options</h4>
@@ -155,7 +148,7 @@
 				<macro name="snippet">
 					<param name="id" value="searchAdv" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 
 				<h4>Search - Using HTTP POST or GET with _search</h4>
@@ -168,9 +161,21 @@
 				<macro name="snippet">
 					<param name="id" value="searchPost" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 				
+			</subsection>			
+
+			<subsection name="Type - Create">
+				<p>
+					The following example shows how to perform a create
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="create" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
 			</subsection>			
 
 			<subsection name="Instance - Delete">
@@ -181,7 +186,7 @@
 				<macro name="snippet">
 					<param name="id" value="delete" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 
@@ -198,7 +203,7 @@
 				<macro name="snippet">
 					<param name="id" value="update" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 
@@ -210,7 +215,7 @@
 				<macro name="snippet">
 					<param name="id" value="conformance" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 			
@@ -221,7 +226,7 @@
 				<macro name="snippet">
 					<param name="id" value="transaction" />
 					<param name="file"
-						value="src/site/example/java/example/GenericClientExample.java" />
+						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
 			
@@ -295,7 +300,7 @@
 				<macro name="snippet">
 					<param name="id" value="provider" />
 					<param name="file"
-						value="src/site/example/java/example/IRestfulClient.java" />
+						value="examples/src/main/java/example/IRestfulClient.java" />
 				</macro>
 
 				<p>
@@ -321,7 +326,7 @@
 				<macro name="snippet">
 					<param name="id" value="client" />
 					<param name="file"
-						value="src/site/example/java/example/ExampleRestfulClient.java" />
+						value="examples/src/main/java/example/ExampleRestfulClient.java" />
 				</macro>
 
 			</subsection>
@@ -343,7 +348,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="clientConfig" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -359,7 +364,7 @@
 				<macro name="snippet">
 					<param name="id" value="client" />
 					<param name="file"
-						value="src/site/example/java/example/CompleteExampleClient.java" />
+						value="examples/src/main/java/example/CompleteExampleClient.java" />
 				</macro>
 				
 			</subsection>
@@ -412,7 +417,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="security" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -429,7 +434,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="logging" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 
 			</subsection>
@@ -443,7 +448,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="logging" />
-					<param name="file" value="src/site/example/java/example/ClientExamples.java" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 			
 			</subsection>

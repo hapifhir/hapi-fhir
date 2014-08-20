@@ -8,10 +8,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>jar</packaging>
-	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
+	
+	<url>http://jamesagnew.github.io/hapi-fhir/</url>
  
 	<name>HAPI FHIR - Core Library</name>
 
@@ -20,14 +20,11 @@
 			<id>git.server</id>
 			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
 		</site>
-
-		<!-- <site> <id>hl7api.sf.net</id> <url>scp://shell.sourceforge.net/home/project-web/hl7api/htdocs/hapi-fhir</url> </site> -->
 	</distributionManagement>
 
 	<dependencies>
 
 		<!-- JSON -->
-		<!-- <dependency> <groupId>com.google.code.gson</groupId> <artifactId>gson</artifactId> <version>2.2.4</version> </dependency> -->
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>

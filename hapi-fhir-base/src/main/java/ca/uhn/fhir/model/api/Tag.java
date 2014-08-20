@@ -35,6 +35,18 @@ public class Tag extends BaseElement implements IElement {
 	 */
 	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
 
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/security" scheme
+	 * value
+	 */
+	public static final String HL7_ORG_SECURITY_TAG = "http://hl7.org/fhir/tag/security";
+
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/profile" scheme
+	 * value
+	 */
+	public static final String HL7_ORG_PROFILE_TAG = "http://hl7.org/fhir/tag/profile";
+
 	public static final String ATTR_TERM = "term";
 	public static final String ATTR_LABEL = "label";
 	public static final String ATTR_SCHEME = "scheme";

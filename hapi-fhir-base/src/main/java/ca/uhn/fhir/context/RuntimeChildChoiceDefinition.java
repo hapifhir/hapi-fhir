@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -103,6 +104,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (alternateElementName != null) {
 				myNameToChildDefinition.put(alternateElementName, nextDef);
 			}
+			
+			if (IResource.class.isAssignableFrom(next)) {
+				myDatatypeToElementDefinition.put(ResourceReferenceDt.class, nextDef);
+			}
+			
 			myDatatypeToElementDefinition.put(next, nextDef);
 			myDatatypeToElementName.put(next, elementName);
 		}

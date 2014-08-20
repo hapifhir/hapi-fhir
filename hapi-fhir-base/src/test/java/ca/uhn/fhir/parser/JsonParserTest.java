@@ -366,6 +366,29 @@ public class JsonParserTest {
 		Bundle b = new Bundle();
 		BundleEntry e = b.addEntry();
 		e.setResource(new Patient());
+		b.addCategory().setLabel("label").setTerm("term").setScheme("scheme");
+		
+		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, StringContains.containsString("\"category\":[{\"term\":\"term\",\"label\":\"label\",\"scheme\":\"scheme\"}]"));
+		
+		b = new FhirContext().newJsonParser().parseBundle(val);
+		assertEquals(1,b.getEntries().size());
+		assertEquals(1,b.getCategories().size());
+		assertEquals("term", b.getCategories().get(0).getTerm());
+		assertEquals("label", b.getCategories().get(0).getLabel());
+		assertEquals("scheme", b.getCategories().get(0).getScheme());
+		assertNull(b.getEntries().get(0).getResource());
+
+	}
+
+	@Test
+	public void testEncodeBundleEntryCategory() {
+
+		Bundle b = new Bundle();
+		BundleEntry e = b.addEntry();
+		e.setResource(new Patient());
 		e.addCategory().setLabel("label").setTerm("term").setScheme("scheme");
 		
 		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
@@ -382,7 +405,6 @@ public class JsonParserTest {
 		assertNull(b.getEntries().get(0).getResource());
 
 	}
-
 	
 	@Test
 	public void testEncodeContainedResources() throws IOException {
@@ -542,7 +564,7 @@ public class JsonParserTest {
 
 		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"resource\":\"Organization/123\"}"));
+		assertThat(str, StringContains.containsString("\"managingOrganization\":{\"reference\":\"Organization/123\"}"));
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");
@@ -671,6 +693,11 @@ public class JsonParserTest {
 		IParser p = ourCtx.newJsonParser();
 		Bundle bundle = p.parseBundle(msg);
 
+		assertEquals(1, bundle.getCategories().size());
+		assertEquals("http://scheme", bundle.getCategories().get(0).getScheme());
+		assertEquals("http://term", bundle.getCategories().get(0).getTerm());
+		assertEquals("label", bundle.getCategories().get(0).getLabel());
+		
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle);
 		ourLog.info(encoded);
 

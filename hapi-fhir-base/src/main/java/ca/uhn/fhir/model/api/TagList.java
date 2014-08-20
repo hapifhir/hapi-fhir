@@ -21,6 +21,7 @@ package ca.uhn.fhir.model.api;
  */
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TagList extends ArrayList<Tag> {
 
@@ -48,7 +49,7 @@ public class TagList extends ArrayList<Tag> {
 		return null;
 	}
 
-	public ArrayList<Tag> getTagsWithScheme(String theScheme) {
+	public List<Tag> getTagsWithScheme(String theScheme) {
 		ArrayList<Tag> retVal = new ArrayList<Tag>();
 		for (Tag next : this) {
 			if (theScheme.equals(next.getScheme())) {

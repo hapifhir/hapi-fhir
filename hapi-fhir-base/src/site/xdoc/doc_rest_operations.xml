@@ -202,7 +202,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="read" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -218,7 +218,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="clientReadInterface" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<a name="instance_vread" />
@@ -243,7 +243,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="vread" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -294,7 +294,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="update" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -311,7 +311,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="updateClient" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<a name="instance_delete" />
@@ -336,7 +336,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="delete" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -407,7 +407,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="create" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -424,7 +424,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="createClient" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<a name="type_search" />
@@ -456,7 +456,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchAll" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -495,7 +495,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchStringParam" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -517,7 +517,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchIdentifierParam" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -550,7 +550,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="dates" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -565,7 +565,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="dateClient" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 			</subsection>
@@ -597,7 +597,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="dateRange" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -612,7 +612,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="dateClient" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<h4>Unbounded Ranges</h4>
@@ -658,7 +658,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="quantity" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -699,7 +699,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="reference" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -722,7 +722,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="referenceChain" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 			</subsection>
@@ -744,7 +744,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="searchComposite" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -800,7 +800,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="searchOptionalParam" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -878,7 +878,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchMultiple" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -910,7 +910,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="searchMultipleAnd" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 				
 				<h4>AND Relationship Query Parameters for Dates</h4>
@@ -940,7 +940,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="pathSpec" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -957,7 +957,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="pathSpecSimple" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 			</subsection>
@@ -979,7 +979,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchNamedQuery" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -1016,7 +1016,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="sort" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
@@ -1041,7 +1041,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="searchWithDocs" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 			</subsection>
@@ -1108,7 +1108,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="validate" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -1150,7 +1150,7 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="metadataProvider" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -1160,7 +1160,7 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="metadataClient" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -1171,7 +1171,7 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="metadataClientUsage" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<a name="system_transaction" />
@@ -1198,8 +1198,13 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="transaction" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
+			
+			<p>
+				Transaction methods require one parameter annotated with @TransactionParam, and that
+				parameter may be of type List&lt;IResource&gt; or Bundle.
+			</p>
 			
 			<p>
 				Example URL to invoke this method:
@@ -1315,7 +1320,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="history" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<p>
@@ -1324,7 +1329,7 @@
 
 			<macro name="snippet">
 				<param name="id" value="historyClient" />
-				<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
 			<a name="exceptions" />
@@ -1406,7 +1411,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="readTags" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 				
 				<p>
@@ -1417,7 +1422,7 @@
 				
 				<macro name="snippet">
 					<param name="id" value="clientReadTags" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 				
 			</subsection>
@@ -1444,7 +1449,7 @@
 
 				<macro name="snippet">
 					<param name="id" value="createTags" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 				
 			</subsection>
@@ -1464,7 +1469,7 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="tagMethodProvider" />
-					<param name="file" value="src/site/example/java/example/RestfulPatientResourceProviderMore.java" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 				
 				<p>

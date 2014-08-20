@@ -29,7 +29,10 @@ public class ModelExtensionTest {
 
 		MyPatient parsed = ourCtx.newXmlParser().parseResource(MyPatient.class, str);
 		assertEquals("foo", parsed.getIdentifierFirstRep().getSystem().getValueAsString());
-		
+
+//		assertEquals(MyOrganization.class, parsed.getManagingOrganization().getResource().getClass());
+//		MyOrganization parsedOrg = (MyOrganization) parsed.getManagingOrganization().getResource();
+//		assertEquals("arg0", parsedOrg.getName().getValue());
 	}
 
 }

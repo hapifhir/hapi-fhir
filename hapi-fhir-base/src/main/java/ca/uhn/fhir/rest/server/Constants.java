@@ -48,6 +48,7 @@ public class Constants {
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_CATEGORY = "Category";
+	public static final String HEADER_CATEGORY_LC = HEADER_CATEGORY.toLowerCase();
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
@@ -97,8 +98,6 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
-	public static final String TAG_SCHEME_PROFILE = "http://hl7.org/fhir/tag/profile	";
-	
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

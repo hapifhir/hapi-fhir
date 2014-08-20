@@ -19,7 +19,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.TagListParam;
+import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -57,7 +57,6 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.client.ITestClient;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -78,6 +77,14 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 @SuppressWarnings("unused")
 public abstract class RestfulPatientResourceProviderMore implements IResourceProvider {
 
+   public interface ITestClient extends IBasicClient
+   {
+
+      @Search
+      List<Patient> getPatientByDob(@RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theParam);
+      
+   }
+   
 private boolean detectedVersionConflict;
 private boolean conflictHappened;
 private boolean couldntFindThisId;

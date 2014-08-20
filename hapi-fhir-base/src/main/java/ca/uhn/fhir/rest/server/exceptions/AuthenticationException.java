@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import java.text.ParseException;
-
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -41,7 +39,7 @@ public class AuthenticationException extends BaseServerResponseException {
 		super(STATUS_CODE, theMessage);
 	}
 
-	public AuthenticationException(String theMessage, ParseException theCause) {
+	public AuthenticationException(String theMessage, Throwable theCause) {
 		super(STATUS_CODE, theMessage, theCause);
 	}
 

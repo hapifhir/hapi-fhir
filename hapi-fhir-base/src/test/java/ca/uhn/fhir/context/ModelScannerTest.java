@@ -5,7 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.resource.CarePlan;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.MyPatient;
 
 public class ModelScannerTest {
 
@@ -13,6 +15,16 @@ public class ModelScannerTest {
 	@Test
 	public void testCarePlan() throws DataFormatException {
 		new ModelScanner(CarePlan.class);
+	}
+	
+	@Test
+	public void testExtendedClass() {
+		FhirContext ctx = new FhirContext();
+		ctx.getResourceDefinition(MyPatient.class);
+		ctx.getResourceDefinition(Patient.class);
+		
+		RuntimeResourceDefinition patient = ctx.getResourceDefinition("Patient");
+		assertEquals(Patient.class, patient.getImplementingClass());
 	}
 	
 	

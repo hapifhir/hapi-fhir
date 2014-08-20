@@ -63,7 +63,7 @@ public class CustomTypeTest {
 		assertEquals(1, bundle.getEntries().size());
 
 		BundleEntry entry = bundle.getEntries().get(0);
-		ArrayList<Tag> profileTags = entry.getCategories().getTagsWithScheme(Constants.TAG_SCHEME_PROFILE);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
 		assertEquals(1, profileTags.size());
 		assertEquals("http://foo/profiles/Profile", profileTags.get(0).getTerm());
 		

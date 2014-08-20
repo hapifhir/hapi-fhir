@@ -80,6 +80,8 @@ import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 
 public class XmlParser extends BaseParser implements IParser {
+	static final String RESREF_DISPLAY = "display";
+	static final String RESREF_REFERENCE = "reference";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
@@ -144,6 +146,8 @@ public class XmlParser extends BaseParser implements IParser {
 				eventWriter.writeEndElement();
 			}
 
+			writeCategories(eventWriter, theBundle.getCategories());
+
 			for (BundleEntry nextEntry : theBundle.getEntries()) {
 				boolean deleted = false;
 				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
@@ -182,15 +186,7 @@ public class XmlParser extends BaseParser implements IParser {
 				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
 
-				if (nextEntry.getCategories() != null) {
-					for (Tag next : nextEntry.getCategories()) {
-						eventWriter.writeStartElement("category");
-						eventWriter.writeAttribute("term", defaultString(next.getTerm()));
-						eventWriter.writeAttribute("label", defaultString(next.getLabel()));
-						eventWriter.writeAttribute("scheme", defaultString(next.getScheme()));
-						eventWriter.writeEndElement();
-					}
-				}
+				writeCategories(eventWriter, nextEntry.getCategories());
 
 				if (!nextEntry.getLinkSelf().isEmpty()) {
 					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
@@ -221,6 +217,18 @@ public class XmlParser extends BaseParser implements IParser {
 			eventWriter.close();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	private void writeCategories(XMLStreamWriter eventWriter,  TagList categories) throws XMLStreamException {
+		if (categories != null) {
+			for (Tag next : categories) {
+				eventWriter.writeStartElement("category");
+				eventWriter.writeAttribute("term", defaultString(next.getTerm()));
+				eventWriter.writeAttribute("label", defaultString(next.getLabel()));
+				eventWriter.writeAttribute("scheme", defaultString(next.getScheme()));
+				eventWriter.writeEndElement();
+			}
 		}
 	}
 
@@ -550,12 +558,12 @@ public class XmlParser extends BaseParser implements IParser {
 		// }
 
 		if (!(theRef.getDisplay().isEmpty())) {
-			theEventWriter.writeStartElement("display");
+			theEventWriter.writeStartElement(RESREF_DISPLAY);
 			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
 			theEventWriter.writeEndElement();
 		}
 		if (StringUtils.isNotBlank(reference)) {
-			theEventWriter.writeStartElement("reference");
+			theEventWriter.writeStartElement(RESREF_REFERENCE);
 			theEventWriter.writeAttribute("value", reference);
 			theEventWriter.writeEndElement();
 		}

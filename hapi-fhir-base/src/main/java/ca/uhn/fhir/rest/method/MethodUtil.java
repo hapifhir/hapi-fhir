@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -79,6 +79,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
  */
 
 public class MethodUtil {
+	private static final String LABEL = "label=\"";
+	private static final String SCHEME = "scheme=\"";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
 
@@ -132,8 +134,95 @@ public class MethodUtil {
 			String headerValue = clHeaders.get(0);
 			resource.getId().setValue(headerValue);
 		}
+		
+		List<String> categoryHeaders = theHeaders.get(Constants.HEADER_CATEGORY_LC);
+		if (categoryHeaders != null && categoryHeaders.size() > 0 && StringUtils.isNotBlank(categoryHeaders.get(0))) {
+			TagList tagList = new TagList();
+			for (String header : categoryHeaders) {
+				parseTagValue(tagList, header);
+			}
+			ResourceMetadataKeyEnum.TAG_LIST.put(resource, tagList);
+		}
 	}
 
+	public static void parseTagValue(TagList tagList, String nextTagComplete) {
+		StringBuilder next = new StringBuilder(nextTagComplete);
+		parseTagValue(tagList, nextTagComplete, next);
+	}
+
+	private static void parseTagValue(TagList theTagList, String theCompleteHeaderValue, StringBuilder theBuffer) {
+		int firstSemicolon = theBuffer.indexOf(";");
+		int deleteTo;
+		if (firstSemicolon == -1) {
+			firstSemicolon = theBuffer.indexOf(",");
+			if (firstSemicolon == -1) {
+				firstSemicolon = theBuffer.length();
+				deleteTo = theBuffer.length();
+			} else {
+				deleteTo = firstSemicolon;
+			}
+		} else {
+			deleteTo = firstSemicolon + 1;
+		}
+
+		String term = theBuffer.substring(0, firstSemicolon);
+		String scheme = null;
+		String label = null;
+		if (isBlank(term)) {
+			return;
+		}
+
+		theBuffer.delete(0, deleteTo);
+		while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
+			theBuffer.deleteCharAt(0);
+		}
+
+		while (theBuffer.length() > 0) {
+			boolean foundSomething = false;
+			if (theBuffer.length() > SCHEME.length() && theBuffer.substring(0, SCHEME.length()).equals(SCHEME)) {
+				int closeIdx = theBuffer.indexOf("\"", SCHEME.length());
+				scheme = theBuffer.substring(SCHEME.length(), closeIdx);
+				theBuffer.delete(0, closeIdx + 1);
+				foundSomething = true;
+			}
+			if (theBuffer.length() > LABEL.length() && theBuffer.substring(0, LABEL.length()).equals(LABEL)) {
+				int closeIdx = theBuffer.indexOf("\"", LABEL.length());
+				label = theBuffer.substring(LABEL.length(), closeIdx);
+				theBuffer.delete(0, closeIdx + 1);
+				foundSomething = true;
+			}
+			// TODO: support enc2231-string as described in
+			// http://tools.ietf.org/html/draft-johnston-http-category-header-02
+			// TODO: support multiple tags in one header as described in
+			// http://hl7.org/implement/standards/fhir/http.html#tags
+
+			while (theBuffer.length() > 0 && (theBuffer.charAt(0) == ' ' || theBuffer.charAt(0) == ';')) {
+				theBuffer.deleteCharAt(0);
+			}
+
+			if (!foundSomething) {
+				break;
+			}
+		}
+
+		if (theBuffer.length() > 0 && theBuffer.charAt(0) == ',') {
+			theBuffer.deleteCharAt(0);
+			while (theBuffer.length() > 0 && theBuffer.charAt(0) == ' ') {
+				theBuffer.deleteCharAt(0);
+			}
+			theTagList.add(new Tag(scheme, term, label));
+			parseTagValue(theTagList, theCompleteHeaderValue, theBuffer);
+		} else {
+			theTagList.add(new Tag(scheme, term, label));
+		}
+
+		if (theBuffer.length() > 0) {
+			ourLog.warn("Ignoring extra text at the end of " + Constants.HEADER_CATEGORY + " tag '" + theBuffer.toString() + "' - Complete tag value was: " + theCompleteHeaderValue);
+		}
+
+	}
+
+	
 	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (list != null) {
