@@ -27,9 +27,8 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  */
 
 /**
- * Base class for RESTful client and server exceptions. RESTful client methods
- * will only throw exceptions which are subclasses of this exception type, and
- * RESTful server methods should also only call subclasses of this exception
+ * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are
+ * subclasses of this exception type, and RESTful server methods should also only call subclasses of this exception
  * type.
  */
 public abstract class BaseServerResponseException extends RuntimeException {
@@ -50,10 +49,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	private final OperationOutcome myOperationOutcome;
-
 	private String myResponseBody;
 	private String myResponseMimeType;
-
 	private int myStatusCode;
 
 	/**
@@ -77,6 +74,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 *            The HTTP status code corresponding to this problem
 	 * @param theMessage
 	 *            The message
+	 * @param theOperationOutcome
+	 *            An OperationOutcome resource to return to the calling client (in a server) or the OperationOutcome
+	 *            that was returned from the server (in a client)
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, OperationOutcome theOperationOutcome) {
 		super(theMessage);
@@ -105,6 +105,25 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * 
 	 * @param theStatusCode
 	 *            The HTTP status code corresponding to this problem
+	 * @param theMessage
+	 *            The message
+	 * @param theCause
+	 *            The underlying cause exception
+	 * @param theOperationOutcome
+	 *            An OperationOutcome resource to return to the calling client (in a server) or the OperationOutcome
+	 *            that was returned from the server (in a client)
+	 */
+	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, OperationOutcome theOperationOutcome) {
+		super(theMessage, theCause);
+		myStatusCode = theStatusCode;
+		myOperationOutcome = theOperationOutcome;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code corresponding to this problem
 	 * @param theCause
 	 *            The underlying cause exception
 	 */
@@ -115,17 +134,32 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the {@link OperationOutcome} resource if any which was supplied
-	 * in the response, or <code>null</code>
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code corresponding to this problem
+	 * @param theCause
+	 *            The underlying cause exception
+	 * @param theOperationOutcome
+	 *            An OperationOutcome resource to return to the calling client (in a server) or the OperationOutcome
+	 *            that was returned from the server (in a client)
+	 */
+	public BaseServerResponseException(int theStatusCode, Throwable theCause, OperationOutcome theOperationOutcome) {
+		super(theCause.toString(), theCause);
+		myStatusCode = theStatusCode;
+		myOperationOutcome = theOperationOutcome;
+	}
+
+	/**
+	 * Returns the {@link OperationOutcome} resource if any which was supplied in the response, or <code>null</code>
 	 */
 	public OperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
 	}
 
 	/**
-	 * In a RESTful client, this method will be populated with the body of the
-	 * HTTP respone if one was provided by the server, or <code>null</code>
-	 * otherwise.
+	 * In a RESTful client, this method will be populated with the body of the HTTP respone if one was provided by the
+	 * server, or <code>null</code> otherwise.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
 	 * </p>
@@ -135,8 +169,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * In a RESTful client, this method will be populated with the HTTP status
-	 * code that was returned with the HTTP response.
+	 * In a RESTful client, this method will be populated with the HTTP status code that was returned with the HTTP
+	 * response.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
 	 * </p>
@@ -153,16 +187,14 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * This method is currently only called internally by HAPI, it should not be
-	 * called by user code.
+	 * This method is currently only called internally by HAPI, it should not be called by user code.
 	 */
 	public void setResponseBody(String theResponseBody) {
 		myResponseBody = theResponseBody;
 	}
 
 	/**
-	 * This method is currently only called internally by HAPI, it should not be
-	 * called by user code.
+	 * This method is currently only called internally by HAPI, it should not be called by user code.
 	 */
 	public void setResponseMimeType(String theResponseMimeType) {
 		myResponseMimeType = theResponseMimeType;
