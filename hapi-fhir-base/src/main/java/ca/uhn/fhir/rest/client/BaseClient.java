@@ -211,6 +211,7 @@ public abstract class BaseClient {
 				}
 
 				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
+				OperationOutcome oo=null;
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
@@ -218,7 +219,7 @@ public abstract class BaseClient {
 					if (enc != null) {
 						IParser p = enc.newParser(theContext);
 						try {
-							OperationOutcome oo = p.parseResource(OperationOutcome.class, body);
+							oo = p.parseResource(OperationOutcome.class, body);
 							if (oo.getIssueFirstRep().getDetails().isEmpty()==false) {
 								message = message + ": " + oo.getIssueFirstRep().getDetails().getValue();
 							}
@@ -231,7 +232,8 @@ public abstract class BaseClient {
 				keepResponseAndLogIt(theLogRequestAndResponse, response, body);
 
 				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
-
+				exception.setOperationOutcome(oo);
+				
 				if (body != null) {
 					exception.setResponseBody(body);
 				}

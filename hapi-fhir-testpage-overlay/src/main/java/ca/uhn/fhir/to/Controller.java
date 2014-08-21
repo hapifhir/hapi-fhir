@@ -65,6 +65,7 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -967,11 +968,14 @@ public class Controller {
 		}
 
 		List<String> values;
+		boolean addToWhere=true;
 		if ("token".equals(nextType)) {
 			if (isBlank(parts.get(2))) {
 				return true;
 			}
 			values = Collections.singletonList(StringUtils.join(parts, ""));
+			addToWhere=false;
+			theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(2)));
 		} else if ("date".equals(nextType)) {
 			values = new ArrayList<String>();
 			if (isNotBlank(parts.get(1))) {
@@ -998,8 +1002,9 @@ public class Controller {
 			theClientCodeJsonWriter.write("qualifier", nextQualifier);
 			theClientCodeJsonWriter.write("value", nextValue);
 			theClientCodeJsonWriter.writeEnd();
-
+			if (addToWhere) {
 			theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
+			}
 
 		}
 

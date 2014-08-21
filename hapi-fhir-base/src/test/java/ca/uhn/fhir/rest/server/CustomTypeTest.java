@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,14 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -29,16 +25,11 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -50,10 +41,14 @@ public class CustomTypeTest {
 	private static FhirContext ourCtx = new FhirContext(ExtendedPatient.class);
 	private static int ourPort;
 	private static Server ourServer;
+	private static RestfulServer ourServlet;
 
 	
 	@Test
 	public void testSearchReturnsProfile() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		ourReturnExtended=true;
+		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -72,7 +67,65 @@ public class CustomTypeTest {
 		
 	}
 	
+	@Test
+	public void testSearchReturnsNoProfileForNormalType() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ONLY_FOR_CUSTOM);
+		ourReturnExtended=false;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
+		assertEquals(0, profileTags.size());
+	}
 	
+	@Test
+	public void testSearchReturnsNoProfileForExtendedType() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.NEVER);
+		ourReturnExtended=true;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
+		assertEquals(0, profileTags.size());
+	}
+
+	
+	@Test
+	public void testSearchReturnsProfileForNormalType() throws Exception {
+		ourServlet.setAddProfileTag(AddProfileTagEnum.ALWAYS);
+		ourReturnExtended=false;
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		BundleEntry entry = bundle.getEntries().get(0);
+		List<Tag> profileTags = entry.getCategories().getTagsWithScheme(Tag.HL7_ORG_PROFILE_TAG);
+		assertEquals(1, profileTags.size());
+		assertEquals("http://hl7.org/fhir/profiles/Patient", profileTags.get(0).getTerm());
+		
+		Patient p = (Patient) bundle.getEntries().get(0).getResource();
+		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
+		
+	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -87,11 +140,11 @@ public class CustomTypeTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourServlet = new RestfulServer();
+		ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -111,6 +164,8 @@ public class CustomTypeTest {
 		
 	}
 	
+	private static boolean ourReturnExtended = false;
+	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -120,7 +175,7 @@ public class CustomTypeTest {
 		public List<Patient> findPatient(@OptionalParam(name = "_id") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
-			ExtendedPatient patient = new ExtendedPatient();
+			Patient patient = ourReturnExtended ? new ExtendedPatient() : new Patient();
 			patient.setId("1");
 			patient.addIdentifier("system", "identifier123");
 			if (theParam != null) {

@@ -629,8 +629,6 @@ class ModelScanner {
 			}
 		}
 
-		String profile = resourceDefinition.profile();
-
 		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(resourceName, theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {

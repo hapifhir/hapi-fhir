@@ -352,4 +352,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return retVal;
 	}
 
+	public boolean isStandardProfile() {
+		return myResourceProfile.startsWith("http://hl7.org/fhir/profiles");
+	}
+
 }

@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -432,7 +433,7 @@ public class JsonParserTest {
 
 		ourLog.info(str);
 		assertThat(str, StringContains.containsString("<div>AAA</div>"));
-		String substring = "\"resource\":\"#";
+		String substring = "\"reference\":\"#";
 		assertThat(str, StringContains.containsString(substring));
 
 		int idx = str.indexOf(substring) + substring.length();
@@ -473,7 +474,7 @@ public class JsonParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"reference\":\"Organization/123\"}}]"));
 
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
@@ -526,7 +527,7 @@ public class JsonParserTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"resource\":\"Organization/123\"}}]"));
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"reference\":\"Organization/123\"}}]"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUseEnum.HOME, patient.getAddressFirstRep().getUse().getValueAsEnum());
@@ -907,6 +908,18 @@ public class JsonParserTest {
 
 	}
 
+	/**
+	 * HAPI FHIR < 0.6 incorrectly used "resource" instead of "reference"
+	 */
+	@Test
+	public void testParseWithIncorrectReference() throws IOException {
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class,jsonString);
+		assertEquals("Organization/1", parsed.getManagingOrganization().getReference().getValue());
+	}
+	
+	
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
