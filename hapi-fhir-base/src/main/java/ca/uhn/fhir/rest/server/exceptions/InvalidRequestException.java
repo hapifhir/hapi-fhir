@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -43,5 +44,17 @@ public class InvalidRequestException extends BaseServerResponseException {
 	public InvalidRequestException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public InvalidRequestException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
 
 }

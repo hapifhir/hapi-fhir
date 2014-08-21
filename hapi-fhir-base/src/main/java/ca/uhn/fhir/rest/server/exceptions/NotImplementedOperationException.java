@@ -1,4 +1,5 @@
 package ca.uhn.fhir.rest.server.exceptions;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -37,12 +38,24 @@ import ca.uhn.fhir.rest.server.Constants;
  * 
  * 
  */
-public class NotImpementedOperationException extends BaseServerResponseException {
+public class NotImplementedOperationException extends BaseServerResponseException {
 
 public static final int STATUS_CODE = Constants.STATUS_HTTP_501_NOT_IMPLEMENTED;
     private static final long serialVersionUID = 1L;
 
-    public NotImpementedOperationException(String theMessage) {
+    public NotImplementedOperationException(String theMessage) {
         super(STATUS_CODE, theMessage);
     }
+    
+	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public NotImplementedOperationException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -36,6 +38,19 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 	 */
 	public UnclassifiedServerFailureException(int theStatusCode, String theMessage) {
 		super(theStatusCode, theMessage);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code to return (e.g. 404 if you wish to return an HTTP 404 status)
+	 * @param theMessage
+	 *            The message to add to the status line
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, OperationOutcome theOperationOutcome) {
+		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 
 	private static final long serialVersionUID = 1L;

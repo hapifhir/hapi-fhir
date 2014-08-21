@@ -127,12 +127,16 @@ public class FhirTerser {
 	 * message. Specifying a type of {@link IResource} would return the resource itself, as well as any contained
 	 * resources.
 	 * </p>
+	 * <p>
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not
+	 * decend into linked resources (e.g. {@link ResourceReferenceDt#getResource()})
+	 * </p>
 	 * 
-	 * @param theResourceT
+	 * @param theResource
 	 *            The resource instance to search. Must not be null.
 	 * @param theType
 	 *            The type to search for. Must not be null.
-	 * @return
+	 * @return Returns a list of all matching elements
 	 */
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(IResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<T>();

@@ -39,6 +39,18 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY;
 
 	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message to add to the status line
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public UnprocessableEntityException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
+	
+	/**
 	 * Constructor which accepts an {@link OperationOutcome} resource which will be supplied in the response
 	 */
 	public UnprocessableEntityException(OperationOutcome theOperationOutcome) {

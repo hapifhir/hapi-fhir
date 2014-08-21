@@ -44,6 +44,17 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 	}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public ResourceNotFoundException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
+	/**
 	 * @deprecated This doesn't make sense, since an identifier is not a resource ID and shouldn't generate a 404 if it isn't found - Should be removed
 	 */
 	public ResourceNotFoundException(Class<? extends IResource> theClass, IdentifierDt theId) {

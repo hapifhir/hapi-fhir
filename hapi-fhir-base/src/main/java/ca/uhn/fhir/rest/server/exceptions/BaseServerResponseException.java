@@ -46,13 +46,14 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
 		registerExceptionType(ResourceGoneException.STATUS_CODE, ResourceGoneException.class);
+		registerExceptionType(NotImplementedOperationException.STATUS_CODE, NotImplementedOperationException.class);
 	}
 
-	private final OperationOutcome myOperationOutcome;
+	private OperationOutcome myOperationOutcome;
 	private String myResponseBody;
 	private String myResponseMimeType;
 	private int myStatusCode;
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -66,7 +67,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myStatusCode = theStatusCode;
 		myOperationOutcome = null;
 	}
-
+	
 	/**
 	 * Constructor
 	 * 
@@ -187,6 +188,17 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * Sets the OperationOutcome resource associated with this exception. In server
+	 * implementations, this is the OperartionOutcome resource to include with the HTTP response. In 
+	 * client implementations you should not call this method.
+	 * 
+	 * @param theOperationOutcome The OperationOutcome resource
+	 */
+	public void setOperationOutcome(OperationOutcome theOperationOutcome) {
+		myOperationOutcome = theOperationOutcome;
+	}
+
+	/**
 	 * This method is currently only called internally by HAPI, it should not be called by user code.
 	 */
 	public void setResponseBody(String theResponseBody) {
@@ -198,6 +210,13 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 */
 	public void setResponseMimeType(String theResponseMimeType) {
 		myResponseMimeType = theResponseMimeType;
+	}
+
+	/**
+	 * For unit tests only
+	 */
+	static boolean isExceptionTypeRegistered(Class<?> theType) {
+		return ourStatusCodeToExceptionType.values().contains(theType);
 	}
 
 	public static BaseServerResponseException newInstance(int theStatusCode, String theMessage) {

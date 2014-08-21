@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -35,6 +36,17 @@ import ca.uhn.fhir.rest.server.Constants;
 public class MethodNotAllowedException extends BaseServerResponseException {
 	public 	static final int STATUS_CODE = Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED;
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public MethodNotAllowedException(String theMessage, OperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
 
 	public MethodNotAllowedException(String error) {
 		super(STATUS_CODE, error);

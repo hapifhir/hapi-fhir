@@ -310,56 +310,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>2.16</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9.1</version>
-				<configuration>
-				</configuration>
-				<reportSets>
-					<reportSet>
-						<id>default</id>
-						<reports>
-							<report>javadoc</report>
-						</reports>
-					</reportSet>
-				</reportSets>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-				<version>2.5.3</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-				<version>2.4</version>
-				<reportSets>
-					<reportSet>
-						<id>normal</id>
-						<reports>
-							<report>jxr</report>
-						</reports>
-					</reportSet>
-					<reportSet>
-						<id>restful-server-example</id>
-						<reports>
-							<report>jxr</report>
-						</reports>
-						<configuration>
-							<sourcePath>../restful-server-example/src/main/java</sourcePath>
-							<destDir>${project.reporting.outputDirectory}/rse-xref</destDir>
-							<outputDirectory>tmp</outputDirectory>
-							<reportOutputDirectory>rse-xref</reportOutputDirectory>
-						</configuration>
-					</reportSet>
-				</reportSets>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>2.7</version>
 				<reportSets>
@@ -600,6 +550,74 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>MINI</id>
+		</profile>
+		<profile>
+			<id>DEFAULT</id>
+			<!-- 
+				The default profile has a bunch of the site plugins that
+				take longer to execute, so that they can be skipped for
+				testing the site build 
+			-->
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-report-plugin</artifactId>
+						<version>2.16</version>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9.1</version>
+						<configuration>
+						</configuration>
+						<reportSets>
+							<reportSet>
+								<id>default</id>
+								<reports>
+									<report>javadoc</report>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<version>2.5.3</version>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jxr-plugin</artifactId>
+						<version>2.4</version>
+						<reportSets>
+							<reportSet>
+								<id>normal</id>
+								<reports>
+									<report>jxr</report>
+								</reports>
+							</reportSet>
+							<reportSet>
+								<id>restful-server-example</id>
+								<reports>
+									<report>jxr</report>
+								</reports>
+								<configuration>
+									<sourcePath>../restful-server-example/src/main/java</sourcePath>
+									<destDir>${project.reporting.outputDirectory}/rse-xref</destDir>
+									<outputDirectory>tmp</outputDirectory>
+									<reportOutputDirectory>rse-xref</reportOutputDirectory>
+								</configuration>
+							</reportSet>
+						</reportSets>
+					</plugin>				
+				</plugins>
+			</reporting>
+		</profile>
 		<profile>
 			<id>DIST</id>
 			<build>

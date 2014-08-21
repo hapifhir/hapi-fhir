@@ -416,6 +416,10 @@
 					case, you may pass one into the constructor of the
 					exception you are throwing.
 				</p>
+				<macro name="snippet">
+					<param name="id" value="returnOO" />
+					<param name="file" value="examples/src/main/java/example/ServerExceptionsExample.java" />
+				</macro>				
 			</subsection>
 		</section>
 

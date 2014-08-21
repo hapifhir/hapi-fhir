@@ -53,7 +53,7 @@ public class InternalErrorException extends BaseServerResponseException {
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
 	public InternalErrorException(String theMessage, OperationOutcome theOperationOutcome) {
-		super(theMessage, theOperationOutcome);
+		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
 	public InternalErrorException(String theMessage) {

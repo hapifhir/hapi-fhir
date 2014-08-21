@@ -94,6 +94,9 @@
 				of the name "reference" for the actual reference. Thanks to
 				Ricky Nguyen for reporting and tracking down the issue!
 			</action>
+			<action type="fix">
+				Rename NotImpementedException to NotImplementedException (to correct typo)
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
