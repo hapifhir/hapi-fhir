@@ -97,6 +97,9 @@
 			<action type="fix">
 				Rename NotImpementedException to NotImplementedException (to correct typo)
 			</action>
+			<action type="fix">
+				Server setUseBrowserFriendlyContentType setting also respected for errors (e.g. OperationOutcome with 4xx/5xx status)
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

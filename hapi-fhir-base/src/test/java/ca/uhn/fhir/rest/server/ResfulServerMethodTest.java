@@ -1300,16 +1300,16 @@ public class ResfulServerMethodTest {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdDt theId) {
 			return getIdToPatient().get(theId.getIdPart());
 		}
 
-		@Read()
-		public Patient getResourceById(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
+		@Read(version=true)
+		public Patient vread(@IdParam IdDt theId) {
 			Patient retVal = getIdToPatient().get(theId.getIdPart());
 			List<HumanNameDt> name = retVal.getName();
 			HumanNameDt nameDt = name.get(0);
-			String value = theVersionId.getValue();
+			String value = theId.getVersionIdPart();
 			nameDt.setText(value);
 			return retVal;
 		}

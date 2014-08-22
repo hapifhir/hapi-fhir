@@ -150,7 +150,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			params[myIdParamIndex] = theRequest.getId();
 		}
 		if (myVersionIdParamIndex != null) {
-			params[myVersionIdParamIndex] = theRequest.getVersionId();
+			params[myVersionIdParamIndex] = theRequest.getId();
 		}
 
 		TagList resp = (TagList) invokeServerMethod(params);

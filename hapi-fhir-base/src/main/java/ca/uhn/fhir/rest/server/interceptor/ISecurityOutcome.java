@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.security;
+package ca.uhn.fhir.rest.server.interceptor;
 
 /*
  * #%L

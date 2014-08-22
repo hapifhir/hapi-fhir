@@ -189,7 +189,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {

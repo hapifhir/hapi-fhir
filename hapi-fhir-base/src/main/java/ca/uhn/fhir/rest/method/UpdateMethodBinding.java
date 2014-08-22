@@ -91,14 +91,11 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 			if (mo.getId() == null || mo.getId().isEmpty()) {
 				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
 			}
-			if (mo.getVersionId() != null && mo.getVersionId().isEmpty() == false) {
-				theRequest.setVersion(mo.getVersionId());
-			}
 		}
 
 		theParams[myIdParameterIndex] = theRequest.getId();
 		if (myVersionIdParameterIndex != null) {
-			theParams[myVersionIdParameterIndex] = theRequest.getVersionId();
+			theParams[myVersionIdParameterIndex] = theRequest.getId();
 		}
 	}
 

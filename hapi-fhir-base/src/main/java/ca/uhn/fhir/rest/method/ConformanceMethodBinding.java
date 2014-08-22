@@ -65,7 +65,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		IResource conf = (IResource) invokeServerMethod(theMethodParams);
 		return new SimpleBundleProvider(conf);
 	}

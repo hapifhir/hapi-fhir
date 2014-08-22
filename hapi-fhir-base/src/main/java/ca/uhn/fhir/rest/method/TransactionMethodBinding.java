@@ -93,7 +93,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		// Grab the IDs of all of the resources in the transaction
 		List<IResource> resources;
 		if (theMethodParams[myTransactionParamIndex] instanceof Bundle) {

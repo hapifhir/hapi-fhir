@@ -154,7 +154,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
@@ -220,7 +220,9 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 
-		if (theRequest.getVersionId() != null && !theRequest.getVersionId().isEmpty()) {
+		if (theRequest.getId() == null) {
+			return myResourceOperationType == RestfulOperationTypeEnum.HISTORY_TYPE;
+		} else if (theRequest.getId().hasVersionIdPart()) {
 			return false;
 		}
 

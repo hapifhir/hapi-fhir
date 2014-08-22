@@ -70,12 +70,14 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
@@ -605,11 +607,23 @@ public class RestfulServer extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
+	
+	
+	private List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
+	
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+		for(IServerInterceptor next : myInterceptors) {
+			boolean continueProcessing = next.incomingRequest(theRequest, theResponse);
+			if (!continueProcessing) {
+				return;
+			}
+		}
+		
 		String fhirServerBase = null;
+		boolean requestIsBrowser = requestIsBrowser(theRequest);
 		try {
-
+			
 			if (null != mySecurityManager) {
 				mySecurityManager.authenticate(theRequest);
 			}
@@ -633,7 +647,6 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			IdDt id = null;
-			IdDt versionId = null;
 			String operation = null;
 
 			String requestPath = requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
@@ -691,7 +704,6 @@ public class RestfulServer extends HttpServlet {
 							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
 						}
 						id = new IdDt(resourceName + "/" + id.getIdPart() + "/_history/" + versionString);
-						versionId = id;
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
@@ -717,10 +729,10 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			if (theRequestType == RequestType.PUT && versionId == null) {
+			if (theRequestType == RequestType.PUT) {
 				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
-					versionId = new IdDt(contentLocation);
+					id = new IdDt(contentLocation);
 				}
 			}
 
@@ -740,7 +752,6 @@ public class RestfulServer extends HttpServlet {
 			Request r = new Request();
 			r.setResourceName(resourceName);
 			r.setId(id);
-			r.setVersion(versionId);
 			r.setOperation(operation);
 			r.setSecondaryOperation(secondaryOperation);
 			r.setParameters(params);
@@ -760,7 +771,7 @@ public class RestfulServer extends HttpServlet {
 			if (resourceMethod == null && resourceBinding != null) {
 				resourceMethod = resourceBinding.getMethod(r);
 			}
-			if (null == resourceMethod) {
+			if (resourceMethod == null) {
 				StringBuilder b = new StringBuilder();
 				b.append("No resource method available for ");
 				b.append(theRequestType.name());
@@ -772,10 +783,21 @@ public class RestfulServer extends HttpServlet {
 				throw new InvalidRequestException(b.toString());
 			}
 
+			RequestDetails requestDetails = r;
+			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
+			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
+			
+			for (IServerInterceptor next : myInterceptors) {
+				boolean continueProcessing = next.incomingRequest(requestDetails, theRequest, theResponse);
+				if (!continueProcessing) {
+					return;
+				}
+			}
+			
 			resourceMethod.invokeServer(this, r, theResponse);
 
 		} catch (AuthenticationException e) {
-			if (requestIsBrowser(theRequest)) {
+			if (requestIsBrowser) {
 				// if request is coming from a browser, prompt the user to enter login credentials
 				theResponse.setHeader("WWW-Authenticate", "BASIC realm=\"FHIR\"");
 			}
@@ -812,7 +834,7 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, false, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
+			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
 
 			theResponse.setStatus(statusCode);
 			addHeadersToResponse(theResponse);
@@ -938,7 +960,7 @@ public class RestfulServer extends HttpServlet {
 		return b.toString();
 	}
 
-	public static NarrativeModeEnum determineNarrativeMode(Request theRequest) {
+	public static NarrativeModeEnum determineNarrativeMode(RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
 		NarrativeModeEnum narrativeMode = null;

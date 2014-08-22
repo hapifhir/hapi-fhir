@@ -30,24 +30,23 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 
-public class Request {
+/**
+ * This class is internal to HAPI - Use with caution as methods may change in future versions of the library
+ */
+public class Request extends RequestDetails {
 
 	private String myCompleteUrl;
 	private String myFhirServerBase;
-	private IdDt myId;
 	private String myOperation;
-	private Map<String, String[]> myParameters;
 	private RequestType myRequestType;
 	private String myResourceName;
+	private boolean myRespondGzip;
 	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
-	private IdDt myVersion;
-	private Map<String,List<String>> myUnqualifiedToQualifiedNames;
-	private boolean myRespondGzip;
+	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 
 	public String getCompleteUrl() {
 		return myCompleteUrl;
@@ -57,19 +56,10 @@ public class Request {
 		return myFhirServerBase;
 	}
 
-	public IdDt getId() {
-		return myId;
-	}
-
 	public String getOperation() {
 		return myOperation;
 	}
 
-	public Map<String, String[]> getParameters() {
-		return myParameters;
-	}
-
-	
 	public RequestType getRequestType() {
 		return myRequestType;
 	}
@@ -90,8 +80,12 @@ public class Request {
 		return myServletResponse;
 	}
 
-	public IdDt getVersionId() {
-		return myVersion;
+	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
+		return myUnqualifiedToQualifiedNames;
+	}
+
+	public boolean isRespondGzip() {
+		return myRespondGzip;
 	}
 
 	public void setCompleteUrl(String theCompleteUrl) {
@@ -102,28 +96,25 @@ public class Request {
 		myFhirServerBase = theFhirServerBase;
 	}
 
-	public void setId(IdDt theId) {
-		myId = theId;
-	}
-
 	public void setOperation(String theOperation) {
 		myOperation = theOperation;
 	}
 
+	@Override
 	public void setParameters(Map<String, String[]> theParams) {
-		myParameters = theParams;
-		
-		for (String next : myParameters.keySet()) {
-			for (int i = 0; i < next.length();i++) {
+		super.setParameters(theParams);
+
+		for (String next : theParams.keySet()) {
+			for (int i = 0; i < next.length(); i++) {
 				char nextChar = next.charAt(i);
-				if(nextChar == ':' || nextChar == '.') {
-					if (myUnqualifiedToQualifiedNames==null) {
+				if (nextChar == ':' || nextChar == '.') {
+					if (myUnqualifiedToQualifiedNames == null) {
 						myUnqualifiedToQualifiedNames = new HashMap<String, List<String>>();
 					}
-					String unqualified = next.substring(0,i);
+					String unqualified = next.substring(0, i);
 					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
-					if (list==null) {
-						list=new ArrayList<String>(4);
+					if (list == null) {
+						list = new ArrayList<String>(4);
 						myUnqualifiedToQualifiedNames.put(unqualified, list);
 					}
 					list.add(next);
@@ -132,13 +123,10 @@ public class Request {
 			}
 		}
 
-		if (myUnqualifiedToQualifiedNames==null) {
-			myUnqualifiedToQualifiedNames=Collections.emptyMap();
+		if (myUnqualifiedToQualifiedNames == null) {
+			myUnqualifiedToQualifiedNames = Collections.emptyMap();
 		}
-	}
 
-	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
-		return myUnqualifiedToQualifiedNames;
 	}
 
 	public void setRequestType(RequestType theRequestType) {
@@ -147,6 +135,10 @@ public class Request {
 
 	public void setResourceName(String theResourceName) {
 		myResourceName = theResourceName;
+	}
+
+	public void setRespondGzip(boolean theRespondGzip) {
+		myRespondGzip = theRespondGzip;
 	}
 
 	public void setSecondaryOperation(String theSecondaryOperation) {
@@ -161,10 +153,6 @@ public class Request {
 		myServletResponse = theServletResponse;
 	}
 
-	public void setVersion(IdDt theVersion) {
-		myVersion = theVersion;
-	}
-
 	public static Request withResourceAndParams(String theResourceName, RequestType theRequestType, Set<String> theParamNames) {
 		Request retVal = new Request();
 		retVal.setResourceName(theResourceName);
@@ -175,14 +163,6 @@ public class Request {
 		}
 		retVal.setParameters(paramNames);
 		return retVal;
-	}
-
-	public void setRespondGzip(boolean theRespondGzip) {
-		myRespondGzip=theRespondGzip;
-	}
-
-	public boolean isRespondGzip() {
-		return myRespondGzip;
 	}
 
 }

@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -111,7 +112,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	}
 
-	private void parseParams(Request theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
 		String[] value = theRequest.getParameters().get(theQualifiedParamName);
 		if (value != null) {
 			for (String nextParam : value) {

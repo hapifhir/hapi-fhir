@@ -122,9 +122,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		assert theRequest.getId() == null;
-		assert theRequest.getVersionId() == null;
 
 		Object response = invokeServerMethod(theMethodParams);
 
@@ -138,8 +137,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
-		if (theRequest.getId() != null || theRequest.getVersionId() != null) {
-			ourLog.trace("Method {} doesn't match because ID or Version are not null: {} - {}", theRequest.getId(), theRequest.getVersionId());
+		if (theRequest.getId() != null) {
+			ourLog.trace("Method {} doesn't match because IDis not null: {}", theRequest.getId());
 			return false;
 		}
 		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {

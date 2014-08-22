@@ -162,7 +162,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		params[myIdParamIndex] = theRequest.getId();
 
 		if (myVersionIdParamIndex != null) {
-			params[myVersionIdParamIndex] = theRequest.getVersionId();
+			params[myVersionIdParamIndex] = theRequest.getId();
 		}
 
 		IParser parser = createAppropriateParserForParsingServerRequest(theRequest);
@@ -204,7 +204,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			return false;
 		}
 
-		if ((myVersionIdParamIndex != null) != (theRequest.getVersionId() != null)) {
+		if ((myVersionIdParamIndex != null) != (theRequest.getId() != null && theRequest.getId().hasVersionIdPart())) {
 			return false;
 		}
 

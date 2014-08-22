@@ -91,13 +91,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
-		if (mySupportsVersion == false) {
-			if ((theRequest.getVersionId() == null) != (myVersionIdIndex == null)) {
-				return false;
-			}
-		}
 		if (theRequest.getId() == null) {
 			return false;
+		}
+		if (mySupportsVersion == false) {
+			if (theRequest.getId().hasVersionIdPart()) {
+				return false;
+			}
 		}
 		if (theRequest.getRequestType() != RequestType.GET) {
 			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
@@ -107,7 +107,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			if (mySupportsVersion == false && myVersionIdIndex == null) {
 				return false;
 			}
-			if (theRequest.getVersionId() == null) {
+			if (theRequest.getId().hasVersionIdPart()==false) {
 				return false;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
@@ -122,10 +122,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public IBundleProvider invokeServer(Request theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = theRequest.getId();
 		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getVersionId().getVersionIdPart());
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
