@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:os="http://a9.com/-/opensearch/extensions/relevance/1.0/" xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+   targetNamespace="http://a9.com/-/opensearch/extensions/relevance/1.0/" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:element name="score" type="xs:decimal">
+    <xs:annotation>
+      <xs:documentation>
+Contains a string indicating a relative assessment of relevance for a particular search result with respect to the search query.
+
+Decimal values less than 0 should be considered equal to 0.
+
+Decimal values greater than 1 should be considered equal to 1.
+
+Unparseable or empty values can be ignored by the client.
+
+Restrictions: The value must contain a decimal representation of a real number between 0 and 1, inclusive.
+Requirements: This element may appear zero or one time.
+The score element is used to indicate a relative assessment of relevance for a particular search result with respect to the search query.
+        
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+</xs:schema>

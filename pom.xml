@@ -83,6 +83,7 @@
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<mockito_version>1.9.5</mockito_version>
+		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j_version>1.7.7</slf4j_version>
 		<spring_version>4.0.1.RELEASE</spring_version>

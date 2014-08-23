@@ -21,10 +21,13 @@ public class ModelScannerTest {
 	public void testExtendedClass() {
 		FhirContext ctx = new FhirContext();
 		ctx.getResourceDefinition(MyPatient.class);
-		ctx.getResourceDefinition(Patient.class);
 		
 		RuntimeResourceDefinition patient = ctx.getResourceDefinition("Patient");
 		assertEquals(Patient.class, patient.getImplementingClass());
+		
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(MyPatient.class);
+		RuntimeResourceDefinition baseDef = def.getBaseDefinition();
+		assertEquals(Patient.class,baseDef.getImplementingClass());
 	}
 	
 	

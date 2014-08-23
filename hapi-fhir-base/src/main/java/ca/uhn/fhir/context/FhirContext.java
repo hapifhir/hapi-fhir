@@ -44,18 +44,23 @@ import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.validation.ResourceValidator;
 
 /**
- * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then used as a factory for various other types of objects (parsers, clients, etc.).
+ * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
+ * used as a factory for various other types of objects (parsers, clients, etc.).
  * 
  * <p>
  * Important usage notes:
  * <ul>
  * <li>Thread safety: <b>This class is thread safe</b> and may be shared between multiple processing threads.</li>
  * <li>
- * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode to build up an internal model of those classes. For that reason, you should try
- * to create one FhirContext instance which remains for the life of your application and reuse that instance. Note that it will not cause problems to create multiple instances (ie. resources
- * originating from one FhirContext may be passed to parsers originating from another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.</li>
+ * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode
+ * to build up an internal model of those classes. For that reason, you should try to create one FhirContext instance
+ * which remains for the life of your application and reuse that instance. Note that it will not cause problems to
+ * create multiple instances (ie. resources originating from one FhirContext may be passed to parsers originating from
+ * another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.
+ * </li>
  * </ul>
  * </p>
  */
@@ -67,7 +72,7 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	
+
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
@@ -78,7 +83,7 @@ public class FhirContext {
 	public FhirContext(Class<? extends IResource> theResourceType) {
 		this(toCollection(theResourceType));
 	}
-	
+
 	public FhirContext(Class<?>... theResourceTypes) {
 		this(toCollection(theResourceTypes));
 	}
@@ -88,7 +93,8 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
@@ -99,7 +105,8 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
@@ -108,30 +115,31 @@ public class FhirContext {
 		}
 		return retVal;
 	}
-	
+
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		String resourceName = theResourceName;
-		
+
 		/*
-		 * TODO: this is a bit of a hack, really we should have a translation table 
-		 * based on a property file or something so that we can detect names like
-		 * diagnosticreport 
+		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or
+		 * something so that we can detect names like diagnosticreport
 		 */
 		if (Character.isLowerCase(resourceName.charAt(0))) {
 			resourceName = WordUtils.capitalize(resourceName);
 		}
-		
+
 		Validate.notBlank(resourceName, "Resource name must not be blank");
 
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(resourceName);
@@ -152,14 +160,16 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
 		return myIdToResourceDefinition.get(theId);
 	}
 
 	/**
-	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
+	 * core library.
 	 */
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
@@ -180,7 +190,8 @@ public class FhirContext {
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+	 * without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newJsonParser() {
@@ -188,12 +199,16 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use cases to contain methods for each of the RESTful operations you wish to
-	 * implement (e.g. "read ImagingStudy", "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its sub-interface {@link IBasicClient}). See the <a
-	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more information on how to define this interface.
+	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
+	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
+	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
+	 * sub-interface {@link IBasicClient}). See the <a
+	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
+	 * information on how to define this interface.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
+	 * without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theClientType
@@ -209,16 +224,18 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against a compliant server, but does not have methods defining the specific
-	 * functionality required (as is the case with {@link #newRestfulClient(Class, String) non-generic clients}).
+	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against
+	 * a compliant server, but does not have methods defining the specific functionality required (as is the case with
+	 * {@link #newRestfulClient(Class, String) non-generic clients}).
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
+	 * without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theServerBase
 	 *            The URL of the base for the restful FHIR server to connect to
-	 * @return 
+	 * @return
 	 */
 	public IGenericClient newRestfulGenericClient(String theServerBase) {
 		return getRestfulClientFactory().newGenericClient(theServerBase);
@@ -228,11 +245,20 @@ public class FhirContext {
 		return new FhirTerser(this);
 	}
 
+	public ResourceValidator newValidator() {
+		return new ResourceValidator(this);
+	}
+
+	public ViewGenerator newViewGenerator() {
+		return new ViewGenerator(this);
+	}
+
 	/**
 	 * Create and return a new XML parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+	 * without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newXmlParser() {
@@ -296,10 +322,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	public ViewGenerator newViewGenerator() {
-		return new ViewGenerator(this);
 	}
 
 }

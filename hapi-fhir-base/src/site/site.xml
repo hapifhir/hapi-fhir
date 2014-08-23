@@ -62,6 +62,7 @@
 				<item name="Extensions" href="./doc_extensions.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />
 				<item name="Tags" href="./doc_tags.html" />
+				<item name="Validation" href="./doc_validation.html" />
 			</item>
 			<item name="RESTful Client" href="./doc_rest_client.html" />
 			<item name="RESTful Server" href="./doc_rest_server.html" >

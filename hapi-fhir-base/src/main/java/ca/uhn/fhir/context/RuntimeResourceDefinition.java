@@ -53,12 +53,13 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinition.class);
+	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+	private String myId;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
 	private Profile myProfileDef;
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
-	private String myId;
 
 	public RuntimeResourceDefinition(String theResourceName, Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceName, theClass);
@@ -68,6 +69,107 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
 		myNameToSearchParam.put(theParam.getName(), theParam);
+	}
+
+	/**
+	 * If this definition refers to a class which extends another resource definition type, this
+	 * method will return the definition of the topmost resource. For example, if this definition
+	 * refers to MyPatient2, which extends MyPatient, which in turn extends Patient, this method
+	 * will return the resource definition for Patient.
+	 * <p>
+	 * If the definition has no parent, returns <code>this</code>
+	 * </p>
+	 */
+	public RuntimeResourceDefinition getBaseDefinition() {
+		return myBaseDefinition;
+	}
+
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.RESOURCE;
+	}
+
+	public String getResourceProfile() {
+		return myResourceProfile;
+	}
+
+	public RuntimeSearchParam getSearchParam(String theName) {
+		return myNameToSearchParam.get(theName);
+	}
+
+	public List<RuntimeSearchParam> getSearchParams() {
+		return mySearchParams;
+	}
+
+	public boolean isStandardProfile() {
+		return myResourceProfile.startsWith("http://hl7.org/fhir/profiles");
+	}
+
+	@Override
+	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theClassToElementDefinitions);
+
+		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
+
+		ArrayList<RuntimeSearchParam> searchParams = new ArrayList<RuntimeSearchParam>(myNameToSearchParam.values());
+		Collections.sort(searchParams, new Comparator<RuntimeSearchParam>() {
+			@Override
+			public int compare(RuntimeSearchParam theArg0, RuntimeSearchParam theArg1) {
+				return theArg0.getName().compareTo(theArg1.getName());
+			}
+		});
+		mySearchParams = Collections.unmodifiableList(searchParams);
+		
+		Class<?> target = getImplementingClass();
+		myBaseDefinition = this;
+		do {
+			target = target.getSuperclass();
+			if (IResource.class.isAssignableFrom(target) && target.getAnnotation(ResourceDef.class)!=null) {
+				myBaseDefinition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(target);
+			}
+		} while (target.equals(Object.class)==false);
+	}
+
+	public synchronized Profile toProfile() {
+		if (myProfileDef != null) {
+			return myProfileDef;
+		}
+
+		Profile retVal = new Profile();
+		
+		RuntimeResourceDefinition def = this;
+
+		if (StringUtils.isBlank(myId)) {
+			myId = getName().toLowerCase();
+		}
+		
+		retVal.setId(new IdDt(myId));
+		
+		// Scan for extensions
+		scanForExtensions(retVal, def);
+		Collections.sort(retVal.getExtensionDefn(), new Comparator<ExtensionDefn>() {
+			@Override
+			public int compare(ExtensionDefn theO1, ExtensionDefn theO2) {
+				return theO1.getCode().compareTo(theO2.getCode());
+			}
+		});
+
+		// Scan for children
+		retVal.setName(getName());
+		Structure struct = retVal.addStructure();
+		LinkedList<String> path = new LinkedList<String>();
+
+		StructureElement element = struct.addElement();
+		element.getDefinition().setMin(1);
+		element.getDefinition().setMax("1");
+
+		fillProfile(struct, element, def, path, null);
+
+		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
+
+		myProfileDef = retVal;
+
+		return retVal;
 	}
 
 	private void fillBasics(StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
@@ -234,23 +336,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		path.pollLast();
 	}
 
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.RESOURCE;
-	}
-
-	public String getResourceProfile() {
-		return myResourceProfile;
-	}
-
-	public RuntimeSearchParam getSearchParam(String theName) {
-		return myNameToSearchParam.get(theName);
-	}
-
-	public List<RuntimeSearchParam> getSearchParams() {
-		return mySearchParams;
-	}
-
 	private void scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
 		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
@@ -292,68 +377,6 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 			}
 		}
-	}
-
-	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theClassToElementDefinitions);
-
-		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
-
-		ArrayList<RuntimeSearchParam> searchParams = new ArrayList<RuntimeSearchParam>(myNameToSearchParam.values());
-		Collections.sort(searchParams, new Comparator<RuntimeSearchParam>() {
-			@Override
-			public int compare(RuntimeSearchParam theArg0, RuntimeSearchParam theArg1) {
-				return theArg0.getName().compareTo(theArg1.getName());
-			}
-		});
-		mySearchParams = Collections.unmodifiableList(searchParams);
-	}
-
-	public synchronized Profile toProfile() {
-		if (myProfileDef != null) {
-			return myProfileDef;
-		}
-
-		Profile retVal = new Profile();
-		
-		RuntimeResourceDefinition def = this;
-
-		if (StringUtils.isBlank(myId)) {
-			myId = getName().toLowerCase();
-		}
-		
-		retVal.setId(new IdDt(myId));
-		
-		// Scan for extensions
-		scanForExtensions(retVal, def);
-		Collections.sort(retVal.getExtensionDefn(), new Comparator<ExtensionDefn>() {
-			@Override
-			public int compare(ExtensionDefn theO1, ExtensionDefn theO2) {
-				return theO1.getCode().compareTo(theO2.getCode());
-			}
-		});
-
-		// Scan for children
-		retVal.setName(getName());
-		Structure struct = retVal.addStructure();
-		LinkedList<String> path = new LinkedList<String>();
-
-		StructureElement element = struct.addElement();
-		element.getDefinition().setMin(1);
-		element.getDefinition().setMax("1");
-
-		fillProfile(struct, element, def, path, null);
-
-		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
-
-		myProfileDef = retVal;
-
-		return retVal;
-	}
-
-	public boolean isStandardProfile() {
-		return myResourceProfile.startsWith("http://hl7.org/fhir/profiles");
 	}
 
 }
