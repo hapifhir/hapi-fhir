@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
@@ -143,7 +144,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest, null);
 
 		if (myIdParamIndex != null) {
@@ -155,17 +156,25 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
 		TagList resp = (TagList) invokeServerMethod(params);
 
+		for (IServerInterceptor next : theServer.getInterceptors()) {
+			boolean continueProcessing = next.outgoingResponse(theRequest, resp, theRequest.getServletRequest(), theRequest.getServletResponse());
+			if (!continueProcessing) {
+				return;
+			}
+		}
+		
 		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 
-		theResponse.setContentType(responseEncoding.getResourceContentType());
-		theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
-		theResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		HttpServletResponse response = theRequest.getServletResponse();
+		response.setContentType(responseEncoding.getResourceContentType());
+		response.setStatus(Constants.STATUS_HTTP_200_OK);
+		response.setCharacterEncoding(Constants.CHARSET_UTF_8);
 
-		theServer.addHeadersToResponse(theResponse);
+		theServer.addHeadersToResponse(response);
 
 		IParser parser = responseEncoding.newParser(getContext());
 		parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
-		PrintWriter writer = theResponse.getWriter();
+		PrintWriter writer = response.getWriter();
 		try {
 			parser.encodeTagListToWriter(resp, writer);
 		} finally {

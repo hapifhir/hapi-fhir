@@ -32,6 +32,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,12 +86,12 @@ import ca.uhn.fhir.util.VersionUtil;
 public class RestfulServer extends HttpServlet {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
-
 	private static final long serialVersionUID = 1L;
 
 	private AddProfileTagEnum myAddProfileTag;
 	private FhirContext myFhirContext;
 	private String myImplementationDescription;
+	private List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
 	private ResourceBinding myNullResourceBinding = new ResourceBinding();
 	private IPagingProvider myPagingProvider;
 	private Collection<Object> myPlainProviders;
@@ -148,6 +149,13 @@ public class RestfulServer extends HttpServlet {
 
 	public String getImplementationDescription() {
 		return myImplementationDescription;
+	}
+
+	/**
+	 * Returns a ist of all registered server interceptors
+	 */
+	public List<IServerInterceptor> getInterceptors() {
+		return Collections.unmodifiableList(myInterceptors);
 	}
 
 	public IPagingProvider getPagingProvider() {
@@ -306,6 +314,19 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
+	 * Sets (or clears) the list of interceptors
+	 * 
+	 * @param theList
+	 *            The list of interceptors (may be null)
+	 */
+	public void setInterceptors(List<IServerInterceptor> theList) {
+		myInterceptors.clear();
+		if (theList != null) {
+			myInterceptors.addAll(theList);
+		}
+	}
+
+	/**
 	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
 	 */
 	public void setPagingProvider(IPagingProvider thePagingProvider) {
@@ -419,6 +440,23 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+	// /**
+	// * Sets the {@link INarrativeGenerator Narrative Generator} to use when
+	// serializing responses from this server, or <code>null</code> (which is
+	// the default) to disable narrative generation.
+	// * Note that this method can only be called before the server is
+	// initialized.
+	// *
+	// * @throws IllegalStateException
+	// * Note that this method can only be called prior to {@link #init()
+	// initialization} and will throw an {@link IllegalStateException} if called
+	// after that.
+	// */
+	// public void setNarrativeGenerator(INarrativeGenerator
+	// theNarrativeGenerator) {
+	// myNarrativeGenerator = theNarrativeGenerator;
+	// }
+
 	/**
 	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
 	 */
@@ -451,23 +489,6 @@ public class RestfulServer extends HttpServlet {
 			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
 		}
 	}
-
-	// /**
-	// * Sets the {@link INarrativeGenerator Narrative Generator} to use when
-	// serializing responses from this server, or <code>null</code> (which is
-	// the default) to disable narrative generation.
-	// * Note that this method can only be called before the server is
-	// initialized.
-	// *
-	// * @throws IllegalStateException
-	// * Note that this method can only be called prior to {@link #init()
-	// initialization} and will throw an {@link IllegalStateException} if called
-	// after that.
-	// */
-	// public void setNarrativeGenerator(INarrativeGenerator
-	// theNarrativeGenerator) {
-	// myNarrativeGenerator = theNarrativeGenerator;
-	// }
 
 	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
 		int count = 0;
@@ -574,7 +595,17 @@ public class RestfulServer extends HttpServlet {
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
-		streamResponseAsBundle(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction, respondGzip);
+
+		Bundle bundle = createBundleFromBundleProvider(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction);
+
+		for (IServerInterceptor next : getInterceptors()) {
+			boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+			if (!continueProcessing) {
+				return;
+			}
+		}
+
+		streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
 
 	}
 
@@ -607,23 +638,19 @@ public class RestfulServer extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
-	
-	
-	private List<IServerInterceptor> myInterceptors = new ArrayList<IServerInterceptor>();
-	
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		for(IServerInterceptor next : myInterceptors) {
+		for (IServerInterceptor next : myInterceptors) {
 			boolean continueProcessing = next.incomingRequest(theRequest, theResponse);
 			if (!continueProcessing) {
 				return;
 			}
 		}
-		
+
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
 		try {
-			
+
 			if (null != mySecurityManager) {
 				mySecurityManager.authenticate(theRequest);
 			}
@@ -786,15 +813,15 @@ public class RestfulServer extends HttpServlet {
 			RequestDetails requestDetails = r;
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
 			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
-			
+
 			for (IServerInterceptor next : myInterceptors) {
 				boolean continueProcessing = next.incomingRequest(requestDetails, theRequest, theResponse);
 				if (!continueProcessing) {
 					return;
 				}
 			}
-			
-			resourceMethod.invokeServer(this, r, theResponse);
+
+			resourceMethod.invokeServer(this, r);
 
 		} catch (AuthenticationException e) {
 			if (requestIsBrowser) {
@@ -853,6 +880,89 @@ public class RestfulServer extends HttpServlet {
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default
+	}
+
+	public static Bundle createBundleFromBundleProvider(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
+			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId) {
+		theHttpResponse.setStatus(200);
+
+		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
+			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
+		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
+			theHttpResponse.setContentType(Constants.CT_HTML);
+		} else {
+			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
+		}
+
+		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+
+		theServer.addHeadersToResponse(theHttpResponse);
+
+		int numToReturn;
+		String searchId = null;
+		List<IResource> resourceList;
+		if (theServer.getPagingProvider() == null) {
+			numToReturn = theResult.size();
+			resourceList = theResult.getResources(0, numToReturn);
+		} else {
+			IPagingProvider pagingProvider = theServer.getPagingProvider();
+			if (theLimit == null) {
+				numToReturn = pagingProvider.getDefaultPageSize();
+			} else {
+				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
+			}
+
+			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
+			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+
+			if (theSearchId != null) {
+				searchId = theSearchId;
+			} else {
+				if (theResult.size() > numToReturn) {
+					searchId = pagingProvider.storeResultList(theResult);
+					Validate.notNull(searchId, "Paging provider returned null searchId");
+				}
+			}
+		}
+
+		for (IResource next : resourceList) {
+			if (next.getId() == null || next.getId().isEmpty()) {
+				if (!(next instanceof OperationOutcome)) {
+					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+				}
+			}
+		}
+
+		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
+			for (int i = 0; i < resourceList.size(); i++) {
+				IResource nextRes = resourceList.get(i);
+				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
+				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
+					addProfileToBundleEntry(theServer.getFhirContext(), nextRes);
+				}
+			}
+		}
+
+		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
+
+		bundle.setPublished(theResult.getPublished());
+
+		if (theServer.getPagingProvider() != null) {
+			int limit;
+			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
+			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
+
+			if (searchId != null) {
+				if (theOffset + numToReturn < theResult.size()) {
+					bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+				}
+				if (theOffset > 0) {
+					int start = Math.max(0, theOffset - limit);
+					bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+				}
+			}
+		}
+		return bundle;
 	}
 
 	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults) {
@@ -1079,93 +1189,14 @@ public class RestfulServer extends HttpServlet {
 		return prettyPrint;
 	}
 
-	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, boolean theRespondGzip) throws IOException {
+	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, Bundle bundle, EncodingEnum theResponseEncoding, String theServerBase, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip)
+			throws IOException {
 		assert !theServerBase.endsWith("/");
-
-		theHttpResponse.setStatus(200);
-
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
-		}
-
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
-
-		theServer.addHeadersToResponse(theHttpResponse);
-
-		int numToReturn;
-		String searchId = null;
-		List<IResource> resourceList;
-		if (theServer.getPagingProvider() == null) {
-			numToReturn = theResult.size();
-			resourceList = theResult.getResources(0, numToReturn);
-		} else {
-			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null) {
-				numToReturn = pagingProvider.getDefaultPageSize();
-			} else {
-				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-			}
-
-			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-
-			if (theSearchId != null) {
-				searchId = theSearchId;
-			} else {
-				if (theResult.size() > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResult);
-					Validate.notNull(searchId, "Paging provider returned null searchId");
-				}
-			}
-		}
-
-		for (IResource next : resourceList) {
-			if (next.getId() == null || next.getId().isEmpty()) {
-				if (!(next instanceof OperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-				}
-			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (int i = 0; i < resourceList.size(); i++) {
-				IResource nextRes = resourceList.get(i);
-				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					addProfileToBundleEntry(theServer.getFhirContext(), nextRes);
-				}
-			}
-		}
-
-		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
-
-		bundle.setPublished(theResult.getPublished());
-
-		if (theServer.getPagingProvider() != null) {
-			int limit;
-			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-			if (searchId != null) {
-				if (theOffset + numToReturn < theResult.size()) {
-					bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
-				}
-				if (theOffset > 0) {
-					int start = Math.max(0, theOffset - limit);
-					bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
-				}
-			}
-		}
 
 		Writer writer = getWriter(theHttpResponse, theRespondGzip);
 		try {
 			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				for (IResource next : resourceList) {
+				for (IResource next : bundle.toListOfResources()) {
 					writer.append(next.getText().getDiv().getValueAsString());
 					writer.append("<hr/>");
 				}

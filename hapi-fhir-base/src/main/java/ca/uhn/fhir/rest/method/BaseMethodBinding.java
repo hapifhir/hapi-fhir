@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -32,8 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
@@ -136,7 +134,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException;
+	public abstract void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException;
 
 	/** For unit tests only */
 	public void setParameters(List<IParameter> theParameters) {

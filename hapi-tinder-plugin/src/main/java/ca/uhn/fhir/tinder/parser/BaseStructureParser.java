@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -51,7 +52,20 @@ public abstract class BaseStructureParser {
 	private Map<String, String> myLocallyDefinedClassNames = new HashMap<String, String>();
 	private List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private boolean myImportsResolved;
+	private TreeMap<String, String> myNameToResourceClass = new TreeMap<String, String>();
+	private TreeMap<String, String> myNameToDatatypeClass = new TreeMap<String, String>();
 
+	public TreeMap<String, String> getNameToDatatypeClass() {
+		return myNameToDatatypeClass;
+	}
+
+	public void combineContentMaps(BaseStructureParser theStructureParser) {
+		myNameToResourceClass.putAll(theStructureParser.myNameToResourceClass);
+		myNameToDatatypeClass.putAll(theStructureParser.myNameToDatatypeClass);
+		theStructureParser.myNameToResourceClass.putAll(myNameToResourceClass);
+		theStructureParser.myNameToDatatypeClass.putAll(myNameToDatatypeClass);
+	}
+	
 	public void addResource(BaseRootType theResource) {
 		myResources.add(theResource);
 	}
@@ -84,8 +98,7 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
-			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -316,12 +329,20 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	public void writeAll(File theOutputDirectory, String thePackageBase) throws MojoFailureException {
+	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 		if (!theOutputDirectory.exists()) {
 			theOutputDirectory.mkdirs();
 		}
 		if (!theOutputDirectory.isDirectory()) {
 			throw new MojoFailureException(theOutputDirectory + " is not a directory");
+		}
+		if (theResourceOutputDirectory != null) {
+			if (!theResourceOutputDirectory.exists()) {
+				theResourceOutputDirectory.mkdirs();
+			}
+			if (!theResourceOutputDirectory.isDirectory()) {
+				throw new MojoFailureException(theResourceOutputDirectory + " is not a directory");
+			}
 		}
 
 		if (!myImportsResolved) {
@@ -348,6 +369,40 @@ public abstract class BaseStructureParser {
 			} catch (IOException e) {
 				throw new MojoFailureException("Failed to write structure", e);
 			}
+
+			if (next instanceof Resource) {
+				myNameToResourceClass.put(next.getElementName(), thePackageBase + '.' + elementName);
+			} else if (next instanceof Composite) {
+				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + '.' + elementName);
+			} else {
+				throw new IllegalStateException(next.getClass().toString());
+			}
+		}
+
+		if (theResourceOutputDirectory != null) {
+			try {
+				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
+				FileWriter w = new FileWriter(versionFile, false);
+
+				ourLog.info("Writing file: {}", versionFile.getAbsolutePath());
+
+				VelocityContext ctx = new VelocityContext();
+				ctx.put("nameToResourceClass", myNameToResourceClass);
+				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
+
+				VelocityEngine v = new VelocityEngine();
+				v.setProperty("resource.loader", "cp");
+				v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				v.setProperty("runtime.references.strict", Boolean.TRUE);
+
+				InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/fhirversion_properties.vm");
+				InputStreamReader templateReader = new InputStreamReader(templateIs);
+				v.evaluate(ctx, w, "", templateReader);
+
+				w.close();
+			} catch (IOException e) {
+				throw new MojoFailureException(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -371,8 +426,8 @@ public abstract class BaseStructureParser {
 	}
 
 	/**
-	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location resource type, so we need to use the fully qualified name for that resource
-	 * reference
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
+	 * resource type, so we need to use the fully qualified name for that resource reference
 	 */
 	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
 		for (BaseElement next : theNext.getChildren()) {

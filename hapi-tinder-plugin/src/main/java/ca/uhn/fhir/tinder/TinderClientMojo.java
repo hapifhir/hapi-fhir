@@ -122,7 +122,7 @@ public class TinderClientMojo extends AbstractMojo {
 		File resourceDir = new File(myDirectoryBase, "resource");
 		resourceDir.mkdirs();
 		pp.markResourcesForImports();
-		pp.writeAll(resourceDir, myPackageBase);
+		pp.writeAll(resourceDir, null,myPackageBase);
 
 		try {
 			write();

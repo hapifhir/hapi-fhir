@@ -26,7 +26,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 
 /**
- * Client interceptor which simply captures request and response objects and stored them so that they can be inspected after a client
+ * Client interceptor which simply captures request and response objects and stores them so that they can be inspected after a client
  * call has returned
  */
 public class CapturingInterceptor implements IClientInterceptor {

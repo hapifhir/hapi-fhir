@@ -1,0 +1,9 @@
+# This file contains version definitions
+
+#foreach ( $next in ${nameToResourceClass.entrySet()} )
+resource.${next.key}=${next.value}
+#end
+
+#foreach ( $next in ${nameToDatatypeClass.entrySet()} )
+datatype.${next.key}=${next.value}
+#end

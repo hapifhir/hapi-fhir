@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.ListResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -606,6 +607,19 @@ public class XmlParserTest {
 		ourLog.info(result);
 	}
 
+//	@Test
+	public void testParseFeedWithListResource() throws ConfigurationException, DataFormatException, IOException {
+
+		// Use new context here to ensure List isn't already loaded
+		IParser p = new FhirContext().newXmlParser();
+
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"));
+		Bundle bundle = p.parseBundle(string);
+
+		ListResource res = (ListResource) bundle.toListOfResources().get(2); 
+	}
+
+	
 	@Test
 	public void testLoadPatient() throws ConfigurationException, DataFormatException, IOException {
 

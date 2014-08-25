@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
 
@@ -156,7 +157,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest, null);
 
 		params[myIdParamIndex] = theRequest.getId();
@@ -175,15 +176,23 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		}
 		invokeServerMethod(params);
 
+		for (IServerInterceptor next : theServer.getInterceptors()) {
+			boolean continueProcessing = next.outgoingResponse(theRequest, theRequest.getServletRequest(), theRequest.getServletResponse());
+			if (!continueProcessing) {
+				return;
+			}
+		}
+
 		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
 
-		theResponse.setContentType(responseEncoding.getResourceContentType());
-		theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
-		theResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		HttpServletResponse response = theRequest.getServletResponse();
+		response.setContentType(responseEncoding.getResourceContentType());
+		response.setStatus(Constants.STATUS_HTTP_200_OK);
+		response.setCharacterEncoding(Constants.CHARSET_UTF_8);
 
-		theServer.addHeadersToResponse(theResponse);
+		theServer.addHeadersToResponse(response);
 
-		PrintWriter writer = theResponse.getWriter();
+		PrintWriter writer = response.getWriter();
 		writer.close();
 	}
 

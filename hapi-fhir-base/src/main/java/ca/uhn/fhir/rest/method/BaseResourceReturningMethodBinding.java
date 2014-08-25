@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
@@ -78,8 +79,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
-							+ collectionType);
+					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -91,8 +91,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
-					+ theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -192,7 +191,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public abstract IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
 		boolean prettyPrint = RestfulServer.prettyPrintResponse(theRequest);
@@ -225,11 +224,21 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		boolean respondGzip = theRequest.isRespondGzip();
 
+		HttpServletResponse response = theRequest.getServletResponse();
 		IBundleProvider result = invokeServer(theRequest, params);
 		switch (getReturnType()) {
 		case BUNDLE:
-			RestfulServer.streamResponseAsBundle(theServer, theResponse, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser,
-					narrativeMode, 0, count, null, respondGzip);
+
+			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
+
+			for (IServerInterceptor next : theServer.getInterceptors()) {
+				boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					return;
+				}
+			}
+
+			RestfulServer.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
 			break;
 		case RESOURCE:
 			if (result.size() == 0) {
@@ -237,8 +246,17 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			} else if (result.size() > 1) {
 				throw new InternalErrorException("Method returned multiple resources");
 			}
-			RestfulServer.streamResponseAsResource(theServer, theResponse, result.getResources(0, 1).get(0), responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip,
-					theRequest.getFhirServerBase());
+
+			IResource resource = result.getResources(0, 1).get(0);
+
+			for (IServerInterceptor next : theServer.getInterceptors()) {
+				boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					return;
+				}
+			}
+
+			RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 			break;
 		}
 	}
@@ -246,6 +264,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	/**
 	 * Subclasses may override
 	 * 
+	 * @param theRequest
+	 *            The incoming request
 	 * @throws IOException
 	 *             Subclasses may throw this in the event of an IO exception
 	 */

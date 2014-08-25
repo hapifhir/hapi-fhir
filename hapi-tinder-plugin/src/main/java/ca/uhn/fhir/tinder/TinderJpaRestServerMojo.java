@@ -59,7 +59,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 			gen.setFilenameSuffix("ResourceProvider");
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
-			gen.writeAll(directoryBase, packageBase);
+			gen.writeAll(directoryBase, null,packageBase);
 
 			// gen.setFilenameSuffix("ResourceTable");
 			// gen.setTemplate("/vm/jpa_resource_table.vm");

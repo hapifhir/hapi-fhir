@@ -45,14 +45,20 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
+	private static final Pattern ourYearDashMonthDashDayPattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
+	private static final Pattern ourYearDashMonthPattern = Pattern.compile("[0-9]{4}-[0-9]{2}");
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
 	private static final FastDateFormat ourYearMonthDayFormat = FastDateFormat.getInstance("yyyy-MM-dd");
 	private static final FastDateFormat ourYearMonthDayNoDashesFormat = FastDateFormat.getInstance("yyyyMMdd");
+	private static final Pattern ourYearMonthDayPattern = Pattern.compile("[0-9]{4}[0-9]{2}[0-9]{2}");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
 	private static final FastDateFormat ourYearMonthDayTimeMilliFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
+	private static final FastDateFormat ourYearMonthNoDashesFormat = FastDateFormat.getInstance("yyyyMM");
+	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
+	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
 
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
 	private TimeZone myTimeZone;
@@ -60,9 +66,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private Date myValue;
 
 	/**
-	 * Gets the precision for this datatype using field values from
-	 * {@link Calendar}, such as {@link Calendar#MONTH}. Default is
-	 * {@link Calendar#DAY_OF_MONTH}
+	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}.
+	 * Default is {@link Calendar#DAY_OF_MONTH}
 	 * 
 	 * @see #setPrecision(int)
 	 */
@@ -127,7 +132,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	/**
 	 * Returns <code>true</code> if this object represents a date that is today's date
 	 * 
-	 * @throws NullPointerException if {@link #getValue()} returns <code>null</code>
+	 * @throws NullPointerException
+	 *             if {@link #getValue()} returns <code>null</code>
 	 */
 	public boolean isToday() {
 		Validate.notNull(myValue, getClass().getSimpleName() + " contains null value");
@@ -135,8 +141,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the precision for this datatype using field values from
-	 * {@link Calendar}. Valid values are:
+	 * Sets the precision for this datatype using field values from {@link Calendar}. Valid values are:
 	 * <ul>
 	 * <li>{@link Calendar#SECOND}
 	 * <li>{@link Calendar#DAY_OF_MONTH}
@@ -166,12 +171,6 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		myValue = theValue;
 	}
 
-	private Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
-	private Pattern ourYearDashMonthPattern = Pattern.compile("[0-9]{4}-[0-9]{2}");
-	private Pattern ourYearDashMonthDashDayPattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
-	private Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
-	private Pattern ourYearMonthDayPattern = Pattern.compile("[0-9]{4}[0-9]{2}[0-9]{2}");
-	
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		try {
@@ -186,6 +185,15 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
 				}
+			} else if (theValue.length() == 6 && ourYearMonthPattern.matcher(theValue).matches()) {
+				// Eg. 198401 (allow this just to be lenient)
+				if (isPrecisionAllowed(MONTH)) {
+					setValue((ourYearMonthNoDashesFormat).parse(theValue));
+					setPrecision(MONTH);
+					clearTimeZone();
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
 			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
 				// E.g. 1984-01 (this is valid according to the spec)
 				if (isPrecisionAllowed(MONTH)) {
@@ -196,7 +204,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
 				}
 			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
-				//Eg. 19840101 (allow this just to be lenient)
+				// Eg. 19840101 (allow this just to be lenient)
 				if (isPrecisionAllowed(DAY)) {
 					setValue((ourYearMonthDayNoDashesFormat).parse(theValue));
 					setPrecision(DAY);
@@ -255,9 +263,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * To be implemented by subclasses to indicate whether the given precision
-	 * is allowed by this type
+	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
 	 */
 	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
-	
+
 }

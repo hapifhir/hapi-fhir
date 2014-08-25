@@ -79,7 +79,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		p.setBaseResourceNames(names);
 		p.parse();
 		p.markResourcesForImports();
-		p.writeAll(new File("target/gen/ca/uhn/fhir/model/dstu/resource"), "ca.uhn.fhir.model.dstu");
+		p.writeAll(new File("target/gen/ca/uhn/fhir/model/dstu/resource"), null,"ca.uhn.fhir.model.dstu");
 //		
 //		// TODO: this needs to be properly populated
 //		p.getAllDatatypes().add("String");

@@ -315,7 +315,7 @@ public class ProfileParser extends BaseStructureParser {
 		pp.parseSingleProfile(prof, "http://foo");
 
 		pp.markResourcesForImports();
-		pp.writeAll(new File("target/gen/test/resource"), "test");
+		pp.writeAll(new File("target/gen/test/resource"), null,"test");
 
 	}
 

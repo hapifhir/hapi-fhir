@@ -53,6 +53,18 @@ public class BaseDateTimeDtTest {
 	}
 
 	@Test
+	public void testParseMonthNoDashes() throws DataFormatException {
+		DateTimeDt dt = new DateTimeDt();
+		dt.setValueAsString("201302");
+
+		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
+		assertEquals("2013-02", dt.getValueAsString());
+		assertEquals(false, dt.isTimeZoneZulu());
+		assertNull(dt.getTimeZone());
+		assertEquals(TemporalPrecisionEnum.MONTH, dt.getPrecision());
+	}
+
+	@Test
 	public void testParseDay() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03");

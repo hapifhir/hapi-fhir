@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.w3.org/2005/Atom ../../Blogs/fhir-all-xsd/fhir-atom.xsd"
+ xmlns="http://www.w3.org/2005/Atom">
+    <title>Glucosemeter data from suresense</title>
+    <id>urn:uuid:500bee81-d973-4afe-b592-d39fe71e38</id>
+    <updated>2014-05-28T22:12:21Z</updated>    
+    <author>
+        <name>Aaron Jackson</name>
+    </author>
+    
+    <category scheme="http://hl7.org/fhir/tag/profile" term="http://localhost/Profile/medman" label="Medman Profile" />
+
+<entry>
+    <title>Patient details</title>
+    <id>cid:patient@bundle</id>
+    <updated>2014-05-28T22:12:21Z</updated>
+    <link href="http://localhost/Patient?identifier=PRP1660" rel="search"/>
+    <content type="text/xml">
+        <Patient xmlns="http://hl7.org/fhir">
+            <text>
+                <status value="generated"/>
+                <div xmlns="http://www.w3.org/1999/xhtml">Joe Bloggs</div>
+            </text>
+            <identifier>
+                <system value="urn:oid:2.16.840.1.113883.2.18.2"/>
+                <value value="PRP1660"/>
+            </identifier>
+            <name>
+                <text value="Joe Bloggs"/>
+            </name>
+        </Patient>
+    </content>
+</entry>
+    
+<entry>
+    <title>Practitioner</title>
+    <id>cid:practioner@bundle</id>
+    <updated>2014-05-28T22:12:21Z</updated>
+    <link href="http://localhost/Device?udi=abc123456" rel="search"/>
+    <content type="text/xml">
+       <Practitioner xmlns="http://hl7.org/fhir">
+           <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml"/>
+           </text>
+       </Practitioner>
+    </content>
+</entry>
+    
+    
+    <entry>
+        <title>Medication List</title>
+        <id>cid:list1</id>
+        <updated>2013-05-28T22:12:21Z</updated>
+       
+        <content type="text/xml">
+            <List xmlns="http://hl7.org/fhir">
+                <code>
+                    <coding>
+                        <system value="http://loinc.org"/>
+                        <code value="= 18605-6"/>
+                    </coding>
+                </code>
+                <subject>
+                    <reference value="cid:patient@bundle"/>
+                </subject>
+                <source>
+                    <reference value="cid:practioner@bundle"/>
+                </source>
+                <mode value="snapshot"/>
+                <entry>
+                    <item>
+                        <reference value="#med1"/>
+                    </item>                    
+                </entry>
+                <entry>
+                    <item>
+                        <reference value="#med2"/>
+                    </item>
+                </entry>
+                <entry>
+                    <deleted value="true"/>
+                    <item>
+                        <reference value="#med3"/>
+                    </item>
+                </entry>
+            </List>
+        </content>
+    </entry>
+    
+    <entry>
+        <title>Medication 1</title>
+        <id>cid:med1</id>
+        <updated>2013-05-29T22:12:21Z</updated>
+        
+        <content type="text/xml">
+            <MedicationStatement xmlns="http://hl7.org/fhir">
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Atenolol 50mg 1 mane</div>
+                </text>
+                <contained>
+                    <Medication id="med1">
+                        <code>
+                            <coding>
+                                <system value="mySys"/>
+                                <code value="med1"/>
+                            </coding>
+                            <text value="Atenolol 50mg"/>
+                        </code>
+                    </Medication>
+                </contained>
+                <patient>
+                    <reference value="cid:patient@bundle"/>
+                </patient>
+                <dosage>
+                    <!-- Once a day -->
+                    <timing>
+                       <repeat>
+                           <frequency value="1"/>
+                           <when value="ACM"/>
+                           <duration value="1"/>
+                           <units value="d"/>
+                       </repeat> 
+                    </timing> 
+                    <quantity>
+                        <value value="1"/>
+                    </quantity>
+                </dosage>
+                
+            </MedicationStatement>
+        </content>
+    </entry>
+    
+    <entry>
+        <title>Medication 2</title>
+        <id>cid:med2</id>
+        <updated>2013-05-29T22:12:21Z</updated>
+        
+        <content type="text/xml">
+            <MedicationStatement xmlns="http://hl7.org/fhir">
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Voltaren 25mg 3 times a day</div>
+                </text>
+                <contained>
+                    <Medication id="med1">
+                        <code>
+                            <coding>
+                                <system value="mySys"/>
+                                <code value="volt25"/>
+                            </coding>
+                            <text value="Voltaren 50mg"/>
+                        </code>
+                    </Medication>
+                </contained>
+                <patient>
+                    <reference value="cid:patient@bundle"/>
+                </patient>
+                <dosage>
+                    <!-- Three times a day -->
+                    <timing>
+                        <repeat>
+                            <frequency value="3"/>
+                            <duration value="1"/>
+                            <units value="d"/>
+                        </repeat> 
+                    </timing> 
+                    <quantity>
+                        <value value="2"/>
+                    </quantity>
+                </dosage>
+                
+            </MedicationStatement>
+        </content>
+    </entry>
+
+    <entry>
+        <title>Medication 3</title>
+        <id>cid:med2</id>
+        <updated>2013-05-29T22:12:21Z</updated>
+        
+        <content type="text/xml">
+            <MedicationStatement xmlns="http://hl7.org/fhir">
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Voltaren 25mg 3 times a day</div>
+                </text>
+                <contained>
+                    <Medication id="med1">
+                        <code>
+                            <coding>
+                                <system value="mySys"/>
+                                <code value="volt25"/>
+                            </coding>
+                            <text value="Voltaren 100mg SR"/>
+                        </code>
+                    </Medication>
+                </contained>
+                <patient>
+                    <reference value="cid:patient@bundle"/>
+                </patient>
+                <dosage>
+                    <!-- once a day -->
+                    <timing>
+                        <repeat>
+                            <frequency value="1"/>
+                            <duration value="1"/>
+                            <units value="d"/>
+                        </repeat> 
+                    </timing> 
+                    <quantity>
+                        <value value="2"/>
+                    </quantity>
+                </dosage>
+                
+            </MedicationStatement>
+        </content>
+    </entry>
+
+
+</feed>

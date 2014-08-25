@@ -38,7 +38,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
@@ -106,7 +107,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 		IResource resource;
 		if (requestContainsResource()) {
 			resource = parseIncomingServerResource(theRequest);
@@ -125,18 +126,19 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		Object[] params = createParametersForServerRequest(theRequest, resource);
 		addParametersForServerRequest(theRequest, params);
 
+		HttpServletResponse servletResponse = theRequest.getServletResponse();
 		MethodOutcome response;
 		try {
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
 			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
+			streamOperationOutcome(e, theServer, encoding, servletResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
 			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encoding, theResponse, theRequest);
+			streamOperationOutcome(e, theServer, encoding, servletResponse, theRequest);
 			return;
 		}
 
@@ -145,7 +147,15 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				throw new InternalErrorException("Server method returned invalid resource ID: " + response.getId().getValue());
 			}
 		}
-
+		
+		OperationOutcome outcome = response != null ? response.getOperationOutcome():null;
+		for (IServerInterceptor next : theServer.getInterceptors()) {
+			boolean continueProcessing = next.outgoingResponse(theRequest, outcome, theRequest.getServletRequest(), theRequest.getServletResponse());
+			if (!continueProcessing) {
+				return;
+			}
+		}
+		
 		switch (getResourceOperationType()) {
 		case CREATE:
 			if (response == null) {
@@ -153,20 +163,20 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 						+ " returned null, which is not allowed for create operation");
 			}
 			if (response.getCreated() == null || response.getCreated() == Boolean.TRUE) {
-				theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			} else {
-				theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			}
-			addLocationHeader(theRequest, theResponse, response);
+			addLocationHeader(theRequest, servletResponse, response);
 			break;
 
 		case UPDATE:
 			if (response.getCreated() == null || response.getCreated() == Boolean.FALSE) {
-				theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			} else {
-				theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
+				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			}
-			addLocationHeader(theRequest, theResponse, response);
+			addLocationHeader(theRequest, servletResponse, response);
 			break;
 
 		case VALIDATE:
@@ -176,27 +186,23 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				if (isReturnVoid() == false) {
 					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 				}
-				theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
+				servletResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 			} else {
 				if (response.getOperationOutcome() == null) {
-					theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
+					servletResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT);
 				} else {
-					theResponse.setStatus(Constants.STATUS_HTTP_200_OK);
+					servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 				}
-				if (getResourceOperationType() == RestfulOperationTypeEnum.UPDATE) {
-					addLocationHeader(theRequest, theResponse, response);
-				}
-
 			}
 
 		}
 
-		theServer.addHeadersToResponse(theResponse);
+		theServer.addHeadersToResponse(servletResponse);
 
-		if (response != null && response.getOperationOutcome() != null) {
+		if (outcome != null) {
 			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-			theResponse.setContentType(encoding.getResourceContentType());
-			Writer writer = theResponse.getWriter();
+			servletResponse.setContentType(encoding.getResourceContentType());
+			Writer writer = servletResponse.getWriter();
 			IParser parser = encoding.newParser(getContext());
 			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
 			try {
@@ -205,8 +211,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				writer.close();
 			}
 		} else {
-			theResponse.setContentType(Constants.CT_TEXT);
-			Writer writer = theResponse.getWriter();
+			servletResponse.setContentType(Constants.CT_TEXT);
+			Writer writer = servletResponse.getWriter();
 			writer.close();
 		}
 
