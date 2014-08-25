@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
@@ -52,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eclipse.jetty.security.MappedLoginService.Anonymous;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -68,6 +70,7 @@ import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.Request;
@@ -524,6 +527,21 @@ public class RestfulServer extends HttpServlet {
 						}
 					}
 
+					List<Class<?>> allowableParams = foundMethodBinding.getAllowableParamAnnotations();
+					if (allowableParams != null) {
+						for (Annotation[] nextParamAnnotations : m.getParameterAnnotations()) {
+							for (Annotation annotation : nextParamAnnotations) {
+								Package pack = annotation.annotationType().getPackage();
+								if (pack.equals(IdParam.class.getPackage())) {
+									if (!allowableParams.contains(annotation)) {
+										throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with "+ annotation);
+									}
+								}
+							}
+						}
+					}
+					
+					
 					resourceBinding.addMethod(foundMethodBinding);
 					ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 				}

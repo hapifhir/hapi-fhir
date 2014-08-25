@@ -20,6 +20,7 @@ import ca.uhn.fhir.util.ElementUtil;
 @ResourceDef(name="Patient")
 public class DummyPatientWithExtensions extends Patient {
 
+	
 	/**
 	 * Each extension is defined in a field. Any valid HAPI Data Type
 	 * can be used for the field type. Note that the [name=""] attribute

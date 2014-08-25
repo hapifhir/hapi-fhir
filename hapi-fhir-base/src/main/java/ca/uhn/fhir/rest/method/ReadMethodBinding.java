@@ -23,6 +23,9 @@ package ca.uhn.fhir.rest.method;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
@@ -52,9 +56,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 
 	private Integer myIdIndex;
-	private Integer myVersionIdIndex;
 	private boolean mySupportsVersion;
-
+	private Integer myVersionIdIndex;
+	
 	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
@@ -63,7 +67,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod);
 		Integer versionIdIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
-		mySupportsVersion = theMethod.getAnnotation(Read.class).version();		
+		mySupportsVersion = theMethod.getAnnotation(Read.class).version();
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
 
@@ -77,8 +81,26 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 	}
 
-	public boolean isVread() {
-		return mySupportsVersion || myVersionIdIndex != null;
+	@Override
+	public List<Class<?>> getAllowableParamAnnotations() {
+		ArrayList<Class<?>> retVal = new ArrayList<Class<?>>();
+		retVal.add(IdParam.class);
+		return retVal;
+	}
+
+	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return isVread() ? RestfulOperationTypeEnum.VREAD : RestfulOperationTypeEnum.READ;
+	}
+
+	@Override
+	public ReturnTypeEnum getReturnType() {
+		return ReturnTypeEnum.RESOURCE;
+	}
+
+	@Override
+	public RestfulOperationSystemEnum getSystemOperationType() {
+		return null;
 	}
 
 	@Override
@@ -107,30 +129,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			if (mySupportsVersion == false && myVersionIdIndex == null) {
 				return false;
 			}
-			if (theRequest.getId().hasVersionIdPart()==false) {
+			if (theRequest.getId().hasVersionIdPart() == false) {
 				return false;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.RESOURCE;
-	}
-
-	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		theMethodParams[myIdIndex] = theRequest.getId();
-		if (myVersionIdIndex != null) {
-			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
-		}
-
-		Object response = invokeServerMethod(theMethodParams);
-
-		return toResourceList(response);
 	}
 
 	@Override
@@ -154,35 +159,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return retVal;
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, vid.getIdPart());
-	}
-
-	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		if (theId.hasVersionIdPart()) {
-			return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, theId.getVersionIdPart());
-		} else {
-			return new HttpGetClientInvocation(resourceName, theId.getIdPart());
-		}
-	}
-
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return isVread() ? RestfulOperationTypeEnum.VREAD : RestfulOperationTypeEnum.READ;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
-	}
-
-	@Override
-	public boolean isBinary() {
-		return "Binary".equals(getResourceName());
-	}
-
-	@Override
-	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+			BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 		Binary resource = new Binary(theResponseMimeType, contents);
 
@@ -198,6 +177,39 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
+	}
+
+	@Override
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		theMethodParams[myIdIndex] = theRequest.getId();
+		if (myVersionIdIndex != null) {
+			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
+		}
+
+		Object response = invokeServerMethod(theMethodParams);
+
+		return toResourceList(response);
+	}
+
+	@Override
+	public boolean isBinary() {
+		return "Binary".equals(getResourceName());
+	}
+
+	public boolean isVread() {
+		return mySupportsVersion || myVersionIdIndex != null;
+	}
+
+	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
+		if (theId.hasVersionIdPart()) {
+			return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, theId.getVersionIdPart());
+		} else {
+			return new HttpGetClientInvocation(resourceName, theId.getIdPart());
+		}
+	}
+
+	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
+		return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, vid.getIdPart());
 	}
 
 }

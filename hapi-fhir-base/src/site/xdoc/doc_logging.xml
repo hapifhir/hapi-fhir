@@ -23,7 +23,9 @@
 				Unfortunately HAPI is not immune to this issue.
 			</p>
 
-			<subsection name="SLF4j">
+			<subsection name="Configuring HAPI's Logging - SLF4j">
+				
+				<img src="svg/hapi-fhir-logging.svg"  width="723" height="273" alt="Logging arch diagram" align="right"/>
 			
 				<p>
 					HAPI uses 
@@ -62,11 +64,13 @@
 						</ul> 
 					</li>
 				</ul>
-				
+								
 			</subsection>
 
 			<subsection name="Commons-Logging">
 				
+				<img src="svg/hapi-fhir-logging-complete.svg" width="614" height="153" alt="Logging arch diagram" align="right"/>
+			
 				<p>
 					Note that HAPI's client uses Apache HttpComponents Client internally, and that 
 					library uses Apache Commons Logging as a logging facade. The recommended approach to
@@ -75,6 +79,21 @@
 					but will redirect its logging statements to the same target as SLF4j has been
 					configured to.   
 				</p>
+				
+				<p>
+					The diagram at the right shows the chain of command for logging under this scheme.
+				</p>
+				
+				<p>
+					Note that some popular libraries (e.g. Spring Framework) also use commons-logging
+					for logging. As such they may include a commons-logging JAR automatically as 
+					a transitive dependency in Maven. If you are using jcl-over-slf4j and it isn't
+					working correctly, it is often worth checking the list of JARs included in your
+					application to see whether commons-logging has also been added. It can then be specifically
+					excluded in Maven. 
+				</p>
+			
+				<br clear="all"/>
 			
 			</subsection>
 

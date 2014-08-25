@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import javax.servlet.ServletException;
 
@@ -13,6 +14,8 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.param.StringParam;
 
 public class ServerInvalidDefinitionTest {
 
@@ -42,7 +45,20 @@ public class ServerInvalidDefinitionTest {
 			assertThat(e.getCause().toString(), StringContains.containsString("public"));
 		}
 	}
-	
+
+	@Test
+	public void testReadMethodWithSearchParameters() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new ReadMethodWithSearchParamProvider());
+		
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+		}
+	}
+
 	/**
 	 * Normal, should initialize properly
 	 */
@@ -64,6 +80,22 @@ public class ServerInvalidDefinitionTest {
 		@SuppressWarnings("unused")
 		@Read
 		public Patient read(@IdParam IdDt theId) {
+			return null;
+		}
+		
+	}
+	
+	public static class ReadMethodWithSearchParamProvider implements IResourceProvider
+	{
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+		
+		@SuppressWarnings("unused")
+		@Read
+		public Patient read(@IdParam IdDt theId, @RequiredParam(name="aaa") StringParam theParam) {
 			return null;
 		}
 		

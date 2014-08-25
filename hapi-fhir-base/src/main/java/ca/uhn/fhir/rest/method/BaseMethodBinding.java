@@ -95,6 +95,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myParameters = MethodUtil.getResourceParameters(theMethod);
 	}
 
+	
+	public List<Class<?>> getAllowableParamAnnotations() {
+		return null;
+	}
+	
 	public Set<String> getIncludes() {
 		Set<String> retVal = new TreeSet<String>();
 		for (IParameter next : myParameters) {

@@ -103,6 +103,10 @@
 			<action type="fix">
 				Fix performance issue in date/time datatypes where pattern matchers were not static
 			</action>
+			<action type="fix">
+				Server now gives a more helpful error message if a @Read method has a search parameter (which is invalid, but
+				previously lead to a very unhelpful error message). Thanks to Tahura Chaudhry of UHN for reporting!
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
