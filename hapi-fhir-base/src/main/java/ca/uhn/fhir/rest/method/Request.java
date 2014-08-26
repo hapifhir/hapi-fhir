@@ -41,7 +41,7 @@ public class Request extends RequestDetails {
 	private String myFhirServerBase;
 	private String myOperation;
 	private RequestType myRequestType;
-	private String myResourceName;
+	
 	private boolean myRespondGzip;
 	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
@@ -64,9 +64,6 @@ public class Request extends RequestDetails {
 		return myRequestType;
 	}
 
-	public String getResourceName() {
-		return myResourceName;
-	}
 
 	public String getSecondaryOperation() {
 		return mySecondaryOperation;
@@ -133,9 +130,6 @@ public class Request extends RequestDetails {
 		myRequestType = theRequestType;
 	}
 
-	public void setResourceName(String theResourceName) {
-		myResourceName = theResourceName;
-	}
 
 	public void setRespondGzip(boolean theRespondGzip) {
 		myRespondGzip = theRespondGzip;

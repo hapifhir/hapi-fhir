@@ -9,7 +9,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class RequestDetails {
 
 	private IdDt myId;
+	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
+	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
 	private RestfulOperationSystemEnum mySystemOperationType;
 
@@ -17,10 +19,17 @@ public class RequestDetails {
 		return myId;
 	}
 
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return myOtherOperationType;
+	}
+
 	public Map<String, String[]> getParameters() {
 		return myParameters;
 	}
 
+	public String getResourceName() {
+		return myResourceName;
+	}
 
 	public RestfulOperationTypeEnum getResourceOperationType() {
 		return myResourceOperationType;
@@ -34,10 +43,17 @@ public class RequestDetails {
 		myId = theId;
 	}
 
+	public void setOtherOperationType(OtherOperationTypeEnum theOtherOperationType) {
+		myOtherOperationType = theOtherOperationType;
+	}
+
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
 	}
 
+	public void setResourceName(String theResourceName) {
+		myResourceName = theResourceName;
+	}
 
 	public void setResourceOperationType(RestfulOperationTypeEnum theResourceOperationType) {
 		myResourceOperationType = theResourceOperationType;

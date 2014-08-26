@@ -1100,6 +1100,15 @@ public class Controller {
 			char nextChar = retVal.charAt(i);
 			int nextCharI = nextChar;
 			if (nextCharI == 65533) {
+				b.append(' ');
+				continue;
+			}
+			if (nextCharI == 160) {
+				b.append(' ');
+				continue;
+			}
+			if (nextCharI == 194) {
+				b.append(' ');
 				continue;
 			}
 			b.append(nextChar);

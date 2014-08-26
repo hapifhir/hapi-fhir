@@ -135,6 +135,10 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return null;
+	}
+
 	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;

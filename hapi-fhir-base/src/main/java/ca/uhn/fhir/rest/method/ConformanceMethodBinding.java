@@ -93,4 +93,9 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		return null;
 	}
 
+	@Override
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return OtherOperationTypeEnum.METADATA;
+	}
+
 }

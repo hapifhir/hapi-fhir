@@ -1,7 +1,12 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,10 +26,13 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -38,14 +46,14 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class InterceptorTest {
+public class LoggingInterceptorTest {
 
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
@@ -53,23 +61,65 @@ public class InterceptorTest {
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
 
+
+
 	@Test
-	public void testInterceptorFires() throws Exception {
-		when(myInterceptor.incomingRequest(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.incomingRequest(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+	public void testRead() throws Exception {
+		
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor)interceptor));
+			
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		verify(myInterceptor, times(1)).incomingRequest(any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verify(myInterceptor, times(1)).incomingRequest(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verify(myInterceptor, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verifyNoMoreInteractions(myInterceptor);
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), StringContains.containsString("read - Patient/1"));
 	}
 
+	@Test
+	public void testSearch() throws Exception {
+		
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat( "${operationType} - ${idOrResourceName} - ${requestParameters}");
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor)interceptor));
+			
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=1");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), StringContains.containsString("search-type - Patient - ?_id=1"));
+	}
+	
+	@Test
+	public void testMetadata() throws Exception {
+		
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		servlet.setInterceptors(Collections.singletonList((IServerInterceptor)interceptor));
+			
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, times(1)).info(captor.capture());
+		assertThat(captor.getValue(), StringContains.containsString("metadata - "));
+	}
+
+	
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -145,14 +195,6 @@ public class InterceptorTest {
 			return retVal;
 		}
 
-		
-		@Search(queryName="searchWithWildcardRetVal")
-		public List<? extends IResource> searchWithWildcardRetVal() {
-			Patient p = new Patient();
-			p.setId("1234");
-			p.addName().addFamily("searchWithWildcardRetVal");
-			return Collections.singletonList(p);
-		}
 		
 		/**
 		 * Retrieve the resource by its identifier

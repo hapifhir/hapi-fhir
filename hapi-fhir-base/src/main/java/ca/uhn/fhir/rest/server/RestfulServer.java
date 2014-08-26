@@ -132,332 +132,36 @@ public class RestfulServer extends HttpServlet {
 		theHttpResponse.addHeader("X-Powered-By", "HAPI FHIR " + VersionUtil.getVersion() + " RESTful Server");
 	}
 
-	/**
-	 * Returns the setting for automatically adding profile tags
-	 * 
-	 * @see #setAddProfileTag(AddProfileTagEnum)
-	 */
-	public AddProfileTagEnum getAddProfileTag() {
-		return myAddProfileTag;
-	}
-
-	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
-	 * providers should generally use this context if one is needed, as opposed to creating their own.
-	 */
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	public String getImplementationDescription() {
-		return myImplementationDescription;
-	}
-
-	/**
-	 * Returns a ist of all registered server interceptors
-	 */
-	public List<IServerInterceptor> getInterceptors() {
-		return Collections.unmodifiableList(myInterceptors);
-	}
-
-	public IPagingProvider getPagingProvider() {
-		return myPagingProvider;
-	}
-
-	/**
-	 * Provides the non-resource specific providers which implement method calls on this server
-	 * 
-	 * @see #getResourceProviders()
-	 */
-	public Collection<Object> getPlainProviders() {
-		return myPlainProviders;
-	}
-
-	public Collection<ResourceBinding> getResourceBindings() {
-		return myResourceNameToProvider.values();
-	}
-
-	/**
-	 * Provides the resource providers for this server
-	 */
-	public Collection<IResourceProvider> getResourceProviders() {
-		return myResourceProviders;
-	}
-
-	/**
-	 * Provides the security manager, or <code>null</code> if none
-	 */
-	public ISecurityManager getSecurityManager() {
-		return mySecurityManager;
-	}
-
-	/**
-	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
-	 */
-	public IServerAddressStrategy getServerAddressStrategy() {
-		return myServerAddressStrategy;
-	}
-
-	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
-	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
-	 * </p>
-	 */
-	public Object getServerConformanceProvider() {
-		return myServerConformanceProvider;
-	}
-
-	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
-	 * 
-	 * @see RestfulServer#setServerName(String)
-	 */
-	public String getServerName() {
-		return myServerName;
-	}
-
-	public IResourceProvider getServerProfilesProvider() {
-		return new ServerProfileProvider(getFhirContext());
-	}
-
-	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
-	 */
-	public String getServerVersion() {
-		return myServerVersion;
-	}
-
-	/**
-	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
-	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
-	 * initialization of the restful server's internal init.
-	 */
-	@Override
-	public final void init() throws ServletException {
-		initialize();
-		try {
-			ourLog.info("Initializing HAPI FHIR restful server");
-
-			mySecurityManager = getSecurityManager();
-			if (null == mySecurityManager) {
-				ourLog.trace("No security manager has been provided");
-			}
-
-			Collection<IResourceProvider> resourceProvider = getResourceProviders();
-			if (resourceProvider != null) {
-				Map<Class<? extends IResource>, IResourceProvider> typeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
-				for (IResourceProvider nextProvider : resourceProvider) {
-					Class<? extends IResource> resourceType = nextProvider.getResourceType();
-					if (resourceType == null) {
-						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
-					}
-					if (typeToProvider.containsKey(resourceType)) {
-						throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
-					}
-					typeToProvider.put(resourceType, nextProvider);
-				}
-				ourLog.info("Got {} resource providers", typeToProvider.size());
-				for (IResourceProvider provider : typeToProvider.values()) {
-					assertProviderIsValid(provider);
-					findResourceMethods(provider);
-				}
-			}
-
-			Collection<Object> providers = getPlainProviders();
-			if (providers != null) {
-				for (Object next : providers) {
-					assertProviderIsValid(next);
-					findResourceMethods(next);
-				}
-			}
-
-			findResourceMethods(getServerProfilesProvider());
-			findSystemMethods(getServerConformanceProvider());
-
-		} catch (Exception ex) {
-			ourLog.error("An error occurred while loading request handlers!", ex);
-			throw new ServletException("Failed to initialize FHIR Restful server", ex);
-		}
-		
-		myStarted = true;
-		ourLog.info("A FHIR has been lit on this server");
-	}
-
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return myUseBrowserFriendlyContentTypes;
-	}
-
-	/**
-	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER}
-	 * (which is the default), the server will automatically add a profile tag based on the class of the resource(s)
-	 * being returned.
-	 * 
-	 * @param theAddProfileTag
-	 *            The behaviour enum (must not be null)
-	 */
-	public void setAddProfileTag(AddProfileTagEnum theAddProfileTag) {
-		Validate.notNull(theAddProfileTag, "theAddProfileTag must not be null");
-		myAddProfileTag = theAddProfileTag;
-	}
-
-	public void setFhirContext(FhirContext theFhirContext) {
-		Validate.notNull(theFhirContext, "FhirContext must not be null");
-		myFhirContext = theFhirContext;
-	}
-
-	public void setImplementationDescription(String theImplementationDescription) {
-		myImplementationDescription = theImplementationDescription;
-	}
-
-	/**
-	 * Sets (or clears) the list of interceptors
-	 * 
-	 * @param theList
-	 *            The list of interceptors (may be null)
-	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
-		myInterceptors.clear();
-		if (theList != null) {
-			myInterceptors.addAll(theList);
-		}
-	}
-
-	/**
-	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
-	 */
-	public void setPagingProvider(IPagingProvider thePagingProvider) {
-		myPagingProvider = thePagingProvider;
-	}
-
-	/**
-	 * Sets the non-resource specific providers which implement method calls on this server.
-	 * 
-	 * @see #setResourceProviders(Collection)
-	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders = theProviders;
-	}
-
-	/**
-	 * Sets the non-resource specific providers which implement method calls on this server.
-	 * 
-	 * @see #setResourceProviders(Collection)
-	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
-	}
-
-	/**
-	 * Sets the non-resource specific providers which implement method calls on this server
-	 * 
-	 * @see #setResourceProviders(Collection)
-	 */
-	public void setProviders(Object... theProviders) {
-		myPlainProviders = Arrays.asList(theProviders);
-	}
-
-	/**
-	 * Sets the resource providers for this server
-	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
-		myResourceProviders = theResourceProviders;
-	}
-
-	/**
-	 * Sets the resource providers for this server
-	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
-		myResourceProviders = Arrays.asList(theResourceProviders);
-	}
-
-	/**
-	 * Sets the security manager, or <code>null</code> if none
-	 */
-	public void setSecurityManager(ISecurityManager theSecurityManager) {
-		mySecurityManager = theSecurityManager;
-	}
-
-	/**
-	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
-	 */
-	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
-		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
-		myServerAddressStrategy = theServerAddressStrategy;
-	}
-
-	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
-	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
-	 * </p>
-	 * Note that this method can only be called before the server is initialized.
-	 * 
-	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
-	 *             {@link IllegalStateException} if called after that.
-	 */
-	public void setServerConformanceProvider(Object theServerConformanceProvider) {
-		if (myStarted) {
-			throw new IllegalStateException("Server is already started");
-		}
-		myServerConformanceProvider = theServerConformanceProvider;
-	}
-
-	/**
-	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
-	 */
-	public void setServerName(String theServerName) {
-		myServerName = theServerName;
-	}
-
-	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
-	 */
-	public void setServerVersion(String theServerVersion) {
-		myServerVersion = theServerVersion;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
-	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
-	 */
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
-
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
 		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
 			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Class ust be public");
 		}
 	}
 
-	// /**
-	// * Sets the {@link INarrativeGenerator Narrative Generator} to use when
-	// serializing responses from this server, or <code>null</code> (which is
-	// the default) to disable narrative generation.
-	// * Note that this method can only be called before the server is
-	// initialized.
-	// *
-	// * @throws IllegalStateException
-	// * Note that this method can only be called prior to {@link #init()
-	// initialization} and will throw an {@link IllegalStateException} if called
-	// after that.
-	// */
-	// public void setNarrativeGenerator(INarrativeGenerator
-	// theNarrativeGenerator) {
-	// myNarrativeGenerator = theNarrativeGenerator;
-	// }
+	@Override
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
+	}
+
+	@Override
+	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
+	}
+
+	@Override
+	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
+	}
 
 	/**
 	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
@@ -580,6 +284,107 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Returns the setting for automatically adding profile tags
+	 * 
+	 * @see #setAddProfileTag(AddProfileTagEnum)
+	 */
+	public AddProfileTagEnum getAddProfileTag() {
+		return myAddProfileTag;
+	}
+
+	/**
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
+	 * providers should generally use this context if one is needed, as opposed to creating their own.
+	 */
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	public String getImplementationDescription() {
+		return myImplementationDescription;
+	}
+
+	/**
+	 * Returns a ist of all registered server interceptors
+	 */
+	public List<IServerInterceptor> getInterceptors() {
+		return Collections.unmodifiableList(myInterceptors);
+	}
+
+	public IPagingProvider getPagingProvider() {
+		return myPagingProvider;
+	}
+
+	/**
+	 * Provides the non-resource specific providers which implement method calls on this server
+	 * 
+	 * @see #getResourceProviders()
+	 */
+	public Collection<Object> getPlainProviders() {
+		return myPlainProviders;
+	}
+
+	public Collection<ResourceBinding> getResourceBindings() {
+		return myResourceNameToProvider.values();
+	}
+
+	/**
+	 * Provides the resource providers for this server
+	 */
+	public Collection<IResourceProvider> getResourceProviders() {
+		return myResourceProviders;
+	}
+
+	/**
+	 * Provides the security manager, or <code>null</code> if none
+	 */
+	public ISecurityManager getSecurityManager() {
+		return mySecurityManager;
+	}
+
+	/**
+	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this
+	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 */
+	public IServerAddressStrategy getServerAddressStrategy() {
+		return myServerAddressStrategy;
+	}
+
+	/**
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
+	 * <p>
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
+	 * </p>
+	 */
+	public Object getServerConformanceProvider() {
+		return myServerConformanceProvider;
+	}
+
+	/**
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
+	 * 
+	 * @see RestfulServer#setServerName(String)
+	 */
+	public String getServerName() {
+		return myServerName;
+	}
+
+	public IResourceProvider getServerProfilesProvider() {
+		return new ServerProfileProvider(getFhirContext());
+	}
+
+	/**
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
+	 */
+	public String getServerVersion() {
+		return myServerVersion;
+	}
+
 	private void handlePagingRequest(Request theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
 		IBundleProvider resultList = getPagingProvider().retrieveResultList(thePagingAction);
 		if (resultList == null) {
@@ -624,36 +429,6 @@ public class RestfulServer extends HttpServlet {
 
 		streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
 
-	}
-
-	private boolean requestIsBrowser(HttpServletRequest theRequest) {
-		String userAgent = theRequest.getHeader("User-Agent");
-		return userAgent != null && userAgent.contains("Mozilla");
-	}
-
-	@Override
-	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
-	}
-
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
-	}
-
-	@Override
-	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
-	}
-
-	@Override
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
 	}
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
@@ -830,6 +605,7 @@ public class RestfulServer extends HttpServlet {
 			RequestDetails requestDetails = r;
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
 			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
+			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
 
 			for (IServerInterceptor next : myInterceptors) {
 				boolean continueProcessing = next.incomingRequest(requestDetails, theRequest, theResponse);
@@ -892,11 +668,245 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
+	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
+	 * initialization of the restful server's internal init.
+	 */
+	@Override
+	public final void init() throws ServletException {
+		initialize();
+		try {
+			ourLog.info("Initializing HAPI FHIR restful server");
+
+			mySecurityManager = getSecurityManager();
+			if (null == mySecurityManager) {
+				ourLog.trace("No security manager has been provided");
+			}
+
+			Collection<IResourceProvider> resourceProvider = getResourceProviders();
+			if (resourceProvider != null) {
+				Map<Class<? extends IResource>, IResourceProvider> typeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
+				for (IResourceProvider nextProvider : resourceProvider) {
+					Class<? extends IResource> resourceType = nextProvider.getResourceType();
+					if (resourceType == null) {
+						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
+					}
+					if (typeToProvider.containsKey(resourceType)) {
+						throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
+					}
+					typeToProvider.put(resourceType, nextProvider);
+				}
+				ourLog.info("Got {} resource providers", typeToProvider.size());
+				for (IResourceProvider provider : typeToProvider.values()) {
+					assertProviderIsValid(provider);
+					findResourceMethods(provider);
+				}
+			}
+
+			Collection<Object> providers = getPlainProviders();
+			if (providers != null) {
+				for (Object next : providers) {
+					assertProviderIsValid(next);
+					findResourceMethods(next);
+				}
+			}
+
+			findResourceMethods(getServerProfilesProvider());
+			findSystemMethods(getServerConformanceProvider());
+
+		} catch (Exception ex) {
+			ourLog.error("An error occurred while loading request handlers!", ex);
+			throw new ServletException("Failed to initialize FHIR Restful server", ex);
+		}
+		
+		myStarted = true;
+		ourLog.info("A FHIR has been lit on this server");
+	}
+
+	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
 	 * server being used.
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default
+	}
+
+	public boolean isUseBrowserFriendlyContentTypes() {
+		return myUseBrowserFriendlyContentTypes;
+	}
+
+	public void registerInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.add(theInterceptor);
+	}
+
+	private boolean requestIsBrowser(HttpServletRequest theRequest) {
+		String userAgent = theRequest.getHeader("User-Agent");
+		return userAgent != null && userAgent.contains("Mozilla");
+	}
+
+	/**
+	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER}
+	 * (which is the default), the server will automatically add a profile tag based on the class of the resource(s)
+	 * being returned.
+	 * 
+	 * @param theAddProfileTag
+	 *            The behaviour enum (must not be null)
+	 */
+	public void setAddProfileTag(AddProfileTagEnum theAddProfileTag) {
+		Validate.notNull(theAddProfileTag, "theAddProfileTag must not be null");
+		myAddProfileTag = theAddProfileTag;
+	}
+
+	public void setFhirContext(FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "FhirContext must not be null");
+		myFhirContext = theFhirContext;
+	}
+
+	public void setImplementationDescription(String theImplementationDescription) {
+		myImplementationDescription = theImplementationDescription;
+	}
+
+
+	/**
+	 * Sets (or clears) the list of interceptors
+	 * 
+	 * @param theList
+	 *            The list of interceptors (may be null)
+	 */
+	public void setInterceptors(List<IServerInterceptor> theList) {
+		myInterceptors.clear();
+		if (theList != null) {
+			myInterceptors.addAll(theList);
+		}
+	}
+
+	/**
+	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
+	 */
+	public void setPagingProvider(IPagingProvider thePagingProvider) {
+		myPagingProvider = thePagingProvider;
+	}
+
+	/**
+	 * Sets the non-resource specific providers which implement method calls on this server.
+	 * 
+	 * @see #setResourceProviders(Collection)
+	 */
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders = theProviders;
+	}
+
+	/**
+	 * Sets the non-resource specific providers which implement method calls on this server.
+	 * 
+	 * @see #setResourceProviders(Collection)
+	 */
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
+	}
+
+	/**
+	 * Sets the non-resource specific providers which implement method calls on this server
+	 * 
+	 * @see #setResourceProviders(Collection)
+	 */
+	public void setProviders(Object... theProviders) {
+		myPlainProviders = Arrays.asList(theProviders);
+	}
+
+	/**
+	 * Sets the resource providers for this server
+	 */
+	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+		myResourceProviders = theResourceProviders;
+	}
+
+	/**
+	 * Sets the resource providers for this server
+	 */
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+		myResourceProviders = Arrays.asList(theResourceProviders);
+	}
+
+	/**
+	 * Sets the security manager, or <code>null</code> if none
+	 */
+	public void setSecurityManager(ISecurityManager theSecurityManager) {
+		mySecurityManager = theSecurityManager;
+	}
+
+	/**
+	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this
+	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 */
+	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
+		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
+		myServerAddressStrategy = theServerAddressStrategy;
+	}
+
+	/**
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
+	 * (metadata) statement.
+	 * <p>
+	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * if you do not wish to export a conformance statement.
+	 * </p>
+	 * Note that this method can only be called before the server is initialized.
+	 * 
+	 * @throws IllegalStateException
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
+	 *             {@link IllegalStateException} if called after that.
+	 */
+	public void setServerConformanceProvider(Object theServerConformanceProvider) {
+		if (myStarted) {
+			throw new IllegalStateException("Server is already started");
+		}
+		myServerConformanceProvider = theServerConformanceProvider;
+	}
+
+	/**
+	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only,
+	 * but can be helpful to set with something appropriate.
+	 */
+	public void setServerName(String theServerName) {
+		myServerName = theServerName;
+	}
+
+	/**
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
+	 * only, but can be helpful to set with something appropriate.
+	 */
+	public void setServerVersion(String theServerVersion) {
+		myServerVersion = theServerVersion;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
+	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
+	 */
+	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
+		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
+	}
+
+	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.remove(theInterceptor);
+	}
+
+	private static void addProfileToBundleEntry(FhirContext theContext, IResource theResource) {
+
+		TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
+		if (tl == null) {
+			tl = new TagList();
+			ResourceMetadataKeyEnum.TAG_LIST.put(theResource, tl);
+		}
+
+		RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
+		String profile = nextDef.getResourceProfile();
+		if (isNotBlank(profile)) {
+			tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
+		}
 	}
 
 	public static Bundle createBundleFromBundleProvider(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
@@ -1181,6 +1191,17 @@ public class RestfulServer extends HttpServlet {
 		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
 	}
 
+	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
+		Writer writer;
+		if (theRespondGzip) {
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
+			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
+		} else {
+			writer = theHttpResponse.getWriter();
+		}
+		return writer;
+	}
+
 	public static boolean prettyPrintResponse(Request theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
@@ -1229,32 +1250,6 @@ public class RestfulServer extends HttpServlet {
 			String theServerBase) throws IOException {
 		int stausCode = 200;
 		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip, theServerBase);
-	}
-
-	private static void addProfileToBundleEntry(FhirContext theContext, IResource theResource) {
-
-		TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
-		if (tl == null) {
-			tl = new TagList();
-			ResourceMetadataKeyEnum.TAG_LIST.put(theResource, tl);
-		}
-
-		RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-		String profile = nextDef.getResourceProfile();
-		if (isNotBlank(profile)) {
-			tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
-		}
-	}
-
-	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
-		Writer writer;
-		if (theRespondGzip) {
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
-		} else {
-			writer = theHttpResponse.getWriter();
-		}
-		return writer;
 	}
 
 	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode,

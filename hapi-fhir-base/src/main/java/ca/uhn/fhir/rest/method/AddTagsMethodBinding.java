@@ -36,4 +36,9 @@ class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 		return false;
 	}
 
+	@Override
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return OtherOperationTypeEnum.ADD_TAGS;
+	}
+
 }

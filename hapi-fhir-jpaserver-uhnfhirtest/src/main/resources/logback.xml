@@ -18,12 +18,30 @@
 			<fileNamePattern>${fhir.logdir}/fhirtest.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
-
 		<encoder>
 			<!-- [%file:%line] -->
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{req.remoteAddr}] [%X{req.userAgent}] %-5level %logger{36} %msg%n</pattern>
 		</encoder>
 	</appender>
+
+	<appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<file>${fhir.logdir}/access.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${fhir.logdir}/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<!-- [%file:%line] -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
+		</encoder>
+	</appender>
+
+    <logger name="fhirtest.access" level="INFO" additivity="false">
+        <appender-ref ref="ACCESS" />
+    </logger>  
 
 	<root level="DEBUG">
 		<appender-ref ref="FILE" />

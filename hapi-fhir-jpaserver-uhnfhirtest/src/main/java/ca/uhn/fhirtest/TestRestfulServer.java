@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -76,6 +77,11 @@ public class TestRestfulServer extends RestfulServer {
 		
 		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));
 		setPagingProvider(new FifoMemoryPagingProvider(10));
+		
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setLoggerName("fhirtest.access");
+		loggingInterceptor.setMessageFormat("Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
+		registerInterceptor(loggingInterceptor);
 		
 	}
 

@@ -207,4 +207,9 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		return true;
 	}
 
+	@Override
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return OtherOperationTypeEnum.GET_TAGS;
+	}
+
 }

@@ -23,7 +23,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -65,11 +64,12 @@ public class PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * Stores a new version of the patient in memory so that it
-	 * can be retrieved later.
+	 * Stores a new version of the patient in memory so that it can be retrieved later.
 	 * 
-	 * @param thePatient The patient resource to store
-	 * @param theId The ID of the patient to retrieve
+	 * @param thePatient
+	 *            The patient resource to store
+	 * @param theId
+	 *            The ID of the patient to retrieve
 	 */
 	private void addNewVersion(Patient thePatient, Long theId) {
 		InstantDt publishedDate;
@@ -83,21 +83,19 @@ public class PatientResourceProvider implements IResourceProvider {
 		}
 
 		/*
-		 * PUBLISHED time will always be set to the time that the first
-		 * version was stored. UPDATED time is set to the time that the new
-		 * version was stored. 
+		 * PUBLISHED time will always be set to the time that the first version was stored. UPDATED time is set to the time that the new version was stored.
 		 */
 		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, publishedDate);
 		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, InstantDt.withCurrentTime());
 
 		Deque<Patient> existingVersions = myIdToPatientVersions.get(theId);
-		
+
 		/*
 		 * We just use the current number of versions as the next version number
 		 */
 		IdDt version = new IdDt(existingVersions.size());
 		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, version);
-		
+
 		existingVersions.add(thePatient);
 	}
 
@@ -153,7 +151,7 @@ public class PatientResourceProvider implements IResourceProvider {
 
 		return retVal;
 	}
-	
+
 	/**
 	 * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
 	 */
@@ -163,18 +161,16 @@ public class PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * This is the "read" operation.
-	 * The "@Read" annotation indicates that this method supports the read and/or vread operation.
-	 * <p> 
-	 * Read operations take a single parameter annotated with the {@link IdParam} paramater, and 
-	 * should return a single resource instance.
+	 * This is the "read" operation. The "@Read" annotation indicates that this method supports the read and/or vread operation.
+	 * <p>
+	 * Read operations take a single parameter annotated with the {@link IdParam} paramater, and should return a single resource instance.
 	 * </p>
 	 * 
 	 * @param theId
 	 *            The read operation takes one parameter, which must be of type IdDt and must be annotated with the "@Read.IdParam" annotation.
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
-	@Read()
+	@Read(version = true)
 	public Patient readPatient(@IdParam IdDt theId) {
 		Deque<Patient> retVal;
 		try {
@@ -186,7 +182,19 @@ public class PatientResourceProvider implements IResourceProvider {
 			throw new ResourceNotFoundException(theId);
 		}
 
-		return retVal.getLast();
+		if (theId.hasVersionIdPart() == false) {
+			return retVal.getLast();
+		} else {
+			for (Patient nextVersion : retVal) {
+				String nextVersionId = nextVersion.getId().getVersionIdPart();
+				if (theId.getVersionIdPart().equals(nextVersionId)) {
+					return nextVersion;
+				}
+			}
+			// No matching version
+			throw new ResourceNotFoundException("Unknown version: " + theId.getValue());
+		}
+
 	}
 
 	/**
@@ -238,40 +246,4 @@ public class PatientResourceProvider implements IResourceProvider {
 		}
 	}
 
-	/**
-	 * This is the "vread" operation.
-	 * The "@Read" annotation indicates that this method supports the read and/or vread operation.
-	 * <p> 
-	 * VRead operations take a parameter annotated with the {@link IdParam} paramater, 
-	 * and a paramater annotated with the {@link VersionIdParam} parmeter,
-	 * and should return a single resource instance.
-	 * </p>
-	 * 
-	 * @param theId
-	 *            The read operation takes one parameter, which must be of type IdDt and must be annotated with the "@Read.IdParam" annotation.
-	 * @return Returns a resource matching this identifier, or null if none exists.
-	 */
-	@Read()
-	public Patient vreadPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersionId) {
-		Deque<Patient> versions;
-		try {
-			versions = myIdToPatientVersions.get(theId.getIdPartAsLong());
-		} catch (NumberFormatException e) {
-			/*
-			 * If we can't parse the ID as a long, it's not valid so this is an unknown resource
-			 */
-			throw new ResourceNotFoundException(theId);
-		}
-
-		for (Patient nextVersion : versions) {
-			IdDt nextVersionId = (IdDt) nextVersion.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID);
-			if (theVersionId.equals(nextVersionId)) {
-				return nextVersion;
-			}
-		}
-		
-		throw new ResourceNotFoundException("Unknown version " + theVersionId);
-	}
-
 }
-
