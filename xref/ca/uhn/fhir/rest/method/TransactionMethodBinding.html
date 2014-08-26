@@ -101,7 +101,7 @@
 <a class="jxr_linenumber" name="L93" href="#L93">93</a>  
 <a class="jxr_linenumber" name="L94" href="#L94">94</a>  	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  	@Override
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> invokeServer(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theMethodParams) <strong class="jxr_keyword">throws</strong> InvalidRequestException, InternalErrorException {
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> invokeServer(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theMethodParams) <strong class="jxr_keyword">throws</strong> InvalidRequestException, InternalErrorException {
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  		<em class="jxr_comment">// Grab the IDs of all of the resources in the transaction</em>
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  		List&lt;IResource&gt; resources;
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">if</strong> (theMethodParams[myTransactionParamIndex] instanceof Bundle) {
