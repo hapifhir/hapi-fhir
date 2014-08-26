@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
 import ca.uhn.fhir.parser.XmlParser;
@@ -150,14 +151,14 @@ public class FhirContext {
 			try {
 				String className = myNameToResourceType.get(resourceName.toLowerCase());
 				if (className == null) {
-					return null;
+					throw new DataFormatException("Unknown resource name[" + resourceName + "]");
 				}
 				Class<?> clazz = Class.forName(className);
 				if (IResource.class.isAssignableFrom(clazz)) {
 					retVal = scanResourceType((Class<? extends IResource>) clazz);
 				}
 			} catch (ClassNotFoundException e) {
-				return null;
+				throw new DataFormatException("Unknown resource name[" + resourceName + "]");
 			}
 		}
 
