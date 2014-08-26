@@ -52,6 +52,75 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  */
 public class LoggingInterceptor extends InterceptorAdapter {
 
+	private final class MyLookup extends StrLookup<String> {
+		private final HttpServletRequest myRequest;
+		private final RequestDetails myRequestDetails;
+
+		private MyLookup(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+			myRequest = theRequest;
+			myRequestDetails = theRequestDetails;
+		}
+
+		@Override
+		public String lookup(String theKey) {
+			if ("operationType".equals(theKey)) {
+				if (myRequestDetails.getResourceOperationType() != null) {
+					return myRequestDetails.getResourceOperationType().getCode();
+				}
+				if (myRequestDetails.getSystemOperationType() != null) {
+					return myRequestDetails.getSystemOperationType().getCode();
+				}
+				if (myRequestDetails.getOtherOperationType() != null) {
+					return myRequestDetails.getOtherOperationType().getCode();
+				}
+				return "";
+			}
+			if ("id".equals(theKey)) {
+				if (myRequestDetails.getId() != null) {
+					return myRequestDetails.getId().getValue();
+				}
+				return "";
+			}
+			if ("idOrResourceName".equals(theKey)) {
+				if (myRequestDetails.getId() != null) {
+					return myRequestDetails.getId().getValue();
+				}
+				if (myRequestDetails.getResourceName() != null) {
+					return myRequestDetails.getResourceName();
+				}
+				return "";
+			}
+			if (theKey.equals("requestParameters")) {
+				StringBuilder b = new StringBuilder();
+				for (Entry<String, String[]> next : myRequestDetails.getParameters().entrySet()) {
+					for (String nextValue : next.getValue()) {
+						if (b.length() == 0) {
+							b.append('?');
+						} else {
+							b.append('&');
+						}
+						try {
+							b.append(URLEncoder.encode(next.getKey(), "UTF-8"));
+							b.append('=');
+							b.append(URLEncoder.encode(nextValue, "UTF-8"));
+						} catch (UnsupportedEncodingException e) {
+							throw new ca.uhn.fhir.context.ConfigurationException("UTF-8 not supported", e);
+						}
+					}
+				}
+				return b.toString();
+			}
+			if (theKey.startsWith("requestHeader.")) {
+				String val = myRequest.getHeader(theKey.substring("requestHeader.".length()));
+				return StringUtils.defaultString(val);
+			}
+			if (theKey.startsWith("remoteAddr")) {
+				return StringUtils.defaultString(myRequest.getRemoteAddr());
+			}
+			return "!VAL!";
+		}
+	}
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
 	private Logger myLogger = ourLog;
@@ -59,68 +128,12 @@ public class LoggingInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean incomingRequest(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-		StrLookup<?> lookup = new StrLookup<String>() {
-			@Override
-			public String lookup(String theKey) {
-				if ("operationType".equals(theKey)) {
-					if (theRequestDetails.getResourceOperationType() != null) {
-						return theRequestDetails.getResourceOperationType().getCode();
-					}
-					if (theRequestDetails.getSystemOperationType() != null) {
-						return theRequestDetails.getSystemOperationType().getCode();
-					}
-					if (theRequestDetails.getOtherOperationType() != null) {
-						return theRequestDetails.getOtherOperationType().getCode();
-					}
-					return "";
-				}
-				if ("id".equals(theKey)) {
-					if (theRequestDetails.getId() != null) {
-						return theRequestDetails.getId().getValue();
-					}
-					return "";
-				}
-				if ("idOrResourceName".equals(theKey)) {
-					if (theRequestDetails.getId() != null) {
-						return theRequestDetails.getId().getValue();
-					}
-					if (theRequestDetails.getResourceName() != null) {
-						return theRequestDetails.getResourceName();
-					}
-					return "";
-				}
-				if (theKey.equals("requestParameters")) {
-					StringBuilder b = new StringBuilder();
-					for (Entry<String, String[]> next : theRequestDetails.getParameters().entrySet()) {
-						for (String nextValue : next.getValue()) {
-							if (b.length() == 0) {
-								b.append('?');
-							} else {
-								b.append('&');
-							}
-							try {
-								b.append(URLEncoder.encode(next.getKey(), "UTF-8"));
-								b.append('=');
-								b.append(URLEncoder.encode(nextValue, "UTF-8"));
-							} catch (UnsupportedEncodingException e) {
-								throw new ca.uhn.fhir.context.ConfigurationException("UTF-8 not supported", e);
-							}
-						}
-					}
-					return b.toString();
-				}
-				if (theKey.startsWith("requestHeader.")) {
-					String val = theRequest.getHeader(theKey.substring("requestHeader.".length()));
-					return StringUtils.defaultString(val);
-				}
-				if (theKey.startsWith("remoteAddr")) {
-					return StringUtils.defaultString(theRequest.getRemoteAddr());
-				}
-				return "!VAL!";
-			}
-		};
+
+		// Perform any string substitutions from the message format
+		StrLookup<?> lookup = new MyLookup(theRequest, theRequestDetails);
 		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
 
+		// Actuall log the line
 		String line = subs.replace(myMessageFormat);
 		myLogger.info(line);
 
