@@ -55,10 +55,10 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
 	private Logger myLogger = ourLog;
-
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
+	
 	@Override
-	public boolean incomingRequest(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean incomingRequestPostProcessed(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 
 		// Perform any string substitutions from the message format
 		StrLookup<?> lookup = new MyLookup(theRequest, theRequestDetails);

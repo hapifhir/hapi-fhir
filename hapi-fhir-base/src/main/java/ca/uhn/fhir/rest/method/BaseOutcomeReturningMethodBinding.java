@@ -149,7 +149,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 		
 		OperationOutcome outcome = response != null ? response.getOperationOutcome():null;
-		for (IServerInterceptor next : theServer.getInterceptors()) {
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
 			boolean continueProcessing = next.outgoingResponse(theRequest, outcome, theRequest.getServletRequest(), theRequest.getServletResponse());
 			if (!continueProcessing) {
 				return;

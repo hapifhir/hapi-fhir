@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>ca.uhn.hapi.fhir</groupId>
+		<groupId>com.cloudyle.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>0.6-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
@@ -25,7 +25,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>com.cloudyle.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.6-SNAPSHOT</version>
 		</dependency>
@@ -48,7 +48,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>com.cloudyle.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
 			<version>0.6-SNAPSHOT</version>
 			<scope>test</scope>

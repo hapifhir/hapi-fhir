@@ -98,12 +98,12 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
     	var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
     	for (var i = 0; i < qualifiers.length; i++) {
     		var nextLink = $('<a>' + qualifiers[i].name+'</a>');
-    		var theSearchParamName = qualifiers[i].name;
+    		var qualName = qualifiers[i].name;
     		var nextValue = qualifiers[i].value;
     		qualifierDropdown.append($('<li />').append(nextLink));
     		nextLink.click(function(){ 
     			qualifierInput.val(nextValue);
-    			matchesLabel.text(theSearchParamName);
+    			matchesLabel.text(qualName);
     		});
     	}
 

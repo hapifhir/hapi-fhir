@@ -64,11 +64,14 @@
 				<item name="Tags" href="./doc_tags.html" />
 				<item name="Validation" href="./doc_validation.html" />
 			</item>
-			<item name="RESTful Client" href="./doc_rest_client.html" />
+			<item name="RESTful Client" href="./doc_rest_client.html" >
+				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
+			</item>
 			<item name="RESTful Server" href="./doc_rest_server.html" >
 				<item name="RESTful Operations" href="./doc_rest_operations.html" />
 				<item name="Narrative Generator" href="./doc_narrative.html" />
 				<item name="CORS Support" href="./doc_cors.html" />
+				<item name="Interceptors (server)" href="./doc_rest_server_interceptor.html" />
 				<item name="Web Testing UI" href="./doc_server_tester.html" />
 			</item>
 			<item name="Logging" href="./doc_logging.html" />
@@ -90,7 +93,7 @@
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
 			<item name="License" href="license.html" />
-			<item name="Source Code" href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/" />
+			<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
 		</menu>
 
 	</body>

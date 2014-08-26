@@ -16,12 +16,12 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
-	public boolean incomingRequest(HttpServletRequest theRequest, HttpServletResponse theResponse) {
+	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
 		return true;
 	}
 
 	@Override
-	public boolean incomingRequest(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 		return true;
 	}
 

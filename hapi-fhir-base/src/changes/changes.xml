@@ -12,6 +12,13 @@
 				Allow generic client  ... OAUTH
 			</action>
 			-->
+			<action type="add">
+				Add server interceptor framework, and new interceptor for logging incoming
+				requests.   
+			</action>
+			<action type="add">
+				Add server validation framework for validating resources against the FHIR schemas and schematrons
+			</action>
 			<action type="fix">
 				Tester UI created double _format and _pretty param entries in searches. Thanks to Gered King of University
 				Health Network for reporting!   

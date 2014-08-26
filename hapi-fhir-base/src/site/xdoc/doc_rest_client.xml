@@ -352,7 +352,7 @@
 				</macro>
 
 			</subsection>
-			
+						
 			<subsection name="A Complete Example">
 	
 				<p>
@@ -371,8 +371,8 @@
 			
 		</section>
 
-		<section name="Configuring the Client">
-
+		<section name="Configuring the HTTP Client">
+		
 			<p>
 				RESTful clients (both Generic and Annotation-Driven) use 
 				<a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
@@ -392,67 +392,12 @@
 				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html">IRestfulClientFactory</a>
 				class from the FhirContext.
 			</p>
-
-			<subsection name="Interceptors">
-			
-				<p>
-					Both generic clients and annotation-driven clients support
-					<a href="./apidocs/ca/uhn/fhir/rest/client/IClientInterceptor.html">Client Interceptors</a>,
-					which may be registered in order to provide specific behaviour to each
-					client request.
-				</p>
-				
-				<p>
-					The following section shows some sample interceptors which may be used.
-				</p>
-			
-			</subsection>
-
-			<subsection name="HTTP Basic Authorization">
-
-				<p>
-					The following example shows how to configure your client to
-					use a specific username and password in every request.
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="security" />
-					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
-				</macro>
-
-			</subsection>
-
-			<a name="req_resp_logging"/>
-			<subsection name="Logging Requests and Responses">
-
-				<p>
-					An interceptor is provided with HAPI FHIR which can be used to
-					log every transaction. The interceptor can be configured to be extremely
-					verbose (logging entire transactions including HTTP headers and payload bodies) 
-					or simply to log request URLs.
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="logging" />
-					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
-				</macro>
-
-			</subsection>
-
-			<subsection name="Configuring an HTTP Proxy">
-			
-				<p>
-					An HTTP proxy may be configured directly on the 
-					restful client factory, as shown below.
-				</p>
-				
-				<macro name="snippet">
-					<param name="id" value="logging" />
-					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
-				</macro>
-			
-			</subsection>
-
+		
+			<p>
+				Note that individual requests and responses
+				can be tweaked using <a href="./doc_rest_client_interceptor.html">interceptors</a>.
+			</p>
+						
 		</section>
 
 	</body>

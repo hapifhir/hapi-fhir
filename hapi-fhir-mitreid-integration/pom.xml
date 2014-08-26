@@ -2,13 +2,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>ca.uhn.hapi.fhir</groupId>
+		<groupId>com.cloudyle.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>0.6-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ca.uhn.hapi.fhir</groupId>
+	<groupId>com.cloudyle.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-mitreid-integration</artifactId>
 	<packaging>jar</packaging>
 	<name>HAPI FHIR - MitreID Integration Module</name>
@@ -16,7 +16,7 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>com.cloudyle.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.6-SNAPSHOT</version>
 		</dependency>

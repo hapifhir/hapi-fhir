@@ -26,12 +26,12 @@ import javax.servlet.http.HttpServletResponse;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 
 /**
- * Provides methods to intercept requests and responses
+ * Provides methods to intercept requests and responses. Note that implementations of this interface may wish
+ * to use {@link InterceptorAdapter} in order to not need to implement every method.
  */
 public interface IServerInterceptor {
 
@@ -46,16 +46,19 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 */
-	public boolean incomingRequest(HttpServletRequest theRequest, HttpServletResponse theResponse);
+	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse);
 
 	/**
-	 * This method is called just before the actual implementing server method is invoked
+	 * This method is called just before the actual implementing server method is invoked.
+	 * <p>
+	 * Note about exceptions: 
+	 * </p>
 	 * 
 	 * @param theRequestDetails
 	 *            A bean containing details about the request that is about to be processed, including
@@ -63,16 +66,16 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 * @throws AuthenticationException
 	 *             This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *             attempt
+	 *             attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	public boolean incomingRequest(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
+	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream
@@ -86,14 +89,14 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 * @throws AuthenticationException
 	 *             This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *             attempt
+	 *             attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
@@ -110,14 +113,14 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 * @throws AuthenticationException
 	 *             This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *             attempt
+	 *             attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
@@ -133,14 +136,14 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 * @throws AuthenticationException
 	 *             This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *             attempt
+	 *             attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
@@ -156,14 +159,14 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>true</code>
+	 *            {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
 	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further
 	 *         interceptors will be called.
 	 * @throws AuthenticationException
 	 *             This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *             attempt
+	 *             attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
 	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 

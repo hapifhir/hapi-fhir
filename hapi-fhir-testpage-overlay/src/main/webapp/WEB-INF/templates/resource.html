@@ -106,7 +106,7 @@
 												if (this.id) {
 													if (this.id.substring(0,4) == 'inc_') {
 														this.name = '_include';
-													} else {
+													} else if (this.id.indexOf('autogen') == -1) {
 														this.name = this.id;
 													}	
 												}
