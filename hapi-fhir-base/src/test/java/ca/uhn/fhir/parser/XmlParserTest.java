@@ -730,6 +730,25 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testDuplicateContainedResources() {
+
+		Observation resA = new Observation();
+		resA.getName().setText("A");
+
+		Observation resB = new Observation();
+		resB.getName().setText("B");
+		resB.addRelated().setTarget(new ResourceReferenceDt(resA));
+		resB.addRelated().setTarget(new ResourceReferenceDt(resA));
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "<Obser", "</contained>"))));
+		
+	}
+	
+	@Test
 	public void testNestedContainedResources() {
 
 		Observation A = new Observation();
