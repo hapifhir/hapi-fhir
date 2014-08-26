@@ -72,13 +72,13 @@ public class XmlParserTest {
 
 		Binary patient = new Binary();
 		patient.setContentType("foo");
-		patient.setContent(new byte[] {1,2,3,4});
-		
+		patient.setContent(new byte[] { 1, 2, 3, 4 });
+
 		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\" contentType=\"foo\">AQIDBA==</Binary>", val);
-		
+
 	}
-	
+
 	@Test
 	public void testEncodeBoundCode() {
 
@@ -94,13 +94,13 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
-		Bundle b= new Bundle();
-		b.getCategories().addTag("http://hl7.org/fhir/tag", "http://hl7.org/fhir/tag/message", "Message"); 
+		Bundle b = new Bundle();
+		b.getCategories().addTag("http://hl7.org/fhir/tag", "http://hl7.org/fhir/tag/message", "Message");
 
 		InstantDt pub = InstantDt.withCurrentTime();
 		b.setPublished(pub);
 		Thread.sleep(2);
-		
+
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntry entry = b.addEntry();
@@ -114,11 +114,11 @@ public class XmlParserTest {
 		entry.setLinkAlternate(new StringDt("http://foo/bar"));
 		entry.setLinkSearch(new StringDt("http://foo/bar/search"));
 		entry.setResource(p2);
-		
+
 		BundleEntry deletedEntry = b.addEntry();
 		deletedEntry.setId(new IdDt("Patient/3"));
 		deletedEntry.setDeleted(InstantDt.withCurrentTime());
-		
+
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(bundleString);
 
@@ -126,14 +126,12 @@ public class XmlParserTest {
 		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.add("<category term=\"http://hl7.org/fhir/tag/message\" label=\"Message\" scheme=\"http://hl7.org/fhir/tag\"/>");
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
-		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>","</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
 		assertThat(bundleString, not(containsString("at:by")));
-		
-	}
 
-	
+	}
 
 	@Test
 	public void testEncodeBundleCategory() {
@@ -157,7 +155,7 @@ public class XmlParserTest {
 		assertNull(b.getEntries().get(0).getResource());
 
 	}
-	
+
 	@Test
 	public void testEncodeBundleResultCount() {
 
@@ -171,13 +169,12 @@ public class XmlParserTest {
 
 	}
 
-	
 	@Test
 	public void testEncodeContainedAndIncludedResources() {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		rpt.getName().setText("Report");
-		
+
 		Specimen spm = new Specimen();
 		spm.addIdentifier().setLabel("Report1ContainedSpecimen1");
 		rpt.addSpecimen().setResource(spm);
@@ -186,11 +183,9 @@ public class XmlParserTest {
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
-		
-		
+
 	}
 
-	
 	@Test
 	public void testEncodeContainedResources() {
 
@@ -232,8 +227,7 @@ public class XmlParserTest {
 		assertEquals("line1", ref.getLineFirstRep().getValue());
 
 	}
-	
-	
+
 	@Test
 	public void testEncodeDeclaredExtensionWithResourceContent() {
 		IParser parser = ourCtx.newXmlParser();
@@ -294,7 +288,7 @@ public class XmlParserTest {
 		Patient patient = new Patient();
 		patient.getText().getDiv().setValueAsString("<div>\n  <i>  hello     <pre>\n  LINE1\n  LINE2</pre></i>\n\n\n\n</div>");
 		patient.addName().addFamily("Family").addGiven("Given");
-		
+
 		//@formatter:off
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -324,7 +318,7 @@ public class XmlParserTest {
 				+ "   </name>\n"
 				+ "</Patient>";
 		//@formatter:on
-		
+
 		// Whitespace should be preserved and not reformatted in narrative blocks
 		assertEquals(expected, encoded);
 
@@ -335,13 +329,12 @@ public class XmlParserTest {
 		Query q = new Query();
 		ExtensionDt parameter = q.addParameter();
 		parameter.setUrl("http://foo").setValue(new StringDt("bar"));
-		
-		
+
 		String val = ourCtx.newXmlParser().encodeResourceToString(q);
 		ourLog.info(val);
 
 		assertEquals("<Query xmlns=\"http://hl7.org/fhir\"><parameter url=\"http://foo\"><valueString value=\"bar\"/></parameter></Query>", val);
-		
+
 	}
 
 	@Test
@@ -408,7 +401,6 @@ public class XmlParserTest {
 
 	}
 
-	
 	@Test
 	public void testExtensionOnPrimitive() throws Exception {
 
@@ -433,9 +425,6 @@ public class XmlParserTest {
 
 	}
 
-	
-	
-	
 	@Test
 	public void testExtensions() throws DataFormatException {
 
@@ -456,7 +445,7 @@ public class XmlParserTest {
 		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2010-01-02\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString("<modifierExtension url=\"http://example.com/dontuse#importantDates\"><valueDateTime value=\"2014-01-26T11:11:11\"/></modifierExtension>"));
 		assertThat(str, StringContains.containsString("<name><family value=\"Smith\"/></name>"));
-		
+
 	}
 
 	@Test
@@ -541,7 +530,6 @@ public class XmlParserTest {
 		assertTrue(d.toString(), d.identical());
 	}
 
-	
 	@Test
 	public void testLoadAndEncodeUndeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
 		IParser p = ourCtx.newXmlParser();
@@ -607,7 +595,7 @@ public class XmlParserTest {
 		ourLog.info(result);
 	}
 
-//	@Test
+	@Test
 	public void testParseFeedWithListResource() throws ConfigurationException, DataFormatException, IOException {
 
 		// Use new context here to ensure List isn't already loaded
@@ -616,10 +604,11 @@ public class XmlParserTest {
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"));
 		Bundle bundle = p.parseBundle(string);
 
-		ListResource res = (ListResource) bundle.toListOfResources().get(2); 
+		ListResource res = (ListResource) bundle.toListOfResources().get(2);
+		assertEquals("cid:patient@bundle", res.getSubject().getReference().getValue());
+
 	}
 
-	
 	@Test
 	public void testLoadPatient() throws ConfigurationException, DataFormatException, IOException {
 
@@ -673,7 +662,6 @@ public class XmlParserTest {
 
 	}
 
-	
 	@Test
 	public void testMoreExtensions() throws Exception {
 
@@ -717,8 +705,7 @@ public class XmlParserTest {
 		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 	}
-	
-	
+
 	@Test
 	public void testNarrativeGeneration() throws DataFormatException {
 
@@ -747,37 +734,36 @@ public class XmlParserTest {
 
 		Observation A = new Observation();
 		A.getName().setText("A");
-		
+
 		Observation B = new Observation();
 		B.getName().setText("B");
 		A.addRelated().setTarget(new ResourceReferenceDt(B));
-		
+
 		Observation C = new Observation();
 		C.getName().setText("C");
 		B.addRelated().setTarget(new ResourceReferenceDt(C));
 
 		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(A);
 		ourLog.info(str);
-		
+
 		assertThat(str, stringContainsInOrder(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
 		assertThat(str, stringContainsInOrder(Arrays.asList("<contained>", "</contained>")));
-		
+
 		// Only one (outer) contained block
 		int idx0 = str.indexOf("<contained>");
-		int idx1 = str.indexOf("<contained>",idx0+1);
+		int idx1 = str.indexOf("<contained>", idx0 + 1);
 		assertNotEquals(-1, idx0);
 		assertEquals(-1, idx1);
-		
+
 		Observation obs = ourCtx.newXmlParser().parseResource(Observation.class, str);
-		assertEquals("A",obs.getName().getText().getValue());
-		
+		assertEquals("A", obs.getName().getText().getValue());
+
 		Observation obsB = (Observation) obs.getRelatedFirstRep().getTarget().getResource();
-		assertEquals("B",obsB.getName().getText().getValue());
+		assertEquals("B", obsB.getName().getText().getValue());
 
 		Observation obsC = (Observation) obsB.getRelatedFirstRep().getTarget().getResource();
-		assertEquals("C",obsC.getName().getText().getValue());
+		assertEquals("C", obsC.getName().getText().getValue());
 
-		
 	}
 
 	@Test
@@ -785,7 +771,7 @@ public class XmlParserTest {
 
 		Binary val = ourCtx.newXmlParser().parseResource(Binary.class, "<Binary xmlns=\"http://hl7.org/fhir\" contentType=\"foo\">AQIDBA==</Binary>");
 		assertEquals("foo", val.getContentType());
-		assertArrayEquals(new byte[] {1,2,3,4}, val.getContent());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, val.getContent());
 
 	}
 
@@ -860,7 +846,7 @@ public class XmlParserTest {
 
 		assertEquals(1, bundle.getCategories().size());
 		assertEquals("http://hl7.org/fhir/tag", bundle.getCategories().get(0).getScheme());
-		
+
 		assertEquals("FHIR Core Valuesets", bundle.getTitle().getValue());
 		assertEquals("http://hl7.org/implement/standards/fhir/valuesets.xml", bundle.getLinkSelf().getValue());
 		assertEquals("2014-02-10T04:11:24.435+00:00", bundle.getUpdated().getValueAsString());
@@ -893,7 +879,7 @@ public class XmlParserTest {
 		resource = (ValueSet) entry.getResource();
 		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
 		assertEquals("12345", resource.getId().getVersionIdPart());
-		assertEquals("12345", ((IdDt)resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
+		assertEquals("12345", ((IdDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 
 	}
 
@@ -927,17 +913,17 @@ public class XmlParserTest {
 		assertEquals("http://foo/Patient/1/_history/2", entry.getLinkSelf().getValue());
 		assertEquals("1", entry.getResource().getId().getIdPart());
 		assertEquals("2", entry.getResource().getId().getVersionIdPart());
-		assertEquals("2", ((IdDt)entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
+		assertEquals("2", ((IdDt) entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 		assertEquals("John Doe", entry.getDeletedByName().getValue());
 		assertEquals("jdoe@example.org", entry.getDeletedByEmail().getValue());
 		assertEquals("Removed comment spam", entry.getDeletedComment().getValue());
 		assertEquals(new InstantDt("2013-02-10T04:11:24.435+00:00"), entry.getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
-		
+
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(bundle));
-		
+
 		String encoded = ourCtx.newXmlParser().encodeBundleToString(bundle);
-		assertEquals(msg,encoded);
-		
+		assertEquals(msg, encoded);
+
 	}
 
 	@Test
@@ -953,7 +939,7 @@ public class XmlParserTest {
 		assertEquals("3216379", bundle.getEntries().get(0).getResource().getId().getIdPart());
 
 	}
-	
+
 	@Test
 	public void testParseBundleWithMixedReturnTypes() {
 		InputStreamReader str = new InputStreamReader(getClass().getResourceAsStream("/mixed-return-bundle.xml"));
@@ -978,15 +964,14 @@ public class XmlParserTest {
 
 	}
 
-	
 	@Test
 	public void testParseEncodeNarrative() {
-		
+
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> Donald null <b>DUCK </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>7000135</td></tr><tr><td>Address</td><td><span>10 Duxon Street </span><br/><span>VICTORIA </span><span>BC </span><span>Can </span></td></tr><tr><td>Date of birth</td><td><span>01 June 1980</span></td></tr></tbody></table></div></text><identifier><use value=\"official\"/><label value=\"University Health Network MRN 7000135\"/><system value=\"urn:oid:2.16.840.1.113883.3.239.18.148\"/><value value=\"7000135\"/><assigner><reference value=\"Organization/1.3.6.1.4.1.12201\"/></assigner></identifier><name><family value=\"Duck\"/><given value=\"Donald\"/></name><telecom><system value=\"phone\"/><use value=\"home\"/></telecom><telecom><system value=\"phone\"/><use value=\"work\"/></telecom><telecom><system value=\"phone\"/><use value=\"mobile\"/></telecom><telecom><system value=\"email\"/><use value=\"home\"/></telecom><gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\"/><code value=\"M\"/></coding></gender><birthDate value=\"1980-06-01T00:00:00\"/><address><use value=\"home\"/><line value=\"10 Duxon Street\"/><city value=\"VICTORIA\"/><state value=\"BC\"/><zip value=\"V8N 1Y4\"/><country value=\"Can\"/></address><managingOrganization><reference value=\"Organization/1.3.6.1.4.1.12201\"/></managingOrganization></Patient>";
 		IResource res = ourCtx.newXmlParser().parseResource(input);
-		
+
 		String output = ourCtx.newXmlParser().encodeResourceToString(res);
-		
+
 		// Should occur exactly twice (once for the resource, once for the DIV
 		assertThat(output, (StringContainsInOrder.stringContainsInOrder(Arrays.asList("Patient xmlns", "div xmlns"))));
 		assertThat(output, not(StringContainsInOrder.stringContainsInOrder(Arrays.asList("b xmlns"))));
@@ -1000,8 +985,7 @@ public class XmlParserTest {
 	}
 
 	/**
-	 * This sample has extra elements in <searchParam> that are not actually a
-	 * part of the spec any more..
+	 * This sample has extra elements in <searchParam> that are not actually a part of the spec any more..
 	 */
 	@Test
 	public void testParseFuroreMetadataWithExtraElements() throws IOException {
@@ -1017,33 +1001,23 @@ public class XmlParserTest {
 	public void testParseLanguage() {
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><language value=\"zh-CN\"/><text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> 海生 <b>王 </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>URNo</td></tr><tr><td>Address</td><td><span>99 Houston Road </span><br/><span>BENTLEIGH </span><span>Victoria </span></td></tr><tr><td>Date of birth</td><td><span>01 January 1997</span></td></tr></tbody></table></div></text><identifier><use value=\"usual\"/><label value=\"URNo\"/><value value=\"89532\"/></identifier><name><text value=\"王海生\"/><family value=\"王\"/><given value=\"海生\"/></name><telecom><system value=\"phone\"/><value value=\"9899 9878\"/><use value=\"home\"/></telecom><telecom><system value=\"email\"/><value value=\"zimmerman@datacorp.com.au\"/><use value=\"home\"/></telecom><gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\"/><code value=\"M\"/><display value=\"Male\"/></coding><text value=\"Male\"/></gender><birthDate value=\"1997-01-01\"/><address><use value=\"home\"/><text value=\"99 Houston Road, BENTLEIGH, 3204\"/><line value=\"99 Houston Road\"/><city value=\"BENTLEIGH\"/><state value=\"Victoria\"/><zip value=\"3204\"/><period><start value=\"2006-06-16\"/></period></address><active value=\"true\"/></Patient>";
 		Patient pt = ourCtx.newXmlParser().parseResource(Patient.class, input);
-		
+
 		assertEquals("zh-CN", pt.getLanguage().getValue());
 	}
 
 	@Test
 	public void testParseQuery() {
-		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + 
-				"  <text>\n" + 
-				"    <status value=\"generated\"/>\n" + 
-				"    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n" + 
-				"  </text>\n" + 
-				"\n" + 
-				"  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + 
-				"   responder   -->\n" + 
-				"  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + 
-				"  <parameter url=\"http://hl7.org/fhir/query#_query\">\n" + 
-				"    <valueString value=\"example\"/>\n" + 
-				"  </parameter>\n" + 
-				"</Query>";
+		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + "  <text>\n" + "    <status value=\"generated\"/>\n" + "    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n" + "  </text>\n" + "\n"
+				+ "  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + "   responder   -->\n" + "  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + "  <parameter url=\"http://hl7.org/fhir/query#_query\">\n"
+				+ "    <valueString value=\"example\"/>\n" + "  </parameter>\n" + "</Query>";
 		Query query = ourCtx.newXmlParser().parseResource(Query.class, msg);
-		
+
 		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());
 		assertEquals("http://hl7.org/fhir/query#_query", query.getParameterFirstRep().getUrlAsString());
 		assertEquals("example", query.getParameterFirstRep().getValueAsPrimitive().getValueAsString());
-		
+
 	}
-	
+
 	@Test
 	public void testParseWithXmlHeader() throws ConfigurationException, DataFormatException {
 		IParser p = ourCtx.newXmlParser();
@@ -1121,7 +1095,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testTagList() {
-		
+
 		//@formatter:off
 		String tagListStr = "<taglist xmlns=\"http://hl7.org/fhir\"> \n" + 
 				"    <category term=\"term0\" label=\"label0\" scheme=\"scheme0\" /> \n" + 
@@ -1129,7 +1103,7 @@ public class XmlParserTest {
 				"    <category term=\"term2\" label=\"label2\" /> \n" + 
 				"</taglist>";
 		//@formatter:on
-		
+
 		TagList tagList = ourCtx.newXmlParser().parseTagList(tagListStr);
 		assertEquals(3, tagList.size());
 		assertEquals("term0", tagList.get(0).getTerm());
@@ -1141,7 +1115,7 @@ public class XmlParserTest {
 		assertEquals("term2", tagList.get(2).getTerm());
 		assertEquals("label2", tagList.get(2).getLabel());
 		assertEquals(null, tagList.get(2).getScheme());
-		
+
 		/*
 		 * Encode
 		 */
@@ -1153,10 +1127,10 @@ public class XmlParserTest {
 				"<category term=\"term2\" label=\"label2\"/>" + 
 				"</taglist>";
 		//@formatter:on
-		
+
 		String encoded = ourCtx.newXmlParser().encodeTagListToString(tagList);
-		assertEquals(expected,encoded);
-		
+		assertEquals(expected, encoded);
+
 	}
 
 	@Test

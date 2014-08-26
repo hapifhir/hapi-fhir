@@ -72,12 +72,14 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
+	private Map<String, String> myNameToResourceType;
+	private static final List<Class<? extends IResource>> EMPTY_LIST = Collections.emptyList();
 
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
 	 */
 	public FhirContext() {
-		super();
+		this(EMPTY_LIST);
 	}
 
 	public FhirContext(Class<? extends IResource> theResourceType) {
@@ -146,8 +148,11 @@ public class FhirContext {
 
 		if (retVal == null) {
 			try {
-				String candidateName = Patient.class.getPackage().getName() + "." + resourceName;
-				Class<?> clazz = Class.forName(candidateName);
+				String className = myNameToResourceType.get(resourceName.toLowerCase());
+				if (className == null) {
+					return null;
+				}
+				Class<?> clazz = Class.forName(className);
 				if (IResource.class.isAssignableFrom(clazz)) {
 					retVal = scanResourceType((Class<? extends IResource>) clazz);
 				}
@@ -298,6 +303,8 @@ public class FhirContext {
 		myClassToElementDefinition = classToElementDefinition;
 		myIdToResourceDefinition = idToElementDefinition;
 
+		myNameToResourceType = scanner.getNameToResourceType();
+		
 		return classToElementDefinition;
 	}
 

@@ -107,6 +107,10 @@
 				Server now gives a more helpful error message if a @Read method has a search parameter (which is invalid, but
 				previously lead to a very unhelpful error message). Thanks to Tahura Chaudhry of UHN for reporting!
 			</action>
+			<action type="fix">
+				Resource of type "List" failed to parse from a bundle correctly. Thanks to David Hay of Orion Health 
+				for reporting!
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

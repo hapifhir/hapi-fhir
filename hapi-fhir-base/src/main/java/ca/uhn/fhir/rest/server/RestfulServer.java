@@ -285,7 +285,7 @@ public class RestfulServer extends HttpServlet {
 			ourLog.error("An error occurred while loading request handlers!", ex);
 			throw new ServletException("Failed to initialize FHIR Restful server", ex);
 		}
-
+		
 		myStarted = true;
 		ourLog.info("A FHIR has been lit on this server");
 	}

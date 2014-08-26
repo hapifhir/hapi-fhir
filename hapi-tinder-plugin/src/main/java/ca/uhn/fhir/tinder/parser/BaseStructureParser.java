@@ -371,9 +371,9 @@ public abstract class BaseStructureParser {
 			}
 
 			if (next instanceof Resource) {
-				myNameToResourceClass.put(next.getElementName(), thePackageBase + '.' + elementName);
+				myNameToResourceClass.put(next.getElementName(), thePackageBase + ".resource." + elementName);
 			} else if (next instanceof Composite) {
-				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + '.' + elementName);
+				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + elementName + "Dt");
 			} else {
 				throw new IllegalStateException(next.getClass().toString());
 			}

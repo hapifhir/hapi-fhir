@@ -130,7 +130,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 			pp.combineContentMaps(rp);
 			pp.combineContentMaps(dtp);
-			pp.writeAll(new File(directoryBase, "resource"), null, packageName);
+			pp.writeAll(new File(directoryBase, "resource"), resDirectoryBase, packageName);
 		}
 
 		
@@ -139,7 +139,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 			
 			dtp.combineContentMaps(pp);
 			dtp.combineContentMaps(rp);
-			dtp.writeAll(new File(directoryBase, "composite"), null, packageName);
+			dtp.writeAll(new File(directoryBase, "composite"), resDirectoryBase, packageName);
 		}
 
 		ourLog.info("Writing ValueSet Enums...");
