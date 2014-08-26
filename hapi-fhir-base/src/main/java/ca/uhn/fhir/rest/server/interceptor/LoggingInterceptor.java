@@ -52,6 +52,44 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  */
 public class LoggingInterceptor extends InterceptorAdapter {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
+
+	private Logger myLogger = ourLog;
+
+	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
+	@Override
+	public boolean incomingRequest(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+
+		// Perform any string substitutions from the message format
+		StrLookup<?> lookup = new MyLookup(theRequest, theRequestDetails);
+		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
+
+		// Actuall log the line
+		String line = subs.replace(myMessageFormat);
+		myLogger.info(line);
+
+		return true;
+	}
+
+	public void setLogger(Logger theLogger) {
+		Validate.notNull(theLogger, "Logger can not be null");
+		myLogger = theLogger;
+	}
+
+	public void setLoggerName(String theLoggerName) {
+		Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
+		myLogger = LoggerFactory.getLogger(theLoggerName);
+
+	}
+
+	/**
+	 * Sets the message format itself. See the {@link LoggingInterceptor class documentation} for information on the format
+	 */
+	public void setMessageFormat(String theMessageFormat) {
+		Validate.notBlank(theMessageFormat, "Message format can not be null/empty");
+		myMessageFormat = theMessageFormat;
+	}
+
 	private final class MyLookup extends StrLookup<String> {
 		private final HttpServletRequest myRequest;
 		private final RequestDetails myRequestDetails;
@@ -119,44 +157,6 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			}
 			return "!VAL!";
 		}
-	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
-
-	private Logger myLogger = ourLog;
-	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
-
-	@Override
-	public boolean incomingRequest(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-
-		// Perform any string substitutions from the message format
-		StrLookup<?> lookup = new MyLookup(theRequest, theRequestDetails);
-		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
-
-		// Actuall log the line
-		String line = subs.replace(myMessageFormat);
-		myLogger.info(line);
-
-		return true;
-	}
-
-	public void setLogger(Logger theLogger) {
-		Validate.notNull(theLogger, "Logger can not be null");
-		myLogger = theLogger;
-	}
-
-	public void setLoggerName(String theLoggerName) {
-		Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
-		myLogger = LoggerFactory.getLogger(theLoggerName);
-
-	}
-
-	/**
-	 * Sets the message format itself. See the {@link LoggingInterceptor class documentation} for information on the format
-	 */
-	public void setMessageFormat(String theMessageFormat) {
-		Validate.notBlank(theMessageFormat, "Message format can not be null/empty");
-		myMessageFormat = theMessageFormat;
 	}
 
 }
