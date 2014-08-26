@@ -32,7 +32,7 @@ function generateHapiSearch(json, container) {
 		var paramLine = null;
 		if (nextParam.type == 'string') {
 			paramLine = '.where(new StringClientParam("' + nextParam.name + '")';
-			paramLine += nextParam.qualifier = ':exact' ? '.matchesExactly()' : '.matches()';
+			paramLine += nextParam.qualifier == ':exact' ? '.matchesExactly()' : '.matches()';
 			paramLine += '.value("' + nextParam.value + '"))';
 		} else if (nextParam.type == 'id') {
 				paramLine = '.where(new StringClientParam("' + nextParam.name + '")';

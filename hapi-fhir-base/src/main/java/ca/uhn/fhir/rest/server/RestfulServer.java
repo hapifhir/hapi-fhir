@@ -72,6 +72,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
@@ -420,7 +421,8 @@ public class RestfulServer extends HttpServlet {
 
 		Bundle bundle = createBundleFromBundleProvider(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction);
 
-		for (IServerInterceptor next : getInterceptors()) {
+		for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = getInterceptors().get(i);
 			boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
 			if (!continueProcessing) {
 				return;
@@ -433,7 +435,7 @@ public class RestfulServer extends HttpServlet {
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		for (IServerInterceptor next : myInterceptors) {
-			boolean continueProcessing = next.incomingRequest(theRequest, theResponse);
+			boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
 			if (!continueProcessing) {
 				return;
 			}
@@ -583,6 +585,7 @@ public class RestfulServer extends HttpServlet {
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
+				r.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
 				handlePagingRequest(r, theResponse, pagingAction);
 				return;
 			}
@@ -608,7 +611,7 @@ public class RestfulServer extends HttpServlet {
 			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
 
 			for (IServerInterceptor next : myInterceptors) {
-				boolean continueProcessing = next.incomingRequest(requestDetails, theRequest, theResponse);
+				boolean continueProcessing = next.incomingRequestPostProcessed(requestDetails, theRequest, theResponse);
 				if (!continueProcessing) {
 					return;
 				}
@@ -778,6 +781,19 @@ public class RestfulServer extends HttpServlet {
 		myInterceptors.clear();
 		if (theList != null) {
 			myInterceptors.addAll(theList);
+		}
+	}
+
+	/**
+	 * Sets (or clears) the list of interceptors
+	 * 
+	 * @param theList
+	 *            The list of interceptors (may be null)
+	 */
+	public void setInterceptors(IServerInterceptor... theList) {
+		myInterceptors.clear();
+		if (theList != null) {
+			myInterceptors.addAll(Arrays.asList(theList));
 		}
 	}
 

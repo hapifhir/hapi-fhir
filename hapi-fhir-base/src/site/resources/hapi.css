@@ -123,3 +123,11 @@ dfn {
 a,a.externalLink,a:active,a:hover,a:link,a:visited {
 	color: #993300;
 }
+
+DIV.sidebar-nav UL LI UL LI {
+        /*
+        list-style: initial;
+        list-style-type: circle;
+        */
+        font-size: 0.9em;
+}

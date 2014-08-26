@@ -176,7 +176,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		}
 		invokeServerMethod(params);
 
-		for (IServerInterceptor next : theServer.getInterceptors()) {
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
 			boolean continueProcessing = next.outgoingResponse(theRequest, theRequest.getServletRequest(), theRequest.getServletResponse());
 			if (!continueProcessing) {
 				return;

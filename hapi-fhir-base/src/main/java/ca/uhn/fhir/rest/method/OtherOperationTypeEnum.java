@@ -8,7 +8,9 @@ public enum OtherOperationTypeEnum {
 	
 	DELETE_TAGS("delete-tags"), 
 	
-	GET_TAGS("get-tags");
+	GET_TAGS("get-tags"), 
+	
+	GET_PAGE("get-page");
 	
 	private String myCode;
 

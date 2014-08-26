@@ -25,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -51,22 +52,32 @@ public class InterceptorTest {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private IServerInterceptor myInterceptor;
+	private IServerInterceptor myInterceptor1;
+	private IServerInterceptor myInterceptor2;
 
 	@Test
 	public void testInterceptorFires() throws Exception {
-		when(myInterceptor.incomingRequest(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.incomingRequest(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor1.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor2.outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		verify(myInterceptor, times(1)).incomingRequest(any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verify(myInterceptor, times(1)).incomingRequest(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verify(myInterceptor, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
-		verifyNoMoreInteractions(myInterceptor);
+		InOrder order = inOrder(myInterceptor1, myInterceptor2);
+		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		
+		order.verify(myInterceptor2, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		order.verify(myInterceptor1, times(1)).outgoingResponse(any(RequestDetails.class), any(IResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
+		verifyNoMoreInteractions(myInterceptor1);
+		verifyNoMoreInteractions(myInterceptor2);
 	}
 
 
@@ -77,8 +88,9 @@ public class InterceptorTest {
 
 	@Before
 	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		myInterceptor1 = mock(IServerInterceptor.class);
+		myInterceptor2 = mock(IServerInterceptor.class);
+		servlet.setInterceptors(myInterceptor1, myInterceptor2);
 	}
 
 	

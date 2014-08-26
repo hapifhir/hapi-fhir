@@ -231,7 +231,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
 
-			for (IServerInterceptor next : theServer.getInterceptors()) {
+			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = theServer.getInterceptors().get(i);
 				boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
 				if (!continueProcessing) {
 					return;
@@ -249,7 +250,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			IResource resource = result.getResources(0, 1).get(0);
 
-			for (IServerInterceptor next : theServer.getInterceptors()) {
+			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = theServer.getInterceptors().get(i);
 				boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
 				if (!continueProcessing) {
 					return;
