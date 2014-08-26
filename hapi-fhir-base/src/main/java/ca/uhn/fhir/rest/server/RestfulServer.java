@@ -533,7 +533,7 @@ public class RestfulServer extends HttpServlet {
 							for (Annotation annotation : nextParamAnnotations) {
 								Package pack = annotation.annotationType().getPackage();
 								if (pack.equals(IdParam.class.getPackage())) {
-									if (!allowableParams.contains(annotation)) {
+									if (!allowableParams.contains(annotation.annotationType())) {
 										throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with "+ annotation);
 									}
 								}
