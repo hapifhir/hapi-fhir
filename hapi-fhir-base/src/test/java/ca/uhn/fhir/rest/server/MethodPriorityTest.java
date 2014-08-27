@@ -42,7 +42,8 @@ public class MethodPriorityTest {
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
-	public void testOmitEmptyOptionalParam() throws Exception {
+	@Test
+	public void testDelegateTo_idMethod() throws Exception {
 		ourServlet.setResourceProviders(new DummyObservationResourceProvider());
 		ourServer.start();
 

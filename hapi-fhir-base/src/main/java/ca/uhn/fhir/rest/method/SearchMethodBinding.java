@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -48,10 +49,17 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
  */
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
+	private static final Set<String> SPECIAL_PARAM_NAMES;
+
+	static {
+		HashSet<String> specialParamNames = new HashSet<String>();
+		specialParamNames.add("_id");
+		specialParamNames.add("_language");
+		SPECIAL_PARAM_NAMES = Collections.unmodifiableSet(specialParamNames);
+	}
 
 	private Class<? extends IResource> myDeclaredResourceType;
 	private String myQueryName;
-
 	private String myDescription;
 
 	@SuppressWarnings("unchecked")
@@ -69,6 +77,20 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
+		for (IParameter next : getParameters()) {
+			if (!(next instanceof SearchParameter)) {
+				continue;
+			}
+			
+			SearchParameter sp = (SearchParameter)next;
+			if (sp.getName().startsWith("_")) {
+				if (ALLOWED_PARAMS.contains(sp.getName())) {
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(), sp.getName());
+					throw new ConfigurationException(msg); 
+				}
+			}
+		}
+		
 	}
 
 	public String getDescription() {
@@ -216,7 +238,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		Set<String> keySet = theRequest.getParameters().keySet();
 		for (String next : keySet) {
 			if (next.startsWith("_")) {
-				continue;
+				if (!SPECIAL_PARAM_NAMES.contains(next)) {
+					continue;
+				}
 			}
 			if (!methodParamsTemp.contains(next)) {
 				return false;
