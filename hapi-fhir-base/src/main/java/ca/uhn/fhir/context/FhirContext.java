@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.validation.ResourceValidator;
+import ca.uhn.fhir.validation.FhirValidator;
 
 /**
  * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
@@ -251,8 +251,8 @@ public class FhirContext {
 		return new FhirTerser(this);
 	}
 
-	public ResourceValidator newValidator() {
-		return new ResourceValidator(this);
+	public FhirValidator newValidator() {
+		return new FhirValidator(this);
 	}
 
 	public ViewGenerator newViewGenerator() {

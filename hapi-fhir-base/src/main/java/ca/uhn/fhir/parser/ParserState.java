@@ -703,6 +703,9 @@ class ParserState<T> {
 			myStack = theState;
 		}
 
+		/**
+		 * @param theData The string value
+		 */
 		public void string(String theData) {
 			// ignore by default
 		}
@@ -711,6 +714,9 @@ class ParserState<T> {
 			// allow an implementor to override
 		}
 
+		/**
+		 * @param theNextEvent The XML event
+		 */
 		public void xmlEvent(XMLEvent theNextEvent) {
 			// ignore
 		}
@@ -1198,7 +1204,7 @@ class ParserState<T> {
 			BaseRuntimeElementDefinition<?> definition;
 			if (myResourceType == null) {
 				definition = myContext.getResourceDefinition(theLocalPart);
-				if (!(definition instanceof RuntimeResourceDefinition)) {
+				if ((definition == null)) {
 					throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
 				}
 			} else {
@@ -1258,16 +1264,16 @@ class ParserState<T> {
 			}
 
 			myContext.newTerser().visit(myInstance, new IModelVisitor() {
-				
+
 				@Override
 				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
 					acceptElement(theNextExt.getValue(), null, null);
 				}
-				
+
 				@Override
 				public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 					if (theElement instanceof ResourceReferenceDt) {
-						ResourceReferenceDt nextRef = (ResourceReferenceDt)theElement;
+						ResourceReferenceDt nextRef = (ResourceReferenceDt) theElement;
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
@@ -1282,7 +1288,7 @@ class ParserState<T> {
 					}
 				}
 			});
-			
+
 		}
 
 	}

@@ -948,7 +948,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class SortInternal implements ISort {
+	private static class SortInternal implements ISort {
 
 		private SearchInternal myFor;
 		private String myParamName;

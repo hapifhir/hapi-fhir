@@ -21,7 +21,9 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -105,8 +107,8 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(CompositeOrListParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, SearchParamTypeEnum.COMPOSITE);
 	}
-	private Class<? extends IQueryParameterType>[] myCompositeTypes;
-	private Class<? extends IResource>[] myDeclaredTypes;
+	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
+	private List<Class<? extends IResource>> myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder myParamBinder;
@@ -140,8 +142,8 @@ public class SearchParameter extends BaseQueryParameter {
 		return retVal;
 	}
 
-	public Class<? extends IResource>[] getDeclaredTypes() {
-		return myDeclaredTypes;
+	public List<Class<? extends IResource>> getDeclaredTypes() {
+		return Collections.unmodifiableList(myDeclaredTypes);
 	}
 
 	public String getDescription() {
@@ -188,11 +190,11 @@ public class SearchParameter extends BaseQueryParameter {
 	}
 
 	public void setCompositeTypes(Class<? extends IQueryParameterType>[] theCompositeTypes) {
-		myCompositeTypes = theCompositeTypes;
+		myCompositeTypes = Arrays.asList(theCompositeTypes);
 	}
 
 	public void setDeclaredTypes(Class<? extends IResource>[] theTypes) {
-		myDeclaredTypes = theTypes;
+		myDeclaredTypes = Arrays.asList(theTypes);
 	}
 
 	public void setDescription(String theDescription) {

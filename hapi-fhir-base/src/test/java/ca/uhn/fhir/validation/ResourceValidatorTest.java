@@ -22,7 +22,7 @@ public class ResourceValidatorTest {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.xml"));
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 
-		ResourceValidator val = ourCtx.newValidator();
+		FhirValidator val = ourCtx.newValidator();
 		val.setValidateBaseSchema(true);
 		val.setValidateBaseSchematron(false);
 		
@@ -48,7 +48,7 @@ public class ResourceValidatorTest {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.xml"));
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 
-		ResourceValidator val = ourCtx.newValidator();
+		FhirValidator val = ourCtx.newValidator();
 		val.setValidateBaseSchema(false);
 		val.setValidateBaseSchematron(true);
 

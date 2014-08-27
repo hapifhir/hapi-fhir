@@ -22,7 +22,8 @@ package ca.uhn.fhir.rest.param;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+import static ca.uhn.fhir.rest.param.ParameterUtil.*;
+import static org.apache.commons.lang3.StringUtils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -163,27 +164,27 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	public String getValueAsQueryToken() {
-		if (super.getMissing()!=null) {
+		if (super.getMissing() != null) {
 			return super.getValueAsQueryToken();
 		}
-		
+
 		StringBuilder b = new StringBuilder();
-		if (myQuantity.getComparator() != null) {
-			b.append(ParameterUtil.escape(myQuantity.getComparator().getValue()));
-		} else if (myApproximate) {
+		if (myApproximate) {
 			b.append('~');
+		} else {
+			b.append(defaultString(escape(myQuantity.getComparator().getValue())));
 		}
 
 		if (!myQuantity.getValue().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getValue().getValueAsString()));
+			b.append(defaultString(escape(myQuantity.getValue().getValueAsString())));
 		}
 		b.append('|');
 		if (!myQuantity.getSystem().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getSystem().getValueAsString()));
+			b.append(defaultString(escape(myQuantity.getSystem().getValueAsString())));
 		}
 		b.append('|');
 		if (!myQuantity.getUnits().isEmpty()) {
-			b.append(ParameterUtil.escape(myQuantity.getUnits().getValueAsString()));
+			b.append(defaultString(escape(myQuantity.getUnits().getValueAsString())));
 		}
 
 		return b.toString();
@@ -195,7 +196,9 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	public void setApproximate(boolean theApproximate) {
 		myApproximate = theApproximate;
-		myQuantity.setComparator((QuantityCompararatorEnum) null);
+		if (theApproximate) {
+			myQuantity.setComparator((QuantityCompararatorEnum) null);
+		}
 	}
 
 	public QuantityParam setComparator(QuantityCompararatorEnum theComparator) {
@@ -254,14 +257,14 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 		clear();
 
 		super.setValueAsQueryToken(theQualifier, theValue);
-		if (getMissing()!=null) {
+		if (getMissing() != null) {
 			return;
 		}
-		
+
 		if (theValue == null) {
 			return;
 		}
-		List<String> parts = ParameterUtil.splitParameterString(theValue, true);
+		List<String> parts = ParameterUtil.splitParameterString(theValue, '|', true);
 
 		if (parts.size() > 0 && StringUtils.isNotBlank(parts.get(0))) {
 			if (parts.get(0).startsWith("~")) {
@@ -273,7 +276,8 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
 			} else if (parts.get(0).startsWith("<")) {
 				myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN);
-				myQuantity.setValue(new BigDecimal(parts.get(0).substring(1)));
+				String valStr = parts.get(0).substring(1);
+				myQuantity.setValue(new BigDecimal(valStr));
 			} else if (parts.get(0).startsWith(">=")) {
 				myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
 				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
@@ -300,7 +304,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 		b.append("value", myQuantity.getValue().getValueAsString());
 		b.append("system", myQuantity.getSystem().getValueAsString());
 		b.append("units", myQuantity.getUnits().getValueAsString());
-		if (getMissing()!=null) {
+		if (getMissing() != null) {
 			b.append("missing", getMissing());
 		}
 		return b.toString();
