@@ -33,7 +33,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> implements IParamBinder {
 
-	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType, Class<? extends IQueryParameterType>[] theCompositeTypes) {
+	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType, List<Class<? extends IQueryParameterType>> theCompositeTypes) {
 		super(theType, theCompositeTypes);
 	}
 

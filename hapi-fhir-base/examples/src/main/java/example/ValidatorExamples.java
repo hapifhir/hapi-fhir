@@ -6,7 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.validation.ResourceValidator;
+import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationFailureException;
 
 public class ValidatorExamples {
@@ -24,7 +24,7 @@ public class ValidatorExamples {
       p.addTelecom().setSystem(ContactSystemEnum.PHONE).setValue("416 123-4567");
       
       // Request a validator and apply it
-      ResourceValidator val = ctx.newValidator();
+      FhirValidator val = ctx.newValidator();
       try {
          
          val.validate(p);

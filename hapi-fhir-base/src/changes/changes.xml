@@ -118,6 +118,9 @@
 				Resource of type "List" failed to parse from a bundle correctly. Thanks to David Hay of Orion Health 
 				for reporting!
 			</action>
+			<action type="fix">
+				QuantityParam correctly encodes approximate (~) prefix to values
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

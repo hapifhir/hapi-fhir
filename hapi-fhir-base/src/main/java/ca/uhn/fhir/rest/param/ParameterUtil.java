@@ -184,7 +184,7 @@ public class ParameterUtil {
 	 */
 	public static String escape(String theValue) {
 		if (theValue == null) {
-			return theValue;
+			return null;
 		}
 		StringBuilder b = new StringBuilder();
 

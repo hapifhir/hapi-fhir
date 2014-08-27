@@ -145,11 +145,11 @@ public class FhirTerser {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-				if (theElement.isEmpty()) {
+				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
 
-				if (theElement != null && theType.isAssignableFrom(theElement.getClass())) {
+				if (theType.isAssignableFrom(theElement.getClass())) {
 					retVal.add((T) theElement);
 				}
 			}
