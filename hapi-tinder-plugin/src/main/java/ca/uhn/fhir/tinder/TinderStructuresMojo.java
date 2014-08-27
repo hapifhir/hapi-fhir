@@ -198,8 +198,8 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
-		ProfileParser pp = new ProfileParser();
-		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
+//		ProfileParser pp = new ProfileParser();
+//		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
 
 		ValueSetGenerator vsp = new ValueSetGenerator();
 		// vsp.setDirectory("src/test/resources/vs/");
@@ -213,7 +213,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		rp.setBaseResourceNames(Arrays.asList("patient"));
+		rp.setBaseResourceNames(Arrays.asList("securityevent"));
 		rp.parse();
 
 		// rp.bindValueSets(vsp);

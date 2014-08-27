@@ -448,7 +448,7 @@ public class SecurityEvent extends BaseResource implements IResource {
 		shortDefinition="Specific instances of data or objects that have been accessed",
 		formalDefinition="Specific instances of data or objects that have been accessed"
 	)
-	private java.util.List<Object> myObject;
+	private java.util.List<ObjectElement> myObject;
 	
 
 	@Override
@@ -593,9 +593,9 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Specific instances of data or objects that have been accessed
      * </p> 
 	 */
-	public java.util.List<Object> getObject() {  
+	public java.util.List<ObjectElement> getObject() {  
 		if (myObject == null) {
-			myObject = new java.util.ArrayList<Object>();
+			myObject = new java.util.ArrayList<ObjectElement>();
 		}
 		return myObject;
 	}
@@ -608,7 +608,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Specific instances of data or objects that have been accessed
      * </p> 
 	 */
-	public SecurityEvent setObject(java.util.List<Object> theValue) {
+	public SecurityEvent setObject(java.util.List<ObjectElement> theValue) {
 		myObject = theValue;
 		return this;
 	}
@@ -621,8 +621,8 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Specific instances of data or objects that have been accessed
      * </p> 
 	 */
-	public Object addObject() {
-		Object newType = new Object();
+	public ObjectElement addObject() {
+		ObjectElement newType = new ObjectElement();
 		getObject().add(newType);
 		return newType; 
 	}
@@ -636,7 +636,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Specific instances of data or objects that have been accessed
      * </p> 
 	 */
-	public Object getObjectFirstRep() {
+	public ObjectElement getObjectFirstRep() {
 		if (getObject().isEmpty()) {
 			return addObject();
 		}
@@ -1735,7 +1735,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Object extends BaseIdentifiableElement implements IResourceBlock {
+	public static class ObjectElement extends BaseIdentifiableElement implements IResourceBlock {
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -1844,7 +1844,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifies a specific instance of the participant object. The reference should always be version specific
      * </p> 
 	 */
-	public Object setIdentifier(IdentifierDt theValue) {
+	public ObjectElement setIdentifier(IdentifierDt theValue) {
 		myIdentifier = theValue;
 		return this;
 	}
@@ -1857,7 +1857,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifies a specific instance of the participant object. The reference should always be version specific
      * </p> 
 	 */
-	public Object setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+	public ObjectElement setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
 		myIdentifier = new IdentifierDt(theUse, theSystem, theValue, theLabel); 
 		return this; 
 	}
@@ -1870,7 +1870,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifies a specific instance of the participant object. The reference should always be version specific
      * </p> 
 	 */
-	public Object setIdentifier( String theSystem,  String theValue) {
+	public ObjectElement setIdentifier( String theSystem,  String theValue) {
 		myIdentifier = new IdentifierDt(theSystem, theValue); 
 		return this; 
 	}
@@ -1901,7 +1901,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifies a specific instance of the participant object. The reference should always be version specific
      * </p> 
 	 */
-	public Object setReference(ResourceReferenceDt theValue) {
+	public ObjectElement setReference(ResourceReferenceDt theValue) {
 		myReference = theValue;
 		return this;
 	}
@@ -1932,7 +1932,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Object type being audited
      * </p> 
 	 */
-	public Object setType(BoundCodeDt<SecurityEventObjectTypeEnum> theValue) {
+	public ObjectElement setType(BoundCodeDt<SecurityEventObjectTypeEnum> theValue) {
 		myType = theValue;
 		return this;
 	}
@@ -1945,7 +1945,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Object type being audited
      * </p> 
 	 */
-	public Object setType(SecurityEventObjectTypeEnum theValue) {
+	public ObjectElement setType(SecurityEventObjectTypeEnum theValue) {
 		getType().setValueAsEnum(theValue);
 		return this;
 	}
@@ -1976,7 +1976,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Code representing the functional application role of Participant Object being audited
      * </p> 
 	 */
-	public Object setRole(BoundCodeDt<SecurityEventObjectRoleEnum> theValue) {
+	public ObjectElement setRole(BoundCodeDt<SecurityEventObjectRoleEnum> theValue) {
 		myRole = theValue;
 		return this;
 	}
@@ -1989,7 +1989,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Code representing the functional application role of Participant Object being audited
      * </p> 
 	 */
-	public Object setRole(SecurityEventObjectRoleEnum theValue) {
+	public ObjectElement setRole(SecurityEventObjectRoleEnum theValue) {
 		getRole().setValueAsEnum(theValue);
 		return this;
 	}
@@ -2020,7 +2020,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifier for the data life-cycle stage for the participant object
      * </p> 
 	 */
-	public Object setLifecycle(BoundCodeDt<SecurityEventObjectLifecycleEnum> theValue) {
+	public ObjectElement setLifecycle(BoundCodeDt<SecurityEventObjectLifecycleEnum> theValue) {
 		myLifecycle = theValue;
 		return this;
 	}
@@ -2033,7 +2033,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Identifier for the data life-cycle stage for the participant object
      * </p> 
 	 */
-	public Object setLifecycle(SecurityEventObjectLifecycleEnum theValue) {
+	public ObjectElement setLifecycle(SecurityEventObjectLifecycleEnum theValue) {
 		getLifecycle().setValueAsEnum(theValue);
 		return this;
 	}
@@ -2064,7 +2064,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics
      * </p> 
 	 */
-	public Object setSensitivity(BoundCodeableConceptDt<SecurityEventObjectSensitivityEnum> theValue) {
+	public ObjectElement setSensitivity(BoundCodeableConceptDt<SecurityEventObjectSensitivityEnum> theValue) {
 		mySensitivity = theValue;
 		return this;
 	}
@@ -2077,7 +2077,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics
      * </p> 
 	 */
-	public Object setSensitivity(SecurityEventObjectSensitivityEnum theValue) {
+	public ObjectElement setSensitivity(SecurityEventObjectSensitivityEnum theValue) {
 		getSensitivity().setValueAsEnum(theValue);
 		return this;
 	}
@@ -2108,7 +2108,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * An instance-specific descriptor of the Participant Object ID audited, such as a person's name
      * </p> 
 	 */
-	public Object setName(StringDt theValue) {
+	public ObjectElement setName(StringDt theValue) {
 		myName = theValue;
 		return this;
 	}
@@ -2121,7 +2121,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * An instance-specific descriptor of the Participant Object ID audited, such as a person's name
      * </p> 
 	 */
-	public Object setName( String theString) {
+	public ObjectElement setName( String theString) {
 		myName = new StringDt(theString); 
 		return this; 
 	}
@@ -2152,7 +2152,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Text that describes the object in more detail
      * </p> 
 	 */
-	public Object setDescription(StringDt theValue) {
+	public ObjectElement setDescription(StringDt theValue) {
 		myDescription = theValue;
 		return this;
 	}
@@ -2165,7 +2165,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * Text that describes the object in more detail
      * </p> 
 	 */
-	public Object setDescription( String theString) {
+	public ObjectElement setDescription( String theString) {
 		myDescription = new StringDt(theString); 
 		return this; 
 	}
@@ -2196,7 +2196,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The actual query for a query-type participant object
      * </p> 
 	 */
-	public Object setQuery(Base64BinaryDt theValue) {
+	public ObjectElement setQuery(Base64BinaryDt theValue) {
 		myQuery = theValue;
 		return this;
 	}
@@ -2209,7 +2209,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * The actual query for a query-type participant object
      * </p> 
 	 */
-	public Object setQuery( byte[] theBytes) {
+	public ObjectElement setQuery( byte[] theBytes) {
 		myQuery = new Base64BinaryDt(theBytes); 
 		return this; 
 	}
@@ -2240,7 +2240,7 @@ public class SecurityEvent extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Object setDetail(java.util.List<ObjectDetail> theValue) {
+	public ObjectElement setDetail(java.util.List<ObjectDetail> theValue) {
 		myDetail = theValue;
 		return this;
 	}

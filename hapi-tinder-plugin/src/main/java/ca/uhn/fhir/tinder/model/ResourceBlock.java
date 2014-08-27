@@ -11,6 +11,15 @@ public class ResourceBlock extends Child {
 		return super.getChildren();
 	}
 
+	@Override
+	public void setElementName(String theName) {
+		super.setElementName(theName);
+		String name = theName;
+		if ("object".equals(name)) {
+			setForcedClassName("ObjectElement");
+		}
+	}
+	
 	public String getClassName() {
 		if (myForcedClassName != null) {
 			return myForcedClassName;

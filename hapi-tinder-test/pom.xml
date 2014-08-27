@@ -84,6 +84,8 @@
 								<baseResourceName>device</baseResourceName>
 								<baseResourceName>location</baseResourceName>
 								<baseResourceName>practitioner</baseResourceName>
+								<baseResourceName>list</baseResourceName>
+								<baseResourceName>securityevent</baseResourceName>
 							</baseResourceNames>
 							<buildDatatypes>true</buildDatatypes>
 						</configuration>

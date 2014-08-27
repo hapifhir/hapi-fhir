@@ -20,10 +20,12 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static ca.uhn.fhir.rest.param.ParameterUtil.escape;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 import java.math.BigDecimal;
 import java.util.List;
-import static ca.uhn.fhir.rest.param.ParameterUtil.*;
-import static org.apache.commons.lang3.StringUtils.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

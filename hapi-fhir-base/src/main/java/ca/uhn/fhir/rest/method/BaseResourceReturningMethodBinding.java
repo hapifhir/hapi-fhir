@@ -61,6 +61,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		set.add(Constants.PARAM_FORMAT);
 		set.add(Constants.PARAM_NARRATIVE);
 		set.add(Constants.PARAM_PRETTY);
+		set.add(Constants.PARAM_SORT);
+		set.add(Constants.PARAM_SORT_ASC);
+		set.add(Constants.PARAM_SORT_DESC);
+		set.add(Constants.PARAM_COUNT);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
 	private MethodReturnTypeEnum myMethodReturnType;

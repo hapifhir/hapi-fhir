@@ -121,6 +121,16 @@
 			<action type="fix">
 				QuantityParam correctly encodes approximate (~) prefix to values
 			</action>
+			<action type="fix" issue="14">
+				If a server defines a method with parameter "_id", incoming search requests for that method may
+				get delegated to the wrong method. Thanks to Neal Acharya for reporting! 
+			</action>
+			<action type="add">
+				SecurityEvent.Object structural element has been renamed to 
+				SecurityEvent.ObjectElement to avoid conflicting names with the 
+				java Object class. Thanks to Laurie Macdougall-Sookraj of UHN for
+				reporting! 
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

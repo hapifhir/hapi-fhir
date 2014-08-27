@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 
 @Retention(RetentionPolicy.RUNTIME)
