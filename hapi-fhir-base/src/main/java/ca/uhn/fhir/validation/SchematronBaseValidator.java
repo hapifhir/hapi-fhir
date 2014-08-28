@@ -30,6 +30,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
@@ -87,25 +89,37 @@ public class SchematronBaseValidator implements IValidator {
 		Class<? extends IResource> resource = theCtx.getResource().getClass();
 		Class<? extends IResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
-		return getSchematronAndCache(theCtx, "dstu",baseResourceClass);
+		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion , Class<? extends IResource> theClass) {
+	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion, Class<? extends IResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {
 				return retVal;
 			}
 
-			String pathToBase = "ca/uhn/fhir/model/"+theVersion+"/schema/" +  theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
+			String pathToBase = "ca/uhn/fhir/model/" + theVersion + "/schema/" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
+					+ ".sch";
 			InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 			if (baseIs == null) {
-				throw new ValidationFailureException("No schematron found for resource type: " + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
+				throw new ValidationFailureException("No schematron found for resource type: "
+						+ theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
 			}
 
 			retVal = SchematronResourceSCH.fromClassPath(pathToBase);
 			myClassToSchematron.put(theClass, retVal);
 			return retVal;
+		}
+	}
+
+	@Override
+	public void validateBundle(ValidationContext<Bundle> theContext) {
+		for (BundleEntry next : theContext.getResource().getEntries()) {
+			if (next.getResource() != null) {
+				ValidationContext<IResource> ctx = ValidationContext.newChild(theContext, next.getResource());
+				validateResource(ctx);
+			}
 		}
 	}
 

@@ -32,6 +32,14 @@ public class ValidationFailureException extends RuntimeException {
 		this(theProblem, IssueSeverityEnum.FATAL, null);
 	}
 
+	private static String toDescription(OperationOutcome theOo) {
+		StringBuilder b = new StringBuilder();
+		b.append(theOo.getIssueFirstRep().getDetails().getValue());
+		b.append(" - ");
+		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
+		return b.toString();
+	}
+
 	public ValidationFailureException(String theProblem, Exception theCause) {
 		this(theProblem, IssueSeverityEnum.FATAL, theCause);
 	}
@@ -42,8 +50,8 @@ public class ValidationFailureException extends RuntimeException {
 		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
 	}
 
-	public ValidationFailureException(String theProblem, OperationOutcome theOperationOutcome) {
-		super(theProblem);
+	public ValidationFailureException(OperationOutcome theOperationOutcome) {
+		super(toDescription(theOperationOutcome));
 		myOperationOutcome = theOperationOutcome;
 	}
 

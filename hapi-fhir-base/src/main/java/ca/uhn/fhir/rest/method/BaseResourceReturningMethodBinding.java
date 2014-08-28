@@ -67,10 +67,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		set.add(Constants.PARAM_COUNT);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
+	
 	private MethodReturnTypeEnum myMethodReturnType;
 	private Class<?> myResourceListCollectionType;
 	private String myResourceName;
-
 	private Class<? extends IResource> myResourceType;
 
 	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {

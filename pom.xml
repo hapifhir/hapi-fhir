@@ -22,6 +22,17 @@
 
 	<inceptionYear>2014</inceptionYear>
 
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
+	</issueManagement>
+  
+	<scm>
+		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
+		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
+	</scm>
+    
 	<description>
 	</description>
 

@@ -216,6 +216,7 @@
 			<Patient id="cid:b01227b1-2701-4f9f-93b3-428146aa3ed3" xmlns="http://hl7.org/fhir">
 				<language value="en-US" />
 				<text>
+					<status value="generated"/>
 					<div xmlns="http://www.w3.org/1999/xhtml">Parkerson, Parkie</div>
 				</text>
 				<identifier>
@@ -262,6 +263,7 @@
 			<Patient id="cid:dd85a42b-eab0-4863-b4e4-2296e8369e9a" xmlns="http://hl7.org/fhir">
 				<language value="en-US" />
 				<text>
+				    <status value="generated"/>
 					<div xmlns="http://www.w3.org/1999/xhtml">Parkerson, Parkie</div>
 				</text>
 				<identifier>
@@ -339,6 +341,7 @@
 			<Patient xmlns="http://hl7.org/fhir">
 				<language value="en-US" />
 				<text>
+				    <status value="generated"/>
 					<div xmlns="http://www.w3.org/1999/xhtml">Parkerson, Parkie</div>
 				</text>
 				<identifier>
@@ -385,6 +388,7 @@
 			<Patient xmlns="http://hl7.org/fhir">
 				<language value="en-US" />
 				<text>
+				    <status value="generated"/>
 					<div xmlns="http://www.w3.org/1999/xhtml">Parkerson, Parkie</div>
 				</text>
 				<identifier>
@@ -431,6 +435,7 @@
 			<Patient xmlns="http://hl7.org/fhir">
 				<language value="en-US" />
 				<text>
+				    <status value="generated"/>
 					<div xmlns="http://www.w3.org/1999/xhtml">Parkerson, Parkie</div>
 				</text>
 				<identifier>

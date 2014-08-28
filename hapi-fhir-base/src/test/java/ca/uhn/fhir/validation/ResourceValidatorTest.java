@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
 
@@ -18,7 +19,7 @@ public class ResourceValidatorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorTest.class);
 
 	@Test
-	public void testSchemaValidator() throws IOException {
+	public void testSchemaResourceValidator() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.xml"));
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 
@@ -39,12 +40,33 @@ public class ResourceValidatorTest {
 		}
 	}
 
+	@Test
+	public void testSchemaBundleValidator() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(res);
+
+		FhirValidator val = ourCtx.newValidator();
+		val.setValidateAgainstStandardSchema(true);
+		val.setValidateAgainstStandardSchematron(false);
+
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(false).encodeBundleToString(b).substring(15600));
+		
+		val.validate(b);
+
+//		b.getAnimal().getBreed().setText("The Breed");
+//		try {
+//			val.validate(b);
+//			fail();
+//		} catch (ValidationFailureException e) {
+//			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+//			assertEquals(1, e.getOperationOutcome().getIssue().size());
+//			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetails().getValue(), containsString("Invalid content was found starting with element 'breed'"));
+//		}
+	}
+
 	
 	@Test
-	public void testSchematronValidator() throws IOException {
-//		System.setProperty("javax.xml.transform.TransformerFactory", "org.apache.xalan.processor.TransformerFactoryImpl ");
-//		System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
-		
+	public void testSchematronResourceValidator() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.xml"));
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 

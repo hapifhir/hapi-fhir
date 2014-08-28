@@ -79,6 +79,12 @@ class ValidationContext<T> {
 		});
 	}
 
+	public static ValidationContext<IResource> newChild(ValidationContext<Bundle> theContext, IResource theResource) {
+		ValidationContext<IResource> retVal = forResource(theContext.getFhirContext(), theResource);
+		retVal.myOperationOutcome = theContext.getOperationOutcome();
+		return retVal;
+	}
+
 	private interface IEncoder {
 		String encode();
 	}

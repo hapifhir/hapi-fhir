@@ -69,15 +69,6 @@ class SchemaBaseValidator implements IValidator {
 
 	private Map<String, Schema> myKeyToSchema = new HashMap<String, Schema>();
 
-	public void validateBundle(ValidationContext<Bundle> theContext) {
-		doValidate(theContext, "fhir-atom-single.xsd");
-	}
-
-	@Override
-	public void validateResource(ValidationContext<IResource> theContext) {
-		doValidate(theContext, "fhir-single.xsd");
-	}
-
 	private void doValidate(ValidationContext<?> theContext, String schemaName) {
 		Schema schema = loadSchema("dstu", schemaName);
 
@@ -128,12 +119,29 @@ class SchemaBaseValidator implements IValidator {
 		return baseSource;
 	}
 
+	@Override
+	public void validateBundle(ValidationContext<Bundle> theContext) {
+		doValidate(theContext, "fhir-atom-single.xsd");
+	}
+
+	@Override
+	public void validateResource(ValidationContext<IResource> theContext) {
+		doValidate(theContext, "fhir-single.xsd");
+	}
+
 	private static class MyErrorHandler implements org.xml.sax.ErrorHandler {
 
 		private ValidationContext<?> myContext;
 
 		public MyErrorHandler(ValidationContext<?> theContext) {
 			myContext = theContext;
+		}
+
+		private void addIssue(SAXParseException theException, IssueSeverityEnum severity) {
+			Issue issue = myContext.getOperationOutcome().addIssue();
+			issue.setSeverity(severity);
+			issue.setDetails(theException.getLocalizedMessage());
+			issue.addLocation().setValue("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
 		}
 
 		@Override
@@ -149,13 +157,6 @@ class SchemaBaseValidator implements IValidator {
 		@Override
 		public void warning(SAXParseException theException) throws SAXException {
 			addIssue(theException, IssueSeverityEnum.WARNING);
-		}
-
-		private void addIssue(SAXParseException theException, IssueSeverityEnum severity) {
-			Issue issue = myContext.getOperationOutcome().addIssue();
-			issue.setSeverity(severity);
-			issue.setDetails(theException.getLocalizedMessage());
-			issue.addLocation().setValue("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
 		}
 
 	}

@@ -652,7 +652,8 @@ public class XmlParser extends BaseParser implements IParser {
 				break;
 			case XMLStreamConstants.CHARACTERS:
 			case XMLStreamConstants.SPACE:
-				theEventWriter.writeCharacters(((Characters) event).getData());
+				String data = ((Characters) event).getData();
+				theEventWriter.writeCharacters(data);
 				break;
 			case XMLStreamConstants.COMMENT:
 				theEventWriter.writeComment(((Comment) event).getText());
@@ -671,15 +672,18 @@ public class XmlParser extends BaseParser implements IParser {
 			case XMLStreamConstants.START_ELEMENT:
 				StartElement se = event.asStartElement();
 				if (firstEvent) {
-					theEventWriter.writeStartElement(se.getName().getLocalPart());
 					if (StringUtils.isBlank(se.getName().getPrefix())) {
 						String namespaceURI = se.getName().getNamespaceURI();
 						if (StringUtils.isBlank(namespaceURI)) {
 							namespaceURI = "http://www.w3.org/1999/xhtml";
 						}
+						theEventWriter.writeStartElement(se.getName().getLocalPart());
 						theEventWriter.writeDefaultNamespace(namespaceURI);
 					} else {
-						theEventWriter.writeNamespace(se.getName().getPrefix(), se.getName().getNamespaceURI());
+						String prefix = se.getName().getPrefix();
+						String namespaceURI = se.getName().getNamespaceURI();
+						theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
+						theEventWriter.writeNamespace(prefix, namespaceURI);
 					}
 				} else {
 					if (isBlank(se.getName().getPrefix())) {

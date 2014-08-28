@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 
 /*
@@ -26,5 +27,7 @@ import ca.uhn.fhir.model.api.IResource;
 interface IValidator {
 
 	void validateResource(ValidationContext<IResource> theCtx);
+
+	void validateBundle(ValidationContext<Bundle> theContext);
 
 }

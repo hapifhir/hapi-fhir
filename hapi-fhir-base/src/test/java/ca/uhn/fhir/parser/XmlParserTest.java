@@ -283,6 +283,29 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeNarrativeBlockInBundle() {
+		Patient p = new Patient();
+		p.addIdentifier("foo", "bar");
+		p.getText().setStatus(NarrativeStatusEnum.GENERATED);
+		p.getText().setDiv("<div>hello</div>");
+		
+		Bundle b = new Bundle();
+		b.getTotalResults().setValue(123);
+		b.addEntry().setResource(p);
+		
+		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		assertThat(out, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>"));
+
+		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
+		out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>"));
+		
+	}
+	
+	
+	@Test
 	public void testEncodePrettyPrint() throws DataFormatException {
 
 		Patient patient = new Patient();
