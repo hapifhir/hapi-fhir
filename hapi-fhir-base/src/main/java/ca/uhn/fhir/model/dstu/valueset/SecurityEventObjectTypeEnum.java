@@ -21,10 +21,9 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum SecurityEventObjectTypeEnum {
 
@@ -33,28 +32,28 @@ public enum SecurityEventObjectTypeEnum {
 	 *
 	 * Person.
 	 */
-	_1("1", "http://hl7.org/fhir/object-type"),
+	PERSON("1", "http://hl7.org/fhir/object-type"),
 	
 	/**
 	 * Code Value: <b>2</b>
 	 *
 	 * System Object.
 	 */
-	_2("2", "http://hl7.org/fhir/object-type"),
+	SYSTEM_OBJECT("2", "http://hl7.org/fhir/object-type"),
 	
 	/**
 	 * Code Value: <b>3</b>
 	 *
 	 * Organization.
 	 */
-	_3("3", "http://hl7.org/fhir/object-type"),
+	ORGANIZATION("3", "http://hl7.org/fhir/object-type"),
 	
 	/**
 	 * Code Value: <b>4</b>
 	 *
 	 * Other.
 	 */
-	_4("4", "http://hl7.org/fhir/object-type"),
+	OTHER("4", "http://hl7.org/fhir/object-type"),
 	
 	;
 	

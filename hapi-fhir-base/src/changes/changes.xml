@@ -140,6 +140,11 @@
 				Resource references previously encoded their children (display and reference)
 				in the wrong order so references with both would fail schema validation.
 			</action>
+			<action type="add">
+				SecurityEvent resource's enums now use friendly enum names instead of the unfriendly
+				numeric code values. Thanks to Laurie MacDougall-Sookraj of UHN for the
+				suggestion!
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

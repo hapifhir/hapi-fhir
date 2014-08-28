@@ -9,6 +9,7 @@ import java.util.Set;
 import org.codehaus.plexus.util.StringUtils;
 
 public class ValueSetTm {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetTm.class);
 
 	private String myClassName;
 	private List<Code> myCodes = new ArrayList<Code>();
@@ -92,7 +93,7 @@ public class ValueSetTm {
 		myName = theName;
 	}
 
-	public static class Code {
+	public  class Code {
 
 		private String myCode;
 		private String myDefinition;
@@ -118,6 +119,25 @@ public class ValueSetTm {
 			String retVal = myDisplay;
 			if (StringUtils.isBlank(retVal)) {
 				retVal = myCode;
+				if (Character.isDigit(myCode.charAt(0))) {
+					if (StringUtils.isNotBlank(myDefinition)) {
+						if (myDefinition.length() < 100) {
+							String newValue = myDefinition;
+							if (newValue.contains(",")) {
+								newValue = newValue.substring(0, newValue.indexOf(','));
+							}
+							if (newValue.contains("(")) {
+								newValue = newValue.substring(0, newValue.indexOf('('));
+							}
+							newValue = newValue.replace(" / ", " OR ");
+							while (!Character.isLetterOrDigit(newValue.charAt(newValue.length() - 1))) {
+								newValue = newValue.substring(0, newValue.length() - 1);
+							}
+							ourLog.info("[{}] Replacing numeric code {} with description: {}", new Object[] {myName, retVal, newValue});
+							retVal = newValue;
+						}
+					}
+				}
 			}
 
 			if ("=".equals(retVal)) {

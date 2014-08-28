@@ -21,10 +21,9 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum SecurityEventParticipantNetworkTypeEnum {
 
@@ -33,35 +32,35 @@ public enum SecurityEventParticipantNetworkTypeEnum {
 	 *
 	 * Machine Name, including DNS name.
 	 */
-	_1("1", "http://hl7.org/fhir/network-type"),
+	MACHINE_NAME("1", "http://hl7.org/fhir/network-type"),
 	
 	/**
 	 * Code Value: <b>2</b>
 	 *
 	 * IP Address.
 	 */
-	_2("2", "http://hl7.org/fhir/network-type"),
+	IP_ADDRESS("2", "http://hl7.org/fhir/network-type"),
 	
 	/**
 	 * Code Value: <b>3</b>
 	 *
 	 * Telephone Number.
 	 */
-	_3("3", "http://hl7.org/fhir/network-type"),
+	TELEPHONE_NUMBER("3", "http://hl7.org/fhir/network-type"),
 	
 	/**
 	 * Code Value: <b>4</b>
 	 *
 	 * Email address.
 	 */
-	_4("4", "http://hl7.org/fhir/network-type"),
+	EMAIL_ADDRESS("4", "http://hl7.org/fhir/network-type"),
 	
 	/**
 	 * Code Value: <b>5</b>
 	 *
 	 * URI (User directory, HTTP-PUT, ftp, etc.).
 	 */
-	_5("5", "http://hl7.org/fhir/network-type"),
+	URI("5", "http://hl7.org/fhir/network-type"),
 	
 	;
 	

@@ -21,10 +21,9 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum SecurityEventObjectLifecycleEnum {
 
@@ -33,105 +32,105 @@ public enum SecurityEventObjectLifecycleEnum {
 	 *
 	 * Origination / Creation.
 	 */
-	_1("1", "http://hl7.org/fhir/object-lifecycle"),
+	ORIGINATION_OR_CREATION("1", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>2</b>
 	 *
 	 * Import / Copy from original.
 	 */
-	_2("2", "http://hl7.org/fhir/object-lifecycle"),
+	IMPORT_OR_COPY_FROM_ORIGINAL("2", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>3</b>
 	 *
 	 * Amendment.
 	 */
-	_3("3", "http://hl7.org/fhir/object-lifecycle"),
+	AMENDMENT("3", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>4</b>
 	 *
 	 * Verification.
 	 */
-	_4("4", "http://hl7.org/fhir/object-lifecycle"),
+	VERIFICATION("4", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>5</b>
 	 *
 	 * Translation.
 	 */
-	_5("5", "http://hl7.org/fhir/object-lifecycle"),
+	TRANSLATION("5", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>6</b>
 	 *
 	 * Access / Use.
 	 */
-	_6("6", "http://hl7.org/fhir/object-lifecycle"),
+	ACCESS_OR_USE("6", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>7</b>
 	 *
 	 * De-identification.
 	 */
-	_7("7", "http://hl7.org/fhir/object-lifecycle"),
+	DE_IDENTIFICATION("7", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>8</b>
 	 *
 	 * Aggregation, summarization, derivation.
 	 */
-	_8("8", "http://hl7.org/fhir/object-lifecycle"),
+	AGGREGATION("8", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>9</b>
 	 *
 	 * Report.
 	 */
-	_9("9", "http://hl7.org/fhir/object-lifecycle"),
+	REPORT("9", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>10</b>
 	 *
 	 * Export / Copy to target.
 	 */
-	_10("10", "http://hl7.org/fhir/object-lifecycle"),
+	EXPORT_OR_COPY_TO_TARGET("10", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>11</b>
 	 *
 	 * Disclosure.
 	 */
-	_11("11", "http://hl7.org/fhir/object-lifecycle"),
+	DISCLOSURE("11", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>12</b>
 	 *
 	 * Receipt of disclosure.
 	 */
-	_12("12", "http://hl7.org/fhir/object-lifecycle"),
+	RECEIPT_OF_DISCLOSURE("12", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>13</b>
 	 *
 	 * Archiving.
 	 */
-	_13("13", "http://hl7.org/fhir/object-lifecycle"),
+	ARCHIVING("13", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>14</b>
 	 *
 	 * Logical deletion.
 	 */
-	_14("14", "http://hl7.org/fhir/object-lifecycle"),
+	LOGICAL_DELETION("14", "http://hl7.org/fhir/object-lifecycle"),
 	
 	/**
 	 * Code Value: <b>15</b>
 	 *
 	 * Permanent erasure / Physical destruction.
 	 */
-	_15("15", "http://hl7.org/fhir/object-lifecycle"),
+	PERMANENT_ERASURE_OR_PHYSICAL_DESTRUCTION("15", "http://hl7.org/fhir/object-lifecycle"),
 	
 	;
 	

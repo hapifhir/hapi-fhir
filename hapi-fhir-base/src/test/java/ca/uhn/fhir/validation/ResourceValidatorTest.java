@@ -1,7 +1,9 @@
 package ca.uhn.fhir.validation;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -47,21 +49,21 @@ public class ResourceValidatorTest {
 
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
-		val.setValidateAgainstStandardSchematron(false);
+		val.setValidateAgainstStandardSchematron(true);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(false).encodeBundleToString(b).substring(15600));
-		
 		val.validate(b);
 
-//		b.getAnimal().getBreed().setText("The Breed");
-//		try {
-//			val.validate(b);
-//			fail();
-//		} catch (ValidationFailureException e) {
-//			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-//			assertEquals(1, e.getOperationOutcome().getIssue().size());
-//			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetails().getValue(), containsString("Invalid content was found starting with element 'breed'"));
-//		}
+		Patient p = (Patient) b.getEntries().get(0).getResource();
+		p.getTelecomFirstRep().setValue("123-4567");
+		
+		try {
+			val.validate(b);
+			fail();
+		} catch (ValidationFailureException e) {
+			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			assertEquals(1, e.getOperationOutcome().getIssue().size());
+			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+		}
 	}
 
 	
