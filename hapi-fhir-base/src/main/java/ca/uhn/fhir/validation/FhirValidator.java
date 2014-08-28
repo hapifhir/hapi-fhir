@@ -31,8 +31,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
 /**
- * Resource validator, which checks resources for compliance against various
- * validation schemes (schemas, schematrons, etc.)
+ * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons,
+ * etc.)
  * 
  * <p>
  * To obtain a resource validator, call {@link FhirContext#newValidator()}
@@ -51,15 +51,15 @@ public class FhirValidator {
 	 */
 	public FhirValidator(FhirContext theFhirContext) {
 		myContext = theFhirContext;
-		setValidateBaseSchema(true);
-		setValidateBaseSchematron(true);
+		setValidateAgainstStandardSchema(true);
+		setValidateAgainstStandardSchematron(true);
 	}
 
 	/**
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
 	 * distribution itself)
 	 */
-	public boolean isValidateBaseSchema() {
+	public boolean isValidateAgainstStandardSchema() {
 		return haveValidatorOfType(SchemaBaseValidator.class);
 	}
 
@@ -67,15 +67,15 @@ public class FhirValidator {
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
 	 * distribution itself)
 	 */
-	public void setValidateBaseSchema(boolean theValidateBaseSchema) {
-		addOrRemoveValidator(theValidateBaseSchema, SchemaBaseValidator.class, new SchemaBaseValidator());
+	public void setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
+		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator());
 	}
 
 	/**
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
 	 * distribution itself)
 	 */
-	public boolean isValidateBaseSchematron() {
+	public boolean isValidateAgainstStandardSchematron() {
 		return haveValidatorOfType(SchematronBaseValidator.class);
 	}
 
@@ -83,18 +83,23 @@ public class FhirValidator {
 	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR
 	 * distribution itself)
 	 */
-	public void setValidateBaseSchematron(boolean theValidateBaseSchematron) {
-		addOrRemoveValidator(theValidateBaseSchematron, SchematronBaseValidator.class, new SchematronBaseValidator());
+	public void setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
+		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator());
 	}
 
-	
+	/**
+	 * Validates a resource instance, throwing a {@link ValidationFailureException} if the validation fails
+	 * 
+	 * @param theResource The resource to validate
+	 * @throws ValidationFailureException If the validation fails
+	 */
 	public void validate(IResource theResource) throws ValidationFailureException {
 		Validate.notNull(theResource, "theResource must not be null");
 
-		ValidationContext ctx = new ValidationContext(myContext, theResource);
+		ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, theResource);
 
 		for (IValidator next : myValidators) {
-			next.validate(ctx);
+			next.validateResource(ctx);
 		}
 
 		OperationOutcome oo = ctx.getOperationOutcome();
@@ -104,8 +109,8 @@ public class FhirValidator {
 
 	}
 
-	private void addOrRemoveValidator(boolean theValidateBaseSchema, Class<? extends IValidator> type, IValidator instance) {
-		if (theValidateBaseSchema) {
+	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator instance) {
+		if (theValidateAgainstStandardSchema) {
 			boolean found = haveValidatorOfType(type);
 			if (!found) {
 				myValidators.add(instance);

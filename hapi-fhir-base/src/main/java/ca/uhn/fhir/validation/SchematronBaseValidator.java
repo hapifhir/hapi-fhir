@@ -45,7 +45,7 @@ public class SchematronBaseValidator implements IValidator {
 	private Map<Class<? extends IResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IResource>, ISchematronResource>();
 
 	@Override
-	public void validate(ValidationContext theCtx) {
+	public void validateResource(ValidationContext<IResource> theCtx) {
 
 		ISchematronResource sch = getSchematron(theCtx);
 		StreamSource source = new StreamSource(new StringReader(theCtx.getXmlEncodedResource()));
@@ -83,22 +83,21 @@ public class SchematronBaseValidator implements IValidator {
 
 	}
 
-	private ISchematronResource getSchematron(ValidationContext theCtx) {
+	private ISchematronResource getSchematron(ValidationContext<IResource> theCtx) {
 		Class<? extends IResource> resource = theCtx.getResource().getClass();
 		Class<? extends IResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
-		return getSchematronAndCache(theCtx, baseResourceClass);
+		return getSchematronAndCache(theCtx, "dstu",baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(ValidationContext theCtx, Class<? extends IResource> theClass) {
+	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion , Class<? extends IResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {
 				return retVal;
 			}
-			Package pack = theClass.getPackage();
 
-			String pathToBase = pack.getName().replace('.', '/') + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
+			String pathToBase = "ca/uhn/fhir/model/"+theVersion+"/schema/" +  theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase() + ".sch";
 			InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 			if (baseIs == null) {
 				throw new ValidationFailureException("No schematron found for resource type: " + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());

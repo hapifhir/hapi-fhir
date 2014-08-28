@@ -23,8 +23,8 @@ public class ResourceValidatorTest {
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.setValidateBaseSchema(true);
-		val.setValidateBaseSchematron(false);
+		val.setValidateAgainstStandardSchema(true);
+		val.setValidateAgainstStandardSchematron(false);
 		
 		val.validate(p);
 
@@ -49,8 +49,8 @@ public class ResourceValidatorTest {
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 
 		FhirValidator val = ourCtx.newValidator();
-		val.setValidateBaseSchema(false);
-		val.setValidateBaseSchematron(true);
+		val.setValidateAgainstStandardSchema(false);
+		val.setValidateAgainstStandardSchematron(true);
 
 		val.validate(p);
 

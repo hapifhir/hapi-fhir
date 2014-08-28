@@ -37,7 +37,7 @@ public class ResponseValidatingInterceptor extends InterceptorAdapter {
 	private FhirValidator myValidator;
 	
 	/**
-	 * Returns the validator used ny this interceptor
+	 * Returns the validator used by this interceptor
 	 */
 	public FhirValidator getValidator() {
 		return myValidator;

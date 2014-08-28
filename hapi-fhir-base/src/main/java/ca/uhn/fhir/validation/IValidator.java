@@ -1,5 +1,7 @@
 package ca.uhn.fhir.validation;
 
+import ca.uhn.fhir.model.api.IResource;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +25,6 @@ package ca.uhn.fhir.validation;
 
 interface IValidator {
 
-	void validate(ValidationContext theCtx);
+	void validateResource(ValidationContext<IResource> theCtx);
 
 }

@@ -661,6 +661,7 @@ class ParserState<T> {
 			myPreResourceState = thePreResourceState;
 		}
 
+		@SuppressWarnings("unused")
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			// ignore by default
 		}
@@ -669,6 +670,7 @@ class ParserState<T> {
 			// ignore by default
 		}
 
+		@SuppressWarnings("unused")
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			// ignore by default
 		}
@@ -676,6 +678,7 @@ class ParserState<T> {
 		/**
 		 * Default implementation just handles undeclared extensions
 		 */
+		@SuppressWarnings("unused")
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			if (myPreResourceState != null && getCurrentElement() instanceof ISupportsUndeclaredExtensions) {
 				ExtensionDt newExtension = new ExtensionDt(theIsModifier, theUrlAttr);

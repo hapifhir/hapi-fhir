@@ -21,26 +21,26 @@ package ca.uhn.fhir.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
-class ValidationContext {
+class ValidationContext<T> {
 
-	private FhirContext myFhirContext;
+	private final IEncoder myEncoder;
+	private final FhirContext myFhirContext;
 	private OperationOutcome myOperationOutcome;
-	private IResource myResource;
+	private final T myResource;
 	private String myXmlEncodedResource;
 
-	public ValidationContext(FhirContext theContext, IResource theResource) {
+	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder) {
 		myFhirContext = theContext;
 		myResource = theResource;
+		myEncoder = theEncoder;
 	}
 
-	public String getXmlEncodedResource() {
-		if (myXmlEncodedResource == null) {
-			myXmlEncodedResource = myFhirContext.newXmlParser().encodeResourceToString(myResource);
-		}
-		return myXmlEncodedResource;
+	public FhirContext getFhirContext() {
+		return myFhirContext;
 	}
 
 	public OperationOutcome getOperationOutcome() {
@@ -50,12 +50,37 @@ class ValidationContext {
 		return myOperationOutcome;
 	}
 
-	public FhirContext getFhirContext() {
-		return myFhirContext;
+	public T getResource() {
+		return myResource;
 	}
 
-	public IResource getResource() {
-		return myResource;
+	public String getXmlEncodedResource() {
+		if (myXmlEncodedResource == null) {
+			myXmlEncodedResource = myEncoder.encode();
+		}
+		return myXmlEncodedResource;
+	}
+
+	public static ValidationContext<Bundle> forBundle(final FhirContext theContext, final Bundle theBundle) {
+		return new ValidationContext<Bundle>(theContext, theBundle, new IEncoder() {
+			@Override
+			public String encode() {
+				return theContext.newXmlParser().encodeBundleToString(theBundle);
+			}
+		});
+	}
+
+	public static ValidationContext<IResource> forResource(final FhirContext theContext, final IResource theResource) {
+		return new ValidationContext<IResource>(theContext, theResource, new IEncoder() {
+			@Override
+			public String encode() {
+				return theContext.newXmlParser().encodeResourceToString(theResource);
+			}
+		});
+	}
+
+	private interface IEncoder {
+		String encode();
 	}
 
 }
