@@ -557,14 +557,14 @@ public class XmlParser extends BaseParser implements IParser {
 		// }
 		// }
 
-		if (!(theRef.getDisplay().isEmpty())) {
-			theEventWriter.writeStartElement(RESREF_DISPLAY);
-			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
-			theEventWriter.writeEndElement();
-		}
 		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement(RESREF_REFERENCE);
 			theEventWriter.writeAttribute("value", reference);
+			theEventWriter.writeEndElement();
+		}
+		if (!(theRef.getDisplay().isEmpty())) {
+			theEventWriter.writeStartElement(RESREF_DISPLAY);
+			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
 			theEventWriter.writeEndElement();
 		}
 	}

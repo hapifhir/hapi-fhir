@@ -370,9 +370,12 @@ public class XmlParserTest {
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
+		ResourceReferenceDt ref = new ResourceReferenceDt();
+		ref.setReference("Organization/123");
+		ref.setDisplay("DISPLAY!");
+		patient.setManagingOrganization(ref);
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/></managingOrganization>"));
+		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/><display value=\"DISPLAY!\"/></managingOrganization>"));
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");
