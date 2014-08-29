@@ -13,23 +13,25 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.method.SearchParameter;
 
 public class ResourceMethodTest {
 
 	private SearchMethodBinding rm;
 
+	@Search
 	public Bundle foo() {
 		return null;
 	}
 	
 	@Before
 	public void before() throws NoSuchMethodException, SecurityException {
-		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), null, new FhirContext(), null);
+		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), new FhirContext(), null);
 	}
 	
 	@Test

@@ -23,6 +23,9 @@
 				<li>
 					<a href="#tags">Tags</a>
 				</li>
+				<li>
+					<a href="#compartments">Compartments</a>
+				</li>
 			</ul>
 
 			<p>
@@ -1478,6 +1481,39 @@
 				</p>
 				
 			</subsection>
+			
+			<a name="compartments" />
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="Compartments">
+
+			<p>
+				FHIR defines a mechanism for logically grouping
+				resources together called <a href="http://www.hl7.org/implement/standards/fhir/extras.html#compartment">compartments</a>.
+			</p>
+			<p>
+				To define a search by compartment, you simply need to add the <code>compartmentName</code> attribute
+				to the <code>@Search</code> annotation, and add an <code>@IdParam</code> parameter. 
+			</p>
+			<p>
+				The following example shows a search method in a resource provider which returns
+				a compartment. Note that you may also add <code>@RequiredParam</code> and
+				<code>@OptionalParam</code> parameters to your compartment search method.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="searchCompartment" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			<p>
+				Example URL to invoke this method:
+				<br />
+				<code>http://fhir.example.com/Patient/123/fooCompartment</code>
+			</p>
 			
 		</section>
 		

@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -241,7 +240,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			params.put(nextEntry.getKey() + qualifier, valueList);
 		}
 
-		HttpGetClientInvocation invocation = SearchMethodBinding.createSearchInvocation(toResourceName(theType), params);
+		BaseHttpClientInvocation invocation = SearchMethodBinding.createSearchInvocation(myContext, toResourceName(theType), params, null, null, null);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
@@ -422,8 +421,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -714,8 +712,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<OperationOutcome> {
 
 		@Override
-		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -742,8 +739,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, myResourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			if (theResponseStatusCode == Constants.STATUS_HTTP_201_CREATED) {
 				response.setCreated(true);
@@ -761,8 +757,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			return new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources();
 		}
 	}
@@ -799,15 +794,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class SearchInternal extends BaseClientExecutable<IQuery, Bundle> implements IQuery, IUntypedQuery {
 
 		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
-
 		private List<Include> myInclude = new ArrayList<Include>();
-
 		private Integer myParamLimit;
 		private String myResourceName;
 		private Class<? extends IResource> myResourceType;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
-
 		private SearchStyleEnum mySearchStyle;
+		private String myResourceId;
+		private String myCompartmentName;
 
 		public SearchInternal() {
 			myResourceType = null;
@@ -824,10 +818,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public Bundle execute() {
 
 			Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
-//			Map<String, List<String>> initial = createExtraParams();
-//			if (initial != null) {
-//				params.putAll(initial);
-//			}
+			// Map<String, List<String>> initial = createExtraParams();
+			// if (initial != null) {
+			// params.putAll(initial);
+			// }
 
 			for (ICriterionInternal next : myCriterion) {
 				String parameterName = next.getParameterName();
@@ -849,36 +843,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			BundleResponseHandler binding = new BundleResponseHandler(myResourceType);
 
-			SearchStyleEnum searchStyle = mySearchStyle;
-			if (searchStyle == null) {
-				int length = 0;
-				for (Entry<String, List<String>> nextEntry : params.entrySet()) {
-					length += nextEntry.getKey().length();
-					for (String next : nextEntry.getValue()) {
-						length += next.length();
-					}
-				}
-
-				if (length < 5000) {
-					searchStyle = SearchStyleEnum.GET;
-				} else {
-					searchStyle = SearchStyleEnum.POST;
-				}
-			}
-
-			BaseHttpClientInvocation invocation;
-			switch (searchStyle) {
-			case GET:
-			default:
-				invocation = new HttpGetClientInvocation(params, myResourceName);
-				break;
-			case GET_WITH_SEARCH:
-				invocation = new HttpGetClientInvocation(params, myResourceName, Constants.PARAM_SEARCH);
-				break;
-			case POST:
-				invocation = new HttpPostClientInvocation(myContext, params, myResourceName, Constants.PARAM_SEARCH);
-			}
-
+			IdDt resourceId = myResourceId != null? new IdDt(myResourceId ) : null;
+			
+			BaseHttpClientInvocation invocation = SearchMethodBinding.createSearchInvocation(myContext, myResourceName, params, resourceId, myCompartmentName, mySearchStyle);
+			
 			return invoke(params, binding, invocation);
 
 		}
@@ -946,6 +914,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IQuery withIdAndCompartment(String theResourceId, String theCompartmentName) {
+			myResourceId = theResourceId;
+			myCompartmentName = theCompartmentName;
+			return this;
+		}
+
 	}
 
 	private static class SortInternal implements ISort {
@@ -992,8 +967,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
 
 		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);

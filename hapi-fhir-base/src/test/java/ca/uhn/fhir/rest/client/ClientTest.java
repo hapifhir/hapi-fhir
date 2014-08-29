@@ -1,9 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -167,7 +166,8 @@ public class ClientTest {
 	}
 
 	/**
-	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to ignore it.
+	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to
+	 * ignore it.
 	 */
 	@Test
 	public void testCreateWithResourceResponse() throws Exception {
@@ -579,12 +579,9 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		Header[] headers = new Header[] {
-			new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-			new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),				
-			new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"")
-		};
-	
+		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+
 		when(httpResponse.getAllHeaders()).thenReturn(headers);
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
@@ -596,7 +593,7 @@ public class ClientTest {
 
 		assertEquals("http://foo/Patient/111", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.getIdentifier().get(0).getValue().getValue());
-		
+
 		assertEquals("http://foo.com/Patient/123/_history/2333", response.getId().getValue());
 
 		InstantDt lm = (InstantDt) response.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
@@ -605,10 +602,10 @@ public class ClientTest {
 
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(response);
 		assertNotNull(tags);
-		assertEquals(1,tags.size());
+		assertEquals(1, tags.size());
 		assertEquals("http://foo/tagdefinition.html", tags.get(0).getTerm());
-		assertEquals("http://hl7.org/fhir/tag",tags.get(0).getScheme());
-		assertEquals("Some tag",tags.get(0).getLabel());
+		assertEquals("http://hl7.org/fhir/tag", tags.get(0).getScheme());
+		assertEquals("Some tag", tags.get(0).getLabel());
 
 	}
 
@@ -699,8 +696,6 @@ public class ClientTest {
 
 	}
 
-	
-		
 	@Test
 	public void testSearchByDateRange() throws Exception {
 
@@ -728,19 +723,47 @@ public class ClientTest {
 		String msg = getPatientFeedWithOneResult();
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		
+
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-//		httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
-		
+
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Patient> response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
 		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
+
+	}
+
+	@Test
+	public void testSearchByCompartment() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+
+		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		List<Patient> response = client.getPatientByCompartmentAndDob(new IdDt("123"), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+
+		assertEquals("http://foo/Patient/123/compartmentName?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.get(0).getIdentifier().get(0).getValue().getValue());
+
+		try {
+			client.getPatientByCompartmentAndDob(new IdDt(""), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.toString(), containsString("null or empty for compartment"));
+		}
 
 	}
 
@@ -956,9 +979,7 @@ public class ClientTest {
 		assertEquals("PRP1660", resource.getIdentifier().get(0).getValue().getValue());
 
 	}
-	
-	
-	
+
 	@Test
 	public void testSearchByCompositeParam() throws Exception {
 
@@ -975,7 +996,7 @@ public class ClientTest {
 		DateParam date = new DateParam("2001-01-01");
 		client.getObservationByNameValueDate(new CompositeParam<StringParam, DateParam>(str, date));
 
-		assertEquals("http://foo/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + URLEncoder.encode("FOO\\$BAR$2001-01-01","UTF-8"), capt.getValue().getURI().toString());
+		assertEquals("http://foo/Observation?" + Observation.SP_NAME_VALUE_DATE + "=" + URLEncoder.encode("FOO\\$BAR$2001-01-01", "UTF-8"), capt.getValue().getURI().toString());
 
 	}
 
@@ -1039,11 +1060,11 @@ public class ClientTest {
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
-		
+
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
 		assertEquals("http://foo/Patient/100", post.getURI().toASCIIString());
-		
+
 		Header h = post.getFirstHeader("content-location");
 		assertEquals("Patient/100/_history/200", h.getValue());
 

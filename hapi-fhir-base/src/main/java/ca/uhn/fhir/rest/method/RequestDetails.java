@@ -28,12 +28,17 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public class RequestDetails {
 
+	private String myCompartmentName;
 	private IdDt myId;
 	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
 	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
 	private RestfulOperationSystemEnum mySystemOperationType;
+
+	public String getCompartmentName() {
+		return myCompartmentName;
+	}
 
 	public IdDt getId() {
 		return myId;
@@ -57,6 +62,10 @@ public class RequestDetails {
 
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return mySystemOperationType;
+	}
+
+	public void setCompartmentName(String theCompartmentName) {
+		myCompartmentName = theCompartmentName;
 	}
 
 	public void setId(IdDt theId) {

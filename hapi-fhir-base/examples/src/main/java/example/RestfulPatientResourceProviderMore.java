@@ -96,6 +96,15 @@ public List<Organization> getAllOrganizations() {
 }
 //END SNIPPET: searchAll
 
+//START SNIPPET: searchCompartment
+@Search(compartmentName="fooCompartment")
+public List<IResource> searchCompartment(@IdParam IdDt theId) {
+ List<IResource> retVal=new ArrayList<IResource>(); // populate this
+ return retVal;
+}
+//END SNIPPET: searchCompartment
+
+
 //START SNIPPET: sort
 @Search
 public List<Patient> findPatients(

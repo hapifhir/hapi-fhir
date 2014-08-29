@@ -163,6 +163,19 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
+
+				<h4>Search - Compartments</h4>
+				<p>
+					To search a 
+					<a href="http://www.hl7.org/implement/standards/fhir/extras.html#compartment">resource compartment</a>, 
+					simply use the <code>withIdAndCompartment</code>
+					method in your search. 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchCompartment" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
 				
 			</subsection>			
 

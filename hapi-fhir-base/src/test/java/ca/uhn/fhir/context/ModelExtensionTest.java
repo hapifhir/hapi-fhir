@@ -1,6 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

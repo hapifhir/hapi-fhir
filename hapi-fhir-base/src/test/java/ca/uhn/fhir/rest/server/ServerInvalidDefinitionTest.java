@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -76,6 +75,20 @@ public class ServerInvalidDefinitionTest {
 		}
 	}
 
+	@Test
+	public void testSearchWithId() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new SearchWithIdParamProvider());
+		
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("compartment"));
+		}
+	}
+
 	/**
 	 * Normal, should initialize properly
 	 */
@@ -118,6 +131,22 @@ public class ServerInvalidDefinitionTest {
 		
 	}
 	
+	public static class SearchWithIdParamProvider implements IResourceProvider
+	{
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+		
+		@SuppressWarnings("unused")
+		@Search
+		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name="aaa") StringParam theParam) {
+			return null;
+		}
+		
+	}
+
 	public static class NonInstantiableTypeForResourceProvider implements IResourceProvider
 	{
 

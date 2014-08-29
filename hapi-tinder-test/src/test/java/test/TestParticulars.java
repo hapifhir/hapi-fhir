@@ -9,7 +9,7 @@ public class TestParticulars {
 
 	@Test
 	public void testElementsWithSpecialNames() {
-		// This won't compile if tinder didn't getenerate the right names...
+		// This won't compile if tinder didn't generate the right names...
 		ListResource.class.getName();
 		ObjectElement.class.getName();
 	}

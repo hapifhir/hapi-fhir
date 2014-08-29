@@ -44,5 +44,7 @@ public interface IQuery extends IClientExecutable<IQuery,Bundle> {
 	 * @since 0.6
 	 */
 	IQuery usingStyle(SearchStyleEnum theStyle);
+
+	IQuery withIdAndCompartment(String theResourceId, String theCompartmentName);
 	
 }

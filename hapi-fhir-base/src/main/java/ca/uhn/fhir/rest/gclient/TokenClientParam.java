@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Arrays;
 import java.util.List;

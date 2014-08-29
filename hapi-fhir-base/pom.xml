@@ -635,6 +635,7 @@
 							</reportSet>
 						</reportSets>
 					</plugin>				
+					<!--
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-linkcheck-plugin</artifactId>
@@ -643,6 +644,7 @@
 							<forceSite>false</forceSite>
 						</configuration>
 					</plugin>
+					-->
 				</plugins>
 			</reporting>
 		</profile>

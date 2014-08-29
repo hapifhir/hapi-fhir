@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import org.eclipse.jetty.server.Server;

@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +39,9 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -53,12 +57,18 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private Class<? extends IResource> myDeclaredResourceType;
 	private String myQueryName;
 	private String myDescription;
+	private String myCompartmentName;
+
+	private Integer myIdParamIndex;
 
 	@SuppressWarnings("unchecked")
-	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, String theQueryName, FhirContext theContext, Object theProvider) {
+	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
-		this.myQueryName = StringUtils.defaultIfBlank(theQueryName, null);
+		Search search = theMethod.getAnnotation(Search.class);
+		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
+		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
 		this.myDeclaredResourceType = (Class<? extends IResource>) theMethod.getReturnType();
+		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		Description desc = theMethod.getAnnotation(Description.class);
 		if (desc != null) {
@@ -77,11 +87,15 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			SearchParameter sp = (SearchParameter) next;
 			if (sp.getName().startsWith("_")) {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
-							sp.getName());
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(), sp.getName());
 					throw new ConfigurationException(msg);
 				}
 			}
+		}
+
+		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
+			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
+			throw new ConfigurationException(msg);
 		}
 
 	}
@@ -110,7 +124,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public HttpGetClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
 
 		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
@@ -119,8 +133,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
 		}
 
+		IdDt id = (IdDt) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
+
 		String resourceName = getResourceName();
-		HttpGetClientInvocation retVal = createSearchInvocation(resourceName, queryStringArgs);
+		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -132,13 +148,68 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static HttpGetClientInvocation createSearchInvocation(String theResourceName, Map<String, List<String>> theParameters) {
-		return new HttpGetClientInvocation(theParameters, theResourceName);
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
+		SearchStyleEnum searchStyle = theSearchStyle;
+		if (searchStyle == null) {
+			int length = 0;
+			for (Entry<String, List<String>> nextEntry : theParameters.entrySet()) {
+				length += nextEntry.getKey().length();
+				for (String next : nextEntry.getValue()) {
+					length += next.length();
+				}
+			}
+
+			if (length < 5000) {
+				searchStyle = SearchStyleEnum.GET;
+			} else {
+				searchStyle = SearchStyleEnum.POST;
+			}
+		}
+
+		BaseHttpClientInvocation invocation;
+
+		boolean compartmentSearch = false;
+		if (theCompartmentName != null) {
+			if (theId == null || !theId.hasIdPart()) {
+				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
+				throw new InvalidRequestException(msg);
+			} else {
+				compartmentSearch = true;
+			}
+		}
+
+		switch (searchStyle) {
+		case GET:
+		default:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+			} else {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName);
+			}
+			break;
+		case GET_WITH_SEARCH:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
+			break;
+		case POST:
+			if (compartmentSearch) {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
+		}
+
+		return invocation;
 	}
 
 	@Override
 	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		assert theRequest.getId() == null;
+		if (myIdParamIndex != null) {
+			theMethodParams[myIdParamIndex] = theRequest.getId();
+		}
 
 		Object response = invokeServerMethod(theMethodParams);
 
@@ -152,8 +223,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;
 		}
-		if (theRequest.getId() != null) {
-			ourLog.trace("Method {} doesn't match because IDis not null: {}", theRequest.getId());
+		if (theRequest.getId() != null && myIdParamIndex == null) {
+			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
 		}
 		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
@@ -165,10 +236,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 		if (theRequest.getRequestType() != RequestType.GET && theRequest.getRequestType() != RequestType.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", theRequest.getOperation());
+			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
 			return false;
 		}
-
+		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
+			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", new Object[] { getMethod(), myCompartmentName, theRequest.getCompartmentName() });
+			return false;
+		}
 		// This is used to track all the parameters so we can reject queries that
 		// have additional params we don't understand
 		Set<String> methodParamsTemp = new HashSet<String>();
