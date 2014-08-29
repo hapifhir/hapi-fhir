@@ -104,7 +104,7 @@
 			<p>
 				To enable detailed logging of client requests and responses (what URL is being requested, what headers and payload
 				are being received, etc.), an interceptor may be added to the client which logs each transaction. See
-				<a href="./doc_rest_client.html#req_resp_logging">Logging Requests and Responses</a> for more information.
+				<a href="./doc_rest_client_interceptor.html#req_resp_logging">Logging Requests and Responses</a> for more information.
 			</p>
 		
 		</section>

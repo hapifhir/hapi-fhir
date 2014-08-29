@@ -118,6 +118,33 @@
 				Resource of type "List" failed to parse from a bundle correctly. Thanks to David Hay of Orion Health 
 				for reporting!
 			</action>
+			<action type="fix">
+				QuantityParam correctly encodes approximate (~) prefix to values
+			</action>
+			<action type="fix" issue="14">
+				If a server defines a method with parameter "_id", incoming search requests for that method may
+				get delegated to the wrong method. Thanks to Neal Acharya for reporting! 
+			</action>
+			<action type="add">
+				SecurityEvent.Object structural element has been renamed to 
+				SecurityEvent.ObjectElement to avoid conflicting names with the 
+				java Object class. Thanks to Laurie Macdougall-Sookraj of UHN for
+				reporting! 
+			</action>
+			<action type="fix">
+				Text/narrative blocks that were created with a non-empty
+				namespace prefix (e.g. &lt;xhtml:div xmlns:xhtml="..."&gt;...&lt;/xhtml:div&gt;)
+				failed to encode correctly (prefix was missing in encoded resource)				
+			</action>
+			<action type="fix">
+				Resource references previously encoded their children (display and reference)
+				in the wrong order so references with both would fail schema validation.
+			</action>
+			<action type="add">
+				SecurityEvent resource's enums now use friendly enum names instead of the unfriendly
+				numeric code values. Thanks to Laurie MacDougall-Sookraj of UHN for the
+				suggestion!
+			</action>
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">

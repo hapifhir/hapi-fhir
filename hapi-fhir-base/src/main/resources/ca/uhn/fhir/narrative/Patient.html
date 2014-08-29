@@ -16,7 +16,7 @@ a browser.
 		<tbody>
 			<tr th:if="${not resource.identifierFirstRep.empty}">
 				<td>Identifier</td>
-				<td th:narrative="${resource.identifierFirstRep}">8708660</td>
+				<td th:narrative="${resource.identifierFirstRep}"></td>
 			</tr>
 			<tr th:if="${not resource.addressFirstRep.empty}">
 				<td>Address</td>
@@ -24,7 +24,7 @@ a browser.
 			</tr>
 			<tr th:if="${not resource.birthDate.empty}">
 				<td>Date of birth</td>
-				<td><span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}">22 March 2012</span></td>
+				<td><span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}"></span></td>
 			</tr>
 		</tbody>
 	</table>

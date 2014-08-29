@@ -198,34 +198,35 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
-		ProfileParser pp = new ProfileParser();
-		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
+//		ProfileParser pp = new ProfileParser();
+//		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
 
 		ValueSetGenerator vsp = new ValueSetGenerator();
-		// vsp.setDirectory("src/test/resources/vs/");
+//		 vsp.setResourceValueSetFiles(theResourceValueSetFiles);Directory("src/main/resources/vs/");
 		vsp.parse();
 
 		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
 		dtp.parse();
 		dtp.bindValueSets(vsp);
 
-		String dtOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/composite";
+		String dtOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/composite";
 		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		rp.setBaseResourceNames(Arrays.asList("patient"));
+		rp.setBaseResourceNames(Arrays.asList("securityevent"));
 		rp.parse();
-
+		rp.bindValueSets(vsp);
+		
 		// rp.bindValueSets(vsp);
 
-		String rpOutputDir = "target/generated-sources/valuesets/ca/uhn/fhir/model/dstu/resource";
-		String rpSOutputDir = "target/generated-resources/valuesets/ca/uhn/fhir/model/dstu";
+		String rpOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/resource";
+		String rpSOutputDir = "target/generated-resources/ca/uhn/fhir/model/dstu";
 		
 		rp.combineContentMaps(dtp);
 		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dstu");
-		//
-		// String vsOutputDir = "target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset";
-		// vsp.writeMarkedValueSets(vsOutputDir);
+		
+		 String vsOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/valueset";
+		 vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dstu");
 	}
 
 	public static class ProfileFileDefinition {

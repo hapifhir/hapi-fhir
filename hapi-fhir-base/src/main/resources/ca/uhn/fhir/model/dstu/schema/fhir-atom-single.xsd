@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2011-2012, HL7, Inc
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without modification, 
+ are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this 
+ list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, 
+ this list of conditions and the following disclaimer in the documentation 
+ and/or other materials provided with the distribution.
+ * Neither the name of HL7 nor the names of its contributors may be used to 
+ endorse or promote products derived from this software without specific 
+ prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ POSSIBILITY OF SUCH DAMAGE.
+
+ Generated on Mon, Feb 3, 2014 23:47+1100 for FHIR v0.80
+-->
+<xs:schema xmlns:atom="http://www.w3.org/2005/Atom" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:os="http://a9.com/-/spec/opensearch/1.1/" xmlns:osr="http://a9.com/-/opensearch/extensions/relevance/1.0/" 
+  xmlns:fhir="http://hl7.org/fhir" xmlns:at="http://purl.org/atompub/tombstones/1.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://www.w3.org/2005/Atom" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:annotation>
+    <xs:documentation>
+				This is a reduced form of the atom schema, that only supports the features profiled in the FHIR specification
+			</xs:documentation>
+  </xs:annotation>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <xs:import namespace="http://hl7.org/fhir" schemaLocation="fhir-single.xsd"/>
+  <xs:import namespace="http://purl.org/atompub/tombstones/1.0" schemaLocation="tombstone.xsd"/>
+  <xs:import namespace="http://a9.com/-/spec/opensearch/1.1/" schemaLocation="opensearch.xsd"/>
+  <xs:import namespace="http://a9.com/-/opensearch/extensions/relevance/1.0/" schemaLocation="opensearchscore.xsd"/>
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="xmldsig-core-schema.xsd"/>
+  <xs:element name="feed" type="atom:FeedType"/>
+  <xs:complexType name="TextType" mixed="true">
+    <xs:annotation>
+      <xs:documentation>
+				The Atom text construct is defined in section 3.1 of the format spec.
+			</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:any namespace="http://www.w3.org/1999/xhtml" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="type">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="text"/>
+          <xs:enumeration value="html"/>
+          <xs:enumeration value="xhtml"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="PersonType">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="uri" type="atom:UriType" minOccurs="0"/>
+    </xs:choice>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="FeedType">
+    <xs:sequence>
+      <xs:choice minOccurs="3" maxOccurs="unbounded">
+        <xs:element name="title" type="atom:TextType"/>
+        <xs:element name="updated" type="atom:DateTimeType"/>
+        <xs:element name="id" type="atom:IdType"/>
+        <xs:element name="link" type="atom:LinkType"/>
+        <xs:element name="author" type="atom:PersonType" maxOccurs="unbounded"/>
+        <xs:element name="category" type="atom:CategoryType" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="entry" type="atom:EntryType"/>
+        <xs:element ref="at:deleted-entry"/>
+        <xs:element ref="os:totalResults"/> 
+        <xs:element ref="osr:score"/> 
+      </xs:choice>
+      <xs:element ref="ds:Signature" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="EntryType">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="title" type="atom:TextType"/>
+      <xs:element name="link" type="atom:LinkType"/>
+      <xs:element name="id" type="atom:IdType"/>
+      <xs:element name="updated" type="atom:DateTimeType"/>
+      <xs:element name="published" type="atom:DateTimeType" minOccurs="0"/>
+      <xs:element name="author" type="atom:PersonType" maxOccurs="unbounded"/>
+      <xs:element name="category" type="atom:CategoryType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="content" type="atom:ContentType" minOccurs="0"/>
+      <xs:element name="summary" type="atom:TextType"/>
+    </xs:choice>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="CategoryType">
+    <xs:attribute name="term" type="xs:anyURI" use="required"/>
+    <xs:attribute name="scheme" type="xs:anyURI" use="required"/>
+    <xs:attribute name="label" type="xs:string" use="optional"/>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="ContentType" mixed="true">
+    <xs:choice>
+      <xs:element ref="fhir:Binary"/>
+	  <xs:element ref="atom:feed" />
+            <xs:element ref="fhir:AdverseReaction"/>
+      <xs:element ref="fhir:Alert"/>
+      <xs:element ref="fhir:AllergyIntolerance"/>
+      <xs:element ref="fhir:CarePlan"/>
+      <xs:element ref="fhir:Composition"/>
+      <xs:element ref="fhir:ConceptMap"/>
+      <xs:element ref="fhir:Condition"/>
+      <xs:element ref="fhir:Conformance"/>
+      <xs:element ref="fhir:Device"/>
+      <xs:element ref="fhir:DeviceObservationReport"/>
+      <xs:element ref="fhir:DiagnosticOrder"/>
+      <xs:element ref="fhir:DiagnosticReport"/>
+      <xs:element ref="fhir:DocumentManifest"/>
+      <xs:element ref="fhir:DocumentReference"/>
+      <xs:element ref="fhir:Encounter"/>
+      <xs:element ref="fhir:FamilyHistory"/>
+      <xs:element ref="fhir:Group"/>
+      <xs:element ref="fhir:ImagingStudy"/>
+      <xs:element ref="fhir:Immunization"/>
+      <xs:element ref="fhir:ImmunizationRecommendation"/>
+      <xs:element ref="fhir:List"/>
+      <xs:element ref="fhir:Location"/>
+      <xs:element ref="fhir:Media"/>
+      <xs:element ref="fhir:Medication"/>
+      <xs:element ref="fhir:MedicationAdministration"/>
+      <xs:element ref="fhir:MedicationDispense"/>
+      <xs:element ref="fhir:MedicationPrescription"/>
+      <xs:element ref="fhir:MedicationStatement"/>
+      <xs:element ref="fhir:MessageHeader"/>
+      <xs:element ref="fhir:Observation"/>
+      <xs:element ref="fhir:OperationOutcome"/>
+      <xs:element ref="fhir:Order"/>
+      <xs:element ref="fhir:OrderResponse"/>
+      <xs:element ref="fhir:Organization"/>
+      <xs:element ref="fhir:Other"/>
+      <xs:element ref="fhir:Patient"/>
+      <xs:element ref="fhir:Practitioner"/>
+      <xs:element ref="fhir:Procedure"/>
+      <xs:element ref="fhir:Profile"/>
+      <xs:element ref="fhir:Provenance"/>
+      <xs:element ref="fhir:Query"/>
+      <xs:element ref="fhir:Questionnaire"/>
+      <xs:element ref="fhir:RelatedPerson"/>
+      <xs:element ref="fhir:SecurityEvent"/>
+      <xs:element ref="fhir:Specimen"/>
+      <xs:element ref="fhir:Substance"/>
+      <xs:element ref="fhir:Supply"/>
+      <xs:element ref="fhir:ValueSet"/>
+
+    </xs:choice>
+    <xs:attribute name="type" type="xs:string"/>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="UriType">
+    <xs:simpleContent>
+      <xs:extension base="xs:anyURI">
+        <xs:attributeGroup ref="atom:CommonAttributes"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="LinkType" mixed="true">
+    <xs:attribute name="href" type="xs:anyURI" use="required"/>
+    <xs:attribute name="rel" type="xs:string" use="optional"/>
+    <xs:attribute name="type" type="xs:string" use="optional"/>
+    <xs:attribute name="hreflang" type="xs:NMTOKEN" use="optional"/>
+    <xs:attribute name="title" type="xs:string" use="optional"/>
+    <xs:attribute name="length" type="xs:positiveInteger" use="optional"/>
+    <xs:attributeGroup ref="atom:CommonAttributes"/>
+  </xs:complexType>
+  <xs:complexType name="IdType">
+    <xs:simpleContent>
+      <xs:extension base="xs:anyURI">
+        <xs:attributeGroup ref="atom:CommonAttributes"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="DateTimeType">
+    <xs:simpleContent>
+      <xs:extension base="xs:dateTime">
+        <xs:attributeGroup ref="atom:CommonAttributes"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:attributeGroup name="CommonAttributes">
+    <xs:attribute ref="xml:base"/>
+    <xs:attribute ref="xml:lang"/>
+  </xs:attributeGroup>
+</xs:schema>

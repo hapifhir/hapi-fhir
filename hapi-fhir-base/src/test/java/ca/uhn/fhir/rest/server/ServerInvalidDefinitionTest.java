@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.server;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 
 public class ServerInvalidDefinitionTest {
@@ -46,6 +49,20 @@ public class ServerInvalidDefinitionTest {
 		}
 	}
 
+	@Test
+	public void testInvalidSpecialNameResourceProvider() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new InvalidSpecialParameterNameResourceProvider());
+		
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("_pretty"));
+		}
+	}
+	
 	@Test
 	public void testReadMethodWithSearchParameters() {
 		RestfulServer srv = new RestfulServer();
@@ -116,6 +133,24 @@ public class ServerInvalidDefinitionTest {
 		}
 		
 	}
+	
+	
+	public static class InvalidSpecialParameterNameResourceProvider implements IResourceProvider
+	{
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@SuppressWarnings("unused")
+		@Search
+		public List<Patient> search(@RequiredParam(name="_pretty") StringParam theParam) {
+			return null;
+		}
+		
+	}
+	
 	
 	public static class InstantiableTypeForResourceProvider implements IResourceProvider
 	{

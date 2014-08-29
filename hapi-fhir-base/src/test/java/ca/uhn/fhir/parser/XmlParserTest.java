@@ -283,6 +283,29 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeNarrativeBlockInBundle() {
+		Patient p = new Patient();
+		p.addIdentifier("foo", "bar");
+		p.getText().setStatus(NarrativeStatusEnum.GENERATED);
+		p.getText().setDiv("<div>hello</div>");
+		
+		Bundle b = new Bundle();
+		b.getTotalResults().setValue(123);
+		b.addEntry().setResource(p);
+		
+		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		assertThat(out, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>"));
+
+		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
+		out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>"));
+		
+	}
+	
+	
+	@Test
 	public void testEncodePrettyPrint() throws DataFormatException {
 
 		Patient patient = new Patient();
@@ -347,9 +370,12 @@ public class XmlParserTest {
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		patient.setManagingOrganization(new ResourceReferenceDt("Organization/123"));
+		ResourceReferenceDt ref = new ResourceReferenceDt();
+		ref.setReference("Organization/123");
+		ref.setDisplay("DISPLAY!");
+		patient.setManagingOrganization(ref);
 		str = p.encodeResourceToString(patient);
-		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/></managingOrganization>"));
+		assertThat(str, StringContains.containsString("<managingOrganization><reference value=\"Organization/123\"/><display value=\"DISPLAY!\"/></managingOrganization>"));
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");

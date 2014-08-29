@@ -93,6 +93,12 @@
 	<build>
 		
 		<!-- 
+		Tells Maven to name the generated WAR file as
+		restful-server-example.war
+		-->
+		<finalName>restful-server-example</finalName>
+		
+		<!-- 
 		The following is not required for the application to build, but
 		allows you to test it by issuing "mvn jetty:run" from the command
 		line. 

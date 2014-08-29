@@ -30,9 +30,9 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -45,36 +45,33 @@ import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.validation.ResourceValidator;
+import ca.uhn.fhir.validation.FhirValidator;
 
 /**
- * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
- * used as a factory for various other types of objects (parsers, clients, etc.).
+ * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then used as a factory for various other types of objects (parsers, clients, etc.).
  * 
  * <p>
  * Important usage notes:
  * <ul>
  * <li>Thread safety: <b>This class is thread safe</b> and may be shared between multiple processing threads.</li>
  * <li>
- * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode
- * to build up an internal model of those classes. For that reason, you should try to create one FhirContext instance
- * which remains for the life of your application and reuse that instance. Note that it will not cause problems to
- * create multiple instances (ie. resources originating from one FhirContext may be passed to parsers originating from
- * another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.
- * </li>
+ * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode to build up an internal model of those classes. For that reason, you should try
+ * to create one FhirContext instance which remains for the life of your application and reuse that instance. Note that it will not cause problems to create multiple instances (ie. resources
+ * originating from one FhirContext may be passed to parsers originating from another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.</li>
  * </ul>
  * </p>
  */
 public class FhirContext {
 
+	private static final List<Class<? extends IResource>> EMPTY_LIST = Collections.emptyList();
 	private volatile Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
+	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
+	private Map<String, String> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private Map<String, String> myNameToResourceType;
-	private static final List<Class<? extends IResource>> EMPTY_LIST = Collections.emptyList();
 
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
@@ -96,11 +93,25 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
+	}
+
+	/** For unit tests only */
+	int getElementDefinitionCount() {
+		return myClassToElementDefinition.size();
+	}
+
+	/**
+	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
+	 */
+	public HapiLocalizer getLocalizer() {
+		if (myLocalizer == null) {
+			myLocalizer = new HapiLocalizer();
+		}
+		return myLocalizer;
 	}
 
 	public INarrativeGenerator getNarrativeGenerator() {
@@ -108,8 +119,7 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
@@ -120,24 +130,21 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		String resourceName = theResourceName;
 
 		/*
-		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or
-		 * something so that we can detect names like diagnosticreport
+		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or something so that we can detect names like diagnosticreport
 		 */
 		if (Character.isLowerCase(resourceName.charAt(0))) {
 			resourceName = WordUtils.capitalize(resourceName);
@@ -166,16 +173,14 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
 		return myIdToResourceDefinition.get(theId);
 	}
 
 	/**
-	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
-	 * core library.
+	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the core library.
 	 */
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
@@ -196,8 +201,7 @@ public class FhirContext {
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
-	 * without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newJsonParser() {
@@ -205,16 +209,12 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
-	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
-	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
-	 * sub-interface {@link IBasicClient}). See the <a
-	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
-	 * information on how to define this interface.
+	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use cases to contain methods for each of the RESTful operations you wish to
+	 * implement (e.g. "read ImagingStudy", "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its sub-interface {@link IBasicClient}). See the <a
+	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more information on how to define this interface.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
-	 * without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theClientType
@@ -230,13 +230,11 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against
-	 * a compliant server, but does not have methods defining the specific functionality required (as is the case with
-	 * {@link #newRestfulClient(Class, String) non-generic clients}).
+	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against a compliant server, but does not have methods defining the specific
+	 * functionality required (as is the case with {@link #newRestfulClient(Class, String) non-generic clients}).
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
-	 * without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theServerBase
@@ -251,8 +249,8 @@ public class FhirContext {
 		return new FhirTerser(this);
 	}
 
-	public ResourceValidator newValidator() {
-		return new ResourceValidator(this);
+	public FhirValidator newValidator() {
+		return new FhirValidator(this);
 	}
 
 	public ViewGenerator newViewGenerator() {
@@ -263,16 +261,11 @@ public class FhirContext {
 	 * Create and return a new XML parser.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
-	 * without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newXmlParser() {
 		return new XmlParser(this);
-	}
-
-	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
-		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
@@ -305,13 +298,19 @@ public class FhirContext {
 		myIdToResourceDefinition = idToElementDefinition;
 
 		myNameToResourceType = scanner.getNameToResourceType();
-		
+
 		return classToElementDefinition;
 	}
 
-	/** For unit tests only */
-	int getElementDefinitionCount() {
-		return myClassToElementDefinition.size();
+	/**
+	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
+	 */
+	public void setLocalizer(HapiLocalizer theMessages) {
+		myLocalizer = theMessages;
+	}
+
+	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
 	private static Collection<Class<? extends IResource>> toCollection(Class<? extends IResource> theResourceType) {

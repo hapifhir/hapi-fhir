@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -51,7 +52,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private Class<? extends IResource> myDeclaredResourceType;
 	private String myQueryName;
-
 	private String myDescription;
 
 	@SuppressWarnings("unchecked")
@@ -66,6 +66,21 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				myDescription = StringUtils.defaultIfBlank(desc.formalDefinition(), null);
 			} else {
 				myDescription = StringUtils.defaultIfBlank(desc.shortDefinition(), null);
+			}
+		}
+
+		for (IParameter next : getParameters()) {
+			if (!(next instanceof SearchParameter)) {
+				continue;
+			}
+
+			SearchParameter sp = (SearchParameter) next;
+			if (sp.getName().startsWith("_")) {
+				if (ALLOWED_PARAMS.contains(sp.getName())) {
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
+							sp.getName());
+					throw new ConfigurationException(msg);
+				}
 			}
 		}
 
@@ -215,9 +230,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
 		for (String next : keySet) {
-			if (next.startsWith("_")) {
-				continue;
-			}
+			// if (next.startsWith("_")) {
+			// if (!SPECIAL_PARAM_NAMES.contains(next)) {
+			// continue;
+			// }
+			// }
 			if (!methodParamsTemp.contains(next)) {
 				return false;
 			}

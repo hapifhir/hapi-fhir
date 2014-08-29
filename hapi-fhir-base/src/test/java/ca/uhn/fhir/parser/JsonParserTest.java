@@ -1,9 +1,17 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -28,7 +36,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -63,6 +70,31 @@ public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
 	private static FhirContext ourCtx;
 
+	
+	@Test
+	public void testEncodeNarrativeBlockInBundle() {
+		Patient p = new Patient();
+		p.addIdentifier("foo", "bar");
+		p.getText().setStatus(NarrativeStatusEnum.GENERATED);
+		p.getText().setDiv("<div>hello</div>");
+		
+		Bundle b = new Bundle();
+		b.getTotalResults().setValue(123);
+		b.addEntry().setResource(p);
+		
+		String out = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		assertThat(out, containsString("<div>hello</div>"));
+
+		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
+		out = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(out);
+		// Backslashes need to be escaped because they are in a JSON value
+		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
+		
+	}
+	
+	
 	@Test
 	public void testEncodingNullExtension() {
 		Patient p = new Patient();

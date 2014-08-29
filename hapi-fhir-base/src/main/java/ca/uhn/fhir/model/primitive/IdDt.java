@@ -259,6 +259,9 @@ public class IdDt extends BasePrimitive<String> {
 	 * "https://"
 	 */
 	public boolean isAbsolute() {
+		if (StringUtils.isBlank(getValue())) {
+			return false;
+		}
 		return UrlUtil.isAbsolute(getValue());
 	}
 

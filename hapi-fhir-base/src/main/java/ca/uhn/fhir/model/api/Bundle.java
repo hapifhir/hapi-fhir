@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -42,10 +43,11 @@ import ca.uhn.fhir.util.UrlUtil;
 
 public class Bundle extends BaseBundle /* implements IElement */{
 
-	private volatile transient Map<IdDt, IResource> myIdToEntries;
-
-	private List<BundleEntry> myEntries;
 	private StringDt myBundleId;
+
+	private TagList myCategories;
+	private List<BundleEntry> myEntries;
+	private volatile transient Map<IdDt, IResource> myIdToEntries;
 	private StringDt myLinkBase;
 	private StringDt myLinkFirst;
 	private StringDt myLinkLast;
@@ -56,15 +58,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
 	private InstantDt myUpdated;
-	private TagList myCategories;
-
-	/**
-	 * Returns true if this bundle contains zero entries
-	 */
-	@Override
-	public boolean isEmpty() {
-		return getEntries().isEmpty();
-	}
 
 	public Tag addCategory() {
 		Tag retVal = new Tag();
@@ -86,198 +79,14 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	}
 
 	/**
-	 * Retrieves a resource from a bundle given its logical ID.
-	 * <p>
-	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of
-	 * <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
-	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been
-	 * populated. It will cache its results for fast performance, but that means that modifications to the bundle after
-	 * this method is called may not be accurately reflected.
-	 * </p>
+	 * Adds a new entry
 	 * 
-	 * @param theId
-	 *            The resource ID
-	 * @return Returns the resource with the given ID, or <code>null</code> if none is found
+	 * @param theBundleEntry
+	 *            The entry to add
 	 */
-	public IResource getResourceById(IdDt theId) {
-		Map<IdDt, IResource> map = myIdToEntries;
-		if (map == null) {
-			map = new HashMap<IdDt, IResource>();
-			for (BundleEntry next : this.getEntries()) {
-				if (next.getId().isEmpty() == false) {
-					map.put(next.getId().toUnqualified(), next.getResource());
-				}
-			}
-			myIdToEntries = map;
-		}
-		return map.get(theId.toUnqualified());
-	}
-
-	// public static void main(String[] args) {
-	//
-	// FhirContext ctx = new FhirContext();
-	// String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" +
-	// "   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" +
-	// "      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" +
-	// "   </extension>\n" +
-	// "   <text>\n" +
-	// "      <status value=\"generated\"/>\n" +
-	// "      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" +
-	// "   </text>\n" +
-	// "   <identifier>\n" +
-	// "      <use value=\"official\"/>\n" +
-	// "      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" +
-	// "      <system value=\"urn:cgta:hsp_ids\"/>\n" +
-	// "      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" +
-	// "   </identifier>\n" +
-	// "   <name value=\"火星第五人民医院\"/>\n" +
-	// "</Organization>";
-	//
-	// IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
-	// c.registerInterceptor(new LoggingInterceptor(true));
-	// c.update().resource(txt).withId("1665").execute();
-	// }
-	//
-
-	public TagList getCategories() {
-		if (myCategories == null) {
-			myCategories = new TagList();
-		}
-		return myCategories;
-	}
-
-	public void setCategories(TagList theCategories) {
-		myCategories = theCategories;
-	}
-
-	public List<BundleEntry> getEntries() {
-		if (myEntries == null) {
-			myEntries = new ArrayList<BundleEntry>();
-		}
-		return myEntries;
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append(getEntries().size() + " entries");
-		b.append("id", getId());
-		return b.toString();
-	}
-
-	public StringDt getBundleId() {
-		if (myBundleId == null) {
-			myBundleId = new StringDt();
-		}
-		return myBundleId;
-	}
-
-	public StringDt getLinkBase() {
-		if (myLinkBase == null) {
-			myLinkBase = new StringDt();
-		}
-		return myLinkBase;
-	}
-
-	public StringDt getLinkFirst() {
-		if (myLinkFirst == null) {
-			myLinkFirst = new StringDt();
-		}
-		return myLinkFirst;
-	}
-
-	public StringDt getLinkLast() {
-		if (myLinkLast == null) {
-			myLinkLast = new StringDt();
-		}
-		return myLinkLast;
-	}
-
-	public StringDt getLinkNext() {
-		if (myLinkNext == null) {
-			myLinkNext = new StringDt();
-		}
-		return myLinkNext;
-	}
-
-	public StringDt getLinkPrevious() {
-		if (myLinkPrevious == null) {
-			myLinkPrevious = new StringDt();
-		}
-		return myLinkPrevious;
-	}
-
-	public StringDt getLinkSelf() {
-		if (myLinkSelf == null) {
-			myLinkSelf = new StringDt();
-		}
-		return myLinkSelf;
-	}
-
-	public InstantDt getPublished() {
-		if (myPublished == null) {
-			myPublished = new InstantDt();
-		}
-		return myPublished;
-	}
-
-	public StringDt getTitle() {
-		if (myTitle == null) {
-			myTitle = new StringDt();
-		}
-		return myTitle;
-	}
-
-	public IntegerDt getTotalResults() {
-		if (myTotalResults == null) {
-			myTotalResults = new IntegerDt();
-		}
-		return myTotalResults;
-	}
-
-	public InstantDt getUpdated() {
-		if (myUpdated == null) {
-			myUpdated = new InstantDt();
-		}
-		return myUpdated;
-	}
-
-	public List<IResource> toListOfResources() {
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
-		for (BundleEntry next : getEntries()) {
-			if (next.getResource() != null) {
-				retVal.add(next.getResource());
-			}
-		}
-		return retVal;
-	}
-
-	public static Bundle withSingleResource(IResource theResource) {
-		Bundle retVal = new Bundle();
-		retVal.addEntry().setResource(theResource);
-		return retVal;
-	}
-
-	/**
-	 * Returns the number of entries in this bundle
-	 */
-	public int size() {
-		return getEntries().size();
-	}
-
-	/**
-	 * Returns a list containing all resources of the given type from this bundle
-	 */
-	public <T extends IResource> List<T> getResources(Class<T> theClass) {
-		ArrayList<T> retVal = new ArrayList<T>();
-		for (BundleEntry next : getEntries()) {
-			if (next.getResource() != null && theClass.isAssignableFrom(next.getResource().getClass())) {
-				@SuppressWarnings("unchecked")
-				T resource = (T) next.getResource();
-				retVal.add(resource);
-			}
-		}
-		return retVal;
+	public void addEntry(BundleEntry theBundleEntry) {
+		Validate.notNull(theBundleEntry, "theBundleEntry can not be null");
+		getEntries().add(theBundleEntry);
 	}
 
 	/**
@@ -384,6 +193,205 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return entry;
 	}
 
+	// public static void main(String[] args) {
+	//
+	// FhirContext ctx = new FhirContext();
+	// String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" +
+	// "   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" +
+	// "      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" +
+	// "   </extension>\n" +
+	// "   <text>\n" +
+	// "      <status value=\"generated\"/>\n" +
+	// "      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" +
+	// "   </text>\n" +
+	// "   <identifier>\n" +
+	// "      <use value=\"official\"/>\n" +
+	// "      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" +
+	// "      <system value=\"urn:cgta:hsp_ids\"/>\n" +
+	// "      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" +
+	// "   </identifier>\n" +
+	// "   <name value=\"火星第五人民医院\"/>\n" +
+	// "</Organization>";
+	//
+	// IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
+	// c.registerInterceptor(new LoggingInterceptor(true));
+	// c.update().resource(txt).withId("1665").execute();
+	// }
+	//
+
+	public StringDt getBundleId() {
+		if (myBundleId == null) {
+			myBundleId = new StringDt();
+		}
+		return myBundleId;
+	}
+
+	public TagList getCategories() {
+		if (myCategories == null) {
+			myCategories = new TagList();
+		}
+		return myCategories;
+	}
+
+	public List<BundleEntry> getEntries() {
+		if (myEntries == null) {
+			myEntries = new ArrayList<BundleEntry>();
+		}
+		return myEntries;
+	}
+
+	public StringDt getLinkBase() {
+		if (myLinkBase == null) {
+			myLinkBase = new StringDt();
+		}
+		return myLinkBase;
+	}
+
+	public StringDt getLinkFirst() {
+		if (myLinkFirst == null) {
+			myLinkFirst = new StringDt();
+		}
+		return myLinkFirst;
+	}
+
+	public StringDt getLinkLast() {
+		if (myLinkLast == null) {
+			myLinkLast = new StringDt();
+		}
+		return myLinkLast;
+	}
+
+	public StringDt getLinkNext() {
+		if (myLinkNext == null) {
+			myLinkNext = new StringDt();
+		}
+		return myLinkNext;
+	}
+
+	public StringDt getLinkPrevious() {
+		if (myLinkPrevious == null) {
+			myLinkPrevious = new StringDt();
+		}
+		return myLinkPrevious;
+	}
+
+	public StringDt getLinkSelf() {
+		if (myLinkSelf == null) {
+			myLinkSelf = new StringDt();
+		}
+		return myLinkSelf;
+	}
+
+	public InstantDt getPublished() {
+		if (myPublished == null) {
+			myPublished = new InstantDt();
+		}
+		return myPublished;
+	}
+
+	/**
+	 * Retrieves a resource from a bundle given its logical ID.
+	 * <p>
+	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
+	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been populated. It will cache its results for fast performance, but that means that
+	 * modifications to the bundle after this method is called may not be accurately reflected.
+	 * </p>
+	 * 
+	 * @param theId
+	 *            The resource ID
+	 * @return Returns the resource with the given ID, or <code>null</code> if none is found
+	 */
+	public IResource getResourceById(IdDt theId) {
+		Map<IdDt, IResource> map = myIdToEntries;
+		if (map == null) {
+			map = new HashMap<IdDt, IResource>();
+			for (BundleEntry next : this.getEntries()) {
+				if (next.getId().isEmpty() == false) {
+					map.put(next.getId().toUnqualified(), next.getResource());
+				}
+			}
+			myIdToEntries = map;
+		}
+		return map.get(theId.toUnqualified());
+	}
+
+	/**
+	 * Returns a list containing all resources of the given type from this bundle
+	 */
+	public <T extends IResource> List<T> getResources(Class<T> theClass) {
+		ArrayList<T> retVal = new ArrayList<T>();
+		for (BundleEntry next : getEntries()) {
+			if (next.getResource() != null && theClass.isAssignableFrom(next.getResource().getClass())) {
+				@SuppressWarnings("unchecked")
+				T resource = (T) next.getResource();
+				retVal.add(resource);
+			}
+		}
+		return retVal;
+	}
+
+	public StringDt getTitle() {
+		if (myTitle == null) {
+			myTitle = new StringDt();
+		}
+		return myTitle;
+	}
+
+	public IntegerDt getTotalResults() {
+		if (myTotalResults == null) {
+			myTotalResults = new IntegerDt();
+		}
+		return myTotalResults;
+	}
+
+	public InstantDt getUpdated() {
+		if (myUpdated == null) {
+			myUpdated = new InstantDt();
+		}
+		return myUpdated;
+	}
+
+	/**
+	 * Returns true if this bundle contains zero entries
+	 */
+	@Override
+	public boolean isEmpty() {
+		return getEntries().isEmpty();
+	}
+
+	public void setCategories(TagList theCategories) {
+		myCategories = theCategories;
+	}
+
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished;
+	}
+
+	/**
+	 * Returns the number of entries in this bundle
+	 */
+	public int size() {
+		return getEntries().size();
+	}
+
+	public List<IResource> toListOfResources() {
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		for (BundleEntry next : getEntries()) {
+			if (next.getResource() != null) {
+				retVal.add(next.getResource());
+			}
+		}
+		return retVal;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append(getEntries().size() + " entries");
+		b.append("id", getId());
+		return b.toString();
+	}
+
 	public static Bundle withResources(List<IResource> theResources, FhirContext theContext, String theServerBase) {
 		Bundle retVal = new Bundle();
 		for (IResource next : theResources) {
@@ -392,8 +400,10 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return retVal;
 	}
 
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished;
+	public static Bundle withSingleResource(IResource theResource) {
+		Bundle retVal = new Bundle();
+		retVal.addEntry().setResource(theResource);
+		return retVal;
 	}
 
 }
