@@ -543,8 +543,8 @@
 <a class="jxr_linenumber" name="L535" href="#L535">535</a> <em class="jxr_javadoccomment">     * The composition editing time, when the composition was last logically changed by the author</em>
 <a class="jxr_linenumber" name="L536" href="#L536">536</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L537" href="#L537">537</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L538" href="#L538">538</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Composition</a> setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L539" href="#L539">539</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L538" href="#L538">538</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Composition</a> setDateWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L539" href="#L539">539</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L540" href="#L540">540</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L541" href="#L541">541</a> 	}
 <a class="jxr_linenumber" name="L542" href="#L542">542</a> 
@@ -556,8 +556,8 @@
 <a class="jxr_linenumber" name="L548" href="#L548">548</a> <em class="jxr_javadoccomment">     * The composition editing time, when the composition was last logically changed by the author</em>
 <a class="jxr_linenumber" name="L549" href="#L549">549</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L550" href="#L550">550</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L551" href="#L551">551</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Composition</a> setDateWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L552" href="#L552">552</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L551" href="#L551">551</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Composition</a> setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L552" href="#L552">552</a> 		myDate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L553" href="#L553">553</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L554" href="#L554">554</a> 	}
 <a class="jxr_linenumber" name="L555" href="#L555">555</a> 
@@ -1205,8 +1205,8 @@
 <a class="jxr_linenumber" name="L1197" href="#L1197">1197</a> <em class="jxr_javadoccomment">     * When composition was attested by the party</em>
 <a class="jxr_linenumber" name="L1198" href="#L1198">1198</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1199" href="#L1199">1199</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Attester</a> setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a> 		myTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L1200" href="#L1200">1200</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Attester</a> setTimeWithSecondsPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L1201" href="#L1201">1201</a> 		myTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
 <a class="jxr_linenumber" name="L1202" href="#L1202">1202</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1203" href="#L1203">1203</a> 	}
 <a class="jxr_linenumber" name="L1204" href="#L1204">1204</a> 
@@ -1218,8 +1218,8 @@
 <a class="jxr_linenumber" name="L1210" href="#L1210">1210</a> <em class="jxr_javadoccomment">     * When composition was attested by the party</em>
 <a class="jxr_linenumber" name="L1211" href="#L1211">1211</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1212" href="#L1212">1212</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Attester</a> setTimeWithSecondsPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a> 		myTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate); 
+<a class="jxr_linenumber" name="L1213" href="#L1213">1213</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Composition.html">Attester</a> setTime( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L1214" href="#L1214">1214</a> 		myTime = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L1215" href="#L1215">1215</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1216" href="#L1216">1216</a> 	}
 <a class="jxr_linenumber" name="L1217" href="#L1217">1217</a> 

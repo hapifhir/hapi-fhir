@@ -312,8 +312,8 @@
 <a class="jxr_linenumber" name="L304" href="#L304">304</a> <em class="jxr_javadoccomment">     * The date when the enclosed suite of services were performed or completed</em>
 <a class="jxr_linenumber" name="L305" href="#L305">305</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L306" href="#L306">306</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">Claim</a> setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		myServicedate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">Claim</a> setServicedateWithDayPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		myServicedate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
 <a class="jxr_linenumber" name="L309" href="#L309">309</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L310" href="#L310">310</a> 	}
 <a class="jxr_linenumber" name="L311" href="#L311">311</a> 
@@ -325,8 +325,8 @@
 <a class="jxr_linenumber" name="L317" href="#L317">317</a> <em class="jxr_javadoccomment">     * The date when the enclosed suite of services were performed or completed</em>
 <a class="jxr_linenumber" name="L318" href="#L318">318</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L319" href="#L319">319</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">Claim</a> setServicedateWithDayPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 		myServicedate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">Claim</a> setServicedate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 		myServicedate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L322" href="#L322">322</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> 	}
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> 
@@ -833,8 +833,8 @@
 <a class="jxr_linenumber" name="L825" href="#L825">825</a> <em class="jxr_javadoccomment">     * The date of birth of the PolicyHolder</em>
 <a class="jxr_linenumber" name="L826" href="#L826">826</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L827" href="#L827">827</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L828" href="#L828">828</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Patient.html">Patient</a> setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L829" href="#L829">829</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L828" href="#L828">828</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Patient.html">Patient</a> setBirthdateWithDayPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L829" href="#L829">829</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
 <a class="jxr_linenumber" name="L830" href="#L830">830</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L831" href="#L831">831</a> 	}
 <a class="jxr_linenumber" name="L832" href="#L832">832</a> 
@@ -846,8 +846,8 @@
 <a class="jxr_linenumber" name="L838" href="#L838">838</a> <em class="jxr_javadoccomment">     * The date of birth of the PolicyHolder</em>
 <a class="jxr_linenumber" name="L839" href="#L839">839</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L840" href="#L840">840</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L841" href="#L841">841</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Patient.html">Patient</a> setBirthdateWithDayPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L842" href="#L842">842</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
+<a class="jxr_linenumber" name="L841" href="#L841">841</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Patient.html">Patient</a> setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L842" href="#L842">842</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L843" href="#L843">843</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L844" href="#L844">844</a> 	}
 <a class="jxr_linenumber" name="L845" href="#L845">845</a> 
@@ -1566,8 +1566,8 @@
 <a class="jxr_linenumber" name="L1558" href="#L1558">1558</a> <em class="jxr_javadoccomment">     * The date of birth of the PolicyHolder</em>
 <a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">CoverageSubscriber</a> setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
+<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">CoverageSubscriber</a> setBirthdateWithDayPrecision( Date theDate) {
+<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
 <a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 	}
 <a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 
@@ -1579,8 +1579,8 @@
 <a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> <em class="jxr_javadoccomment">     * The date of birth of the PolicyHolder</em>
 <a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">CoverageSubscriber</a> setBirthdateWithDayPrecision( Date theDate) {
-<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate); 
+<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/Claim.html">CoverageSubscriber</a> setBirthdate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 		myBirthdate = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/DateDt.html">DateDt</a>(theDate, thePrecision); 
 <a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 	}
 <a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> 

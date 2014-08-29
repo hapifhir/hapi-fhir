@@ -64,7 +64,7 @@
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myReturnVoid;
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseOutcomeReturningMethodBinding.html">BaseOutcomeReturningMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Class&lt;?&gt; theMethodAnnotation, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> theProvider) {
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseOutcomeReturningMethodBinding.html">BaseOutcomeReturningMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Class&lt;?&gt; theMethodAnnotation, Object theProvider) {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  		<strong class="jxr_keyword">super</strong>(theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">if</strong> (!theMethod.getReturnType().equals(MethodOutcome.<strong class="jxr_keyword">class</strong>)) {
@@ -171,7 +171,7 @@
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InternalErrorException.html">InternalErrorException</a>(<span class="jxr_string">"Method "</span> + getMethod().getName() + <span class="jxr_string">" in type "</span> + getMethod().getDeclaringClass().getCanonicalName()
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 						+ <span class="jxr_string">" returned null, which is not allowed for create operation"</span>);
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 			}
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			<strong class="jxr_keyword">if</strong> (response.getCreated() == <strong class="jxr_keyword">null</strong> || response.getCreated() == Boolean.TRUE) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			<strong class="jxr_keyword">if</strong> (response.getCreated() == <strong class="jxr_keyword">null</strong> || Boolean.TRUE.equals(response.getCreated())) {
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 			} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
@@ -180,7 +180,7 @@
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 			<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> 		<strong class="jxr_keyword">case</strong> UPDATE:
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			<strong class="jxr_keyword">if</strong> (response.getCreated() == <strong class="jxr_keyword">null</strong> || response.getCreated() == Boolean.FALSE) {
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			<strong class="jxr_keyword">if</strong> (response.getCreated() == <strong class="jxr_keyword">null</strong> || Boolean.FALSE.equals(response.getCreated())) {
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> 			} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
@@ -273,7 +273,7 @@
 <a class="jxr_linenumber" name="L265" href="#L265">265</a> <em class="jxr_comment">	 * encoding.newParser(getContext()); parser.encodeResourceToWriter(outcome, writer); } } finally { writer.close(); } // getMethod().in }</em>
 <a class="jxr_linenumber" name="L266" href="#L266">266</a> <em class="jxr_comment">	 */</em>
 <a class="jxr_linenumber" name="L267" href="#L267">267</a> 
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> addParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theParams);
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> addParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, Object[] theParams);
 <a class="jxr_linenumber" name="L269" href="#L269">269</a> 
 <a class="jxr_linenumber" name="L270" href="#L270">270</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L271" href="#L271">271</a> <em class="jxr_javadoccomment">	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)</em>
@@ -282,7 +282,7 @@
 <a class="jxr_linenumber" name="L274" href="#L274">274</a> 		<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L275" href="#L275">275</a> 	}
 <a class="jxr_linenumber" name="L276" href="#L276">276</a> 
-<a class="jxr_linenumber" name="L277" href="#L277">277</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> createClientInvocation(<a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theArgs, <a href="../../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> resource);
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> createClientInvocation(Object[] theArgs, <a href="../../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> resource);
 <a class="jxr_linenumber" name="L278" href="#L278">278</a> 
 <a class="jxr_linenumber" name="L279" href="#L279">279</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L280" href="#L280">280</a> <em class="jxr_javadoccomment">	 * For servers, this method will match only incoming requests that match the given operation, or which have no operation in the URL if this method returns null.</em>

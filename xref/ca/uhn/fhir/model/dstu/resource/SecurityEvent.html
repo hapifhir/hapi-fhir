@@ -456,7 +456,7 @@
 <a class="jxr_linenumber" name="L448" href="#L448">448</a> 		shortDefinition=<span class="jxr_string">"Specific instances of data or objects that have been accessed"</span>,
 <a class="jxr_linenumber" name="L449" href="#L449">449</a> 		formalDefinition=<span class="jxr_string">"Specific instances of data or objects that have been accessed"</span>
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> 	)
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 	<strong class="jxr_keyword">private</strong> java.util.List&lt;Object&gt; myObject;
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 	<strong class="jxr_keyword">private</strong> java.util.List&lt;ObjectElement&gt; myObject;
 <a class="jxr_linenumber" name="L452" href="#L452">452</a> 	
 <a class="jxr_linenumber" name="L453" href="#L453">453</a> 
 <a class="jxr_linenumber" name="L454" href="#L454">454</a> 	@Override
@@ -601,9 +601,9 @@
 <a class="jxr_linenumber" name="L593" href="#L593">593</a> <em class="jxr_javadoccomment">     * Specific instances of data or objects that have been accessed</em>
 <a class="jxr_linenumber" name="L594" href="#L594">594</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L595" href="#L595">595</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L596" href="#L596">596</a> 	<strong class="jxr_keyword">public</strong> java.util.List&lt;Object&gt; getObject() {  
+<a class="jxr_linenumber" name="L596" href="#L596">596</a> 	<strong class="jxr_keyword">public</strong> java.util.List&lt;ObjectElement&gt; getObject() {  
 <a class="jxr_linenumber" name="L597" href="#L597">597</a> 		<strong class="jxr_keyword">if</strong> (myObject == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L598" href="#L598">598</a> 			myObject = <strong class="jxr_keyword">new</strong> java.util.ArrayList&lt;Object&gt;();
+<a class="jxr_linenumber" name="L598" href="#L598">598</a> 			myObject = <strong class="jxr_keyword">new</strong> java.util.ArrayList&lt;ObjectElement&gt;();
 <a class="jxr_linenumber" name="L599" href="#L599">599</a> 		}
 <a class="jxr_linenumber" name="L600" href="#L600">600</a> 		<strong class="jxr_keyword">return</strong> myObject;
 <a class="jxr_linenumber" name="L601" href="#L601">601</a> 	}
@@ -616,7 +616,7 @@
 <a class="jxr_linenumber" name="L608" href="#L608">608</a> <em class="jxr_javadoccomment">     * Specific instances of data or objects that have been accessed</em>
 <a class="jxr_linenumber" name="L609" href="#L609">609</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L610" href="#L610">610</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L611" href="#L611">611</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">SecurityEvent</a> setObject(java.util.List&lt;Object&gt; theValue) {
+<a class="jxr_linenumber" name="L611" href="#L611">611</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">SecurityEvent</a> setObject(java.util.List&lt;ObjectElement&gt; theValue) {
 <a class="jxr_linenumber" name="L612" href="#L612">612</a> 		myObject = theValue;
 <a class="jxr_linenumber" name="L613" href="#L613">613</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L614" href="#L614">614</a> 	}
@@ -629,8 +629,8 @@
 <a class="jxr_linenumber" name="L621" href="#L621">621</a> <em class="jxr_javadoccomment">     * Specific instances of data or objects that have been accessed</em>
 <a class="jxr_linenumber" name="L622" href="#L622">622</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L623" href="#L623">623</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L624" href="#L624">624</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> addObject() {
-<a class="jxr_linenumber" name="L625" href="#L625">625</a> 		Object newType = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>();
+<a class="jxr_linenumber" name="L624" href="#L624">624</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> addObject() {
+<a class="jxr_linenumber" name="L625" href="#L625">625</a> 		ObjectElement newType = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a>();
 <a class="jxr_linenumber" name="L626" href="#L626">626</a> 		getObject().add(newType);
 <a class="jxr_linenumber" name="L627" href="#L627">627</a> 		<strong class="jxr_keyword">return</strong> newType; 
 <a class="jxr_linenumber" name="L628" href="#L628">628</a> 	}
@@ -644,7 +644,7 @@
 <a class="jxr_linenumber" name="L636" href="#L636">636</a> <em class="jxr_javadoccomment">     * Specific instances of data or objects that have been accessed</em>
 <a class="jxr_linenumber" name="L637" href="#L637">637</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L638" href="#L638">638</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L639" href="#L639">639</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> getObjectFirstRep() {
+<a class="jxr_linenumber" name="L639" href="#L639">639</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> getObjectFirstRep() {
 <a class="jxr_linenumber" name="L640" href="#L640">640</a> 		<strong class="jxr_keyword">if</strong> (getObject().isEmpty()) {
 <a class="jxr_linenumber" name="L641" href="#L641">641</a> 			<strong class="jxr_keyword">return</strong> addObject();
 <a class="jxr_linenumber" name="L642" href="#L642">642</a> 		}
@@ -1743,7 +1743,7 @@
 <a class="jxr_linenumber" name="L1735" href="#L1735">1735</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1736" href="#L1736">1736</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L1737" href="#L1737">1737</a> 	@Block()	
-<a class="jxr_linenumber" name="L1738" href="#L1738">1738</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../ca/uhn/fhir/model/api/BaseIdentifiableElement.html">BaseIdentifiableElement</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../ca/uhn/fhir/model/api/IResourceBlock.html">IResourceBlock</a> {
+<a class="jxr_linenumber" name="L1738" href="#L1738">1738</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../ca/uhn/fhir/model/api/BaseIdentifiableElement.html">BaseIdentifiableElement</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../ca/uhn/fhir/model/api/IResourceBlock.html">IResourceBlock</a> {
 <a class="jxr_linenumber" name="L1739" href="#L1739">1739</a> 	
 <a class="jxr_linenumber" name="L1740" href="#L1740">1740</a> 	@Child(name=<span class="jxr_string">"identifier"</span>, type=IdentifierDt.<strong class="jxr_keyword">class</strong>, order=0, min=0, max=1)	
 <a class="jxr_linenumber" name="L1741" href="#L1741">1741</a> 	@Description(
@@ -1852,7 +1852,7 @@
 <a class="jxr_linenumber" name="L1844" href="#L1844">1844</a> <em class="jxr_javadoccomment">     * Identifies a specific instance of the participant object. The reference should always be version specific</em>
 <a class="jxr_linenumber" name="L1845" href="#L1845">1845</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1846" href="#L1846">1846</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1847" href="#L1847">1847</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setIdentifier(<a href="../../../../../../ca/uhn/fhir/model/dstu/composite/IdentifierDt.html">IdentifierDt</a> theValue) {
+<a class="jxr_linenumber" name="L1847" href="#L1847">1847</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setIdentifier(<a href="../../../../../../ca/uhn/fhir/model/dstu/composite/IdentifierDt.html">IdentifierDt</a> theValue) {
 <a class="jxr_linenumber" name="L1848" href="#L1848">1848</a> 		myIdentifier = theValue;
 <a class="jxr_linenumber" name="L1849" href="#L1849">1849</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1850" href="#L1850">1850</a> 	}
@@ -1865,7 +1865,7 @@
 <a class="jxr_linenumber" name="L1857" href="#L1857">1857</a> <em class="jxr_javadoccomment">     * Identifies a specific instance of the participant object. The reference should always be version specific</em>
 <a class="jxr_linenumber" name="L1858" href="#L1858">1858</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1859" href="#L1859">1859</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1860" href="#L1860">1860</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
+<a class="jxr_linenumber" name="L1860" href="#L1860">1860</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setIdentifier( IdentifierUseEnum theUse,  String theSystem,  String theValue,  String theLabel) {
 <a class="jxr_linenumber" name="L1861" href="#L1861">1861</a> 		myIdentifier = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/IdentifierDt.html">IdentifierDt</a>(theUse, theSystem, theValue, theLabel); 
 <a class="jxr_linenumber" name="L1862" href="#L1862">1862</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1863" href="#L1863">1863</a> 	}
@@ -1878,7 +1878,7 @@
 <a class="jxr_linenumber" name="L1870" href="#L1870">1870</a> <em class="jxr_javadoccomment">     * Identifies a specific instance of the participant object. The reference should always be version specific</em>
 <a class="jxr_linenumber" name="L1871" href="#L1871">1871</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1872" href="#L1872">1872</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1873" href="#L1873">1873</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setIdentifier( String theSystem,  String theValue) {
+<a class="jxr_linenumber" name="L1873" href="#L1873">1873</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setIdentifier( String theSystem,  String theValue) {
 <a class="jxr_linenumber" name="L1874" href="#L1874">1874</a> 		myIdentifier = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/composite/IdentifierDt.html">IdentifierDt</a>(theSystem, theValue); 
 <a class="jxr_linenumber" name="L1875" href="#L1875">1875</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L1876" href="#L1876">1876</a> 	}
@@ -1909,7 +1909,7 @@
 <a class="jxr_linenumber" name="L1901" href="#L1901">1901</a> <em class="jxr_javadoccomment">     * Identifies a specific instance of the participant object. The reference should always be version specific</em>
 <a class="jxr_linenumber" name="L1902" href="#L1902">1902</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1903" href="#L1903">1903</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1904" href="#L1904">1904</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setReference(<a href="../../../../../../ca/uhn/fhir/model/dstu/composite/ResourceReferenceDt.html">ResourceReferenceDt</a> theValue) {
+<a class="jxr_linenumber" name="L1904" href="#L1904">1904</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setReference(<a href="../../../../../../ca/uhn/fhir/model/dstu/composite/ResourceReferenceDt.html">ResourceReferenceDt</a> theValue) {
 <a class="jxr_linenumber" name="L1905" href="#L1905">1905</a> 		myReference = theValue;
 <a class="jxr_linenumber" name="L1906" href="#L1906">1906</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1907" href="#L1907">1907</a> 	}
@@ -1940,7 +1940,7 @@
 <a class="jxr_linenumber" name="L1932" href="#L1932">1932</a> <em class="jxr_javadoccomment">     * Object type being audited</em>
 <a class="jxr_linenumber" name="L1933" href="#L1933">1933</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1934" href="#L1934">1934</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1935" href="#L1935">1935</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setType(BoundCodeDt&lt;SecurityEventObjectTypeEnum&gt; theValue) {
+<a class="jxr_linenumber" name="L1935" href="#L1935">1935</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setType(BoundCodeDt&lt;SecurityEventObjectTypeEnum&gt; theValue) {
 <a class="jxr_linenumber" name="L1936" href="#L1936">1936</a> 		myType = theValue;
 <a class="jxr_linenumber" name="L1937" href="#L1937">1937</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1938" href="#L1938">1938</a> 	}
@@ -1953,7 +1953,7 @@
 <a class="jxr_linenumber" name="L1945" href="#L1945">1945</a> <em class="jxr_javadoccomment">     * Object type being audited</em>
 <a class="jxr_linenumber" name="L1946" href="#L1946">1946</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1947" href="#L1947">1947</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1948" href="#L1948">1948</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setType(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectTypeEnum.html">SecurityEventObjectTypeEnum</a> theValue) {
+<a class="jxr_linenumber" name="L1948" href="#L1948">1948</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setType(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectTypeEnum.html">SecurityEventObjectTypeEnum</a> theValue) {
 <a class="jxr_linenumber" name="L1949" href="#L1949">1949</a> 		getType().setValueAsEnum(theValue);
 <a class="jxr_linenumber" name="L1950" href="#L1950">1950</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1951" href="#L1951">1951</a> 	}
@@ -1984,7 +1984,7 @@
 <a class="jxr_linenumber" name="L1976" href="#L1976">1976</a> <em class="jxr_javadoccomment">     * Code representing the functional application role of Participant Object being audited</em>
 <a class="jxr_linenumber" name="L1977" href="#L1977">1977</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1978" href="#L1978">1978</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1979" href="#L1979">1979</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setRole(BoundCodeDt&lt;SecurityEventObjectRoleEnum&gt; theValue) {
+<a class="jxr_linenumber" name="L1979" href="#L1979">1979</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setRole(BoundCodeDt&lt;SecurityEventObjectRoleEnum&gt; theValue) {
 <a class="jxr_linenumber" name="L1980" href="#L1980">1980</a> 		myRole = theValue;
 <a class="jxr_linenumber" name="L1981" href="#L1981">1981</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1982" href="#L1982">1982</a> 	}
@@ -1997,7 +1997,7 @@
 <a class="jxr_linenumber" name="L1989" href="#L1989">1989</a> <em class="jxr_javadoccomment">     * Code representing the functional application role of Participant Object being audited</em>
 <a class="jxr_linenumber" name="L1990" href="#L1990">1990</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L1991" href="#L1991">1991</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1992" href="#L1992">1992</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setRole(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectRoleEnum.html">SecurityEventObjectRoleEnum</a> theValue) {
+<a class="jxr_linenumber" name="L1992" href="#L1992">1992</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setRole(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectRoleEnum.html">SecurityEventObjectRoleEnum</a> theValue) {
 <a class="jxr_linenumber" name="L1993" href="#L1993">1993</a> 		getRole().setValueAsEnum(theValue);
 <a class="jxr_linenumber" name="L1994" href="#L1994">1994</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L1995" href="#L1995">1995</a> 	}
@@ -2028,7 +2028,7 @@
 <a class="jxr_linenumber" name="L2020" href="#L2020">2020</a> <em class="jxr_javadoccomment">     * Identifier for the data life-cycle stage for the participant object</em>
 <a class="jxr_linenumber" name="L2021" href="#L2021">2021</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2022" href="#L2022">2022</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2023" href="#L2023">2023</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setLifecycle(BoundCodeDt&lt;SecurityEventObjectLifecycleEnum&gt; theValue) {
+<a class="jxr_linenumber" name="L2023" href="#L2023">2023</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setLifecycle(BoundCodeDt&lt;SecurityEventObjectLifecycleEnum&gt; theValue) {
 <a class="jxr_linenumber" name="L2024" href="#L2024">2024</a> 		myLifecycle = theValue;
 <a class="jxr_linenumber" name="L2025" href="#L2025">2025</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2026" href="#L2026">2026</a> 	}
@@ -2041,7 +2041,7 @@
 <a class="jxr_linenumber" name="L2033" href="#L2033">2033</a> <em class="jxr_javadoccomment">     * Identifier for the data life-cycle stage for the participant object</em>
 <a class="jxr_linenumber" name="L2034" href="#L2034">2034</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2035" href="#L2035">2035</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2036" href="#L2036">2036</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setLifecycle(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectLifecycleEnum.html">SecurityEventObjectLifecycleEnum</a> theValue) {
+<a class="jxr_linenumber" name="L2036" href="#L2036">2036</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setLifecycle(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectLifecycleEnum.html">SecurityEventObjectLifecycleEnum</a> theValue) {
 <a class="jxr_linenumber" name="L2037" href="#L2037">2037</a> 		getLifecycle().setValueAsEnum(theValue);
 <a class="jxr_linenumber" name="L2038" href="#L2038">2038</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2039" href="#L2039">2039</a> 	}
@@ -2072,7 +2072,7 @@
 <a class="jxr_linenumber" name="L2064" href="#L2064">2064</a> <em class="jxr_javadoccomment">     * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics</em>
 <a class="jxr_linenumber" name="L2065" href="#L2065">2065</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2066" href="#L2066">2066</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2067" href="#L2067">2067</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setSensitivity(BoundCodeableConceptDt&lt;SecurityEventObjectSensitivityEnum&gt; theValue) {
+<a class="jxr_linenumber" name="L2067" href="#L2067">2067</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setSensitivity(BoundCodeableConceptDt&lt;SecurityEventObjectSensitivityEnum&gt; theValue) {
 <a class="jxr_linenumber" name="L2068" href="#L2068">2068</a> 		mySensitivity = theValue;
 <a class="jxr_linenumber" name="L2069" href="#L2069">2069</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2070" href="#L2070">2070</a> 	}
@@ -2085,7 +2085,7 @@
 <a class="jxr_linenumber" name="L2077" href="#L2077">2077</a> <em class="jxr_javadoccomment">     * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics</em>
 <a class="jxr_linenumber" name="L2078" href="#L2078">2078</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2079" href="#L2079">2079</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2080" href="#L2080">2080</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setSensitivity(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectSensitivityEnum.html">SecurityEventObjectSensitivityEnum</a> theValue) {
+<a class="jxr_linenumber" name="L2080" href="#L2080">2080</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setSensitivity(<a href="../../../../../../ca/uhn/fhir/model/dstu/valueset/SecurityEventObjectSensitivityEnum.html">SecurityEventObjectSensitivityEnum</a> theValue) {
 <a class="jxr_linenumber" name="L2081" href="#L2081">2081</a> 		getSensitivity().setValueAsEnum(theValue);
 <a class="jxr_linenumber" name="L2082" href="#L2082">2082</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2083" href="#L2083">2083</a> 	}
@@ -2116,7 +2116,7 @@
 <a class="jxr_linenumber" name="L2108" href="#L2108">2108</a> <em class="jxr_javadoccomment">     * An instance-specific descriptor of the Participant Object ID audited, such as a person's name</em>
 <a class="jxr_linenumber" name="L2109" href="#L2109">2109</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2110" href="#L2110">2110</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2111" href="#L2111">2111</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setName(<a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theValue) {
+<a class="jxr_linenumber" name="L2111" href="#L2111">2111</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setName(<a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theValue) {
 <a class="jxr_linenumber" name="L2112" href="#L2112">2112</a> 		myName = theValue;
 <a class="jxr_linenumber" name="L2113" href="#L2113">2113</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2114" href="#L2114">2114</a> 	}
@@ -2129,7 +2129,7 @@
 <a class="jxr_linenumber" name="L2121" href="#L2121">2121</a> <em class="jxr_javadoccomment">     * An instance-specific descriptor of the Participant Object ID audited, such as a person's name</em>
 <a class="jxr_linenumber" name="L2122" href="#L2122">2122</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2123" href="#L2123">2123</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2124" href="#L2124">2124</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setName( String theString) {
+<a class="jxr_linenumber" name="L2124" href="#L2124">2124</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setName( String theString) {
 <a class="jxr_linenumber" name="L2125" href="#L2125">2125</a> 		myName = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a>(theString); 
 <a class="jxr_linenumber" name="L2126" href="#L2126">2126</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2127" href="#L2127">2127</a> 	}
@@ -2160,7 +2160,7 @@
 <a class="jxr_linenumber" name="L2152" href="#L2152">2152</a> <em class="jxr_javadoccomment">     * Text that describes the object in more detail</em>
 <a class="jxr_linenumber" name="L2153" href="#L2153">2153</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2154" href="#L2154">2154</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2155" href="#L2155">2155</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setDescription(<a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theValue) {
+<a class="jxr_linenumber" name="L2155" href="#L2155">2155</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setDescription(<a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> theValue) {
 <a class="jxr_linenumber" name="L2156" href="#L2156">2156</a> 		myDescription = theValue;
 <a class="jxr_linenumber" name="L2157" href="#L2157">2157</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2158" href="#L2158">2158</a> 	}
@@ -2173,7 +2173,7 @@
 <a class="jxr_linenumber" name="L2165" href="#L2165">2165</a> <em class="jxr_javadoccomment">     * Text that describes the object in more detail</em>
 <a class="jxr_linenumber" name="L2166" href="#L2166">2166</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2167" href="#L2167">2167</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2168" href="#L2168">2168</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setDescription( String theString) {
+<a class="jxr_linenumber" name="L2168" href="#L2168">2168</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setDescription( String theString) {
 <a class="jxr_linenumber" name="L2169" href="#L2169">2169</a> 		myDescription = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a>(theString); 
 <a class="jxr_linenumber" name="L2170" href="#L2170">2170</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2171" href="#L2171">2171</a> 	}
@@ -2204,7 +2204,7 @@
 <a class="jxr_linenumber" name="L2196" href="#L2196">2196</a> <em class="jxr_javadoccomment">     * The actual query for a query-type participant object</em>
 <a class="jxr_linenumber" name="L2197" href="#L2197">2197</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2198" href="#L2198">2198</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2199" href="#L2199">2199</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setQuery(<a href="../../../../../../ca/uhn/fhir/model/primitive/Base64BinaryDt.html">Base64BinaryDt</a> theValue) {
+<a class="jxr_linenumber" name="L2199" href="#L2199">2199</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setQuery(<a href="../../../../../../ca/uhn/fhir/model/primitive/Base64BinaryDt.html">Base64BinaryDt</a> theValue) {
 <a class="jxr_linenumber" name="L2200" href="#L2200">2200</a> 		myQuery = theValue;
 <a class="jxr_linenumber" name="L2201" href="#L2201">2201</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2202" href="#L2202">2202</a> 	}
@@ -2217,7 +2217,7 @@
 <a class="jxr_linenumber" name="L2209" href="#L2209">2209</a> <em class="jxr_javadoccomment">     * The actual query for a query-type participant object</em>
 <a class="jxr_linenumber" name="L2210" href="#L2210">2210</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2211" href="#L2211">2211</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setQuery( byte[] theBytes) {
+<a class="jxr_linenumber" name="L2212" href="#L2212">2212</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setQuery( byte[] theBytes) {
 <a class="jxr_linenumber" name="L2213" href="#L2213">2213</a> 		myQuery = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/model/primitive/Base64BinaryDt.html">Base64BinaryDt</a>(theBytes); 
 <a class="jxr_linenumber" name="L2214" href="#L2214">2214</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>; 
 <a class="jxr_linenumber" name="L2215" href="#L2215">2215</a> 	}
@@ -2248,7 +2248,7 @@
 <a class="jxr_linenumber" name="L2240" href="#L2240">2240</a> <em class="jxr_javadoccomment">     * </em>
 <a class="jxr_linenumber" name="L2241" href="#L2241">2241</a> <em class="jxr_javadoccomment">     * &lt;/p&gt; </em>
 <a class="jxr_linenumber" name="L2242" href="#L2242">2242</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> setDetail(java.util.List&lt;ObjectDetail&gt; theValue) {
+<a class="jxr_linenumber" name="L2243" href="#L2243">2243</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">ObjectElement</a> setDetail(java.util.List&lt;ObjectDetail&gt; theValue) {
 <a class="jxr_linenumber" name="L2244" href="#L2244">2244</a> 		myDetail = theValue;
 <a class="jxr_linenumber" name="L2245" href="#L2245">2245</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L2246" href="#L2246">2246</a> 	}

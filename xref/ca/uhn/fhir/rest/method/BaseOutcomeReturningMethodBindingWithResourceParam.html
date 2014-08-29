@@ -51,7 +51,7 @@
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">private</strong> String myResourceName;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myBinary;
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseOutcomeReturningMethodBindingWithResourceParam.html">BaseOutcomeReturningMethodBindingWithResourceParam</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Class&lt;?&gt; theMethodAnnotation, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> theProvider) {
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseOutcomeReturningMethodBindingWithResourceParam.html">BaseOutcomeReturningMethodBindingWithResourceParam</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Class&lt;?&gt; theMethodAnnotation, Object theProvider) {
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  		<strong class="jxr_keyword">super</strong>(theMethod, theContext, theMethodAnnotation, theProvider);
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  		ResourceParameter resourceParameter = <strong class="jxr_keyword">null</strong>;
@@ -110,7 +110,7 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> <em class="jxr_javadoccomment">	 * For subclasses to override</em>
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 	@Override
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> addParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theParams) {
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> addParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, Object[] theParams) {
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<em class="jxr_comment">// nothing</em>
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 	}
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 
@@ -120,7 +120,7 @@
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 	}
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 	@Override
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> invokeClient(<a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theArgs) <strong class="jxr_keyword">throws</strong> InternalErrorException {
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> invokeClient(Object[] theArgs) <strong class="jxr_keyword">throws</strong> InternalErrorException {
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 		IResource resource = (IResource) theArgs[myResourceParameterIndex];
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">if</strong> (resource == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"Resource can not be null"</span>);

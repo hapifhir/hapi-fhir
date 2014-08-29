@@ -1,4 +1,5 @@
 ca.uhn.fhir.context
+ca.uhn.fhir.i18n
 ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
 ca.uhn.fhir.model.base.composite

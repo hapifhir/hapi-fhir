@@ -91,9 +91,9 @@
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">private</strong> Method myMethod;
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">private</strong> List&lt;IParameter&gt; myParameters;
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> myProvider;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">private</strong> Object myProvider;
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseMethodBinding.html">BaseMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> theProvider) {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseMethodBinding.html">BaseMethodBinding</a>(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider) {
 <a class="jxr_linenumber" name="L89" href="#L89">89</a>  		assert theMethod != <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  		assert theContext != <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  
@@ -130,7 +130,7 @@
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">return</strong> myParameters;
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 	}
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> getProvider() {
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<strong class="jxr_keyword">public</strong> Object getProvider() {
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> myProvider;
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 
@@ -149,7 +149,7 @@
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">boolean</strong> incomingServerRequestMatchesMethod(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest);
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> invokeClient(<a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theArgs) <strong class="jxr_keyword">throws</strong> InternalErrorException;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/client/BaseHttpClientInvocation.html">BaseHttpClientInvocation</a> invokeClient(Object[] theArgs) <strong class="jxr_keyword">throws</strong> InternalErrorException;
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">void</strong> invokeServer(<a href="../../../../../ca/uhn/fhir/rest/server/RestfulServer.html">RestfulServer</a> theServer, <a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest) <strong class="jxr_keyword">throws</strong> BaseServerResponseException, IOException;
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 
@@ -191,8 +191,8 @@
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 		<strong class="jxr_keyword">return</strong> parser;
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 	}
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] createParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> theResource) {
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		Object[] params = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[getParameters().size()];
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 	<strong class="jxr_keyword">protected</strong> Object[] createParametersForServerRequest(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, <a href="../../../../../ca/uhn/fhir/model/api/IResource.html">IResource</a> theResource) {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		Object[] params = <strong class="jxr_keyword">new</strong> Object[getParameters().size()];
 <a class="jxr_linenumber" name="L188" href="#L188">188</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; getParameters().size(); i++) {
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> 			IParameter param = getParameters().get(i);
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 			<strong class="jxr_keyword">if</strong> (param == <strong class="jxr_keyword">null</strong>) {
@@ -203,7 +203,7 @@
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">return</strong> params;
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 	}
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 	<strong class="jxr_keyword">protected</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> invokeServerMethod(<a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a>[] theMethodParams) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 	<strong class="jxr_keyword">protected</strong> Object invokeServerMethod(Object[] theMethodParams) {
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> 			Method method = getMethod();
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 			<strong class="jxr_keyword">return</strong> method.invoke(getProvider(), theMethodParams);
@@ -251,7 +251,7 @@
 <a class="jxr_linenumber" name="L243" href="#L243">243</a> 	}
 <a class="jxr_linenumber" name="L244" href="#L244">244</a> 
 <a class="jxr_linenumber" name="L245" href="#L245">245</a> 	@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
-<a class="jxr_linenumber" name="L246" href="#L246">246</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> BaseMethodBinding&lt;?&gt; bindMethod(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, <a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> theProvider) {
+<a class="jxr_linenumber" name="L246" href="#L246">246</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> BaseMethodBinding&lt;?&gt; bindMethod(Method theMethod, <a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theProvider) {
 <a class="jxr_linenumber" name="L247" href="#L247">247</a> 		Read read = theMethod.getAnnotation(Read.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L248" href="#L248">248</a> 		Search search = theMethod.getAnnotation(Search.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L249" href="#L249">249</a> 		Metadata conformance = theMethod.getAnnotation(Metadata.<strong class="jxr_keyword">class</strong>);
@@ -299,7 +299,7 @@
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> 			<strong class="jxr_keyword">if</strong> (!verifyIsValidResourceReturnType(returnTypeFromMethod) &amp;&amp; !IResource.<strong class="jxr_keyword">class</strong>.equals(returnTypeFromMethod)) {
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Method '"</span> + theMethod.getName() + <span class="jxr_string">"' from "</span> + IResourceProvider.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" type "</span> + theMethod.getDeclaringClass().getCanonicalName()
 <a class="jxr_linenumber" name="L293" href="#L293">293</a> 						+ <span class="jxr_string">" returns a collection with generic type "</span> + toLogString(returnTypeFromMethod)
-<a class="jxr_linenumber" name="L294" href="#L294">294</a> 						+ <span class="jxr_string">" - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List&lt;Patient&gt; )"</span>);
+<a class="jxr_linenumber" name="L294" href="#L294">294</a> 						+ <span class="jxr_string">" - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List&lt;Patient&gt; or List&lt;IResource&gt; )"</span>);
 <a class="jxr_linenumber" name="L295" href="#L295">295</a> 			}
 <a class="jxr_linenumber" name="L296" href="#L296">296</a> 		} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L297" href="#L297">297</a> 			<strong class="jxr_keyword">if</strong> (!IResource.<strong class="jxr_keyword">class</strong>.equals(returnTypeFromMethod) &amp;&amp; !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
@@ -363,7 +363,7 @@
 <a class="jxr_linenumber" name="L355" href="#L355">355</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ReadMethodBinding.html">ReadMethodBinding</a>(returnType, theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L356" href="#L356">356</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (search != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L357" href="#L357">357</a> 			String queryName = search.queryName();
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/SearchMethodBinding.html">SearchMethodBinding</a>(returnType, theMethod, queryName, theContext, theProvider);
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/SearchMethodBinding.html">SearchMethodBinding</a>(returnType, theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L359" href="#L359">359</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (conformance != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L360" href="#L360">360</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ConformanceMethodBinding.html">ConformanceMethodBinding</a>(theMethod, theContext, theProvider);
 <a class="jxr_linenumber" name="L361" href="#L361">361</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (create != <strong class="jxr_keyword">null</strong>) {
@@ -460,7 +460,7 @@
 <a class="jxr_linenumber" name="L452" href="#L452">452</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L453" href="#L453">453</a> 	}
 <a class="jxr_linenumber" name="L454" href="#L454">454</a> 
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> toResourceList(<a href="../../../../../ca/uhn/fhir/model/dstu/resource/SecurityEvent.html">Object</a> response) <strong class="jxr_keyword">throws</strong> InternalErrorException {
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/server/IBundleProvider.html">IBundleProvider</a> toResourceList(Object response) <strong class="jxr_keyword">throws</strong> InternalErrorException {
 <a class="jxr_linenumber" name="L456" href="#L456">456</a> 		<strong class="jxr_keyword">if</strong> (response == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L457" href="#L457">457</a> 			<strong class="jxr_keyword">return</strong> BundleProviders.newEmptyList();
 <a class="jxr_linenumber" name="L458" href="#L458">458</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (response instanceof IBundleProvider) {
