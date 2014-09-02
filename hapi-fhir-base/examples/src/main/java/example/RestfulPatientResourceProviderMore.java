@@ -97,10 +97,24 @@ public List<Organization> getAllOrganizations() {
 //END SNIPPET: searchAll
 
 //START SNIPPET: searchCompartment
-@Search(compartmentName="fooCompartment")
-public List<IResource> searchCompartment(@IdParam IdDt theId) {
- List<IResource> retVal=new ArrayList<IResource>(); // populate this
- return retVal;
+public class PatientRp implements IResourceProvider {
+   
+   @Override
+   public Class<? extends IResource> getResourceType() {
+      return Patient.class;
+   }
+   
+   @Search(compartmentName="Condition")
+   public List<IResource> searchCompartment(@IdParam IdDt thePatientId) {
+      List<IResource> retVal=new ArrayList<IResource>(); 
+      
+      // populate this with resources of any type that are a part of the
+      // "Condition" compartment for the Patient with ID "thePatientId"
+      
+      return retVal;
+   }
+
+   // .. also include other Patient operations ..
 }
 //END SNIPPET: searchCompartment
 

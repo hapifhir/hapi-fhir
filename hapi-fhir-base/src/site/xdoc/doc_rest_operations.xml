@@ -1512,7 +1512,7 @@
 			<p>
 				Example URL to invoke this method:
 				<br />
-				<code>http://fhir.example.com/Patient/123/fooCompartment</code>
+				<code>http://fhir.example.com/Patient/123/Condition</code>
 			</p>
 			
 		</section>

@@ -122,7 +122,7 @@ patient.getManagingOrganization().setResource(patient);]]></source>
 				</p>
 				<source><![CDATA[Organization org = new Organization();
 // org.setId("Organization/65546");
-org.getName().setValue("Contained Test Organization");
+org.getName().setValue("Normal (not contained) Test Organization");
 
 Patient patient = new Patient();
 patient.setId("Patient/1333");
