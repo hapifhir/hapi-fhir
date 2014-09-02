@@ -20,11 +20,14 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -113,6 +116,17 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+		if (getQualifierWhitelist() != null) {
+			if (!getQualifierWhitelist().contains(defaultString(theQualifier)) ){
+				return;
+			}
+		}
+		if (getQualifierBlacklist() != null) {
+			if (getQualifierBlacklist().contains(defaultString(theQualifier))) {
+				return;
+			}
+		}
+		
 		String[] value = theRequest.getParameters().get(theQualifiedParamName);
 		if (value != null) {
 			for (String nextParam : value) {
@@ -128,6 +142,20 @@ public abstract class BaseQueryParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
+	}
+	
+	/**
+	 * Returns null if blacklist is "none"
+	 */
+	public Set<String> getQualifierBlacklist() {
+		return null;
+	}
+
+	/**
+	 * Returns null if whitelist is "all"
+	 */
+	public Set<String> getQualifierWhitelist() {
+		return null;
 	}
 
 }

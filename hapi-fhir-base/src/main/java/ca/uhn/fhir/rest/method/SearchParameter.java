@@ -25,7 +25,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -39,6 +41,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.CompositeAndListParam;
@@ -107,6 +110,8 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(CompositeOrListParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, SearchParamTypeEnum.COMPOSITE);
 	}
+	private Set<String> myQualifierBlacklist;
+	private Set<String> myQualifierWhitelist;
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
 	private List<Class<? extends IResource>> myDeclaredTypes;
 	private String myDescription;
@@ -114,7 +119,6 @@ public class SearchParameter extends BaseQueryParameter {
 	private IParamBinder myParamBinder;
 	private SearchParamTypeEnum myParamType;
 	private boolean myRequired;
-
 	private Class<?> myType;
 
 	public SearchParameter() {
@@ -140,6 +144,16 @@ public class SearchParameter extends BaseQueryParameter {
 		}
 
 		return retVal;
+	}
+
+	@Override
+	public Set<String> getQualifierBlacklist() {
+		return myQualifierBlacklist;
+	}
+
+	@Override
+	public Set<String> getQualifierWhitelist() {
+		return myQualifierWhitelist;
 	}
 
 	public List<Class<? extends IResource>> getDeclaredTypes() {
@@ -189,6 +203,31 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamBinder.parse(getName(), theString);
 	}
 
+	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
+		myQualifierWhitelist = new HashSet<String>(theChainWhitelist.length);
+		for (int i = 0; i < theChainWhitelist.length; i++) {
+			if (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {
+				myQualifierWhitelist = null;
+				break;
+			} else if (theChainWhitelist[i].equals("")) {
+				myQualifierWhitelist.add("");
+			} else {
+				myQualifierWhitelist.add('.' + theChainWhitelist[i]);
+			}
+		}
+
+		if (theChainBlacklist.length > 0) {
+			myQualifierBlacklist = new HashSet<String>(theChainBlacklist.length);
+			for (String next : theChainBlacklist) {
+				if (next.equals("")) {
+					myQualifierBlacklist.add("");
+				} else {
+					myQualifierBlacklist.add('.' + next);
+				}
+			}
+		}
+	}
+
 	public void setCompositeTypes(Class<? extends IQueryParameterType>[] theCompositeTypes) {
 		myCompositeTypes = Arrays.asList(theCompositeTypes);
 	}
@@ -215,7 +254,7 @@ public class SearchParameter extends BaseQueryParameter {
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type, myCompositeTypes);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type,myCompositeTypes);
+			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type, myCompositeTypes);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type, myCompositeTypes);
 		} else if (String.class.equals(type)) {

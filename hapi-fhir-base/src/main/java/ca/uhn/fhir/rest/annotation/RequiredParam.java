@@ -36,44 +36,61 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
  */
 public @interface RequiredParam {
 	/**
-	 * This is the name for the parameter. Generally this should be a 
-	 * simple string (e.g. "name", or "identifier") which will be the name
-	 * of the URL parameter used to populate this method parameter.
+	 * For reference parameters ({@link ReferenceParam}) this value may be used to indicate which chain values (if any)
+	 * are <b>not</b> valid for the given parameter. Values here will supercede any values specified in
+	 * {@link #chainWhitelist()}
 	 * <p>
-	 * Most resource model classes have constants which may be used to
-	 * supply values for this field, e.g. {@link Patient#SP_NAME} or
-	 * {@link Observation#SP_DATE}
-	 * </p>  
+	 * If the parameter annotated with this annotation is not a {@link ReferenceParam}, this value must not be
+	 * populated.
+	 * </p>
+	 */
+	String[] chainBlacklist() default {};
+
+	/**
+	 * For reference parameters ({@link ReferenceParam}) this value may be used to indicate which chain values (if any)
+	 * are valid for the given parameter. If the list contains the value {@link OptionalParam#ALLOW_CHAIN_ANY}, as is
+	 * the default, all values are valid. Any values specified in {@link #chainBlacklist()} will supercede (have
+	 * priority over) values here.
 	 * <p>
-	 * If you wish to specify a parameter for a resource reference which
-	 * only accepts a specific chained value, it is also valid to supply
-	 * a chained name here, such as "patient.name". It is recommended to
-	 * supply this using constants where possible, e.g.
-	 * <code>{@link Observation#SP_SUBJECT} + '.' + {@link Patient#SP_IDENTIFIER}</code>
+	 * If the parameter annotated with this annotation is not a {@link ReferenceParam}, this value must not be
+	 * populated.
+	 * </p>
+	 */
+	String[] chainWhitelist() default { OptionalParam.ALLOW_CHAIN_ANY };
+
+	/**
+	 * For composite parameters ({@link CompositeParam}) this parameter may be used to indicate the parameter type(s)
+	 * which may be referenced by this param.
+	 * <p>
+	 * If the parameter annotated with this annotation is not a {@link CompositeParam}, this value must not be
+	 * populated.
+	 * </p>
+	 */
+	Class<? extends IQueryParameterType>[] compositeTypes() default {};
+
+	/**
+	 * This is the name for the parameter. Generally this should be a simple string (e.g. "name", or "identifier") which
+	 * will be the name of the URL parameter used to populate this method parameter.
+	 * <p>
+	 * Most resource model classes have constants which may be used to supply values for this field, e.g.
+	 * {@link Patient#SP_NAME} or {@link Observation#SP_DATE}
+	 * </p>
+	 * <p>
+	 * If you wish to specify a parameter for a resource reference which only accepts a specific chained value, it is
+	 * also valid to supply a chained name here, such as "patient.name". It is recommended to supply this using
+	 * constants where possible, e.g. <code>{@link Observation#SP_SUBJECT} + '.' + {@link Patient#SP_IDENTIFIER}</code>
 	 * </p>
 	 */
 	String name();
-    
-    /**
-     * For resource reference parameters ({@link ReferenceParam}) this parameter may be
-     * used to indicate the resource type(s) which may be referenced by this param.
-     * <p>
-     * If the parameter annotated with this annotation is not a {@link ReferenceParam},
-     * this value must not be populated.
-     * </p>
-     */
-    Class<? extends IResource>[] targetTypes() default {};
-    
-    
-    /**
-     * For composite parameters ({@link CompositeParam}) this parameter may be
-     * used to indicate the parameter type(s) which may be referenced by this param.
-     * <p>
-     * If the parameter annotated with this annotation is not a {@link CompositeParam},
-     * this value must not be populated.
-     * </p>
-     */
-    Class<? extends IQueryParameterType>[] compositeTypes() default {};
 
+	/**
+	 * For resource reference parameters ({@link ReferenceParam}) this parameter may be used to indicate the resource
+	 * type(s) which may be referenced by this param.
+	 * <p>
+	 * If the parameter annotated with this annotation is not a {@link ReferenceParam}, this value must not be
+	 * populated.
+	 * </p>
+	 */
+	Class<? extends IResource>[] targetTypes() default {};
 
 }

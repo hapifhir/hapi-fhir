@@ -30,13 +30,52 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 
-@Retention(RetentionPolicy.RUNTIME)
 
 /**
  * Parameter annotation which specifies a search parameter for a {@link Search} method. 
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface OptionalParam {
+
+	public static final String ALLOW_CHAIN_ANY = "*";
+
 	/**
+     * For reference parameters ({@link ReferenceParam}) this value may be
+     * used to indicate which chain values (if any) are <b>not</b> valid 
+     * for the given parameter. Values here will supercede any values specified
+     * in {@link #chainWhitelist()}  
+     * <p>
+     * If the parameter annotated with this annotation is not a {@link ReferenceParam},
+     * this value must not be populated.
+     * </p>
+     */
+	String[] chainBlacklist() default {};
+    
+    /**
+     * For reference parameters ({@link ReferenceParam}) this value may be
+     * used to indicate which chain values (if any) are valid for the given 
+     * parameter. If the list contains the value {@link #ALLOW_CHAIN_ANY}, as is
+     * the default, all values are valid. Any values specified in 
+     * {@link #chainBlacklist()} will supercede (have priority over) values
+     * here.
+     * <p>
+     * If the parameter annotated with this annotation is not a {@link ReferenceParam},
+     * this value must not be populated.
+     * </p>
+     */
+	String[] chainWhitelist() default {ALLOW_CHAIN_ANY};
+    
+    /**
+     * For composite parameters ({@link CompositeParam}) this value may be
+     * used to indicate the parameter type(s) which may be referenced by this param.
+     * <p>
+     * If the parameter annotated with this annotation is not a {@link CompositeParam},
+     * this value must not be populated.
+     * </p>
+     */
+    Class<? extends IQueryParameterType>[] compositeTypes() default {};
+
+    /**
 	 * This is the name for the parameter. Generally this should be a 
 	 * simple string (e.g. "name", or "identifier") which will be the name
 	 * of the URL parameter used to populate this method parameter.
@@ -54,9 +93,9 @@ public @interface OptionalParam {
 	 * </p>
 	 */
 	String name();
-    
+
     /**
-     * For resource reference parameters ({@link ReferenceParam}) this parameter may be
+     * For resource reference parameters ({@link ReferenceParam}) this value may be
      * used to indicate the resource type(s) which may be referenced by this param.
      * <p>
      * If the parameter annotated with this annotation is not a {@link ReferenceParam},
@@ -64,15 +103,4 @@ public @interface OptionalParam {
      * </p>
      */
     Class<? extends IResource>[] targetTypes() default {};
-    
-    /**
-     * For composite parameters ({@link CompositeParam}) this parameter may be
-     * used to indicate the parameter type(s) which may be referenced by this param.
-     * <p>
-     * If the parameter annotated with this annotation is not a {@link CompositeParam},
-     * this value must not be populated.
-     * </p>
-     */
-    Class<? extends IQueryParameterType>[] compositeTypes() default {};
-
 }

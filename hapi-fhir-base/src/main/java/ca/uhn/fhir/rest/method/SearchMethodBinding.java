@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -54,12 +55,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
-	private Class<? extends IResource> myDeclaredResourceType;
-	private String myQueryName;
-	private String myDescription;
 	private String myCompartmentName;
-
+	private Class<? extends IResource> myDeclaredResourceType;
+	private String myDescription;
 	private Integer myIdParamIndex;
+
+	private String myQueryName;
 
 	@SuppressWarnings("unchecked")
 	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -79,7 +80,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		for (IParameter next : getParameters()) {
+		/*
+		 * Check for parameter combinations and names that are invalid
+		 */
+		List<IParameter> parameters = getParameters();
+		List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
+		for (int i =0; i < parameters.size(); i++) {
+			IParameter next = parameters.get(i);
 			if (!(next instanceof SearchParameter)) {
 				continue;
 			}
@@ -91,8 +98,17 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					throw new ConfigurationException(msg);
 				}
 			}
+			
+			searchParameters.add(sp);
 		}
-
+		for (int i = 0; i < searchParameters.size(); i++) {
+			SearchParameter next = searchParameters.get(i);
+//			next.
+		}
+		
+		/*
+		 * Only compartment searching methods may have an ID parameter 
+		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
 			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
 			throw new ConfigurationException(msg);
@@ -100,12 +116,12 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public String getDescription() {
-		return myDescription;
-	}
-
 	public Class<? extends IResource> getDeclaredResourceType() {
 		return myDeclaredResourceType;
+	}
+
+	public String getDescription() {
+		return myDescription;
 	}
 
 	@Override
@@ -121,100 +137,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return null;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
-
-		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
-
-		if (myQueryName != null) {
-			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
-		}
-
-		IdDt id = (IdDt) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
-
-		String resourceName = getResourceName();
-		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs, retVal);
-			}
-		}
-
-		return retVal;
-	}
-
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
-		SearchStyleEnum searchStyle = theSearchStyle;
-		if (searchStyle == null) {
-			int length = 0;
-			for (Entry<String, List<String>> nextEntry : theParameters.entrySet()) {
-				length += nextEntry.getKey().length();
-				for (String next : nextEntry.getValue()) {
-					length += next.length();
-				}
-			}
-
-			if (length < 5000) {
-				searchStyle = SearchStyleEnum.GET;
-			} else {
-				searchStyle = SearchStyleEnum.POST;
-			}
-		}
-
-		BaseHttpClientInvocation invocation;
-
-		boolean compartmentSearch = false;
-		if (theCompartmentName != null) {
-			if (theId == null || !theId.hasIdPart()) {
-				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
-				throw new InvalidRequestException(msg);
-			} else {
-				compartmentSearch = true;
-			}
-		}
-
-		switch (searchStyle) {
-		case GET:
-		default:
-			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
-			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName);
-			}
-			break;
-		case GET_WITH_SEARCH:
-			if (compartmentSearch) {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
-			} else {
-				invocation = new HttpGetClientInvocation(theParameters, theResourceName, Constants.PARAM_SEARCH);
-			}
-			break;
-		case POST:
-			if (compartmentSearch) {
-				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
-			} else {
-				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
-			}
-		}
-
-		return invocation;
-	}
-
-	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theMethodParams);
-
-		return toResourceList(response);
-
 	}
 
 	@Override
@@ -260,7 +182,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				if (qualifiedParamNames.contains(name)) {
 					methodParamsTemp.add(name);
 				} else if (unqualifiedNames.contains(name)) {
-					methodParamsTemp.addAll(theRequest.getUnqualifiedToQualifiedNames().get(name));
+					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
+					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
+					methodParamsTemp.addAll(qualifiedNames);
 				} else {
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
@@ -270,7 +194,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				if (qualifiedParamNames.contains(name)) {
 					methodParamsTemp.add(name);
 				} else if (unqualifiedNames.contains(name)) {
-					methodParamsTemp.addAll(theRequest.getUnqualifiedToQualifiedNames().get(name));
+					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
+					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
+					methodParamsTemp.addAll(qualifiedNames);
 				} else {
 					methodParamsTemp.add(name);
 				}
@@ -317,8 +243,133 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
+	@Override
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		assert (myQueryName == null || ((theArgs != null ? theArgs.length : 0) == getParameters().size())) : "Wrong number of arguments: " + (theArgs != null ? theArgs.length : "null");
+
+		Map<String, List<String>> queryStringArgs = new LinkedHashMap<String, List<String>>();
+
+		if (myQueryName != null) {
+			queryStringArgs.put(Constants.PARAM_QUERY, Collections.singletonList(myQueryName));
+		}
+
+		IdDt id = (IdDt) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
+
+		String resourceName = getResourceName();
+		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
+
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				IParameter nextParam = getParameters().get(idx);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs, retVal);
+			}
+		}
+
+		return retVal;
+	}
+
+	@Override
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		if (myIdParamIndex != null) {
+			theMethodParams[myIdParamIndex] = theRequest.getId();
+		}
+
+		Object response = invokeServerMethod(theMethodParams);
+
+		return toResourceList(response);
+
+	}
+
 	public void setResourceType(Class<? extends IResource> resourceType) {
 		this.myDeclaredResourceType = resourceType;
+	}
+
+	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
+		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
+			return theQualifiedNames;
+		}
+		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
+		for (String next : theQualifiedNames) {
+			String qualifier = "";
+			int idx = next.indexOf('.');
+			if (idx > -1 && next.length() > (idx + 1)) {
+				qualifier = next.substring(idx);
+			}
+
+			if (theQualifierWhitelist != null) {
+				if (!theQualifierWhitelist.contains(qualifier)) {
+					continue;
+				}
+			}
+			if (theQualifierBlacklist != null) {
+				if (theQualifierBlacklist.contains(qualifier)) {
+					continue;
+				}
+			}
+			retVal.add(next);
+		}
+		return retVal;
+	}
+
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
+		SearchStyleEnum searchStyle = theSearchStyle;
+		if (searchStyle == null) {
+			int length = 0;
+			for (Entry<String, List<String>> nextEntry : theParameters.entrySet()) {
+				length += nextEntry.getKey().length();
+				for (String next : nextEntry.getValue()) {
+					length += next.length();
+				}
+			}
+
+			if (length < 5000) {
+				searchStyle = SearchStyleEnum.GET;
+			} else {
+				searchStyle = SearchStyleEnum.POST;
+			}
+		}
+
+		BaseHttpClientInvocation invocation;
+
+		boolean compartmentSearch = false;
+		if (theCompartmentName != null) {
+			if (theId == null || !theId.hasIdPart()) {
+				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
+				throw new InvalidRequestException(msg);
+			} else {
+				compartmentSearch = true;
+			}
+		}
+
+		/*
+		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo)
+		 * or a post (POST [base]/Patient with parameters in the POST body)
+		 */
+		switch (searchStyle) {
+		case GET:
+		default:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName);
+			} else {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName);
+			}
+			break;
+		case GET_WITH_SEARCH:
+			if (compartmentSearch) {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpGetClientInvocation(theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
+			break;
+		case POST:
+			if (compartmentSearch) {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, theId.getIdPart(), theCompartmentName, Constants.PARAM_SEARCH);
+			} else {
+				invocation = new HttpPostClientInvocation(theContext, theParameters, theResourceName, Constants.PARAM_SEARCH);
+			}
+		}
+
+		return invocation;
 	}
 
 	public static enum RequestType {

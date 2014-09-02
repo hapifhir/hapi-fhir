@@ -18,9 +18,12 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.Option;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+
+import com.google.common.base.Optional;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -420,6 +423,7 @@ public class MethodUtil {
 						parameter.setRequired(true);
 						parameter.setDeclaredTypes(((RequiredParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((RequiredParam) nextAnnotation).compositeTypes());
+						parameter.setChainlists(((RequiredParam) nextAnnotation).chainWhitelist(), ((RequiredParam) nextAnnotation).chainBlacklist());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
@@ -429,6 +433,7 @@ public class MethodUtil {
 						parameter.setRequired(false);
 						parameter.setDeclaredTypes(((OptionalParam) nextAnnotation).targetTypes());
 						parameter.setCompositeTypes(((OptionalParam) nextAnnotation).compositeTypes());
+						parameter.setChainlists(((OptionalParam) nextAnnotation).chainWhitelist(), ((OptionalParam) nextAnnotation).chainBlacklist());
 						parameter.setType(parameterType, innerCollectionType, outerCollectionType);
 						MethodUtil.extractDescription(parameter, annotations);
 						param = parameter;
