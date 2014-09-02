@@ -682,35 +682,54 @@
 				<p>
 					Reference parameters use the 
 					<a href="./apidocs/ca/uhn/fhir/rest/param/ReferenceParam.html">ReferenceParam</a> 
-					type. Reference param objects being passed into server methods will have three properties
-					populated:
+					type. Reference parameters are, in their most basic form, just a pointer to another
+					resource. For example, you might want to query for DiagnosticReport resources where the
+					subject (the Patient resource that the report is about) is Patient/123. The following
+					example shows a simple resource reference parameter in use. 
 				</p>
-				<ul>
-					<li>
-						<b>The resource type (optional):</b> This is the type of resource
-						being targeted, if the client specifies one in the URL.
-					</li>
-					<li>
-						<b>The chain property (optional):</b> This is the name of the 
-						property on the target resource to search for
-					</li>
-					<li>
-						<b>The value (required):</b> This is the actual value to search for. If
-						a chain property has not been specified, this is the ID of the resource.
-					</li>
-				</ul>
+				<macro name="snippet">
+					<param name="id" value="referenceSimple" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
+				
+				<h4>Chained Resource References</h4>
+				
+				<p>
+					References may also support a "chained" value. This is a search parameter name
+					on the target resource. For example, you might want to search for DiagnosticReport
+					resources by subject, but use the subject's last name instead of their resource ID.
+					In this example, you are chaining "family" (the last name) to "subject" (the patient).
+					The net result in the query string would look like:<br/>
+					<code>http://fhir.example.com/DiagnosticReport?subject.family=SMITH</code>
+				</p>
+				<p>
+					Chained values must be explicitly declared through the use
+					of a whitelist (or blacklist). The following example shows how to declare a
+					report with an allowable chained parameter: 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="referenceWithChain" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+				<p>
+					You may also specify the whitelist value of
+					<code>""</code> to allow an empty chain (e.g. ther resource ID)
+					and this can be combined with other values, as shown below: 
+				</p>
 
 				<macro name="snippet">
-					<param name="id" value="reference" />
+					<param name="id" value="referenceWithChainCombo" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 
 				<p>
 					Example URLs to invoke this method:
 					<br />
-					Resource by ID: <code>http://fhir.example.com/Patient?provider=1234</code>
+					Resource by ID: <code>http://fhir.example.com/DiagnosticReport?subject=1234</code>
 					<br />
-					Resource by chained parameter value: <code>http://fhir.example.com/Patient?provider:Organization.name=FooOrg</code>
+					Resource by chained parameter value: <code>http://fhir.example.com/DiagnosticReport?subject.family=SMITH</code>
 				</p>
 
 				<h4>Static Chains</h4>
@@ -724,7 +743,7 @@
 				</p>
 
 				<macro name="snippet">
-					<param name="id" value="referenceChain" />
+					<param name="id" value="referenceWithStaticChain" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
 

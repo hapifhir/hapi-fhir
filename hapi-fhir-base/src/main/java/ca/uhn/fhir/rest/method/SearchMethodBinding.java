@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
@@ -84,8 +85,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 * Check for parameter combinations and names that are invalid
 		 */
 		List<IParameter> parameters = getParameters();
-		List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
-		for (int i =0; i < parameters.size(); i++) {
+		// List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
+		for (int i = 0; i < parameters.size(); i++) {
 			IParameter next = parameters.get(i);
 			if (!(next instanceof SearchParameter)) {
 				continue;
@@ -94,20 +95,21 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			SearchParameter sp = (SearchParameter) next;
 			if (sp.getName().startsWith("_")) {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(), sp.getName());
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
+							sp.getName());
 					throw new ConfigurationException(msg);
 				}
 			}
-			
-			searchParameters.add(sp);
+
+			// searchParameters.add(sp);
 		}
-		for (int i = 0; i < searchParameters.size(); i++) {
-			SearchParameter next = searchParameters.get(i);
-//			next.
-		}
-		
+		// for (int i = 0; i < searchParameters.size(); i++) {
+		// SearchParameter next = searchParameters.get(i);
+		// // next.
+		// }
+
 		/*
-		 * Only compartment searching methods may have an ID parameter 
+		 * Only compartment searching methods may have an ID parameter
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
 			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
@@ -291,14 +293,34 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
 		for (String next : theQualifiedNames) {
 			String qualifier = "";
-			int idx = next.indexOf('.');
-			if (idx > -1 && next.length() > (idx + 1)) {
-				qualifier = next.substring(idx);
+
+			int start = -1;
+			int end = -1;
+			for (int idx = 0; idx < next.length(); idx++) {
+				char nextChar = next.charAt(idx);
+				if (nextChar == '.' || nextChar == ':') {
+					if (start == -1) {
+						start = idx;
+					} else {
+						end = idx;
+						break;
+					}
+				}
+			}
+
+			if (start != -1) {
+				if (end != -1) {
+					qualifier = next.substring(start, end);
+				} else {
+					qualifier = next.substring(start);
+				}
 			}
 
 			if (theQualifierWhitelist != null) {
-				if (!theQualifierWhitelist.contains(qualifier)) {
-					continue;
+				if (!theQualifierWhitelist.contains(OptionalParam.ALLOW_CHAIN_ANY)) {
+					if (!theQualifierWhitelist.contains(qualifier)) {
+						continue;
+					}
 				}
 			}
 			if (theQualifierBlacklist != null) {
@@ -311,7 +333,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
+			SearchStyleEnum theSearchStyle) {
 		SearchStyleEnum searchStyle = theSearchStyle;
 		if (searchStyle == null) {
 			int length = 0;
@@ -342,8 +365,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		/*
-		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo)
-		 * or a post (POST [base]/Patient with parameters in the POST body)
+		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo) or a post (POST [base]/Patient with parameters in the POST body)
 		 */
 		switch (searchStyle) {
 		case GET:

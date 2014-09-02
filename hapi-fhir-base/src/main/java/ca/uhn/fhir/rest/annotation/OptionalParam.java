@@ -39,6 +39,8 @@ public @interface OptionalParam {
 
 	public static final String ALLOW_CHAIN_ANY = "*";
 
+	public static final String ALLOW_CHAIN_NOTCHAINED = "";
+
 	/**
      * For reference parameters ({@link ReferenceParam}) this value may be
      * used to indicate which chain values (if any) are <b>not</b> valid 
@@ -54,10 +56,23 @@ public @interface OptionalParam {
     /**
      * For reference parameters ({@link ReferenceParam}) this value may be
      * used to indicate which chain values (if any) are valid for the given 
-     * parameter. If the list contains the value {@link #ALLOW_CHAIN_ANY}, as is
-     * the default, all values are valid. Any values specified in 
+     * parameter. If the list contains the value {@link #ALLOW_CHAIN_ANY}, all values are valid.  (this is the default)
+     * If the list contains the value {@link #ALLOW_CHAIN_NOTCHAINED}
+     * then the reference param only supports the empty chain (i.e. the resource
+     * ID). 
+     * <p>
+     * Valid values for this parameter include:
+     * <ul>
+     * <li><code>chainWhitelist={ OptionalParam.ALLOW_CHAIN_NOTCHAINED }</code> - Only allow resource reference (no chaining allowed for this parameter)</li>
+     * <li><code>chainWhitelist={ OptionalParam.ALLOW_CHAIN_ANY }</code> - Allow any chaining at all (including a non chained value, <b>this is the default</b>)</li>
+     * <li><code>chainWhitelist={ "foo", "bar" }</code> - Allow property.foo and property.bar</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Any values specified in 
      * {@link #chainBlacklist()} will supercede (have priority over) values
      * here.
+     * </p>
      * <p>
      * If the parameter annotated with this annotation is not a {@link ReferenceParam},
      * this value must not be populated.

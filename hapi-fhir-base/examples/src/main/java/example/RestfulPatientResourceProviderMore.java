@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -156,36 +157,82 @@ public List<Patient> findPatients(
 }
 //END SNIPPET: underlyingReq
 
-//START SNIPPET: reference
+//START SNIPPET: referenceSimple
 @Search
-public List<Patient> findPatients(
-		@RequiredParam(name=Patient.SP_PROVIDER) ReferenceParam theProvider
+public List<Patient> findPatientsWithSimpleReference(
+		@OptionalParam(name=Patient.SP_PROVIDER) ReferenceParam theProvider
 		) {
+   List<Patient> retVal=new ArrayList<Patient>();
 
-// May be populated with the resource type (e.g. "Patient") if the client requested one
-String type = theProvider.getResourceType(); 
-
-// May be populated with the chain (e.g. "name") if the client requested one
-String chain = theProvider.getChain();
-
-/* The actual parameter value. This will be the resource ID if no chain was provided,
- * but refers to the value of a specific property noted by the chain if one was given.
- * For example, the following request: 
- * http://example.com/fhir/Patient?provider:Organization.name=FooOrg
- * has a type of "Organization" and a chain of "name", meaning that
- * the returned patients should have a provider which is an Organization
- * with a name matching "FooOrg".
- */
-String value = theProvider.getValue();
-
-List<Patient> retVal=new ArrayList<Patient>(); // populate this
-return retVal;
+   // If the parameter passed in includes a resource type (e.g. ?provider:Patient=123)
+   // that resoruce type is available. Here we just check that it is either not provided
+   // or set to "Patient"
+   if (theProvider.hasResourceType()) {
+      String resourceType = theProvider.getResourceType();
+      if ("Patient".equals(resourceType) == false) {
+         throw new InvalidRequestException("Invalid resource type for parameter 'provider': " + resourceType);
+      }
+   }
+   
+   if (theProvider != null) {
+      // ReferenceParam extends IdDt so all of the resource ID methods are available
+      String providerId = theProvider.getIdPart();
+      
+      // .. populate retVal will Patient resources having provider with id "providerId" ..
+      
+   }
+   
+   return retVal;
 
 }
-//END SNIPPET: reference
+//END SNIPPET: referenceSimple
 
 
-//START SNIPPET: referenceChain
+//START SNIPPET: referenceWithChain
+@Search
+public List<DiagnosticReport> findReportsWithChain(
+    @RequiredParam(name=DiagnosticReport.SP_SUBJECT, chainWhitelist= {Patient.SP_FAMILY, Patient.SP_GENDER}) ReferenceParam theSubject
+    ) {
+   List<DiagnosticReport> retVal=new ArrayList<DiagnosticReport>();
+
+   String chain = theSubject.getChain();
+   if (Patient.SP_FAMILY.equals(chain)) {
+      String familyName = theSubject.getValue();
+      // .. populate with reports matching subject family name ..
+   }
+   if (Patient.SP_GENDER.equals(chain)) {
+      String gender = theSubject.getValue();
+      // .. populate with reports matching subject gender ..
+   }
+
+   return retVal;
+}
+//END SNIPPET: referenceWithChain
+
+
+//START SNIPPET: referenceWithChainCombo
+@Search
+public List<DiagnosticReport> findReportsWithChainCombo (
+  @RequiredParam(name=DiagnosticReport.SP_SUBJECT, chainWhitelist= {"", Patient.SP_FAMILY}) ReferenceParam theSubject
+  ) {
+   List<DiagnosticReport> retVal=new ArrayList<DiagnosticReport>();
+
+   String chain = theSubject.getChain();
+   if (Patient.SP_FAMILY.equals(chain)) {
+      String familyName = theSubject.getValue();
+      // .. populate with reports matching subject family name ..
+   }
+   if ("".equals(chain)) {
+      String resourceId = theSubject.getValue();
+      // .. populate with reports matching subject with resource ID ..
+   }
+
+   return retVal;
+}
+//END SNIPPET: referenceWithChainCombo
+
+
+//START SNIPPET: referenceWithStaticChain
 @Search
 public List<Patient> findObservations(
 		@RequiredParam(name=Observation.SP_SUBJECT+'.'+Patient.SP_IDENTIFIER) TokenParam theProvider
@@ -200,7 +247,7 @@ public List<Patient> findObservations(
   return retVal;
 
 }
-//END SNIPPET: referenceChain
+//END SNIPPET: referenceWithStaticChain
 
 
 //START SNIPPET: read

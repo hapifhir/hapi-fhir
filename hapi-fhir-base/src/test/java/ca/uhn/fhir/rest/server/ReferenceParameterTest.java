@@ -1,11 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -221,7 +221,9 @@ public class ReferenceParameterTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider());
+		servlet.setResourceProviders(patientProvider
+				,			new DummyOrganizationResourceProvider()
+		);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

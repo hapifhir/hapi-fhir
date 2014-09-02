@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -52,15 +53,15 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract boolean isRequired();
 
 	/**
-	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no
-	 * values for the given parameter
+	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no values for the given parameter
 	 */
 	public abstract boolean handlesMissing();
 
 	public abstract SearchParamTypeEnum getParamType();
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments,
+			BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
 				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
@@ -68,8 +69,8 @@ public abstract class BaseQueryParameter implements IParameter {
 		} else {
 			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);
 			ArrayList<String> paramValues = new ArrayList<String>(value.size());
-			String qualifier=null;
-			
+			String qualifier = null;
+
 			for (QualifiedParamList nextParamEntry : value) {
 				StringBuilder b = new StringBuilder();
 				for (String str : nextParamEntry) {
@@ -79,13 +80,13 @@ public abstract class BaseQueryParameter implements IParameter {
 					b.append(str.replace(",", "\\,"));
 				}
 				paramValues.add(b.toString());
-				
+
 				if (StringUtils.isBlank(qualifier)) {
-					qualifier=nextParamEntry.getQualifier();
+					qualifier = nextParamEntry.getQualifier();
 				}
 			}
 
-			theTargetQueryArguments.put(getName()+StringUtils.defaultString(qualifier), paramValues);
+			theTargetQueryArguments.put(getName() + StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
 
@@ -117,8 +118,10 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
 		if (getQualifierWhitelist() != null) {
-			if (!getQualifierWhitelist().contains(defaultString(theQualifier)) ){
-				return;
+			if (!getQualifierWhitelist().contains(OptionalParam.ALLOW_CHAIN_ANY)) {
+				if (!getQualifierWhitelist().contains(defaultString(theQualifier))) {
+					return;
+				}
 			}
 		}
 		if (getQualifierBlacklist() != null) {
@@ -126,7 +129,7 @@ public abstract class BaseQueryParameter implements IParameter {
 				return;
 			}
 		}
-		
+
 		String[] value = theRequest.getParameters().get(theQualifiedParamName);
 		if (value != null) {
 			for (String nextParam : value) {
@@ -143,7 +146,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
 	}
-	
+
 	/**
 	 * Returns null if blacklist is "none"
 	 */
