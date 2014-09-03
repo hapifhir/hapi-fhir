@@ -95,8 +95,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			SearchParameter sp = (SearchParameter) next;
 			if (sp.getName().startsWith("_")) {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
-							sp.getName());
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(), sp.getName());
 					throw new ConfigurationException(msg);
 				}
 			}
@@ -317,9 +316,18 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 
 			if (theQualifierWhitelist != null) {
-				if (!theQualifierWhitelist.contains(OptionalParam.ALLOW_CHAIN_ANY)) {
+				if (qualifier != null) {
 					if (!theQualifierWhitelist.contains(qualifier)) {
-						continue;
+						if (qualifier.charAt(0) == '.') {
+							if (!theQualifierWhitelist.contains(".*")) {
+								continue;
+							}
+						}
+						if (qualifier.charAt(0) == ':') {
+							if (!theQualifierWhitelist.contains(":*")) {
+								continue;
+							}
+						}
 					}
 				}
 			}
@@ -333,8 +341,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
-			SearchStyleEnum theSearchStyle) {
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
 		SearchStyleEnum searchStyle = theSearchStyle;
 		if (searchStyle == null) {
 			int length = 0;
@@ -365,7 +372,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		/*
-		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo) or a post (POST [base]/Patient with parameters in the POST body)
+		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo)
+		 * or a post (POST [base]/Patient with parameters in the POST body)
 		 */
 		switch (searchStyle) {
 		case GET:

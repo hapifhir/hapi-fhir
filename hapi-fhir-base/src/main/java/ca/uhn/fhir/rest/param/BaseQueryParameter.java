@@ -53,15 +53,15 @@ public abstract class BaseQueryParameter implements IParameter {
 	public abstract boolean isRequired();
 
 	/**
-	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no values for the given parameter
+	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no
+	 * values for the given parameter
 	 */
 	public abstract boolean handlesMissing();
 
 	public abstract SearchParamTypeEnum getParamType();
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments,
-			BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, BaseHttpClientInvocation theClientInvocation) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
 				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");
@@ -118,8 +118,19 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
 		if (getQualifierWhitelist() != null) {
-			if (!getQualifierWhitelist().contains(OptionalParam.ALLOW_CHAIN_ANY)) {
-				if (!getQualifierWhitelist().contains(defaultString(theQualifier))) {
+			if (!getQualifierWhitelist().contains(defaultString(theQualifier))) {
+				if (theQualifier == null) {
+					return;
+				}
+				if (theQualifier.charAt(0) == '.') {
+					if (!getQualifierWhitelist().contains(".*")) {
+						return;
+					}
+				} else if (theQualifier.charAt(0) == ':') {
+					if (!getQualifierWhitelist().contains(":*")) {
+						return;
+					}
+				} else {
 					return;
 				}
 			}

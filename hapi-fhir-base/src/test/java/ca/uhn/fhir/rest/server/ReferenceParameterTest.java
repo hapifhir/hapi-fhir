@@ -49,121 +49,127 @@ public class ReferenceParameterTest {
 
 	@Test
 	public void testSearchWithValue() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + "=123");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + "=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-			assertEquals(1, entries.size());
-			Patient p = (Patient) entries.get(0).getResource();
-			assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-			assertEquals("1", p.getName().get(1).getFamilyFirstRep().getValue());
-			assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
-		}
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
 	}
 
 	@Test
 	public void testSearchWithValueAndType() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization=123");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-			assertEquals(1, entries.size());
-			Patient p = (Patient) entries.get(0).getResource();
-			assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-			assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
-			assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
-		}
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
 	}
 
 	@Test
 	public void testSearchWithValueAndTypeAndChain() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization.name=123");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization.name=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-			assertEquals(1, entries.size());
-			Patient p = (Patient) entries.get(0).getResource();
-			assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-			assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
-			assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
-		}
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
+
 	}
 
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName1() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof=po123");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
-		}
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof=po123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
 	}
 
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName2() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.name=poname");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
-		}
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.name=poname");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
 	}
 
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName3() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof=po123&partof.name=poname");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
-			assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
-		}
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof=po123&partof.name=poname");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
+		assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
 	}
 
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName4() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.fooChain=po123&partof.name=poname");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("value=\"thePartOfId po123 fooChain\""));
-			assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
-		}
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.fooChain=po123&partof.name=poname");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"thePartOfId po123 fooChain\""));
+		assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
 	}
 
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName5() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.bar=po123");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("value=\"theBarId po123 bar\""));
-		}
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.bar=po123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"theBarId po123 bar\""));
 	}
 
+	@Test
+	public void testSearchWithMultipleParamsOfTheSameName6() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof:Organization.bar=po123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"theBarId po123 bar\""));
+	}
+	
+	@Test
+	public void testSearchWithMultipleParamsOfTheSameName7() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof:Organization=po123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
+	}
+
+	
 	@Test
 	public void testSearchWithValueAndChain() throws Exception {
 		{
@@ -221,9 +227,7 @@ public class ReferenceParameterTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider
-				,			new DummyOrganizationResourceProvider()
-		);
+		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -245,7 +249,7 @@ public class ReferenceParameterTest {
 		}
 
 		/**
-		 * https://github.com/jamesagnew/hapi-fhir/issues/18
+		 * https://github.com/jamesagnew/hapi-fhir/issues/19
 		 */
 		//@formatter:off
 		@Search
