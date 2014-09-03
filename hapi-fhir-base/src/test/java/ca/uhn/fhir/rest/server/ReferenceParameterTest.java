@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 
 /**
@@ -156,7 +158,7 @@ public class ReferenceParameterTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("value=\"theBarId po123 bar\""));
+		assertThat(responseContent, containsString("value=\"theBarId Organization/po123 bar\""));
 	}
 	
 	@Test
@@ -166,7 +168,15 @@ public class ReferenceParameterTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
+		assertThat(responseContent, containsString("value=\"thePartOfId Organization/po123 null\""));
+	}
+
+	@Test
+	public void testSearchWithMultipleParamsOfTheSameName8() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Location?partof=po123");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	
@@ -202,7 +212,7 @@ public class ReferenceParameterTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class, responseContent);
 
-		RestResource res = conf.getRestFirstRep().getResource().get(1);
+		RestResource res = conf.getRestFirstRep().getResource().get(2);
 		assertEquals("Patient", res.getType().getValue());
 
 		RestResourceSearchParam param = res.getSearchParamFirstRep();
@@ -227,7 +237,7 @@ public class ReferenceParameterTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider());
+		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -272,10 +282,8 @@ public class ReferenceParameterTest {
 				retVal.add(org);
 			}
 			if (retVal.isEmpty()) {
-				Organization org = new Organization();
-				org.setId("0");
-				org.getName().setValue("none");
-				retVal.add(org);
+				ourLog.info("No values for foo - Going to fail");
+				throw new InternalErrorException("No Values for foo");
 			}
 
 			return retVal;
@@ -295,16 +303,46 @@ public class ReferenceParameterTest {
 				retVal.add(org);
 			}
 			if (retVal.isEmpty()) {
-				Organization org = new Organization();
-				org.setId("0");
-				org.getName().setValue("none");
-				retVal.add(org);
+				ourLog.info("No values for bar - Going to fail");
+				throw new InternalErrorException("No Values for bar");
 			}
 
 			return retVal;
 		}
 
 	}
+	
+	
+	public static class DummyLocationResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Location.class;
+		}
+
+		//@formatter:off
+		@Search
+		public List<Location> searchByNameWithDifferentChain(
+				@OptionalParam(name = "partof", chainWhitelist= {"bar"}) ReferenceParam theBarId) {
+			//@formatter:on
+
+			ArrayList<Location> retVal = new ArrayList<Location>();
+			if (theBarId != null) {
+				Location loc = new Location();
+				loc.setId("1");
+				loc.getName().setValue("theBarId " + theBarId.getValue() + " " + theBarId.getChain());
+				retVal.add(loc);
+			}
+			if (retVal.isEmpty()) {
+				ourLog.info("No values for bar - Going to fail");
+				throw new InternalErrorException("No Values for bar");
+			}
+
+			return retVal;
+		}
+
+	}
+	
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.

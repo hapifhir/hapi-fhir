@@ -117,20 +117,15 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(ReferenceParam.class, SearchParamTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceOrListParam.class, SearchParamTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceAndListParam.class, SearchParamTypeEnum.REFERENCE);
-		ourParamQualifiers.put(SearchParamTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING)); // no
-																														// empty
-																														// because
-																														// that
-																														// gets
-																														// added
-																														// from
-																														// OptionalParam#chainWhitelist
+		// --vvvv-- no empty because that gets added from OptionalParam#chainWhitelist
+		ourParamQualifiers.put(SearchParamTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
 
 		ourParamTypes.put(CompositeParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeOrListParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamQualifiers.put(SearchParamTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 	}
+	
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
 	private List<Class<? extends IResource>> myDeclaredTypes;
 	private String myDescription;
@@ -230,9 +225,9 @@ public class SearchParameter extends BaseQueryParameter {
 
 		for (int i = 0; i < theChainWhitelist.length; i++) {
 			if (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {
-				myQualifierWhitelist.add(OptionalParam.ALLOW_CHAIN_ANY);
+				myQualifierWhitelist.add('.' + OptionalParam.ALLOW_CHAIN_ANY);
 			} else if (theChainWhitelist[i].equals(EMPTY_STRING)) {
-				myQualifierWhitelist.add("");
+				myQualifierWhitelist.add(".");
 			} else {
 				myQualifierWhitelist.add('.' + theChainWhitelist[i]);
 			}

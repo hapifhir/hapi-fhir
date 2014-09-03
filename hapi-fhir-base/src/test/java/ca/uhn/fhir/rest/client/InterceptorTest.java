@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ResourceBundle;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -21,6 +23,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.testutil.RandomServerPortProvider;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -53,7 +56,12 @@ public class InterceptorTest {
 			Patient patient = client.read(Patient.class, "1");
 			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-			verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			int times = 1;
+			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
+				times = 3;
+			}
+			
+			verify(mockAppender, times(times)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 				@Override
 				public boolean matches(final Object argument) {
 					return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");

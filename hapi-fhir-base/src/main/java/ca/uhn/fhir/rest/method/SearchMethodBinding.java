@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,7 +42,6 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
@@ -95,7 +95,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			SearchParameter sp = (SearchParameter) next;
 			if (sp.getName().startsWith("_")) {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(), sp.getName());
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
+							sp.getName());
 					throw new ConfigurationException(msg);
 				}
 			}
@@ -115,6 +116,40 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
+	}
+
+	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
+		QualifierDetails retVal = new QualifierDetails();
+		if (theParamName == null || theParamName.length() == 0) {
+			return retVal;
+		}
+
+		int dotIdx = -1;
+		int colonIdx = -1;
+		for (int idx = 0; idx < theParamName.length(); idx++) {
+			char nextChar = theParamName.charAt(idx);
+			if (nextChar == '.' && dotIdx == -1) {
+				dotIdx = idx;
+			} else if (nextChar == ':' && colonIdx == -1) {
+				colonIdx = idx;
+			}
+		}
+
+		if (dotIdx != -1 && colonIdx != -1) {
+			if (dotIdx < colonIdx) {
+				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
+				retVal.setColonQualifier(theParamName.substring(colonIdx));
+			} else {
+				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
+				retVal.setDotQualifier(theParamName.substring(dotIdx));
+			}
+		} else if (dotIdx != -1) {
+			retVal.setDotQualifier(theParamName.substring(dotIdx));
+		} else if (colonIdx != -1) {
+			retVal.setColonQualifier(theParamName.substring(colonIdx));
+		}
+
+		return retVal;
 	}
 
 	public Class<? extends IResource> getDeclaredResourceType() {
@@ -181,7 +216,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			if (temp.isRequired()) {
 
 				if (qualifiedParamNames.contains(name)) {
-					methodParamsTemp.add(name);
+					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
+					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
+						methodParamsTemp.add(name);
+					}
 				} else if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
@@ -193,7 +231,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 			} else {
 				if (qualifiedParamNames.contains(name)) {
-					methodParamsTemp.add(name);
+					QualifierDetails qualifiers = extractQualifiersFromParameterName(name);
+					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
+						methodParamsTemp.add(name);
+					}
 				} else if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
@@ -281,67 +322,27 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public void setResourceType(Class<? extends IResource> resourceType) {
-		this.myDeclaredResourceType = resourceType;
-	}
-
 	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
 			return theQualifiedNames;
 		}
 		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
 		for (String next : theQualifiedNames) {
-			String qualifier = "";
-
-			int start = -1;
-			int end = -1;
-			for (int idx = 0; idx < next.length(); idx++) {
-				char nextChar = next.charAt(idx);
-				if (nextChar == '.' || nextChar == ':') {
-					if (start == -1) {
-						start = idx;
-					} else {
-						end = idx;
-						break;
-					}
-				}
-			}
-
-			if (start != -1) {
-				if (end != -1) {
-					qualifier = next.substring(start, end);
-				} else {
-					qualifier = next.substring(start);
-				}
-			}
-
-			if (theQualifierWhitelist != null) {
-				if (qualifier != null) {
-					if (!theQualifierWhitelist.contains(qualifier)) {
-						if (qualifier.charAt(0) == '.') {
-							if (!theQualifierWhitelist.contains(".*")) {
-								continue;
-							}
-						}
-						if (qualifier.charAt(0) == ':') {
-							if (!theQualifierWhitelist.contains(":*")) {
-								continue;
-							}
-						}
-					}
-				}
-			}
-			if (theQualifierBlacklist != null) {
-				if (theQualifierBlacklist.contains(qualifier)) {
-					continue;
-				}
+			QualifierDetails qualifiers = extractQualifiersFromParameterName(next);
+			if (!qualifiers.passes(theQualifierWhitelist, theQualifierBlacklist)) {
+				continue;
 			}
 			retVal.add(next);
 		}
 		return retVal;
 	}
 
-	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName, SearchStyleEnum theSearchStyle) {
+	public void setResourceType(Class<? extends IResource> resourceType) {
+		this.myDeclaredResourceType = resourceType;
+	}
+
+	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
+			SearchStyleEnum theSearchStyle) {
 		SearchStyleEnum searchStyle = theSearchStyle;
 		if (searchStyle == null) {
 			int length = 0;
@@ -372,8 +373,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		/*
-		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo)
-		 * or a post (POST [base]/Patient with parameters in the POST body)
+		 * Are we doing a get (GET [base]/Patient?name=foo) or a get with search (GET [base]/Patient/_search?name=foo) or a post (POST [base]/Patient with parameters in the POST body)
 		 */
 		switch (searchStyle) {
 		case GET:
@@ -400,6 +400,76 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return invocation;
+	}
+
+	public static class QualifierDetails {
+
+		private String myColonQualifier;
+
+		private String myDotQualifier;
+
+		public String getColonQualifier() {
+			return myColonQualifier;
+		}
+
+		public String getDotQualifier() {
+			return myDotQualifier;
+		}
+
+		public boolean passes(Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
+			if (theQualifierWhitelist != null) {
+				if (!theQualifierWhitelist.contains(".*")) {
+					if (myDotQualifier != null) {
+						if (!theQualifierWhitelist.contains(myDotQualifier)) {
+							return false;
+						}
+					} else {
+						if (!theQualifierWhitelist.contains(".")) {
+							return false;
+						}
+					}
+				}
+				if (!theQualifierWhitelist.contains(":*")) {
+					if (myColonQualifier != null) {
+						if (!theQualifierWhitelist.contains(myColonQualifier)) {
+							return false;
+						}
+					} else {
+						if (!theQualifierWhitelist.contains(":")) {
+							return false;
+						}
+					}
+				}
+			}
+			if (theQualifierBlacklist != null) {
+				if (myDotQualifier != null) {
+					if (theQualifierBlacklist.contains(myDotQualifier)) {
+						return false;
+					}
+				}
+				if (myColonQualifier != null) {
+					if (theQualifierBlacklist.contains(myColonQualifier)) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		public void setColonQualifier(String theColonQualifier) {
+			myColonQualifier = theColonQualifier;
+		}
+
+		public void setDotQualifier(String theDotQualifier) {
+			myDotQualifier = theDotQualifier;
+		}
+
+	}
+
+	@Override
+	public String toString() {
+		return getMethod().toString();
 	}
 
 	public static enum RequestType {

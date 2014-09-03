@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,12 +31,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -89,7 +88,7 @@ public abstract class BaseQueryParameter implements IParameter {
 			theTargetQueryArguments.put(getName() + StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
-
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 
@@ -105,6 +104,9 @@ public abstract class BaseQueryParameter implements IParameter {
 		}
 
 		if (paramList.isEmpty()) {
+			
+			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", getName(), qualified, getQualifierWhitelist());
+			
 			if (handlesMissing()) {
 				return parse(paramList);
 			} else {
@@ -117,28 +119,9 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
-		if (getQualifierWhitelist() != null) {
-			if (!getQualifierWhitelist().contains(defaultString(theQualifier))) {
-				if (theQualifier == null) {
-					return;
-				}
-				if (theQualifier.charAt(0) == '.') {
-					if (!getQualifierWhitelist().contains(".*")) {
-						return;
-					}
-				} else if (theQualifier.charAt(0) == ':') {
-					if (!getQualifierWhitelist().contains(":*")) {
-						return;
-					}
-				} else {
-					return;
-				}
-			}
-		}
-		if (getQualifierBlacklist() != null) {
-			if (getQualifierBlacklist().contains(defaultString(theQualifier))) {
-				return;
-			}
+		QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(theQualifier);
+		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
+			return;
 		}
 
 		String[] value = theRequest.getParameters().get(theQualifiedParamName);
