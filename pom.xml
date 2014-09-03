@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -26,19 +27,23 @@
 		<system>GitHub</system>
 		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
 	</issueManagement>
-  
+
 	<scm>
 		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
 		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
 		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
 	</scm>
-    
+
 	<description>
 	</description>
 
 	<dependencies>
 	</dependencies>
 
+	<prerequisites>
+		<maven>3.0.1</maven>
+	</prerequisites>
+	
 	<developers>
 		<developer>
 			<name>James Agnew</name>
@@ -80,28 +85,32 @@
 	</modules>
 
 	<properties>
+		<commons_lang_version>3.3.2</commons_lang_version>
 		<derby_version>10.10.2.0</derby_version>
-		<guava_version>14.0.1</guava_version>
+		<guava_version>18.0</guava_version>
 		<hamcrest_version>1.3</hamcrest_version>
 		<hibernate_version>4.2.12.Final</hibernate_version>
 		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
-		<jetty_version>9.1.1.v20140108</jetty_version>
-		<jetty_version>9.1.1.v20140108</jetty_version>
+		<jetty_version>9.2.2.v20140723</jetty_version>
 		<jscience_version>4.3.1</jscience_version>
 		<junit_version>4.11</junit_version>
 		<logback_version>1.1.1</logback_version>
+		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
 		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
+		<maven_license_plugin_version>1.7</maven_license_plugin_version>
 		<maven_surefire_plugin_version>2.17</maven_surefire_plugin_version>
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
+		<maven_source_plugin_version>2.3</maven_source_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<mockito_version>1.9.5</mockito_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j_version>1.7.7</slf4j_version>
-		<spring_version>4.0.1.RELEASE</spring_version>
+		<spring_version>4.0.6.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
 		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+		<woodstox_version>4.4.0</woodstox_version>
 	</properties>
 
 	<build>
@@ -153,50 +162,26 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.2.1</version>
+					<version>${maven_source_plugin_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>1.6</version>
+					<version>${maven_license_plugin_version}</version>
 					<configuration>
-						<verbose>false</verbose>
+						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
 					</configuration>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<!-- 
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-antrun-plugin
-										</artifactId>
-										<versionRange>
-											[1.7,)
-										</versionRange>
-										<goals>
-											<goal>run</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				 -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<!-- <plugin> <groupId>org.eclipse.m2e</groupId> <artifactId>lifecycle-mapping</artifactId> 
+					<version>1.0.0</version> <configuration> <lifecycleMappingMetadata> <pluginExecutions> 
+					<pluginExecution> <pluginExecutionFilter> <groupId> org.apache.maven.plugins 
+					</groupId> <artifactId> maven-antrun-plugin </artifactId> <versionRange> 
+					[1.7,) </versionRange> <goals> <goal>run</goal> </goals> </pluginExecutionFilter> 
+					<action> <ignore></ignore> </action> </pluginExecution> </pluginExecutions> 
+					</lifecycleMappingMetadata> </configuration> </plugin> -->
 			</plugins>
 		</pluginManagement>
 

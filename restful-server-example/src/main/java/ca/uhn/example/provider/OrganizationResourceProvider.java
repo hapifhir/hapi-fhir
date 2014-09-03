@@ -50,6 +50,7 @@ public class OrganizationResourceProvider implements IResourceProvider {
 		}
 		
 		MyOrganization retVal = new MyOrganization();
+		retVal.setId("1");
 		retVal.addIdentifier("urn:example:orgs", "FooOrganization");
 		retVal.addAddress().addLine("123 Fake Street").setCity("Toronto");
 		retVal.addTelecom().setUse(ContactUseEnum.WORK).setValue("1-888-123-4567");

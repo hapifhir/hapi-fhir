@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>woodstox-core-asl</artifactId>
-			<version>4.2.0</version>
+			<version>${woodstox_version}</version>
 		</dependency>
 
 		<!-- Only required for OpenID Connect Support -->
@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.2.1</version>
+			<version>${commons_lang_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -274,7 +274,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>17.0</version>
+			<version>${guava_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- 
@@ -355,6 +355,7 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven_site_plugin_version}</version>
 					<configuration>
 						<skip>false</skip>
 						<skipDeploy>true</skipDeploy>
@@ -520,6 +521,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
+				<version>${maven_site_plugin_version}</version>
 				<executions>
 					<execution>
 						<id>stage-for-scm-publish</id>
@@ -675,6 +677,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven_source_plugin_version}</version>
 						<executions>
 							<execution>
 								<phase>package</phase>
@@ -686,7 +689,7 @@
 					</plugin>
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>2.4</version>
+						<version>${maven_assembly_plugin_version}</version>
 						<executions>
 							<execution>
 								<phase>package</phase>
@@ -706,6 +709,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>license-maven-plugin</artifactId>
+						<version>${maven_license_plugin_version}</version>
 						<executions>
 							<execution>
 								<id>first</id>

@@ -30,8 +30,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 /**
- * This is a resource provider which stores Patient resources in memory using a HashMap. This is obviously not a production-ready solution for many reasons, but it is useful to help illustrate how to
- * build a fully-functional server.
+ * This is a resource provider which stores Patient resources in memory using a HashMap. This is obviously not a production-ready solution for many reasons, 
+ * but it is useful to help illustrate how to build a fully-functional server.
  */
 public class PatientResourceProvider implements IResourceProvider {
 
@@ -49,7 +49,10 @@ public class PatientResourceProvider implements IResourceProvider {
 	 * Constructor, which pre-populates the provider with one resource instance.
 	 */
 	public PatientResourceProvider() {
+		long resourceId = myNextId++;
+		
 		Patient patient = new Patient();
+		patient.setId(Long.toString(resourceId));
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
 		patient.getIdentifier().get(0).setValue("00002");
@@ -59,7 +62,9 @@ public class PatientResourceProvider implements IResourceProvider {
 
 		LinkedList<Patient> list = new LinkedList<Patient>();
 		list.add(patient);
-		myIdToPatientVersions.put(myNextId++, list);
+		
+		
+		myIdToPatientVersions.put(resourceId, list);
 
 	}
 
@@ -90,12 +95,13 @@ public class PatientResourceProvider implements IResourceProvider {
 
 		Deque<Patient> existingVersions = myIdToPatientVersions.get(theId);
 
-		/*
-		 * We just use the current number of versions as the next version number
-		 */
-		IdDt version = new IdDt(existingVersions.size());
-		thePatient.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, version);
-
+		// We just use the current number of versions as the next version number
+		String newVersion = Integer.toString(existingVersions.size());
+		
+		// Create an ID with the new version and assign it back to the resource
+		IdDt newId = new IdDt("Patient", Long.toString(theId), newVersion);
+		thePatient.setId(newId);
+		
 		existingVersions.add(thePatient);
 	}
 
@@ -152,6 +158,19 @@ public class PatientResourceProvider implements IResourceProvider {
 		return retVal;
 	}
 
+	@Search
+	public List<Patient> findPatientsUsingArbitraryCtriteria() {
+		LinkedList<Patient> retVal = new LinkedList<Patient>();
+
+		for (Deque<Patient> nextPatientList : myIdToPatientVersions.values()) {
+			Patient nextPatient = nextPatientList.getLast();
+			retVal.add(nextPatient);
+		}
+	
+		return retVal;
+	}
+	
+	
 	/**
 	 * The getResourceType method comes from IResourceProvider, and must be overridden to indicate what type of resource this provider supplies.
 	 */
