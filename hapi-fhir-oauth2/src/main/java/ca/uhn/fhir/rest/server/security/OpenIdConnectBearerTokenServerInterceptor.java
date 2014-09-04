@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mitre.jwt.signer.service.JwtSigningAndValidationService;
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService;
@@ -34,18 +35,22 @@ import org.mitre.openid.connect.client.service.ServerConfigurationService;
 import org.mitre.openid.connect.config.ServerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurity {
+public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapter {
 
 	private static final String BEARER_PREFIX = "Bearer ";
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OpenIdConnectBearerTokenSecurityManager.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OpenIdConnectBearerTokenServerInterceptor.class);
+
 	@Autowired
 	private ClientConfigurationService myClientConfigurationService;
 
@@ -54,16 +59,32 @@ public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurit
 
 	private int myTimeSkewAllowance = 300;
 
-	private SymmetricCacheService symmetricCacheService;
-	private JWKSetCacheService validationServices;
+	private SymmetricCacheService mySymmetricCacheService;
+	private JWKSetCacheService myValidationServices;
 
-	public OpenIdConnectBearerTokenSecurityManager() {
-		symmetricCacheService = new SymmetricCacheService();
-		validationServices = new JWKSetCacheService();
+	public OpenIdConnectBearerTokenServerInterceptor() {
+		mySymmetricCacheService = new SymmetricCacheService();
+		myValidationServices = new JWKSetCacheService();
 	}
 
+	
+	
+	
 	@Override
-	public ISecurityOutcome authenticate(HttpServletRequest theRequest) throws AuthenticationException {
+	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		if (theRequestDetails.getOtherOperationType() == OtherOperationTypeEnum.METADATA) {
+			return true;
+		}
+		
+		authenticate(theRequest);
+		
+		return true;
+	}
+
+
+
+
+	public void authenticate(HttpServletRequest theRequest) throws AuthenticationException {
 		String token = theRequest.getHeader(Constants.HEADER_AUTHORIZATION);
 		if (token == null) {
 			throw new AuthenticationException("Not authorized (no authorization header found in request)");
@@ -110,10 +131,10 @@ public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurit
 		if (alg.equals(JWSAlgorithm.HS256) || alg.equals(JWSAlgorithm.HS384) || alg.equals(JWSAlgorithm.HS512)) {
 
 			// generate one based on client secret
-			jwtValidator = symmetricCacheService.getSymmetricValidtor(clientConfig.getClient());
+			jwtValidator = mySymmetricCacheService.getSymmetricValidtor(clientConfig.getClient());
 		} else {
 			// otherwise load from the server's public key
-			jwtValidator = validationServices.getValidator(serverConfig.getJwksUri());
+			jwtValidator = myValidationServices.getValidator(serverConfig.getJwksUri());
 		}
 
 		if (jwtValidator != null) {
@@ -130,8 +151,9 @@ public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurit
 			throw new AuthenticationException("Id Token does not have required expiration claim");
 		} else {
 			// it's not null, see if it's expired
-			Date now = new Date(System.currentTimeMillis() - (myTimeSkewAllowance * 1000));
-			if (now.after(idClaims.getExpirationTime())) {
+			Date minAllowableExpirationTime = new Date(System.currentTimeMillis() - (myTimeSkewAllowance * 1000L));
+			Date expirationTime = idClaims.getExpirationTime();
+			if (!expirationTime.after(minAllowableExpirationTime)) {
 				throw new AuthenticationException("Id Token is expired: " + idClaims.getExpirationTime());
 			}
 		}
@@ -155,8 +177,6 @@ public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurit
 			}
 		}
 
-		return new ISecurityOutcome() {
-		};
 	}
 
 	public int getTimeSkewAllowance() {
@@ -176,7 +196,7 @@ public class OpenIdConnectBearerTokenSecurityManager implements IResourceSecurit
 	}
 
 	public void setValidationServices(JWKSetCacheService theValidationServices) {
-		validationServices = theValidationServices;
+		myValidationServices = theValidationServices;
 	}
 
 }

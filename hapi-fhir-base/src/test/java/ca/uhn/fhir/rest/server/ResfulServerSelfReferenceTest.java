@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -59,7 +59,7 @@ public class ResfulServerSelfReferenceTest {
 
 	@Test
 	public void testContextWithSpace() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		Server server = new Server(port);
 
 		RestfulServer restServer = new RestfulServer();
@@ -102,7 +102,7 @@ public class ResfulServerSelfReferenceTest {
 
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		Server hServer = new Server(port);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();

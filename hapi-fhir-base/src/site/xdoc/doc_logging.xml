@@ -108,6 +108,16 @@
 			</p>
 		
 		</section>
+
+		<section name="Server Request Logging">
+			
+			<p>
+				To enable detailed logging of server requests and responses, 
+				an interceptor may be added to the server which logs each transaction. See
+				<a href="./doc_rest_server_interceptor.html#Logging">Logging Server Requests</a> for more information.
+			</p>
+		
+		</section>
 		
 	</body>
 

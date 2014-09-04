@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 public class ServerExtraParametersTest {
 
@@ -37,7 +37,7 @@ public class ServerExtraParametersTest {
 
 	@Before
 	public void before() {
-		myPort = RandomServerPortProvider.findFreePort();
+		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
 
 		ServletHandler proxyHandler = new ServletHandler();

@@ -16,7 +16,7 @@
 	<version>0.6-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>Sample RESTful Server (HAPI-FHIR)</name>
+	<name>HAPI FHIR Sample RESTful Server</name>
 
 	<repositories>
 		<repository>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.2</version>
 		</dependency>
 
 		<!-- Needed for JEE/Servlet support -->
