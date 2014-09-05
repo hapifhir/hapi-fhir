@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
 /**
@@ -36,7 +37,9 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  * etc.)
  * 
  * <p>
- * To obtain a resource validator, call {@link FhirContext#newValidator()}
+ * To obtain a resource validator, call {@link FhirContext#newValidator()}. See
+ * <a href="http://jamesagnew.github.io/hapi-fhir/doc_validation.html">Validation Documentation</a> for
+ * more information on how to use the validator.
  * </p>
  */
 public class FhirValidator {
@@ -54,32 +57,6 @@ public class FhirValidator {
 		myContext = theFhirContext;
 		setValidateAgainstStandardSchema(true);
 		setValidateAgainstStandardSchematron(true);
-	}
-
-	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator instance) {
-		if (theValidateAgainstStandardSchema) {
-			boolean found = haveValidatorOfType(type);
-			if (!found) {
-				myValidators.add(instance);
-			}
-		} else {
-			for (Iterator<IValidator> iter = myValidators.iterator(); iter.hasNext();) {
-				IValidator next = iter.next();
-				if (next.getClass().equals(type)) {
-					iter.remove();
-				}
-			}
-		}
-	}
-
-	private boolean haveValidatorOfType(Class<? extends IValidator> type) {
-		boolean found = false;
-		for (IValidator next : myValidators) {
-			if (next.getClass().equals(type)) {
-				found = true;
-			}
-		}
-		return found;
 	}
 
 	/**
@@ -157,6 +134,42 @@ public class FhirValidator {
 			throw new ValidationFailureException(oo);
 		}
 
+	}
+
+	/**
+	 * **Not yet implemented**
+	 * 
+	 * @param theTagList The tagList to validate
+	 * @throws ValidationFailureException If the validation fails
+	 */
+	public void validate(TagList theTagList)  throws ValidationFailureException {
+		// TODO: validate this
+	}
+
+	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator instance) {
+		if (theValidateAgainstStandardSchema) {
+			boolean found = haveValidatorOfType(type);
+			if (!found) {
+				myValidators.add(instance);
+			}
+		} else {
+			for (Iterator<IValidator> iter = myValidators.iterator(); iter.hasNext();) {
+				IValidator next = iter.next();
+				if (next.getClass().equals(type)) {
+					iter.remove();
+				}
+			}
+		}
+	}
+
+	private boolean haveValidatorOfType(Class<? extends IValidator> type) {
+		boolean found = false;
+		for (IValidator next : myValidators) {
+			if (next.getClass().equals(type)) {
+				found = true;
+			}
+		}
+		return found;
 	}
 
 }

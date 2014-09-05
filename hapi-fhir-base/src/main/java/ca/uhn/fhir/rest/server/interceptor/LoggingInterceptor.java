@@ -91,15 +91,24 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		return true;
 	}
 
+	/**
+	 * The logger to use for logging request/response messages
+	 * 
+	 * @param theLogger The logger. Must not be null.
+	 */
 	public void setLogger(Logger theLogger) {
 		Validate.notNull(theLogger, "Logger can not be null");
 		myLogger = theLogger;
 	}
 
+	/**
+	 * The logger nameto use for logging request/response messages
+	 * 
+	 * @param theLoggerName The logger name. Must not be null/empty.
+	 */
 	public void setLoggerName(String theLoggerName) {
 		Validate.notBlank(theLoggerName, "Logger name can not be null/empty");
 		myLogger = LoggerFactory.getLogger(theLoggerName);
-
 	}
 
 	/**
