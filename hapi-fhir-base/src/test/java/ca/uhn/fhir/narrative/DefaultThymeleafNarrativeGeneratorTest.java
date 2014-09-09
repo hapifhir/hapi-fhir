@@ -79,7 +79,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 		enc.addIdentifier("urn:visits", "1234567");
 		enc.setClassElement(EncounterClassEnum.AMBULATORY);
-		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00")));
+		enc.setPeriod(new PeriodDt().setStart(new DateTimeDt("2001-01-02T11:11:00-05:00")));
 		enc.setType(EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
 
 		String title = gen.generateTitle(enc);

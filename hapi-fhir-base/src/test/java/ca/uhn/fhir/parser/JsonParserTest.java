@@ -929,7 +929,7 @@ public class JsonParserTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
