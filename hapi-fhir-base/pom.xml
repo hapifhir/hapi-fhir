@@ -767,4 +767,5 @@
 	</profiles>
 
 	<groupId>com.cloudyle.hapi.fhir</groupId>
+	<version>0.6</version>
 </project>
