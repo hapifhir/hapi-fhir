@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,118 +37,365 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.ElementUtil;
 
-public abstract class BaseResource extends BaseElement implements IResource {
 
-	/**
-	 * Search parameter constant for <b>_language</b>
-	 */
-	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
-	public static final String SP_RES_LANGUAGE = "_language";
+public abstract class BaseResource<Id extends Serializable> extends BaseElement implements IResource
+{
 
 
-	/**
-	 * Search parameter constant for <b>_id</b>
-	 */
-	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
-	public static final String SP_RES_ID = "_id";
+  // indexable dto
+  protected String indexId;
 
-	@Child(name = "contained", order = 2, min = 0, max = 1)
-	private ContainedDt myContained;
+  // indexable dto
+  protected Timestamp tsIndexSync;
 
-	private IdDt myId;
+  // cancelable dto
+  protected Timestamp tsCancellation;
 
-	@Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
-	private CodeDt myLanguage;
+  // cancelable dto
+  protected String userCancelledId;
 
-	private Map<ResourceMetadataKeyEnum<?>, Object> myResourceMetadata;
+  // cancelable dto
+  protected String cancellationState;
 
-	@Child(name = "text", order = 1, min = 0, max = 1)
-	private NarrativeDt myText;
+  // versionable dto
+  protected Timestamp tsVersion;
 
-	@Override
-	public ContainedDt getContained() {
-		if (myContained == null) {
-			myContained = new ContainedDt();
-		}
-		return myContained;
-	}
+  // versionable dto
+  protected long versionNumber;
 
-	public IdDt getId() {
-		if (myId == null) {
-			myId = new IdDt();
-		}
-		return myId;
-	}
+  // versionable dto
+  protected String userVersionedId;
 
-	@Override
-	public CodeDt getLanguage() {
-		if (myLanguage == null) {
-			myLanguage = new CodeDt();
-		}
-		return myLanguage;
-	}
+  protected Timestamp tsLastModified;
 
-	@Override
-	public Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata() {
-		if (myResourceMetadata == null) {
-			myResourceMetadata = new HashMap<ResourceMetadataKeyEnum<?>, Object>();
-		}
-		return myResourceMetadata;
-	}
+  protected Timestamp tsCreation;
 
-	@Override
-	public NarrativeDt getText() {
-		if (myText == null) {
-			myText = new NarrativeDt();
-		}
-		return myText;
-	}
+  /**
+   * Search parameter constant for <b>_language</b>
+   */
+  @SearchParamDefinition(name = "_language", path = "", description = "The language of the resource", type = "string")
+  public static final String SP_RES_LANGUAGE = "_language";
 
-	public void setContained(ContainedDt theContained) {
-		myContained = theContained;
-	}
+  /**
+   * Search parameter constant for <b>_id</b>
+   */
+  @SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "string")
+  public static final String SP_RES_ID = "_id";
 
-	public void setId(IdDt theId) {
-		myId = theId;
-	}
+  @Child(name = "contained", order = 2, min = 0, max = 1)
+  private ContainedDt myContained;
 
-	public void setId(String theId) {
-		if (theId == null) {
-			myId = null;
-		} else {
-			myId = new IdDt(theId);
-		}
-	}
+  private IdDt myId;
 
-	@Override
-	public void setLanguage(CodeDt theLanguage) {
-		myLanguage = theLanguage;
-	}
+  @Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
+  private CodeDt myLanguage;
 
-	@Override
-	public void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap) {
-		Validate.notNull(theMap, "The Map must not be null");
-		myResourceMetadata = theMap;
-	}
+  private Map<ResourceMetadataKeyEnum<?>, Object> myResourceMetadata;
 
-	public void setText(NarrativeDt theText) {
-		myText = theText;
-	}
+  @Child(name = "text", order = 1, min = 0, max = 1)
+  private NarrativeDt myText;
 
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("id", getId().toUnqualified());
-		return b.toString();
-	}
 
-	/**
-	 * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
-	 * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
-	 */
-	@Override
-	protected boolean isBaseEmpty() {
-		return super.isBaseEmpty() && ElementUtil.isEmpty(myLanguage, myText, myId);
-	}
+
+  @Override
+  public ContainedDt getContained()
+  {
+    if (this.myContained == null)
+    {
+      this.myContained = new ContainedDt();
+    }
+    return this.myContained;
+  }
+
+
+
+  @Override
+  public IdDt getId()
+  {
+    if (this.myId == null)
+    {
+      this.myId = new IdDt();
+    }
+    return this.myId;
+  }
+
+
+
+  @Override
+  public CodeDt getLanguage()
+  {
+    if (this.myLanguage == null)
+    {
+      this.myLanguage = new CodeDt();
+    }
+    return this.myLanguage;
+  }
+
+
+
+  @Override
+  public Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata()
+  {
+    if (this.myResourceMetadata == null)
+    {
+      this.myResourceMetadata = new HashMap<ResourceMetadataKeyEnum<?>, Object>();
+    }
+    return this.myResourceMetadata;
+  }
+
+
+
+  @Override
+  public NarrativeDt getText()
+  {
+    if (this.myText == null)
+    {
+      this.myText = new NarrativeDt();
+    }
+    return this.myText;
+  }
+
+
+
+  public void setContained(final ContainedDt theContained)
+  {
+    this.myContained = theContained;
+  }
+
+
+
+  @Override
+  public void setId(final IdDt theId)
+  {
+    this.myId = theId;
+  }
+
+
+
+  public void setId(final String theId)
+  {
+    if (theId == null)
+    {
+      this.myId = null;
+    }
+    else
+    {
+      this.myId = new IdDt(theId);
+    }
+  }
+
+
+
+  @Override
+  public void setLanguage(final CodeDt theLanguage)
+  {
+    this.myLanguage = theLanguage;
+  }
+
+
+
+  @Override
+  public void setResourceMetadata(final Map<ResourceMetadataKeyEnum<?>, Object> theMap)
+  {
+    Validate.notNull(theMap, "The Map must not be null");
+    this.myResourceMetadata = theMap;
+  }
+
+
+
+  public void setText(final NarrativeDt theText)
+  {
+    this.myText = theText;
+  }
+
+
+
+  @Override
+  public String toString()
+  {
+    final ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    b.append("id", getId().toUnqualified());
+    return b.toString();
+  }
+
+
+
+  /**
+   * Intended to be called by extending classes {@link #isEmpty()} implementations, returns <code>true</code> if all
+   * content in this superclass instance is empty per the semantics of {@link #isEmpty()}.
+   */
+  @Override
+  protected boolean isBaseEmpty()
+  {
+    return super.isBaseEmpty() && ElementUtil.isEmpty(this.myLanguage, this.myText, this.myId);
+  }
+
+
+
+  /**
+   * @return the tsIndexSync
+   */
+  public Timestamp getTsIndexSync()
+  {
+    return this.tsIndexSync;
+  }
+
+
+
+  /**
+   * @param tsIndexSync
+   *          the tsIndexSync to set
+   */
+  public void setTsIndexSync(final Timestamp tsIndexSync)
+  {
+    this.tsIndexSync = tsIndexSync;
+  }
+
+
+
+  /**
+   * @return the tsCancellation
+   */
+  public Timestamp getTsCancellation()
+  {
+    return this.tsCancellation;
+  }
+
+
+
+  /**
+   * @param tsCancellation
+   *          the tsCancellation to set
+   */
+  public void setTsCancellation(final Timestamp tsCancellation)
+  {
+    this.tsCancellation = tsCancellation;
+  }
+
+
+
+  /**
+   * @return the userCancelledId
+   */
+  public String getUserCancelledId()
+  {
+    return this.userCancelledId;
+  }
+
+
+
+  /**
+   * @param userCancelledId
+   *          the userCancelledId to set
+   */
+  public void setUserCancelledId(final String userCancelledId)
+  {
+    this.userCancelledId = userCancelledId;
+  }
+
+
+
+  /**
+   * @return the tsVersion
+   */
+  public Timestamp getTsVersion()
+  {
+    return this.tsVersion;
+  }
+
+
+
+  /**
+   * @param tsVersion
+   *          the tsVersion to set
+   */
+  public void setTsVersion(final Timestamp tsVersion)
+  {
+    this.tsVersion = tsVersion;
+  }
+
+
+
+  /**
+   * @return the versionNumber
+   */
+  public long getVersionNumber()
+  {
+    return this.versionNumber;
+  }
+
+
+
+  /**
+   * @param versionNumber
+   *          the versionNumber to set
+   */
+  public void setVersionNumber(final long versionNumber)
+  {
+    this.versionNumber = versionNumber;
+  }
+
+
+
+  /**
+   * @return the userVersionedId
+   */
+  public String getUserVersionedId()
+  {
+    return this.userVersionedId;
+  }
+
+
+
+  /**
+   * @param userVersionedId
+   *          the userVersionedId to set
+   */
+  public void setUserVersionedId(final String userVersionedId)
+  {
+    this.userVersionedId = userVersionedId;
+  }
+
+
+
+  /**
+   * @return the tsLastModified
+   */
+  public Timestamp getTsLastModified()
+  {
+    return this.tsLastModified;
+  }
+
+
+
+  /**
+   * @param tsLastModified
+   *          the tsLastModified to set
+   */
+  public void setTsLastModified(final Timestamp tsLastModified)
+  {
+    this.tsLastModified = tsLastModified;
+  }
+
+
+
+  /**
+   * @return the tsCreation
+   */
+  public Timestamp getTsCreation()
+  {
+    return this.tsCreation;
+  }
+
+
+
+  /**
+   * @param tsCreation
+   *          the tsCreation to set
+   */
+  public void setTsCreation(final Timestamp tsCreation)
+  {
+    this.tsCreation = tsCreation;
+  }
 
 }

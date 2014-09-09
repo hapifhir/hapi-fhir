@@ -181,6 +181,27 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											com.cloudyle.hapi.fhir
+										</groupId>
+										<artifactId>
+											hapi-tinder-plugin
+										</artifactId>
+										<versionRange>
+											[0.6-SNAPSHOT,)
+										</versionRange>
+										<goals>
+											<goal>
+												generate-jparest-server
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
