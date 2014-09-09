@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-base</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
  
@@ -89,8 +89,7 @@
 		<dependency>
 		    <groupId>com.phloc</groupId>
 		    <artifactId>phloc-schematron</artifactId>
-		    <version>${phloc_schematron_version}</version>
-			<optional>true</optional>
+		    <version>${phloc_schematron_version}</version>			
 		</dependency>
 
 		<!-- 
@@ -147,12 +146,12 @@
 					<artifactId>commons-logging</artifactId>
 					<groupId>commons-logging</groupId>
 				</exclusion>
-			</exclusions>
+			</exclusions>			
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>4.3.2</version>
+			<version>4.3.2</version>			
 		</dependency>
 
 		<dependency>
@@ -174,6 +173,7 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
 			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Testing -->
@@ -385,6 +385,39 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
+		<plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>          
+          <configuration>            
+            <includePOM>true</includePOM>
+          </configuration>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        
+		<plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+             <Include-Resource>ca=src/main/resources/ca</Include-Resource>
+
+            <!-- Resources: Zielpfad=Quellpfad -->         
+		
+			<Import-Package>
+			 org.slf4j;provider=paxlogging,			
+			 *
+			 </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
@@ -727,4 +760,5 @@
 		</profile>
 	</profiles>
 
+	<groupId>com.cloudyle.hapi.fhir</groupId>
 </project>
