@@ -25,7 +25,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -39,6 +41,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.CompositeAndListParam;
@@ -65,8 +68,10 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.CollectionUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -74,47 +79,62 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 @SuppressWarnings("deprecation")
 public class SearchParameter extends BaseQueryParameter {
 
+	private static final String EMPTY_STRING = "";
+	private static HashMap<SearchParamTypeEnum, Set<String>> ourParamQualifiers;
 	private static HashMap<Class<?>, SearchParamTypeEnum> ourParamTypes;
+	static final String QUALIFIER_ANY_TYPE = ":*";
+
 	static {
 		ourParamTypes = new HashMap<Class<?>, SearchParamTypeEnum>();
+		ourParamQualifiers = new HashMap<SearchParamTypeEnum, Set<String>>();
 
 		ourParamTypes.put(StringParam.class, SearchParamTypeEnum.STRING);
 		ourParamTypes.put(StringOrListParam.class, SearchParamTypeEnum.STRING);
 		ourParamTypes.put(StringAndListParam.class, SearchParamTypeEnum.STRING);
+		ourParamQualifiers.put(SearchParamTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(TokenParam.class, SearchParamTypeEnum.TOKEN);
 		ourParamTypes.put(TokenOrListParam.class, SearchParamTypeEnum.TOKEN);
 		ourParamTypes.put(TokenAndListParam.class, SearchParamTypeEnum.TOKEN);
+		ourParamQualifiers.put(SearchParamTypeEnum.TOKEN, CollectionUtil.newSet(Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(DateParam.class, SearchParamTypeEnum.DATE);
 		ourParamTypes.put(DateOrListParam.class, SearchParamTypeEnum.DATE);
 		ourParamTypes.put(DateAndListParam.class, SearchParamTypeEnum.DATE);
 		ourParamTypes.put(DateRangeParam.class, SearchParamTypeEnum.DATE);
+		ourParamQualifiers.put(SearchParamTypeEnum.DATE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(QuantityParam.class, SearchParamTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityOrListParam.class, SearchParamTypeEnum.QUANTITY);
 		ourParamTypes.put(QuantityAndListParam.class, SearchParamTypeEnum.QUANTITY);
+		ourParamQualifiers.put(SearchParamTypeEnum.QUANTITY, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(NumberParam.class, SearchParamTypeEnum.NUMBER);
 		ourParamTypes.put(NumberOrListParam.class, SearchParamTypeEnum.NUMBER);
 		ourParamTypes.put(NumberAndListParam.class, SearchParamTypeEnum.NUMBER);
+		ourParamQualifiers.put(SearchParamTypeEnum.NUMBER, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 
 		ourParamTypes.put(ReferenceParam.class, SearchParamTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceOrListParam.class, SearchParamTypeEnum.REFERENCE);
 		ourParamTypes.put(ReferenceAndListParam.class, SearchParamTypeEnum.REFERENCE);
+		// --vvvv-- no empty because that gets added from OptionalParam#chainWhitelist
+		ourParamQualifiers.put(SearchParamTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
 
 		ourParamTypes.put(CompositeParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeOrListParam.class, SearchParamTypeEnum.COMPOSITE);
 		ourParamTypes.put(CompositeAndListParam.class, SearchParamTypeEnum.COMPOSITE);
+		ourParamQualifiers.put(SearchParamTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));
 	}
+	
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
 	private List<Class<? extends IResource>> myDeclaredTypes;
 	private String myDescription;
 	private String myName;
 	private IParamBinder myParamBinder;
 	private SearchParamTypeEnum myParamType;
+	private Set<String> myQualifierBlacklist;
+	private Set<String> myQualifierWhitelist;
 	private boolean myRequired;
-
 	private Class<?> myType;
 
 	public SearchParameter() {
@@ -165,6 +185,16 @@ public class SearchParameter extends BaseQueryParameter {
 		return myParamType;
 	}
 
+	@Override
+	public Set<String> getQualifierBlacklist() {
+		return myQualifierBlacklist;
+	}
+
+	@Override
+	public Set<String> getQualifierWhitelist() {
+		return myQualifierWhitelist;
+	}
+
 	public Class<?> getType() {
 		return myType;
 	}
@@ -187,6 +217,32 @@ public class SearchParameter extends BaseQueryParameter {
 	@Override
 	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		return myParamBinder.parse(getName(), theString);
+	}
+
+	public void setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {
+		myQualifierWhitelist = new HashSet<String>(theChainWhitelist.length);
+		myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);
+
+		for (int i = 0; i < theChainWhitelist.length; i++) {
+			if (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {
+				myQualifierWhitelist.add('.' + OptionalParam.ALLOW_CHAIN_ANY);
+			} else if (theChainWhitelist[i].equals(EMPTY_STRING)) {
+				myQualifierWhitelist.add(".");
+			} else {
+				myQualifierWhitelist.add('.' + theChainWhitelist[i]);
+			}
+		}
+
+		if (theChainBlacklist.length > 0) {
+			myQualifierBlacklist = new HashSet<String>(theChainBlacklist.length);
+			for (String next : theChainBlacklist) {
+				if (next.equals(EMPTY_STRING)) {
+					myQualifierBlacklist.add(EMPTY_STRING);
+				} else {
+					myQualifierBlacklist.add('.' + next);
+				}
+			}
+		}
 	}
 
 	public void setCompositeTypes(Class<? extends IQueryParameterType>[] theCompositeTypes) {
@@ -215,7 +271,7 @@ public class SearchParameter extends BaseQueryParameter {
 		if (IQueryParameterType.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterTypeBinder((Class<? extends IQueryParameterType>) type, myCompositeTypes);
 		} else if (IQueryParameterOr.class.isAssignableFrom(type)) {
-			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type,myCompositeTypes);
+			myParamBinder = new QueryParameterOrBinder((Class<? extends IQueryParameterOr<?>>) type, myCompositeTypes);
 		} else if (IQueryParameterAnd.class.isAssignableFrom(type)) {
 			myParamBinder = new QueryParameterAndBinder((Class<? extends IQueryParameterAnd<?>>) type, myCompositeTypes);
 		} else if (String.class.equals(type)) {
@@ -225,8 +281,23 @@ public class SearchParameter extends BaseQueryParameter {
 			throw new ConfigurationException("Unsupported data type for parameter: " + type.getCanonicalName());
 		}
 
+		SearchParamTypeEnum typeEnum = ourParamTypes.get(type);
+		if (typeEnum != null) {
+			Set<String> builtInQualifiers = ourParamQualifiers.get(typeEnum);
+			if (builtInQualifiers != null) {
+				if (myQualifierWhitelist != null) {
+					HashSet<String> qualifierWhitelist = new HashSet<String>();
+					qualifierWhitelist.addAll(myQualifierWhitelist);
+					qualifierWhitelist.addAll(builtInQualifiers);
+					myQualifierWhitelist = qualifierWhitelist;
+				} else {
+					myQualifierWhitelist = Collections.unmodifiableSet(builtInQualifiers);
+				}
+			}
+		}
+
 		if (myParamType == null) {
-			myParamType = ourParamTypes.get(type);
+			myParamType = typeEnum;
 		}
 
 		if (myParamType != null) {

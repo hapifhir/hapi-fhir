@@ -18,7 +18,6 @@ package ca.uhn.fhir.testmodel;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;

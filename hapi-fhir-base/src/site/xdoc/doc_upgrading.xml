@@ -26,7 +26,7 @@
 						The 
 						IdDt
 						class, which is used to represent resource IDs has been vastly
-						improved so that I can store any form of ID, including a simple alphanumeric 
+						improved so that they can store any form of ID, including a simple alphanumeric 
 						ID (1234), a relative ID (Patient/1234), a fully qualified ID (http://foo/Patient/1234) or
 						even a version specific ID (Patient/1234/_history/2). As a result, a number
 						of version specific fields/methods have been deprocated. In general, if you 

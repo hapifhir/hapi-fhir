@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -95,11 +95,14 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myParameters = MethodUtil.getResourceParameters(theMethod);
 	}
 
-	
 	public List<Class<?>> getAllowableParamAnnotations() {
 		return null;
 	}
-	
+
+	public FhirContext getContext() {
+		return myContext;
+	}
+
 	public Set<String> getIncludes() {
 		Set<String> retVal = new TreeSet<String>();
 		for (IParameter next : myParameters) {
@@ -110,12 +113,12 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return retVal;
 	}
 
-	public FhirContext getContext() {
-		return myContext;
-	}
-
 	public Method getMethod() {
 		return myMethod;
+	}
+
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return null;
 	}
 
 	public List<IParameter> getParameters() {
@@ -127,17 +130,14 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	/**
-	 * Returns the name of the resource this method handles, or <code>null</code> if this method is not resource specific
+	 * Returns the name of the resource this method handles, or <code>null</code> if this method is not resource
+	 * specific
 	 */
 	public abstract String getResourceName();
 
 	public abstract RestfulOperationTypeEnum getResourceOperationType();
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
-
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return null;
-	}
 
 	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
 
@@ -267,16 +267,14 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (theProvider instanceof IResourceProvider) {
 			returnTypeFromRp = ((IResourceProvider) theProvider).getResourceType();
 			if (!verifyIsValidResourceReturnType(returnTypeFromRp)) {
-				throw new ConfigurationException("getResourceType() from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returned "
-						+ toLogString(returnTypeFromRp) + " - Must return a resource type");
+				throw new ConfigurationException("getResourceType() from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returned " + toLogString(returnTypeFromRp) + " - Must return a resource type");
 			}
 		}
 
 		Class<?> returnTypeFromMethod = theMethod.getReturnType();
 		if (getTags != null) {
 			if (!TagList.class.equals(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @"
-						+ GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' from type " + theMethod.getDeclaringClass().getCanonicalName() + " is annotated with @" + GetTags.class.getSimpleName() + " but does not return type " + TagList.class.getName());
 			}
 		} else if (MethodOutcome.class.equals(returnTypeFromMethod)) {
 			// returns a method outcome
@@ -289,15 +287,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !IResource.class.equals(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns a collection with generic type " + toLogString(returnTypeFromMethod)
 						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IResource> )");
 			}
 		} else {
 			if (!IResource.class.equals(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
-				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, " + Bundle.class.getSimpleName() + ", "
-						+ IBundleProvider.class.getSimpleName() + ", etc., see the documentation for more details)");
+				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromMethod)
+						+ " - Must return a resource type (eg Patient, " + Bundle.class.getSimpleName() + ", " + IBundleProvider.class.getSimpleName() + ", etc., see the documentation for more details)");
 			}
 		}
 
@@ -327,13 +323,12 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && returnTypeFromAnnotation != IResource.class) {
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
-							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName()
+							+ " (or a subclass of it) per IResourceProvider contract");
 				}
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type "
-							+ returnTypeFromAnnotation.getCanonicalName() + " per method annotation - Must return " + returnTypeFromRp.getCanonicalName()
-							+ " (or a subclass of it) per IResourceProvider contract");
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type " + returnTypeFromAnnotation.getCanonicalName() + " per method annotation - Must return "
+							+ returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
@@ -342,8 +337,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else {
 			if (returnTypeFromAnnotation != IResource.class) {
 				if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type "
-							+ theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromAnnotation)
+							+ " according to annotation - Must return a resource type");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
@@ -354,8 +349,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			String queryName = search.queryName();
-			return new SearchMethodBinding(returnType, theMethod, queryName, theContext, theProvider);
+			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
@@ -409,8 +403,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				if (obj1 == null) {
 					obj1 = object;
 				} else {
-					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
-							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
+					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @" + obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName()
+							+ ". Can not have both.");
 				}
 
 			}

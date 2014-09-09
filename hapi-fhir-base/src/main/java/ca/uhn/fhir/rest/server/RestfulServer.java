@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -469,6 +469,7 @@ public class RestfulServer extends HttpServlet {
 
 			IdDt id = null;
 			String operation = null;
+			String compartment = null;
 
 			String requestPath = requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
@@ -533,6 +534,8 @@ public class RestfulServer extends HttpServlet {
 						throw new InvalidRequestException("URL Path contains two operations (part beginning with _): " + requestPath);
 					}
 					operation = nextString;
+				} else {
+					compartment = nextString;
 				}
 			}
 
@@ -582,6 +585,7 @@ public class RestfulServer extends HttpServlet {
 			r.setServletRequest(theRequest);
 			r.setServletResponse(theResponse);
 			r.setRespondGzip(respondGzip);
+			r.setCompartmentName(compartment);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {

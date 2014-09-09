@@ -19,7 +19,17 @@
 			<p>
 				The RESTful server provides a powerful mechanism for adding cross-cutting behaviour
 				to each incoming request that it processes. This mechanism consists of defining one or
-				more <b>interceptors</b> that will
+				more <b>interceptors</b> that will be invoked at defined points in the processing of 
+				each incoming request.
+			</p>
+			
+			<p>
+				Interceptors will intercept the incoming request, and can take action such as 
+				logging or auditing it, or examining/injecting headers. They can optionally choose 
+				to handle the request themself and the cancel any subsequent processing. Interceptors
+				may also be notified of responses prior to those responses being served to a client, 
+				and may audit or even cancel response. The diagram on the right shows the 
+				lifecycle of a normal (non failing) request which is subject to an interceptor.  
 			</p>
 			
 			<p>
@@ -84,7 +94,8 @@
 		<section name="Built In Interceptors">
 		
 			<p>
-				HAPI also provides built-in interceptors which may be useful.
+				HAPI also provides built-in interceptors which may be useful. Links to the code for each interceptor
+				is also provided, to give examples of how interceptors are written.
 			</p>
 			
 			<a name="Logging"/>
@@ -93,6 +104,7 @@
 				<p>
 					The 
 					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/LoggingInterceptor.html">LoggingInterceptor</a>
+					(<a href="./xref/ca/uhn/fhir/rest/server/interceptor/LoggingInterceptor.html">code</a>)
 					can be used to generate a new log line (via SLF4j) for each incoming request. LoggingInterceptor
 					provides a flexible message format that can be used to provide a customized level
 					of detail about each incoming request.

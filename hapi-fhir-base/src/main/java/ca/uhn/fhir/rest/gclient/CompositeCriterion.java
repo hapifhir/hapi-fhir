@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class CompositeCriterion<A extends IParam, B extends IParam> implements ICompositeWithLeft<B>, ICriterion<B>, ICriterionInternal {
 

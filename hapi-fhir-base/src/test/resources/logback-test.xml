@@ -7,10 +7,9 @@
 		</encoder>
 	</appender>
 
-<!-- 
-	<logger name="org.eclipse" additivity="false">
+	<logger name="org.eclipse" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
 	</logger>
--->
 
 	<!-- 
 	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
@@ -18,7 +17,7 @@
 	</logger>
  	-->
  	
-	<root level="info">
+	<root level="debug">
 		<appender-ref ref="STDOUT" />
 	</root>
 

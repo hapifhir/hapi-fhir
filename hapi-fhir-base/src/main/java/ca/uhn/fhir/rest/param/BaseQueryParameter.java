@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,6 +36,8 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -65,8 +68,8 @@ public abstract class BaseQueryParameter implements IParameter {
 		} else {
 			List<QualifiedParamList> value = encode(theContext, theSourceClientArgument);
 			ArrayList<String> paramValues = new ArrayList<String>(value.size());
-			String qualifier=null;
-			
+			String qualifier = null;
+
 			for (QualifiedParamList nextParamEntry : value) {
 				StringBuilder b = new StringBuilder();
 				for (String str : nextParamEntry) {
@@ -76,16 +79,16 @@ public abstract class BaseQueryParameter implements IParameter {
 					b.append(str.replace(",", "\\,"));
 				}
 				paramValues.add(b.toString());
-				
+
 				if (StringUtils.isBlank(qualifier)) {
-					qualifier=nextParamEntry.getQualifier();
+					qualifier = nextParamEntry.getQualifier();
 				}
 			}
 
-			theTargetQueryArguments.put(getName()+StringUtils.defaultString(qualifier), paramValues);
+			theTargetQueryArguments.put(getName() + StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
-
+private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 
@@ -101,6 +104,9 @@ public abstract class BaseQueryParameter implements IParameter {
 		}
 
 		if (paramList.isEmpty()) {
+			
+			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", getName(), qualified, getQualifierWhitelist());
+			
 			if (handlesMissing()) {
 				return parse(paramList);
 			} else {
@@ -113,6 +119,11 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+		QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(theQualifier);
+		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
+			return;
+		}
+
 		String[] value = theRequest.getParameters().get(theQualifiedParamName);
 		if (value != null) {
 			for (String nextParam : value) {
@@ -128,6 +139,20 @@ public abstract class BaseQueryParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
+	}
+
+	/**
+	 * Returns null if blacklist is "none"
+	 */
+	public Set<String> getQualifierBlacklist() {
+		return null;
+	}
+
+	/**
+	 * Returns null if whitelist is "all"
+	 */
+	public Set<String> getQualifierWhitelist() {
+		return null;
 	}
 
 }

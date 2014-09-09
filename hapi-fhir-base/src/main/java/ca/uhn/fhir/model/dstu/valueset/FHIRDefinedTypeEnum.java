@@ -21,9 +21,10 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
+
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum FHIRDefinedTypeEnum {
 

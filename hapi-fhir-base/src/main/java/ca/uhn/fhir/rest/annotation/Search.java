@@ -50,7 +50,17 @@ public @interface Search {
 	 * </p>
 	 */
 	String queryName() default "";
-	
+
+	/**
+	 * If specified, this the name for the compartment
+	 * 
+	 * <p>
+	 * See the FHIR specification section on 
+	 * 	<a href="http://hl7-fhir.github.io/extras.html#compartments">compartments</a>
+	 * </p>
+	 */
+	String compartmentName() default "";
+
 	/**
 	 * The return type for this method. This generally does not need
 	 * to be populated for {@link IResourceProvider resource providers} in a server implementation, 
