@@ -100,4 +100,8 @@ public interface ITestClient extends IBasicClient {
 	@Search(type=Patient.class)
 	Patient findPatientQuantity(@RequiredParam(name="quantityParam") QuantityParam theQuantityDt);
 
+	@Search(compartmentName="compartmentName")
+	public List<Patient> getPatientByCompartmentAndDob(@IdParam IdDt theIdDt, @RequiredParam(name=Patient.SP_BIRTHDATE) DateParam theBirthDate);
+
+
 }

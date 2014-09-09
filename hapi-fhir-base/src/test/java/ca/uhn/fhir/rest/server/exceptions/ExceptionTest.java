@@ -2,15 +2,9 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.junit.Test;
-import org.mockito.internal.matchers.GreaterThan;
 
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;

@@ -1,11 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
 import java.net.URLEncoder;
@@ -114,6 +111,50 @@ public class GenericClientTest {
 		//@formatter:on
 		return msg;
 	}
+	
+	
+	@Test
+	public void testSearchByCompartment() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+		//@formatter:off
+		Bundle response = client
+			.search()
+			.forResource(Patient.class)
+			.withIdAndCompartment("123", "fooCompartment")
+			.where(Patient.BIRTHDATE.afterOrEquals().day("2011-01-02"))
+			.execute();
+		//@formatter:on
+
+		assertEquals("http://foo/Patient/123/fooCompartment?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
+		assertEquals("PRP1660", response.getResources(Patient.class).get(0).getIdentifier().get(0).getValue().getValue());
+
+		try {
+			//@formatter:off
+			client
+				.search()
+				.forResource(Patient.class)
+				.withIdAndCompartment("", "fooCompartment")
+				.where(Patient.BIRTHDATE.afterOrEquals().day("2011-01-02"))
+				.execute();
+			//@formatter:on
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.toString(), containsString("null or empty for compartment"));
+		}
+
+	}
+
 	
 	
 	@Test

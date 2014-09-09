@@ -117,6 +117,14 @@ response = client.search()
  .execute();
 //END SNIPPET: searchAnd
 
+//START SNIPPET: searchCompartment
+response = client.search()
+  .forResource(Patient.class)
+  .withIdAndCompartment("123", "condition")
+  .where(Patient.ADDRESS.matches().values("Toronto"))
+  .execute();
+//END SNIPPET: searchCompartment
+
 //START SNIPPET: searchAdv
 response = client.search()
    .forResource(Patient.class)

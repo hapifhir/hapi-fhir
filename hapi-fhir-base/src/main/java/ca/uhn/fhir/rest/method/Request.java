@@ -41,7 +41,6 @@ public class Request extends RequestDetails {
 	private String myFhirServerBase;
 	private String myOperation;
 	private RequestType myRequestType;
-	
 	private boolean myRespondGzip;
 	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
