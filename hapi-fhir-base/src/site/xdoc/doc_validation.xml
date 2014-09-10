@@ -23,7 +23,7 @@
 			<subsection name="Background">
 				
 				<p>
-					FHIR resource definitions are distributed with a set of XML schema files (XDS)
+					FHIR resource definitions are distributed with a set of XML schema files (XSD)
 					as well as a set of XML Schematron (SCH) files. These two sets of files are
 					complimentary to each other, meaning that in order to claim compliance to the
 					FHIR specification, your resources must validate against both sets.
@@ -55,6 +55,19 @@
 				</p>
 				<macro name="snippet">
 					<param name="id" value="basicValidation" />
+					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+				</macro>
+						
+			</subsection>
+
+			<subsection name="Validating a Set of Files">
+				
+				<p>
+					The following example shows how to load a set of resources from files
+					on disk and validate each one.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="validateFiles" />
 					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
 				</macro>
 						

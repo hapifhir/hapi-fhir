@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -18,6 +19,7 @@ public class FhirTerserTest {
 	public void testGetAllPopulatedChildElementsOfType() {
 
 		Patient p = new Patient();
+		p.setGender(AdministrativeGenderCodesEnum.M);
 		p.addIdentifier().setSystem("urn:foo");
 		p.addAddress().addLine("Line1");
 		p.addAddress().addLine("Line2");
