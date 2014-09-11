@@ -17,7 +17,7 @@
 
 			<p>
 				HAPI provides a built-in and configurable mechanism for validating resources.
-				This mechanism is called the <i>Resource Validator</i>.
+				This mechanism is called the <i>FHIR Validator</i>.
 			</p>
 
 			<subsection name="Background">
