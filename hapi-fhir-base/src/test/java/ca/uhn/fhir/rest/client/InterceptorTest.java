@@ -56,12 +56,12 @@ public class InterceptorTest {
 			Patient patient = client.read(Patient.class, "1");
 			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-			int times = 1;
-			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
-				times = 3;
-			}
+//			int times = 1;
+//			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
+//				times = 3;
+//			}
 			
-			verify(mockAppender, times(times)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 				@Override
 				public boolean matches(final Object argument) {
 					return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");
