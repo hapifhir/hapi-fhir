@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 public class PlainProviderTest {
 
@@ -56,7 +56,7 @@ public class PlainProviderTest {
 
 	@Before
 	public void before() throws Exception {
-		myPort = RandomServerPortProvider.findFreePort();
+		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
 		myCtx = new FhirContext(Patient.class);
 

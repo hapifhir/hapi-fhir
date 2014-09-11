@@ -73,6 +73,7 @@
 
 	<modules>
 		<module>hapi-fhir-base</module>
+		<module>hapi-fhir-oauth2</module>
 		<module>hapi-fhir-base/examples</module>
 		<module>hapi-tinder-plugin</module>
 		<module>hapi-tinder-test</module>
@@ -80,13 +81,14 @@
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-jpaserver-test</module>
 		<module>restful-server-example</module>
+		<module>restful-server-example-test</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 	</modules>
 
 	<properties>
 		<commons_lang_version>3.3.2</commons_lang_version>
-		<derby_version>10.10.2.0</derby_version>
+		<derby_version>10.11.1.1</derby_version>
 		<guava_version>18.0</guava_version>
 		<hamcrest_version>1.3</hamcrest_version>
 		<hibernate_version>4.2.12.Final</hibernate_version>
@@ -94,7 +96,7 @@
 		<jetty_version>9.2.2.v20140723</jetty_version>
 		<jscience_version>4.3.1</jscience_version>
 		<junit_version>4.11</junit_version>
-		<logback_version>1.1.1</logback_version>
+		<logback_version>1.1.2</logback_version>
 		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
 		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
 		<maven_license_plugin_version>1.7</maven_license_plugin_version>
@@ -105,8 +107,9 @@
 		<mockito_version>1.9.5</mockito_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<servlet_api_version>3.1.0</servlet_api_version>
 		<slf4j_version>1.7.7</slf4j_version>
-		<spring_version>4.0.6.RELEASE</spring_version>
+		<spring_version>4.1.0.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
 		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
@@ -131,6 +134,7 @@
 					<version>${maven_surefire_plugin_version}</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<runOrder>random</runOrder>
 					</configuration>
 				</plugin>
 				<plugin>

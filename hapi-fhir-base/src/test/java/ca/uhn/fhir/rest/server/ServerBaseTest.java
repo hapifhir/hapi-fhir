@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -51,7 +51,7 @@ public class ServerBaseTest {
 
 	@Test
 	public void testWithContextPath() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		myServer = new Server(port);
 
 		DummyProvider patientProvider = new DummyProvider();
@@ -85,7 +85,7 @@ public class ServerBaseTest {
 	
 	@Test
 	public void testWithContextAndServletPath() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		myServer = new Server(port);
 
 		DummyProvider patientProvider = new DummyProvider();
@@ -118,7 +118,7 @@ public class ServerBaseTest {
 
 	@Test
 	public void testWithNoPath() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		myServer = new Server(port);
 
 		DummyProvider patientProvider = new DummyProvider();

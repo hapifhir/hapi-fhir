@@ -521,7 +521,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>${maven_site_plugin_version}</version>
 				<executions>
 					<execution>
 						<id>stage-for-scm-publish</id>

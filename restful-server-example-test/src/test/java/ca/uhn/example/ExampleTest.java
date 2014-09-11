@@ -23,6 +23,9 @@ public class ExampleTest {
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
+		
+		System.clearProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS");
+		
 	}
 	
 	@Test
@@ -40,6 +43,9 @@ public class ExampleTest {
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 
+		String base = "http://localhost:" + ourPort+"/fhir";
+		System.setProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS", "example , Restful Server Example , " + base);		
+		
 		WebAppContext root = new WebAppContext();
 
 		root.setWar("file:../restful-server-example/target/restful-server-example.war");
@@ -54,8 +60,9 @@ public class ExampleTest {
 		ourServer.start();
 
 		ourCtx = new FhirContext();
-		ourClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort+"/fhir");
-		
+		ourClient = ourCtx.newRestfulGenericClient(base);
+
+
 	}
 	
 }

@@ -81,7 +81,7 @@ public class TestRestfulServer extends RestfulServer {
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLoggerName("fhirtest.access");
 		loggingInterceptor.setMessageFormat("Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
-		registerInterceptor(loggingInterceptor);
+		this.registerInterceptor(loggingInterceptor);
 		
 	}
 

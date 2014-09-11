@@ -11,7 +11,7 @@
 	<artifactId>restful-server-example-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI Tinder Plugin - Test Project</name>
+	<name>HAPI FHIR Sample RESTful Server - Tests</name>
 
 	<dependencies>
 		<dependency>
