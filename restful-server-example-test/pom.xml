@@ -4,20 +4,20 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.6-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>restful-server-example-test</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI Tinder Plugin - Test Project</name>
+	<name>HAPI FHIR Sample RESTful Server - Tests</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

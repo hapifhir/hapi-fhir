@@ -1,4 +1,4 @@
-package ca.uhn.fhir.testutil;
+package ca.uhn.fhir.rest.server.security;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,10 +8,13 @@ import java.util.List;
 /**
  * Provides server ports
  */
-public class RandomServerPortProvider {
+public class PortUtil {
 
 	private static List<Integer> ourPorts = new ArrayList<Integer>(); 
 	
+	/**
+	 * This is really only used for unit tests but is included in the library so it can be reused across modules. Use with caution.
+	 */
 	public static int findFreePort() {
 		ServerSocket server;
 		try {

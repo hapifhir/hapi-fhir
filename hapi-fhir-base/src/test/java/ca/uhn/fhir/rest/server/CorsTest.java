@@ -30,7 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.server.ResfulServerSelfReferenceTest.DummyPatientResourceProvider;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -42,7 +42,7 @@ public class CorsTest {
 
 	@Test
 	public void testContextWithSpace() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		Server server = new Server(port);
 
 		RestfulServer restServer = new RestfulServer();

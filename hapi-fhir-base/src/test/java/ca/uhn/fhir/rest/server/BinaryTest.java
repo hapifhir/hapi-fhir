@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -122,7 +122,7 @@ public class BinaryTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		ResourceProvider patientProvider = new ResourceProvider();

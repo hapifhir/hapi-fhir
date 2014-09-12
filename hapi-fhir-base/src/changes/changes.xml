@@ -6,6 +6,11 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="0.7" date="TBD">
+			<action type="add">
+				Documentation update, thanks to Suranga Nath Kasthurirathne of the OpenMRS project.
+			</action>
+		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
 			<action type="add">

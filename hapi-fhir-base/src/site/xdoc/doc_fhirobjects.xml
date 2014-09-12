@@ -103,7 +103,24 @@
 			</subsection>
 			
 		</section>
+		
+		<section name="Examples">
+		
+			<subsection name="Populating an Observation Resource">
 
+				<p>
+					The following example shows how to create an observation resource containing
+					a numeric datatype.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="observation" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
+				</macro>
+			
+			</subsection>
+			
+		</section>
+		
 	</body>
 
 </document>

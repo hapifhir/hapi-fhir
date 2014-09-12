@@ -15,7 +15,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 public class ResourceProviderWithNoMethodsTest {
 
@@ -28,7 +28,7 @@ public class ResourceProviderWithNoMethodsTest {
 
 	@Test
 	public void testNoAnnotatedMethods() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		ourServer = new Server(port);
 
 		ResourceProvider patientProvider = new ResourceProvider();
@@ -50,7 +50,7 @@ public class ResourceProviderWithNoMethodsTest {
 
 	@Test
 	public void testNonPublicMethod() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		int port = PortUtil.findFreePort();
 		ourServer = new Server(port);
 
 		NonPublicMethodProvider patientProvider = new NonPublicMethodProvider();

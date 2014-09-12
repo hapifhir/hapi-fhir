@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -238,7 +238,7 @@ public class TagsServerTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 		ourCtx = new FhirContext(Patient.class);
 

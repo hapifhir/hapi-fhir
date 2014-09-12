@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>hapi-fhir-mitreid-integration</name>
+	<name>hapi-fhir-oauth2</name>
 	<comment></comment>
 	<projects>
 	</projects>
