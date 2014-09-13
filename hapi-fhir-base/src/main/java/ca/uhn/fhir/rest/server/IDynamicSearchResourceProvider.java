@@ -1,6 +1,4 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.model.api.IQueryParameterType;
+package ca.uhn.fhir.rest.server;
 
 /*
  * #%L
@@ -22,30 +20,16 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
  * #L%
  */
 
+import java.util.List;
 
-public class CompositeOrListParam<A extends IQueryParameterType, B extends IQueryParameterType>  extends BaseOrListParam<CompositeParam<A,B>> {
+import ca.uhn.fhir.context.RuntimeSearchParam;
 
-	private Class<A> myLeftType;
-	private Class<B> myRightType;
+/**
+ * This is still an experimental API - It isn't meant for public consumption yet. Get in touch if you'd like to use it
+ * and maybe we can help work out a good design together.
+ */
+public interface IDynamicSearchResourceProvider extends IResourceProvider {
 
-	public CompositeOrListParam(Class<A> theLeftType, Class<B> theRightType) {
-		super();
-		myLeftType = theLeftType;
-		myRightType = theRightType;
-	}
-
-	public Class<A> getLeftType() {
-		return myLeftType;
-	}
-
-	public Class<B> getRightType() {
-		return myRightType;
-	}
-
-	@Override
-	CompositeParam<A,B> newInstance() {
-		return new CompositeParam<A,B>(myLeftType, myRightType);
-	}
-	
+	List<RuntimeSearchParam> getSearchParameters();
 
 }

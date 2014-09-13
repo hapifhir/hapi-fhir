@@ -117,7 +117,7 @@ public class CodingListParam implements IQueryParameterOr<IQueryParameterType>, 
 	}
 
 	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
 		getCodings().clear();
 		for (String string : theParameters) {
 			CodingDt dt = new CodingDt();

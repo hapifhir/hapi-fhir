@@ -13,7 +13,7 @@
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>0.7</version>
+	<version>0.7-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Sample RESTful Server</name>
