@@ -14,6 +14,10 @@
 				HAPI now runs successfully on Servlet 2.5 containers (such as Tomcat 6). Thanks to
 				Bernard Gitaadji for reporting and diagnosing the issue!
 			</action>
+			<action type="fix">
+				XHTML (in narratives) containing escapable characters (e.g. &lt; or &quot;) will now always have those characters 
+				escaped properly in encoded messages.
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

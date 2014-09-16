@@ -20,8 +20,12 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +36,10 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.codehaus.stax2.XMLOutputFactory2;
+import org.codehaus.stax2.io.EscapingWriterFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.BasePrimitive;
@@ -50,7 +58,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	public XhtmlDt() {
 		// nothing
 	}
-	
+
 	/**
 	 * Constructor which accepts a string code
 	 * 
@@ -64,9 +72,8 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	/**
 	 * Accepts a textual DIV and parses it into XHTML events which are stored internally.
 	 * <p>
-	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with
-	 * an HTML tag (generally this would be a div tag), a div tag will be automatically
-	 * placed surrounding the text. 
+	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with an HTML tag (generally this would be a div tag), a div tag will be automatically placed
+	 * surrounding the text.
 	 * </p>
 	 */
 	@Override
@@ -75,7 +82,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			myValue = null;
 			return;
 		}
-		
+
 		String val = theValue.trim();
 		if (!val.startsWith("<")) {
 			val = "<div>" + val + "</div>";
@@ -84,7 +91,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 			myValue = null;
 			return;
 		}
-		
+
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
 			XMLEventReader er = XMLInputFactory.newInstance().createXMLEventReader(new StringReader(val));
@@ -101,9 +108,9 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 				}
 			}
 			setValue(value);
-			
+
 		} catch (XMLStreamException e) {
-			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \""+e.getMessage() + "\"): " + theValue, e);
+			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}
@@ -116,9 +123,17 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		}
 		try {
 			StringWriter w = new StringWriter();
-			XMLEventWriter ew = XMLOutputFactory.newInstance().createXMLEventWriter(w);
+			XMLOutputFactory newInstance = XMLOutputFactory.newInstance();
+
+			newInstance.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+
+			XMLEventWriter ew = newInstance.createXMLEventWriter(w);
 			for (XMLEvent next : myValue) {
-				ew.add(next);
+				if (next.isCharacters()) {
+					ew.add(next);
+				} else {
+					ew.add(next);
+				}
 			}
 			ew.close();
 			return w.toString();
@@ -127,6 +142,55 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}
+	}
+
+	private static class MyEscaper implements EscapingWriterFactory {
+
+		@Override
+		public Writer createEscapingWriterFor(final Writer theW, String theEnc) throws UnsupportedEncodingException {
+			return new Writer() {
+
+				@Override
+				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
+					boolean hasEscapable = false;
+					for (int i = 0; i < theLen && !hasEscapable; i++) {
+						char nextChar = theCbuf[i + theOff];
+						switch (nextChar) {
+						case '<':
+						case '>':
+						case '"':
+						case '&':
+							hasEscapable = true;
+						}
+					}
+
+					if (!hasEscapable) {
+						theW.write(theCbuf, theOff, theLen);
+						return;
+					}
+
+					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
+					theW.write(escaped.toCharArray());
+				}
+
+				@Override
+				public void flush() throws IOException {
+					theW.flush();
+				}
+
+				@Override
+				public void close() throws IOException {
+					theW.close();
+				}
+			};
+		}
+
+		@Override
+		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 	}
 
 	@Override
