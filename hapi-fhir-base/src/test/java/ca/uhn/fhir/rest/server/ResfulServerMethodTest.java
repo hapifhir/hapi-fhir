@@ -1305,7 +1305,7 @@ public class ResfulServerMethodTest {
 		public Patient vread(@IdParam IdDt theId) {
 			Patient retVal = getIdToPatient().get(theId.getIdPart());
 			if (retVal == null) {
-				throw new InternalErrorException("Couldn't find ID " + theId.getIdPart() + " - Valid IDs are: " + getIdToPatient().keySet());
+				throw new ResourceNotFoundException("Couldn't find ID " + theId.getIdPart() + " - Valid IDs are: " + getIdToPatient().keySet());
 			}
 			
 			List<HumanNameDt> name = retVal.getName();
