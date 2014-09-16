@@ -154,7 +154,7 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	}
 
 	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
 		myBase.setMissing(null);
 		myComparator = null;
 		setValueAsString(null);
@@ -164,6 +164,7 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 		} else if (theParameters.size() > 1) {
 			throw new InvalidRequestException("This server does not support multi-valued dates for this paramater: " + theParameters);
 		}
+		
 	}
 
 	@Override

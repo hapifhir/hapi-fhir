@@ -110,15 +110,12 @@ public abstract class BaseFhirDao implements IDao {
 	private List<IDaoListener> myListeners = new ArrayList<IDaoListener>();
 
 	@Autowired
+	private PlatformTransactionManager myPlatformTransactionManager;
+
+	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 
 	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
-
-	protected void notifyWriteCompleted() {
-		for (IDaoListener next : myListeners) {
-			next.writeCompleted();
-		}
-	}
 
 	public FhirContext getContext() {
 		return myContext;
@@ -290,6 +287,18 @@ public abstract class BaseFhirDao implements IDao {
 			Long id = next.get(0, Long.class);
 			Date updated = (Date) next.get(1);
 			tuples.add(new HistoryTuple(true, updated, id));
+		}
+	}
+
+	protected void createForcedIdIfNeeded(ResourceTable entity, IdDt id) {
+		if (id.isEmpty() == false && id.hasIdPart()) {
+			if (isValidPid(id)) {
+				return;
+			}
+			ForcedId fid = new ForcedId();
+			fid.setForcedId(id.getIdPart());
+			fid.setResource(entity);
+			entity.setForcedId(fid);
 		}
 	}
 
@@ -829,9 +838,6 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-
 	protected IBundleProvider history(String theResourceName, Long theId, Date theSince) {
 		final List<HistoryTuple> tuples = new ArrayList<HistoryTuple>();
 
@@ -905,6 +911,17 @@ public abstract class BaseFhirDao implements IDao {
 		};
 	}
 
+	protected boolean isValidPid(IdDt theId) {
+		String idPart = theId.getIdPart();
+		for (int i = 0; i < idPart.length(); i++) {
+			char nextChar = idPart.charAt(i);
+			if (nextChar < '0' || nextChar > '9') {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	protected List<IResource> loadResourcesById(Set<IdDt> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
 		for (IdDt next : theIncludePids) {
@@ -941,6 +958,12 @@ public abstract class BaseFhirDao implements IDao {
 			}
 		}
 		return new String(out).toUpperCase();
+	}
+
+	protected void notifyWriteCompleted() {
+		for (IDaoListener next : myListeners) {
+			next.writeCompleted();
+		}
 	}
 
 	protected void populateResourceIntoEntity(IResource theResource, ResourceTable theEntity) {
@@ -1002,46 +1025,9 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
-	protected void createForcedIdIfNeeded(ResourceTable entity, IdDt id) {
-		if (id.isEmpty() == false && id.hasIdPart()) {
-			if (isValidPid(id)) {
-				return;
-			}
-			ForcedId fid = new ForcedId();
-			fid.setForcedId(id.getIdPart());
-			fid.setResource(entity);
-			entity.setForcedId(fid);
-		}
-	}
-
 	protected IResource toResource(BaseHasResource theEntity) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity);
-	}
-
-	protected Long translateForcedIdToPid(IdDt theId) {
-		if (isValidPid(theId)) {
-			return theId.getIdPartAsLong();
-		} else {
-			TypedQuery<ForcedId> q = myEntityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
-			q.setParameter("ID", theId.getIdPart());
-			try {
-				return q.getSingleResult().getResourcePid();
-			} catch (NoResultException e) {
-				throw new ResourceNotFoundException(theId);
-			}
-		}
-	}
-
-	protected boolean isValidPid(IdDt theId) {
-		String idPart = theId.getIdPart();
-		for (int i = 0; i < idPart.length(); i++) {
-			char nextChar = idPart.charAt(i);
-			if (nextChar < '0' || nextChar > '9') {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
@@ -1093,6 +1079,20 @@ public abstract class BaseFhirDao implements IDao {
 
 	protected String toResourceName(IResource theResource) {
 		return myContext.getResourceDefinition(theResource).getName();
+	}
+
+	protected Long translateForcedIdToPid(IdDt theId) {
+		if (isValidPid(theId)) {
+			return theId.getIdPartAsLong();
+		} else {
+			TypedQuery<ForcedId> q = myEntityManager.createNamedQuery("Q_GET_FORCED_ID", ForcedId.class);
+			q.setParameter("ID", theId.getIdPart());
+			try {
+				return q.getSingleResult().getResourcePid();
+			} catch (NoResultException e) {
+				throw new ResourceNotFoundException(theId);
+			}
+		}
 	}
 
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, boolean theDelete) {

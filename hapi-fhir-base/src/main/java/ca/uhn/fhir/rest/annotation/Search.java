@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 
@@ -76,5 +77,12 @@ public @interface Search {
 	 */
 	// NB: Read, Search (maybe others) share this annotation method, so update the javadocs everywhere
 	Class<? extends IResource> type() default IResource.class;
+
+	/**
+	 * This is an experimental option - Use with caution
+	 * 
+	 * @see IDynamicSearchResourceProvider
+	 */
+	boolean dynamic() default false;
 	
 }

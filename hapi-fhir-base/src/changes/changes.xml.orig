@@ -6,16 +6,16 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+<<<<<<< HEAD
+		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
+=======
 		<release version="0.7" date="TBD">
 			<action type="add">
 				Documentation update, thanks to Suranga Nath Kasthurirathne of the OpenMRS project.
 			</action>
-			<action type="fix">
-				HAPI now runs successfully on Servlet 2.5 containers (such as Tomcat 6). Thanks to
-				Bernard Gitaadji for reporting and diagnosing the issue!
-			</action>
 		</release>
-		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
+		<release version="0.6" date="TBD">
+>>>>>>> cdd4b137fb40dd72f895c2bcb644d6e668e1015b
 			<!-- 
 			<action type="add">
 				Allow generic client  ... OAUTH

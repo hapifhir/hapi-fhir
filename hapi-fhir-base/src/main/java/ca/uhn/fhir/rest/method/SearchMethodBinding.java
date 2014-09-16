@@ -60,7 +60,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private Class<? extends IResource> myDeclaredResourceType;
 	private String myDescription;
 	private Integer myIdParamIndex;
-
 	private String myQueryName;
 
 	@SuppressWarnings("unchecked")
@@ -116,40 +115,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
-	}
-
-	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
-		QualifierDetails retVal = new QualifierDetails();
-		if (theParamName == null || theParamName.length() == 0) {
-			return retVal;
-		}
-
-		int dotIdx = -1;
-		int colonIdx = -1;
-		for (int idx = 0; idx < theParamName.length(); idx++) {
-			char nextChar = theParamName.charAt(idx);
-			if (nextChar == '.' && dotIdx == -1) {
-				dotIdx = idx;
-			} else if (nextChar == ':' && colonIdx == -1) {
-				colonIdx = idx;
-			}
-		}
-
-		if (dotIdx != -1 && colonIdx != -1) {
-			if (dotIdx < colonIdx) {
-				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
-				retVal.setColonQualifier(theParamName.substring(colonIdx));
-			} else {
-				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
-				retVal.setDotQualifier(theParamName.substring(dotIdx));
-			}
-		} else if (dotIdx != -1) {
-			retVal.setDotQualifier(theParamName.substring(dotIdx));
-		} else if (colonIdx != -1) {
-			retVal.setColonQualifier(theParamName.substring(colonIdx));
-		}
-
-		return retVal;
 	}
 
 	public Class<? extends IResource> getDeclaredResourceType() {
@@ -322,6 +287,15 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
+	public void setResourceType(Class<? extends IResource> resourceType) {
+		this.myDeclaredResourceType = resourceType;
+	}
+
+	@Override
+	public String toString() {
+		return getMethod().toString();
+	}
+
 	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
 			return theQualifiedNames;
@@ -335,10 +309,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			retVal.add(next);
 		}
 		return retVal;
-	}
-
-	public void setResourceType(Class<? extends IResource> resourceType) {
-		this.myDeclaredResourceType = resourceType;
 	}
 
 	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
@@ -400,6 +370,40 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return invocation;
+	}
+
+	public static QualifierDetails extractQualifiersFromParameterName(String theParamName) {
+		QualifierDetails retVal = new QualifierDetails();
+		if (theParamName == null || theParamName.length() == 0) {
+			return retVal;
+		}
+
+		int dotIdx = -1;
+		int colonIdx = -1;
+		for (int idx = 0; idx < theParamName.length(); idx++) {
+			char nextChar = theParamName.charAt(idx);
+			if (nextChar == '.' && dotIdx == -1) {
+				dotIdx = idx;
+			} else if (nextChar == ':' && colonIdx == -1) {
+				colonIdx = idx;
+			}
+		}
+
+		if (dotIdx != -1 && colonIdx != -1) {
+			if (dotIdx < colonIdx) {
+				retVal.setDotQualifier(theParamName.substring(dotIdx, colonIdx));
+				retVal.setColonQualifier(theParamName.substring(colonIdx));
+			} else {
+				retVal.setColonQualifier(theParamName.substring(colonIdx, dotIdx));
+				retVal.setDotQualifier(theParamName.substring(dotIdx));
+			}
+		} else if (dotIdx != -1) {
+			retVal.setDotQualifier(theParamName.substring(dotIdx));
+		} else if (colonIdx != -1) {
+			retVal.setColonQualifier(theParamName.substring(colonIdx));
+		}
+
+		return retVal;
 	}
 
 	public static class QualifierDetails {
@@ -465,11 +469,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			myDotQualifier = theDotQualifier;
 		}
 
-	}
-
-	@Override
-	public String toString() {
-		return getMethod().toString();
 	}
 
 	public static enum RequestType {

@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.dstu.resource.ListResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
@@ -67,6 +68,16 @@ public class XmlParserTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 
+	@Test
+	public void testEncodeProfile() {
+		
+		Profile p = new Profile();
+		p.getStructureFirstRep().getElementFirstRep().getDefinition().getBinding().setReference(new ResourceReferenceDt("ValudSet/123"));
+		
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(encoded);
+	}
+	
 	@Test
 	public void testEncodeBinaryResource() {
 

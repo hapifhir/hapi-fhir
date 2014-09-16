@@ -40,6 +40,14 @@
 		<section name="Announcements">
 
 			<p>
+				<b>Sep 8, 2014 - HAPI FHIR 0.6 Released</b> - A new build has been uploaded,
+				containing a number of new features and bug fixes. See the changelog
+				for a complete list of what has changed. 
+				<br/>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
+
+			<p>
 				<b>July 30, 2014 - HAPI FHIR 0.5 Released</b> - HAPI 0.5 has now been released.
 				This is surprisingly soon after the last release (and probably not a 
 				pace we will sustain) but we landed a number of big fixes and enhancements

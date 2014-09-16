@@ -47,15 +47,23 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 			requestPath = requestPath.substring(1);
 		}
 
+		int startOfPath = requestUrl.indexOf("//");
+		if (startOfPath != -1 && (startOfPath + 2) < requestUrl.length()) {
+			startOfPath = requestUrl.indexOf("/", startOfPath + 2);
+		}
+		if (startOfPath == -1) {
+			startOfPath = 0;
+		}
+
 		int contextIndex;
 		if (servletPath.length() == 0) {
 			if (requestPath.length() == 0) {
 				contextIndex = requestUrl.length();
 			} else {
-				contextIndex = requestUrl.indexOf(requestPath);
+				contextIndex = requestUrl.indexOf(requestPath, startOfPath);
 			}
 		} else {
-			contextIndex = requestUrl.indexOf(servletPath);
+			contextIndex = requestUrl.indexOf(servletPath, startOfPath);
 		}
 
 		String fhirServerBase;

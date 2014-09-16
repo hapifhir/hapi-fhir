@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
@@ -61,11 +62,10 @@ import ca.uhn.fhir.util.ExtensionConstants;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of 
- * {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value
- * of <code>false</code>. This means that if you are adding anything to the returned
- * conformance instance on each call you should call <code>setCache(false)</code> in 
- * your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
+ * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
+ * you are adding anything to the returned conformance instance on each call you should call
+ * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider {
@@ -142,91 +142,9 @@ public class ServerConformanceProvider {
 				}
 
 				if (nextMethodBinding instanceof SearchMethodBinding) {
-					SearchMethodBinding searchMethodBinding = (SearchMethodBinding) nextMethodBinding;
-					includes.addAll(searchMethodBinding.getIncludes());
-
-					List<IParameter> params = searchMethodBinding.getParameters();
-					List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
-					for (IParameter nextParameter : params) {
-						if ((nextParameter instanceof SearchParameter)) {
-							searchParameters.add((SearchParameter) nextParameter);
-						}
-					}
-					Collections.sort(searchParameters, new Comparator<SearchParameter>() {
-						@Override
-						public int compare(SearchParameter theO1, SearchParameter theO2) {
-							if (theO1.isRequired() == theO2.isRequired()) {
-								return theO1.getName().compareTo(theO2.getName());
-							}
-							if (theO1.isRequired()) {
-								return -1;
-							}
-							return 1;
-						}
-					});
-					if (searchParameters.isEmpty()) {
-						continue;
-					}
-					boolean allOptional = searchParameters.get(0).isRequired() == false;
-
-					RestQuery query = null;
-					if (!allOptional) {
-						query = rest.addQuery();
-						query.getDocumentation().setValue(searchMethodBinding.getDescription());
-						query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
-						for (String nextInclude : searchMethodBinding.getIncludes()) {
-							query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
-						}
-					}
-
-					for (SearchParameter nextParameter : searchParameters) {
-
-						String nextParamName = nextParameter.getName();
-
-//						String chain = null;
-						String nextParamUnchainedName = nextParamName;
-						if (nextParamName.contains(".")) {
-//							chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-							nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
-						}
-
-						String nextParamDescription = nextParameter.getDescription();
-
-						/*
-						 * If the parameter has no description, default to the one from the resource
-						 */
-						if (StringUtils.isBlank(nextParamDescription)) {
-							RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
-							if (paramDef != null) {
-								nextParamDescription = paramDef.getDescription();
-							}
-						}
-
-						RestResourceSearchParam param;
-						if (query == null) {
-							param = resource.addSearchParam();
-						} else {
-							param = query.addParameter();
-							param.addUndeclaredExtension(false, ExtensionConstants.PARAM_IS_REQUIRED, new BooleanDt(nextParameter.isRequired()));
-						}
-
-						param.setName(nextParamName);
-//						if (StringUtils.isNotBlank(chain)) {
-//							param.addChain(chain);
-//						}
-						param.setDocumentation(nextParamDescription);
-						param.setType(nextParameter.getParamType());
-						for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
-							RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
-							if (targetDef != null) {
-								ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
-								if (code != null) {
-									param.addTarget(code);
-								}
-							}
-						}
-						
-					}
+					handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
+				} else if (nextMethodBinding instanceof DynamicSearchMethodBinding) {
+					handleDynamicSearchMethodBinding(resource, def, includes, (DynamicSearchMethodBinding) nextMethodBinding);
 				}
 
 				Collections.sort(resource.getOperation(), new Comparator<RestResourceOperation>() {
@@ -257,6 +175,149 @@ public class ServerConformanceProvider {
 
 		myConformance = retVal;
 		return retVal;
+	}
+
+	private void handleSearchMethodBinding(Rest rest, RestResource resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes, SearchMethodBinding searchMethodBinding) {
+		includes.addAll(searchMethodBinding.getIncludes());
+
+		List<IParameter> params = searchMethodBinding.getParameters();
+		List<SearchParameter> searchParameters = new ArrayList<SearchParameter>();
+		for (IParameter nextParameter : params) {
+			if ((nextParameter instanceof SearchParameter)) {
+				searchParameters.add((SearchParameter) nextParameter);
+			}
+		}
+		sortSearchParameters(searchParameters);
+		if (!searchParameters.isEmpty()) {
+			boolean allOptional = searchParameters.get(0).isRequired() == false;
+
+			RestQuery query = null;
+			if (!allOptional) {
+				query = rest.addQuery();
+				query.getDocumentation().setValue(searchMethodBinding.getDescription());
+				query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+				for (String nextInclude : searchMethodBinding.getIncludes()) {
+					query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
+				}
+			}
+
+			for (SearchParameter nextParameter : searchParameters) {
+
+				String nextParamName = nextParameter.getName();
+
+				// String chain = null;
+				String nextParamUnchainedName = nextParamName;
+				if (nextParamName.contains(".")) {
+					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+				}
+
+				String nextParamDescription = nextParameter.getDescription();
+
+				/*
+				 * If the parameter has no description, default to the one from the resource
+				 */
+				if (StringUtils.isBlank(nextParamDescription)) {
+					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
+					if (paramDef != null) {
+						nextParamDescription = paramDef.getDescription();
+					}
+				}
+
+				RestResourceSearchParam param;
+				if (query == null) {
+					param = resource.addSearchParam();
+				} else {
+					param = query.addParameter();
+					param.addUndeclaredExtension(false, ExtensionConstants.PARAM_IS_REQUIRED, new BooleanDt(nextParameter.isRequired()));
+				}
+
+				param.setName(nextParamName);
+				// if (StringUtils.isNotBlank(chain)) {
+				// param.addChain(chain);
+				// }
+				param.setDocumentation(nextParamDescription);
+				param.setType(nextParameter.getParamType());
+				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
+					RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
+					if (targetDef != null) {
+						ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
+						if (code != null) {
+							param.addTarget(code);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
+		includes.addAll(searchMethodBinding.getIncludes());
+
+		List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
+		searchParameters.addAll(searchMethodBinding.getSearchParams());
+		sortRuntimeSearchParameters(searchParameters);
+
+		if (!searchParameters.isEmpty()) {
+
+			for (RuntimeSearchParam nextParameter : searchParameters) {
+
+				String nextParamName = nextParameter.getName();
+
+				// String chain = null;
+				String nextParamUnchainedName = nextParamName;
+				if (nextParamName.contains(".")) {
+					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+				}
+
+				String nextParamDescription = nextParameter.getDescription();
+
+				/*
+				 * If the parameter has no description, default to the one from the resource
+				 */
+				if (StringUtils.isBlank(nextParamDescription)) {
+					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
+					if (paramDef != null) {
+						nextParamDescription = paramDef.getDescription();
+					}
+				}
+
+				RestResourceSearchParam param;
+				param = resource.addSearchParam();
+
+				param.setName(nextParamName);
+				// if (StringUtils.isNotBlank(chain)) {
+				// param.addChain(chain);
+				// }
+				param.setDocumentation(nextParamDescription);
+				param.setType(nextParameter.getParamType());
+			}
+		}
+	}
+
+	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
+		Collections.sort(searchParameters, new Comparator<RuntimeSearchParam>() {
+			@Override
+			public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
+				return theO1.getName().compareTo(theO2.getName());
+			}
+		});
+	}
+
+	private void sortSearchParameters(List<SearchParameter> searchParameters) {
+		Collections.sort(searchParameters, new Comparator<SearchParameter>() {
+			@Override
+			public int compare(SearchParameter theO1, SearchParameter theO2) {
+				if (theO1.isRequired() == theO2.isRequired()) {
+					return theO1.getName().compareTo(theO2.getName());
+				}
+				if (theO1.isRequired()) {
+					return -1;
+				}
+				return 1;
+			}
+		});
 	}
 
 	/**
