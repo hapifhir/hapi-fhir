@@ -454,12 +454,14 @@ public class RestfulServer extends HttpServlet {
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
-			if (theRequest.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
-				// } else {
-				// servletContextPath = servletPath;
-			}
 
+//			if (getServletContext().getMajorVersion() >= 3) {
+//				// getServletContext is only supported in version 3+ of servlet-api
+				if (getServletContext() != null) {
+					servletContextPath = StringUtils.defaultString(getServletContext().getContextPath());
+				}
+//			}
+			
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Request FullPath: {}", requestFullPath);
 				ourLog.trace("Servlet Path: {}", servletPath);
@@ -476,7 +478,7 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			fhirServerBase = myServerAddressStrategy.determineServerBase(theRequest);
+			fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
 
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);

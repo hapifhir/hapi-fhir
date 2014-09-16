@@ -10,6 +10,10 @@
 			<action type="add">
 				Documentation update, thanks to Suranga Nath Kasthurirathne of the OpenMRS project.
 			</action>
+			<action type="fix">
+				HAPI now runs successfully on Servlet 2.5 containers (such as Tomcat 6). Thanks to
+				Bernard Gitaadji for reporting and diagnosing the issue!
+			</action>
 		</release>
 		<release version="0.6" date="TBD">
 			<!-- 
