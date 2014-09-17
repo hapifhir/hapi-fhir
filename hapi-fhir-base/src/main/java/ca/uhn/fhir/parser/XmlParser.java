@@ -207,6 +207,14 @@ public class XmlParser extends BaseParser implements IParser {
 				} else {
 					ourLog.debug("Bundle entry contains null resource");
 				}
+				
+				if (!nextEntry.getSummary().isEmpty()) {
+					eventWriter.writeStartElement("summary");
+					eventWriter.writeAttribute("type", "xhtml");
+					encodeXhtml(nextEntry.getSummary(), eventWriter);
+					eventWriter.writeEndElement();
+				}
+				
 
 				eventWriter.writeEndElement(); // entry
 			}

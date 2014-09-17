@@ -117,6 +117,7 @@ public class XmlParserTest {
 		BundleEntry entry = b.addEntry();
 		entry.getId().setValue("1");
 		entry.setResource(p1);
+		entry.getSummary().setValueAsString("this is the summary");
 
 		Patient p2 = new Patient();
 		p2.addName().addFamily("Family2");
@@ -136,7 +137,7 @@ public class XmlParserTest {
 		List<String> strings = new ArrayList<String>();
 		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.add("<category term=\"http://hl7.org/fhir/tag/message\" label=\"Message\" scheme=\"http://hl7.org/fhir/tag\"/>");
-		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</Patient>","<summary type=\"xhtml\">", "<div", "</entry>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
@@ -941,6 +942,8 @@ public class XmlParserTest {
 		assertEquals("12345", resource.getId().getVersionIdPart());
 		assertEquals("12345", ((IdDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 
+		assertThat(entry.getSummary().getValueAsString(), containsString("LOINC Codes for Cholesterol"));
+		
 	}
 
 	@SuppressWarnings("deprecation")

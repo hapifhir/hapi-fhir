@@ -763,7 +763,9 @@ public class JsonParserTest {
 
 		DiagnosticReport res = (DiagnosticReport) entry.getResource();
 		assertEquals("Complete Blood Count", res.getName().getText().getValue());
-
+		
+		assertThat(entry.getSummary().getValueAsString(), containsString("CBC Report for Wile"));
+		
 	}
 
 	@Test
@@ -874,7 +876,8 @@ public class JsonParserTest {
 		BundleEntry entry = b.addEntry();
 		entry.getId().setValue("1");
 		entry.setResource(p1);
-
+		entry.getSummary().setValueAsString("this is the summary");
+		
 		Patient p2 = new Patient();
 		p2.addName().addFamily("Family2");
 		entry = b.addEntry();
@@ -893,6 +896,7 @@ public class JsonParserTest {
 		List<String> strings = new ArrayList<String>();
 		strings.addAll(Arrays.asList("\"published\":\""+pub.getValueAsString()+"\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
+		strings.addAll(Arrays.asList("this is the summary"));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));
 		strings.addAll(Arrays.asList("\"deleted\":\""+nowDt.getValueAsString()+"\"", "\"id\":\"Patient/3\""));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));

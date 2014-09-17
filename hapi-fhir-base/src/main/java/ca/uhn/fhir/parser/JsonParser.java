@@ -203,6 +203,10 @@ public class JsonParser extends BaseParser implements IParser {
 				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content", false);
 			}
 
+			if (nextEntry.getSummary().isEmpty()==false) {
+				eventWriter.write("summary", nextEntry.getSummary().getValueAsString());
+			}
+			
 			eventWriter.writeEnd(); // entry object
 		}
 		eventWriter.writeEnd(); // entry array
