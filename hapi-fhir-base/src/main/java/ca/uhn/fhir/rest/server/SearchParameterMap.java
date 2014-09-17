@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.BaseAndListParam;
@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 
-public class SearchParameterMap extends HashMap<String, BaseAndListParam<?>> {
+public class SearchParameterMap extends LinkedHashMap<String, BaseAndListParam<?>> {
 
 	private static final long serialVersionUID = 1L;
 

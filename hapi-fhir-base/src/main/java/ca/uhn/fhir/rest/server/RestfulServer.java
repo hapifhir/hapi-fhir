@@ -951,6 +951,8 @@ public class RestfulServer extends HttpServlet {
 		if (theServer.getPagingProvider() == null) {
 			numToReturn = theResult.size();
 			resourceList = theResult.getResources(0, numToReturn);
+			validateResourceListNotNull(resourceList);
+			
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
 			if (theLimit == null) {
@@ -961,6 +963,7 @@ public class RestfulServer extends HttpServlet {
 
 			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
 			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			validateResourceListNotNull(resourceList);
 
 			if (theSearchId != null) {
 				searchId = theSearchId;
@@ -1010,6 +1013,12 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 		return bundle;
+	}
+
+	private static void validateResourceListNotNull(List<IResource> theResourceList) {
+		if (theResourceList == null) {
+			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
+		}
 	}
 
 	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults) {

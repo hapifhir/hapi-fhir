@@ -10,6 +10,16 @@
 			<action type="add">
 				Documentation update, thanks to Suranga Nath Kasthurirathne of the OpenMRS project.
 			</action>
+			<action type="fix">
+				Server implementation was not correctly figuring out its own FHIR Base URL when deployed
+				on Amazon Web Service server. Thanks to Jeffrey Ting and Bill De Beaubien of
+				Systems Made Simple for their help in figuring out this issue! 
+			</action>
+			<action type="fix">
+				XML Parser failed to encode fields with both a resource reference child and
+				a primitive type child. Thanks to Jeffrey Ting and Bill De Beaubien of
+				Systems Made Simple for their help in figuring out this issue!
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

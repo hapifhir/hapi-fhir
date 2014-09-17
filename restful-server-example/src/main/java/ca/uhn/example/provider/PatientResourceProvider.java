@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -106,13 +107,8 @@ public class PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * The "@Search" annotation indicates that this method supports the search operation. You may have many different method annotated with this annotation, to support many different search criteria.
-	 * This example searches by family name.
-	 * 
-	 * @param theIdentifier
-	 *            This operation takes one parameter which is the search criteria. It is annotated with the "@Required" annotation. This annotation takes one argument, a string containing the name of
-	 *            the search criteria. The datatype here is StringDt, but there are other possible parameter types depending on the specific search criteria.
-	 * @return This method returns a list of Patients. This list may contain multiple matching resources, or it may also be empty.
+	 * The "@Create" annotation indicates that this method implements "create=type", which adds a 
+	 * new instance of a resource to the server.
 	 */
 	@Create()
 	public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
@@ -217,7 +213,8 @@ public class PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * The "@Update" annotation indicates that this method supports replacing an existing resource (by ID) with a new instance of that resource.
+	 * The "@Update" annotation indicates that this method supports replacing an existing 
+	 * resource (by ID) with a new instance of that resource.
 	 * 
 	 * @param theId
 	 *            This is the ID of the patient to update
@@ -225,7 +222,7 @@ public class PatientResourceProvider implements IResourceProvider {
 	 *            This is the actual resource to save
 	 * @return This method returns a "MethodOutcome"
 	 */
-	@Create()
+	@Update()
 	public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
 		validateResource(thePatient);
 

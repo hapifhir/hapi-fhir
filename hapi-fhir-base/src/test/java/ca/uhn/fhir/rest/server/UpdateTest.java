@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -279,6 +280,21 @@ public class UpdateTest {
 		fail();
 	}
 
+@Test	
+	public void testUpdateWithNoReturn() throws Exception {
+
+		Organization patient = new Organization();
+		patient.addIdentifier().setValue("002");
+
+		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Organization/001");
+		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourClient.execute(httpPost);
+		assertEquals(200, response.getStatusLine().getStatusCode());
+		response.close();
+	}
+
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -295,7 +311,7 @@ public class UpdateTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
-		servlet.setResourceProviders(patientProvider, ourReportProvider, new ObservationProvider());
+		servlet.setResourceProviders(patientProvider, ourReportProvider, new ObservationProvider(), new OrganizationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -308,6 +324,23 @@ public class UpdateTest {
 
 	}
 
+	
+	public static class OrganizationResourceProvider implements IResourceProvider
+	{
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
+		}
+		
+		@SuppressWarnings("unused")
+		@Update
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Organization theOrganization) {
+			return new MethodOutcome();
+		}
+		
+	}
+	
 	public static class DiagnosticReportProvider implements IResourceProvider {
 		private TagList myLastTags;
 

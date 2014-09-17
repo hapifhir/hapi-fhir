@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -27,5 +29,11 @@ public class ReferenceAndListParam extends BaseAndListParam<ReferenceOrListParam
 	ReferenceOrListParam newInstance() {
 		return new ReferenceOrListParam();
 	}
+	
+	@Override
+	public SearchParamTypeEnum getSearchParamType() {
+		return SearchParamTypeEnum.REFERENCE;
+	}
+
 	
 }
