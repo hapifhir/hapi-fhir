@@ -28,6 +28,10 @@
 				XHTML (in narratives) containing escapable characters (e.g. &lt; or &quot;) will now always have those characters 
 				escaped properly in encoded messages.
 			</action>
+			<action type="fix">
+				Summary (in the bundle entry) is now encoded by the XML and JSON parsers if supplied. Thanks to David Hay of 
+				Orion Health for reporting this!
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
