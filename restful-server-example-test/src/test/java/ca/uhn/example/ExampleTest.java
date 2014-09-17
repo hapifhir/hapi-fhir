@@ -47,7 +47,8 @@ public class ExampleTest {
 		System.setProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS", "example , Restful Server Example , " + base);		
 		
 		WebAppContext root = new WebAppContext();
-
+		root.setAllowDuplicateFragmentNames(true);
+		
 		root.setWar("file:../restful-server-example/target/restful-server-example.war");
 		root.setContextPath("/");
 		root.setAttribute(WebAppContext.BASETEMPDIR, "target/tempextrtact");
