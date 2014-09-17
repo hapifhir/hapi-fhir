@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
  */
 public class Request extends RequestDetails {
 
-	private String myCompleteUrl;
 	private String myFhirServerBase;
 	private String myOperation;
 	private RequestType myRequestType;
@@ -46,10 +45,6 @@ public class Request extends RequestDetails {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
-
-	public String getCompleteUrl() {
-		return myCompleteUrl;
-	}
 
 	public String getFhirServerBase() {
 		return myFhirServerBase;
@@ -82,10 +77,6 @@ public class Request extends RequestDetails {
 
 	public boolean isRespondGzip() {
 		return myRespondGzip;
-	}
-
-	public void setCompleteUrl(String theCompleteUrl) {
-		myCompleteUrl = theCompleteUrl;
 	}
 
 	public void setFhirServerBase(String theFhirServerBase) {

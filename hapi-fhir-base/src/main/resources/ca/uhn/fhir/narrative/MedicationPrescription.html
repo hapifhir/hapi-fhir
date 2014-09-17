@@ -1,0 +1,36 @@
+<!--/* 
+This top section is not exported as a part of the Narrative,
+it is only present so that this template can be viewed in 
+a browser. 
+-->
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="narrative.css"/>
+	</head>
+	<body>
+<!--*/-->
+
+<div>
+	<div class="hapiHeaderText" th:if="${not resource.medication.resource.name.empty}" th:narrative="${resource.medication.resource.name}"></div>
+	<table class="hapiPropertyTable">
+		<tbody>
+			<tr th:if="${not resource.id.empty}">
+				<td>Id</td>
+				<td th:text="${resource.id.value}"></td>
+			</tr>
+			<tr th:if="${not resource.dateWritten.empty}">
+				<td>Date</td>
+				<td ><span th:text="${#dates.format(resource.dateWritten.value,'dd MMMM yyyy')}"></span></td>
+			</tr>
+			<tr th:if="${not resource.status.empty}">
+				<td>Status</td>
+				<td><span th:text="${resource.status.valueAsEnum}"></span></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<!--/*-->
+	</body>
+</html>
+<!--*/-->

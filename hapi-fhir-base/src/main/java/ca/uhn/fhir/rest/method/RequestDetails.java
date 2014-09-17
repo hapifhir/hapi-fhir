@@ -35,6 +35,7 @@ public class RequestDetails {
 	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
 	private RestfulOperationSystemEnum mySystemOperationType;
+	private String myCompleteUrl;
 
 	public String getCompartmentName() {
 		return myCompartmentName;
@@ -90,6 +91,14 @@ public class RequestDetails {
 
 	public void setSystemOperationType(RestfulOperationSystemEnum theSystemOperationType) {
 		mySystemOperationType = theSystemOperationType;
+	}
+
+	public String getCompleteUrl() {
+		return myCompleteUrl;
+	}
+
+	public void setCompleteUrl(String theCompleteUrl) {
+		myCompleteUrl = theCompleteUrl;
 	}
 
 }

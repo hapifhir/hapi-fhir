@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
@@ -19,6 +20,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -26,6 +29,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -202,6 +206,26 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 
+	}
+	
+	@Test
+	public void testGenerateMedicationPrescription(){
+		MedicationPrescription mp = new MedicationPrescription();
+		mp.setId("12345");
+		Medication med = new Medication();
+		med.setName("ciprofloaxin");
+		ResourceReferenceDt medRef = new ResourceReferenceDt(med);
+		mp.setMedication(medRef );
+		mp.setStatus(MedicationPrescriptionStatusEnum.ACTIVE);
+		mp.setDateWritten(new DateTimeDt("2014-09-01"));
+		
+		NarrativeDt narrative = gen.generateNarrative(mp);
+		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin")>-1);
+		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE")>-1);
+		
+		String title = gen.generateTitle(mp);
+		assertEquals("ciprofloaxin", title);
+		
 	}
 
 }
