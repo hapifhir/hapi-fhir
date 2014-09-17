@@ -637,7 +637,7 @@ public class XmlParser extends BaseParser implements IParser {
 			return;
 		}
 
-		boolean firstEvent = true;
+		boolean firstElement = true;
 		for (XMLEvent event : theDt.getValue()) {
 			switch (event.getEventType()) {
 			case XMLStreamConstants.ATTRIBUTE:
@@ -677,7 +677,7 @@ public class XmlParser extends BaseParser implements IParser {
 				break;
 			case XMLStreamConstants.START_ELEMENT:
 				StartElement se = event.asStartElement();
-				if (firstEvent) {
+				if (firstElement) {
 					if (StringUtils.isBlank(se.getName().getPrefix())) {
 						String namespaceURI = se.getName().getNamespaceURI();
 						if (StringUtils.isBlank(namespaceURI)) {
@@ -691,6 +691,7 @@ public class XmlParser extends BaseParser implements IParser {
 						theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
 						theEventWriter.writeNamespace(prefix, namespaceURI);
 					}
+					firstElement = false;
 				} else {
 					if (isBlank(se.getName().getPrefix())) {
 						if (isBlank(se.getName().getNamespaceURI())) {
@@ -721,7 +722,6 @@ public class XmlParser extends BaseParser implements IParser {
 				break;
 			}
 
-			firstEvent = false;
 		}
 	}
 

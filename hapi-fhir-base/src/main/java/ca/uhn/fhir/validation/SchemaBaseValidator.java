@@ -76,7 +76,11 @@ class SchemaBaseValidator implements IValidator {
 			Validator validator = schema.newValidator();
 			MyErrorHandler handler = new MyErrorHandler(theContext);
 			validator.setErrorHandler(handler);
-			validator.validate(new StreamSource(new StringReader(theContext.getXmlEncodedResource())));
+			String encodedResource = theContext.getXmlEncodedResource();
+			
+//			ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString((Bundle) theContext.getResource()));
+			
+			validator.validate(new StreamSource(new StringReader(encodedResource)));
 		} catch (SAXException e) {
 			throw new ConfigurationException("Could not apply schema file", e);
 		} catch (IOException e) {
