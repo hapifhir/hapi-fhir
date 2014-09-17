@@ -172,12 +172,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			break;
 
 		case UPDATE:
-			if (response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
+			if (response == null || response.getCreated() == null || Boolean.FALSE.equals(response.getCreated())) {
 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			} else {
 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			}
-			addLocationHeader(theRequest, servletResponse, response);
+			if (response != null && response.getId() != null) {
+				addLocationHeader(theRequest, servletResponse, response);
+			}
 			break;
 
 		case VALIDATE:

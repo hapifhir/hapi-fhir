@@ -25,12 +25,17 @@ import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implements IQueryParameterAnd<T> {
+public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implements IQueryParameterAnd<T> {
 
 	private List<T> myValues=new ArrayList<T>(); 
+	
+	public void addValue(T theValue) {
+		myValues.add(theValue);
+	}
 	
 	@Override
 	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
@@ -42,6 +47,8 @@ abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implements IQuer
 		}
 	}
 
+	public abstract SearchParamTypeEnum getSearchParamType();
+	
 	abstract T newInstance();
 
 	@Override

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -45,6 +44,7 @@ import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.ServerBase;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Sort;
@@ -57,6 +57,8 @@ import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
+import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 /*
@@ -91,7 +93,7 @@ public class MethodUtil {
 		urlBuilder.append(resourceName);
 		urlBuilder.append('/');
 		urlBuilder.append(theId.getIdPart());
-	
+
 		HttpPutClientInvocation retVal;
 		String urlExtension = urlBuilder.toString();
 		if (StringUtils.isBlank(theResourceBody)) {
@@ -109,10 +111,10 @@ public class MethodUtil {
 				urlBuilder.append(versionId);
 				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
 			}
-		} 
-		
+		}
+
 		addTagsToPostOrPut(theResource, retVal);
-	
+
 		return retVal;
 	}
 
@@ -135,7 +137,7 @@ public class MethodUtil {
 			String headerValue = clHeaders.get(0);
 			resource.getId().setValue(headerValue);
 		}
-		
+
 		List<String> categoryHeaders = theHeaders.get(Constants.HEADER_CATEGORY_LC);
 		if (categoryHeaders != null && categoryHeaders.size() > 0 && StringUtils.isNotBlank(categoryHeaders.get(0))) {
 			TagList tagList = new TagList();
@@ -223,7 +225,6 @@ public class MethodUtil {
 
 	}
 
-	
 	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
 		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		if (list != null) {
@@ -265,8 +266,7 @@ public class MethodUtil {
 		return new HttpGetClientInvocation("metadata");
 	}
 
-	public static MethodOutcome process2xxResponse(FhirContext theContext, String theResourceName, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader,
-			Map<String, List<String>> theHeaders) {
+	public static MethodOutcome process2xxResponse(FhirContext theContext, String theResourceName, int theResponseStatusCode, String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
 		List<String> locationHeaders = new ArrayList<String>();
 		List<String> lh = theHeaders.get(Constants.HEADER_LOCATION_LC);
 		if (lh != null) {
@@ -378,7 +378,7 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(Method theMethod) {
+	public static List<IParameter> getResourceParameters(Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -389,7 +389,14 @@ public class MethodUtil {
 			Class<?> parameterType = parameterTypes[paramIndex];
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
-			if (TagList.class.isAssignableFrom(parameterType)) {
+			if (SearchParameterMap.class.equals(parameterType)) {
+				if (theProvider instanceof IDynamicSearchResourceProvider) {
+					Search searchAnnotation = theMethod.getAnnotation(Search.class);
+					if (searchAnnotation != null && searchAnnotation.dynamic()) {
+						param = new DynamicSearchParameter((IDynamicSearchResourceProvider) theProvider);
+					}
+				}
+			} else if (TagList.class.isAssignableFrom(parameterType)) {
 				// TagList is handled directly within the method bindings
 				param = new NullParameter();
 			} else {
@@ -403,8 +410,7 @@ public class MethodUtil {
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
-					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
-							+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
 			}
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
@@ -443,19 +449,16 @@ public class MethodUtil {
 							instantiableCollectionType = null;
 							specType = String.class;
 						} else if ((parameterType != Include.class && parameterType != PathSpecification.class) || innerCollectionType == null || outerCollectionType != null) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<"
-									+ Include.class.getSimpleName() + ">");
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + IncludeParam.class.getSimpleName() + " but has a type other than Collection<" + Include.class.getSimpleName() + ">");
 						} else {
-							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName()
-									+ "'");
+							instantiableCollectionType = (Class<? extends Collection<Include>>) CollectionBinder.getInstantiableCollectionType(innerCollectionType, "Method '" + theMethod.getName() + "'");
 							specType = parameterType;
 						}
 
 						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
 						if (!IResource.class.isAssignableFrom(parameterType)) {
-							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName()
-									+ " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
+							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 						}
 						param = new ResourceParameter((Class<? extends IResource>) parameterType);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
@@ -479,8 +482,8 @@ public class MethodUtil {
 			}
 
 			if (param == null) {
-				throw new ConfigurationException("Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '"
-						+ theMethod.getDeclaringClass().getCanonicalName() + "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
+				throw new ConfigurationException("Parameter #" + ((paramIndex + 1)) + "/" + (parameterTypes.length) + " of method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName()
+						+ "' has no recognized FHIR interface parameter annotations. Don't know how to handle this parameter");
 			}
 
 			param.initializeTypes(theMethod, outerCollectionType, innerCollectionType, parameterType);

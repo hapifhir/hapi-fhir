@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,4 +30,9 @@ public class QuantityAndListParam  extends BaseAndListParam<QuantityOrListParam>
 		return new QuantityOrListParam();
 	}
 	
+	@Override
+	public SearchParamTypeEnum getSearchParamType() {
+		return SearchParamTypeEnum.QUANTITY;
+	}
+
 }

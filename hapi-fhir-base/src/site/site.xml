@@ -4,18 +4,18 @@
 	<bannerLeft>
 		<name>HAPI</name>
 		<src>images/hapi_fhir_banner.png</src>
-		<href>http://hl7api.sourceforge.net/hapi-fhir/</href>
+		<href>http://jamesagnew.github.io/hapi-fhir/</href>
 	</bannerLeft>
 	
 	<bannerRight>
 		<name>FHIR</name>
 		<src>images/hapi_fhir_banner_right.png</src>
-		<href>http://hl7api.sourceforge.net/hapi-fhir/</href>
+		<href>http://jamesagnew.github.io/hapi-fhir/</href>
 	</bannerRight>
 	
 	<poweredBy>
-		<logo name="Hosted on SourceForge.net" href="https://sourceforge.net/projects/hl7api/" img="http://sflogo.sourceforge.net/sflogo.php?group_id=38899&amp;type=2" />
-		<logo name="Built with Maven 2" href="http://maven.apache.org" img="images/logos/maven-feather.png" />
+		<logo name="Hosted on GitHub" href="https://github.com/jamesagnew/hapi-fhir" img="./images/github-logo-mini.png"/>
+		<logo name="Built with Maven 3" href="http://maven.apache.org" img="./images/maven-logo-mini.png" />
 	</poweredBy>
 
 	<version position="left" />

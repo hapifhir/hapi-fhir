@@ -69,10 +69,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -1001,7 +1002,7 @@ public class ResfulServerMethodTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 		ourCtx = new FhirContext(Patient.class);
 
@@ -1303,6 +1304,10 @@ public class ResfulServerMethodTest {
 		@Read(version=true)
 		public Patient vread(@IdParam IdDt theId) {
 			Patient retVal = getIdToPatient().get(theId.getIdPart());
+			if (retVal == null) {
+				throw new ResourceNotFoundException("Couldn't find ID " + theId.getIdPart() + " - Valid IDs are: " + getIdToPatient().keySet());
+			}
+			
 			List<HumanNameDt> name = retVal.getName();
 			HumanNameDt nameDt = name.get(0);
 			String value = theId.getVersionIdPart();

@@ -156,7 +156,7 @@ public class SearchParameter extends BaseQueryParameter {
 
 		List<IQueryParameterOr<?>> val = myParamBinder.encode(theContext, theObject);
 		for (IQueryParameterOr<?> nextOr : val) {
-			retVal.add(new QualifiedParamList(theContext, nextOr));
+			retVal.add(new QualifiedParamList(nextOr));
 		}
 
 		return retVal;

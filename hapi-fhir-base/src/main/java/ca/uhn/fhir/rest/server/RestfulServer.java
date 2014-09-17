@@ -454,12 +454,14 @@ public class RestfulServer extends HttpServlet {
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
 			String servletContextPath = "";
-			if (theRequest.getServletContext() != null) {
-				servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
-				// } else {
-				// servletContextPath = servletPath;
-			}
 
+//			if (getServletContext().getMajorVersion() >= 3) {
+//				// getServletContext is only supported in version 3+ of servlet-api
+				if (getServletContext() != null) {
+					servletContextPath = StringUtils.defaultString(getServletContext().getContextPath());
+				}
+//			}
+			
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Request FullPath: {}", requestFullPath);
 				ourLog.trace("Servlet Path: {}", servletPath);
@@ -476,7 +478,7 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			fhirServerBase = myServerAddressStrategy.determineServerBase(theRequest);
+			fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
 
 			if (fhirServerBase.endsWith("/")) {
 				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
@@ -951,6 +953,8 @@ public class RestfulServer extends HttpServlet {
 		if (theServer.getPagingProvider() == null) {
 			numToReturn = theResult.size();
 			resourceList = theResult.getResources(0, numToReturn);
+			validateResourceListNotNull(resourceList);
+			
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
 			if (theLimit == null) {
@@ -961,6 +965,7 @@ public class RestfulServer extends HttpServlet {
 
 			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
 			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
+			validateResourceListNotNull(resourceList);
 
 			if (theSearchId != null) {
 				searchId = theSearchId;
@@ -1010,6 +1015,12 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 		return bundle;
+	}
+
+	private static void validateResourceListNotNull(List<IResource> theResourceList) {
+		if (theResourceList == null) {
+			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
+		}
 	}
 
 	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults) {

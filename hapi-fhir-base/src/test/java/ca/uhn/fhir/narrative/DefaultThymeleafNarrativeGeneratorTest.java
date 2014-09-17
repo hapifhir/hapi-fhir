@@ -86,7 +86,8 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		enc.setType(EncounterTypeEnum.ANNUAL_DIABETES_MELLITUS_SCREENING);
 
 		String title = gen.generateTitle(enc);
-		assertEquals("1234567 / ADMS / ambulatory / Tue Jan 02 11:11:00 EST 2001 - ?", title);
+		title = title.replaceAll("00 [A-Z]+ 2001", "00 TZ 2001"); // account for whatever time zone
+		assertEquals("1234567 / ADMS / ambulatory / Tue Jan 02 11:11:00 TZ 2001 - ?", title);
 		ourLog.info(title);
 
 	}

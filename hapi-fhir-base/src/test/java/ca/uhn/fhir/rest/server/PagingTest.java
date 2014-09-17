@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -167,7 +167,7 @@ public class PagingTest {
 	public static void beforeClass() throws Exception {
 		ourContext = new FhirContext();
 
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();

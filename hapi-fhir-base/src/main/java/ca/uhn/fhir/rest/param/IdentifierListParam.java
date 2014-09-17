@@ -59,7 +59,7 @@ public class IdentifierListParam implements IQueryParameterOr<IQueryParameterTyp
 	}
 
 	@Override
-	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {
+	public void  setValuesAsQueryTokens(QualifiedParamList theParameters) {
 		for (String string : theParameters) {
 			IdentifierDt dt = new IdentifierDt();
 			dt.setValueAsQueryToken(null, string);

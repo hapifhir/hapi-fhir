@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,13 +31,13 @@ import org.apache.commons.lang3.StringUtils;
 public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 
 	@Override
-	public String determineServerBase(HttpServletRequest theRequest) {
+	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
 		String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 		String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 		StringBuffer requestUrl = theRequest.getRequestURL();
 		String servletContextPath = "";
-		if (theRequest.getServletContext() != null) {
-			servletContextPath = StringUtils.defaultString(theRequest.getServletContext().getContextPath());
+		if (theServletContext != null) {
+			servletContextPath = StringUtils.defaultString(theServletContext.getContextPath());
 			// } else {
 			// servletContextPath = servletPath;
 		}
@@ -46,15 +47,23 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 			requestPath = requestPath.substring(1);
 		}
 
+		int startOfPath = requestUrl.indexOf("//");
+		if (startOfPath != -1 && (startOfPath + 2) < requestUrl.length()) {
+			startOfPath = requestUrl.indexOf("/", startOfPath + 2);
+		}
+		if (startOfPath == -1) {
+			startOfPath = 0;
+		}
+
 		int contextIndex;
 		if (servletPath.length() == 0) {
 			if (requestPath.length() == 0) {
 				contextIndex = requestUrl.length();
 			} else {
-				contextIndex = requestUrl.indexOf(requestPath);
+				contextIndex = requestUrl.indexOf(requestPath, startOfPath);
 			}
 		} else {
-			contextIndex = requestUrl.indexOf(servletPath);
+			contextIndex = requestUrl.indexOf(servletPath, startOfPath);
 		}
 
 		String fhirServerBase;

@@ -374,17 +374,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return entity;
 	}
 
-	private void validateGivenIdIsAppropriateToRetrieveResource(IdDt theId, BaseHasResource entity) {
-		if (entity.getForcedId() != null) {
-			if (theId.isIdPartValidLong()) {
-				// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
-				// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer to the
-				// forced ID)
-				throw new ResourceNotFoundException(theId);
-			}
-		}
-	}
-
 	@Override
 	public void removeTag(IdDt theId, String theScheme, String theTerm) {
 		StopWatch w = new StopWatch();
@@ -562,34 +551,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		ourLog.info("Processed search for {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
-	}
-
-	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
-		if (theSort == null || isBlank(theSort.getParamName())) {
-			return;
-		}
-
-		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
-		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
-		if (param == null) {
-			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
-		}
-
-		String joinAttrName = "myParamsString";
-		String sortAttrName = "myValueExact";
-
-		switch (param.getParamType()) {
-		case STRING: {
-			From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
-			Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
-			Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
-			thePredicates.add(theBuilder.or(p, pn));
-			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
-			break;
-		}
-		}
-
-		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
 	@Override
@@ -904,6 +865,51 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return found;
 	}
 
+	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
+		if (theList == null || theList.isEmpty()) {
+			return thePids;
+		}
+		if (theList.size() > 1) {
+			throw new InvalidRequestException("Language parameter can not have more than one AND value, found " + theList.size());
+		}
+
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		Set<String> values = new HashSet<String>();
+		for (IQueryParameterType next : theList.get(0)) {
+			if (next instanceof StringParam) {
+				String nextValue = ((StringParam) next).getValue();
+				if (isBlank(nextValue)) {
+					continue;
+				}
+				values.add(nextValue);
+			} else {
+				throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
+			}
+		}
+
+		if (values.isEmpty()) {
+			return thePids;
+		}
+
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
+		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
+
+		if (thePids.size() > 0) {
+			Predicate inPids = (from.get("myId").in(thePids));
+			cq.where(builder.and(masterCodePredicate, inPids));
+		} else {
+			cq.where(masterCodePredicate);
+		}
+
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		return new HashSet<Long>(q.getResultList());
+	}
+
 	private Set<Long> addPredicateNumber(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -1203,51 +1209,6 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
-		if (theList == null || theList.isEmpty()) {
-			return thePids;
-		}
-		if (theList.size() > 1) {
-			throw new InvalidRequestException("Language parameter can not have more than one AND value, found " + theList.size());
-		}
-
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		Set<String> values = new HashSet<String>();
-		for (IQueryParameterType next : theList.get(0)) {
-			if (next instanceof StringParam) {
-				String nextValue = ((StringParam) next).getValue();
-				if (isBlank(nextValue)) {
-					continue;
-				}
-				values.add(nextValue);
-			} else {
-				throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
-			}
-		}
-
-		if (values.isEmpty()) {
-			return thePids;
-		}
-
-		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
-		Predicate langPredicate = from.get("myLanguage").as(String.class).in(values);
-		Predicate masterCodePredicate = builder.and(typePredicate, langPredicate);
-
-		if (thePids.size() > 0) {
-			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(masterCodePredicate, inPids));
-		} else {
-			cq.where(masterCodePredicate);
-		}
-
-		TypedQuery<Long> q = myEntityManager.createQuery(cq);
-		return new HashSet<Long>(q.getResultList());
-	}
-
 	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -1410,6 +1371,34 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return singleCode;
 	}
 
+	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
+		if (theSort == null || isBlank(theSort.getParamName())) {
+			return;
+		}
+
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
+		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
+		if (param == null) {
+			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
+		}
+
+		String joinAttrName = "myParamsString";
+		String sortAttrName = "myValueExact";
+
+		switch (param.getParamType()) {
+		case STRING: {
+			From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
+			Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
+			Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
+			thePredicates.add(theBuilder.or(p, pn));
+			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
+			break;
+		}
+		}
+
+		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
+	}
+
 	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
 		if (theIncludePids.isEmpty()) {
 			return;
@@ -1495,6 +1484,17 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		qp.setValueAsQueryToken(null, theValueAsQueryToken);
 		return qp;
+	}
+
+	private void validateGivenIdIsAppropriateToRetrieveResource(IdDt theId, BaseHasResource entity) {
+		if (entity.getForcedId() != null) {
+			if (theId.isIdPartValidLong()) {
+				// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
+				// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer to the
+				// forced ID)
+				throw new ResourceNotFoundException(theId);
+			}
+		}
 	}
 
 	private void validateResourceType(BaseHasResource entity) {

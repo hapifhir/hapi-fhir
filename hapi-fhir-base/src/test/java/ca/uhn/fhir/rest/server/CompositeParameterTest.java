@@ -32,7 +32,7 @@ import ca.uhn.fhir.rest.param.CompositeOrListParam;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -100,7 +100,7 @@ public class CompositeParameterTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyObservationResourceProvider patientProvider = new DummyObservationResourceProvider();

@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -56,12 +56,12 @@ public class InterceptorTest {
 			Patient patient = client.read(Patient.class, "1");
 			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-			int times = 1;
-			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
-				times = 3;
-			}
+//			int times = 1;
+//			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
+//				times = 3;
+//			}
 			
-			verify(mockAppender, times(times)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 				@Override
 				public boolean matches(final Object argument) {
 					return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");
@@ -80,7 +80,7 @@ public class InterceptorTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();

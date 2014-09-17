@@ -18,7 +18,7 @@ import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(name="Patient")
 public class MyObservationWithExtensions extends Patient {
-
+	
 	@Extension(url = "urn:patientext:att", definedLocally = false, isModifier = false)
 	@Child(name = "extAtt", order = 0)
 	private AttachmentDt myExtAtt;

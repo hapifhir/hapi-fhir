@@ -34,6 +34,14 @@ public class CompositeOrListParam<A extends IQueryParameterType, B extends IQuer
 		myRightType = theRightType;
 	}
 
+	public Class<A> getLeftType() {
+		return myLeftType;
+	}
+
+	public Class<B> getRightType() {
+		return myRightType;
+	}
+
 	@Override
 	CompositeParam<A,B> newInstance() {
 		return new CompositeParam<A,B>(myLeftType, myRightType);

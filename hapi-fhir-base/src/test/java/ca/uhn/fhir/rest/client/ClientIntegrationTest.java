@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 public class ClientIntegrationTest {
 
@@ -37,7 +37,7 @@ public class ClientIntegrationTest {
 
 	@Before
 	public void before() {
-		myPort = RandomServerPortProvider.findFreePort();
+		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
 
 		myPatientProvider = new MyPatientResourceProvider();

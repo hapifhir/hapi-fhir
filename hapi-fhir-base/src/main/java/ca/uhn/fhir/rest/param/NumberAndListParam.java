@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,6 +28,11 @@ public class NumberAndListParam  extends BaseAndListParam<NumberOrListParam> {
 	@Override
 	NumberOrListParam newInstance() {
 		return new NumberOrListParam();
+	}
+
+	@Override
+	public SearchParamTypeEnum getSearchParamType() {
+		return SearchParamTypeEnum.NUMBER;
 	}
 	
 }

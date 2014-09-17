@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
@@ -33,10 +34,10 @@ abstract class BaseOrListParam<T extends IQueryParameterType> implements IQueryP
 
 	private List<T> myList=new ArrayList<T>();
 
-	public void addToken(T theParam) {
-		Validate.notNull(theParam,"Param can not be null");
-		myList.add(theParam);
-	}
+//	public void addToken(T theParam) {
+//		Validate.notNull(theParam,"Param can not be null");
+//		myList.add(theParam);
+//	}
 	
 	@Override
 	public void setValuesAsQueryTokens(QualifiedParamList theParameters) {

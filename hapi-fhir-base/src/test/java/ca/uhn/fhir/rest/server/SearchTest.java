@@ -39,9 +39,10 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -105,6 +106,21 @@ public class SearchTest {
 		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
+	@Test
+	public void testSearchWithOrList() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?findPatientWithOrList=aaa,bbb");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("aaa", p.getIdentifier().get(0).getValue().getValue());
+		assertEquals("bbb", p.getIdentifier().get(1).getValue().getValue());
+	}
+	
 	@Test
 	public void testSearchByPost() throws Exception {
 		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search");
@@ -199,7 +215,7 @@ public class SearchTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
+		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
@@ -295,6 +311,20 @@ public class SearchTest {
 			return retVal;
 		}
 
+		@Search()
+		public List<Patient> findPatientWithOrList(@RequiredParam(name = "findPatientWithOrList") StringOrListParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = new Patient();
+			patient.setId("1");
+			for (StringParam next : theParam.getValuesAsQueryTokens()) {
+				patient.addIdentifier("system", next.getValue());
+			}
+			retVal.add(patient);
+			return retVal;
+		}
+
+		
 		@Search(queryName = "findWithLinks")
 		public List<Patient> findWithLinks() {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();

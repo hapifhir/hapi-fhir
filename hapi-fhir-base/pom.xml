@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.6</version>
+		<version>0.7-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -225,6 +225,13 @@
 			<version>9.1.1.v20140108</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+            <version>9.1.1.v20140108</version>
+            <scope>test</scope>
+        </dependency>
+        
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -521,7 +528,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>${maven_site_plugin_version}</version>
 				<executions>
 					<execution>
 						<id>stage-for-scm-publish</id>

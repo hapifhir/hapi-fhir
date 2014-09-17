@@ -63,8 +63,10 @@ import ca.uhn.fhir.rest.server.BundleProviders;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -82,7 +84,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	private FhirContext myContext;
 	private Method myMethod;
 	private List<IParameter> myParameters;
-
 	private Object myProvider;
 
 	public BaseMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -92,7 +93,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = MethodUtil.getResourceParameters(theMethod);
+		myParameters = MethodUtil.getResourceParameters(theMethod, theProvider);
 	}
 
 	public List<Class<?>> getAllowableParamAnnotations() {
@@ -349,7 +350,12 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
+			if (search.dynamic()) {
+				IDynamicSearchResourceProvider provider = (IDynamicSearchResourceProvider) theProvider;
+				return new DynamicSearchMethodBinding(returnType, theMethod, theContext, provider);
+			} else {
+				return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
+			}
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
