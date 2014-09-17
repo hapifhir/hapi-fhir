@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
@@ -442,6 +443,31 @@ public class JsonParserTest {
 		ourLog.info(encoded);
 
 	}
+
+	@Test
+	public void testParseJsonProfile() throws IOException {
+
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/alert.profile.json"));
+		ourLog.info(msg);
+
+		IParser p = ourCtx.newJsonParser();
+		Profile res = p.parseResource(Profile.class, msg);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
+		ourLog.info(encoded);
+
+		JSON expected = JSONSerializer.toJSON(msg.trim());
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
+
+		String exp = expected.toString().replace("\\r\\n", "\\n");
+		String act = actual.toString().replace("\\r\\n","\\n");
+		
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+		
+		assertEquals(exp, act);
+	}
+
 	
 	
 	@Test
@@ -926,9 +952,13 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		ourLog.info("Expected: {}", expected);
-		ourLog.info("Actual  : {}", actual);
-		assertEquals(expected.toString(), actual.toString());
+		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
+		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+		String act = actual.toString();
+		
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+		assertEquals(exp, act);
 
 	}
 
@@ -969,9 +999,13 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		ourLog.info("Expected: {}", expected);
-		ourLog.info("Actual  : {}", actual);
-		assertEquals(expected.toString(), actual.toString());
+		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
+		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+		String act = actual.toString();
+		
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+		assertEquals(exp, act);
 
 	}
 

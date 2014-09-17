@@ -26,14 +26,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
+import com.phloc.schematron.ISchematronResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 
 /**
- * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons,
- * etc.)
+ * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, etc.)
  * 
  * <p>
  * To obtain a resource validator, call {@link FhirContext#newValidator()}
@@ -43,17 +44,33 @@ public class FhirValidator {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
 
+	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName()+".noPhlocWarningOnStartup";
+	private static final String I18N_KEY_NO_PHLOC_ERROR = FhirValidator.class.getName()+".noPhlocError";
+
 	private FhirContext myContext;
 	private List<IValidator> myValidators = new ArrayList<IValidator>();
+	private static volatile Boolean ourPhlocPresentOnClasspath;
 
 	/**
-	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called
-	 * to obtain an instance of {@link FhirValidator})
+	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
 	 */
 	public FhirValidator(FhirContext theFhirContext) {
 		myContext = theFhirContext;
 		setValidateAgainstStandardSchema(true);
-		setValidateAgainstStandardSchematron(true);
+
+		if (ourPhlocPresentOnClasspath == null) {
+			try {
+				Class.forName("com.phloc.schematron.ISchematronResource");
+				ourPhlocPresentOnClasspath = true;
+			} catch (ClassNotFoundException e) {
+				ourLog.info(theFhirContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_WARNING));
+				ourPhlocPresentOnClasspath = false;
+			}
+		}
+		if (ourPhlocPresentOnClasspath) {
+			setValidateAgainstStandardSchematron(true);
+		}
+
 	}
 
 	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator instance) {
@@ -83,43 +100,43 @@ public class FhirValidator {
 	}
 
 	/**
-	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
-	 * distribution itself)
+	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public boolean isValidateAgainstStandardSchema() {
 		return haveValidatorOfType(SchemaBaseValidator.class);
 	}
 
 	/**
-	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
-	 * distribution itself)
+	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public boolean isValidateAgainstStandardSchematron() {
 		return haveValidatorOfType(SchematronBaseValidator.class);
 	}
 
 	/**
-	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR
-	 * distribution itself)
+	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public void setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
 		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator());
 	}
 
 	/**
-	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR
-	 * distribution itself)
+	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR distribution itself)
 	 */
 	public void setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
+		if (theValidateAgainstStandardSchematron && !ourPhlocPresentOnClasspath) {
+			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_ERROR));
+		}
 		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator());
 	}
 
 	/**
-	 * Validates a bundle instance, throwing a {@link ValidationFailureException} if the validation fails. This
-	 * validation includes validation of all resources in the bundle.
+	 * Validates a bundle instance, throwing a {@link ValidationFailureException} if the validation fails. This validation includes validation of all resources in the bundle.
 	 * 
-	 * @param theResource The resource to validate
-	 * @throws ValidationFailureException If the validation fails
+	 * @param theResource
+	 *            The resource to validate
+	 * @throws ValidationFailureException
+	 *             If the validation fails
 	 */
 	public void validate(Bundle theBundle) {
 		Validate.notNull(theBundle, "theBundle must not be null");
@@ -140,8 +157,10 @@ public class FhirValidator {
 	/**
 	 * Validates a resource instance, throwing a {@link ValidationFailureException} if the validation fails
 	 * 
-	 * @param theResource The resource to validate
-	 * @throws ValidationFailureException If the validation fails
+	 * @param theResource
+	 *            The resource to validate
+	 * @throws ValidationFailureException
+	 *             If the validation fails
 	 */
 	public void validate(IResource theResource) throws ValidationFailureException {
 		Validate.notNull(theResource, "theResource must not be null");

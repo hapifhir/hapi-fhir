@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -31,6 +32,6 @@ public interface IServerAddressStrategy {
 	/**
 	 * Determine the server base for a given request
 	 */
-	public String determineServerBase(HttpServletRequest theRequest);
+	String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest);
 	
 }

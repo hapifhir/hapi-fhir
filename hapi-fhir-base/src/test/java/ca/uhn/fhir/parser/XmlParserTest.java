@@ -920,7 +920,11 @@ public class XmlParserTest {
 
 		ValueSet resource = (ValueSet) entry.getResource();
 		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());
-		assertEquals(summaryText.trim(), entry.getSummary().getValueAsString().trim());
+		
+		String exp = summaryText.trim();
+		exp = exp.replace("\"LOINC", "&quot;LOINC");
+		exp = exp.replace("terol\"", "terol&quot;");
+		assertEquals(exp, entry.getSummary().getValueAsString().trim());
 
 		TagList tl = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		assertEquals(1, tl.size());

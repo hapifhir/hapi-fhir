@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -30,16 +31,11 @@ public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 	private String myValue;
 
 	public HardcodedServerAddressStrategy() {
-		//nothing
-	}
-	
-	public HardcodedServerAddressStrategy(String theValue) {
-		myValue=theValue;
+		// nothing
 	}
 
-	@Override
-	public String determineServerBase(HttpServletRequest theRequest) {
-		return myValue;
+	public HardcodedServerAddressStrategy(String theValue) {
+		myValue = theValue;
 	}
 
 	public String getValue() {
@@ -48,6 +44,11 @@ public class HardcodedServerAddressStrategy implements IServerAddressStrategy {
 
 	public void setValue(String theValue) {
 		myValue = theValue;
+	}
+
+	@Override
+	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
+		return myValue;
 	}
 
 }
