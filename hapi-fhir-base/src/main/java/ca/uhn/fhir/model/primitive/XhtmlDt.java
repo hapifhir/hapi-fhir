@@ -32,13 +32,10 @@ import java.util.List;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -46,6 +43,7 @@ import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.XmlUtil;
 
 @DatatypeDef(name = "xhtml")
 public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
@@ -94,7 +92,8 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
 		try {
 			ArrayList<XMLEvent> value = new ArrayList<XMLEvent>();
-			XMLEventReader er = XMLInputFactory.newInstance().createXMLEventReader(new StringReader(val));
+			StringReader reader = new StringReader(val);
+			XMLEventReader er = XmlUtil.createXmlReader(reader);
 			boolean first = true;
 			while (er.hasNext()) {
 				XMLEvent next = er.nextEvent();
@@ -123,11 +122,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		}
 		try {
 			StringWriter w = new StringWriter();
-			XMLOutputFactory newInstance = XMLOutputFactory.newInstance();
-
-			newInstance.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
-
-			XMLEventWriter ew = newInstance.createXMLEventWriter(w);
+			XMLEventWriter ew = XmlUtil.createXmlWriter(w);
 			for (XMLEvent next : myValue) {
 				if (next.isCharacters()) {
 					ew.add(next);
@@ -142,55 +137,6 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}
-	}
-
-	private static class MyEscaper implements EscapingWriterFactory {
-
-		@Override
-		public Writer createEscapingWriterFor(final Writer theW, String theEnc) throws UnsupportedEncodingException {
-			return new Writer() {
-
-				@Override
-				public void write(char[] theCbuf, int theOff, int theLen) throws IOException {
-					boolean hasEscapable = false;
-					for (int i = 0; i < theLen && !hasEscapable; i++) {
-						char nextChar = theCbuf[i + theOff];
-						switch (nextChar) {
-						case '<':
-						case '>':
-						case '"':
-						case '&':
-							hasEscapable = true;
-						}
-					}
-
-					if (!hasEscapable) {
-						theW.write(theCbuf, theOff, theLen);
-						return;
-					}
-
-					String escaped = StringEscapeUtils.escapeXml10(new String(theCbuf, theOff, theLen));
-					theW.write(escaped.toCharArray());
-				}
-
-				@Override
-				public void flush() throws IOException {
-					theW.flush();
-				}
-
-				@Override
-				public void close() throws IOException {
-					theW.close();
-				}
-			};
-		}
-
-		@Override
-		public Writer createEscapingWriterFor(OutputStream theOut, String theEnc) throws UnsupportedEncodingException {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
 	}
 
 	@Override

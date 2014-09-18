@@ -36,12 +36,11 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
 /**
- * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs,
- * Resource References, etc. to represent a specific instance of a resource.
+ * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
  * 
  * <p>
- * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any
- * other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+ * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+ * limit of 36 characters.
  * </p>
  * <p>
  * regex: [a-z0-9\-\.]{1,36}
@@ -50,6 +49,7 @@ import ca.uhn.fhir.util.UrlUtil;
 @DatatypeDef(name = "id")
 public class IdDt extends BasePrimitive<String> {
 
+	private String myBaseUrl;
 	private boolean myHaveComponentParts;
 	private String myResourceType;
 	private String myUnqualifiedId;
@@ -64,8 +64,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string
-	 * representation.
+	 * Create a new ID, using a BigDecimal input. Uses {@link BigDecimal#toPlainString()} to generate the string representation.
 	 */
 	public IdDt(BigDecimal thePid) {
 		if (thePid != null) {
@@ -83,12 +82,11 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234") or it may contain a complete
-	 * URL (http://example.com/fhir/Patient/1234).
+	 * Create a new ID using a string. This String may contain a simple ID (e.g. "1234") or it may contain a complete URL (http://example.com/fhir/Patient/1234).
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -141,8 +139,14 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is
-	 *             ambiguous)
+	 * Creates an ID based on a given URL
+	 */
+	public IdDt(UriDt theUrl) {
+		setValue(theUrl.getValueAsString());
+	}
+
+	/**
+	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
 	 */
 	public BigDecimal asBigDecimal() {
 		return getIdPartAsBigDecimal();
@@ -160,6 +164,17 @@ public class IdDt extends BasePrimitive<String> {
 			return isEmpty();
 		}
 		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
+	}
+
+	/**
+	 * Returns the portion of this resource ID which corresponds to the server base URL. For example given the resource ID <code>http://example.com/fhir/Patient/123</code> the base URL would be
+	 * <code>http://example.com/fhir</code>.
+	 * <p>
+	 * This method may return null if the ID contains no base (e.g. "Patient/123")
+	 * </p>
+	 */
+	public String getBaseUrl() {
+		return myBaseUrl;
 	}
 
 	public String getIdPart() {
@@ -199,8 +214,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a
-	 * simple ID. Use {@link #getIdPart()} to get just the ID portion.
+	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
 	 * 
 	 * @see #getIdPart()
 	 */
@@ -241,6 +255,15 @@ public class IdDt extends BasePrimitive<String> {
 		}
 	}
 
+	/**
+	 * Returns true if this ID has a base url
+	 * 
+	 * @see #getBaseUrl()
+	 */
+	public boolean hasBaseUrl() {
+		return isNotBlank(myBaseUrl);
+	}
+
 	public boolean hasIdPart() {
 		return isNotBlank(getIdPart());
 	}
@@ -254,8 +277,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or
-	 * "https://"
+	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or "https://"
 	 */
 	public boolean isAbsolute() {
 		if (StringUtils.isBlank(getValue())) {
@@ -265,8 +287,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only
-	 * of digits)
+	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only of digits)
 	 */
 	public boolean isIdPartValidLong() {
 		String id = getIdPart();
@@ -289,8 +310,7 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method
-	 * but it is provided for consistency with the rest of the API.
+	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
 	 */
 	@Override
 	public void setId(IdDt theId) {
@@ -301,8 +321,8 @@ public class IdDt extends BasePrimitive<String> {
 	 * Set the value
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -331,6 +351,7 @@ public class IdDt extends BasePrimitive<String> {
 				myUnqualifiedVersionId = null;
 			}
 
+			myBaseUrl = null;
 			if (idIndex <= 0) {
 				myResourceType = null;
 			} else {
@@ -339,6 +360,11 @@ public class IdDt extends BasePrimitive<String> {
 					myResourceType = theValue.substring(0, idIndex);
 				} else {
 					myResourceType = theValue.substring(typeIndex + 1, idIndex);
+
+					if (typeIndex > 4) {
+						myBaseUrl = theValue.substring(0, typeIndex);
+					}
+
 				}
 			}
 
@@ -349,8 +375,8 @@ public class IdDt extends BasePrimitive<String> {
 	 * Set the value
 	 * 
 	 * <p>
-	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or
-	 * any other combination of lowercase letters, numerals, "-" and ".", with a length limit of 36 characters.
+	 * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+	 * limit of 36 characters.
 	 * </p>
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
@@ -389,10 +415,8 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be
-	 * used if the ID does not already contain those respective parts). Essentially, because IdDt can contain either a
-	 * complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete
-	 * URL.
+	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,
+	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.
 	 * 
 	 * @param theServerBase
 	 *            The server base (e.g. "http://example.com/fhir")
@@ -428,13 +452,11 @@ public class IdDt extends BasePrimitive<String> {
 	}
 
 	/**
-	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID
-	 * noted by theVersion.
+	 * Creates a new instance of this ID which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 * 
 	 * @param theVersion
 	 *            The actual version string, e.g. "1"
-	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted
-	 *         by theVersion.
+	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 */
 	public IdDt withVersion(String theVersion) {
 		Validate.notBlank(theVersion, "Version may not be null or empty");

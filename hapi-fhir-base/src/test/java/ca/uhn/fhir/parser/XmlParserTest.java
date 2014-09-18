@@ -182,6 +182,28 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeEscapedChars() {
+		
+		Patient p = new Patient();
+		p.addName().addFamily("and <>&ü");
+		
+		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(enc);
+		
+		p = ourCtx.newXmlParser().parseResource(Patient.class, enc);
+		assertEquals("and <>&ü", p.getNameFirstRep().getFamilyFirstRep().getValue());
+		
+		p = ourCtx.newXmlParser().parseResource(Patient.class, "<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"quot &quot;\"/></name></Patient>");
+		assertEquals("quot \"", p.getNameFirstRep().getFamilyFirstRep().getValue());
+		
+		// Unescaped entities are swallowed
+		p = ourCtx.newXmlParser().parseResource(Patient.class, "<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"uuml &uuml;\"/></name></Patient>");
+		assertEquals("uuml ", p.getNameFirstRep().getFamilyFirstRep().getValue());
+
+	}
+	
+	
+	@Test
 	public void testEncodeContainedAndIncludedResources() {
 
 		DiagnosticReport rpt = new DiagnosticReport();

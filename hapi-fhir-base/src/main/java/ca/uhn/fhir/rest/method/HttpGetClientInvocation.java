@@ -35,6 +35,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
+/**
+ * @author James Agnew
+ * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
+ */
 public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 
 	private final Map<String, List<String>> myParameters;
@@ -77,12 +81,15 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
 		StringBuilder b = new StringBuilder();
-		b.append(theUrlBase);
-		if (!theUrlBase.endsWith("/")) {
-			b.append('/');
-		}
-		b.append(myUrlPath);
-
+		
+		if (!myUrlPath.contains("://")) {
+            b.append(theUrlBase);
+            if (!theUrlBase.endsWith("/")) {
+                b.append('/');
+            }
+        }
+        b.append(myUrlPath);
+		
 		boolean first = b.indexOf("?") == -1;
 		for (Entry<String, List<String>> next : myParameters.entrySet()) {
 			if (next.getValue() == null || next.getValue().isEmpty()) {

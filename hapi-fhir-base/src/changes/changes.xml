@@ -7,8 +7,21 @@
 	</properties>
 	<body>
 		<release version="0.7" date="TBD">
-			<action type="add">
-				Documentation update, thanks to Suranga Nath Kasthurirathne of the OpenMRS project.
+			<action type="add" dev="suranga">
+				Documentation fixes
+			</action>
+			<action type="add" dev="dougmartin">
+				Add a collection of new methods on the generic client which support the
+				<![CDATA[ 
+				<b><a href="./apidocs/ca/uhn/fhir/rest/client/IGenericClient.html#read(java.lang.Class,%20ca.uhn.fhir.model.primitive.UriDt)">read</a></b>,
+				<b><a href="./apidocs/ca/uhn/fhir/rest/client/IGenericClient.html#vread(java.lang.Class,%20ca.uhn.fhir.model.primitive.UriDt)">read</a></b>,
+				and <b><a href="./apidocs/ca/uhn/fhir/rest/client/IGenericClient.html#search(java.lang.Class,%20ca.uhn.fhir.model.primitive.UriDt)">search</a></b>
+				]]>
+				operations using an absolute URL. This allows developers to perform these operations using
+				URLs they obtained from other sources (or external resource references within resources). In
+				addition, the existing read/vread operations will now access absolute URL references if
+				they are passed in. Thanks to Doug Martin of the Regenstrief Center for Biomedical Informatics
+				for contributing this implementation!
 			</action>
 			<action type="fix">
 				Server implementation was not correctly figuring out its own FHIR Base URL when deployed

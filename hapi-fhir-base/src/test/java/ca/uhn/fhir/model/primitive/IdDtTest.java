@@ -18,10 +18,27 @@ public class IdDtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IdDtTest.class);
 
 	@Test
+	public void testDetermineBase() {
+
+		IdDt rr;
+
+		rr = new IdDt("http://foo/fhir/Organization/123");
+		assertEquals("http://foo/fhir", rr.getBaseUrl());
+
+		rr = new IdDt("http://foo/fhir/Organization/123/_history/123");
+		assertEquals("http://foo/fhir", rr.getBaseUrl());
+		
+		rr = new IdDt("Organization/123/_history/123");
+		assertEquals(null, rr.getBaseUrl());
+
+	}
+
+	@Test
 	public void testParseValueAbsolute() {
 		Patient patient = new Patient();
 		IdDt rr = new IdDt();
 		rr.setValue("http://foo/fhir/Organization/123");
+
 		patient.setManagingOrganization(new ResourceReferenceDt(rr));
 
 		Patient actual = parseAndEncode(patient);
@@ -33,12 +50,12 @@ public class IdDtTest {
 
 	@Test
 	public void testBigDecimalIds() {
-		
+
 		IdDt id = new IdDt(new BigDecimal("123"));
 		assertEquals(id.getIdPartAsBigDecimal(), new BigDecimal("123"));
-		
+
 	}
-	
+
 	@Test
 	public void testParseValueAbsoluteWithVersion() {
 		Patient patient = new Patient();
@@ -69,7 +86,6 @@ public class IdDtTest {
 
 	}
 
-	
 	@Test
 	public void testParseValueMissingType1() {
 		Patient patient = new Patient();

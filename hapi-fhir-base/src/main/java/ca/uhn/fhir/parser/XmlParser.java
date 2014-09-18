@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -76,6 +78,7 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
+import ca.uhn.fhir.util.XmlUtil;
 
 public class XmlParser extends BaseParser implements IParser {
 	static final String RESREF_DISPLAY = "display";
@@ -91,14 +94,10 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private FhirContext myContext;
 	private boolean myPrettyPrint;
-	private XMLInputFactory myXmlInputFactory;
-	private XMLOutputFactory myXmlOutputFactory;
 
 	public XmlParser(FhirContext theContext) {
 		super(theContext);
 		myContext = theContext;
-		myXmlInputFactory = XMLInputFactory.newInstance();
-		myXmlOutputFactory = XMLOutputFactory.newInstance();
 	}
 
 	@Override
@@ -264,7 +263,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private XMLStreamWriter createXmlWriter(Writer theWriter) throws XMLStreamException {
 		XMLStreamWriter eventWriter;
-		eventWriter = myXmlOutputFactory.createXMLStreamWriter(theWriter);
+		eventWriter = XmlUtil.createXmlStreamWriter(theWriter);
 		eventWriter = decorateStreamWriter(eventWriter);
 		return eventWriter;
 	}
@@ -329,15 +328,23 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private XMLEventReader createStreamReader(Reader theReader) {
-		XMLEventReader streamReader;
 		try {
-			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
-		} catch (XMLStreamException e) {
-			throw new DataFormatException(e);
-		} catch (FactoryConfigurationError e) {
-			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+			return XmlUtil.createXmlReader(theReader);
+		} catch (FactoryConfigurationError e1) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e1);
+		} catch (XMLStreamException e1) {
+			throw new DataFormatException(e1);
 		}
-		return streamReader;
+		
+//		XMLEventReader streamReader;
+//		try {
+//			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+//		} catch (XMLStreamException e) {
+//			throw new DataFormatException(e);
+//		} catch (FactoryConfigurationError e) {
+//			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+//		}
+//		return streamReader;
 	}
 
 	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {

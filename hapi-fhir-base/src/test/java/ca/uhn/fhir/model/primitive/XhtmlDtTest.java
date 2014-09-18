@@ -40,4 +40,28 @@ public class XhtmlDtTest {
 
 	}
 
+	@Test
+	public void testBasicCharacterEntity() {
+		String input = "amp &amp;";
+		
+		XhtmlDt x = new XhtmlDt();
+		x.setValueAsString(input);
+		
+		assertEquals("<div>amp &amp;</div>", x.getValueAsString());
+	}
+
+	
+	@Test
+	public void testCharacterEntities() {
+		String input = "Sect: &sect; uuml: &uuml; &Uuml;";
+		
+		XhtmlDt x = new XhtmlDt();
+		x.setValueAsString(input);
+
+		// <div>Sect: § uuml: ü Ü</div>
+		assertEquals("<div>Sect: &sect; uuml: &uuml; &Uuml;</div>", x.getValueAsString());
+
+	}
+	
+
 }
