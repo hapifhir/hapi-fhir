@@ -34,7 +34,8 @@ import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 public class ServerConformanceProviderTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderTest.class);
-
+	private FhirContext myCtx = new FhirContext();
+	
 	@Test
 	public void testSearchParameterDocumentation() throws Exception {
 
@@ -59,13 +60,33 @@ public class ServerConformanceProviderTest {
 		}
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance();
-		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+
+		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
+		
 	}
 
+	
+	@Test
+	public void testValidateGeneratedStatement() throws Exception {
+
+		RestfulServer rs = new RestfulServer();
+		rs.setProviders(new MultiOptionalProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(null);
+		
+		Conformance conformance = sc.getServerConformance();
+
+		myCtx.newValidator().validate(conformance);
+	}
+
+	
 	
 	@Test
 	public void testMultiOptionalDocumentation() throws Exception {

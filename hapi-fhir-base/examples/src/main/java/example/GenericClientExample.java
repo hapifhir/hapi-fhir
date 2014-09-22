@@ -184,7 +184,9 @@ public class GenericClientExample {
          Patient patient = client.read(Patient.class, id); // search for patient 123 on example.com
          // END SNIPPET: readabsolute
       }
-
+      
+      
+      
       
    }
 

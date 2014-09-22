@@ -91,4 +91,11 @@ public class DateTimeDt extends BaseDateTimeDt {
 		}
 	}
 
+	/**
+	 * Returns a new instance of DateTimeDt with the current system time and SECOND precision
+	 */
+	public static DateTimeDt withCurrentTime() {
+		return new DateTimeDt(new Date(), TemporalPrecisionEnum.SECOND);
+	}
+
 }

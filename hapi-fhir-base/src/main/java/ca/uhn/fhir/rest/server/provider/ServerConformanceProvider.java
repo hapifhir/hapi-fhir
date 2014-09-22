@@ -45,6 +45,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
@@ -70,12 +71,22 @@ import ca.uhn.fhir.util.ExtensionConstants;
  */
 public class ServerConformanceProvider {
 
-	private volatile Conformance myConformance;
-	private final RestfulServer myRestfulServer;
 	private boolean myCache = true;
+	private volatile Conformance myConformance;
+	private String myPublisher = "Not provided";
+	private final RestfulServer myRestfulServer;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
 		myRestfulServer = theRestfulServer;
+	}
+
+	/**
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this
+	 * is a mandatory element, the value should not be null (although this is not enforced). The value defaults
+	 * to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 */
+	public String getPublisher() {
+		return myPublisher;
 	}
 
 	/**
@@ -91,6 +102,11 @@ public class ServerConformanceProvider {
 
 		Conformance retVal = new Conformance();
 
+		retVal.setPublisher(myPublisher);
+		retVal.setDate(DateTimeDt.withCurrentTime());
+		retVal.setFhirVersion("0.80"); // TODO: pull from model
+		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser needs to be modified to actually allow it
+		
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
@@ -177,6 +193,51 @@ public class ServerConformanceProvider {
 		return retVal;
 	}
 
+	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
+		includes.addAll(searchMethodBinding.getIncludes());
+
+		List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
+		searchParameters.addAll(searchMethodBinding.getSearchParams());
+		sortRuntimeSearchParameters(searchParameters);
+
+		if (!searchParameters.isEmpty()) {
+
+			for (RuntimeSearchParam nextParameter : searchParameters) {
+
+				String nextParamName = nextParameter.getName();
+
+				// String chain = null;
+				String nextParamUnchainedName = nextParamName;
+				if (nextParamName.contains(".")) {
+					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+				}
+
+				String nextParamDescription = nextParameter.getDescription();
+
+				/*
+				 * If the parameter has no description, default to the one from the resource
+				 */
+				if (StringUtils.isBlank(nextParamDescription)) {
+					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
+					if (paramDef != null) {
+						nextParamDescription = paramDef.getDescription();
+					}
+				}
+
+				RestResourceSearchParam param;
+				param = resource.addSearchParam();
+
+				param.setName(nextParamName);
+				// if (StringUtils.isNotBlank(chain)) {
+				// param.addChain(chain);
+				// }
+				param.setDocumentation(nextParamDescription);
+				param.setType(nextParameter.getParamType());
+			}
+		}
+	}
+
 	private void handleSearchMethodBinding(Rest rest, RestResource resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes, SearchMethodBinding searchMethodBinding) {
 		includes.addAll(searchMethodBinding.getIncludes());
 
@@ -251,49 +312,24 @@ public class ServerConformanceProvider {
 		}
 	}
 
-	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
-		includes.addAll(searchMethodBinding.getIncludes());
+	/**
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
+	 * invocation.
+	 * <p>
+	 * See the class documentation for an important note if you are extending this class
+	 * </p>
+	 */
+	public void setCache(boolean theCache) {
+		myCache = theCache;
+	}
 
-		List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
-		searchParameters.addAll(searchMethodBinding.getSearchParams());
-		sortRuntimeSearchParameters(searchParameters);
-
-		if (!searchParameters.isEmpty()) {
-
-			for (RuntimeSearchParam nextParameter : searchParameters) {
-
-				String nextParamName = nextParameter.getName();
-
-				// String chain = null;
-				String nextParamUnchainedName = nextParamName;
-				if (nextParamName.contains(".")) {
-					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
-				}
-
-				String nextParamDescription = nextParameter.getDescription();
-
-				/*
-				 * If the parameter has no description, default to the one from the resource
-				 */
-				if (StringUtils.isBlank(nextParamDescription)) {
-					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
-					if (paramDef != null) {
-						nextParamDescription = paramDef.getDescription();
-					}
-				}
-
-				RestResourceSearchParam param;
-				param = resource.addSearchParam();
-
-				param.setName(nextParamName);
-				// if (StringUtils.isNotBlank(chain)) {
-				// param.addChain(chain);
-				// }
-				param.setDocumentation(nextParamDescription);
-				param.setType(nextParameter.getParamType());
-			}
-		}
+	/**
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this
+	 * is a mandatory element, the value should not be null (although this is not enforced). The value defaults
+	 * to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 */
+	public void setPublisher(String thePublisher) {
+		myPublisher = thePublisher;
 	}
 
 	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
@@ -318,16 +354,5 @@ public class ServerConformanceProvider {
 				return 1;
 			}
 		});
-	}
-
-	/**
-	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
-	 * invocation.
-	 * <p>
-	 * See the class documentation for an important note if you are extending this class
-	 * </p>
-	 */
-	public void setCache(boolean theCache) {
-		myCache = theCache;
 	}
 }

@@ -153,11 +153,11 @@ public class InstantDt extends BaseDateTimeDt {
 	}
 
 	/**
-	 * Factory method which creates a new InstantDt and initializes it with the
+	 * Factory method which creates a new InstantDt with millisecond precision and initializes it with the
 	 * current time.
 	 */
 	public static InstantDt withCurrentTime() {
-		return new InstantDt(new Date());
+		return new InstantDt(new Date(), TemporalPrecisionEnum.MILLI);
 	}
 
 }
