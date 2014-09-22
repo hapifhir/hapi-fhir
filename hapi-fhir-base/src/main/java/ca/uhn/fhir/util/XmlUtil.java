@@ -167,18 +167,18 @@ public class XmlUtil {
 			public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) throws XMLStreamException {
 				if (thePublicID == null && theSystemID == null) {
 					if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
-						return IOUtils.toInputStream(Character.toString((char)VALID_ENTITY_NAMES.get(theNamespace).intValue()));
+						return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
 					}
 				}
 				
 				return null;
 			}
 		};
-		inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
-//		inputFactory.setProperty(WstxInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-//		inputFactory.setProperty(WstxInputFactory.IS_VALIDATING, false);
-//		inputFactory.setProperty(WstxInputProperties.P_TREAT_CHAR_REFS_AS_ENTS, true);
-//		inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, xmlResolver);
+		
+		// In the following two lines, you can uncomment the first and comment the second to disable
+		// automatic parsing of extended entities, e.g. &sect;
+//		inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);		
+		inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, xmlResolver);
 
 		XMLEventReader er = inputFactory.createXMLEventReader(reader);
 		return er;

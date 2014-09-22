@@ -70,14 +70,14 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeProfile() {
-		
+
 		Profile p = new Profile();
 		p.getStructureFirstRep().getElementFirstRep().getDefinition().getBinding().setReference(new ResourceReferenceDt("ValudSet/123"));
-		
+
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(encoded);
 	}
-	
+
 	@Test
 	public void testEncodeBinaryResource() {
 
@@ -137,7 +137,7 @@ public class XmlParserTest {
 		List<String> strings = new ArrayList<String>();
 		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.add("<category term=\"http://hl7.org/fhir/tag/message\" label=\"Message\" scheme=\"http://hl7.org/fhir/tag\"/>");
-		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</Patient>","<summary type=\"xhtml\">", "<div", "</entry>"));
+		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</Patient>", "<summary type=\"xhtml\">", "<div", "</entry>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>", "</entry>"));
 		strings.addAll(Arrays.asList("<at:deleted-entry", "ref=\"Patient/3", "/>"));
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
@@ -183,26 +183,27 @@ public class XmlParserTest {
 
 	@Test
 	public void testEncodeEscapedChars() {
-		
+
 		Patient p = new Patient();
 		p.addName().addFamily("and <>&ü");
-		
+
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(enc);
-		
+
 		p = ourCtx.newXmlParser().parseResource(Patient.class, enc);
 		assertEquals("and <>&ü", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		
+
 		p = ourCtx.newXmlParser().parseResource(Patient.class, "<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"quot &quot;\"/></name></Patient>");
 		assertEquals("quot \"", p.getNameFirstRep().getFamilyFirstRep().getValue());
-		
-		// Unescaped entities are swallowed
-		p = ourCtx.newXmlParser().parseResource(Patient.class, "<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"uuml &uuml;\"/></name></Patient>");
-		assertEquals("uuml ", p.getNameFirstRep().getFamilyFirstRep().getValue());
 
 	}
-	
-	
+
+	@Test
+	public void testEncodeEscapedExtendedChars() {
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, "<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"uuml &uuml;\"/></name></Patient>");
+		assertEquals("uuml ü", p.getNameFirstRep().getFamilyFirstRep().getValue());
+	}
+
 	@Test
 	public void testEncodeContainedAndIncludedResources() {
 
@@ -322,11 +323,11 @@ public class XmlParserTest {
 		p.addIdentifier("foo", "bar");
 		p.getText().setStatus(NarrativeStatusEnum.GENERATED);
 		p.getText().setDiv("<div>hello</div>");
-		
+
 		Bundle b = new Bundle();
 		b.getTotalResults().setValue(123);
 		b.addEntry().setResource(p);
-		
+
 		String out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(out);
 		assertThat(out, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>"));
@@ -335,10 +336,9 @@ public class XmlParserTest {
 		out = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(out);
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>"));
-		
+
 	}
-	
-	
+
 	@Test
 	public void testEncodePrettyPrint() throws DataFormatException {
 
@@ -762,7 +762,9 @@ public class XmlParserTest {
 
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
-		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+		assertThat(
+				enc,
+				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 	}
 
@@ -802,12 +804,12 @@ public class XmlParserTest {
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
 		ourLog.info(encoded);
-		
+
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Observation", "</Observation>", "<Obser", "</contained>"))));
-		
+
 	}
-	
+
 	@Test
 	public void testNestedContainedResources() {
 
@@ -943,7 +945,7 @@ public class XmlParserTest {
 
 		ValueSet resource = (ValueSet) entry.getResource();
 		assertEquals("LOINC Codes for Cholesterol", resource.getName().getValue());
-		
+
 		String exp = summaryText.trim();
 		exp = exp.replace("\"LOINC", "&quot;LOINC");
 		exp = exp.replace("terol\"", "terol&quot;");
@@ -957,7 +959,8 @@ public class XmlParserTest {
 
 		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
 
-		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>", "<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
+		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>",
+				"<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
 		entry = p.parseBundle(msg).getEntries().get(0);
 		resource = (ValueSet) entry.getResource();
 		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
@@ -965,7 +968,7 @@ public class XmlParserTest {
 		assertEquals("12345", ((IdDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION_ID)).getVersionIdPart());
 
 		assertThat(entry.getSummary().getValueAsString(), containsString("LOINC Codes for Cholesterol"));
-		
+
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1092,9 +1095,10 @@ public class XmlParserTest {
 
 	@Test
 	public void testParseQuery() {
-		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + "  <text>\n" + "    <status value=\"generated\"/>\n" + "    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n" + "  </text>\n" + "\n"
-				+ "  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + "   responder   -->\n" + "  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + "  <parameter url=\"http://hl7.org/fhir/query#_query\">\n"
-				+ "    <valueString value=\"example\"/>\n" + "  </parameter>\n" + "</Query>";
+		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + "  <text>\n" + "    <status value=\"generated\"/>\n" + "    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n"
+				+ "  </text>\n" + "\n" + "  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + "   responder   -->\n"
+				+ "  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + "  <parameter url=\"http://hl7.org/fhir/query#_query\">\n" + "    <valueString value=\"example\"/>\n"
+				+ "  </parameter>\n" + "</Query>";
 		Query query = ourCtx.newXmlParser().parseResource(Query.class, msg);
 
 		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());

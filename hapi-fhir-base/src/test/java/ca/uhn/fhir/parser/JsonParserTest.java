@@ -464,7 +464,7 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(msg.trim());
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		String exp = expected.toString().replace("\\r\\n", "\\n");
+		String exp = expected.toString().replace("\\r\\n", "\\n").replace("&sect;", "§");
 		String act = actual.toString().replace("\\r\\n","\\n");
 		
 		ourLog.info("Expected: {}", exp);

@@ -73,6 +73,10 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	 * <b>Formatting note:</b> The text will be trimmed {@link String#trim()}. If the text does not start with an HTML tag (generally this would be a div tag), a div tag will be automatically placed
 	 * surrounding the text.
 	 * </p>
+	 * <p>
+	 * Also note that if the parsed text contains any entities (&foo;) which are not a part of the entities defined in core XML (e.g. &sect; which
+	 * is valid in XHTML 1.0 but not in XML 1.0) they will be parsed and converted to their equivalent unicode character.
+	 * </p>
 	 */
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {

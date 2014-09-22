@@ -59,7 +59,8 @@ public class XhtmlDtTest {
 		x.setValueAsString(input);
 
 		// <div>Sect: § uuml: ü Ü</div>
-		assertEquals("<div>Sect: &sect; uuml: &uuml; &Uuml;</div>", x.getValueAsString());
+		// <div>Sect: &sect; uuml: &uuml; &Uuml;</div>
+		assertEquals("<div>Sect: § uuml: ü Ü</div>", x.getValueAsString());
 
 	}
 	
