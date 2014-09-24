@@ -60,7 +60,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		}
 	}
 
-	private void store(SecurityEvent auditEvent) {
+	private void store(SecurityEvent auditEvent) throws Exception {
 		if(myDataStore == null) throw new InternalErrorException("No data store provided to persist audit events");
 		myDataStore.store(auditEvent);
 	}
