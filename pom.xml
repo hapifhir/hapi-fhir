@@ -120,6 +120,7 @@
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<mockito_version>1.9.5</mockito_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
+		<phloc_commons_version>4.3.3</phloc_commons_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<servlet_api_version>3.1.0</servlet_api_version>
 		<slf4j_version>1.7.7</slf4j_version>

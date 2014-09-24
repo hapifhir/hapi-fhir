@@ -68,13 +68,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGenerator.class);
-
 	private static final XhtmlAndHtml5NonValidatingSAXTemplateParser PARSER = new XhtmlAndHtml5NonValidatingSAXTemplateParser(1);
 
 	private Configuration configuration;
 	private boolean myApplyDefaultDatatypeTemplates = true;
 	private HashMap<Class<?>, String> myClassToName;
-
 	private boolean myCleanWhitespace = true;
 	private boolean myIgnoreFailures = true;
 	private boolean myIgnoreMissingTemplates = true;
@@ -82,9 +80,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private HashMap<String, String> myNameToNarrativeTemplate;
 	private HashMap<String, String> myNameToTitleTemplate;
 	private TemplateEngine myProfileTemplateEngine;
-
 	private HashMap<String, String> myProfileToName;
-
 	private TemplateEngine myTitleTemplateEngine;
 
 	public BaseThymeleafNarrativeGenerator() {
