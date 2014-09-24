@@ -446,8 +446,13 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseJsonProfile() throws IOException {
+		parseAndEncode("/patient.profile.json");
+		parseAndEncode("/alert.profile.json");
+	}
 
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/alert.profile.json"));
+
+	private void parseAndEncode(String name) throws IOException {
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name));
 		ourLog.info(msg);
 
 		IParser p = ourCtx.newJsonParser();
@@ -459,7 +464,7 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(msg.trim());
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		String exp = expected.toString().replace("\\r\\n", "\\n");
+		String exp = expected.toString().replace("\\r\\n", "\\n").replace("&sect;", "§");
 		String act = actual.toString().replace("\\r\\n","\\n");
 		
 		ourLog.info("Expected: {}", exp);

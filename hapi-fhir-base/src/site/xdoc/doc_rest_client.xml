@@ -191,6 +191,36 @@
 				</macro>
 			</subsection>			
 
+			<subsection name="Instance - Read / VRead">
+				<p>
+					Given a resource name and ID, it is simple to retrieve
+					the latest version of that resource (a 'read')
+				</p>
+				<macro name="snippet">
+					<param name="id" value="read" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					By adding a version string, it is also possible to retrieve a 
+					specific version (a 'vread')
+				</p>
+				<macro name="snippet">
+					<param name="id" value="vread" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					It is also possible to retrieve a resource given its absolute
+					URL (this will override the base URL set on the client) 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="readabsolute" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
 			<subsection name="Instance - Delete">
 				<p>
 					The following example shows how to perform a delete

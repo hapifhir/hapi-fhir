@@ -48,6 +48,8 @@ public class Constants {
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_CATEGORY = "Category";
+	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
+	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
 	public static final String HEADER_CATEGORY_LC = HEADER_CATEGORY.toLowerCase();
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";

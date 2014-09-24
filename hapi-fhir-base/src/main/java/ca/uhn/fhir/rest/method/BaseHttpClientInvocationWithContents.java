@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +48,15 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+/**
+ * @author James Agnew
+ * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
+ */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
 	private final FhirContext myContext;
 	private final IResource myResource;
-	private final String myUrlExtension;
+	private final String myUrlPath;
 	private final TagList myTagList;
 	private final List<IResource> myResources;
 	private final Bundle myBundle;
@@ -62,18 +64,18 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private boolean myContentsIsBundle;
 	private Map<String, List<String>> myParams;
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlPath) {
 		super();
 		myContext = theContext;
 		myResource = theResource;
-		myUrlExtension = theUrlExtension;
+		myUrlPath = theUrlPath;
 		myTagList = null;
 		myResources = null;
 		myBundle = null;
 		myContents = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlPath) {
 		super();
 		if (theTagList == null) {
 			throw new NullPointerException("Tag list must not be null");
@@ -86,14 +88,14 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundle = null;
 		myContents = null;
 
-		myUrlExtension = StringUtils.join(theUrlExtension, '/');
+		myUrlPath = StringUtils.join(theUrlPath, '/');
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
-		myUrlExtension = null;
+		myUrlPath = null;
 		myResources = theResources;
 		myBundle = null;
 		myContents = null;
@@ -103,28 +105,28 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
-		myUrlExtension = null;
+		myUrlPath = null;
 		myResources = null;
 		myBundle = theBundle;
 		myContents = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
-		myUrlExtension = theUrlExtension;
+		myUrlPath = theUrlPath;
 		myResources = null;
 		myBundle = null;
 		myContents = theContents;
 		myContentsIsBundle = theIsBundle;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
-		myUrlExtension = StringUtils.join(theUrlExtension, '/');
+		myUrlPath = StringUtils.join(theUrlPath, '/');
 		myResources = null;
 		myBundle = null;
 		myContents = null;
@@ -135,12 +137,17 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder b = new StringBuilder();
-		b.append(theUrlBase);
-		if (isNotBlank(myUrlExtension)) {
-			if (!theUrlBase.endsWith("/")) {
-				b.append('/');
+
+		if (myUrlPath == null) {
+			b.append(theUrlBase);
+		} else {
+			if (!myUrlPath.contains("://")) {
+				b.append(theUrlBase);
+				if (!theUrlBase.endsWith("/")) {
+					b.append('/');
+				}
 			}
-			b.append(myUrlExtension);
+			b.append(myUrlPath);
 		}
 
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);

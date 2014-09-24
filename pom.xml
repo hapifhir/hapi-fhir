@@ -56,11 +56,24 @@
 		</developer>
 		<developer>
 			<name>Josh Mandel</name>
-			<url></url>
+			<organization>Boston Children's Hospital</organization>
 		</developer>
 		<developer>
 			<name>Laura MacDougall Sookraj</name>
-			<url></url>
+		</developer>
+		<developer>
+			<name>David Hay</name>
+			<organization>Orion Health</organization>
+		</developer>
+		<developer>
+			<id>suranga</id>
+			<name>Suranga Nath Kasthurirathne</name>
+			<organization>OpenMRS</organization>
+		</developer>
+		<developer>
+			<id>dougmartin</id>
+			<name>Doug Martin</name>
+			<organization>Regenstrief Center for Biomedical Informatics</organization>
 		</developer>
 	</developers>
 

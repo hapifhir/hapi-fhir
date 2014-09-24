@@ -1,15 +1,17 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ResourceBundle;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -23,9 +25,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.PortUtil;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -33,44 +35,45 @@ import ch.qos.logback.core.Appender;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class InterceptorTest {
+public class LoggingInterceptorTest {
 
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx;
 
+	private Appender<ILoggingEvent> myMockAppender;
+	private Logger myLoggerRoot;
+
+	@SuppressWarnings("unchecked")
+	@Before
+	public void before() {
+		/*
+		 * This is a bit funky, but it's useful for verifying that the headers actually get logged
+		 */
+		myLoggerRoot = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+		myMockAppender = mock(Appender.class);
+		when(myMockAppender.getName()).thenReturn("MOCK");
+		myLoggerRoot.addAppender(myMockAppender);
+	}
+
+	@After
+	public void after() {
+		myLoggerRoot.detachAppender(myMockAppender);
+	}
+
 	@Test
 	public void testLogger() throws Exception {
-		/*
-		 * This is a bit funky, but we're verifying that the headers actually get logged
-		 */
-		ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
-		@SuppressWarnings("unchecked")
-		Appender<ILoggingEvent> mockAppender = mock(Appender.class);
-		when(mockAppender.getName()).thenReturn("MOCK");
-		root.addAppender(mockAppender);
-		try {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		client.registerInterceptor(new LoggingInterceptor(true));
+		Patient patient = client.read(Patient.class, "1");
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-			IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-			client.registerInterceptor(new LoggingInterceptor(true));
-			Patient patient = client.read(Patient.class, "1");
-			assertFalse(patient.getIdentifierFirstRep().isEmpty());
-
-//			int times = 1;
-//			if (LoggerFactory.getLogger(ResourceBinding.class).isDebugEnabled()) {
-//				times = 3;
-//			}
-			
-			verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
-				@Override
-				public boolean matches(final Object argument) {
-					return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");
-				}
-			}));
-
-		} finally {
-			root.detachAppender(mockAppender);
-		}
+		verify(myMockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+			@Override
+			public boolean matches(final Object argument) {
+				return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");
+			}
+		}));
 	}
 
 	@AfterClass

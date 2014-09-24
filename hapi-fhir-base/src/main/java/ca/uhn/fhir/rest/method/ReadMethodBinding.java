@@ -56,7 +56,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	private Integer myIdIndex;
 	private boolean mySupportsVersion;
 	private Integer myVersionIdIndex;
-	
+
 	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
@@ -142,11 +142,16 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IdDt id = ((IdDt) theArgs[myIdIndex]);
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
-			retVal = createReadInvocation(id, resourceName);
+			if (id.hasVersionIdPart()) {
+				retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()));
+			} else {
+				retVal = createReadInvocation(id, resourceName);
+			}
 		} else {
 			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
 			String resourceName = getResourceName();
-			retVal = createVReadInvocation(id, vid, resourceName);
+
+			retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()));
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -198,16 +203,20 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return mySupportsVersion || myVersionIdIndex != null;
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String resourceName) {
-		if (theId.hasVersionIdPart()) {
-			return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, theId.getVersionIdPart());
-		} else {
-			return new HttpGetClientInvocation(resourceName, theId.getIdPart());
-		}
+	public static HttpGetClientInvocation createAbsoluteReadInvocation(IdDt theId) {
+		return new HttpGetClientInvocation(theId.getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, IdDt vid, String resourceName) {
-		return new HttpGetClientInvocation(resourceName, theId.getIdPart(), Constants.URL_TOKEN_HISTORY, vid.getIdPart());
+	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IdDt theId) {
+		return new HttpGetClientInvocation(theId.getValue());
+	}
+
+	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String theResourceName) {
+		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart()).getValue());
+	}
+
+	public static HttpGetClientInvocation createVReadInvocation(IdDt theId) {
+		return new HttpGetClientInvocation(theId.getValue());
 	}
 
 }
