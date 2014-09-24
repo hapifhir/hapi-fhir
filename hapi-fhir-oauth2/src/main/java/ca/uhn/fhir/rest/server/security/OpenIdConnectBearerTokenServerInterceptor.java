@@ -47,8 +47,6 @@ import com.nimbusds.jwt.SignedJWT;
 
 public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapter {
 
-	private static final String BEARER_PREFIX = "Bearer ";
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OpenIdConnectBearerTokenServerInterceptor.class);
 
 	@Autowired
@@ -66,8 +64,6 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		mySymmetricCacheService = new SymmetricCacheService();
 		myValidationServices = new JWKSetCacheService();
 	}
-
-	
 	
 	
 	@Override
@@ -89,11 +85,11 @@ public class OpenIdConnectBearerTokenServerInterceptor extends InterceptorAdapte
 		if (token == null) {
 			throw new AuthenticationException("Not authorized (no authorization header found in request)");
 		}
-		if (!token.startsWith(BEARER_PREFIX)) {
+		if (!token.startsWith(Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER)) {
 			throw new AuthenticationException("Not authorized (authorization header does not contain a bearer token)");
 		}
 
-		token = token.substring(BEARER_PREFIX.length());
+		token = token.substring(Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER.length());
 
 		SignedJWT idToken;
 		try {
