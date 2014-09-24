@@ -92,6 +92,12 @@
 		    <version>${phloc_schematron_version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+		    <groupId>com.phloc</groupId>
+		    <artifactId>phloc-commons</artifactId>
+		    <version>${phloc_commons_version}</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- 
 		<dependency>
