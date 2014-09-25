@@ -54,6 +54,39 @@
 			
 		</section>
 
+		<section name="Dependencies">
+			
+			<p>
+				The HAPI-FHIR library depends on other libraries to provide specific functionality.
+				Some of those libraries are listed here:
+			</p>
+			
+			<subsection name="StAX / Woodstox">
+				
+				<p>
+					XML processing (for resource marshalling and unmarshalling) uses the
+					Java StAX API, which is a fast and efficient API for XML processing.
+					HAPI bundles (for release archives) and depends on (for Maven builds)
+					the <a href="http://woodstox.codehaus.org/">Woodstox</a> library, which
+					is a good implementation of StAX.  
+				</p>				
+				<p>
+					Upon starting up, HAPI will emit a log line indicating which StAX implementation
+					is being used, e.g:
+				</p>
+				<source>08:01:32.044 [main] INFO  ca.uhn.fhir.util.XmlUtil - FHIR XML procesing will use StAX implementation 'Woodstox XML-processor' version '4.4.0'</source>
+				<p>
+					If a different implementation is being used, you may want to consider using
+					Woodstox instead by setting the following system properties:	
+				</p>				
+				<source>System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEventFactory");</source>
+
+			</subsection>
+			
+		</section>
+
 	</body>
 
 </document>
