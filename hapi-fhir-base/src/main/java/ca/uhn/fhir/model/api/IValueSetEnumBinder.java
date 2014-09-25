@@ -1,8 +1,5 @@
 package ca.uhn.fhir.model.api;
 
-import java.io.Serializable;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,22 +20,17 @@ import java.io.Serializable;
  * #L%
  */
 
-public interface IValueSetEnumBinder<T extends Enum<?>> extends Serializable
-{
 
 
-  T fromCodeString(String theCodeString);
+public interface IValueSetEnumBinder<T extends Enum<?>> {
 
+	T fromCodeString(String theCodeString);
+	
+	String toCodeString(T theEnum);
 
+	String toSystemString(T theEnum);
 
-  String toCodeString(T theEnum);
-
-
-
-  String toSystemString(T theEnum);
-
-
-
-  T fromCodeString(String theCodeString, String theSystemString);
-
+	T fromCodeString(String theCodeString, String theSystemString);
+	
+	
 }
