@@ -1,5 +1,8 @@
 package ca.uhn.fhir.model.api;
 
+import java.io.Serializable;
+
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,11 +23,10 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+public interface IElement extends Serializable
+{
 
 
-public interface IElement {
+  boolean isEmpty();
 
-	boolean isEmpty();
-
-	
 }
