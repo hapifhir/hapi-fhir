@@ -741,7 +741,13 @@ class ParserState<T> {
 
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
-			if ("contentType".equals(theName)) {
+			if ("id".equals(theName)) {
+				if (myInstance instanceof IIdentifiableElement) {
+					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
+				} else if (myInstance instanceof IResource) {
+					((IResource) myInstance).setId(new IdDt(theValue));
+				}
+			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
 			} else if (myJsonMode && "value".equals(theName)) {
 				string(theValue);
