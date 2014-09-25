@@ -59,6 +59,10 @@
 				Add phloc-commons dependency explicitly, which resolves an issue building HAPI from source on
 				some platforms. Thanks to Odysseas Pentakalos for the patch!
 			</action>
+			<action type="add">
+				HAPI now logs a single line indicating the StAX implementation being used upon the
+				first time an XML parser is created.
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
