@@ -68,8 +68,13 @@
 				first time an XML parser is created.
 			</action>
 			<action type="fix" issue="26" dev="akley">
-				HAPI now logs a single line indicating the StAX implementation being used upon the
-				first time an XML parser is created.
+				Parser failed to correctly read contained Binary resources. Thanks to Alexander Kley for
+				the patch! 
+			</action>
+			<action type="fix" issue="29" dev="akley">
+				Calling encode multiple times on a resource with contained resources caused the contained
+				resources to be re-added (and the actual message to grow) with each encode pass. Thanks to
+				Alexander Kley for the test case!
 			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">

@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -130,16 +132,24 @@ public abstract class BaseParser implements IParser {
 		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
 
 		Set<String> allIds = new HashSet<String>();
-
+		
+		for (IResource next : theTarget.getContained().getContainedResources()) {
+			String nextId = next.getId().getValue();
+			if (StringUtils.isNotBlank(nextId)) {
+				allIds.add(nextId);
+			}
+		}
+		
 		for (ResourceReferenceDt next : allElements) {
 			IResource resource = next.getResource();
 			if (resource != null) {
-				if (resource.getId().isEmpty()) {
+				if (resource.getId().isEmpty()) { // TODO: make this configurable between the two below (and something else?)
 					resource.setId(new IdDt(myNextContainedId++));
 //					resource.setId(new IdDt(UUID.randomUUID().toString()));
 				}
 
-				if (!allIds.contains(resource.getId().getValue())) {
+				String nextResourceId = resource.getId().getValue();
+				if (!allIds.contains(nextResourceId)) {
 					theTarget.getContained().getContainedResources().add(resource);
 					allIds.add(resource.getId().getValue());
 				}
