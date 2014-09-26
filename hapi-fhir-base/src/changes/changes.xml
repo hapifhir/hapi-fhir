@@ -55,6 +55,10 @@
 				entities converted to their equivalent unicode characters when resources are encoded, since FHIR does
 				not allow extended entities in resource instances.
 			</action>
+			<action type="add">
+				Add a new client interceptor which adds HTTP Authorization Bearer Tokens (for use with OAUTH2 servers)
+				to client requests.
+			</action>			
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
