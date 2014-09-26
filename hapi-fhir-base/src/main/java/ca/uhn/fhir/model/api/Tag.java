@@ -29,28 +29,25 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class Tag extends BaseElement implements IElement {
-	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme
-	 * value
-	 */
-	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
+	
+	public static final String ATTR_LABEL = "label";
+	public static final String ATTR_SCHEME = "scheme";
+	public static final String ATTR_TERM = "term";
 
 	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag/security" scheme
-	 * value
+	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme value
+	 */
+	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/profile" scheme value
+	 */
+	public static final String HL7_ORG_PROFILE_TAG = "http://hl7.org/fhir/tag/profile";
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/security" scheme value
 	 */
 	public static final String HL7_ORG_SECURITY_TAG = "http://hl7.org/fhir/tag/security";
 
-	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag/profile" scheme
-	 * value
-	 */
-	public static final String HL7_ORG_PROFILE_TAG = "http://hl7.org/fhir/tag/profile";
-
-	public static final String ATTR_TERM = "term";
-	public static final String ATTR_LABEL = "label";
-	public static final String ATTR_SCHEME = "scheme";
-	
+	private transient Integer myHashCode;
 	private String myLabel;
 	private String myScheme;
 	private String myTerm;
@@ -59,7 +56,7 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	public Tag(String theTerm) {
-		this((String)null, theTerm, null);
+		this((String) null, theTerm, null);
 	}
 
 	public Tag(String theScheme, String theTerm, String theLabel) {
@@ -119,11 +116,17 @@ public class Tag extends BaseElement implements IElement {
 
 	@Override
 	public int hashCode() {
+		if (myHashCode != null) {
+			System.out.println("Tag alread has hashcode " + myHashCode + " - " + myScheme + " - " + myTerm + " - " + myLabel);
+			return myHashCode;
+		}
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((myLabel == null) ? 0 : myLabel.hashCode());
 		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
 		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
+		myHashCode = result;
+		System.out.println("Tag has hashcode " + myHashCode + " - " + myScheme + " - " + myTerm + " - " + myLabel);
 		return result;
 	}
 
@@ -134,16 +137,19 @@ public class Tag extends BaseElement implements IElement {
 
 	public Tag setLabel(String theLabel) {
 		myLabel = theLabel;
+		myHashCode = null;
 		return this;
 	}
 
 	public Tag setScheme(String theScheme) {
 		myScheme = theScheme;
+		myHashCode = null;
 		return this;
 	}
 
 	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
+		myHashCode = null;
 		return this;
 	}
 
