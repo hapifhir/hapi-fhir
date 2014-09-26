@@ -206,7 +206,9 @@
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
-				having multiple ways of accomplishing the same thing. This means that a number of existing classes
+				HAPI has a number of RESTful method parameter types that have similar but not identical
+				purposes and confusing names. A cleanup has been undertaken to clean this up.
+				This means that a number of existing classes
 				have been deprocated in favour of new naming schemes.
 				<![CDATA[<br/><br/>]]>
 				All annotation-based clients and all server search method parameters are now named
