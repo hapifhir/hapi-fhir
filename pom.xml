@@ -46,13 +46,17 @@
 	
 	<developers>
 		<developer>
+			<id>jamesagnew</id>
 			<name>James Agnew</name>
+			<organization>University Health Network</organization>
 		</developer>
 		<developer>
 			<name>Dmitri Sotnikov</name>
+			<organization>University Health Network</organization>
 		</developer>
 		<developer>
 			<name>Lisa Wong</name>
+			<organization>University Health Network</organization>
 		</developer>
 		<developer>
 			<name>Josh Mandel</name>
@@ -60,6 +64,11 @@
 		</developer>
 		<developer>
 			<name>Laura MacDougall Sookraj</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>Neal Acharya</name>
+			<organization>University Health Network</organization>
 		</developer>
 		<developer>
 			<name>David Hay</name>
@@ -68,12 +77,16 @@
 		<developer>
 			<id>suranga</id>
 			<name>Suranga Nath Kasthurirathne</name>
-			<organization>OpenMRS</organization>
+			<organization>OpenMRS / Regenstrief Center for Biomedical Informatics</organization>
 		</developer>
 		<developer>
 			<id>dougmartin</id>
 			<name>Doug Martin</name>
 			<organization>Regenstrief Center for Biomedical Informatics</organization>
+		</developer>
+		<developer>
+			<id>akley</id>
+			<name>Alexander Kley</name>
 		</developer>
 	</developers>
 
