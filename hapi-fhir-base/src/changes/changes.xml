@@ -59,6 +59,14 @@
 				Add a new client interceptor which adds HTTP Authorization Bearer Tokens (for use with OAUTH2 servers)
 				to client requests.
 			</action>			
+			<action type="fix">
+				Add phloc-commons dependency explicitly, which resolves an issue building HAPI from source on
+				some platforms. Thanks to Odysseas Pentakalos for the patch!
+			</action>
+			<action type="add">
+				HAPI now logs a single line indicating the StAX implementation being used upon the
+				first time an XML parser is created.
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
@@ -202,7 +210,9 @@
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
-				having multiple ways of accomplishing the same thing. This means that a number of existing classes
+				HAPI has a number of RESTful method parameter types that have similar but not identical
+				purposes and confusing names. A cleanup has been undertaken to clean this up.
+				This means that a number of existing classes
 				have been deprocated in favour of new naming schemes.
 				<![CDATA[<br/><br/>]]>
 				All annotation-based clients and all server search method parameters are now named

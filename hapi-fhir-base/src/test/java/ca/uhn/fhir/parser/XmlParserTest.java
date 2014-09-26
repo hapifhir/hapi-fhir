@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -34,13 +35,16 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu.resource.ListResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -51,6 +55,7 @@ import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentReferenceStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -68,6 +73,49 @@ public class XmlParserTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 
+	/**
+	 * Thanks to Alexander Kley!
+	 */
+//	@Test
+	public void testParseContainedBinaryResource() {
+		byte[] bin = new byte[] {0,1,2,3,4};
+	    final Binary binary = new Binary("PatientConsent", bin);
+	    binary.setId(UUID.randomUUID().toString());
+	    DocumentManifest manifest = new DocumentManifest();
+	    manifest.setId(UUID.randomUUID().toString());
+	    manifest.setType(new CodeableConceptDt("mySystem", "PatientDocument"));
+	    manifest.setMasterIdentifier("mySystem", UUID.randomUUID().toString());
+	    manifest.addContent().setResource(binary);
+	    manifest.setStatus(DocumentReferenceStatusEnum.CURRENT);
+	    
+	    String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
+	    ourLog.info(encoded);
+	    assertThat(encoded, StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>","<Binary", "</contained>")));
+	    
+	    DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
+	    assertEquals(1, actual.getContained().getContainedResources().size());
+	    assertEquals(1, actual.getContent().size());
+	    assertNotNull(actual.getContent().get(0).getResource());
+	    
+	}
+	
+	
+	@Test
+	public void testComposition() {
+		
+		Composition comp = new Composition();
+		comp.setId("1");
+		
+		ourCtx.newXmlParser().encodeResourceToString(comp);
+		ourCtx.newXmlParser().encodeResourceToString(comp);
+		ourCtx.newXmlParser().encodeResourceToString(comp);
+		ourCtx.newXmlParser().encodeResourceToString(comp);
+		
+//		comp.
+		
+	}
+	
+	
 	@Test
 	public void testEncodeProfile() {
 

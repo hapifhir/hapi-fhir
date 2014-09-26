@@ -79,7 +79,7 @@ public class ValidatorExamples {
       }
       
       // If we make it here with no exception, all the files validated!
-      //START SNIPPET: validateFiles
+      //END SNIPPET: validateFiles
    }
 
 }
