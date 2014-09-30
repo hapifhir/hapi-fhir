@@ -92,6 +92,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ObjectUtil;
 
 @Transactional(propagation = Propagation.REQUIRED)
 public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
@@ -117,7 +118,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+			if (ObjectUtil.equals(next.getTag().getScheme(), theScheme) && ObjectUtil.equals(next.getTag().getTerm(), theTerm)) {
 				return;
 			}
 		}
@@ -141,7 +142,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (theResource.getId().isEmpty() == false) {
 			if (isValidPid(theResource.getId())) {
-				throw new UnprocessableEntityException("This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
+				throw new UnprocessableEntityException(
+						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
 			createForcedIdIfNeeded(entity, theResource.getId());
 
@@ -229,7 +231,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		final T current = currentTmp;
 
-		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
+		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END"
+				+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
 		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
 		countQuery.setParameter("PID", translateForcedIdToPid(theId));
 		countQuery.setParameter("RESTYPE", resourceType);
@@ -267,8 +270,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					retVal.add(current);
 				}
 
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "")
-						+ " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
+								+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
 				q.setParameter("PID", translateForcedIdToPid(theId));
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
@@ -317,7 +321,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
 			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
+						+ "] is not a token type, only token is supported");
 			}
 		}
 
@@ -353,10 +358,11 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				entity = null;
 			}
 		}
-		
+
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getVersionIdPartAsLong());
@@ -365,10 +371,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (entity == null) {
 				throw new ResourceNotFoundException(theId);
 			}
-		} 
+		}
 
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-		
+
 		validateResourceType(entity);
 
 		return entity;
@@ -532,7 +538,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
-								oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
+								oo.addIssue().setSeverity(IssueSeverityEnum.WARNING)
+										.setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
 								retVal.add(0, oo);
 							}
 						}
@@ -704,8 +711,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to
-	 * share the same value.
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
@@ -728,7 +734,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
-		
+
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
 
 		notifyWriteCompleted();
@@ -1294,7 +1300,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return p;
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1313,7 +1320,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = normalizeString(rawSearchTerm);
@@ -1327,7 +1335,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return singleCode;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		if (theParameter instanceof TokenParam) {
@@ -1347,10 +1356,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH
+					+ "): " + system);
 		}
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH
+					+ "): " + code);
 		}
 
 		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
@@ -1499,7 +1510,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	private void validateResourceType(BaseHasResource entity) {
 		if (!myResourceName.equals(entity.getResourceType())) {
-			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
+			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type "
+					+ entity.getResourceType());
 		}
 	}
 

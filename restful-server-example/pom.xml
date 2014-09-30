@@ -34,14 +34,14 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.6-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>
