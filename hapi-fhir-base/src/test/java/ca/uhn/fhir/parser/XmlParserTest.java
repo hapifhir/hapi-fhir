@@ -199,7 +199,7 @@ public class XmlParserTest {
 		Bundle b = new Bundle();
 		BundleEntry e = b.addEntry();
 		e.setResource(new Patient());
-		e.addCategory().setLabel("label").setTerm("term").setScheme("scheme");
+		e.addCategory("scheme", "term", "label");
 
 		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(val);

@@ -74,11 +74,41 @@ public class TagList implements Set<Tag>, Serializable {
 		return myTagSet.addAll(theC);
 	}
 
+	/**
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addTag(String, String, String)} should be used instead
+	 */
 	public Tag addTag() {
 		myOrderedTags = null;
 		return addTag(null, null, null);
 	}
 
+	/**
+	 * Add a new tag instance
+	 * 
+	 * @param theScheme
+	 *            The tag scheme
+	 * @param theTerm
+	 *            The tag term
+	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you generally do not need to interact directly with the added tag.
+	 */
+	public Tag addTag(String theScheme, String theTerm) {
+		Tag retVal = new Tag(theScheme, theTerm);
+		add(retVal);
+		myOrderedTags = null;
+		return retVal;
+	}
+
+	/**
+	 * Add a new tag instance
+	 * 
+	 * @param theScheme
+	 *            The tag scheme
+	 * @param theTerm
+	 *            The tag term
+	 * @param theLabel
+	 *            The tag label
+	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you generally do not need to interact directly with the added tag.
+	 */
 	public Tag addTag(String theScheme, String theTerm, String theLabel) {
 		Tag retVal = new Tag(theScheme, theTerm, theLabel);
 		add(retVal);
@@ -131,81 +161,6 @@ public class TagList implements Set<Tag>, Serializable {
 		}
 		return myOrderedTags.get(theIndex);
 	}
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public Tag set(int theIndex, Tag theElement) {
-	// throw new UnsupportedOperationException();
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public void add(int theIndex, Tag theElement) {
-	// myTagSet.add(theElement);
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public Tag remove(int theIndex) {
-	// Tag retVal = myTagSet.remove(theIndex);
-	// myTagSet.remove(retVal);
-	// return retVal;
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public int indexOf(Object theO) {
-	// myTagSet.remove(theO);
-	// return myTagSet.indexOf(theO);
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public int lastIndexOf(Object theO) {
-	// return myTagSet.lastIndexOf(theO);
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public ListIterator<Tag> listIterator() {
-	// return myTagSet.listIterator();
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public ListIterator<Tag> listIterator(int theIndex) {
-	// return myTagSet.listIterator(theIndex);
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public List<Tag> subList(int theFromIndex, int theToIndex) {
-	// return myTagSet.subList(theFromIndex, theToIndex);
-	// }
 
 	public Tag getTag(String theScheme, String theTerm) {
 		for (Tag next : this) {
@@ -268,22 +223,6 @@ public class TagList implements Set<Tag>, Serializable {
 	public Object[] toArray() {
 		return myTagSet.toArray();
 	}
-
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
-	// public boolean addAll(int theIndex, Collection<? extends Tag> theC) {
-	// myTagSet.addAll(theC);
-	// return myTagSet.addAll(theC);
-	// }
-	//
-	// /**
-	// * @deprecated TagList will not implement the {@link List} interface in a future release, as tag order is not supposed to be meaningful
-	// */
-	// @Deprecated
-	// @Override
 
 	@Override
 	public <T> T[] toArray(T[] theA) {

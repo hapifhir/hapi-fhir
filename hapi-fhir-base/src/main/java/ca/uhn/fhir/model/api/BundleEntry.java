@@ -50,10 +50,17 @@ public class BundleEntry extends BaseBundle {
 	private StringDt myTitle;
 	private InstantDt myUpdated;
 
+	/**
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addCategory(String, String, String)} should be used instead
+	 */
 	public Tag addCategory() {
 		Tag retVal = new Tag();
 		getCategories().add(retVal);
 		return retVal;
+	}
+
+	public void addCategory(String theScheme, String theTerm, String theLabel) {
+		getCategories().add(new Tag(theScheme, theTerm, theLabel));
 	}
 
 	public void addCategory(Tag theTag) {

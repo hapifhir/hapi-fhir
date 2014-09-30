@@ -29,6 +29,20 @@ public class TagListTest {
 	}
 
 	@Test
+	public void testEqualsIgnoresLabel() {
+		TagList tagList1 = new TagList();
+		tagList1.addTag(null, "Dog", "AAAA");
+		tagList1.addTag("http://foo", "Cat", "BBBB");
+
+		TagList tagList2 = new TagList();
+		tagList2.addTag(null, "Dog", "Puppies");
+		tagList2.addTag("http://foo", "Cat", "Kittens");
+		
+		assertEquals(tagList1,tagList2);
+	}
+
+	
+	@Test
 	public void testEqualsIgnoresOrder() {
 		TagList tagList1 = new TagList();
 		tagList1.addTag(null, "Dog", "Puppies");
