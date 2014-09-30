@@ -158,8 +158,7 @@ class ParserState<T> {
 	}
 
 	/**
-	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically
-	 * intended for embedded XHTML content
+	 * Invoked after any new XML event is individually processed, containing a copy of the XML event. This is basically intended for embedded XHTML content
 	 */
 	public void xmlEvent(XMLEvent theNextEvent) {
 		myState.xmlEvent(theNextEvent);
@@ -222,35 +221,37 @@ class ParserState<T> {
 		private static final int STATE_TERM = 1;
 
 		private int myCatState = STATE_NONE;
-		private Tag myInstance;
+		private TagList myTagList;
+		private String myTerm;
+		private String myLabel;
+		private String myScheme;
 
-		public AtomCategoryState(Tag theEntry) {
+		public AtomCategoryState(TagList theTagList) {
 			super(null);
-			myInstance = theEntry;
+			myTagList = theTagList;
 		}
 
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if ("term".equals(theName)) {
-				myInstance.setTerm(theValue);
+				myTerm = theValue;
 			} else if ("label".equals(theName)) {
-				myInstance.setLabel(theValue);
+				myLabel = theValue;
 			} else if ("scheme".equals(theName)) {
-				myInstance.setScheme(theValue);
+				myScheme = theValue;
 			} else if ("value".equals(theName)) {
 				/*
-				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values
-				 * instead of one like everything else.
+				 * This handles XML parsing, which is odd for this quasi-resource type, since the tag has three values instead of one like everything else.
 				 */
 				switch (myCatState) {
 				case STATE_LABEL:
-					myInstance.setLabel(theValue);
+					myLabel = theValue;
 					break;
 				case STATE_TERM:
-					myInstance.setTerm(theValue);
+					myTerm = theValue;
 					break;
 				case STATE_SCHEME:
-					myInstance.setScheme(theValue);
+					myScheme = theValue;
 					break;
 				default:
 					super.string(theValue);
@@ -265,6 +266,9 @@ class ParserState<T> {
 			if (myCatState != STATE_NONE) {
 				myCatState = STATE_NONE;
 			} else {
+				if (isNotEmpty(myScheme) || isNotBlank(myTerm) || isNotBlank(myLabel)) {
+					myTagList.addTag(myScheme, myTerm, myLabel);
+				}
 				pop();
 			}
 		}
@@ -422,7 +426,7 @@ class ParserState<T> {
 			} else if ("summary".equals(theLocalPart)) {
 				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
-				push(new AtomCategoryState(myEntry.addCategory()));
+				push(new AtomCategoryState(myEntry.getCategories()));
 			} else if ("deleted".equals(theLocalPart) && myJsonMode) {
 				// JSON and XML deleted entries are completely different for some reason
 				myDeleted = true;
@@ -629,7 +633,7 @@ class ParserState<T> {
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myInstance));
 			} else if ("category".equals(theLocalPart)) {
-				push(new AtomCategoryState(myInstance.getCategories().addTag()));
+				push(new AtomCategoryState(myInstance.getCategories()));
 			} else if ("deleted-entry".equals(theLocalPart) && verifyNamespace(XmlParser.TOMBSTONES_NS, theNamespaceURI)) {
 				push(new AtomDeletedEntryState(myInstance, myResourceType));
 			} else {
@@ -707,7 +711,8 @@ class ParserState<T> {
 		}
 
 		/**
-		 * @param theData The string value
+		 * @param theData
+		 *            The string value
 		 */
 		public void string(String theData) {
 			// ignore by default
@@ -718,7 +723,8 @@ class ParserState<T> {
 		}
 
 		/**
-		 * @param theNextEvent The XML event
+		 * @param theNextEvent
+		 *            The XML event
 		 */
 		public void xmlEvent(XMLEvent theNextEvent) {
 			// ignore
@@ -1275,7 +1281,8 @@ class ParserState<T> {
 			myContext.newTerser().visit(myInstance, new IModelVisitor() {
 
 				@Override
-				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
+						ExtensionDt theNextExt) {
 					acceptElement(theNextExt.getValue(), null, null);
 				}
 
@@ -1508,7 +1515,7 @@ class ParserState<T> {
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (TagList.ATTR_CATEGORY.equals(theLocalPart)) {
-				push(new TagState(myTagList.addTag()));
+				push(new TagState(myTagList));
 			} else {
 				throw new DataFormatException("Unexpected element: " + theLocalPart);
 			}
@@ -1524,11 +1531,14 @@ class ParserState<T> {
 		private static final int SCHEME = 3;
 		private static final int TERM = 1;
 		private int mySubState = 0;
-		private Tag myTag;
+		private TagList myTagList;
+		private String myTerm;
+		private String myLabel;
+		private String myScheme;
 
-		public TagState(Tag theTag) {
+		public TagState(TagList theTagList) {
 			super(null);
-			myTag = theTag;
+			myTagList = theTagList;
 		}
 
 		@Override
@@ -1537,13 +1547,13 @@ class ParserState<T> {
 
 			switch (mySubState) {
 			case TERM:
-				myTag.setTerm(value);
+				myTerm = (value);
 				break;
 			case LABEL:
-				myTag.setLabel(value);
+				myLabel = (value);
 				break;
 			case SCHEME:
-				myTag.setScheme(value);
+				myScheme = (value);
 				break;
 			case NONE:
 				// This handles JSON encoding, which is a bit weird
@@ -1559,6 +1569,9 @@ class ParserState<T> {
 			if (mySubState != NONE) {
 				mySubState = NONE;
 			} else {
+				if (isNotEmpty(myScheme) || isNotBlank(myTerm) || isNotBlank(myLabel)) {
+					myTagList.addTag(myScheme, myTerm, myLabel);
+				}
 				pop();
 			}
 		}

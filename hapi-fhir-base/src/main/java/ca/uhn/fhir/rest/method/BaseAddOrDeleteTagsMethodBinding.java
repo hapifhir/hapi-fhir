@@ -214,10 +214,6 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			return false;
 		}
 
-		if ((myVersionIdParamIndex != null) != (theRequest.getId() != null && theRequest.getId().hasVersionIdPart())) {
-			return false;
-		}
-
 		if (isDelete()) {
 			if (Constants.PARAM_DELETE.equals(theRequest.getSecondaryOperation()) == false) {
 				return false;

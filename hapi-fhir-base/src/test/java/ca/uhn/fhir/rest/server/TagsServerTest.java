@@ -1,11 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.apache.commons.lang.StringUtils.*;
-import static org.junit.Assert.*;
+import static org.apache.commons.lang.StringUtils.defaultString;
+import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -33,7 +34,6 @@ import ca.uhn.fhir.rest.annotation.DeleteTags;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.TagListParam;
-import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -94,17 +94,6 @@ public class TagsServerTest {
 		assertEquals(tagList, ourLastTagList);
 	}
 
-	@Test
-	public void testEquals() {
-		TagList list1 = ourProvider.getAllTagsPatient();
-		TagList list2 = ourProvider.getAllTagsPatient();
-		assertEquals(list1, list2);
-
-		list1 = ourProvider.getAllTagsPatient();
-		list2 = ourProvider.getAllTagsPatient();
-		list2.get(0).setTerm("!!!!!");
-		assertNotEquals(list1, list2);
-	}
 
 	@Test
 	public void testGetAllTags() throws Exception {
@@ -134,8 +123,10 @@ public class TagsServerTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
-		TagList expected = ourProvider.getAllTags();
-		expected.get(0).setTerm("Patient");
+		
+		TagList expected = new TagList();
+		expected.addTag(null, "Patient", "DogLabel");
+		expected.addTag("http://cats", "AllCat", "CatLabel");
 		assertEquals(expected, actual);
 	}
 
@@ -152,8 +143,10 @@ public class TagsServerTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
-		TagList expected = ourProvider.getAllTags();
-		expected.get(0).setTerm("Patient111");
+
+		TagList expected = new TagList();
+		expected.addTag(null, "Patient111", "DogLabel");
+		expected.addTag("http://cats", "AllCat", "CatLabel");
 		assertEquals(expected, actual);
 	}
 
@@ -170,8 +163,9 @@ public class TagsServerTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
-		TagList expected = ourProvider.getAllTags();
-		expected.get(0).setTerm("Patient111222");
+		TagList expected = new TagList();
+		expected.addTag(null, "Patient111222", "DogLabel");
+		expected.addTag("http://cats", "AllCat", "CatLabel");
 		assertEquals(expected, actual);
 	}
 
@@ -188,8 +182,9 @@ public class TagsServerTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		TagList actual = ourCtx.newXmlParser().parseTagList(responseContent);
-		TagList expected = ourProvider.getAllTags();
-		expected.get(0).setTerm("Patient111222");
+		TagList expected = new TagList();
+		expected.addTag(null, "Patient111222", "DogLabel");
+		expected.addTag("http://cats", "AllCat", "CatLabel");
 		assertEquals(expected, actual);
 	}
 	
@@ -262,14 +257,8 @@ public class TagsServerTest {
 	public static class DummyProvider {
 
 		@AddTags(type = Patient.class)
-		public void addTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getIdPart() + theVersion.getVersionIdPart();
-			ourLastTagList=theTagList;
-		}
-
-		@AddTags(type = Patient.class)
 		public void addTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "add" + theId.getIdPart();
+			ourLastOutcome = "add" + theId.getIdPart() + StringUtils.defaultString(theId.getVersionIdPart());
 			ourLastTagList=theTagList;
 		}
 
@@ -297,13 +286,13 @@ public class TagsServerTest {
 			return tagList;
 		}
 
-		@GetTags(type = Patient.class)
-		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
-			TagList tagList = new TagList();
-			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theVersion.getVersionIdPart(), "DogLabel"));
-			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
-			return tagList;
-		}
+//		@GetTags(type = Patient.class)
+//		public TagList getAllTagsPatientIdVersion(@IdParam IdDt theId, @VersionIdParam IdDt theVersion) {
+//			TagList tagList = new TagList();
+//			tagList.add(new Tag((String) null, "Patient" + theId.getIdPart() + theVersion.getVersionIdPart(), "DogLabel"));
+//			tagList.add(new Tag("http://cats", "AllCat", "CatLabel"));
+//			return tagList;
+//		}
 
 		@GetTags(type = Observation.class)
 		public TagList getAllTagsObservationIdVersion(@IdParam IdDt theId) {
@@ -313,15 +302,15 @@ public class TagsServerTest {
 			return tagList;
 		}
 
-		@DeleteTags(type = Patient.class)
-		public void RemoveTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getIdPart() + theVersion.getVersionIdPart();
-			ourLastTagList=theTagList;
-		}
+//		@DeleteTags(type = Patient.class)
+//		public void RemoveTagsPatient(@IdParam IdDt theId, @VersionIdParam IdDt theVersion, @TagListParam TagList theTagList) {
+//			ourLastOutcome = "Remove" + theId.getIdPart() + theVersion.getVersionIdPart();
+//			ourLastTagList=theTagList;
+//		}
 
 		@DeleteTags(type = Patient.class)
 		public void RemoveTagsPatient(@IdParam IdDt theId, @TagListParam TagList theTagList) {
-			ourLastOutcome = "Remove" + theId.getIdPart();
+			ourLastOutcome = "Remove" + theId.getIdPart()+StringUtils.defaultString(theId.getVersionIdPart());
 			ourLastTagList=theTagList;
 		}
 

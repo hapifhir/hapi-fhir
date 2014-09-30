@@ -1189,14 +1189,17 @@ public class FhirResourceDaoTest {
 		patient.addName().addFamily("Tester").addGiven("Joe");
 		TagList tagList = new TagList();
 		tagList.addTag(null, "Dog", "Puppies");
+		// Add this twice
+		tagList.addTag("http://foo", "Cat", "Kittens");
 		tagList.addTag("http://foo", "Cat", "Kittens");
 		patient.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 
 		MethodOutcome outcome = ourPatientDao.create(patient);
-		assertNotNull(outcome.getId());
-		assertFalse(outcome.getId().isEmpty());
+		IdDt patientId = outcome.getId();
+		assertNotNull(patientId);
+		assertFalse(patientId.isEmpty());
 
-		Patient retrieved = ourPatientDao.read(outcome.getId());
+		Patient retrieved = ourPatientDao.read(patientId);
 		TagList published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		assertEquals(2, published.size());
 		assertEquals("Dog", published.get(0).getTerm());
@@ -1217,6 +1220,23 @@ public class FhirResourceDaoTest {
 		assertEquals("Kittens", published.get(1).getLabel());
 		assertEquals("http://foo", published.get(1).getScheme());
 
+		ourPatientDao.addTag(patientId, "http://foo", "Cat", "Kittens");
+		ourPatientDao.addTag(patientId, "http://foo", "Cow", "Calves");
+		
+		 retrieved = ourPatientDao.read(patientId);
+		 published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		assertEquals(3, published.size());
+		assertEquals("Dog", published.get(0).getTerm());
+		assertEquals("Puppies", published.get(0).getLabel());
+		assertEquals(null, published.get(0).getScheme());
+		assertEquals("Cat", published.get(1).getTerm());
+		assertEquals("Kittens", published.get(1).getLabel());
+		assertEquals("http://foo", published.get(1).getScheme());
+		assertEquals("Cow", published.get(2).getTerm());
+		assertEquals("Calves", published.get(2).getLabel());
+		assertEquals("http://foo", published.get(2).getScheme());
+		
+		
 	}
 
 	@Test
