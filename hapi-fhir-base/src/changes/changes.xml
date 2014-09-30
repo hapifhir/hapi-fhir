@@ -63,6 +63,11 @@
 				HAPI now logs a single line indicating the StAX implementation being used upon the
 				first time an XML parser is created.
 			</action>
+			<action type="fix">
+				Update methods on the server did not return a "content-location" header, but
+				only a "location" header. Both are required according to the FHIR specification.
+				Thanks to Bill de Beaubien of Systems Made Simple for reporting this!				
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

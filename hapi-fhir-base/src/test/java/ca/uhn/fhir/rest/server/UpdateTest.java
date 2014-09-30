@@ -69,6 +69,7 @@ public class UpdateTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 	}
 	
