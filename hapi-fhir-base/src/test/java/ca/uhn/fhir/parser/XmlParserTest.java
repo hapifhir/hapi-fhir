@@ -76,7 +76,7 @@ public class XmlParserTest {
 	/**
 	 * Thanks to Alexander Kley!
 	 */
-//	@Test
+	@Test
 	public void testParseContainedBinaryResource() {
 		byte[] bin = new byte[] {0,1,2,3,4};
 	    final Binary binary = new Binary("PatientConsent", bin);

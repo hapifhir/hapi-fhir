@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -380,9 +381,14 @@ class ModelScanner {
 
 		for (Field next : theClass.getDeclaredFields()) {
 
+			if (Modifier.isFinal(next.getModifiers())) {
+				ourLog.trace("Ignoring constant {} on target type {}",  next.getName(), theClass);
+				continue;
+			}
+			
 			Child childAnnotation = next.getAnnotation(Child.class);
 			if (childAnnotation == null) {
-				ourLog.debug("Ignoring non-type field '" + next.getName() + "' on target type: " + theClass);
+				ourLog.trace("Ignoring non @Child field {} on target type {}",next.getName() , theClass);
 				continue;
 			}
 
