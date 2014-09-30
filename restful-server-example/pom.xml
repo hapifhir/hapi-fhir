@@ -13,7 +13,7 @@
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>0.7</version>
+	<version>0.7-uhn-branch</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Sample RESTful Server</name>
@@ -34,14 +34,14 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.7</version>
+			<version>0.7-uhn-branch</version>
 		</dependency>
 
 		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.7</version>
+			<version>0.7-uhn-branch</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>

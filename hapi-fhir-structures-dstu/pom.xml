@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.7</version>
+		<version>0.7-uhn-branch</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.7</version>
+			<version>0.7-uhn-branch</version>
 		</dependency>
 	</dependencies>
 
@@ -27,7 +27,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.7</version>
+				<version>0.7-uhn-branch</version>
 				<executions>
 					<execution>
 						<goals>
