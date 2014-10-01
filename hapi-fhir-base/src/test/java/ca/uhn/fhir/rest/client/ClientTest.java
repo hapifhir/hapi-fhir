@@ -521,7 +521,9 @@ public class ClientTest {
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt(12));
-		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02&_count=12", capt.getAllValues().get(0).getURI().toString());
+		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
+		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since=2012-01-02T00%3A01%3A02"));
+		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_count=12"));
 
 		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T00:01:02").getValue()).getValueAsString(); // ensures
 																														// the
@@ -529,7 +531,9 @@ public class ClientTest {
 																														// timezone
 		expectedDateString = expectedDateString.replace(":", "%3A");
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02").getValue(), new IntegerDt(12).getValue());
-		assertEquals("http://foo/Patient/111/_history?_since=" + expectedDateString + "&_count=12", capt.getAllValues().get(1).getURI().toString());
+		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
+		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since="+expectedDateString));
+		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_count=12"));
 
 		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
 		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
@@ -538,10 +542,10 @@ public class ClientTest {
 		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
 
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt(), new IntegerDt(12));
-		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(2).getURI().toString());
+		assertEquals("http://foo/Patient/111/_history?_count=12", capt.getAllValues().get(4).getURI().toString());
 
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T00:01:02"), new IntegerDt());
-		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(3).getURI().toString());
+		assertEquals("http://foo/Patient/111/_history?_since=2012-01-02T00%3A01%3A02", capt.getAllValues().get(5).getURI().toString());
 
 	}
 

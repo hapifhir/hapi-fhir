@@ -163,6 +163,7 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
+						<!--<argLine>-Dfile.encoding=ISO-8859-1</argLine>-->
 					</configuration>
 				</plugin>
 				<plugin>

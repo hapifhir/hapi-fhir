@@ -87,6 +87,15 @@
 				resources to be re-added (and the actual message to grow) with each encode pass. Thanks to
 				Alexander Kley for the test case!
 			</action>
+			<action type="fix">
+				JSON-encoded contained resources with the incorrect "_id" element (which should be "id", but some
+				incorrect examples exist on the FHIR specification) now parse correctly. 				
+			</action>
+			<action type="fix">
+				Several unit tests failed on Windows (or any platform with non UTF-8 default encoding). This may
+				have also caused resource validation to fail occasionally on these platforms as well.
+				Thanks to Bill de Beaubien for reporting!
+			</action>			
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

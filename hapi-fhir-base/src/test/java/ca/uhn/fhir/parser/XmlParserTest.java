@@ -73,6 +73,11 @@ public class XmlParserTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 
+	@BeforeClass
+	public static void beforeClass2() {
+		 System.setProperty("file.encoding", "ISO-8859-1");
+	}
+	
 	/**
 	 * Thanks to Alexander Kley!
 	 */
@@ -696,7 +701,7 @@ public class XmlParserTest {
 
 		IParser p = ourCtx.newXmlParser();
 
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"));
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"), Charset.forName("UTF-8"));
 		IResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
@@ -709,7 +714,7 @@ public class XmlParserTest {
 		// Use new context here to ensure List isn't already loaded
 		IParser p = new FhirContext().newXmlParser();
 
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"));
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"), Charset.forName("UTF-8"));
 		Bundle bundle = p.parseBundle(string);
 
 		ListResource res = (ListResource) bundle.toListOfResources().get(2);
@@ -722,7 +727,7 @@ public class XmlParserTest {
 
 		IParser p = ourCtx.newXmlParser();
 
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-dicom.xml"));
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-dicom.xml"), Charset.forName("UTF-8"));
 		IResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
@@ -730,7 +735,7 @@ public class XmlParserTest {
 
 		// Nothing
 
-		string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-us-extensions.xml"));
+		string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-us-extensions.xml"), Charset.forName("UTF-8"));
 		resource = p.parseResource(string);
 
 		result = p.encodeResourceToString(resource);
@@ -743,7 +748,7 @@ public class XmlParserTest {
 
 		IParser p = ourCtx.newXmlParser();
 
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/questionnaire-example.xml"));
+		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/questionnaire-example.xml"), Charset.forName("UTF-8"));
 		IResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
@@ -1188,7 +1193,7 @@ public class XmlParserTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
 
 		String expected = (jsonString);
 		String actual = (encoded.trim());
@@ -1220,7 +1225,7 @@ public class XmlParserTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
 
 		String expected = (jsonString);
 		String actual = (encoded.trim());

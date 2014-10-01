@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.ListResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -85,7 +87,29 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+	
+	@Test
+	public void testEncodeIds() {
+		Patient pt =new Patient();
+		pt.addIdentifier("sys", "val");
+		
+		ListResource list = new ListResource();
+		list.setId("listId");
+		list.addEntry().setItem(new ResourceReferenceDt(pt));
+		
+		String enc = ourCtx.newJsonParser().encodeResourceToString(list);
+		ourLog.info(enc);
+		
+		assertThat(enc, containsString("\"id\":\"1\""));
+		
+		ListResource parsed = ourCtx.newJsonParser().parseResource(ListResource.class,enc);
+		assertEquals(Patient.class, parsed.getEntryFirstRep().getItem().getResource().getClass());
 
+		enc = enc.replace("\"id\"", "\"_id\"");
+		parsed = ourCtx.newJsonParser().parseResource(ListResource.class,enc);
+		assertEquals(Patient.class, parsed.getEntryFirstRep().getItem().getResource().getClass());
+}
+	
 	@Test
 	public void testEncodingNullExtension() {
 		Patient p = new Patient();
@@ -929,7 +953,7 @@ public class JsonParserTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -975,7 +999,7 @@ public class JsonParserTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
