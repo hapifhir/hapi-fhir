@@ -37,8 +37,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -308,9 +308,9 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = SearchParamTypeEnum.DATE;
 		} else if (CodingListParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;
-		} else if (IdentifierDt.class.isAssignableFrom(type)) {
+		} else if (BaseIdentifierDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;
-		} else if (QuantityDt.class.isAssignableFrom(type)) {
+		} else if (BaseQuantityDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.QUANTITY;
 		} else if (ReferenceParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.REFERENCE;

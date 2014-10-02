@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -82,8 +81,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	}
 
 	/**
-	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#getCode() Code} and {@link CodingDt#getSystem() system} (as compared by simple equals comparison). Does not compare other
-	 * Codes (e.g. {@link CodingDt#getUse() use}) or any extensions.
+	 * Returns true if <code>this</code> Coding has the same {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getCode() Code} and {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getSystem() system} (as compared by simple equals comparison). Does not compare other
+	 * Codes (e.g. {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getUse() use}) or any extensions.
 	 */
 	public boolean matchesSystemAndCode(BaseCodingDt theCoding) {
 		if (theCoding == null) {

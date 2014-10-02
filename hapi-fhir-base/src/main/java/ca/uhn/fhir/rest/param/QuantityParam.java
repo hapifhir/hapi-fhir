@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static ca.uhn.fhir.rest.param.ParameterUtil.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static ca.uhn.fhir.rest.param.ParameterUtil.escape;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,7 +31,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -42,7 +41,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	private boolean myApproximate;
-	private QuantityDt myQuantity = new QuantityDt();
+	private InternalQuantityDt myQuantity = new InternalQuantityDt();
 
 	/**
 	 * Constructor

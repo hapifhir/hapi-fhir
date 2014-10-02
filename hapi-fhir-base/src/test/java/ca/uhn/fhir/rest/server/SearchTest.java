@@ -250,7 +250,7 @@ public class SearchTest {
 			o.setId("1");
 
 			o.getSubject().setReference(theSubject.getResourceType() + "/" + theSubject.getIdPart());
-			for (CodingDt next : theName.getListAsCodings()) {
+			for (InternalCodingDt next : theName.getListAsCodings()) {
 				o.getName().getCoding().add(next);
 			}
 

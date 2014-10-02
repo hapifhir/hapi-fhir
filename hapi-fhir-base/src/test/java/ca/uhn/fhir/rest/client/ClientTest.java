@@ -822,8 +822,8 @@ public class ClientTest {
 
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 		TokenOrListParam identifiers = new TokenOrListParam();
-		identifiers.add(new CodingDt("foo", "bar"));
-		identifiers.add(new CodingDt("baz", "boz"));
+		identifiers.add(new InternalCodingDt("foo", "bar"));
+		identifiers.add(new InternalCodingDt("baz", "boz"));
 		client.getPatientMultipleIdentifiers(identifiers);
 
 		assertEquals("http://foo/Patient?ids=foo%7Cbar%2Cbaz%7Cboz", capt.getValue().getURI().toString());

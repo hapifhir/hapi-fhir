@@ -1202,7 +1202,7 @@ public class ResfulServerMethodTest {
 			List<Patient> retVal = new ArrayList<Patient>();
 			Patient next = getIdToPatient().get("1");
 
-			for (CodingDt nextId : theIdentifiers.getCodings()) {
+			for (InternalCodingDt nextId : theIdentifiers.getCodings()) {
 				next.getIdentifier().add(new IdentifierDt(nextId.getSystem().getValueAsString(), nextId.getCode().getValue()));
 			}
 
@@ -1227,7 +1227,7 @@ public class ResfulServerMethodTest {
 		}
 
 		@Search()
-		public Patient getPatientQuantityParam(@RequiredParam(name = "quantityParam") QuantityDt theParam) {
+		public Patient getPatientQuantityParam(@RequiredParam(name = "quantityParam") InternalQuantityDt theParam) {
 			Patient next = getIdToPatient().get("1");
 			next.addName().addFamily(theParam.getComparator().getValueAsString()).addFamily(theParam.getValue().getValueAsString()).addFamily(theParam.getSystem().getValueAsString())
 					.addFamily(theParam.getUnits().getValueAsString());

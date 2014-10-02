@@ -72,7 +72,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		getCoding().clear();
 		if (theValues != null) {
 			for (T next : theValues) {
-				getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
+				getCoding().add(new InternalCodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
 			}
 		}
 	}
@@ -91,7 +91,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		if (theValue == null) {
 			return;
 		}
-		getCoding().add(new CodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
+		getCoding().add(new InternalCodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 */
 	public Set<T> getValueAsEnum() {
 		Set<T> retVal = new HashSet<T>();
-		for (CodingDt next : getCoding()) {
+		for (InternalCodingDt next : getCoding()) {
 			if (next == null) {
 				continue;
 			}

@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-@DatatypeDef(name = "duration")
+@DatatypeDef(name = "contained")
 public class ContainedDt implements IDatatype {
 
 	@Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)

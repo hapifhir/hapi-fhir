@@ -20,13 +20,13 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public class MethodOutcome {
 
 	private IdDt myId;
-	private OperationOutcome myOperationOutcome;
+	private BaseOperationOutcome myBaseOperationOutcome;
 	private IdDt myVersionId;
 	private Boolean myCreated;
 
@@ -67,12 +67,12 @@ public class MethodOutcome {
 	 * @param theId
 	 *            The ID of the created/updated resource
 	 * 
-	 * @param theOperationOutcome
+	 * @param theBaseOperationOutcome
 	 *            The operation outcome to return with the response (or null for none)
 	 */
-	public MethodOutcome(IdDt theId, OperationOutcome theOperationOutcome) {
+	public MethodOutcome(IdDt theId, BaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
-		myOperationOutcome = theOperationOutcome;
+		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 
 	/**
@@ -81,16 +81,16 @@ public class MethodOutcome {
 	 * @param theId
 	 *            The ID of the created/updated resource
 	 * 
-	 * @param theOperationOutcome
+	 * @param theBaseOperationOutcome
 	 *            The operation outcome to return with the response (or null for none)
 	 * 
 	 * @param theCreated
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
-	public MethodOutcome(IdDt theId, OperationOutcome theOperationOutcome, Boolean theCreated) {
+	public MethodOutcome(IdDt theId, BaseOperationOutcome theBaseOperationOutcome, Boolean theCreated) {
 		myId = theId;
-		myOperationOutcome = theOperationOutcome;
+		myBaseOperationOutcome = theBaseOperationOutcome;
 		myCreated = theCreated;
 	}
 
@@ -105,10 +105,10 @@ public class MethodOutcome {
 	/**
 	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
 	 */
-	public MethodOutcome(IdDt theId, IdDt theVersionId, OperationOutcome theOperationOutcome) {
+	public MethodOutcome(IdDt theId, IdDt theVersionId, BaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;
-		myOperationOutcome = theOperationOutcome;
+		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 
 	public IdDt getId() {
@@ -116,12 +116,12 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * Returns the {@link OperationOutcome} resource to return to the client or <code>null</code> if none.
+	 * Returns the {@link BaseOperationOutcome} resource to return to the client or <code>null</code> if none.
 	 * 
 	 * @return This method <b>will return null</b>, unlike many methods in the API.
 	 */
-	public OperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
+	public BaseOperationOutcome getBaseOperationOutcome() {
+		return myBaseOperationOutcome;
 	}
 
 	/**
@@ -156,10 +156,10 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * Sets the {@link OperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
+	 * Sets the {@link BaseOperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
 	 */
-	public void setOperationOutcome(OperationOutcome theOperationOutcome) {
-		myOperationOutcome = theOperationOutcome;
+	public void setBaseOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
+		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 
 	/**

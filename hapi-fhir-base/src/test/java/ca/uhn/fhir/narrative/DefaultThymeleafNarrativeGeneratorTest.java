@@ -169,8 +169,8 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		{
 			Observation obs = new Observation();
 			obs.getName().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
-			obs.setValue(new QuantityDt(null, 2.223, "mg/L"));
-			obs.addReferenceRange().setLow(new QuantityDt(2.20)).setHigh(new QuantityDt(2.99));
+			obs.setValue(new InternalQuantityDt(null, 2.223, "mg/L"));
+			obs.addReferenceRange().setLow(new InternalQuantityDt(2.20)).setHigh(new InternalQuantityDt(2.99));
 			obs.setStatus(ObservationStatusEnum.FINAL);
 			obs.setComments("This is a result comment");
 

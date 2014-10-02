@@ -1,11 +1,11 @@
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.Arrays;
 import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 
 /*
  * #%L
@@ -67,17 +67,17 @@ public class TokenClientParam implements IParam {
 			}
 
 			@Override
-			public ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier) {
+			public ICriterion<TokenClientParam> identifier(BaseIdentifierDt theIdentifier) {
 				return new TokenCriterion(getParamName(), theIdentifier.getSystem().getValueAsString(), theIdentifier.getValue().getValue());
 			}
 
 			@Override
-			public ICriterion<TokenClientParam> identifiers(List<IdentifierDt> theIdentifiers) {
+			public ICriterion<TokenClientParam> identifiers(List<BaseIdentifierDt> theIdentifiers) {
 				return new TokenCriterion(getParamName(), theIdentifiers);
 			}
 
 			@Override
-			public ICriterion<TokenClientParam> identifiers(IdentifierDt... theIdentifiers) {
+			public ICriterion<TokenClientParam> identifiers(BaseIdentifierDt... theIdentifiers) {
 				return new TokenCriterion(getParamName(), Arrays.asList(theIdentifiers));
 			}
 };
@@ -131,7 +131,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion<TokenClientParam> identifier(IdentifierDt theIdentifier);
+		ICriterion<TokenClientParam> identifier(BaseIdentifierDt theIdentifier);
 		
 		/**
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
@@ -141,7 +141,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion<TokenClientParam> identifiers(List<IdentifierDt> theIdentifiers);
+		ICriterion<TokenClientParam> identifiers(List<BaseIdentifierDt> theIdentifiers);
 
 		/**
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
@@ -151,7 +151,7 @@ public class TokenClientParam implements IParam {
 		 *            The identifier
 		 * @return A criterion
 		 */
-		ICriterion<TokenClientParam> identifiers(IdentifierDt... theIdentifiers);
+		ICriterion<TokenClientParam> identifiers(BaseIdentifierDt... theIdentifiers);
 
 	}
 

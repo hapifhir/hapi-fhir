@@ -73,7 +73,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	private String myResourceName;
 	private Class<? extends IResource> myResourceType;
 
-	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
+	@SuppressWarnings("unchecked")
+	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(theMethod, theConetxt, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
@@ -100,7 +101,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		if (theReturnResourceType != null) {
 			if (IResource.class.isAssignableFrom(theReturnResourceType)) {
-				myResourceType = theReturnResourceType;
+				myResourceType = (Class<? extends IResource>) theReturnResourceType;
 				ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
 				if (resourceDefAnnotation == null) {
 					throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");

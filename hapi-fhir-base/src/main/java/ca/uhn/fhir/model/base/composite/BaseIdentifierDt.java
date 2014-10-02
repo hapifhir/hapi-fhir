@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -75,9 +74,9 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 
 	
 	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
-	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
+	 * Returns true if <code>this</code> identifier has the same {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getValue() value}
+	 * and {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getSystem() system} (as compared by simple equals comparison).
+	 * Does not compare other values (e.g. {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getUse() use}) or any extensions. 
 	 */
 	public boolean matchesSystemAndValue(BaseIdentifierDt theIdentifier) {
 		if (theIdentifier == null) {

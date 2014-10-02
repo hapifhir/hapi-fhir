@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
 class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal {
@@ -51,10 +51,10 @@ class TokenCriterion implements ICriterion<TokenClientParam>, ICriterionInternal
 		return value;
 	}
 
-	public TokenCriterion(String theParamName, List<IdentifierDt> theValue) {
+	public TokenCriterion(String theParamName, List<BaseIdentifierDt> theValue) {
 		myName=theParamName;
 		StringBuilder b = new StringBuilder();
-		for (IdentifierDt next : theValue) {
+		for (BaseIdentifierDt next : theValue) {
 			if (next.getSystem().isEmpty() && next.getValue().isEmpty()) {
 				continue;
 			}
