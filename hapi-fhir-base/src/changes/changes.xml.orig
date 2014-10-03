@@ -55,12 +55,10 @@
 				entities converted to their equivalent unicode characters when resources are encoded, since FHIR does
 				not allow extended entities in resource instances.
 			</action>
-<<<<<<< HEAD
 			<action type="add">
 				Add a new client interceptor which adds HTTP Authorization Bearer Tokens (for use with OAUTH2 servers)
 				to client requests.
 			</action>			
-=======
 			<action type="fix">
 				Add phloc-commons dependency explicitly, which resolves an issue building HAPI from source on
 				some platforms. Thanks to Odysseas Pentakalos for the patch!
@@ -69,7 +67,22 @@
 				HAPI now logs a single line indicating the StAX implementation being used upon the
 				first time an XML parser is created.
 			</action>
->>>>>>> 4622af7a822ad80c864516369e1e941660a19194
+<<<<<<< HEAD
+			<action type="fix">
+				Update methods on the server did not return a "content-location" header, but
+				only a "location" header. Both are required according to the FHIR specification.
+				Thanks to Bill de Beaubien of Systems Made Simple for reporting this!				
+=======
+			<action type="fix" issue="26" dev="akley">
+				Parser failed to correctly read contained Binary resources. Thanks to Alexander Kley for
+				the patch! 
+			</action>
+			<action type="fix" issue="29" dev="akley">
+				Calling encode multiple times on a resource with contained resources caused the contained
+				resources to be re-added (and the actual message to grow) with each encode pass. Thanks to
+				Alexander Kley for the test case!
+>>>>>>> 686237f970e4e08ef347a58177b6afc5f69dbfcc
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

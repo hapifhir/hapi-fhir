@@ -79,7 +79,9 @@ public class XmlResourceSigner {
 			trans.transform(new DOMSource(doc), new StreamResult(wos));
 		}
 
-		ourLog.info(w.toString());
+		String string = w.toString();
+				
+		ourLog.info(string);
 
 		{
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
