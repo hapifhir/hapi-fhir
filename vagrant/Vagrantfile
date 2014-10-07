@@ -97,7 +97,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	end
 
 	require 'fileutils'
-	Dir.glob('../**/target/*.war').each do |f|
+	build_dir = 'build'
+	# Remove existing cached artifacts.
+	Dir.glob(File.join(build_dir, '*.war')).each do |f|
+		FileUtils.rm(f)
+	end
+	# Cache new copies.
+	Dir.glob(File.join('..', '**', 'target', '*.war')).each do |f|
 		FileUtils.cp(f, 'build')
 	end
 
