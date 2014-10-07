@@ -42,6 +42,19 @@ Your new server environment should now be running in a headless virtual machine 
  * All compiled *.war applications are deployed automatically and started.
  * A "fhir" user is added to tomcat-users.xml. See [fhir.json](https://github.com/preston/hapi-fhir/blob/master/chef/data_bags/tomcat_users/fhir.json) for the default password.
 
+Tomcat will now be running on the VM on port 8080 with the management GUI available. For example, you can now visit:
+
+ * *Tomcat Manager*: assigned_ip:8080/manager/html
+ * *HAPI FHIR* JPA Server:  assigned_ip:8080/hapi-fhir-jpaserver/ 
+
+Screenshots
+----
+![Tomcat Manager](https://raw.githubusercontent.com/preston/hapi-fhir/master/docs/screenshots/tomcat.png)
+
+![Demo Server](https://raw.githubusercontent.com/preston/hapi-fhir/master/docs/screenshots/hapi-fhir-jpaserver.png)
+
+Advanced Configuration
+----
 The Vagrant documentation is the best place to start, but a few more commands of note are:
 
     vagrant ssh # Command-line access to the VM.
