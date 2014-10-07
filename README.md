@@ -13,14 +13,14 @@ http://fhirtest.uhn.ca/
 
 Creating your own demo server with Vagrant
 ========
-This source code repository includes configuration files to materialize an _entire_ server implementation in a single virtual machine (VM) image from scratch, allowing you to quickly bootstrap your own instance. The server will be completely encapsulated within the created VM image. The process _should_ run on OSX, Linux and Windows, but YMMV. The built-in settings support creation of a *VirtualBox*-based image on Ubuntu Linux, though with tuning the base image you should be able to create images suitable for other hypervisors and cloud-based IaaS providers such as VMware and Amazon Web Services (AWS), respectively.
+This source code repository includes configuration files to materialize an _entire_ server implementation off all project build artifacts in a single virtual machine (VM) image from scratch, allowing you to quickly bootstrap your own local copy of the project. The server will be completely encapsulated within the created VM image. The process _should_ run on OSX, Linux and Windows, but YMMV. The built-in settings support creation of a *VirtualBox*-based image on Ubuntu Linux, though with tuning of the base image you should be able to create images suitable for other hypervisors and cloud-based IaaS providers such as VMware and Amazon Web Services (AWS), respectively.
 
 Dependencies
 ----
 
 Prior to running, please ensure you have all .war files built, and the following installed and functioning propertly.
 
- * All normal Java development dependencies. (SDK and Maven, specifically.)
+ * All normal Java development dependencies. (Java SDK and Maven 3, specifically.)
  * VirtualBox
  * Vagrant
 

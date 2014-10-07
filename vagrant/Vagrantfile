@@ -100,12 +100,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	Dir.glob('../**/target/*.war').each do |f|
 		FileUtils.cp(f, 'build')
 	end
-	# Deploy any/all built .war files.
+
+	# puts "Deploying any/all built .war files.""
 	config.vm.provision 'shell', inline: 'cp /build/*.war /var/lib/tomcat7/webapps'
 
-	# Set MySQL to start automatically at boot, and fire it up. 
+	# puts "Setting MySQL to start automatically at boot, and (re)starting the daemon."
 	config.vm.provision 'shell', inline: 'update-rc.d mysql defaults'
 	config.vm.provision 'shell', inline: 'service mysql restart'
 
+	# puts "The VM network interfaces are configured as follows..."
+	config.vm.provision 'shell', inline: 'ifconfig'
 
 end
