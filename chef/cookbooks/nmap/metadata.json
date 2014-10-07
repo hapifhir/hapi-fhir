@@ -1,0 +1,29 @@
+{
+  "name": "nmap",
+  "description": "Installs/Configures nmap",
+  "long_description": "# nmap cookbook\n\n# Requirements\nChef 10.16.2 or above\n\n# Usage\nsimply include 'recipe[nmap]' in a node's run_list\n\n# Attributes\n\n# Recipes\ndefault.rb : installs the nmap package\n\n# Author\n\nAuthor:: Sean OMeara (<someara@opscode.com>)\n",
+  "maintainer": "Sean OMeara",
+  "maintainer_email": "someara@opscode.com",
+  "license": "Apache2",
+  "platforms": {
+  },
+  "dependencies": {
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  },
+  "version": "0.1.0"
+}

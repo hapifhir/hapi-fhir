@@ -1,0 +1,29 @@
+{
+  "name": "chef-sugar",
+  "version": "2.3.0",
+  "description": "Installs chef-sugar. Please see the chef-sugar Ruby gem for more information.",
+  "long_description": "Chef Sugar is a Gem & Chef Recipe that includes series of helpful syntactic\nsugars on top of the Chef core and other resources to make a cleaner, more lean\nrecipe DSL, enforce DRY principles, and make writing Chef recipes an awesome and\nfun experience!\n\nFor the most up-to-date information and documentation, please visit the [Chef\nSugar project page on GitHub](https://github.com/sethvargo/chef-sugar).\n",
+  "maintainer": "Seth Vargo",
+  "maintainer_email": "sethvargo@gmail.com",
+  "license": "Apache 2.0",
+  "platforms": {
+  },
+  "dependencies": {
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+  }
+}

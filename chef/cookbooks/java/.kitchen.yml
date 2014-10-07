@@ -1,0 +1,108 @@
+---
+driver:
+  name: vagrant
+  require_chef_omnibus: true
+  customize:
+    memory: 1024
+
+provisioner:
+  name: chef_solo
+  attributes:
+    java:
+      ark_retries: 2
+      ark_retry_delay: 10
+
+platforms:
+  - name: ubuntu-14.04
+    run_list:
+    - recipe[apt]
+    driver:
+      box: opscode-ubuntu-14.04
+  - name: ubuntu-13.10
+    driver:
+      box: opscode-ubuntu-13.10
+    run_list:
+    - recipe[apt]
+  - name: ubuntu-12.04
+    driver:
+      box: opscode-ubuntu-12.04
+    run_list:
+    - recipe[apt]
+  - name: ubuntu-10.04
+    driver:
+      box: opscode-ubuntu-10.04
+    run_list:
+    - recipe[apt]
+  - name: debian-6.0.8
+    driver:
+      box: opscode-debian-6.0.8
+    run_list:
+    - recipe[apt]
+  - name: debian-7.4
+    driver:
+      box: opscode-debian-7.4
+    run_list:
+    - recipe[apt]
+  - name: centos-6.5
+    driver:
+      box: opscode-centos-6.5
+  - name: centos-5.10
+    driver:
+      box: opscode-centos-5.10
+  - name: fedora-19
+    driver:
+      box: opscode-fedora-19
+
+suites:
+  - name: openjdk
+    excludes:
+      - fedora-19
+    run_list:
+      - recipe[java::default]
+  - name: openjdk-7
+    excludes:
+      - ubuntu-10.04
+      - debian-6.0.8
+    run_list:
+      - recipe[java::default]
+    attributes:
+      java:
+        jdk_version: "7"
+  - name: oracle
+    run_list:
+      - recipe[java::default]
+    attributes:
+      java:
+        oracle:
+          accept_oracle_download_terms: true
+        install_flavor: oracle
+  - name: oracle-7
+    run_list:
+      - recipe[java::default]
+    attributes:
+      java:
+        jdk_version: "7"
+        oracle:
+          accept_oracle_download_terms: true
+        install_flavor: oracle
+  - name: oracle-8
+    run_list:
+      - recipe[java::default]
+    attributes:
+      java:
+        jdk_version: "8"
+        oracle:
+          accept_oracle_download_terms: true
+        install_flavor: oracle
+  - name: oracle-direct
+    run_list:
+      - recipe[java::oracle]
+    attributes:
+      java:
+        oracle:
+          accept_oracle_download_terms: true
+  - name: openjdk-direct
+    run_list:
+      - recipe[java::openjdk]
+    excludes:
+      - fedora-19

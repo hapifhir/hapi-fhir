@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+#^syntax detection
+
+site 'https://supermarket.getchef.com/api/v1'
+
+# cookbook 'emacs24-nox'
+cookbook 'nmap'
+cookbook 'java'
+cookbook 'mysql'
+cookbook 'tomcat'

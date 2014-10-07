@@ -1,0 +1,31 @@
+{
+  "name": "openssl",
+  "version": "2.0.0",
+  "description": "Provides a library with a method for generating secure random passwords.",
+  "long_description": "openssl Cookbook\n================\n\nThis cookbook provides a library method to generate secure random passwords in recipes using the Ruby OpenSSL library.\n\nIt also provides an attribute-driven recipe for upgrading OpenSSL packages.\n\nRequirements\n------------\n\nThe `secure_password` works on any platform with OpenSSL Ruby bindings installed, which are a requirement for Chef anyway.\n\nThe upgrade recipe works on the following tested platforms:\n\n* Ubuntu 12.04, 14.04\n* Debian 7.4\n* CentOS 6.5\n\nIt may work on other platforms or versions of the above platforms with or without modification.\n\n[Chef Sugar](https://github.com/sethvargo/chef-sugar) was introduced as a dependency to provide helpers that make the default attribute settings (see Attributes) easier to reason about.\n\nAttributes\n----------\n\n* `node['openssl']['packages']` - An array of packages of openssl. The default attributes attempt to be smart about which packages are the default, but this may need to be changed by users of the `openssl::upgrade` recipe.\n* `node['openssl']['restart_services']` - An array of service resources that use the `node['openssl']['packages']`. This is empty by default as Chef has no reliably reasonable way to detect which applications or services are compiled against these packages. *Note* These each need to be \"`service`\" resources specified somewhere in the recipes in the node's run list.\n\nRecipes\n-------\n\n### upgrade\n\nThe upgrade recipe iterates over the list of packages in the `node['openssl']['packages']` attribute and manages them with the `:upgrade` action. Each package will send `:restart` notification to service resources named by the `node['openssl']['restart_services']` attribute.\n\nUsage\n-----\n\nMost often this will be used to generate a secure password for an attribute. In a recipe:\n\n```ruby\n::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)\nnode.set_unless[:my_password] = secure_password\n```\n\nTo use the `openssl::upgrade` recipe, set the attributes as mentioned above. For example, we have a \"stats_collector\" service that uses openssl. It has a recipe that looks like this:\n\nLWRP\n==== \n\nThis cookbook includes an LWRP for generating Self Signed Certificates\n\n## openssl_x509\ngenerate a pem formatted x509 cert + key  \n\n### Attributes\n`common_name` A String representing the `CN` ssl field\n`org` A String representing the `O` ssl field\n`org_unit` A String representing the `OU` ssl field\n`country` A String representing the `C` ssl field\n`expire` A Fixnum reprenting the number of days from _now_ to expire the cert\n`key_file` Optional A string to the key file to use. If no key is present it will generate and store one. \n`key_pass` A String that is the key's passphrase\n`key_length` A Fixnum reprenting your desired Bit Length _Default: 2048_\n`owner` The owner of the files _Default: \"root\"_\n`group` The group of the files _Default: \"root\"_\n`mode`  The mode to store the files in _Default: \"0400\"_\n\n### Example usage\n\n    openssl_x509 \"/tmp/mycert.pem\" do\n      common_name \"www.f00bar.com\"\n      org \"Foo Bar\"\n      org_unit \"Lab\"\n      country \"US\"\n    end\n\n    \nLicense and Author\n==================\n\nAuthor:: Jesse Nelson (<spheromak@gmail.com>)\nAuthor:: Joshua Timberman (<joshua@opscode.com>)\n=======\n\n\n```ruby\nnode.default['openssl']['restart_services'] = ['stats_collector']\n\n# other recipe code here...\nservice 'stats_collector' do\n  action [:enable, :start]\nend\n\ninclude_recipe 'openssl::upgrade'\n```\n\nThis will ensure that openssl is upgraded to the latest version so the `stats_collector` service won't be exploited (hopefully!).\n\n```text\nCopyright:: 2009-2011, Opscode, Inc\nCopyright:: 2014, Chef Software, Inc <legal@getchef.com>\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n```\n",
+  "maintainer": "Opscode, Inc.",
+  "maintainer_email": "cookbooks@opscode.com",
+  "license": "Apache 2.0",
+  "platforms": {
+  },
+  "dependencies": {
+    "chef-sugar": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "openssl": "Empty, this cookbook provides a library, see README.md"
+  }
+}
