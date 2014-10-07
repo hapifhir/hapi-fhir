@@ -72,13 +72,15 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	}
 
 	private static OperationOutcome toOperationOutcome(String... theMessage) {
-		OperationOutcome operationOutcome = new OperationOutcome();
+		OperationOutcome OperationOutcome = new OperationOutcome();
 		if (theMessage != null) {
 			for (String next : theMessage) {
-				operationOutcome.addIssue().setDetails(next);
+				OperationOutcome.addIssue().setDetails(next);
 			}
 		}
-		return operationOutcome;
+		return OperationOutcome;
 	}
 
+	
+	
 }

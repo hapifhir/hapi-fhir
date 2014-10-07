@@ -24,6 +24,12 @@
 
 	<dependencies>
 
+<dependency>
+    <groupId>org.apache.santuario</groupId>
+    <artifactId>xmlsec</artifactId>
+    <version>2.0.2</version>
+</dependency>
+
 		<!-- JSON -->
 		<dependency>
 			<groupId>javax.json</groupId>
