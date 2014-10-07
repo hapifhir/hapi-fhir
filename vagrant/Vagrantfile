@@ -40,6 +40,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	# the path on the guest to mount the folder. And the optional third
 	# argument is a set of non-required options.
 	config.vm.synced_folder "data", '/data'
+	config.vm.synced_folder "build", '/build'
 
 	# Provider-specific configuration so you can fine-tune various
 	# backing providers for Vagrant. These expose provider-specific options.
@@ -96,12 +97,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	end
 
 	require 'fileutils'
-	build_dir = File.join('data', 'build')
-	Dir.glob('**/target/*.war').each do |f|
-		FileUtils.cp(f, build_dir)
+	Dir.glob('../**/target/*.war').each do |f|
+		FileUtils.cp(f, 'build')
 	end
 	# Deploy any/all built .war files.
-	config.vm.provision 'shell', inline: 'cp /data/build/*.war /var/lib/tomcat7/webapps'
+	config.vm.provision 'shell', inline: 'cp /build/*.war /var/lib/tomcat7/webapps'
 
 	# Set MySQL to start automatically at boot, and fire it up. 
 	config.vm.provision 'shell', inline: 'update-rc.d mysql defaults'

@@ -30,17 +30,18 @@ Creating Your VM
 
     cd hapi-fhir-root/
     mvn install # Creates web application .war files. Make sure they're built before proceeding!
+    cd vagrant
     vagrant up # Will take a few minutes to boot up.
 
 Your new server environment should now be running in a headless virtual machine on your local computer. The following step are performed automatically for you within the VM sandbox environment:
 
  * A complete Ubuntu 14.04 Server VM is launched in headless mode, bridged to whatever host network interface you've selected.
  * An IPv4 address is assigned via DHCP.
- * MySQL Server (Community Edition) is installed from the official 10gen repository. (See the [Vagrantfile](https://github.com/preston/hapi-fhir/blob/master/Vagrantfile) for the default root password.)
+ * MySQL Server (Community Edition) is installed from the official 10gen repository. (See the [Vagrantfile](https://github.com/preston/hapi-fhir/blob/master/vagrant/Vagrantfile) for the default root password.)
  * Oracle Java 8 is installed.
  * Tomcat 7 is installed and configured as a system service.
  * All compiled *.war applications are deployed automatically and started.
- * A "fhir" user is added to tomcat-users.xml. See [fhir.json](https://github.com/preston/hapi-fhir/blob/master/chef/data_bags/tomcat_users/fhir.json) for the default password.
+ * A "fhir" user is added to tomcat-users.xml. See [fhir.json](https://github.com/preston/hapi-fhir/blob/master/vagrant/chef/data_bags/tomcat_users/fhir.json) for the default password.
 
 Tomcat will now be running on the VM on port 8080 with the management GUI available. For example, you can now visit:
 
@@ -49,9 +50,9 @@ Tomcat will now be running on the VM on port 8080 with the management GUI availa
 
 Screenshots
 ----
-![Tomcat Manager](https://raw.githubusercontent.com/preston/hapi-fhir/master/docs/screenshots/tomcat.png)
+![Tomcat Manager](https://raw.githubusercontent.com/preston/hapi-fhir/master/vagrant/screenshots/tomcat.png)
 
-![Demo Server](https://raw.githubusercontent.com/preston/hapi-fhir/master/docs/screenshots/hapi-fhir-jpaserver.png)
+![Demo Server](https://raw.githubusercontent.com/preston/hapi-fhir/master/vagrant/screenshots/hapi-fhir-jpaserver.png)
 
 Advanced Configuration
 ----

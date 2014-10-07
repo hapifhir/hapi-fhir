@@ -7,5 +7,5 @@ nohup.out
 
 # Vagrant stuff.
 .vagrant
-/data
-/chef/tmp
+/vagrant/build
+/vagrant/chef/tmp
