@@ -1,9 +1,11 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -205,8 +207,12 @@ public class IncludeTest {
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals(2, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
-		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
-		assertEquals("bar", p.getName().get(1).getFamilyFirstRep().getValue());
+
+		Set<String> values = new HashSet<String>();
+		values.add( p.getName().get(0).getFamilyFirstRep().getValue());
+		values.add( p.getName().get(1).getFamilyFirstRep().getValue());
+		assertThat(values, containsInAnyOrder("foo", "bar"));
+		
 	}
 
 	@Test

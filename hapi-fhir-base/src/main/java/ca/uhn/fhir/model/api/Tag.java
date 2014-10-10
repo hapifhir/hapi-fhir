@@ -28,38 +28,52 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * A single tag
+ * <p>
+ * Note on equality- When computing hashCode or equals values for this class, only the 
+ * {@link #getScheme() scheme} and 
+ * </p>
+ */
 public class Tag extends BaseElement implements IElement {
-	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme
-	 * value
-	 */
-	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
+	
+	public static final String ATTR_LABEL = "label";
+	public static final String ATTR_SCHEME = "scheme";
+	public static final String ATTR_TERM = "term";
 
 	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag/security" scheme
-	 * value
+	 * Convenience constant containing the "http://hl7.org/fhir/tag" scheme value
+	 */
+	public static final String HL7_ORG_FHIR_TAG = "http://hl7.org/fhir/tag";
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/profile" scheme value
+	 */
+	public static final String HL7_ORG_PROFILE_TAG = "http://hl7.org/fhir/tag/profile";
+	/**
+	 * Convenience constant containing the "http://hl7.org/fhir/tag/security" scheme value
 	 */
 	public static final String HL7_ORG_SECURITY_TAG = "http://hl7.org/fhir/tag/security";
 
-	/**
-	 * Convenience constant containing the "http://hl7.org/fhir/tag/profile" scheme
-	 * value
-	 */
-	public static final String HL7_ORG_PROFILE_TAG = "http://hl7.org/fhir/tag/profile";
-
-	public static final String ATTR_TERM = "term";
-	public static final String ATTR_LABEL = "label";
-	public static final String ATTR_SCHEME = "scheme";
-	
 	private String myLabel;
 	private String myScheme;
 	private String myTerm;
 
+	/**
+	 * @deprecated Tags will become immutable in a future release, so this constructor should not be used.
+	 */
 	public Tag() {
 	}
 
+	/**
+	 * @deprecated There is no reason to create a tag with a term and not a scheme, so this constructor will be removed
+	 */
 	public Tag(String theTerm) {
-		this((String)null, theTerm, null);
+		this((String) null, theTerm, null);
+	}
+
+	public Tag(String theScheme, String theTerm) {
+		myScheme = theScheme;
+		myTerm = theTerm;
 	}
 
 	public Tag(String theScheme, String theTerm, String theLabel) {
@@ -78,32 +92,6 @@ public class Tag extends BaseElement implements IElement {
 		myLabel = theLabel;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Tag other = (Tag) obj;
-		if (myLabel == null) {
-			if (other.myLabel != null)
-				return false;
-		} else if (!myLabel.equals(other.myLabel))
-			return false;
-		if (myScheme == null) {
-			if (other.myScheme != null)
-				return false;
-		} else if (!myScheme.equals(other.myScheme))
-			return false;
-		if (myTerm == null) {
-			if (other.myTerm != null)
-				return false;
-		} else if (!myTerm.equals(other.myTerm))
-			return false;
-		return true;
-	}
 
 	public String getLabel() {
 		return myLabel;
@@ -118,10 +106,31 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Tag other = (Tag) obj;
+		if (myScheme == null) {
+			if (other.myScheme != null)
+				return false;
+		} else if (!myScheme.equals(other.myScheme))
+			return false;
+		if (myTerm == null) {
+			if (other.myTerm != null)
+				return false;
+		} else if (!myTerm.equals(other.myTerm))
+			return false;
+		return true;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((myLabel == null) ? 0 : myLabel.hashCode());
 		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
 		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
 		return result;
@@ -132,16 +141,31 @@ public class Tag extends BaseElement implements IElement {
 		return StringUtils.isBlank(myLabel) && StringUtils.isBlank(myScheme) && StringUtils.isBlank(myTerm);
 	}
 
+	/**
+	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
+	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
+	 * tag object
+	 */
 	public Tag setLabel(String theLabel) {
 		myLabel = theLabel;
 		return this;
 	}
 
+	/**
+	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
+	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
+	 * tag object
+	 */
 	public Tag setScheme(String theScheme) {
 		myScheme = theScheme;
 		return this;
 	}
 
+	/**
+	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
+	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
+	 * tag object
+	 */
 	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
 		return this;

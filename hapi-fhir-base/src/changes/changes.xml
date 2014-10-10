@@ -7,6 +7,12 @@
 	</properties>
 	<body>
 		<release version="0.7" date="TBD">
+			<action type="add" issue="30">
+				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,
+				but this has been replaced with LinkedHashMap semantics. This means that the list of
+				tags will no longer accept duplicate tags, but that tag order will still be
+				preserved. Thanks to Bill de Beaubien for reporting!
+			</action>			
 			<action type="add" dev="suranga">
 				Documentation fixes
 			</action>			
@@ -55,6 +61,10 @@
 				entities converted to their equivalent unicode characters when resources are encoded, since FHIR does
 				not allow extended entities in resource instances.
 			</action>
+			<action type="add">
+				Add a new client interceptor which adds HTTP Authorization Bearer Tokens (for use with OAUTH2 servers)
+				to client requests.
+			</action>			
 			<action type="fix">
 				Add phloc-commons dependency explicitly, which resolves an issue building HAPI from source on
 				some platforms. Thanks to Odysseas Pentakalos for the patch!
@@ -63,6 +73,29 @@
 				HAPI now logs a single line indicating the StAX implementation being used upon the
 				first time an XML parser is created.
 			</action>
+			<action type="fix">
+				Update methods on the server did not return a "content-location" header, but
+				only a "location" header. Both are required according to the FHIR specification.
+				Thanks to Bill de Beaubien of Systems Made Simple for reporting this!				
+			</action>
+			<action type="fix" issue="26" dev="akley">
+				Parser failed to correctly read contained Binary resources. Thanks to Alexander Kley for
+				the patch! 
+			</action>
+			<action type="fix" issue="29" dev="akley">
+				Calling encode multiple times on a resource with contained resources caused the contained
+				resources to be re-added (and the actual message to grow) with each encode pass. Thanks to
+				Alexander Kley for the test case!
+			</action>
+			<action type="fix">
+				JSON-encoded contained resources with the incorrect "_id" element (which should be "id", but some
+				incorrect examples exist on the FHIR specification) now parse correctly. 				
+			</action>
+			<action type="fix">
+				Several unit tests failed on Windows (or any platform with non UTF-8 default encoding). This may
+				have also caused resource validation to fail occasionally on these platforms as well.
+				Thanks to Bill de Beaubien for reporting!
+			</action>			
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
@@ -206,7 +239,9 @@
 		</release>
 		<release version="0.5" date="2014-Jul-30">
 			<action type="add">
-				having multiple ways of accomplishing the same thing. This means that a number of existing classes
+				HAPI has a number of RESTful method parameter types that have similar but not identical
+				purposes and confusing names. A cleanup has been undertaken to clean this up.
+				This means that a number of existing classes
 				have been deprocated in favour of new naming schemes.
 				<![CDATA[<br/><br/>]]>
 				All annotation-based clients and all server search method parameters are now named

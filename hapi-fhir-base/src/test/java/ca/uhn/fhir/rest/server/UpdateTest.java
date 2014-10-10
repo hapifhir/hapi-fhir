@@ -69,6 +69,7 @@ public class UpdateTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 	}
 	
@@ -141,22 +142,24 @@ public class UpdateTest {
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.addHeader("Category", "Dog, Cat");
+		httpPost.addHeader("Category", "Dog; scheme=\"urn:animals\", Cat; scheme=\"urn:animals\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
-		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag("Cat"), ourReportProvider.getLastTags().get(1));
 		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("urn:animals", "Dog"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("urn:animals", "Cat"), ourReportProvider.getLastTags().get(1));
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.addHeader("Category", "Dog; label=\"aa\", Cat; label=\"bb\"");
+		httpPost.addHeader("Category", "Dog; label=\"aa\"; scheme=\"urn:animals\", Cat; label=\"bb\"; scheme=\"urn:animals\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		status = ourClient.execute(httpPost);
-		assertEquals(2, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag((String) null, "Dog", "aa"), ourReportProvider.getLastTags().get(0));
-		assertEquals(new Tag((String) null, "Cat", "bb"), ourReportProvider.getLastTags().get(1));
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(2, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("urn:animals",  "Dog", "aa"), ourReportProvider.getLastTags().get(0));
+		assertEquals(new Tag("urn:animals",  "Cat", "bb"), ourReportProvider.getLastTags().get(1));
 
 	}
 
@@ -167,12 +170,13 @@ public class UpdateTest {
 		dr.addCodedDiagnosis().addCoding().setCode("AAA");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
-		httpPost.addHeader("Category", "Dog");
+		httpPost.addHeader("Category", "Dog; scheme=\"animals\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
-		assertEquals(1, ourReportProvider.getLastTags().size());
-		assertEquals(new Tag("Dog"), ourReportProvider.getLastTags().get(0));
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(1, ourReportProvider.getLastTags().size());
+		assertEquals(new Tag("animals", "Dog"), ourReportProvider.getLastTags().get(0));
 
 	}
 
@@ -186,17 +190,19 @@ public class UpdateTest {
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		httpPost = new HttpPut("http://localhost:" + ourPort + "/DiagnosticReport/001");
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\";");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", null), ourReportProvider.getLastTags().get(0));
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -218,9 +224,10 @@ public class UpdateTest {
 		httpPost.addHeader("Category", "Dog; scheme=\"http://foo\"; label=\"aaaa\";   ");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(dr), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		status=ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		
 		assertEquals(1, ourReportProvider.getLastTags().size());
 		assertEquals(new Tag("http://foo", "Dog", "aaaa"), ourReportProvider.getLastTags().get(0));
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -235,6 +242,7 @@ public class UpdateTest {
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPut);
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		// String responseContent =
 		// IOUtils.toString(status.getEntity().getContent());
@@ -242,7 +250,6 @@ public class UpdateTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/DiagnosticReport/001/_history/002", status.getFirstHeader("Location").getValue());
-		IOUtils.closeQuietly(status.getEntity().getContent());
 
 	}
 
@@ -257,10 +264,11 @@ public class UpdateTest {
 		httpPut.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse status = ourClient.execute(httpPut);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
 		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		ourLog.info("Response was:\n{}", responseContent);
 
 	}
 
@@ -289,9 +297,11 @@ public class UpdateTest {
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Organization/001");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		CloseableHttpResponse response = ourClient.execute(httpPost);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-		response.close();
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		status.close();
 	}
 
 	
@@ -376,6 +386,7 @@ public class UpdateTest {
 			return Observation.class;
 		}
 		
+		@SuppressWarnings("unused")
 		@Update()
 		public MethodOutcome updateDiagnosticReportWithVersion(@IdParam IdDt theId, @ResourceParam DiagnosticOrder thePatient) {
 			/*

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -50,6 +52,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 class SchemaBaseValidator implements IValidator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
@@ -77,9 +80,9 @@ class SchemaBaseValidator implements IValidator {
 			MyErrorHandler handler = new MyErrorHandler(theContext);
 			validator.setErrorHandler(handler);
 			String encodedResource = theContext.getXmlEncodedResource();
-			
-//			ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString((Bundle) theContext.getResource()));
-			
+
+			// ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString((Bundle) theContext.getResource()));
+
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
 		} catch (SAXException e) {
 			throw new ConfigurationException("Could not apply schema file", e);
@@ -115,11 +118,26 @@ class SchemaBaseValidator implements IValidator {
 
 	private Source loadXml(String theVersion, String theSystemId, String theSchemaName) {
 		String pathToBase = "ca/uhn/fhir/model/" + theVersion + "/schema/" + theSchemaName;
+		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 		if (baseIs == null) {
 			throw new ValidationFailureException("No FHIR-BASE schema found");
 		}
-		Source baseSource = new StreamSource(baseIs, theSystemId);
+		 baseIs = new BOMInputStream(baseIs, false);
+		 InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
+		 Source baseSource = new StreamSource(baseReader, theSystemId);
+
+//		String schema;
+//		try {
+//			schema = IOUtils.toString(baseIs, Charset.forName("UTF-8"));
+//		} catch (IOException e) {
+//			throw new InternalErrorException(e);
+//		}
+//
+//		ourLog.info("Schema is:\n{}", schema);
+//		
+//		Source baseSource = new StreamSource(new StringReader(schema), theSystemId);
+//		Source baseSource = new StreamSource(baseIs, theSystemId);
 		return baseSource;
 	}
 
@@ -180,31 +198,16 @@ class SchemaBaseValidator implements IValidator {
 				input.setSystemId(theSystemId);
 				input.setBaseURI(theBaseURI);
 				String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
+				
+				ourLog.debug("Loading referenced schema file: " + pathToBase);
+				
 				InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 				if (baseIs == null) {
 					throw new ValidationFailureException("No FHIR-BASE schema found");
 				}
 
-				ourLog.debug("Loading schema: {}", theSystemId);
-				byte[] schema;
-				try {
-					schema = IOUtils.toByteArray(new InputStreamReader(baseIs, "UTF-8"));
-				} catch (IOException e) {
-					throw new ValidationFailureException("Failed to load schema " + theSystemId, e);
-				}
-
-				// Account for BOM in UTF-8 text (this seems to choke Java 6's built in XML reader)
-				int offset = 0;
-				if (schema[0] == (byte) 0xEF && schema[1] == (byte) 0xBB && schema[2] == (byte) 0xBF) {
-					offset = 3;
-				}
-
-				try {
-					input.setCharacterStream(new InputStreamReader(new ByteArrayInputStream(schema, offset, schema.length - offset), "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new ValidationFailureException("Failed to load schema " + theSystemId, e);
-				}
-
+				input.setByteStream(baseIs);
+				
 				return input;
 
 			}
