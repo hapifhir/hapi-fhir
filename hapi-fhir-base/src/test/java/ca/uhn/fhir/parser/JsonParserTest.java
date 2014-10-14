@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.sf.json.JSON;
@@ -87,6 +88,30 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+	
+	@Test
+	public void testEncodeNonContained() {
+		Organization org = new Organization();
+		org.setId("Organization/65546");
+		org.getName().setValue("Contained Test Organization");
+
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getManagingOrganization().setResource(org);
+		
+		Bundle b = Bundle.withResources(Collections.singletonList((IResource)patient), ourCtx, "http://foo");
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("contained")));
+		assertThat(encoded, containsString("\"reference\":\"Organization/65546\""));
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("contained")));
+		assertThat(encoded, containsString("\"reference\":\"Organization/65546\""));
+	}
+	
 	
 	@Test
 	public void testEncodeIds() {
@@ -437,6 +462,38 @@ public class JsonParserTest {
 
 	}
 
+	@Test
+	public void testEncodeContained() {
+		// Create an organization
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getManagingOrganization().setResource(org);
+		
+		// Create a bundle with just the patient resource
+		List<IResource> resources = new ArrayList<IResource>();
+		resources.add(patient);
+		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
+		
+		// Encode the buntdle
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\":\"Organization", "id\":\"1\"")));
+		assertThat(encoded, containsString("reference\":\"#1\""));
+		
+		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\":\"Organization", "id\":\"1\"")));
+		assertThat(encoded, containsString("reference\":\"#1\""));
+		
+		
+	}
+
+	
 	@Test
 	public void testEncodeContainedResources() throws IOException {
 

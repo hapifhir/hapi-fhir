@@ -103,31 +103,109 @@ patient.getManagingOrganization().setReference("Organization/124362");]]></sourc
 				<p>
 					In the following example, the Organization resource has an ID set, so it will not
 					be contained but will rather appear as a distinct entry in any returned
-					bundles.
+					bundles. Both resources are added to a bundle, which will then have
+					two entries:
 				</p>
-				<source><![CDATA[Organization org = new Organization();
+				<source><![CDATA[// Create an organization
+Organization org = new Organization();
 org.setId("Organization/65546");
 org.getName().setValue("Contained Test Organization");
 
+// Create a patient
 Patient patient = new Patient();
 patient.setId("Patient/1333");
 patient.addIdentifier("urn:mrns", "253345");
-patient.getManagingOrganization().setResource(patient);]]></source>
+patient.getManagingOrganization().setResource(org);
 
+// Create a list containing both resources. In a server method, you might just
+// return this list, but here we will create a bundle to encode.
+List<IResource> resources = new ArrayList<IResource>();
+resources.add(org);
+resources.add(patient);		
+
+// Create a bundle with both
+Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
+
+// Encode the buntdle
+String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+System.out.println(encoded);]]></source>
+
+				<p>
+					This will give the following output:
+				</p>
+				<source><![CDATA[<feed xmlns="http://www.w3.org/2005/Atom">
+   <entry>
+      <title>Organization Organization/65546</title>
+      <id>http://example.com/base/Organization/65546</id>
+      <published>2014-10-14T09:22:54-04:00</published>
+      <link rel="self" href="http://example.com/base/Organization/65546"/>
+      <content type="text/xml">
+         <Organization xmlns="http://hl7.org/fhir">
+            <name value="Contained Test Organization"/>
+         </Organization>
+      </content>
+   </entry>
+   <entry>
+      <title>Patient Patient/1333</title>
+      <id>http://example.com/base/Patient/1333</id>
+      <published>2014-10-14T09:22:54-04:00</published>
+      <link rel="self" href="http://example.com/base/Patient/1333"/>
+      <content type="text/xml">
+         <Patient xmlns="http://hl7.org/fhir">
+            <identifier>
+               <system value="urn:mrns"/>
+               <value value="253345"/>
+            </identifier>
+            <managingOrganization>
+               <reference value="Organization/65546"/>
+            </managingOrganization>
+         </Patient>
+      </content>
+   </entry>
+</feed>]]></source>
+		
+			</subsection>
+			
+			<subsection name="Contained Resources">
+				
 				<p>
 					On the other hand, if the linked resource
 					does not have an ID set, the linked resource will
 					be included in the returned bundle as a "contained" resource. In this
-					case, HAPI itself will define a local reference ID (e.g. "#001").
+					case, HAPI itself will define a local reference ID (e.g. "#1").
 				</p>
-				<source><![CDATA[Organization org = new Organization();
-// org.setId("Organization/65546");
-org.getName().setValue("Normal (not contained) Test Organization");
+				<source><![CDATA[// Create an organization, note that the organization does not have an ID
+Organization org = new Organization();
+org.getName().setValue("Contained Test Organization");
 
+// Create a patient
 Patient patient = new Patient();
 patient.setId("Patient/1333");
 patient.addIdentifier("urn:mrns", "253345");
-patient.getManagingOrganization().setResource(patient);]]></source>
+
+// Put the organization as a reference in the patient resource
+patient.getManagingOrganization().setResource(org);
+
+String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+System.out.println(encoded);]]></source>
+				
+				<p>
+					This will give the following output:
+				</p>
+				<source><![CDATA[<Patient xmlns="http://hl7.org/fhir">
+   <contained>
+      <Organization xmlns="http://hl7.org/fhir" id="1">
+         <name value="Contained Test Organization"/>
+      </Organization>
+   </contained>
+   <identifier>
+      <system value="urn:mrns"/>
+      <value value="253345"/>
+   </identifier>
+   <managingOrganization>
+      <reference value="#1"/>
+   </managingOrganization>
+</Patient>]]></source>
 				
 			</subsection>
 			

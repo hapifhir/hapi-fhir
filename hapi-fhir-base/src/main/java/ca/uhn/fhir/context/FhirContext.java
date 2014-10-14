@@ -201,6 +201,9 @@ public class FhirContext {
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
+	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or every message being parsed/encoded.
+	 * </p>
+	 * <p>
 	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>
 	 */
@@ -260,6 +263,9 @@ public class FhirContext {
 	/**
 	 * Create and return a new XML parser.
 	 * 
+	 * <p>
+	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or every message being parsed/encoded.
+	 * </p>
 	 * <p>
 	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
 	 * </p>

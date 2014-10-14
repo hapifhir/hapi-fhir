@@ -12,6 +12,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,6 +79,77 @@ public class XmlParserTest {
 		 System.setProperty("file.encoding", "ISO-8859-1");
 	}
 	
+	@Test
+	public void testEncodeNonContained() {
+		// Create an organization
+		Organization org = new Organization();
+		org.setId("Organization/65546");
+		org.getName().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getManagingOrganization().setResource(org);
+		
+		// Create a list containing both resources. In a server method, you might just
+		// return this list, but here we will create a bundle to encode.
+		List<IResource> resources = new ArrayList<IResource>();
+		resources.add(org);
+		resources.add(patient);		
+		
+		// Create a bundle with both
+		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
+		
+		// Encode the buntdle
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+		
+		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+		
+		
+	}
+	
+	
+	@Test
+	public void testEncodeContained() {
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		
+		// Put the organization as a reference in the patient resource
+		patient.getManagingOrganization().setResource(org);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("<contained>"));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+		
+		// Create a bundle with just the patient resource
+		List<IResource> resources = new ArrayList<IResource>();
+		resources.add(patient);
+		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
+		
+		// Encode the buntdle
+		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("<contained>"));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+		
+		
+	}
+	
+	
 	/**
 	 * Thanks to Alexander Kley!
 	 */
@@ -85,9 +157,9 @@ public class XmlParserTest {
 	public void testParseContainedBinaryResource() {
 		byte[] bin = new byte[] {0,1,2,3,4};
 	    final Binary binary = new Binary("PatientConsent", bin);
-	    binary.setId(UUID.randomUUID().toString());
+//	    binary.setId(UUID.randomUUID().toString());
 	    DocumentManifest manifest = new DocumentManifest();
-	    manifest.setId(UUID.randomUUID().toString());
+//	    manifest.setId(UUID.randomUUID().toString());
 	    manifest.setType(new CodeableConceptDt("mySystem", "PatientDocument"));
 	    manifest.setMasterIdentifier("mySystem", UUID.randomUUID().toString());
 	    manifest.addContent().setResource(binary);

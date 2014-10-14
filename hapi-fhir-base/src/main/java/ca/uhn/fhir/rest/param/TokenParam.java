@@ -159,13 +159,13 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		builder.append("system", defaultString(getValue()));
+		builder.append("system", defaultString(getSystem()));
 		builder.append("value", getValue());
 		if (myText) {
-			builder.append("text", myText);
+			builder.append(":text", myText);
 		}
 		if (getMissing() != null) {
-			builder.append("missing", getMissing());
+			builder.append(":missing", getMissing());
 		}
 		return builder.toString();
 	}

@@ -96,6 +96,14 @@
 				have also caused resource validation to fail occasionally on these platforms as well.
 				Thanks to Bill de Beaubien for reporting!
 			</action>			
+			<action type="fix">
+				toString() method on TokenParam was incorrectly showing the system as the value.
+				Thanks to Bill de Beaubien for reporting!
+			</action>			
+			<action type="update">
+				Documentation on contained resources contained a typo and did not actually produce contained resources. Thanks
+				to David Hay of Orion Health for reporting!
+			</action>			
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
