@@ -18,6 +18,15 @@ public class IdDtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IdDtTest.class);
 
 	@Test
+	public void testDetectLocal() {
+		
+		IdDt id = new IdDt("#123");
+		assertEquals("#123", id.getValue());
+		assertTrue(id.isLocal());
+		
+	}
+	
+	@Test
 	public void testDetermineBase() {
 
 		IdDt rr;

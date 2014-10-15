@@ -118,6 +118,8 @@ public class XmlParserTest {
 	
 	@Test
 	public void testEncodeContained() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+		
 		// Create an organization, note that the organization does not have an ID
 		Organization org = new Organization();
 		org.getName().setValue("Contained Test Organization");
@@ -130,7 +132,7 @@ public class XmlParserTest {
 		// Put the organization as a reference in the patient resource
 		patient.getManagingOrganization().setResource(org);
 		
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		String encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("<contained>"));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
@@ -141,11 +143,46 @@ public class XmlParserTest {
 		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
 		
 		// Encode the buntdle
-		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		encoded = xmlParser.encodeBundleToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("<contained>"));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>","id=\"1\"", "</contained>")));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<entry>", "</entry>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
 		
+		// Re-parse the bundle
+		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
+		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		
+		assertNotNull(patient.getManagingOrganization().getResource());
+		org = (Organization) patient.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId().getValue());
+		assertEquals("Contained Test Organization", org.getName().getValue());
+		
+		// And re-encode a second time
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"1\"", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+
+		// And re-encode once more, with the references cleared
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((IdDt)null);
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"1\"", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+
+		// And re-encode once more, with the references cleared and a manually set local ID
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((IdDt)null);
+		patient.getManagingOrganization().getResource().setId(new IdDt("#333"));
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"333\"", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
 		
 	}
 	

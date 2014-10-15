@@ -828,8 +828,12 @@ class ParserState<T> {
 				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
 				getPreResourceState().getContainedResources().put(res.getId().getValueAsString(), res);
+				if (!res.getId().isLocal()) {
+					res.setId(new IdDt('#' + res.getId().getIdPart()));
+				}
 			}
 			getPreResourceState().getCurrentElement().getContained().getContainedResources().add(res);
+			
 		}
 
 	}
