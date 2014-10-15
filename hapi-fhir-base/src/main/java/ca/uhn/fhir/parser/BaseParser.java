@@ -25,7 +25,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -45,29 +47,60 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
 
-	private boolean mySuppressNarratives;
+	private ContainedResources myContainedResources;
 	private FhirContext myContext;
-	
+	private boolean mySuppressNarratives;
+
 	public BaseParser(FhirContext theContext) {
 		myContext = theContext;
 	}
 
-	@Override
-	public TagList parseTagList(String theString) {
-		return parseTagList(new StringReader(theString));
+	private void containResourcesForEncoding(ContainedResources theContained, IResource theResource, IResource theTarget) {
+		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
+
+		Set<String> allIds = new HashSet<String>();
+
+		for (IResource next : theTarget.getContained().getContainedResources()) {
+			String nextId = next.getId().getValue();
+			if (StringUtils.isNotBlank(nextId)) {
+				allIds.add(nextId);
+			}
+		}
+
+		for (ResourceReferenceDt next : allElements) {
+			IResource resource = next.getResource();
+			if (resource != null) {
+				if (resource.getId().isEmpty()) {
+					theContained.addContained(resource);
+				} else {
+					continue;
+				}
+
+				containResourcesForEncoding(theContained, resource, theTarget);
+			}
+		}
+
 	}
 
-	@SuppressWarnings("cast")
-	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
-		StringReader reader = new StringReader(theMessageString);
-		return (T) parseResource(theResourceType, reader);
+	public void containResourcesForEncoding(IResource theResource) {
+		ContainedResources contained = new ContainedResources();
+		containResourcesForEncoding(contained, theResource, theResource);
+		myContainedResources = contained;
 	}
 
 	@Override
-	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
-		StringReader reader = new StringReader(theXml);
-		return parseBundle(reader);
+	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
+		if (theBundle == null) {
+			throw new NullPointerException("Bundle can not be null");
+		}
+		StringWriter stringWriter = new StringWriter();
+		try {
+			encodeBundleToWriter(theBundle, stringWriter);
+		} catch (IOException e) {
+			throw new Error("Encountered IOException during write to string - This should not happen!");
+		}
+
+		return stringWriter.toString();
 	}
 
 	@Override
@@ -92,24 +125,15 @@ public abstract class BaseParser implements IParser {
 		return stringWriter.toString();
 	}
 
-	@Override
-	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
-		if (theBundle == null) {
-			throw new NullPointerException("Bundle can not be null");
-		}
-		StringWriter stringWriter = new StringWriter();
-		try {
-			encodeBundleToWriter(theBundle, stringWriter);
-		} catch (IOException e) {
-			throw new Error("Encountered IOException during write to string - This should not happen!");
-		}
-
-		return stringWriter.toString();
+	ContainedResources getContainedResources() {
+		return myContainedResources;
 	}
 
-	@Override
-	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
-		return parseResource(null, theMessageString);
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
+	 */
+	public boolean getSuppressNarratives() {
+		return mySuppressNarratives;
 	}
 
 	@Override
@@ -118,48 +142,37 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public Bundle parseBundle(String theXml) throws ConfigurationException, DataFormatException {
+		StringReader reader = new StringReader(theXml);
+		return parseBundle(reader);
+	}
+
+	@SuppressWarnings("cast")
+	@Override
+	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+		StringReader reader = new StringReader(theMessageString);
+		return (T) parseResource(theResourceType, reader);
+	}
+
+	@Override
 	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theReader);
 	}
 
-	public void containResourcesForEncoding(IResource theResource) {
-		containResourcesForEncoding(theResource, theResource);
+	@Override
+	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
+		return parseResource(null, theMessageString);
 	}
 
-	private long myNextContainedId = 1;
-	
-	private void containResourcesForEncoding(IResource theResource, IResource theTarget) {
-		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
+	@Override
+	public TagList parseTagList(String theString) {
+		return parseTagList(new StringReader(theString));
+	}
 
-		Set<String> allIds = new HashSet<String>();
-		
-		for (IResource next : theTarget.getContained().getContainedResources()) {
-			String nextId = next.getId().getValue();
-			if (StringUtils.isNotBlank(nextId)) {
-				allIds.add(nextId);
-			}
-		}
-		
-		for (ResourceReferenceDt next : allElements) {
-			IResource resource = next.getResource();
-			if (resource != null) {
-				if (resource.getId().isEmpty()) { // TODO: make this configurable between the two below (and something else?)
-					resource.setId(new IdDt(myNextContainedId++));
-//					resource.setId(new IdDt(UUID.randomUUID().toString()));
-				}
-
-				String nextResourceId = resource.getId().getValue();
-				if (!allIds.contains(nextResourceId)) {
-					theTarget.getContained().getContainedResources().add(resource);
-					allIds.add(resource.getId().getValue());
-				}
-
-				next.setReference("#" + resource.getId().getValue());
-				
-				containResourcesForEncoding(resource, theTarget);
-			}
-		}
-
+	@Override
+	public IParser setSuppressNarratives(boolean theSuppressNarratives) {
+		mySuppressNarratives = theSuppressNarratives;
+		return this;
 	}
 
 	protected void throwExceptionForUnknownChildType(BaseRuntimeChildDefinition nextChild, Class<? extends IElement> type) {
@@ -178,18 +191,37 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + type);
 	}
 
-	@Override
-	public IParser setSuppressNarratives(boolean theSuppressNarratives) {
-		mySuppressNarratives = theSuppressNarratives;
-		return this;
-	}
+	static class ContainedResources {
+		private long myNextContainedId = 1;
 
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>), narratives
-	 * will not be included in the encoded values.
-	 */
-	public boolean getSuppressNarratives() {
-		return mySuppressNarratives;
+		private IdentityHashMap<IResource, IdDt> myResourceToId = new IdentityHashMap<IResource, IdDt>();
+		private List<IResource> myResources = new ArrayList<IResource>();
+
+		public void addContained(IResource theResource) {
+			if (myResourceToId.containsKey(theResource)) {
+				return;
+			}
+
+			// TODO: make this configurable between the two below (and something else?)
+			IdDt newId = new IdDt(myNextContainedId++);
+			// newId = new IdDt(UUID.randomUUID().toString());
+
+			myResourceToId.put(theResource, newId);
+			myResources.add(theResource);
+		}
+
+		public List<IResource> getContainedResources() {
+			return myResources;
+		}
+		
+		public IdDt getResourceId(IResource theResource) {
+			return myResourceToId.get(theResource);
+		}
+
+		public boolean isEmpty() {
+			return myResourceToId.isEmpty();
+		}
+
 	}
 
 }

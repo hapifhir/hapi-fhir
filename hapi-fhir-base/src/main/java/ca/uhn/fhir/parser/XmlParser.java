@@ -34,8 +34,6 @@ import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -52,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
@@ -153,9 +152,9 @@ public class XmlParser extends BaseParser implements IParser {
 					eventWriter.writeNamespace("at", TOMBSTONES_NS);
 					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
 					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
-					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty()==false) {
+					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty() == false) {
 						eventWriter.writeStartElement(TOMBSTONES_NS, "by");
-						if (nextEntry.getDeletedByName().isEmpty()==false) {
+						if (nextEntry.getDeletedByName().isEmpty() == false) {
 							eventWriter.writeStartElement(TOMBSTONES_NS, "name");
 							eventWriter.writeCharacters(nextEntry.getDeletedByName().getValue());
 							eventWriter.writeEndElement();
@@ -167,7 +166,7 @@ public class XmlParser extends BaseParser implements IParser {
 						}
 						eventWriter.writeEndElement();
 					}
-					if (nextEntry.getDeletedComment().isEmpty()==false) {
+					if (nextEntry.getDeletedComment().isEmpty() == false) {
 						eventWriter.writeStartElement(TOMBSTONES_NS, "comment");
 						eventWriter.writeCharacters(nextEntry.getDeletedComment().getValue());
 						eventWriter.writeEndElement();
@@ -206,14 +205,13 @@ public class XmlParser extends BaseParser implements IParser {
 				} else {
 					ourLog.debug("Bundle entry contains null resource");
 				}
-				
+
 				if (!nextEntry.getSummary().isEmpty()) {
 					eventWriter.writeStartElement("summary");
 					eventWriter.writeAttribute("type", "xhtml");
 					encodeXhtml(nextEntry.getSummary(), eventWriter);
 					eventWriter.writeEndElement();
 				}
-				
 
 				eventWriter.writeEndElement(); // entry
 			}
@@ -225,7 +223,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeCategories(XMLStreamWriter eventWriter,  TagList categories) throws XMLStreamException {
+	private void writeCategories(XMLStreamWriter eventWriter, TagList categories) throws XMLStreamException {
 		if (categories != null) {
 			for (Tag next : categories) {
 				eventWriter.writeStartElement("category");
@@ -335,16 +333,16 @@ public class XmlParser extends BaseParser implements IParser {
 		} catch (XMLStreamException e1) {
 			throw new DataFormatException(e1);
 		}
-		
-//		XMLEventReader streamReader;
-//		try {
-//			streamReader = myXmlInputFactory.createXMLEventReader(theReader);
-//		} catch (XMLStreamException e) {
-//			throw new DataFormatException(e);
-//		} catch (FactoryConfigurationError e) {
-//			throw new ConfigurationException("Failed to initialize STaX event factory", e);
-//		}
-//		return streamReader;
+
+		// XMLEventReader streamReader;
+		// try {
+		// streamReader = myXmlInputFactory.createXMLEventReader(theReader);
+		// } catch (XMLStreamException e) {
+		// throw new DataFormatException(e);
+		// } catch (FactoryConfigurationError e) {
+		// throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		// }
+		// return streamReader;
 	}
 
 	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
@@ -426,7 +424,11 @@ public class XmlParser extends BaseParser implements IParser {
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theEventWriter, IElement nextValue, String childName,
 			BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		if (nextValue.isEmpty()) {
-			return;
+			if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && getContainedResources().isEmpty()==false && theIncludedResource == false) {
+				// We still want to go in..
+			} else {
+				return;
+			}
 		}
 
 		switch (childDef.getChildType()) {
@@ -466,6 +468,10 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeStartElement("contained");
 			for (IResource next : value.getContainedResources()) {
 				encodeResourceToXmlStreamWriter(next, theEventWriter, true);
+			}
+			for (IResource next : getContainedResources().getContainedResources()) {
+				IdDt resourceId = getContainedResources().getResourceId(next);
+				encodeResourceToXmlStreamWriter(next, theEventWriter, true, resourceId.getValue());
 			}
 			theEventWriter.writeEndElement();
 			break;
@@ -512,7 +518,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (IElement nextValue : values) {
-				if (nextValue == null || nextValue.isEmpty()) {
+				if ((nextValue == null || nextValue.isEmpty()) && !(nextValue instanceof ContainedDt)) {
 					continue;
 				}
 				Class<? extends IElement> type = nextValue.getClass();
@@ -570,6 +576,17 @@ public class XmlParser extends BaseParser implements IParser {
 		// }
 		// }
 
+		if (isBlank(reference)) {
+			if (theRef.getResource() != null) {
+				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
+				if (containedId != null) {
+					reference = "#" + containedId.getValue();
+				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
+					reference = theRef.getResource().getId().getValue();
+				}
+			}
+		}
+		
 		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement(RESREF_REFERENCE);
 			theEventWriter.writeAttribute("value", reference);
@@ -582,12 +599,16 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	/**
-	 * @param theIncludedResource
-	 *            Set to true only if this resource is an "included" resource, as opposed to a "root level" resource by itself or in a bundle entry
-	 * 
-	 */
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+		String resourceId = null;
+		if (theIncludedResource && StringUtils.isNotBlank(theResource.getId().getValue())) {
+			resourceId = theResource.getId().getValue();
+		}
+		
+		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
+	}
+
+	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, String theResourceId) throws XMLStreamException {
 		if (!theIncludedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -600,8 +621,8 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		if (theIncludedResource && StringUtils.isNotBlank(theResource.getId().getValue())) {
-			theEventWriter.writeAttribute("id", theResource.getId().getValue());
+		if (theResourceId != null) {
+			theEventWriter.writeAttribute("id", theResourceId);
 		}
 
 		if (theResource instanceof Binary) {

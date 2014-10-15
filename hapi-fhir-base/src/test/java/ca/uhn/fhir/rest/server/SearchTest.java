@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.net.UrlEscapers;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -120,6 +124,23 @@ public class SearchTest {
 		assertEquals("aaa", p.getIdentifier().get(0).getValue().getValue());
 		assertEquals("bbb", p.getIdentifier().get(1).getValue().getValue());
 	}
+	
+	@Test
+	public void testSearchWithTokenParameter() throws Exception {
+		String token = UrlEscapers.urlFragmentEscaper().asFunction().apply("http://www.dmix.gov/vista/2957|301");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?tokenParam="+token);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("http://www.dmix.gov/vista/2957", p.getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("301", p.getNameFirstRep().getGivenAsSingleString());
+	}
+	
 	
 	@Test
 	public void testSearchByPost() throws Exception {
@@ -320,6 +341,18 @@ public class SearchTest {
 			for (StringParam next : theParam.getValuesAsQueryTokens()) {
 				patient.addIdentifier("system", next.getValue());
 			}
+			retVal.add(patient);
+			return retVal;
+		}
+
+		
+		@Search()
+		public List<Patient> findPatientWithToken(@RequiredParam(name = "tokenParam") TokenParam theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient patient = new Patient();
+			patient.setId("1");
+			patient.addName().addFamily(theParam.getSystem()).addGiven(theParam.getValue());
 			retVal.add(patient);
 			return retVal;
 		}

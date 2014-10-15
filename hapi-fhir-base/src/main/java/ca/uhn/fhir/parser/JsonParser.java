@@ -230,7 +230,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef,
-			String theChildName) throws IOException {
+			String theChildName, boolean theIsSubElementWithinResource) throws IOException {
 
 		switch (theChildDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
@@ -278,7 +278,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (theValue instanceof ExtensionDt) {
 				theWriter.write("url", ((ExtensionDt) theValue).getUrlAsString());
 			}
-			encodeCompositeElementToStreamWriter(theResDef, theResource, theValue, theWriter, childCompositeDef);
+			encodeCompositeElementToStreamWriter(theResDef, theResource, theValue, theWriter, childCompositeDef, theIsSubElementWithinResource);
 			theWriter.writeEnd();
 			break;
 		}
@@ -297,6 +297,16 @@ public class JsonParser extends BaseParser implements IParser {
 					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getIdPart();
 				}
 			}
+			if (StringUtils.isBlank(reference)) {
+				if (referenceDt.getResource() != null) {
+					IdDt containedId = getContainedResources().getResourceId(referenceDt.getResource());
+					if (containedId != null) {
+						reference = "#" + containedId.getValue();
+					} else if (referenceDt.getResource().getId() != null && referenceDt.getResource().getId().hasIdPart()) {
+						reference = referenceDt.getResource().getId().getValue();
+					}
+				}
+			}
 
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
@@ -312,6 +322,10 @@ public class JsonParser extends BaseParser implements IParser {
 			ContainedDt value = (ContainedDt) theValue;
 			for (IResource next : value.getContainedResources()) {
 				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true);
+			}
+			for (IResource next : getContainedResources().getContainedResources()) {
+				IdDt resourceId = getContainedResources().getResourceId(next);
+				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, resourceId.getValue());
 			}
 			theWriter.writeEnd();
 			break;
@@ -341,7 +355,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			List<? extends BaseRuntimeChildDefinition> theChildren) throws IOException {
+			List<? extends BaseRuntimeChildDefinition> theChildren, boolean theIsSubElementWithinResource) throws IOException {
 		for (BaseRuntimeChildDefinition nextChild : theChildren) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
@@ -351,7 +365,7 @@ public class JsonParser extends BaseParser implements IParser {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, type, childName);
+						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, narr, type, childName, theIsSubElementWithinResource);
 						continue;
 					}
 				}
@@ -371,7 +385,13 @@ public class JsonParser extends BaseParser implements IParser {
 			int valueIdx = 0;
 			for (IElement nextValue : values) {
 				if (nextValue == null || nextValue.isEmpty()) {
-					continue;
+					if (nextValue instanceof ContainedDt) {
+						if (theIsSubElementWithinResource || getContainedResources().isEmpty()) {
+							continue;
+						}
+					} else {
+						continue;
+					}
 				}
 
 				Class<? extends IElement> type = nextValue.getClass();
@@ -381,6 +401,10 @@ public class JsonParser extends BaseParser implements IParser {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
+				
+				if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && theIsSubElementWithinResource) {
+					continue;
+				}
 				
 				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
 					// Don't encode extensions
@@ -399,13 +423,13 @@ public class JsonParser extends BaseParser implements IParser {
 						if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED) {
 							theEventWriter.writeStartArray(childName);
 							inArray = true;
-							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null);
+							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theIsSubElementWithinResource);
 						} else {
-							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName);
+							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName, theIsSubElementWithinResource);
 						}
 						currentChildName = childName;
 					} else {
-						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null);
+						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theIsSubElementWithinResource);
 					}
 
 					if (nextValue instanceof ISupportsUndeclaredExtensions && primitive) {
@@ -453,14 +477,24 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			BaseRuntimeElementCompositeDefinition<?> resDef) throws IOException, DataFormatException {
+			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIsSubElementWithinResource) throws IOException, DataFormatException {
 		extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, resDef, theResDef, theResource);
-		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions());
-		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren());
+		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions(), theIsSubElementWithinResource);
+		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren(),theIsSubElementWithinResource);
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
 			boolean theIsSubElementWithinResource) throws IOException {
+		String resourceId = null;
+		if (theIsSubElementWithinResource && StringUtils.isNotBlank(theResource.getId().getValue())) {
+			resourceId = theResource.getId().getValue();
+		}
+
+		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theIsSubElementWithinResource, resourceId);
+	}
+
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource,
+			String theResourceId) throws IOException {
 		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -474,8 +508,8 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		theEventWriter.write("resourceType", resDef.getName());
-		if (theIsSubElementWithinResource && theResource.getId() != null && isNotBlank(theResource.getId().getValue())) {
-			theEventWriter.write("id", theResource.getId().getValue());
+		if (theResourceId != null) {
+			theEventWriter.write("id", theResourceId);
 		}
 
 		if (theResource instanceof Binary) {
@@ -483,7 +517,7 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {
-			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef);
+			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theIsSubElementWithinResource);
 		}
 		theEventWriter.writeEnd();
 	}
@@ -972,7 +1006,7 @@ public class JsonParser extends BaseParser implements IParser {
 					// theEventWriter, myValue, def, "value" +
 					// WordUtils.capitalize(def.getName()));
 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
-					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName,false);
 				}
 
 				// theEventWriter.name(myUndeclaredExtension.get);
@@ -1003,7 +1037,7 @@ public class JsonParser extends BaseParser implements IParser {
 					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + value.getClass().getCanonicalName());
 				}
 				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
-				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName);
+				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName,true);
 			}
 
 			// theEventWriter.name(myUndeclaredExtension.get);

@@ -133,11 +133,11 @@ public class ContainedResourceEncodingTest {
 		final String expectedCompXml = parser.encodeResourceToString(this.comp);
 		logger.debug("[xmlEncoding] first encoding: {}", expectedCompXml);
 
-		assertEquals(3, this.comp.getContained().getContainedResources().size());
+		assertEquals(0, this.comp.getContained().getContainedResources().size());
 
 		final String actualCompXml = parser.encodeResourceToString(this.comp);
 
-		assertEquals(3, this.comp.getContained().getContainedResources().size());
+		assertEquals(0, this.comp.getContained().getContainedResources().size());
 
 		// second encoding - xml could not be parsed back to compositon - i.e.: patient content 4 times! should be the same
 		// as after first encoding!
@@ -145,7 +145,7 @@ public class ContainedResourceEncodingTest {
 
 		final String thirdCompXml = parser.encodeResourceToString(this.comp);
 
-		assertEquals(3, this.comp.getContained().getContainedResources().size());
+		assertEquals(0, this.comp.getContained().getContainedResources().size());
 
 		// third encoding - xml could not be parsed back to compositon i.e.: patient content 4 times! should be the same as
 		// afterfirst encoding!
