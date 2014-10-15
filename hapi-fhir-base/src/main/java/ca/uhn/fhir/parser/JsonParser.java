@@ -411,6 +411,8 @@ public class JsonParser extends BaseParser implements IParser {
 							theEventWriter.writeStartArray(childName);
 							inArray = true;
 							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theIsSubElementWithinResource);
+						} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theIsSubElementWithinResource) {
+							// suppress narratives from contained resources
 						} else {
 							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName, theIsSubElementWithinResource);
 						}

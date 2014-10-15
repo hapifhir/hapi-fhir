@@ -104,6 +104,11 @@
 				Documentation on contained resources contained a typo and did not actually produce contained resources. Thanks
 				to David Hay of Orion Health for reporting!
 			</action>			
+			<action type="fix" issue="33">
+				Server was incorrectly including contained resources being returned as both contained resources, and as 
+				top-level resources in the returned bundle for search operations.
+				Thanks to Bill de Beaubien for reporting!
+			</action>			
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

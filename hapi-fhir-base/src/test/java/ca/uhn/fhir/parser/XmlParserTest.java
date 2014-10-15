@@ -1,9 +1,18 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +21,6 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -115,6 +123,29 @@ public class XmlParserTest {
 		
 	}
 	
+	@Test
+	public void testEncodeContainedWithNarrativeIsSuppresed() {
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+		org.getText().setDiv("<div>FOOBAR</div>");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getManagingOrganization().setResource(org);
+		
+		String encoded = parser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("BARFOO")));
+		
+	}	
+
 	
 	@Test
 	public void testEncodeContained() {
@@ -388,7 +419,8 @@ public class XmlParserTest {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
-		spm.getText().setDiv("AAA");
+		spm.addIdentifier("urn", "123");
+		rpt.getText().setDiv("AAA");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);

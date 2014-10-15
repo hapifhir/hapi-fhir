@@ -1035,6 +1035,13 @@ public class RestfulServer extends HttpServlet {
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 		for (IResource next : theResult) {
 
+			Set<String> containedIds = new HashSet<String>();
+			for (IResource nextContained : next.getContained().getContainedResources()) {
+				if (nextContained.getId().isEmpty()==false) {
+					containedIds.add(nextContained.getId().getValue());
+				}
+			}
+			
 			if (theContext.getNarrativeGenerator() != null) {
 				String title = theContext.getNarrativeGenerator().generateTitle(next);
 				ourLog.trace("Narrative generator created title: {}", title);
@@ -1053,6 +1060,11 @@ public class RestfulServer extends HttpServlet {
 					IResource nextRes = nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
+							if (containedIds.contains(nextRes.getId().getValue())) {
+								// Don't add contained IDs as top level resources
+								continue;
+							}
+							
 							IdDt id = nextRes.getId().toVersionless();
 							if (id.hasResourceType() == false) {
 								String resName = theContext.getResourceDefinition(nextRes).getName();

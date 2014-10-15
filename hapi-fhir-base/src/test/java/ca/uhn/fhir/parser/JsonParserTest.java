@@ -492,6 +492,29 @@ public class JsonParserTest {
 	}
 	
 	@Test
+	public void testEncodeContainedWithNarrativeIsSuppresed() {
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+		org.getText().setDiv("<div>FOOBAR</div>");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getManagingOrganization().setResource(org);
+
+		String encoded = parser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("BARFOO")));
+		
+	}	
+	
+	@Test
 	public void testEncodeContained() {
 		IParser xmlParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		
@@ -603,7 +626,7 @@ public class JsonParserTest {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
-		spm.getText().setDiv("AAA");
+		rpt.getText().setDiv("AAA");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);

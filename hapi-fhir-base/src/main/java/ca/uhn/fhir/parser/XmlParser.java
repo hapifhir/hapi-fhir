@@ -549,6 +549,8 @@ public class XmlParser extends BaseParser implements IParser {
 					theEventWriter.writeAttribute("url", extensionUrl);
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, null, theIncludedResource);
 					theEventWriter.writeEndElement();
+				} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theIncludedResource) {
+					// suppress narratives from contained resources
 				} else {
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
 				}
