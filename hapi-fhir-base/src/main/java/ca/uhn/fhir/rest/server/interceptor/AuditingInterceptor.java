@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.audit.IResourceAuditor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.store.IAuditDataStore;
 
 public class AuditingInterceptor extends InterceptorAdapter {
@@ -34,6 +35,15 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	
 	private IAuditDataStore myDataStore;	
 	private Map<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>> myAuditableResources = new HashMap<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>>();
+	private boolean myClientParamsOptional = false;
+	
+	public AuditingInterceptor() {
+		myClientParamsOptional = false;
+	}
+	
+	public AuditingInterceptor(boolean theClientParamsOptional){
+		myClientParamsOptional = theClientParamsOptional;
+	}
 	
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
@@ -42,6 +52,10 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			log.info("Auditing bundle: " + theResponseObject + " from request " + theRequestDetails);
 			SecurityEvent auditEvent = new SecurityEvent();		
 			
+			//get user info from request if available			
+			boolean hasUserInfo = addParticipantToEvent(theServletRequest, auditEvent);
+			if(!hasUserInfo) return true; //no user to audit - throws exception if client params are required
+						
 			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());
 			boolean hasAuditableEntry = false;
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
@@ -51,7 +65,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 				if(hasAuditableEntryInResource) hasAuditableEntry = true;
 			}
 			if(!hasAuditableEntry) return true; //no PHI to audit 			
-			addParticipantToEvent(theServletRequest, auditEvent);
+			
 			store(auditEvent);
 			return true;
 		}catch(Exception e){
@@ -105,9 +119,8 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * @throws InstantiationException 
 	 */
 	protected boolean addResourceObjectToEvent(SecurityEvent auditEvent, IResource resource, SecurityEventObjectLifecycleEnum lifecycle, byte[] query) throws InstantiationException, IllegalAccessException {
-		//TODO: get resource name from IResource -- James will put this in the model
-		//reference ResourceTypeEnum
-		ResourceTypeEnum resourceType = null; //resource.getResourceType();		
+
+		ResourceTypeEnum resourceType = resource.getResourceType();		
 		if(myAuditableResources.containsKey(resourceType)){									
 			@SuppressWarnings("unchecked")
 			IResourceAuditor<IResource> auditableResource = (IResourceAuditor<IResource>) myAuditableResources.get(resourceType).newInstance();			
@@ -129,13 +142,16 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		return false; //not something we care to audit
 	}
 	
-	private void addParticipantToEvent(HttpServletRequest theServletRequest, SecurityEvent auditEvent) {		
+	private boolean addParticipantToEvent(HttpServletRequest theServletRequest, SecurityEvent auditEvent) throws InvalidRequestException, NotImplementedException {		
 		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
 			//TODO: get user info from token
 			throw new NotImplementedException("OAuth user auditing not yet implemented.");
 		}else { //no auth or basic auth or anything else, use HTTP headers for user info
 			String userId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_USER_ID); 
-			if(userId == null) userId = "anonymous"; //TODO: throw new InvalidParameterException(UserInfoInterceptor.HEADER_USER_ID + " must be specified as an HTTP header to access PHI.");			
+			if(userId == null){
+				if(myClientParamsOptional) return false; //no auditing
+				else throw new InvalidRequestException(UserInfoInterceptor.HEADER_USER_ID + " must be specified as an HTTP header to access PHI.");			
+			}
 			String userName = theServletRequest.getHeader(UserInfoInterceptor.HEADER_USER_NAME);
 			if(userName == null) userName = "Anonymous";
 			String userIp = theServletRequest.getRemoteAddr(); 
@@ -145,6 +161,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			ParticipantNetwork network = participant.getNetwork();
 			network.setType(SecurityEventParticipantNetworkTypeEnum.IP_ADDRESS);
 			network.setIdentifier(userIp);
+			return true;
 		}
 		
 		

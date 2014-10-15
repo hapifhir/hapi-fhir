@@ -52,6 +52,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.AlertStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -438,6 +439,11 @@ public class Alert extends BaseResource implements IResource {
 	public Alert setNote( String theString) {
 		myNote = new StringDt(theString); 
 		return this; 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.ALERT;
 	}
 
  

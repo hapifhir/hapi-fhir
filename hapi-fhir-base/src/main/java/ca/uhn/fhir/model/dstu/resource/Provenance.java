@@ -57,6 +57,7 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ProvenanceEntityRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -1199,7 +1200,10 @@ public class Provenance extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.PROVENANCE;
+	}
 
 
 }

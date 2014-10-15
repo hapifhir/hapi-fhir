@@ -54,6 +54,7 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -1418,6 +1419,13 @@ public class GeneticAnalysis extends BaseResource implements IResource {
 
  
 
+	}
+
+
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.GENETICANALYSIS;
 	}
 
 

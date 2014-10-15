@@ -61,6 +61,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
 import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -1868,7 +1869,10 @@ public class Specimen extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.SPECIMEN;
+	}
 
 
 }

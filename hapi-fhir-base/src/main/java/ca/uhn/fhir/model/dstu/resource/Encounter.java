@@ -62,6 +62,7 @@ import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -2081,6 +2082,13 @@ public class Encounter extends BaseResource implements IResource {
 
   
 
+	}
+
+
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.ENCOUNTER;
 	}
 
 

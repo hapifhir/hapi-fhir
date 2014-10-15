@@ -56,6 +56,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -814,6 +815,11 @@ public class DeviceObservationReport extends BaseResource implements IResource {
 
   
 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.DEVICEOBSERVATIONREPORT;
 	}
 
 

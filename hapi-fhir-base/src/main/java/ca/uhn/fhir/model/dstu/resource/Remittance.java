@@ -52,6 +52,7 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -533,7 +534,10 @@ public class Remittance extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.REMITTANCE;
+	}
 
 
 }

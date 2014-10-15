@@ -66,6 +66,7 @@ import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -2096,7 +2097,10 @@ public class Patient extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.PATIENT;
+	}
 
 
 }

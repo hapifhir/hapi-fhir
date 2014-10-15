@@ -61,6 +61,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuestionnaireGroupNameEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuestionnaireNameEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuestionnaireStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
@@ -1499,7 +1500,10 @@ public class Questionnaire extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.QUESTIONNAIRE;
+	}
 
 
 

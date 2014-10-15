@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -654,6 +655,9 @@ public class User extends BaseResource implements IResource {
 		return newType; 
 	}
   
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.USER;
+	}
 
 }

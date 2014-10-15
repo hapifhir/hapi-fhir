@@ -64,6 +64,7 @@ import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -75,8 +76,7 @@ import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
-/**
- * HAPI/FHIR <b>MedicationPrescription</b> Resource
+/** * HAPI/FHIR <b>MedicationPrescription</b> Resource
  * (Prescription of medication to for patient)
  *
  * <p>
@@ -1709,7 +1709,10 @@ public class MedicationPrescription extends BaseResource implements IResource {
 
 	}
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.MEDICATIONPRESCRIPTION;
+	}
 
 
 }

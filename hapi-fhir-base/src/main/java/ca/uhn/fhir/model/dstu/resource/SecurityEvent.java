@@ -57,6 +57,7 @@ import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectRoleEnum;
@@ -2407,6 +2408,9 @@ public class SecurityEvent extends BaseResource implements IResource {
 
 
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.SECURITYEVENT;
+	}
 
 }

@@ -59,6 +59,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -2025,6 +2026,11 @@ public class Claim extends BaseResource implements IResource {
 
  
 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.CLAIM;
 	}
 
 

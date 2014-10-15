@@ -55,6 +55,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -886,6 +887,11 @@ public class AppointmentResponse extends BaseResource implements IResource {
 	public AppointmentResponse setRecordedDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myRecordedDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.APPOINTMENTRESPONSE;
 	}
 
  

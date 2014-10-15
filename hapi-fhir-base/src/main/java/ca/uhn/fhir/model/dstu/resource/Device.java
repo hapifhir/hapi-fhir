@@ -55,6 +55,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -1012,6 +1013,11 @@ public class Device extends BaseResource implements IResource {
 	public Device setUrl( String theUri) {
 		myUrl = new UriDt(theUri); 
 		return this; 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.DEVICE;
 	}
 
  

@@ -58,6 +58,7 @@ import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -742,6 +743,8 @@ public class RelatedPerson extends BaseResource implements IResource {
 		return getPhoto().get(0); 
 	}
   
-
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.RELATEDPERSON;
+	}
 }

@@ -58,6 +58,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationDateCriterionCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -1316,7 +1317,10 @@ public class ImmunizationRecommendation extends BaseResource implements IResourc
 	}
 
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.IMMUNIZATIONRECOMMENDATION;
+	}
 
 
 }

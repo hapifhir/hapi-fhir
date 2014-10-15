@@ -60,6 +60,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ConditionRelationshipTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -1770,6 +1771,12 @@ public class Condition extends BaseResource implements IResource {
 
   
 
+	}
+
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.CONDITION;
 	}
 
 

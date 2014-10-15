@@ -36,7 +36,6 @@ package ca.uhn.fhir.model.dstu.resource;
  * #L%
  */
 
-
 import java.util.Date;
 import java.util.List;
 
@@ -5133,6 +5132,9 @@ public class Profile extends BaseResource implements IResource {
 	}
 
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.PROFILE;
+	}
 
 }

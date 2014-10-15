@@ -60,6 +60,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImmunizationReasonCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImmunizationRouteCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -2208,6 +2209,9 @@ public class Immunization extends BaseResource implements IResource {
 	}
 
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.IMMUNIZATION;
+	}
 
 }

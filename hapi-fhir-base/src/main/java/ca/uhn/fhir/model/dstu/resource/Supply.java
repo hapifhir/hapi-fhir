@@ -57,6 +57,7 @@ import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SupplyDispenseStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.SupplyItemTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SupplyStatusEnum;
@@ -1126,6 +1127,9 @@ public class Supply extends BaseResource implements IResource {
 	}
 
 
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.SUPPLY;
+	}
 
 }

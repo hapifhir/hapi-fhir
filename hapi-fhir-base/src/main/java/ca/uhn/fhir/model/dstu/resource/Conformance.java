@@ -4880,5 +4880,12 @@ public class Conformance extends BaseResource implements IResource {
 
 
 
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.CONFORMANCE;
+	}
+
+
+
 
 }

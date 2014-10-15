@@ -60,6 +60,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -1147,6 +1148,12 @@ public class Location extends BaseResource implements IResource {
 
  
 
+	}
+
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.LOCATION;
 	}
 
 

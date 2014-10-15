@@ -54,6 +54,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
@@ -512,6 +513,11 @@ public class Availability extends BaseResource implements IResource {
 	public Availability setAuthorDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
 		myAuthorDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.AVAILABILITY;
 	}
 
  

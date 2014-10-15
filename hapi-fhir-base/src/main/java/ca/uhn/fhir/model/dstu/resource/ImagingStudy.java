@@ -59,6 +59,7 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
 import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
 import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -2180,6 +2181,11 @@ public class ImagingStudy extends BaseResource implements IResource {
 
   
 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.IMAGINGSTUDY;
 	}
 
 

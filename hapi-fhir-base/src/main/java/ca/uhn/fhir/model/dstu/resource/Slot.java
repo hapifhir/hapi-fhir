@@ -53,6 +53,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -699,7 +700,10 @@ public class Slot extends BaseResource implements IResource {
 		return this; 
 	}
 
- 
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.SLOT;
+	}
 
 
 }

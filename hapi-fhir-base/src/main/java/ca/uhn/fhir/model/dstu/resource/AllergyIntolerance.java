@@ -53,6 +53,7 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SensitivityStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -781,6 +782,11 @@ public class AllergyIntolerance extends BaseResource implements IResource {
 		ResourceReferenceDt newType = new ResourceReferenceDt();
 		getSensitivityTest().add(newType);
 		return newType; 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.ALLERGYINTOLERANCE;
 	}
   
 

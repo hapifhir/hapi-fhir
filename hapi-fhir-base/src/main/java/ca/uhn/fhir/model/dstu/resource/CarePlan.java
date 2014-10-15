@@ -65,6 +65,7 @@ import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -2150,6 +2151,11 @@ public class CarePlan extends BaseResource implements IResource {
 
  
 
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.CAREPLAN;
 	}
 
 

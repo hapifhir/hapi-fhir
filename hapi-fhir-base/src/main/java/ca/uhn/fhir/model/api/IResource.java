@@ -25,6 +25,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
@@ -112,5 +113,11 @@ public interface IResource extends ICompositeElement {
 	 *             The map must not be null
 	 */
 	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
-	
+
+	/**
+	 * Returns a ResourceTypeEnum representing the type of this Resource
+	 * @return the ResourceType of this Resource
+	 */
+	ResourceTypeEnum getResourceType();
+
 }

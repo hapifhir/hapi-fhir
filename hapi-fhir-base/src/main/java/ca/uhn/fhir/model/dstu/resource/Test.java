@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -1428,6 +1429,9 @@ public class Test extends BaseResource implements IResource {
 	}
 
   
-
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.TEST;
+	}
 
 }
