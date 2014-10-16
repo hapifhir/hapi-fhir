@@ -448,8 +448,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (!IResource.class.isAssignableFrom(theReturnType)) {
 			return false;
 		}
-		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
-		return retVal;
+		return true;
+//		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
+//		return retVal;
 	}
 
 	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {

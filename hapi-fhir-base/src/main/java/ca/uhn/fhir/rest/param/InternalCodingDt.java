@@ -41,7 +41,6 @@ import java.util.List;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -58,7 +57,7 @@ public class InternalCodingDt
 	 * Constructor
 	 */
 	public InternalCodingDt() {
-		// nothing
+		super();
 	}
 
 	/**

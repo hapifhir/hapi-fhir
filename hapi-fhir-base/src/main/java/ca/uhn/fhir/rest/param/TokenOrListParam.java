@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.param;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 
 /*
@@ -33,8 +34,8 @@ public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
 		return new TokenParam();
 	}
 	
-	public List<InternalCodingDt> getListAsCodings() {
-		ArrayList<InternalCodingDt> retVal = new ArrayList<InternalCodingDt>();
+	public List<BaseCodingDt> getListAsCodings() {
+		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>();
 		for (TokenParam next : getValuesAsQueryTokens()) {
 			InternalCodingDt nextCoding = next.getValueAsCoding();
 			if (!nextCoding.isEmpty()) {
@@ -48,7 +49,7 @@ public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
 	 * Convenience method which adds a token to this OR list
 	 * using the system and code from a coding
 	 */
-	public void add(InternalCodingDt theCodingDt) {
+	public void add(BaseCodingDt theCodingDt) {
 		add(new TokenParam(theCodingDt));
 	}
 

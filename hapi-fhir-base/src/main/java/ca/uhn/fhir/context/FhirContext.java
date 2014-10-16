@@ -34,6 +34,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -92,6 +93,13 @@ public class FhirContext {
 
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
 		scanResourceTypes(theResourceTypes);
+		
+		if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
+		} else {
+			throw new IllegalStateException("Could not find any HAPI-FHIR structure JARs on the classpath. Note that as of HAPI version 0.7, a separate FHIR strcture JAR must be added to your classpath or project pom.xml");
+		}
+		
 	}
 
 	/**

@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.model.ValueSetTm;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 

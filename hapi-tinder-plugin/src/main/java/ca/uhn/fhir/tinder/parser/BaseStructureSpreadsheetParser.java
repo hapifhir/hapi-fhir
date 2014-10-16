@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.InputStream;
 import java.util.ArrayList;

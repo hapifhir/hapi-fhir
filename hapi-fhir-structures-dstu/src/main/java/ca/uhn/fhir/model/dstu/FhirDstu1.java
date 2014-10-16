@@ -44,8 +44,10 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
+import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 
 public class FhirDstu1 implements IFhirVersion {
 
@@ -301,6 +303,11 @@ public class FhirDstu1 implements IFhirVersion {
 
 			}
 		}
+	}
+
+	@Override
+	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
+		return new ServerProfileProvider(theRestfulServer.getFhirContext());
 	}
 
 }

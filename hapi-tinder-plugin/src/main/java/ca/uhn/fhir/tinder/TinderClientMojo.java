@@ -76,7 +76,7 @@ public class TinderClientMojo extends AbstractMojo {
 		FhirContext ctx = new FhirContext(Conformance.class);
 		IBasicClient client = ctx.newRestfulClient(IBasicClient.class, serverBaseHref);
 
-		Conformance conformance = client.getServerConformanceStatement();
+		Conformance conformance = (Conformance)client.getServerConformanceStatement();
 
 		if (conformance.getRest().size() != 1) {
 			throw new MojoFailureException("Found " + conformance.getRest().size() + " rest definitions in Conformance resource. Need exactly 1.");

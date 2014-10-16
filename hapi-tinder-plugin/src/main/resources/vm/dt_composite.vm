@@ -61,6 +61,14 @@ public class ${className}
 		setSystem(theSystem);
 		setCode(theCode);
 	}
+	
+	/**
+	 * Copy constructor: Creates a new Coding with the system and code copied out of the given coding
+	 */
+	public CodingDt(BaseCodingDt theCoding) {
+		this(theCoding.getSystem().getValueAsString(), theCoding.getCode().getValue());
+	}
+	
 #end
 #if ( ${className} == "ContactDt" )
 	/**

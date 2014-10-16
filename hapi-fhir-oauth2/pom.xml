@@ -19,7 +19,13 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
-
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<!-- Only required for OpenID Connect Support -->
 		<dependency>
 			<groupId>org.mitre</groupId>
@@ -75,12 +81,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>

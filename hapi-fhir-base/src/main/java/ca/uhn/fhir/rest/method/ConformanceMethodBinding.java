@@ -40,8 +40,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
 
-		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || BaseConformance.class.isAssignableFrom(theMethod.getReturnType()) || Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
-			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class");
+//		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
+//			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
+//		}
+		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom(theMethod.getReturnType())) {
+			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
 	}

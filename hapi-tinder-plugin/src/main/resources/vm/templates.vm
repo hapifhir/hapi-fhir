@@ -307,7 +307,9 @@
      * </p> 
 	 */
 	@Block()	
-	public static class ${blockChild.className} extends BaseIdentifiableElement implements IResourceBlock {
+	public static class ${blockChild.className} 
+	    extends #{if}( ${className}=="OperationOutcome" && ${blockChild.className}=="Issue" ) Base${blockChild.className} #{else} BaseIdentifiableElement #{end} 
+	    implements IResourceBlock {
 	
 #childVars( $blockChild.children )
 #childAccessors( $blockChild.children )

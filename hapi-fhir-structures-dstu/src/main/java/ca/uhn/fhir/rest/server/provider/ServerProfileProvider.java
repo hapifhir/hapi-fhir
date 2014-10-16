@@ -39,8 +39,8 @@ public class ServerProfileProvider implements IResourceProvider {
 
 	private FhirContext myContext;
 
-	public ServerProfileProvider(FhirContext theContext) {
-		myContext = theContext;
+	public ServerProfileProvider(FhirContext theCtx) {
+		myContext = theCtx;
 	}
 	
 	@Override

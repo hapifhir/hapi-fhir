@@ -36,6 +36,12 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.7-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
 		<dependency>
