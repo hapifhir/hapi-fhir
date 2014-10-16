@@ -1,6 +1,4 @@
-package ca.uhn.fhir.model.dstu.composite_;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L
@@ -22,9 +20,14 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
  * #L%
  */
 
-@DatatypeDef(name="AgeDt") 
-public class AgeDt extends QuantityDt {
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
+@DatatypeDef(name = "Duration")
+public class DurationDt extends QuantityDt {
 
 	// TODO: implement restricions
+	
+	// There SHALL be a code if there is a value and it SHALL be an expression of length.  If system is present, it SHALL be UCUM.
+	// (f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
 	
 }

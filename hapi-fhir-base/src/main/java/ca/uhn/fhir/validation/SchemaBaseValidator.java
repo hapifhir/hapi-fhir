@@ -20,12 +20,10 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +38,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
@@ -50,7 +47,7 @@ import org.xml.sax.SAXParseException;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -121,7 +118,7 @@ class SchemaBaseValidator implements IValidator {
 		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 		if (baseIs == null) {
-			throw new ValidationFailureException("No FHIR-BASE schema found");
+			throw new InternalErrorException("No FHIR-BASE schema found");
 		}
 		 baseIs = new BOMInputStream(baseIs, false);
 		 InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
@@ -160,10 +157,10 @@ class SchemaBaseValidator implements IValidator {
 		}
 
 		private void addIssue(SAXParseException theException, IssueSeverityEnum severity) {
-			Issue issue = myContext.getOperationOutcome().addIssue();
-			issue.setSeverity(severity);
-			issue.setDetails(theException.getLocalizedMessage());
-			issue.addLocation().setValue("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
+			BaseIssue issue = myContext.getOperationOutcome().addIssue();
+			issue.getSeverity().setValueAsEnum(severity);
+			issue.getDetails().setValue(theException.getLocalizedMessage());
+			issue.addLocation("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
 		}
 
 		@Override
@@ -203,7 +200,7 @@ class SchemaBaseValidator implements IValidator {
 				
 				InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 				if (baseIs == null) {
-					throw new ValidationFailureException("No FHIR-BASE schema found");
+					throw new InternalErrorException("No FHIR-BASE schema found");
 				}
 
 				input.setByteStream(baseIs);

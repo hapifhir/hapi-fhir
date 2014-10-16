@@ -26,12 +26,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
-import com.phloc.schematron.ISchematronResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, etc.)
@@ -147,7 +145,7 @@ public class FhirValidator {
 			next.validateBundle(ctx);
 		}
 
-		OperationOutcome oo = ctx.getOperationOutcome();
+		BaseOperationOutcome oo = ctx.getOperationOutcome();
 		if (oo != null && oo.getIssue().size() > 0) {
 			throw new ValidationFailureException(oo);
 		}
@@ -171,7 +169,7 @@ public class FhirValidator {
 			next.validateResource(ctx);
 		}
 
-		OperationOutcome oo = ctx.getOperationOutcome();
+		BaseOperationOutcome oo = ctx.getOperationOutcome();
 		if (oo != null && oo.getIssue().size() > 0) {
 			throw new ValidationFailureException(oo);
 		}

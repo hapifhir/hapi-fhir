@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.testmodel.Patient;
+//import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
 
 
 /**

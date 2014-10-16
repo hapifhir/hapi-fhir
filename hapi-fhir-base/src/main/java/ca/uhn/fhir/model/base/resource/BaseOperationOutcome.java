@@ -26,7 +26,11 @@ public abstract class BaseOperationOutcome extends BaseResource implements IReso
 		public abstract StringDt getDetails();
 
 		public abstract BaseCodingDt getType();
+
+		public abstract BaseIssue addLocation( String theString);
 		
 	}
+
+
 	
 }

@@ -33,8 +33,9 @@ import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 import com.phloc.commons.error.IResourceError;
 import com.phloc.commons.error.IResourceErrorGroup;
@@ -64,16 +65,16 @@ public class SchematronBaseValidator implements IValidator {
 		}
 
 		for (IResourceError next : errors.getAllErrors().getAllResourceErrors()) {
-			Issue issue = theCtx.getOperationOutcome().addIssue();
+			BaseIssue issue = theCtx.getOperationOutcome().addIssue();
 			switch (next.getErrorLevel()) {
 			case ERROR:
-				issue.setSeverity(IssueSeverityEnum.ERROR);
+				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
 				break;
 			case FATAL_ERROR:
-				issue.setSeverity(IssueSeverityEnum.FATAL);
+				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.FATAL);
 				break;
 			case WARN:
-				issue.setSeverity(IssueSeverityEnum.WARNING);
+				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.WARNING);
 				break;
 			case INFO:
 			case SUCCESS:
@@ -103,7 +104,7 @@ public class SchematronBaseValidator implements IValidator {
 					+ ".sch";
 			InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 			if (baseIs == null) {
-				throw new ValidationFailureException("No schematron found for resource type: "
+				throw new InternalErrorException("No schematron found for resource type: "
 						+ theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());
 			}
 

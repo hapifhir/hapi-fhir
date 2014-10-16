@@ -82,8 +82,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
@@ -119,7 +117,7 @@ public class RestfulServer extends HttpServlet {
 
 	public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
-		myServerConformanceProvider = new ServerConformanceProvider(this);
+		myServerConformanceProvider = theCtx.getVersion().createServerConformanceProvider(this);
 	}
 
 	/**
@@ -375,7 +373,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public IResourceProvider getServerProfilesProvider() {
-		return new ServerProfileProvider(getFhirContext());
+		return myFhirContext.getVersion().createServerProfilesProvider(this);
 	}
 
 	/**

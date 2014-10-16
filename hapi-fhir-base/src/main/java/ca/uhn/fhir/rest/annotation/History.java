@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.testmodel.Patient;
+//import ca.uhn.fhir.testmodel.Patient; // TODO: qualify this correctly
 
 /**
  * RESTful method annotation to be used for the FHIR

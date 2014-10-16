@@ -38,7 +38,9 @@ import ${import};
 #end
  */
 @ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
-public class ${className} extends BaseResource implements IResource {
+public class ${className} 
+    extends #{if}( ${className}=="OperationOutcome" Base${className} #{else} BaseResource #{end} 
+    implements IResource {
 
 #foreach ( $param in $searchParams )
 	/**

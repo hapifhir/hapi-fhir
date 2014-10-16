@@ -20,19 +20,18 @@ package ca.uhn.fhir.model.dstu.composite;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
 @DatatypeDef(name = "CodeableConcept", isSpecialization = true)
-public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt {
+public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt implements IBoundCodeableConcept {
 
 	private IValueSetEnumBinder<T> myBinder;
 
@@ -72,7 +71,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		getCoding().clear();
 		if (theValues != null) {
 			for (T next : theValues) {
-				getCoding().add(new InternalCodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
+				getCoding().add(new CodingDt(myBinder.toSystemString(next), myBinder.toCodeString(next)));
 			}
 		}
 	}
@@ -91,7 +90,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 		if (theValue == null) {
 			return;
 		}
-		getCoding().add(new InternalCodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
+		getCoding().add(new CodingDt(myBinder.toSystemString(theValue), myBinder.toCodeString(theValue)));
 	}
 
 	/**
@@ -107,7 +106,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 */
 	public Set<T> getValueAsEnum() {
 		Set<T> retVal = new HashSet<T>();
-		for (InternalCodingDt next : getCoding()) {
+		for (CodingDt next : getCoding()) {
 			if (next == null) {
 				continue;
 			}
