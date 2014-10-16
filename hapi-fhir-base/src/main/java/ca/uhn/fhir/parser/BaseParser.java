@@ -20,6 +20,8 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -55,6 +57,14 @@ public abstract class BaseParser implements IParser {
 		myContext = theContext;
 	}
 
+	protected String fixContainedResourceId(String theValue) {
+		if (StringUtils.isNotBlank(theValue)&&theValue.charAt(0)=='#') {
+			return theValue.substring(1);
+		}
+		return theValue;
+	}
+
+	
 	private void containResourcesForEncoding(ContainedResources theContained, IResource theResource, IResource theTarget) {
 		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
 
@@ -70,7 +80,7 @@ public abstract class BaseParser implements IParser {
 		for (ResourceReferenceDt next : allElements) {
 			IResource resource = next.getResource();
 			if (resource != null) {
-				if (resource.getId().isEmpty()) {
+				if (resource.getId().isEmpty() || resource.getId().isLocal()) {
 					theContained.addContained(resource);
 				} else {
 					continue;
@@ -191,6 +201,26 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + type);
 	}
 
+	protected String determineReferenceText(ResourceReferenceDt theRef) {
+		String reference = theRef.getReference().getValue();
+		if (isBlank(reference)) {
+			if (theRef.getResource() != null) {
+				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
+				if (containedId != null && !containedId.isEmpty()) {
+					if (containedId.isLocal()) {
+						reference = containedId.getValue();
+					} else {
+						reference = "#" + containedId.getValue();
+					}
+				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
+					reference = theRef.getResource().getId().getValue();
+				}
+			}
+		}
+		return reference;
+	}
+
+	
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
@@ -201,11 +231,16 @@ public abstract class BaseParser implements IParser {
 			if (myResourceToId.containsKey(theResource)) {
 				return;
 			}
-
-			// TODO: make this configurable between the two below (and something else?)
-			IdDt newId = new IdDt(myNextContainedId++);
-			// newId = new IdDt(UUID.randomUUID().toString());
-
+			
+			IdDt newId;
+			if (theResource.getId().isLocal()) {
+				newId = theResource.getId();
+			} else {
+				// TODO: make this configurable between the two below (and something else?)
+				// newId = new IdDt(UUID.randomUUID().toString());
+				newId = new IdDt(myNextContainedId++);
+			}
+			
 			myResourceToId.put(theResource, newId);
 			myResources.add(theResource);
 		}

@@ -463,7 +463,7 @@ public class JsonParserTest {
 	}
 
 	@Test
-	public void testEncodeContained() {
+	public void testEncodeContained__() {
 		// Create an organization
 		Organization org = new Organization();
 		org.getName().setValue("Contained Test Organization");
@@ -478,7 +478,7 @@ public class JsonParserTest {
 		List<IResource> resources = new ArrayList<IResource>();
 		resources.add(patient);
 		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
-		
+				
 		// Encode the buntdle
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(b);
 		ourLog.info(encoded);
@@ -489,9 +489,96 @@ public class JsonParserTest {
 		ourLog.info(encoded);
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\"", "resourceType\":\"Organization", "id\":\"1\"")));
 		assertThat(encoded, containsString("reference\":\"#1\""));
+	}
+	
+	@Test
+	public void testEncodeContainedWithNarrativeIsSuppresed() {
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+		org.getText().setDiv("<div>FOOBAR</div>");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getManagingOrganization().setResource(org);
+
+		String encoded = parser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("BARFOO")));
 		
+	}	
+	
+	@Test
+	public void testEncodeContained() {
+		IParser xmlParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier("urn:mrns", "253345");
+		
+		// Put the organization as a reference in the patient resource
+		patient.getManagingOrganization().setResource(org);
+		
+		String encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\":[", "\"id\":\"1\"", "\"identifier\"", "\"reference\":\"#1\"")));
+		
+		// Create a bundle with just the patient resource
+		List<IResource> resources = new ArrayList<IResource>();
+		resources.add(patient);
+		Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
+		
+		// Encode the bundle
+		encoded = xmlParser.encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\":[", "\"id\":\"1\"", "\"identifier\"", "\"reference\":\"#1\"")));
+		
+		// Re-parse the bundle
+		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
+		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		
+		assertNotNull(patient.getManagingOrganization().getResource());
+		org = (Organization) patient.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId().getValue());
+		assertEquals("Contained Test Organization", org.getName().getValue());
+		
+		// And re-encode a second time
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\":[", "\"id\":\"1\"", "\"identifier\"", "\"reference\":\"#1\"")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
+
+		// And re-encode once more, with the references cleared
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((IdDt)null);
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\":[", "\"id\":\"1\"", "\"identifier\"", "\"reference\":\"#1\"")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
+
+		// And re-encode once more, with the references cleared and a manually set local ID
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((IdDt)null);
+		patient.getManagingOrganization().getResource().setId(new IdDt("#333"));
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("\"contained\":[", "\"id\":\"333\"", "\"identifier\"", "\"reference\":\"#333\"")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
 		
 	}
+	
+	
 
 	
 	@Test
@@ -539,7 +626,7 @@ public class JsonParserTest {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
-		spm.getText().setDiv("AAA");
+		rpt.getText().setDiv("AAA");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);

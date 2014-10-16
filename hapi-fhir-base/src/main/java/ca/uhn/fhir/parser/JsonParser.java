@@ -284,30 +284,14 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		case RESOURCE_REF: {
 			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theValue;
-			IdDt value = referenceDt.getReference();
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
 				theWriter.writeStartObject();
 			}
 
-			String reference = value.getValue();
-			if (StringUtils.isBlank(reference)) {
-				if (value.getResourceType() != null && StringUtils.isNotBlank(value.getIdPart())) {
-					reference = myContext.getResourceDefinition(value.getResourceType()).getName() + '/' + value.getIdPart();
-				}
-			}
-			if (StringUtils.isBlank(reference)) {
-				if (referenceDt.getResource() != null) {
-					IdDt containedId = getContainedResources().getResourceId(referenceDt.getResource());
-					if (containedId != null) {
-						reference = "#" + containedId.getValue();
-					} else if (referenceDt.getResource().getId() != null && referenceDt.getResource().getId().hasIdPart()) {
-						reference = referenceDt.getResource().getId().getValue();
-					}
-				}
-			}
-
+			String reference = determineReferenceText(referenceDt); 
+					
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
@@ -321,11 +305,14 @@ public class JsonParser extends BaseParser implements IParser {
 			theWriter.writeStartArray(theChildName);
 			ContainedDt value = (ContainedDt) theValue;
 			for (IResource next : value.getContainedResources()) {
-				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true);
+				if (getContainedResources().getResourceId(next)!=null) {
+					continue;
+				}
+				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(next.getId().getValue()));
 			}
 			for (IResource next : getContainedResources().getContainedResources()) {
 				IdDt resourceId = getContainedResources().getResourceId(next);
-				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, resourceId.getValue());
+				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(resourceId.getValue()));
 			}
 			theWriter.writeEnd();
 			break;
@@ -424,6 +411,8 @@ public class JsonParser extends BaseParser implements IParser {
 							theEventWriter.writeStartArray(childName);
 							inArray = true;
 							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theIsSubElementWithinResource);
+						} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theIsSubElementWithinResource) {
+							// suppress narratives from contained resources
 						} else {
 							encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName, theIsSubElementWithinResource);
 						}

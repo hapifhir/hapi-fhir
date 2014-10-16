@@ -467,11 +467,14 @@ public class XmlParser extends BaseParser implements IParser {
 			ContainedDt value = (ContainedDt) nextValue;
 			theEventWriter.writeStartElement("contained");
 			for (IResource next : value.getContainedResources()) {
-				encodeResourceToXmlStreamWriter(next, theEventWriter, true);
+				if (getContainedResources().getResourceId(next)!=null) {
+					continue;
+				}
+				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
 			}
 			for (IResource next : getContainedResources().getContainedResources()) {
 				IdDt resourceId = getContainedResources().getResourceId(next);
-				encodeResourceToXmlStreamWriter(next, theEventWriter, true, resourceId.getValue());
+				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(resourceId.getValue()));
 			}
 			theEventWriter.writeEndElement();
 			break;
@@ -493,6 +496,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 
 	}
+
 
 	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter,
 			List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
@@ -545,6 +549,8 @@ public class XmlParser extends BaseParser implements IParser {
 					theEventWriter.writeAttribute("url", extensionUrl);
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, null, theIncludedResource);
 					theEventWriter.writeEndElement();
+				} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theIncludedResource) {
+					// suppress narratives from contained resources
 				} else {
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
 				}
@@ -569,23 +575,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
-		String reference = theRef.getReference().getValue();
-		// if (StringUtils.isBlank(reference)) {
-		// if (theRef.getResourceType() != null && StringUtils.isNotBlank(theRef.getResourceId())) {
-		// reference = myContext.getResourceDefinition(theRef.getResourceType()).getName() + '/' + theRef.getResourceId();
-		// }
-		// }
-
-		if (isBlank(reference)) {
-			if (theRef.getResource() != null) {
-				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
-				if (containedId != null) {
-					reference = "#" + containedId.getValue();
-				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
-					reference = theRef.getResource().getId().getValue();
-				}
-			}
-		}
+		String reference = determineReferenceText(theRef);
 		
 		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement(RESREF_REFERENCE);
@@ -598,6 +588,7 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeEndElement();
 		}
 	}
+
 
 	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		String resourceId = null;

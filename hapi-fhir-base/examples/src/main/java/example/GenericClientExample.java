@@ -24,7 +24,11 @@ public class GenericClientExample {
       IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
       // Perform a search
-      Bundle results = client.search().forResource(Patient.class).where(Patient.FAMILY.matches().value("duck")).execute();
+      Bundle results = client
+            .search()
+            .forResource(Patient.class)
+            .where(Patient.FAMILY.matches().value("duck"))
+            .execute();
 
       System.out.println("Found " + results.size() + " patients named 'duck'");
       // END SNIPPET: simple
@@ -44,7 +48,12 @@ public class GenericClientExample {
          // Invoke the server create method (and send pretty-printed JSON
          // encoding to the server
          // instead of the default which is non-pretty printed XML)
-         client.create().resource(patient).prettyPrint().encodedJson().execute();
+         client
+            .create()
+            .resource(patient)
+            .prettyPrint()
+            .encodedJson()
+            .execute();
          // END SNIPPET: create
       }
       {
@@ -63,7 +72,10 @@ public class GenericClientExample {
          // Invoke the server create method (and send pretty-printed JSON
          // encoding to the server
          // instead of the default which is non-pretty printed XML)
-         client.update().resource(patient).execute();
+         client
+            .update()
+            .resource(patient)
+            .execute();
          // END SNIPPET: update
       }
       {

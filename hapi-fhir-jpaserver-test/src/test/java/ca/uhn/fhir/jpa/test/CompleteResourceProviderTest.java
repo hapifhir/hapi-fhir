@@ -175,6 +175,28 @@ public class CompleteResourceProviderTest {
 	}
 
 	@Test
+	public void testSaveAndRetrieveWithContained() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained01");
+
+		Organization o1 = new Organization();
+		o1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained02");
+		
+		p1.getManagingOrganization().setResource(o1);
+		
+		IdDt newId = ourClient.create().resource(p1).execute().getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertEquals(1, actual.getContained().getContainedResources().size());
+		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
+		
+		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system","testSaveAndRetrieveWithContained01")).execute();
+		assertEquals(1, b.size());
+		
+	}
+	
+	
+	@Test
 	public void testSearchByIdentifier() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
