@@ -362,8 +362,123 @@ public enum ResourceTypeEnum {
 	 *
 	 * A value set specifies a set of codes drawn from one or more code systems.
 	 */
-	VALUESET("ValueSet", "http://hl7.org/fhir/resource-types"),
+	VALUESET("ValueSet", "http://hl7.org/fhir/resource-types"), 
 	
+	/**
+	 * New types
+	 */
+	
+	/**
+	 * Code Value: <b>Appointment</b>
+	 * 
+	 * A scheduled appointment for a patient and/or practitioner(s) where a service may take place.
+	 */
+	APPOINTMENT("Appointment", "http://hl7.org/fhir/resource-types"), 
+	
+	/**
+	 * Code Value: <b>AppointmentResponse</b> 
+	 * 
+	 * A response to a scheduled appointment for a patient and/or practitioner(s)
+	 */
+	APPOINTMENTRESPONSE("AppointmentResponse","http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Availability</b> 
+	 * 
+	 * A container for slot(s) of time that may be available for booking appointments
+	 */
+	AVAILABILITY("Availability","http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Binary</b>
+	 *  
+	 * http://hl7.org/fhir/profiles/Binary
+	 */
+	BINARY("Binary", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Claim</b> 
+	 * 
+	 * A claim
+	 */
+	CLAIM("Claim", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Coverage</b>
+	 * 
+	 * Insurance or medical plan
+	 */
+	COVERAGE("Coverage", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>GeneExpression</b> 
+	 * 
+	 * Resource that records the patient's expression of a gene
+	 */
+	GENEEXPRESSION("GeneExpression", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>GeneticAnalysis</b> 
+	 * 
+	 * Analysis of a patient's genetic test
+	 */
+	GENETICANALYSIS("GeneticAnalysis", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>GVFMeta</b>
+	 *  
+	 * Meta data of a GVF file
+	 */
+	GVFMETA("GVFMeta", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>GVFVariant</b> 
+	 *  
+	 * A segment of a GVF file
+	 */
+	GVFVARIANT("GVFVariant", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Microarray</b> 
+	 *  
+	 * A resource that displays result of a  microarray
+	 */
+	MICROARRAY("Microarray", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Remittance</b> 
+	 *  
+	 * A remittance
+	 */
+	REMITTANCE("Remittance", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>SequencingAnalysis</b> 
+	 *  
+	 * Computational analysis on a patient's genetic raw file
+	 */
+	SEQUENCINGANALYSIS("SequencingAnalysis", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>SequencingLab</b> 
+	 *  
+	 * A lab for sequencing
+	 */
+	SEQUENCINGLAB("SequencingLab", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>Slot</b> 
+	 *  
+	 * A slot of time that may be available for booking appointments
+	 */
+	SLOT("Slot", "http://hl7.org/fhir/resource-types"),
+	
+	/**
+	 * Code Value: <b>User</b> 
+	 *  
+	 * A user authorized to use the system
+	 */
+	USER("User", "http://hl7.org/fhir/resource-types"),
 	;
 	
 	/**

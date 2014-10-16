@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 
 /**
  * HAPI/FHIR <b>Patient</b> Resource
@@ -103,6 +104,12 @@ public class Patient extends BaseResource implements IResource {
 		IdentifierDt newType = new IdentifierDt();
 		getIdentifier().add(newType);
 		return newType; 
+	}
+
+
+	@Override
+	public ResourceTypeEnum getResourceType() {
+		return ResourceTypeEnum.PATIENT;
 	}
 
   

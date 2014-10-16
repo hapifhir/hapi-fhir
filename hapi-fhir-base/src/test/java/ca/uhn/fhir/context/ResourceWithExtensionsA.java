@@ -11,6 +11,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -190,6 +191,11 @@ public class ResourceWithExtensionsA extends BaseResource {
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType ); // not implemented
+	}
+
+	@Override
+	public ResourceTypeEnum getResourceType() {		
+		return null; //not implemented
 	}
 
 	

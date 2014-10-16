@@ -1431,7 +1431,7 @@ public class Test extends BaseResource implements IResource {
   
 	@Override
 	public ResourceTypeEnum getResourceType() {
-		return ResourceTypeEnum.TEST;
+		return null;
 	}
 
 }
