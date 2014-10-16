@@ -63,38 +63,21 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	 * Constructor which accepts an {@link BaseOperationOutcome} resource which will be supplied in the response
 	 */
 	public UnprocessableEntityException(BaseOperationOutcome theOperationOutcome) {
-		super(STATUS_CODE, DEFAULT_MESSAGE, theOperationOutcome == null ? new BaseOperationOutcome() : theOperationOutcome);
+		super(STATUS_CODE, DEFAULT_MESSAGE, theOperationOutcome);
 	}
 
 	/**
 	 * Constructor which accepts a String describing the issue. This string will be translated into an {@link BaseOperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String theMessage) {
-		super(STATUS_CODE, DEFAULT_MESSAGE, toOperationOutcome(theMessage));
+		super(STATUS_CODE, theMessage);
 	}
 
 	/**
 	 * Constructor which accepts an array of Strings describing the issue. This strings will be translated into an {@link BaseOperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String... theMessage) {
-		super(STATUS_CODE, DEFAULT_MESSAGE, toOperationOutcome(theMessage));
+		super(STATUS_CODE, theMessage[0]); // TODO: this used to generate an OperationOutcome - why?
 	}
 
-	private static BaseOperationOutcome toOperationOutcome(String... theMessage) {
-		BaseOperationOutcome BaseOperationOutcome = new BaseOperationOutcome();
-		if (theMessage != null) {
-			for (String next : theMessage) {
-				BaseOperationOutcome.addIssue().setDetails(next);
-			}
-		}
-		return BaseOperationOutcome;
-	}
-
-	
-	private static class MyOperationOutcome extends BaseOperationOutcome
-	{
-
-		
-	}
-	
 }

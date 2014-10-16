@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -44,7 +44,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public MethodNotAllowedException(String theMessage, OperationOutcome theOperationOutcome) {
+	public MethodNotAllowedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -61,10 +61,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -638,7 +638,7 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
-			OperationOutcome oo = null;
+			BaseOperationOutcome oo = null;
 			int statusCode = 500;
 
 			if (e instanceof BaseServerResponseException) {
@@ -647,8 +647,14 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			if (oo == null) {
-				oo = new OperationOutcome();
-				Issue issue = oo.addIssue();
+				try {
+					oo = (BaseOperationOutcome) myFhirContext.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
+				} catch (Exception e1) {
+					ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
+					throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
+				}
+				
+				BaseIssue issue = oo.addIssue();
 				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
 				if (e instanceof InternalErrorException) {
 					ourLog.error("Failure during REST processing", e);
@@ -979,7 +985,7 @@ public class RestfulServer extends HttpServlet {
 
 		for (IResource next : resourceList) {
 			if (next.getId() == null || next.getId().isEmpty()) {
-				if (!(next instanceof OperationOutcome)) {
+				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}

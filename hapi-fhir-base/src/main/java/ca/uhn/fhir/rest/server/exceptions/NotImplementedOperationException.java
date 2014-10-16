@@ -1,5 +1,5 @@
 package ca.uhn.fhir.rest.server.exceptions;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -54,7 +54,7 @@ public static final int STATUS_CODE = Constants.STATUS_HTTP_501_NOT_IMPLEMENTED;
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public NotImplementedOperationException(String theMessage, OperationOutcome theOperationOutcome) {
+	public NotImplementedOperationException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

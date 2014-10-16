@@ -38,7 +38,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -146,7 +146,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 
-		OperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
+		BaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
 			boolean continueProcessing = next.outgoingResponse(theRequest, outcome, theRequest.getServletRequest(), theRequest.getServletResponse());

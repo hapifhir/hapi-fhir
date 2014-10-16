@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.primitive;
+package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L

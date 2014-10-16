@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -52,7 +52,7 @@ public class InternalErrorException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public InternalErrorException(String theMessage, OperationOutcome theOperationOutcome) {
+	public InternalErrorException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

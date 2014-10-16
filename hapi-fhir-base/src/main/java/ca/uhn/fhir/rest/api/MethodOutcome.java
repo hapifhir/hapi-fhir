@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class MethodOutcome {
 
 	private IdDt myId;
-	private BaseOperationOutcome myBaseOperationOutcome;
+	private BaseOperationOutcome myOperationOutcome;
 	private IdDt myVersionId;
 	private Boolean myCreated;
 
@@ -72,7 +72,7 @@ public class MethodOutcome {
 	 */
 	public MethodOutcome(IdDt theId, BaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
-		myBaseOperationOutcome = theBaseOperationOutcome;
+		myOperationOutcome = theBaseOperationOutcome;
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class MethodOutcome {
 	 */
 	public MethodOutcome(IdDt theId, BaseOperationOutcome theBaseOperationOutcome, Boolean theCreated) {
 		myId = theId;
-		myBaseOperationOutcome = theBaseOperationOutcome;
+		myOperationOutcome = theBaseOperationOutcome;
 		myCreated = theCreated;
 	}
 
@@ -108,7 +108,7 @@ public class MethodOutcome {
 	public MethodOutcome(IdDt theId, IdDt theVersionId, BaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;
-		myBaseOperationOutcome = theBaseOperationOutcome;
+		myOperationOutcome = theBaseOperationOutcome;
 	}
 
 	public IdDt getId() {
@@ -120,8 +120,8 @@ public class MethodOutcome {
 	 * 
 	 * @return This method <b>will return null</b>, unlike many methods in the API.
 	 */
-	public BaseOperationOutcome getBaseOperationOutcome() {
-		return myBaseOperationOutcome;
+	public BaseOperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
 	}
 
 	/**
@@ -158,8 +158,8 @@ public class MethodOutcome {
 	/**
 	 * Sets the {@link BaseOperationOutcome} resource to return to the client. Set to <code>null</code> (which is the default) if none.
 	 */
-	public void setBaseOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
-		myBaseOperationOutcome = theBaseOperationOutcome;
+	public void setOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
+		myOperationOutcome = theBaseOperationOutcome;
 	}
 
 	/**

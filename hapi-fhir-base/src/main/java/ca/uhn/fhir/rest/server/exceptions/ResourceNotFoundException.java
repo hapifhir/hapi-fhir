@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -39,7 +39,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theClass, theId));
 	}
 
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt theId, OperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt theId, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theClass, theId), theOperationOutcome);
 	}
 
@@ -50,14 +50,14 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceNotFoundException(String theMessage, OperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
 	/**
 	 * @deprecated This doesn't make sense, since an identifier is not a resource ID and shouldn't generate a 404 if it isn't found - Should be removed
 	 */
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IdentifierDt theId) {
+	public ResourceNotFoundException(Class<? extends IResource> theClass, BaseIdentifierDt theId) {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known");
 	}
 
@@ -65,7 +65,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theId));
 	}
 
-	public ResourceNotFoundException(IdDt theId, OperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(IdDt theId, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theId), theOperationOutcome);
 	}
 
