@@ -176,6 +176,11 @@
 							<artifactId>wagon-ssh</artifactId>
 							<version>1.0</version>
 						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.doxia</groupId>
+							<artifactId>doxia-module-markdown</artifactId>
+							<version>1.6</version>
+						</dependency>
 					</dependencies>
 					<configuration>
 						<skip>true</skip>
