@@ -1,0 +1,52 @@
+# Put files/directories that should be ignored in this file.
+# Lines that start with '# ' are comments.
+
+## OS
+.DS_Store
+Icon?
+nohup.out
+
+## EDITORS
+\#*
+.#*
+*~
+*.sw[a-z]
+*.bak
+REVISION
+TAGS*
+tmtags
+*_flymake.*
+*_flymake
+*.tmproj
+.project
+.settings
+mkmf.log
+
+## COMPILED
+a.out
+*.o
+*.pyc
+*.so
+
+## OTHER SCM
+*/.bzr/*
+*/.hg/*
+*/.svn/*
+
+## Don't send rspecs up in cookbook
+.watchr
+.rspec
+spec/*
+spec/fixtures/*
+features/*
+
+## SCM
+.gitignore
+
+# Berkshelf
+Berksfile
+Berksfile.lock
+cookbooks/*
+
+# Vagrant
+.vagrant

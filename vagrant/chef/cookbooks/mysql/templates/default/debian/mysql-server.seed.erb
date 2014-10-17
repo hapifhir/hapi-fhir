@@ -1,0 +1,10 @@
+mysql-server-5.5        mysql-server/root_password_again        select <%= @config.server_root_password %>
+mysql-server-5.5        mysql-server/root_password      select <%= @config.server_root_password %>
+mysql-server-5.5        mysql-server-5.5/really_downgrade       boolean false
+mysql-server-5.5        mysql-server-5.5/need_sarge_compat      boolean false
+mysql-server-5.5        mysql-server-5.5/start_on_boot  boolean false
+mysql-server-5.5        mysql-server/error_setting_password     boolean false
+mysql-server-5.5        mysql-server-5.5/nis_warning    note
+mysql-server-5.5        mysql-server-5.5/postrm_remove_databases        boolean false
+mysql-server-5.5        mysql-server/password_mismatch  boolean false
+mysql-server-5.5        mysql-server-5.5/need_sarge_compat_done boolean true

@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='export'>
+  <service name='pkgsrc/tomcat' type='service' version='0'>
+    <create_default_instance enabled='false'/>
+    <single_instance/>
+    <dependency name='network' grouping='require_all' restart_on='error' type='service'>
+      <service_fmri value='svc:/milestone/network:default'/>
+    </dependency>
+    <dependency name='filesystem-local' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/system/filesystem/local:default'/>
+    </dependency>
+    <dependency name='autofs' grouping='optional_all' restart_on='error' type='service'>
+      <service_fmri value='svc:/system/filesystem/autofs:default'/>
+    </dependency>
+    <dependency name='milestone' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/milestone/sysconfig'/>
+    </dependency>
+    <exec_method name='start' type='method' exec='<%= node["tomcat"]["home"] %>/bin/catalina.sh start' timeout_seconds='60'>
+      <method_context working_directory='<%= node["tomcat"]["home"] %>' project='default'>
+        <method_credential user='tomcat' group='tomcat' privileges='basic,net_privaddr'/>
+        <method_environment>
+          <envvar name='JAVA_HOME' value='<%= node["java"]["java_home"] %>'/>
+          <envvar name='CATALINA_HOME' value='<%= node["tomcat"]["home"] %>'/>
+          <envvar name='CATALINA_BASE' value='<%= node["tomcat"]["base"] %>'/>
+          <envvar name='JAVA_OPTS' value='<%= node["tomcat"]["java_options"] %>'/>
+          <envvar name='CATALINA_OPTS' value='<%= node["tomcat"]["catalina_options"] %>'/>
+          <envvar name='CATALINA_PID' value='<%= node["tomcat"]["log_dir"] %>/catalina.pid'/>
+        </method_environment>
+      </method_context>
+    </exec_method>
+    <exec_method name='stop' type='method' exec=':kill' timeout_seconds='60'>
+      <method_context working_directory='<%= node["tomcat"]["home"] %>' project='default'>
+        <method_credential user='tomcat' group='tomcat' privileges='basic,net_privaddr'/>
+        <method_environment>
+          <envvar name='PATH' value='/opt/local/bin:/opt/local/sbin:/usr/bin:/usr/sbin'/>
+          <envvar name='HOME' value='<%= node["tomcat"]["base"] %>'/>
+        </method_environment>
+      </method_context>
+    </exec_method>
+    <property_group name='startd' type='framework'>
+      <propval name="duration" type="astring" value="contract"/>
+      <propval name='ignore_error' type='astring' value='core,signal'/>
+    </property_group>
+    <stability value='Evolving'/>
+    <template>
+      <common_name>
+        <loctext xml:lang='C'>Apache Tomcat</loctext>
+      </common_name>
+    </template>
+  </service>
+</service_bundle>

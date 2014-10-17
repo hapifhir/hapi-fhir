@@ -1,0 +1,9 @@
+{
+  "id": "fhir",
+  "password": "FHIRDefaultPassword",
+  "roles": [
+    "manager",
+    "admin",
+    "manager-gui"
+  ]
+}
