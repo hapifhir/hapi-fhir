@@ -438,8 +438,22 @@
 		
 			<p>
 				Note that individual requests and responses
-				can be tweaked using <a href="./doc_rest_client_interceptor.html">interceptors</a>.
+				can be tweaked using <a href="./doc_rest_client_interceptor.html">Client Interceptors</a>.
 			</p>
+					
+			<subsection name="Configuring an HTTP Proxy">
+			
+				<p>
+					The following example shows how to configure the use of an HTTP
+					proxy in the client.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="proxy" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+			
+			</subsection>
 						
 		</section>
 

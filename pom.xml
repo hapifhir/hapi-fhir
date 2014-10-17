@@ -97,6 +97,10 @@
 			<id>jathman</id>
 			<name>Joe Athman</name>
 		</developer>
+		<developer>
+			<id>petromykhailysyn</id>
+			<name>Petro Mykhailyshyn</name>
+		</developer>
 	</developers>
 
 	<licenses>

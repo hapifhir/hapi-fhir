@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.CookieInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -46,6 +47,27 @@ public class ClientExamples {
       // END SNIPPET: security
    }
 
+   @SuppressWarnings("unused")
+   public void createCookie() {
+      // START SNIPPET: cookie
+      // Create a context and get the client factory so it can be configured
+      FhirContext ctx = new FhirContext();
+      IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
+
+      // Create a cookie interceptor. This cookie will have the name "mycookie" and
+      // the value "Chips Ahoy"
+      CookieInterceptor interceptor = new CookieInterceptor("mycookie=Chips Ahoy");
+
+      // Register the interceptor with your client (either style)
+      IPatientClient annotationClient = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(interceptor);
+
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      annotationClient.registerInterceptor(interceptor);
+      // END SNIPPET: cookie
+   }
+
+   
    @SuppressWarnings("unused")
    public void createSecurityBearer() {
       // START SNIPPET: securityBearer
