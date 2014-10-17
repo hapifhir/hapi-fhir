@@ -88,6 +88,15 @@
 			<id>akley</id>
 			<name>Alexander Kley</name>
 		</developer>
+		<developer>
+			<id>preston</id>
+			<name>Preston Lee</name>
+			<organization>Arizona State University</organization>
+		</developer>
+		<developer>
+			<id>jathman</id>
+			<name>Joe Athman</name>
+		</developer>
 	</developers>
 
 	<licenses>
