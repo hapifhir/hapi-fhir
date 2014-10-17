@@ -2,6 +2,5 @@
     <wb-module deploy-name="hapi-fhir-structures-dstu">
         <wb-resource deploy-path="/" source-path="/target/generated-sources/tinder"/>
         <wb-resource deploy-path="/" source-path="/src/main/java"/>
-        <wb-resource deploy-path="/" source-path="/src/test/resources"/>
     </wb-module>
 </project-modules>

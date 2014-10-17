@@ -22,23 +22,10 @@ import ca.uhn.fhir.rest.param.StringParam;
 public class ServerInvalidDefinitionTest {
 
 	@Test
-	public void testNonInstantiableTypeForResourceProvider() {
-		RestfulServer srv = new RestfulServer();
-		srv.setPlainProviders(new NonInstantiableTypeForPlainProvider());
-		
-		try {
-			srv.init();
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-		}
-	}
-	
-	@Test
 	public void testPrivateResourceProvider() {
 		RestfulServer srv = new RestfulServer();
 		srv.setResourceProviders(new PrivateResourceProvider());
-		
+
 		try {
 			srv.init();
 			fail();
@@ -52,7 +39,7 @@ public class ServerInvalidDefinitionTest {
 	public void testInvalidSpecialNameResourceProvider() {
 		RestfulServer srv = new RestfulServer();
 		srv.setResourceProviders(new InvalidSpecialParameterNameResourceProvider());
-		
+
 		try {
 			srv.init();
 			fail();
@@ -61,12 +48,12 @@ public class ServerInvalidDefinitionTest {
 			assertThat(e.getCause().toString(), StringContains.containsString("_pretty"));
 		}
 	}
-	
+
 	@Test
 	public void testReadMethodWithSearchParameters() {
 		RestfulServer srv = new RestfulServer();
 		srv.setResourceProviders(new ReadMethodWithSearchParamProvider());
-		
+
 		try {
 			srv.init();
 			fail();
@@ -79,7 +66,7 @@ public class ServerInvalidDefinitionTest {
 	public void testSearchWithId() {
 		RestfulServer srv = new RestfulServer();
 		srv.setResourceProviders(new SearchWithIdParamProvider());
-		
+
 		try {
 			srv.init();
 			fail();
@@ -98,65 +85,36 @@ public class ServerInvalidDefinitionTest {
 		srv.setResourceProviders(new InstantiableTypeForResourceProvider());
 		srv.init();
 	}
-	
-	private static class PrivateResourceProvider implements IResourceProvider
-	{
+
+	private static class PrivateResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-		
+
 		@Read
 		public Patient read(@IdParam IdDt theId) {
 			return null;
 		}
-		
+
 	}
-	
-	public static class ReadMethodWithSearchParamProvider implements IResourceProvider
-	{
+
+	public static class ReadMethodWithSearchParamProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-		
-		@Read
-		public Patient read(@IdParam IdDt theId, @RequiredParam(name="aaa") StringParam theParam) {
-			return null;
-		}
-		
-	}
-	
-	public static class SearchWithIdParamProvider implements IResourceProvider
-	{
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-		
-		@Search
-		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name="aaa") StringParam theParam) {
-			return null;
-		}
-		
-	}
-
-	public static class NonInstantiableTypeForPlainProvider
-	{
 
 		@Read
-		public BaseResource read(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
 			return null;
 		}
-		
+
 	}
-	
-	
-	public static class InvalidSpecialParameterNameResourceProvider implements IResourceProvider
-	{
+
+	public static class SearchWithIdParamProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
@@ -164,26 +122,38 @@ public class ServerInvalidDefinitionTest {
 		}
 
 		@Search
-		public List<Patient> search(@RequiredParam(name="_pretty") StringParam theParam) {
+		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
 			return null;
 		}
-		
+
 	}
-	
-	
-	public static class InstantiableTypeForResourceProvider implements IResourceProvider
-	{
+
+	public static class InvalidSpecialParameterNameResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Search
+		public List<Patient> search(@RequiredParam(name = "_pretty") StringParam theParam) {
+			return null;
+		}
+
+	}
+
+	public static class InstantiableTypeForResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
-		
+
 		@Read
 		public Patient read(@IdParam IdDt theId) {
 			return null;
 		}
-		
+
 	}
-	
+
 }

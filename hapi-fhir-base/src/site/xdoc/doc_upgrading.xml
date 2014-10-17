@@ -8,10 +8,26 @@
 
 	<body>
 
-		<section name="Upgrading to HAPI FHIR 0.5">
-
+		<section name="Upgrading to HAPI FHIR 0.8 - DRAFT">
+			
 			<macro name="toc">
 			</macro>
+			
+			<subsection name="Tinder Plugin">
+				
+				<p>
+					If you are using the "Tinder" Maven plugin to generate structure code,
+					you will need to add a structure dependency to the plugin configuration
+					itself in your project pom.xml. See the
+					<a href="./doc_tinder.html">Tinder Page</a> for an example of 
+					how to do this.
+				</p>
+				
+			</subsection>
+		</section>
+
+		<section name="Upgrading to HAPI FHIR 0.5">
+
 			
 			<p>
 				As the HAPI FHIR API begins to mature, a number of minor changes to the way the library works

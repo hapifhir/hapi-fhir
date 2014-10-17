@@ -19,9 +19,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -60,6 +62,28 @@ public class ReadTest {
 		
 	}
 	
+	
+	@Test
+	public void testReadForProviderWithAbstractReturnType() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization/1");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Organization.class,responseContent).getIdentifierFirstRep();
+			
+			assertEquals("1", dt.getSystem().getValueAsString());
+			assertEquals(null, dt.getValue().getValueAsString());
+			
+			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+			assertNotNull(cl);
+			assertEquals("http://localhost:" + ourPort + "/Organization/1/_history/1", cl.getValue());
+			
+		}
+		
+	}
 	
 	@Test
 	public void testBinaryRead() throws Exception {
@@ -124,7 +148,7 @@ public class ReadTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider());
+		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider(), new OrganizationProviderWithAbstractReturnType());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -153,6 +177,27 @@ public class ReadTest {
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
+		}
+
+	}
+
+	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class OrganizationProviderWithAbstractReturnType implements IResourceProvider {
+
+		@Read(version = true)
+		public BaseResource findPatient(@IdParam IdDt theId) {
+			Organization org = new Organization();
+			org.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
+			org.setId("Organization/1/_history/1");
+			return org;
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
 		}
 
 	}

@@ -98,7 +98,13 @@
 					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
 						<generateSearchForAllParams>true</generateSearchForAllParams> </configuration> </execution> -->
 				</executions>
-
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu</artifactId>
+						<version>0.7-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
