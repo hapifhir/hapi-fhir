@@ -20,18 +20,15 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-
-import com.phloc.schematron.ISchematronResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import org.apache.commons.lang3.Validate;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, etc.)
@@ -133,25 +130,18 @@ public class FhirValidator {
 	/**
 	 * Validates a bundle instance, throwing a {@link ValidationFailureException} if the validation fails. This validation includes validation of all resources in the bundle.
 	 * 
-	 * @param theResource
+	 * @param theBundle
 	 *            The resource to validate
 	 * @throws ValidationFailureException
 	 *             If the validation fails
+     * @deprecated use {@link #validateWithResult(ca.uhn.fhir.model.api.Bundle)} instead
 	 */
+    @Deprecated
 	public void validate(Bundle theBundle) {
-		Validate.notNull(theBundle, "theBundle must not be null");
-
-		ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
-
-		for (IValidator next : myValidators) {
-			next.validateBundle(ctx);
-		}
-
-		OperationOutcome oo = ctx.getOperationOutcome();
-		if (oo != null && oo.getIssue().size() > 0) {
-			throw new ValidationFailureException(oo);
-		}
-
+        ValidationResult validationResult = validateWithResult(theBundle);
+        if (!validationResult.isSuccessful()) {
+            throw new ValidationFailureException(validationResult.getOperationOutcome());
+        }
 	}
 
 	/**
@@ -161,21 +151,54 @@ public class FhirValidator {
 	 *            The resource to validate
 	 * @throws ValidationFailureException
 	 *             If the validation fails
+     * @deprecated use {@link #validateWithResult(ca.uhn.fhir.model.api.IResource)} instead
 	 */
+    @Deprecated
 	public void validate(IResource theResource) throws ValidationFailureException {
-		Validate.notNull(theResource, "theResource must not be null");
+        ValidationResult validationResult = validateWithResult(theResource);
+        if (!validationResult.isSuccessful()) {
+            throw new ValidationFailureException(validationResult.getOperationOutcome());
+        }
+    }
 
-		ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, theResource);
+    /**
+     * Validates a bundle instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+     * This validation includes validation of all resources in the bundle.
+     *
+     * @param theBundle the bundle to validate
+     * @return the results of validation
+     * @since 0.7
+     */
+    public ValidationResult validateWithResult(Bundle theBundle) {
+        Validate.notNull(theBundle, "theBundle must not be null");
 
-		for (IValidator next : myValidators) {
-			next.validateResource(ctx);
-		}
+        ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
-		OperationOutcome oo = ctx.getOperationOutcome();
-		if (oo != null && oo.getIssue().size() > 0) {
-			throw new ValidationFailureException(oo);
-		}
+        for (IValidator next : myValidators) {
+            next.validateBundle(ctx);
+        }
 
-	}
+        OperationOutcome oo = ctx.getOperationOutcome();
+        return ValidationResult.valueOf(oo);
+    }
 
+    /**
+     * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+     *
+     * @param theResource the resource to validate
+     * @return the results of validation
+     * @since 0.7
+     */
+    public ValidationResult validateWithResult(IResource theResource) {
+        Validate.notNull(theResource, "theResource must not be null");
+
+        ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, theResource);
+
+        for (IValidator next : myValidators) {
+            next.validateResource(ctx);
+        }
+
+        OperationOutcome oo = ctx.getOperationOutcome();
+        return ValidationResult.valueOf(oo);
+    }
 }
