@@ -48,10 +48,10 @@ public abstract class BaseElement {
 			myChildren = new ArrayList<BaseElement>();
 		}
 		myChildren.add(theElem);
-		
-//		if (theElem.getDeclaringClassNameComplete()==null) {
-			theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
-//		}
+
+		// if (theElem.getDeclaringClassNameComplete()==null) {
+		theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
+		// }
 	}
 
 	public String getBinding() {
@@ -63,11 +63,11 @@ public abstract class BaseElement {
 	}
 
 	public String getCardMax() {
-		return defaultString(myCardMax,"1");
+		return defaultString(myCardMax, "1");
 	}
 
 	public String getCardMin() {
-		return defaultString(myCardMin,"0");
+		return defaultString(myCardMin, "0");
 	}
 
 	public Map<String, Slicing> getChildElementNameToSlicing() {
@@ -90,7 +90,7 @@ public abstract class BaseElement {
 	}
 
 	private String toStringConstant(String theDefinition) {
-		if (theDefinition==null) {
+		if (theDefinition == null) {
 			return "";
 		}
 		StringBuffer b = new StringBuffer();
@@ -188,7 +188,7 @@ public abstract class BaseElement {
 	public void setElementName(String theName) {
 		myElementName = theName;
 	}
-	
+
 	public void setElementNameAndDeriveParentElementName(String theName) {
 		int lastDot = theName.lastIndexOf('.');
 		if (lastDot == -1) {
@@ -220,7 +220,7 @@ public abstract class BaseElement {
 	public void clearTypes() {
 		getType().clear();
 	}
-	
+
 	public void setTypeFromString(String theType) {
 		if (theType == null) {
 			myType = null;
@@ -230,6 +230,9 @@ public abstract class BaseElement {
 		if (typeString.toLowerCase().startsWith("resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
 			myResourceRef = true;
+		} else if (typeString.toLowerCase().startsWith("reference(")) {
+			typeString = typeString.substring("Reference(".length(), typeString.length() - 1);
+			myResourceRef = true;
 		} else if (typeString.startsWith("@")) {
 			typeString = typeString.substring(1);
 			typeString = ResourceBlock.convertFhirPathNameToClassName(typeString);
@@ -238,22 +241,34 @@ public abstract class BaseElement {
 		}
 
 		if (StringUtils.isNotBlank(typeString)) {
+			
+			int idx = typeString.indexOf("Reference(");
+			if (idx != -1) {
+				int endIdx = typeString.indexOf(")");
+				typeString = typeString.substring(0,idx) + typeString.substring(idx, endIdx).replace("|", ",") + typeString.substring(endIdx);
+ 			}
+			
 			String[] types = typeString.replace("=", "").split("\\|");
 			for (String nextType : types) {
 				nextType = nextType.trim();
-				if (nextType.endsWith(")")){
-					nextType = nextType.substring(0, nextType.length()-1);
+				if (nextType.endsWith(")")) {
+					nextType = nextType.substring(0, nextType.length() - 1);
 				}
 				if (nextType.toLowerCase().startsWith("resource(")) {
 					nextType = nextType.substring("Resource(".length(), nextType.length());
+					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
+				} else if (nextType.toLowerCase().startsWith("reference(")) {
+					nextType = nextType.substring("Reference(".length(), nextType.length());
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
 				} else {
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
 					nextType = nextType + getTypeSuffix();
 				}
 
-				if (isNotBlank(nextType)) {
-					getType().add(nextType);
+				for (String next : nextType.split(",")) {
+					if (isNotBlank(next.trim())) {
+						getType().add(next.trim());
+					}
 				}
 			}
 		}
@@ -276,7 +291,6 @@ public abstract class BaseElement {
 		return false; // TODO: implemment
 	}
 
-	
 	public boolean isHasExtensionUrl() {
 		return StringUtils.isNotBlank(myExtensionUrl);
 	}

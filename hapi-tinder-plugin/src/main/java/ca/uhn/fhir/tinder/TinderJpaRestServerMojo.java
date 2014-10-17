@@ -51,7 +51,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		File directoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 		directoryBase.mkdirs();
 
-		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet();
+		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet("dstu");
 		gen.setBaseResourceNames(baseResourceNames);
 
 		try {

@@ -30,12 +30,13 @@
 
 	<dependencies>
 
-		<!-- This dependency includes all neccesary HAPI FHIR classes -->
+		<!-- This dependency includes the core HAPI-FHIR classes -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.7-SNAPSHOT</version>
 		</dependency>
+		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>

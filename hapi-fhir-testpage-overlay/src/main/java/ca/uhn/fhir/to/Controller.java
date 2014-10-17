@@ -1020,7 +1020,7 @@ public class Controller {
 
 		Conformance conformance;
 		try {
-			conformance = client.conformance();
+			conformance = (Conformance)client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());

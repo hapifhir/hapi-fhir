@@ -37,6 +37,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 	@Parameter(alias = "package", required = true)
 	private String packageName;
 
+	@Parameter(alias = "version", required = true, defaultValue="dstu")
+	private String version = "dstu";
+
 	@Parameter(required = false)
 	private List<ProfileFileDefinition> resourceProfileFiles;
 
@@ -81,7 +84,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		ourLog.info("Loading Datatypes...");
 
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet(version);
 		if (buildDatatypes) {
 			try {
 				dtp.parse();
@@ -94,7 +97,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 			datatypeLocalImports = dtp.getLocalImports();
 		}
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(version);
 		if (baseResourceNames != null && baseResourceNames.size() > 0) {
 			ourLog.info("Loading Resources...");
 			try {
@@ -205,24 +208,31 @@ public class TinderStructuresMojo extends AbstractMojo {
 //		 vsp.setResourceValueSetFiles(theResourceValueSetFiles);Directory("src/main/resources/vs/");
 		vsp.parse();
 
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet();
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dev");
 		dtp.parse();
 		dtp.bindValueSets(vsp);
+		dtp.markResourcesForImports();
+		Map<String, String> datatypeLocalImports = dtp.getLocalImports();
 
 		String dtOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/composite";
-		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet();
-		rp.setBaseResourceNames(Arrays.asList("securityevent"));
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev");
+		rp.setBaseResourceNames(Arrays.asList("conceptmap","organization"));
 		rp.parse();
 		rp.bindValueSets(vsp);
+		rp.markResourcesForImports();
 		
 		// rp.bindValueSets(vsp);
 
 		String rpOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/resource";
 		String rpSOutputDir = "target/generated-resources/ca/uhn/fhir/model/dstu";
-		
+
+		dtp.combineContentMaps(rp);
 		rp.combineContentMaps(dtp);
+		rp.getLocalImports().putAll(datatypeLocalImports);
+		datatypeLocalImports.putAll(rp.getLocalImports());
+		
+		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
 		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dstu");
 		
 		 String vsOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/valueset";

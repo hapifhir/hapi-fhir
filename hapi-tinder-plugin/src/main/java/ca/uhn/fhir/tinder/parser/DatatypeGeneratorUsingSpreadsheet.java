@@ -20,6 +20,12 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 
 public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetParser {
 
+	private String myVersion;
+
+	public DatatypeGeneratorUsingSpreadsheet(String theVersion) {
+		myVersion = theVersion;
+	}
+
 	@Override
 	protected String getTemplate() {
 		return "/vm/dt_composite.vm";
@@ -71,22 +77,30 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected List<String> getInputStreamNames() {
 		ArrayList<String> retVal = new ArrayList<String>();
 
-		retVal.add(("/dt/address.xml"));
-		retVal.add(("/dt/coding.xml"));
-		retVal.add(("/dt/humanname.xml"));
-		retVal.add(("/dt/period.xml"));
-		retVal.add(("/dt/ratio.xml"));
-		retVal.add(("/dt/schedule.xml"));
-		retVal.add(("/dt/attachment.xml"));
-		retVal.add(("/dt/contact.xml"));
-		retVal.add(("/dt/identifier.xml"));
-		retVal.add(("/dt/quantity.xml"));
-		retVal.add(("/dt/resourcereference.xml"));
-		retVal.add(("/dt/codeableconcept.xml"));
-//		retVal.add(("/dt/extension.xml"));
-//		retVal.add(("/dt/narrative.xml"));
-		retVal.add(("/dt/range.xml"));
-		retVal.add(("/dt/sampleddata.xml"));
+		retVal.add(("/dt/" + myVersion + "/address.xml"));
+		retVal.add(("/dt/" + myVersion + "/attachment.xml"));
+		retVal.add(("/dt/" + myVersion + "/codeableconcept.xml"));
+		retVal.add(("/dt/" + myVersion + "/coding.xml"));
+		retVal.add(("/dt/" + myVersion + "/humanname.xml"));
+		retVal.add(("/dt/" + myVersion + "/identifier.xml"));
+		retVal.add(("/dt/" + myVersion + "/period.xml"));
+		retVal.add(("/dt/" + myVersion + "/ratio.xml"));
+		retVal.add(("/dt/" + myVersion + "/quantity.xml"));
+		retVal.add(("/dt/" + myVersion + "/range.xml"));
+		retVal.add(("/dt/" + myVersion + "/sampleddata.xml"));
+		
+		if ("dstu".equals(myVersion)) {
+			retVal.add(("/dt/" + myVersion + "/contact.xml"));
+			retVal.add(("/dt/" + myVersion + "/resourcereference.xml"));
+			retVal.add(("/dt/" + myVersion + "/schedule.xml"));
+		}
+		
+		if (!myVersion.equals("dstu")) {			
+			retVal.add(("/dt/" + myVersion + "/reference.xml"));
+			retVal.add(("/dt/" + myVersion + "/attachment.xml"));
+			retVal.add(("/dt/" + myVersion + "/contactpoint.xml"));
+			retVal.add(("/dt/" + myVersion + "/timing.xml"));
+		}
 		
 		return retVal;
 	}
