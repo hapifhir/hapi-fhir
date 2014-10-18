@@ -82,12 +82,13 @@ public class XmlResourceSigner {
 		String string = w.toString();
 				
 		ourLog.info(string);
+		
 
 		{
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			DocumentBuilder builder = dbf.newDocumentBuilder();
-			Document doc = builder.parse(new StringInputStream(w.toString(), Charset.forName("UTF-8")));
+			Document doc = builder.parse(new StringInputStream(string, Charset.forName("UTF-8")));
 			NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 			if (nl.getLength() == 0) {
 				throw new Exception("Cannot find Signature element");

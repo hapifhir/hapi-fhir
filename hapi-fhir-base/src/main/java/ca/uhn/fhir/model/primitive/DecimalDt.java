@@ -76,7 +76,7 @@ public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<D
 	}
 
 	/**
-	 * Rounds the value to the given prevision
+	 * Rounds the value to the given precision
 	 * 
 	 * @see MathContext#getPrecision()
 	 * @see MathContext#getRoundingMode()
