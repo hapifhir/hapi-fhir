@@ -217,7 +217,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		String dtOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/composite";
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev");
-		rp.setBaseResourceNames(Arrays.asList("conceptmap","organization"));
+		rp.setBaseResourceNames(Arrays.asList("referralrequest", "patient","practitioner","encounter","organization"));
 		rp.parse();
 		rp.bindValueSets(vsp);
 		rp.markResourcesForImports();
@@ -233,7 +233,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		datatypeLocalImports.putAll(rp.getLocalImports());
 		
 		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
-		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dstu");
+		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dev");
 		
 		 String vsOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/valueset";
 		 vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dstu");

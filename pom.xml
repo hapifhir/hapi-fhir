@@ -105,6 +105,7 @@
 		<module>hapi-tinder-plugin</module>
 		<module>hapi-tinder-test</module>
 		<module>hapi-fhir-structures-dstu</module>
+		<module>hapi-fhir-structures-dev</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-jpaserver-test</module>
 		<module>restful-server-example</module>

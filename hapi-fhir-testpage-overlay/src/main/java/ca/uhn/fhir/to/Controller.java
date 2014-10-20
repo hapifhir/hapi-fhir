@@ -1009,7 +1009,7 @@ public class Controller {
 		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString + ".0", theReq, theQuery, theClientCodeJsonWriter);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery , theClientCodeJsonWriter);
 		}
 
 		return true;

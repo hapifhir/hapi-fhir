@@ -268,7 +268,7 @@
     <Cell ss:StyleID="s70"><Data ss:Type="String">Contract.term</Data></Cell>
     <Cell><Data ss:Type="String">0..*</Data></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
-    <Cell><Data ss:Type="String">Terms</Data></Cell>
+    <Cell><Data ss:Type="String"><!-- Terms --></Data></Cell>
     <Cell ss:Index="8"><Data ss:Type="String">Contract provisions</Data></Cell>
     <Cell ss:StyleID="s72"><Data ss:Type="String">A contract provision.</Data></Cell>
     <Cell ss:StyleID="s67"/>

@@ -227,6 +227,8 @@ public abstract class BaseElement {
 			return;
 		}
 		String typeString = theType;
+		typeString = typeString.replace("Reference (", "Reference(");
+		
 		if (typeString.toLowerCase().startsWith("resource(")) {
 			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
 			myResourceRef = true;

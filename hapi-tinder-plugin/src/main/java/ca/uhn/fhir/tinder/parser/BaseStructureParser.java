@@ -54,6 +54,7 @@ public abstract class BaseStructureParser {
 	private boolean myImportsResolved;
 	private TreeMap<String, String> myNameToResourceClass = new TreeMap<String, String>();
 	private TreeMap<String, String> myNameToDatatypeClass = new TreeMap<String, String>();
+	private String myPackageBase;
 
 	public TreeMap<String, String> getNameToDatatypeClass() {
 		return myNameToDatatypeClass;
@@ -65,7 +66,7 @@ public abstract class BaseStructureParser {
 		theStructureParser.myNameToResourceClass.putAll(myNameToResourceClass);
 		theStructureParser.myNameToDatatypeClass.putAll(myNameToDatatypeClass);
 	}
-	
+
 	public void addResource(BaseRootType theResource) {
 		myResources.add(theResource);
 	}
@@ -98,7 +99,8 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
+			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -153,31 +155,42 @@ public abstract class BaseStructureParser {
 			return (theNextType);
 		} else {
 			try {
-				String type = "ca.uhn.fhir.model.dstu.composite." + theNextType;
+				String type = myPackageBase + ".composite." + theNextType;
 				Class.forName(type);
 				return (type);
 			} catch (ClassNotFoundException e) {
 				try {
-					String type = "ca.uhn.fhir.model.dstu.resource." + theNextType;
+					String type = "ca.uhn.fhir.model.dstu.composite." + theNextType;
 					Class.forName(type);
 					return (type);
-				} catch (ClassNotFoundException e1) {
+				} catch (ClassNotFoundException e5) {
 					try {
-						String type = "ca.uhn.fhir.model.primitive." + theNextType;
+						String type = "ca.uhn.fhir.model.dstu.resource." + theNextType;
 						Class.forName(type);
 						return (type);
-					} catch (ClassNotFoundException e2) {
+					} catch (ClassNotFoundException e1) {
 						try {
-							String type = "ca.uhn.fhir.model.dstu.valueset." + theNextType;
+							String type = "ca.uhn.fhir.model.primitive." + theNextType;
 							Class.forName(type);
 							return (type);
-						} catch (ClassNotFoundException e3) {
+						} catch (ClassNotFoundException e2) {
 							try {
-								String type = "ca.uhn.fhir.model.api." + theNextType;
+								String type = myPackageBase + ".valueset." + theNextType;
 								Class.forName(type);
 								return (type);
-							} catch (ClassNotFoundException e4) {
-								throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+							} catch (ClassNotFoundException e3) {
+								try {
+									String type = "ca.uhn.fhir.model.api." + theNextType;
+									Class.forName(type);
+									return (type);
+								} catch (ClassNotFoundException e4) {
+									String fileName = "src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + theNextType + ".java";
+									File file = new File(fileName);
+									if (file.exists()) {
+										return myPackageBase + ".composite." + theNextType;
+									}
+									throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+								}
 							}
 						}
 					}
@@ -330,6 +343,8 @@ public abstract class BaseStructureParser {
 	}
 
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+		myPackageBase = thePackageBase;
+
 		if (!theOutputDirectory.exists()) {
 			theOutputDirectory.mkdirs();
 		}
@@ -426,8 +441,8 @@ public abstract class BaseStructureParser {
 	}
 
 	/**
-	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
-	 * resource type, so we need to use the fully qualified name for that resource reference
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location resource type, so we need to use the fully qualified name for that resource
+	 * reference
 	 */
 	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
 		for (BaseElement next : theNext.getChildren()) {
