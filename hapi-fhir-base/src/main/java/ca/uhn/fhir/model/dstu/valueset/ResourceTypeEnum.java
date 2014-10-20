@@ -1,30 +1,9 @@
 
 package ca.uhn.fhir.model.dstu.valueset;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum ResourceTypeEnum {
 
@@ -362,123 +341,120 @@ public enum ResourceTypeEnum {
 	 *
 	 * A value set specifies a set of codes drawn from one or more code systems.
 	 */
-	VALUESET("ValueSet", "http://hl7.org/fhir/resource-types"), 
-	
-	/**
-	 * New types
-	 */
+	VALUESET("ValueSet", "http://hl7.org/fhir/resource-types"),
 	
 	/**
 	 * Code Value: <b>Appointment</b>
-	 * 
+	 *
 	 * A scheduled appointment for a patient and/or practitioner(s) where a service may take place.
 	 */
-	APPOINTMENT("Appointment", "http://hl7.org/fhir/resource-types"), 
+	APPOINTMENT("Appointment", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>AppointmentResponse</b> 
-	 * 
+	 * Code Value: <b>AppointmentResponse</b>
+	 *
 	 * A response to a scheduled appointment for a patient and/or practitioner(s)
 	 */
-	APPOINTMENTRESPONSE("AppointmentResponse","http://hl7.org/fhir/resource-types"),
+	APPOINTMENTRESPONSE("AppointmentResponse", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>Availability</b> 
-	 * 
+	 * Code Value: <b>Availability</b>
+	 *
 	 * A container for slot(s) of time that may be available for booking appointments
 	 */
-	AVAILABILITY("Availability","http://hl7.org/fhir/resource-types"),
+	AVAILABILITY("Availability", "http://hl7.org/fhir/resource-types"),
 	
 	/**
 	 * Code Value: <b>Binary</b>
-	 *  
-	 * http://hl7.org/fhir/profiles/Binary
+	 *
+	 * A binary resource
 	 */
 	BINARY("Binary", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>Claim</b> 
-	 * 
+	 * Code Value: <b>Claim</b>
+	 *
 	 * A claim
 	 */
 	CLAIM("Claim", "http://hl7.org/fhir/resource-types"),
 	
 	/**
 	 * Code Value: <b>Coverage</b>
-	 * 
+	 *
 	 * Insurance or medical plan
 	 */
 	COVERAGE("Coverage", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>GeneExpression</b> 
-	 * 
+	 * Code Value: <b>GeneExpression</b>
+	 *
 	 * Resource that records the patient's expression of a gene
 	 */
 	GENEEXPRESSION("GeneExpression", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>GeneticAnalysis</b> 
-	 * 
+	 * Code Value: <b>GeneticAnalysis</b>
+	 *
 	 * Analysis of a patient's genetic test
 	 */
 	GENETICANALYSIS("GeneticAnalysis", "http://hl7.org/fhir/resource-types"),
 	
 	/**
 	 * Code Value: <b>GVFMeta</b>
-	 *  
+	 *
 	 * Meta data of a GVF file
 	 */
 	GVFMETA("GVFMeta", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>GVFVariant</b> 
-	 *  
+	 * Code Value: <b>GVFVariant</b>
+	 *
 	 * A segment of a GVF file
 	 */
 	GVFVARIANT("GVFVariant", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>Microarray</b> 
-	 *  
+	 * Code Value: <b>Microarray</b>
+	 *
 	 * A resource that displays result of a  microarray
 	 */
 	MICROARRAY("Microarray", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>Remittance</b> 
-	 *  
+	 * Code Value: <b>Remittance</b>
+	 *
 	 * A remittance
 	 */
 	REMITTANCE("Remittance", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>SequencingAnalysis</b> 
-	 *  
+	 * Code Value: <b>SequencingAnalysis</b>
+	 *
 	 * Computational analysis on a patient's genetic raw file
 	 */
 	SEQUENCINGANALYSIS("SequencingAnalysis", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>SequencingLab</b> 
-	 *  
+	 * Code Value: <b>SequencingLab</b>
+	 *
 	 * A lab for sequencing
 	 */
 	SEQUENCINGLAB("SequencingLab", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>Slot</b> 
-	 *  
+	 * Code Value: <b>Slot</b>
+	 *
 	 * A slot of time that may be available for booking appointments
 	 */
 	SLOT("Slot", "http://hl7.org/fhir/resource-types"),
 	
 	/**
-	 * Code Value: <b>User</b> 
-	 *  
+	 * Code Value: <b>User</b>
+	 *
 	 * A user authorized to use the system
 	 */
 	USER("User", "http://hl7.org/fhir/resource-types"),
+	
 	;
 	
 	/**

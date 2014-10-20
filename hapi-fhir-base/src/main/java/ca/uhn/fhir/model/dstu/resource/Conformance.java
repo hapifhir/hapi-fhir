@@ -16,71 +16,198 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 
-import java.util.Date;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AlertStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.resource.Appointment;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.resource.Availability;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CausalityExpectationEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.CompositionAttestationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.CompositionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConceptMapEquivalenceEnum;
+import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.valueset.ConditionRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
+import ca.uhn.fhir.model.dstu.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExposureTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.FamilyHistory;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.GVFMeta;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.resource.Immunization;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationDateCriterionCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRouteCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ListModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.resource.MedicationAdministration;
+import ca.uhn.fhir.model.dstu.valueset.MedicationAdministrationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationDispense;
+import ca.uhn.fhir.model.dstu.valueset.MedicationDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
 import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.resource.Microarray;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Order;
+import ca.uhn.fhir.model.dstu.valueset.OrderOutcomeStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Procedure;
+import ca.uhn.fhir.model.dstu.valueset.ProcedureRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.valueset.ProvenanceEntityRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.valueset.QueryOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireGroupNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.valueset.ReactionSeverityEnum;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResponseTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventParticipantNetworkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventSourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.SequencingAnalysis;
+import ca.uhn.fhir.model.dstu.resource.SequencingLab;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Slot;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyItemTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.AgeDt;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -592,6 +719,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myStatus, myExperimental, myDate, mySoftware, myImplementation, myFhirVersion, myAcceptUnknown, myFormat, myProfile, myRest, myMessaging, myDocument);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this statement).
@@ -1548,6 +1676,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myVersion, myReleaseDate);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (A name the software is known by).
@@ -1733,6 +1862,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDescription, myUrl);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>description</b> (Describes this specific instance).
@@ -1896,6 +2026,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMode, myDocumentation, mySecurity, myResource, myOperation, myQuery, myDocumentMailbox);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>mode</b> (client | server).
@@ -2326,6 +2457,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCors, myService, myDescription, myCertificate);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>cors</b> (Adds CORS Headers (http://enable-cors.org/)).
@@ -2605,6 +2737,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myBlob);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (Mime type for certificate).
@@ -2770,6 +2903,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myProfile, myOperation, myReadHistory, myUpdateCreate, mySearchInclude, mySearchParam);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (A resource type that is supported).
@@ -3170,6 +3304,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDocumentation);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (read | vread | update | delete | history-instance | validate | history-type | create | search-type).
@@ -3326,6 +3461,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDefinition, myType, myDocumentation, myTarget, myChain);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of search parameter).
@@ -3713,6 +3849,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDocumentation);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (transaction | search-system | history-system).
@@ -3855,6 +3992,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDefinition, myDocumentation, myParameter);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
@@ -4102,6 +4240,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myEndpoint, myReliableCache, myDocumentation, myEvent);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>endpoint</b> (Actual endpoint being described).
@@ -4377,6 +4516,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myCategory, myMode, myProtocol, myFocus, myRequest, myResponse, myDocumentation);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Event type).
@@ -4755,6 +4895,7 @@ public class Conformance extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myMode, myDocumentation, myProfile);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>mode</b> (producer | consumer).
@@ -4880,12 +5021,10 @@ public class Conformance extends BaseResource implements IResource {
 
 
 
-	@Override
-	public ResourceTypeEnum getResourceType() {
-		return ResourceTypeEnum.CONFORMANCE;
-	}
 
-
-
+    @Override
+    public ResourceTypeEnum getResourceType() {
+        return ResourceTypeEnum.CONFORMANCE;
+    }
 
 }

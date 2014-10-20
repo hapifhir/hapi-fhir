@@ -110,7 +110,7 @@
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>supply</baseResourceName>
 						<!--<baseResourceName>template</baseResourceName>-->
-						<baseResourceName>test</baseResourceName>
+						<!--<baseResourceName>test</baseResourceName>-->
 						<baseResourceName>user</baseResourceName>
 						<!-- <baseResourceName>valueset-extensions</baseResourceName>  -->
 						<baseResourceName>valueset</baseResourceName>

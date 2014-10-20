@@ -7,6 +7,7 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 
 #foreach ( $import in $imports )
 import ${import};
@@ -84,5 +85,10 @@ public class ${className} extends BaseResource implements IResource {
 #childResourceBlocks($resourceBlockChildren)
 
 #childExtensionTypes( $childExtensionTypes )
+
+    @Override
+    public ResourceTypeEnum getResourceType() {
+        return ResourceTypeEnum.${className.toUpperCase().replaceAll("RESOURCE", "")};
+    }
 
 }

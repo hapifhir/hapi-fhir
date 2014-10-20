@@ -30227,6 +30227,71 @@ Related resources tie this event to the authorizing prescription, and the specif
             <code value="ValueSet"/>
             <definition value="A value set specifies a set of codes drawn from one or more code systems."/>
           </concept>
+          <!-- new codes -->
+          <concept>
+            <code value="Appointment"/>
+            <definition value="A scheduled appointment for a patient and/or practitioner(s) where a service may take place."/>
+          </concept>
+          <concept>
+            <code value="AppointmentResponse"/>
+            <definition value="A response to a scheduled appointment for a patient and/or practitioner(s)"/>
+          </concept>
+          <concept>
+            <code value="Availability"/>
+            <definition value="A container for slot(s) of time that may be available for booking appointments"/>
+          </concept>
+          <concept>
+            <code value="Binary"/>
+            <definition value="A binary resource"/>
+          </concept>
+          <concept>
+            <code value="Claim"/>
+            <definition value="A claim"/>
+          </concept>
+          <concept>
+            <code value="Coverage"/>
+            <definition value="Insurance or medical plan"/>
+          </concept>
+          <concept>
+            <code value="GeneExpression"/>
+            <definition value="Resource that records the patient's expression of a gene"/>
+          </concept>
+          <concept>
+            <code value="GeneticAnalysis"/>
+            <definition value="Analysis of a patient's genetic test"/>
+          </concept>
+          <concept>
+            <code value="GVFMeta"/>
+            <definition value="Meta data of a GVF file"/>
+          </concept>
+          <concept>
+            <code value="GVFVariant"/>
+            <definition value="A segment of a GVF file"/>
+          </concept>
+          <concept>
+            <code value="Microarray"/>
+            <definition value="A resource that displays result of a  microarray"/>
+          </concept>
+          <concept>
+            <code value="Remittance"/>
+            <definition value="A remittance"/>
+          </concept>
+          <concept>
+            <code value="SequencingAnalysis"/>
+            <definition value="Computational analysis on a patient's genetic raw file"/>
+          </concept>
+          <concept>
+            <code value="SequencingLab"/>
+            <definition value="A lab for sequencing"/>
+          </concept>
+          <concept>
+            <code value="Slot"/>
+            <definition value="A slot of time that may be available for booking appointments"/>
+          </concept>
+          <concept>
+            <code value="User"/>
+            <definition value="A user authorized to use the system"/>
+          </concept>
         </define>
       </ValueSet>
     </content>

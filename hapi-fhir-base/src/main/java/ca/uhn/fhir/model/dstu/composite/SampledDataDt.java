@@ -16,38 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>SampledDataDt</b> Datatype
@@ -135,6 +135,7 @@ public class SampledDataDt
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myOrigin, myPeriod, myFactor, myLowerLimit, myUpperLimit, myDimensions, myData);
 	}
+	
 
 	/**
 	 * Gets the value(s) for <b>origin</b> (Zero value and units).
@@ -174,21 +175,8 @@ public class SampledDataDt
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
      * </p> 
 	 */
-	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
-		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
-		return this; 
-	}
-
-	/**
-	 * Sets the value for <b>origin</b> (Zero value and units)
-	 *
-     * <p>
-     * <b>Definition:</b>
-     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
-     * </p> 
-	 */
-	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
-		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
 		return this; 
 	}
 
@@ -213,8 +201,8 @@ public class SampledDataDt
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
      * </p> 
 	 */
-	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
-		myOrigin = new QuantityDt(theComparator, theValue, theSystem, theUnits); 
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -226,8 +214,8 @@ public class SampledDataDt
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
      * </p> 
 	 */
-	public SampledDataDt setOrigin( double theValue) {
-		myOrigin = new QuantityDt(theValue); 
+	public SampledDataDt setOrigin( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
+		myOrigin = new QuantityDt(theComparator, theValue, theUnits); 
 		return this; 
 	}
 
@@ -240,6 +228,19 @@ public class SampledDataDt
      * </p> 
 	 */
 	public SampledDataDt setOrigin( long theValue) {
+		myOrigin = new QuantityDt(theValue); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>origin</b> (Zero value and units)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public SampledDataDt setOrigin( double theValue) {
 		myOrigin = new QuantityDt(theValue); 
 		return this; 
 	}
@@ -283,7 +284,7 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public SampledDataDt setPeriod( long theValue) {
+	public SampledDataDt setPeriod( java.math.BigDecimal theValue) {
 		myPeriod = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -309,7 +310,7 @@ public class SampledDataDt
      * The length of time between sampling times, measured in milliseconds
      * </p> 
 	 */
-	public SampledDataDt setPeriod( java.math.BigDecimal theValue) {
+	public SampledDataDt setPeriod( long theValue) {
 		myPeriod = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -353,7 +354,7 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public SampledDataDt setFactor( long theValue) {
+	public SampledDataDt setFactor( java.math.BigDecimal theValue) {
 		myFactor = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -379,7 +380,7 @@ public class SampledDataDt
      * A correction factor that is applied to the sampled data points before they are added to the origin
      * </p> 
 	 */
-	public SampledDataDt setFactor( java.math.BigDecimal theValue) {
+	public SampledDataDt setFactor( long theValue) {
 		myFactor = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -423,7 +424,7 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public SampledDataDt setLowerLimit( long theValue) {
+	public SampledDataDt setLowerLimit( java.math.BigDecimal theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -449,7 +450,7 @@ public class SampledDataDt
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
      * </p> 
 	 */
-	public SampledDataDt setLowerLimit( java.math.BigDecimal theValue) {
+	public SampledDataDt setLowerLimit( long theValue) {
 		myLowerLimit = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -493,7 +494,7 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public SampledDataDt setUpperLimit( long theValue) {
+	public SampledDataDt setUpperLimit( java.math.BigDecimal theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -519,7 +520,7 @@ public class SampledDataDt
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
      * </p> 
 	 */
-	public SampledDataDt setUpperLimit( java.math.BigDecimal theValue) {
+	public SampledDataDt setUpperLimit( long theValue) {
 		myUpperLimit = new DecimalDt(theValue); 
 		return this; 
 	}
