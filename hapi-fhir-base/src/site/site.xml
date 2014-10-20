@@ -54,6 +54,7 @@
 
 		<menu name="Test Server">
 			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
+			<item name="Vagrant (Private) Test Server" href="doc_vagrant.html"/>
 		</menu>
 
 		<menu name="Documentation">

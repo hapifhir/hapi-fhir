@@ -9,5 +9,3 @@ http://jamesagnew.github.io/hapi-fhir/
 A demonstration of this project is available here:
 http://fhirtest.uhn.ca/
 
-
-

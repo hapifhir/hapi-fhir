@@ -56,6 +56,7 @@ public class Constants {
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";

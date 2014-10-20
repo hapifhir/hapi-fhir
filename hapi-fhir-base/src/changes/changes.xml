@@ -109,6 +109,21 @@
 				top-level resources in the returned bundle for search operations.
 				Thanks to Bill de Beaubien for reporting!
 			</action>			
+			<action type="add" issue="31" dev="preston">
+				Add a 
+				<![CDATA[<a href="https://www.vagrantup.com/">Vagrant</a>]]>  
+				based environment (basically a fully built, self contained development environment) for
+				trying out the HAPI server modules. Thanks to Preston Lee for the pull request, and for 
+				offering to maintain this! 
+			</action>
+			<action type="add" issue="32" dev="jathman">
+				Change validation API so that it uses a return type instead of exceptions to communicate 
+				validation failures. Thanks to Joe Athman for the pull request!
+			</action>
+			<action type="add" issue="35" dev="petromykhailysyn">
+				Add a client interceptor which adds an HTTP cookie to each client request. Thanks to 
+				Petro Mykhailysyn for the pull request! 
+			</action>
 		</release>
 		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 

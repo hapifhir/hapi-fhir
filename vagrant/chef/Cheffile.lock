@@ -1,0 +1,23 @@
+SITE
+  remote: https://supermarket.getchef.com/api/v1
+  specs:
+    chef-sugar (2.3.0)
+    java (1.28.0)
+    mysql (5.5.3)
+      yum-mysql-community (>= 0.0.0)
+    nmap (0.1.0)
+    openssl (2.0.0)
+      chef-sugar (>= 0.0.0)
+    tomcat (0.16.2)
+      java (>= 0.0.0)
+      openssl (>= 0.0.0)
+    yum (3.3.2)
+    yum-mysql-community (0.1.10)
+      yum (>= 3.0)
+
+DEPENDENCIES
+  java (>= 0)
+  mysql (>= 0)
+  nmap (>= 0)
+  tomcat (>= 0)
+

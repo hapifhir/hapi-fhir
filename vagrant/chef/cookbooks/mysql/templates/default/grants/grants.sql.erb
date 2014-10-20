@@ -1,0 +1,27 @@
+<% case node['platform_family'] -%>
+<% when 'debian' -%>
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, SHUTDOWN, PROCESS, FILE, REFERENCES, INDEX, ALTER, SHOW DATABASES, SUPER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '<%= @config.server_debian_password %>' WITH GRANT OPTION;
+<% end %>
+<% if @config.server_repl_password -%>
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%' identified by '<%= @config.server_repl_password %>';
+<% end %>
+<% if @config.allow_remote_root -%>
+GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY '<%= @config.server_root_password %>' WITH GRANT OPTION;
+<% else %>
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+UPDATE mysql.user SET Password=PASSWORD('<%= @config.server_root_password %>') WHERE User='root';
+<% end %>
+<% if @config.remove_anonymous_users -%>
+DELETE FROM mysql.user WHERE User='';
+<% end %>
+<% if @config.remove_test_database  -%>
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%';
+<% end %>
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('<%= @config.server_root_password %>');
+SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('<%= @config.server_root_password %>');
+<% if @config.root_network_acl.each -%>
+<%   @config.root_network_acl.each do |acl| -%>
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'<%= acl %>' IDENTIFIED BY '<%= @config.server_root_password %>' WITH GRANT OPTION;
+<%   end %>
+<% end %>

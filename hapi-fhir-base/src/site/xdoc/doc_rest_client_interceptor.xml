@@ -71,15 +71,15 @@
 
 			</subsection>
 
-			<subsection name="Configuring an HTTP Proxy">
+			<subsection name="Cookies: Add an HTTP Cookie Header to Client Requests">
 			
 				<p>
-					An HTTP proxy may be configured directly on the 
-					restful client factory, as shown below.
+					The <code>CookieInterceptor</code> can be used to 
+					add an HTTP Cookie header to each request created by the client.
 				</p>
 				
 				<macro name="snippet">
-					<param name="id" value="logging" />
+					<param name="id" value="cookie" />
 					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
 				</macro>
 			
