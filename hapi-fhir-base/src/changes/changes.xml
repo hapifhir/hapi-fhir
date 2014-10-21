@@ -89,7 +89,9 @@
 			</action>
 			<action type="fix">
 				JSON-encoded contained resources with the incorrect "_id" element (which should be "id", but some
-				incorrect examples exist on the FHIR specification) now parse correctly. 				
+				incorrect examples exist on the FHIR specification) now parse correctly. In other words, HAPI 
+				previously only accepted the correct "id" element, but now it also accepts the incorrect
+				"_id" element just to be more lenient.				
 			</action>
 			<action type="fix">
 				Several unit tests failed on Windows (or any platform with non UTF-8 default encoding). This may
@@ -107,7 +109,8 @@
 			<action type="fix" issue="33">
 				Server was incorrectly including contained resources being returned as both contained resources, and as 
 				top-level resources in the returned bundle for search operations.
-				Thanks to Bill de Beaubien for reporting!
+				Thanks to Bill de Beaubien for reporting! This also fixes Issue #20, thanks to
+				lephty for reporting!
 			</action>			
 			<action type="add" issue="31" dev="preston">
 				Add a 
