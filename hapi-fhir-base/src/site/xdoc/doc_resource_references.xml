@@ -209,6 +209,17 @@ System.out.println(encoded);]]></source>
 				
 			</subsection>
 			
+			<p>
+				Note that you may also "contain" resources manually in your own code if you 
+				prefer. The following example show how to do this:
+			</p>
+			<macro name="snippet">
+				<param name="id" value="manualContained" />
+				<param name="file" value="examples/src/main/java/example/ResourceRefs.java" />
+			</macro>
+						
+						
+						
 		</section>
 		
 		

@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.7" date="TBD">
+		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
 				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,
 				but this has been replaced with LinkedHashMap semantics. This means that the list of

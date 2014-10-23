@@ -40,15 +40,30 @@
 		<section name="Announcements">
 
 			<p>
-				<b>Oct 22, 2014 - HAPI FHIR 0.7 Released</b> - A new build has been uploaded,
-				containing a number of new features and bug fixes. See the changelog
-				for a complete list of what has changed. Of particular note, the way
-				that contained resources are automatically serialized has been adjusted. This was
-				technically a bugfix, as the previous version was often repeating encoded
-				resources as top-level resources in returned bundles, but it is possible that
-				implementations have been relying on this b 
-				the TagList
-				class has been switched from a List to a Set based on discussion   
+				<b>Oct 23, 2014 - HAPI FHIR 0.7 Released</b> - HAPI 0.7 has been released!
+				This release contains a number of contributions and bugfixes from all over
+				the FHIR community. Thanks to everyone who contributed!
+			</p>
+			<p>
+				In particular, note that this release corrects an issue where contained resources 
+				sometimes got encoded as both contained and top-level resources, and top level 
+				resources sometimes got encoded as contained resources. It is possible that some 
+				existing applications depended on the buggy behaviour, so please do a bit of extra 
+				testing on your server applications if you use contained resources at all. See 
+				the <a href="http://jamesagnew.github.io/hapi-fhir/doc_resource_references.html">resource references</a>
+				documentation for a bit more information on how these work, and please feel free to 
+				post to the <a href="https://groups.google.com/d/forum/hapi-fhir">google group</a>
+				if things aren't working as expected.
+			</p>
+			<p>
+				This release also introduces a fascinating <a href="https://www.vagrantup.com/">Vagrant</a>
+				based development environment contributed by Preston Lee which should allow you 
+				to try out a fully functional, database backed HAPI server in a virtual server 
+				on your own development box.
+			</p>
+			<p>
+				See the <a href="http://jamesagnew.github.io/hapi-fhir/changes-report.html">changelog</a>
+				for a complete list of what's new!
 				<br/>
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
