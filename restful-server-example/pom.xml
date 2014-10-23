@@ -1,19 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!--
+	Because this example is a subproject in HAPI itself, it
+	points to the HAPI parent pom.xml. If you are creating your
+	own project using this project as a guide, you can remove
+	this parent declaration. 
+	-->
 	<parent>
-		<!-- 
-		HAPI projects use the Sonatype OSS parent project. 
-		You do not need to use this in your own projects
-		-->
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>0.7</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
-	<version>0.8-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Sample RESTful Server</name>
@@ -34,20 +37,24 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.7-SNAPSHOT</version>
+			<version>0.7</version>
 		</dependency>
 
 		<!-- This dependency is used for the "FHIR Tester" web app overlay -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.7-SNAPSHOT</version>
+			<version>0.7</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>
 
-		<!-- HAPI-FHIR uses Logback for logging support. The logback library is included automatically by Maven as a part of the hapi-fhir-base dependency, but you also need to include a
-			logging library. Logback is used here, but log4j would also be fine. -->
+		<!-- 
+		HAPI-FHIR uses Logback for logging support. The logback library is included 
+		automatically by Maven as a part of the hapi-fhir-base dependency, but you 
+		also need to include a logging library. Logback is used here, but log4j
+		would also be fine. 
+		-->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
