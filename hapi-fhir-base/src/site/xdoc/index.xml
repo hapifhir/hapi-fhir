@@ -40,6 +40,20 @@
 		<section name="Announcements">
 
 			<p>
+				<b>Oct 22, 2014 - HAPI FHIR 0.7 Released</b> - A new build has been uploaded,
+				containing a number of new features and bug fixes. See the changelog
+				for a complete list of what has changed. Of particular note, the way
+				that contained resources are automatically serialized has been adjusted. This was
+				technically a bugfix, as the previous version was often repeating encoded
+				resources as top-level resources in returned bundles, but it is possible that
+				implementations have been relying on this b 
+				the TagList
+				class has been switched from a List to a Set based on discussion   
+				<br/>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
+
+			<p>
 				<b>Sep 8, 2014 - HAPI FHIR 0.6 Released</b> - A new build has been uploaded,
 				containing a number of new features and bug fixes. See the changelog
 				for a complete list of what has changed. 

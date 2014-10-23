@@ -13,6 +13,12 @@
 				tags will no longer accept duplicate tags, but that tag order will still be
 				preserved. Thanks to Bill de Beaubien for reporting!
 			</action>			
+			<action type="fix" issue="33">
+				Server was incorrectly including contained resources being returned as both contained resources, and as 
+				top-level resources in the returned bundle for search operations.
+				Thanks to Bill de Beaubien for reporting! This also fixes Issue #20, thanks to
+				lephty for reporting!
+			</action>			
 			<action type="add" dev="suranga">
 				Documentation fixes
 			</action>			
@@ -105,12 +111,6 @@
 			<action type="update">
 				Documentation on contained resources contained a typo and did not actually produce contained resources. Thanks
 				to David Hay of Orion Health for reporting!
-			</action>			
-			<action type="fix" issue="33">
-				Server was incorrectly including contained resources being returned as both contained resources, and as 
-				top-level resources in the returned bundle for search operations.
-				Thanks to Bill de Beaubien for reporting! This also fixes Issue #20, thanks to
-				lephty for reporting!
 			</action>			
 			<action type="add" issue="31" dev="preston">
 				Add a 
