@@ -2,7 +2,6 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.validation.FhirValidator;
 
 public enum FhirVersionEnum {
 
