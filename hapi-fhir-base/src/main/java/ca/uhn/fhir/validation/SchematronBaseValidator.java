@@ -68,13 +68,13 @@ public class SchematronBaseValidator implements IValidator {
 			BaseIssue issue = theCtx.getOperationOutcome().addIssue();
 			switch (next.getErrorLevel()) {
 			case ERROR:
-				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
+				issue.getSeverity().setValue("error");
 				break;
 			case FATAL_ERROR:
-				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.FATAL);
+				issue.getSeverity().setValue("fatal");
 				break;
 			case WARN:
-				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.WARNING);
+				issue.getSeverity().setValue("warning");
 				break;
 			case INFO:
 			case SUCCESS:

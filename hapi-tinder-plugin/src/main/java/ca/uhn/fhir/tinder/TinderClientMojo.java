@@ -49,6 +49,12 @@ public class TinderClientMojo extends AbstractMojo {
 	@Parameter(required = true, defaultValue = "false")
 	private boolean generateSearchForAllParams;
 
+	@Parameter(alias = "version", required = true, defaultValue="dstu")
+	private String version = "dstu";
+
+	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
+	private String baseDir;
+	
 	private List<RestResourceTm> myResources = new ArrayList<RestResourceTm>();
 	private String myPackageBase;
 	private File myDirectoryBase;
@@ -87,7 +93,7 @@ public class TinderClientMojo extends AbstractMojo {
 			throw new MojoFailureException("Conformance mode is not server, found: " + rest.getMode().getValue());
 		}
 
-		ProfileParser pp = new ProfileParser();
+		ProfileParser pp = new ProfileParser(version,baseDir );
 		int index = 0;
 		for (RestResource nextResource : rest.getResource()) {
 			if (StringUtils.isBlank(nextResource.getProfile().getReference().getValue())) {

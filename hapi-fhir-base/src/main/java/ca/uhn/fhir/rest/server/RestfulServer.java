@@ -65,7 +65,6 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -653,7 +652,7 @@ public class RestfulServer extends HttpServlet {
 				}
 				
 				BaseIssue issue = oo.addIssue();
-				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
+				issue.getSeverity().setValue("error");
 				if (e instanceof InternalErrorException) {
 					ourLog.error("Failure during REST processing", e);
 					issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));

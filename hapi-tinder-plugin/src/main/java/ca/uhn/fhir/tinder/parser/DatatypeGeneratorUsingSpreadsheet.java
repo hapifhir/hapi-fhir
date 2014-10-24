@@ -22,7 +22,8 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	private String myVersion;
 
-	public DatatypeGeneratorUsingSpreadsheet(String theVersion) {
+	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
+		super(theVersion, theBaseDir);
 		myVersion = theVersion;
 	}
 
@@ -91,7 +92,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		
 		if ("dstu".equals(myVersion)) {
 			retVal.add(("/dt/" + myVersion + "/contact.xml"));
-			retVal.add(("/dt/" + myVersion + "/resourcereference.xml"));
+//			retVal.add(("/dt/" + myVersion + "/resourcereference.xml"));
 			retVal.add(("/dt/" + myVersion + "/schedule.xml"));
 		}
 		

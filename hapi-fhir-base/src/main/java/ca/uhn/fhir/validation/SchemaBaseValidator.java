@@ -48,7 +48,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 class SchemaBaseValidator implements IValidator {
@@ -156,26 +155,26 @@ class SchemaBaseValidator implements IValidator {
 			myContext = theContext;
 		}
 
-		private void addIssue(SAXParseException theException, IssueSeverityEnum severity) {
+		private void addIssue(SAXParseException theException, String severity) {
 			BaseIssue issue = myContext.getOperationOutcome().addIssue();
-			issue.getSeverity().setValueAsEnum(severity);
+			issue.getSeverity().setValue(severity);
 			issue.getDetails().setValue(theException.getLocalizedMessage());
 			issue.addLocation("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
 		}
 
 		@Override
 		public void error(SAXParseException theException) throws SAXException {
-			addIssue(theException, IssueSeverityEnum.ERROR);
+			addIssue(theException, "error");
 		}
 
 		@Override
 		public void fatalError(SAXParseException theException) throws SAXException {
-			addIssue(theException, IssueSeverityEnum.FATAL);
+			addIssue(theException, "fatal");
 		}
 
 		@Override
 		public void warning(SAXParseException theException) throws SAXException {
-			addIssue(theException, IssueSeverityEnum.WARNING);
+			addIssue(theException, "warning");
 		}
 
 	}

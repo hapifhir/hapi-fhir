@@ -1,5 +1,5 @@
 package ca.uhn.fhir.model.dev.composite;
 
-public class CountDt {
+public class CountDt extends QuantityDt {
 
 }

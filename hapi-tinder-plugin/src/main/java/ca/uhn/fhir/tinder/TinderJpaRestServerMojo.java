@@ -42,6 +42,9 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 	@Parameter(required = true)
 	private List<String> baseResourceNames;
 
+	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
+	private String baseDir;
+	
 	@Component
 	private MavenProject myProject;
 
@@ -51,7 +54,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		File directoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 		directoryBase.mkdirs();
 
-		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet("dstu");
+		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet("dstu", baseDir);
 		gen.setBaseResourceNames(baseResourceNames);
 
 		try {

@@ -115,6 +115,8 @@ public class ${className}
 	}
 #end
 #if ( ${className} == "QuantityDt" )
+#{if}(${version}=="dstu") #{set}($ce="QuantityCompararatorEnum") #{else} #{set}($ce="QuantityComparatorEnum") #{end} 
+
 	/**
 	 * Constructor
 	 */
@@ -135,7 +137,7 @@ public class ${className}
 	 * Constructor
 	 */
 	@SimpleSetter
-	public QuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") double theValue,
+	public QuantityDt(@SimpleSetter.Parameter(name = "theComparator") ${ce} theComparator, @SimpleSetter.Parameter(name = "theValue") double theValue,
 			@SimpleSetter.Parameter(name = "theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
@@ -146,7 +148,7 @@ public class ${className}
 	 * Constructor
 	 */
 	@SimpleSetter
-	public QuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") long theValue,
+	public QuantityDt(@SimpleSetter.Parameter(name = "theComparator") ${ce} theComparator, @SimpleSetter.Parameter(name = "theValue") long theValue,
 			@SimpleSetter.Parameter(name = "theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
@@ -157,7 +159,7 @@ public class ${className}
 	 * Constructor
 	 */
 	@SimpleSetter
-	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") ${ce} theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
 		setSystem(theSystem);
@@ -168,7 +170,7 @@ public class ${className}
 	 * Constructor
 	 */
 	@SimpleSetter
-	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+	public QuantityDt(@SimpleSetter.Parameter(name="theComparator") ${ce} theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
 		setSystem(theSystem);

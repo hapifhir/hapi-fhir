@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.7-SNAPSHOT</version>
+		<version>0.8-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -16,12 +16,17 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<version>0.7-SNAPSHOT</version>
+			<version>0.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
-			<version>0.7-SNAPSHOT</version>
+			<version>0.8-SNAPSHOT</version>
 			<type>war</type>
 			<scope>provided</scope>		
 		</dependency>
@@ -29,7 +34,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
-			<version>0.7-SNAPSHOT</version>
+			<version>0.8-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		
@@ -185,7 +190,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.7-SNAPSHOT</version>
+				<version>0.8-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>buildclient</id>
@@ -193,6 +198,7 @@
 							<goal>generate-jparest-server</goal>
 						</goals>
 						<configuration>
+							<version>dstu</version>
 							<packageBase>ca.uhn.test.jpasrv</packageBase>
 							<baseResourceNames>
 								<baseResourceName>adversereaction</baseResourceName>
@@ -202,7 +208,6 @@
 								<baseResourceName>appointment</baseResourceName>
 								<baseResourceName>availability</baseResourceName>
 								<baseResourceName>careplan</baseResourceName>
-								<baseResourceName>claim</baseResourceName>
 								<baseResourceName>composition</baseResourceName>
 								<baseResourceName>conceptmap</baseResourceName>
 								<baseResourceName>condition</baseResourceName>
@@ -256,7 +261,6 @@
 								<baseResourceName>specimen</baseResourceName>
 								<baseResourceName>substance</baseResourceName>
 								<baseResourceName>supply</baseResourceName>
-								<!-- <baseResourceName>test</baseResourceName> -->
 								<baseResourceName>user</baseResourceName>
 								<baseResourceName>valueset</baseResourceName>
 							</baseResourceNames>
@@ -266,6 +270,13 @@
 						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu</artifactId>
+						<version>0.8-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
 			</plugin>		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

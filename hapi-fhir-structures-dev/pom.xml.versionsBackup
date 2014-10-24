@@ -5,20 +5,20 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.7-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-structures-dstu</artifactId>
+	<artifactId>hapi-fhir-structures-dev</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Structures - DSTU (FHIR 0.80)</name>
+	<name>HAPI FHIR Structures - DEV (FHIR Latest)</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.7-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -195,7 +195,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.8-SNAPSHOT</version>
+				<version>0.7-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -204,23 +204,31 @@
 					</execution>
 				</executions>
 				<configuration>
-					<package>ca.uhn.fhir.model.dstu</package>
+					<package>ca.uhn.fhir.model.dev</package>
+					<version>dev</version>
 					<baseResourceNames>
+						<baseResourceName>account</baseResourceName>
 						<baseResourceName>adversereaction</baseResourceName>
+						<baseResourceName>adversereactionrisk</baseResourceName>
 						<baseResourceName>alert</baseResourceName>
 						<baseResourceName>allergyintolerance</baseResourceName>
-						<baseResourceName>appointmentresponse</baseResourceName>
 						<baseResourceName>appointment</baseResourceName>
+						<baseResourceName>appointmentresponse</baseResourceName>
 						<baseResourceName>availability</baseResourceName>
 						<baseResourceName>careplan</baseResourceName>
-						<!-- <baseResourceName>claim</baseResourceName>  -->
+						<!--
+						Doesn't seem to work yet 
+						<baseResourceName>claim</baseResourceName>
+						 -->
 						<baseResourceName>composition</baseResourceName>
 						<baseResourceName>conceptmap</baseResourceName>
 						<baseResourceName>condition</baseResourceName>
 						<baseResourceName>conformance</baseResourceName>
+						<baseResourceName>contract</baseResourceName>
+						<baseResourceName>contraindication</baseResourceName>
 						<baseResourceName>coverage</baseResourceName>
-						<baseResourceName>deviceobservationreport</baseResourceName>
 						<baseResourceName>device</baseResourceName>
+						<baseResourceName>deviceobservationreport</baseResourceName>
 						<baseResourceName>diagnosticorder</baseResourceName>
 						<baseResourceName>diagnosticreport</baseResourceName>
 						<baseResourceName>documentmanifest</baseResourceName>
@@ -230,41 +238,58 @@
 						<baseResourceName>geneexpression</baseResourceName>
 						<baseResourceName>geneticanalysis</baseResourceName>
 						<baseResourceName>group</baseResourceName>
-						<baseResourceName>gvfmeta</baseResourceName>
-						<baseResourceName>gvfvariant</baseResourceName>
 						<baseResourceName>imagingstudy</baseResourceName>
-						<baseResourceName>immunizationrecommendation</baseResourceName>
 						<baseResourceName>immunization</baseResourceName>
+						<baseResourceName>immunizationrecommendation</baseResourceName>
 						<baseResourceName>list</baseResourceName>
 						<baseResourceName>location</baseResourceName>
 						<baseResourceName>media</baseResourceName>
+						<baseResourceName>medication</baseResourceName>
 						<baseResourceName>medicationadministration</baseResourceName>
 						<baseResourceName>medicationdispense</baseResourceName>
 						<baseResourceName>medicationprescription</baseResourceName>
-						<baseResourceName>medication</baseResourceName>
 						<baseResourceName>medicationstatement</baseResourceName>
 						<baseResourceName>messageheader</baseResourceName>
 						<baseResourceName>microarray</baseResourceName>
+						<baseResourceName>namespace</baseResourceName>
+						<baseResourceName>nutritionorder</baseResourceName>
 						<baseResourceName>observation</baseResourceName>
+						<baseResourceName>operationdefinition</baseResourceName>
 						<baseResourceName>operationoutcome</baseResourceName>
-						<baseResourceName>orderresponse</baseResourceName>
 						<baseResourceName>order</baseResourceName>
+						<baseResourceName>orderresponse</baseResourceName>
 						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>other</baseResourceName>
 						<baseResourceName>patient</baseResourceName>
+						<baseResourceName>person</baseResourceName>
 						<baseResourceName>practitioner</baseResourceName>
 						<baseResourceName>procedure</baseResourceName>
 						<baseResourceName>profile</baseResourceName>
+						<!--
+						Depends on "ActivityDefinition", which doesn't exist..
+						<baseResourceName>protocol</baseResourceName>
+						-->
 						<baseResourceName>provenance</baseResourceName>
 						<baseResourceName>query</baseResourceName>
 						<baseResourceName>questionnaire</baseResourceName>
+						<baseResourceName>questionnaireanswers</baseResourceName>
+						<baseResourceName>referralrequest</baseResourceName>
 						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>remittance</baseResourceName>
+						<baseResourceName>riskassessment</baseResourceName>
+						<baseResourceName>securityclaim</baseResourceName>
 						<baseResourceName>securityevent</baseResourceName>
+						<baseResourceName>securitygroup</baseResourceName>
+						<baseResourceName>securityprincipal</baseResourceName>
+						<!-- 
+						What is this?
+						<baseResourceName>sequence</baseResourceName>
+						-->
 						<baseResourceName>sequencinganalysis</baseResourceName>
 						<baseResourceName>sequencinglab</baseResourceName>
 						<baseResourceName>slot</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
+						<baseResourceName>subscription</baseResourceName>
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>supply</baseResourceName>
 						<baseResourceName>user</baseResourceName>

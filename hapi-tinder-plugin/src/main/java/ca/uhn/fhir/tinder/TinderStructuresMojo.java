@@ -52,6 +52,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 	@Parameter(required = true, defaultValue = "${project.build.directory}/generated-resources/tinder")
 	private String targetResourceDirectory;
 
+	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
+	private String baseDir;
+	
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (StringUtils.isBlank(packageName)) {
@@ -73,7 +76,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		directoryBase.mkdirs();
 		ourLog.info(" * Output Source Directory: " + directoryBase.getAbsolutePath());
 
-		ValueSetGenerator vsp = new ValueSetGenerator();
+		ValueSetGenerator vsp = new ValueSetGenerator(version);
 		vsp.setResourceValueSetFiles(resourceValueSetFiles);
 		try {
 			vsp.parse();
@@ -84,7 +87,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 		ourLog.info("Loading Datatypes...");
 
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet(version);
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet(version, baseDir);
 		if (buildDatatypes) {
 			try {
 				dtp.parse();
@@ -97,7 +100,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 			datatypeLocalImports = dtp.getLocalImports();
 		}
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(version);
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
 		if (baseResourceNames != null && baseResourceNames.size() > 0) {
 			ourLog.info("Loading Resources...");
 			try {
@@ -118,7 +121,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 			rp.writeAll(resSubDirectoryBase, resDirectoryBase, packageName);
 		}
 
-		ProfileParser pp = new ProfileParser();
+		ProfileParser pp = new ProfileParser(version, baseDir);
 		if (resourceProfileFiles != null) {
 			ourLog.info("Loading profiles...");
 			for (ProfileFileDefinition next : resourceProfileFiles) {
@@ -201,42 +204,44 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 	public static void main(String[] args) throws Exception {
 
+		
 //		ProfileParser pp = new ProfileParser();
 //		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
 
-		ValueSetGenerator vsp = new ValueSetGenerator();
+		ValueSetGenerator vsp = new ValueSetGenerator("dev");
 //		 vsp.setResourceValueSetFiles(theResourceValueSetFiles);Directory("src/main/resources/vs/");
 		vsp.parse();
 
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dev");
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dev", ".");
 		dtp.parse();
-		dtp.bindValueSets(vsp);
 		dtp.markResourcesForImports();
+		dtp.bindValueSets(vsp);
 		Map<String, String> datatypeLocalImports = dtp.getLocalImports();
 
 		String dtOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/composite";
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev");
-		rp.setBaseResourceNames(Arrays.asList("referralrequest", "patient","practitioner","encounter","organization"));
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev", ".");
+		rp.setBaseResourceNames(Arrays.asList("referralrequest", "patient","practitioner","encounter",
+				"organization","location","relatedperson","appointment","slot","order","availability","device", "valueset"));
 		rp.parse();
 		rp.bindValueSets(vsp);
 		rp.markResourcesForImports();
 		
 		// rp.bindValueSets(vsp);
 
-		String rpOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/resource";
-		String rpSOutputDir = "target/generated-resources/ca/uhn/fhir/model/dstu";
+		String rpOutputDir = "target/generated-sources/ca/uhn/fhir/model/dev/resource";
+		String rpSOutputDir = "target/generated-resources/ca/uhn/fhir/model/dev";
 
 		dtp.combineContentMaps(rp);
 		rp.combineContentMaps(dtp);
 		rp.getLocalImports().putAll(datatypeLocalImports);
 		datatypeLocalImports.putAll(rp.getLocalImports());
 		
-		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dstu");
+		dtp.writeAll(new File(dtOutputDir), null, "ca.uhn.fhir.model.dev");
 		rp.writeAll(new File(rpOutputDir), new File(rpSOutputDir), "ca.uhn.fhir.model.dev");
 		
-		 String vsOutputDir = "target/generated-sources/ca/uhn/fhir/model/dstu/valueset";
-		 vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dstu");
+		 String vsOutputDir = "target/generated-sources/ca/uhn/fhir/model/dev/valueset";
+		 vsp.writeMarkedValueSets(new File(vsOutputDir), "ca.uhn.fhir.model.dev");
 	}
 
 	public static class ProfileFileDefinition {

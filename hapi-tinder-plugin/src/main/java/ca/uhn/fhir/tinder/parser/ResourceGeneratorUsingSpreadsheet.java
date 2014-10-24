@@ -18,7 +18,8 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private String myTemplate = "/vm/resource.vm";
 	private String myVersion;
 
-	public ResourceGeneratorUsingSpreadsheet(String theVersion) {
+	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
+		super(theVersion, theBaseDir);
 		myVersion  = theVersion;
 	}
 	
