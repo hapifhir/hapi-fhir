@@ -50,7 +50,7 @@ public class ServerProfileProvider implements IResourceProvider {
 	
 	@Read()
 	public Profile getProfileById(@IdParam IdDt theId) {
-		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
+		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;
 		}
