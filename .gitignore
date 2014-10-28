@@ -1,5 +1,9 @@
 /bin
 /target
+.idea/
+.project/
+.settings/
+*.iml
 *.log
 *.log*
 nohup.out
