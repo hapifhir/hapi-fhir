@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.dstu.composite;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,32 +20,31 @@ package ca.uhn.fhir.model.dstu.composite;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 @DatatypeDef(name = "CodeableConcept", isSpecialization = true)
-public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt implements IBoundCodeableConcept {
+public class BoundCodeableConceptDt_<T extends Enum<?>> extends CodeableConceptDt {
 
 	private IValueSetEnumBinder<T> myBinder;
 
 	/**
 	 * Constructor
 	 */
-	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder) {
+	public BoundCodeableConceptDt_(IValueSetEnumBinder<T> theBinder) {
 		myBinder = theBinder;
 	}
 
 	/**
 	 * Constructor
 	 */
-	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, T theValue) {
+	public BoundCodeableConceptDt_(IValueSetEnumBinder<T> theBinder, T theValue) {
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}
@@ -53,7 +52,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	/**
 	 * Constructor
 	 */
-	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, Collection<T> theValues) {
+	public BoundCodeableConceptDt_(IValueSetEnumBinder<T> theBinder, Collection<T> theValues) {
 		myBinder = theBinder;
 		setValueAsEnum(theValues);
 	}
@@ -110,7 +109,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 			if (next == null) {
 				continue;
 			}
-			T nextT = myBinder.fromCodeString(defaultString(next.getCode().getValue()), defaultString(next.getSystem().getValueAsString()));
+			T nextT = myBinder.fromCodeString(defaultString(next.getCodeElement().getValue()), defaultString(next.getSystemElement().getValueAsString()));
 			if (nextT != null) {
 				retVal.add(nextT);
 			} else {

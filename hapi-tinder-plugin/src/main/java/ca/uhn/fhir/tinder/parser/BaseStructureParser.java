@@ -255,6 +255,11 @@ public abstract class BaseStructureParser {
 										if (file.exists()) {
 											return myPackageBase + ".composite." + theNextType;
 										}
+										fileName =  myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + theNextType + ".java";
+										file = new File(fileName);
+										if (file.exists()) {
+											return "ca.uhn.fhir.model.primitive." + theNextType;
+										}
 										throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 									}
 								}

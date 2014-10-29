@@ -1,8 +1,8 @@
-package ca.uhn.fhir.model.dstu.composite;
+package ca.uhn.fhir.model.primitive;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU (FHIR 0.80)
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -20,17 +20,20 @@ package ca.uhn.fhir.model.dstu.composite;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 
 @DatatypeDef(name = "CodeableConcept", isSpecialization = true)
-public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt {
+public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt implements IBoundCodeableConcept {
 
 	private IValueSetEnumBinder<T> myBinder;
 
@@ -109,7 +112,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 			if (next == null) {
 				continue;
 			}
-			T nextT = myBinder.fromCodeString(defaultString(next.getCodeElement().getValue()), defaultString(next.getSystemElement().getValueAsString()));
+			T nextT = myBinder.fromCodeString(defaultString(next.getCode().getValue()), defaultString(next.getSystem().getValueAsString()));
 			if (nextT != null) {
 				retVal.add(nextT);
 			} else {

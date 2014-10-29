@@ -53,7 +53,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
-import ca.uhn.fhir.model.dstu.composite.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.BoundCodeableConceptDt_;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContactDt;
@@ -2301,7 +2301,7 @@ public class Conformance extends BaseConformance implements IResource {
 		shortDefinition="OAuth | OAuth2 | NTLM | Basic | Kerberos",
 		formalDefinition="Types of security services are supported/required by the system"
 	)
-	private java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> myService;
+	private java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> myService;
 	
 	@Child(name="description", type=StringDt.class, order=2, min=0, max=1)	
 	@Description(
@@ -2382,9 +2382,9 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> getService() {  
+	public java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> getService() {  
 		if (myService == null) {
-			myService = new java.util.ArrayList<BoundCodeableConceptDt<RestfulSecurityServiceEnum>>();
+			myService = new java.util.ArrayList<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>>();
 		}
 		return myService;
 	}
@@ -2397,7 +2397,7 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public RestSecurity setService(java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
+	public RestSecurity setService(java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> theValue) {
 		myService = theValue;
 		return this;
 	}
@@ -2413,8 +2413,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> addService(RestfulSecurityServiceEnum theValue) {
-		BoundCodeableConceptDt<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER, theValue);
+	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> addService(RestfulSecurityServiceEnum theValue) {
+		BoundCodeableConceptDt_<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt_<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER, theValue);
 		getService().add(retVal);
 		return retVal;
 	}
@@ -2428,7 +2428,7 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> getServiceFirstRep() {
+	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> getServiceFirstRep() {
 		if (getService().size() == 0) {
 			addService();
 		}
@@ -2443,8 +2443,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> addService() {
-		BoundCodeableConceptDt<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER);
+	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> addService() {
+		BoundCodeableConceptDt_<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt_<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER);
 		getService().add(retVal);
 		return retVal;
 	}
