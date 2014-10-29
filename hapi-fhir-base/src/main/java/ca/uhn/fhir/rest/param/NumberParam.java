@@ -20,17 +20,16 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.math.BigDecimal;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 public class NumberParam extends BaseParam implements IQueryParameterType {
 
-	private QuantityDt myQuantity = new QuantityDt();
+	private InternalQuantityDt myQuantity = new InternalQuantityDt();
 
 	public NumberParam() {
 	}
@@ -50,22 +49,22 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 		StringBuilder b = new StringBuilder();
 		b.append(getClass().getSimpleName());
 		b.append("[");
-		if (myQuantity.getComparator().isEmpty() == false) {
-			b.append(myQuantity.getComparator().getValue());
+		if (myQuantity.getComparatorElement().isEmpty() == false) {
+			b.append(myQuantity.getComparatorElement().getValue());
 		}
-		if (myQuantity.getValue().isEmpty() == false) {
-			b.append(myQuantity.getValue().toString());
+		if (myQuantity.getValueElement().isEmpty() == false) {
+			b.append(myQuantity.getValueElement().toString());
 		}
 		b.append("]");
 		return b.toString();
 	}
 
 	public QuantityCompararatorEnum getComparator() {
-		return myQuantity.getComparator().getValueAsEnum();
+		return myQuantity.getComparatorElement().getValueAsEnum();
 	}
 	
 	public BigDecimal getValue() {
-		return myQuantity.getValue().getValue();
+		return myQuantity.getValueElement().getValue();
 	}
 	
 	
@@ -100,11 +99,11 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 		}
 		
 		StringBuilder b = new StringBuilder();
-		if (myQuantity.getComparator().isEmpty() == false) {
-			b.append(myQuantity.getComparator().getValue());
+		if (myQuantity.getComparatorElement().isEmpty() == false) {
+			b.append(myQuantity.getComparatorElement().getValue());
 		}
-		if (myQuantity.getValue().isEmpty() == false) {
-			b.append(myQuantity.getValue().toString());
+		if (myQuantity.getValueElement().isEmpty() == false) {
+			b.append(myQuantity.getValueElement().toString());
 		}
 		return b.toString();
 	}

@@ -179,8 +179,20 @@ public class ParameterUtil {
 	}
 
 	/**
-	 * Escapes a string according to the rules for parameter escaping specified in the <a
-	 * href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escapeWithDefault(Object theValue) {
+		if (theValue == null) {
+			return "";
+		} else {
+			return escape(theValue.toString());
+		}
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
 	 */
 	public static String escape(String theValue) {
 		if (theValue == null) {
@@ -205,8 +217,8 @@ public class ParameterUtil {
 	}
 
 	/**
-	 * Unescapes a string according to the rules for parameter escaping specified in the <a
-	 * href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping Section</a>
+	 * Unescapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
 	 */
 	public static String unescape(String theValue) {
 		if (theValue == null) {

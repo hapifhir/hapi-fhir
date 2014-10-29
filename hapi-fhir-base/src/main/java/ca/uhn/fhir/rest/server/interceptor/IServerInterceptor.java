@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -166,7 +166,7 @@ public interface IServerInterceptor {
 	 * {@link Read} methods) as well as any runtime exceptions thrown by the server itself. This also includes any {@link AuthenticationException}s thrown.
 	 * <p>
 	 * Implementations of this method may choose to ignore/log/count/etc exceptions, and return <code>true</code>. In this case, processing will continue, and the server will automatically generate an
-	 * {@link OperationOutcome OperationOutcome}. Implementations may also choose to provide their own response to the client. In this case, they should return <code>false</code>, to indicate that
+	 * {@link BaseOperationOutcome OperationOutcome}. Implementations may also choose to provide their own response to the client. In this case, they should return <code>false</code>, to indicate that
 	 * they have handled the request and processing should stop.
 	 * </p>
 	 * 

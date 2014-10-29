@@ -32,6 +32,7 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
@@ -72,6 +73,7 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
+	private IFhirVersion myVersion;
 
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
@@ -90,6 +92,13 @@ public class FhirContext {
 
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
 		scanResourceTypes(theResourceTypes);
+		
+		if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
+		} else {
+			throw new IllegalStateException("Could not find any HAPI-FHIR structure JARs on the classpath. Note that as of HAPI-FHIR v0.8, a separate FHIR strcture JAR must be added to your classpath or project pom.xml");
+		}
+		
 	}
 
 	/**
@@ -197,6 +206,10 @@ public class FhirContext {
 		return myRuntimeChildUndeclaredExtensionDefinition;
 	}
 
+	public IFhirVersion getVersion() {
+		return myVersion;
+	}
+
 	/**
 	 * Create and return a new JSON parser.
 	 * 
@@ -282,7 +295,7 @@ public class FhirContext {
 	}
 
 	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IResource>> theResourceTypes) {
-		ModelScanner scanner = new ModelScanner(myClassToElementDefinition, theResourceTypes);
+		ModelScanner scanner = new ModelScanner(this, myClassToElementDefinition, theResourceTypes);
 		if (myRuntimeChildUndeclaredExtensionDefinition == null) {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}

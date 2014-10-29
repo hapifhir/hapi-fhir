@@ -40,7 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -230,7 +230,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
 			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);
-			OperationOutcome operationOutcome = parser.parseResource(OperationOutcome.class, theResponseReader);
+			// TODO: handle if something other than OO comes back
+			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
 			ex = new UnprocessableEntityException(operationOutcome);
 			break;
 		default:
@@ -447,8 +448,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (!IResource.class.isAssignableFrom(theReturnType)) {
 			return false;
 		}
-		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
-		return retVal;
+		return true;
+//		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
+//		return retVal;
 	}
 
 	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {

@@ -38,6 +38,10 @@ import ca.uhn.fhir.tinder.model.Slicing;
 
 public class ProfileParser extends BaseStructureParser {
 
+	public ProfileParser(String theVersion, String theBaseDir) {
+		super(theVersion, theBaseDir);
+	}
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProfileParser.class);
 
 	private ExtensionDefn findExtension(Profile theProfile, String theCode) {
@@ -56,7 +60,7 @@ public class ProfileParser extends BaseStructureParser {
 
 	@Override
 	protected String getTemplate() {
-		return "/vm/resource.vm";
+		return "dstu".equals(getVersion()) ? "/vm/resource_dstu.vm" : "/vm/resource.vm";
 	}
 
 	public void parseSingleProfile(File theProfile, String theHttpUrl) throws MojoFailureException {
@@ -304,7 +308,7 @@ public class ProfileParser extends BaseStructureParser {
 
 	public static void main(String[] args) throws Exception {
 		IParser parser = new FhirContext(Profile.class).newXmlParser();
-		ProfileParser pp = new ProfileParser();
+		ProfileParser pp = new ProfileParser("dev",".");
 		
 		String str = IOUtils.toString(new FileReader("../hapi-tinder-test/src/test/resources/profile/organization.xml"));
 		Profile prof = parser.parseResource(Profile.class, str);

@@ -1,22 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!--
-	Because this example is a subproject in HAPI itself, it
-	points to the HAPI parent pom.xml. If you are creating your
-	own project using this project as a guide, you can remove
-	this parent declaration. 
+	<!-- 
+	HAPI projects use the Sonatype OSS parent project. 
+	You do not need to use this in your own projects.
 	-->
 	<parent>
-		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-fhir</artifactId>
-		<version>0.8-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
 	</parent>
 
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>restful-server-example</artifactId>
+	<version>0.8-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Sample RESTful Server</name>
@@ -33,10 +31,16 @@
 
 	<dependencies>
 
-		<!-- This dependency includes all neccesary HAPI FHIR classes -->
+		<!-- This dependency includes the core HAPI-FHIR classes -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
+			<version>0.8-SNAPSHOT</version>
+		</dependency>
+		<!-- At least one "structures" JAR must also be included -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>0.8-SNAPSHOT</version>
 		</dependency>
 

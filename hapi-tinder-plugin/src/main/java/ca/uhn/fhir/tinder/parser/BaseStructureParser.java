@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.model.BaseElement;
@@ -47,31 +48,32 @@ import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 public abstract class BaseStructureParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureParser.class);
+	private String myBaseDir;
 	private ArrayList<Extension> myExtensions;
 	private TreeSet<String> myImports = new TreeSet<String>();
-	private Map<String, String> myLocallyDefinedClassNames = new HashMap<String, String>();
-	private List<BaseRootType> myResources = new ArrayList<BaseRootType>();
 	private boolean myImportsResolved;
-	private TreeMap<String, String> myNameToResourceClass = new TreeMap<String, String>();
+	private Map<String, String> myLocallyDefinedClassNames = new HashMap<String, String>();
 	private TreeMap<String, String> myNameToDatatypeClass = new TreeMap<String, String>();
+	private TreeMap<String, String> myNameToResourceClass = new TreeMap<String, String>();
+	private String myPackageBase;
+	private List<BaseRootType> myResources = new ArrayList<BaseRootType>();
+	private String myVersion;
 
-	public TreeMap<String, String> getNameToDatatypeClass() {
-		return myNameToDatatypeClass;
+	public BaseStructureParser(String theVersion, String theBaseDir) {
+		myVersion = theVersion;
+		myBaseDir = theBaseDir;
 	}
 
-	public void combineContentMaps(BaseStructureParser theStructureParser) {
-		myNameToResourceClass.putAll(theStructureParser.myNameToResourceClass);
-		myNameToDatatypeClass.putAll(theStructureParser.myNameToDatatypeClass);
-		theStructureParser.myNameToResourceClass.putAll(myNameToResourceClass);
-		theStructureParser.myNameToDatatypeClass.putAll(myNameToDatatypeClass);
+	public String getVersion() {
+		return myVersion;
 	}
-	
+
+	private void addImport(String bindingClass) {
+		myImports.add(bindingClass);
+	}
+
 	public void addResource(BaseRootType theResource) {
 		myResources.add(theResource);
-	}
-
-	public Map<String, String> getLocalImports() {
-		return myLocallyDefinedClassNames;
 	}
 
 	private void bindValueSets(BaseElement theResource, ValueSetGenerator theVsp) {
@@ -80,7 +82,7 @@ public abstract class BaseStructureParser {
 			if (bindingClass != null) {
 				ourLog.info("Adding binding ValueSet class: {}", bindingClass);
 				theResource.setBindingClass(bindingClass);
-				myImports.add(bindingClass);
+				addImport(bindingClass);
 				myLocallyDefinedClassNames.put(bindingClass, "valueset");
 			} else {
 				ourLog.info("No binding found for: {}", theResource.getBinding());
@@ -98,7 +100,15 @@ public abstract class BaseStructureParser {
 		}
 	}
 
-	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations, Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
+	public void combineContentMaps(BaseStructureParser theStructureParser) {
+		myNameToResourceClass.putAll(theStructureParser.myNameToResourceClass);
+		myNameToDatatypeClass.putAll(theStructureParser.myNameToDatatypeClass);
+		theStructureParser.myNameToResourceClass.putAll(myNameToResourceClass);
+		theStructureParser.myNameToDatatypeClass.putAll(myNameToDatatypeClass);
+	}
+
+	private ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter findAnnotation(Class<?> theBase, Annotation[] theAnnotations,
+			Class<ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter> theClass) {
 		for (Annotation next : theAnnotations) {
 			if (theClass.equals(next.annotationType())) {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
@@ -107,7 +117,50 @@ public abstract class BaseStructureParser {
 		throw new IllegalArgumentException(theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
+	/**
+	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location resource type, so we need to use the fully qualified name for that resource
+	 * reference
+	 */
+	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
+		for (BaseElement next : theNext.getChildren()) {
+			fixResourceReferenceClassNames(next, thePackageBase);
+		}
+
+		if (theNext.isResourceRef()) {
+			for (int i = 0; i < theNext.getType().size(); i++) {
+				String nextTypeName = theNext.getType().get(i);
+				if ("Any".equals(nextTypeName)) {
+					continue;
+				}
+				// if ("Location".equals(nextTypeName)) {
+				// ourLog.info("***** Checking for Location");
+				// ourLog.info("***** Imports are: {}", new
+				// TreeSet<String>(myImports));
+				// }
+				boolean found = false;
+				for (String nextImport : myImports) {
+					if (nextImport.endsWith(".resource." + nextTypeName)) {
+						// ourLog.info("***** Found match " + nextImport);
+						theNext.getType().set(i, nextImport);
+						found = true;
+					}
+				}
+				if (!found) {
+					theNext.getType().set(i, thePackageBase + ".resource." + nextTypeName);
+				}
+			}
+		}
+	}
+
 	protected abstract String getFilenameSuffix();
+
+	public Map<String, String> getLocalImports() {
+		return myLocallyDefinedClassNames;
+	}
+
+	public TreeMap<String, String> getNameToDatatypeClass() {
+		return myNameToDatatypeClass;
+	}
 
 	public List<BaseRootType> getResources() {
 		return myResources;
@@ -117,6 +170,100 @@ public abstract class BaseStructureParser {
 
 	protected boolean isSpreadsheet(String theFileName) {
 		return true;
+	}
+
+	public void markResourcesForImports() {
+		for (BaseRootType next : myResources) {
+			if (next instanceof Resource) {
+				myLocallyDefinedClassNames.put(next.getName(), "resource");
+			} else if (next instanceof Composite) {
+				myLocallyDefinedClassNames.put(next.getName() + "Dt", "composite");
+			} else {
+				throw new IllegalStateException(next.getClass() + "");
+			}
+		}
+	}
+
+	private void scanForCorrections(BaseRootType theNext) {
+		if (theNext.getElementName().equals("ResourceReference")) {
+			for (BaseElement next : theNext.getChildren()) {
+				if (next.getElementName().equals("reference")) {
+					next.clearTypes();
+					next.setTypeFromString("id");
+					scanForSimpleSetters((Child) next);
+				}
+			}
+		}
+	}
+
+	private String scanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
+		if ("Any".equals(theNextType)) {
+			return (IResource.class.getCanonicalName());
+		}
+		if ("ExtensionDt".equals(theNextType)) {
+			return (ExtensionDt.class.getCanonicalName());
+		}
+		if ("ResourceReferenceDt".equals(theNextType)) {
+			return ResourceReferenceDt.class.getCanonicalName();
+		}
+		if ("Binary".equals(theNextType)) {
+			return Binary.class.getCanonicalName();
+		}
+		// QuantityCompararatorEnum
+		// QuantityComparatorEnum
+
+		if (myLocallyDefinedClassNames.containsKey(theNextType)) {
+			return (theNextType);
+		} else {
+			try {
+				String type = myPackageBase + ".composite." + theNextType;
+				Class.forName(type);
+				return (type);
+			} catch (ClassNotFoundException e) {
+				try {
+					String type = "ca.uhn.fhir.model."+myVersion+ ".composite." + theNextType;
+					Class.forName(type);
+					return (type);
+				} catch (ClassNotFoundException e5) {
+					try {
+						String type = "ca.uhn.fhir.model."+myVersion+".resource." + theNextType;
+						Class.forName(type);
+						return (type);
+					} catch (ClassNotFoundException e1) {
+						try {
+							String type = "ca.uhn.fhir.model.primitive." + theNextType;
+							Class.forName(type);
+							return (type);
+						} catch (ClassNotFoundException e2) {
+							try {
+								String type = myPackageBase + ".valueset." + theNextType;
+								Class.forName(type);
+								return (type);
+							} catch (ClassNotFoundException e3) {
+								try {
+									String type = "ca.uhn.fhir.model.api." + theNextType;
+									Class.forName(type);
+									return (type);
+								} catch (ClassNotFoundException e4) {
+									try {
+										String type = "ca.uhn.fhir.model."+myVersion+".valueset." + theNextType;
+										Class.forName(type);
+										return (type);
+									} catch (ClassNotFoundException e6) {
+										String fileName =  myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + theNextType + ".java";
+										File file = new File(fileName);
+										if (file.exists()) {
+											return myPackageBase + ".composite." + theNextType;
+										}
+										throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void scanForImportsNames(BaseElement theNext) throws MojoFailureException {
@@ -138,52 +285,7 @@ public abstract class BaseStructureParser {
 	}
 
 	private void scanForImportsNames(String theNextType) throws MojoFailureException {
-		myImports.add(scanForImportNamesAndReturnFqn(theNextType));
-	}
-
-	private String scanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
-		if ("Any".equals(theNextType)) {
-			return (IResource.class.getCanonicalName());
-		}
-		if ("ExtensionDt".equals(theNextType)) {
-			return (ExtensionDt.class.getCanonicalName());
-		}
-
-		if (myLocallyDefinedClassNames.containsKey(theNextType)) {
-			return (theNextType);
-		} else {
-			try {
-				String type = "ca.uhn.fhir.model.dstu.composite." + theNextType;
-				Class.forName(type);
-				return (type);
-			} catch (ClassNotFoundException e) {
-				try {
-					String type = "ca.uhn.fhir.model.dstu.resource." + theNextType;
-					Class.forName(type);
-					return (type);
-				} catch (ClassNotFoundException e1) {
-					try {
-						String type = "ca.uhn.fhir.model.primitive." + theNextType;
-						Class.forName(type);
-						return (type);
-					} catch (ClassNotFoundException e2) {
-						try {
-							String type = "ca.uhn.fhir.model.dstu.valueset." + theNextType;
-							Class.forName(type);
-							return (type);
-						} catch (ClassNotFoundException e3) {
-							try {
-								String type = "ca.uhn.fhir.model.api." + theNextType;
-								Class.forName(type);
-								return (type);
-							} catch (ClassNotFoundException e4) {
-								throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
-							}
-						}
-					}
-				}
-			}
-		}
+		addImport(scanForImportNamesAndReturnFqn(theNextType));
 	}
 
 	protected void scanForSimpleSetters(Child theElem) {
@@ -192,9 +294,13 @@ public abstract class BaseStructureParser {
 			try {
 				childDt = Class.forName("ca.uhn.fhir.model.primitive." + theElem.getReferenceTypesForMultiple().get(0));
 			} catch (ClassNotFoundException e) {
-				try {
-					childDt = Class.forName("ca.uhn.fhir.model.dstu.composite." + theElem.getReferenceTypesForMultiple().get(0));
-				} catch (ClassNotFoundException e2) {
+				if (myVersion.equals("dstu")) {
+					try {
+						childDt = Class.forName("ca.uhn.fhir.model.dstu.composite." + theElem.getReferenceTypesForMultiple().get(0));
+					} catch (ClassNotFoundException e2) {
+						return;
+					}
+				} else {
 					return;
 				}
 			}
@@ -221,7 +327,7 @@ public abstract class BaseStructureParser {
 					p.setDatatype(paramTypes[i].getCanonicalName());
 				} else {
 					if (paramTypes[i].getCanonicalName().startsWith("ca.uhn.fhir")) {
-						myImports.add(paramTypes[i].getSimpleName());
+						addImport(paramTypes[i].getSimpleName());
 					}
 					p.setDatatype(paramTypes[i].getSimpleName());
 				}
@@ -262,6 +368,13 @@ public abstract class BaseStructureParser {
 		myExtensions = theExts;
 	}
 
+	private String translateClassName(String theName) {
+		if ("List".equals(theName)) {
+			return "ListResource";
+		}
+		return theName;
+	}
+
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileWriter w = new FileWriter(theFile, false);
 
@@ -287,6 +400,7 @@ public abstract class BaseStructureParser {
 		ctx.put("hash", "#");
 		ctx.put("imports", imports);
 		ctx.put("profile", theResource.getProfile());
+		ctx.put("version", myVersion);
 		ctx.put("id", StringUtils.defaultString(theResource.getId()));
 		if (theResource.getDeclaringClassNameComplete() != null) {
 			ctx.put("className", theResource.getDeclaringClassNameComplete());
@@ -317,19 +431,9 @@ public abstract class BaseStructureParser {
 		w.close();
 	}
 
-	public void markResourcesForImports() {
-		for (BaseRootType next : myResources) {
-			if (next instanceof Resource) {
-				myLocallyDefinedClassNames.put(next.getName(), "resource");
-			} else if (next instanceof Composite) {
-				myLocallyDefinedClassNames.put(next.getName() + "Dt", "composite");
-			} else {
-				throw new IllegalStateException(next.getClass() + "");
-			}
-		}
-	}
-
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
+		myPackageBase = thePackageBase;
+
 		if (!theOutputDirectory.exists()) {
 			theOutputDirectory.mkdirs();
 		}
@@ -389,6 +493,7 @@ public abstract class BaseStructureParser {
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
+				ctx.put("version", myVersion);
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty("resource.loader", "cp");
@@ -402,60 +507,6 @@ public abstract class BaseStructureParser {
 				w.close();
 			} catch (IOException e) {
 				throw new MojoFailureException(e.getMessage(), e);
-			}
-		}
-	}
-
-	private void scanForCorrections(BaseRootType theNext) {
-		if (theNext.getElementName().equals("ResourceReference")) {
-			for (BaseElement next : theNext.getChildren()) {
-				if (next.getElementName().equals("reference")) {
-					next.clearTypes();
-					next.setTypeFromString("id");
-					scanForSimpleSetters((Child) next);
-				}
-			}
-		}
-	}
-
-	private String translateClassName(String theName) {
-		if ("List".equals(theName)) {
-			return "ListResource";
-		}
-		return theName;
-	}
-
-	/**
-	 * Example: Encounter has an internal block class named "Location", but it also has a reference to the Location
-	 * resource type, so we need to use the fully qualified name for that resource reference
-	 */
-	private void fixResourceReferenceClassNames(BaseElement theNext, String thePackageBase) {
-		for (BaseElement next : theNext.getChildren()) {
-			fixResourceReferenceClassNames(next, thePackageBase);
-		}
-
-		if (theNext.isResourceRef()) {
-			for (int i = 0; i < theNext.getType().size(); i++) {
-				String nextTypeName = theNext.getType().get(i);
-				if ("Any".equals(nextTypeName)) {
-					continue;
-				}
-				// if ("Location".equals(nextTypeName)) {
-				// ourLog.info("***** Checking for Location");
-				// ourLog.info("***** Imports are: {}", new
-				// TreeSet<String>(myImports));
-				// }
-				boolean found = false;
-				for (String nextImport : myImports) {
-					if (nextImport.endsWith(".resource." + nextTypeName)) {
-						// ourLog.info("***** Found match " + nextImport);
-						theNext.getType().set(i, nextImport);
-						found = true;
-					}
-				}
-				if (!found) {
-					theNext.getType().set(i, thePackageBase + ".resource." + nextTypeName);
-				}
 			}
 		}
 	}

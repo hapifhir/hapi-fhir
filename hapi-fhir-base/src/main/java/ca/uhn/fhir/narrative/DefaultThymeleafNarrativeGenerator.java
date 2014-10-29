@@ -23,7 +23,6 @@ package ca.uhn.fhir.narrative;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 
@@ -46,7 +45,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * {@link Conformance} resource will be provided, which is designed to be used with 
+	 * {@link ca.uhn.fhir.model.dstu.resource.Conformance} resource will be provided, which is designed to be used with 
 	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
 	 * page which can assist users of the service.
 	 */
@@ -56,7 +55,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * {@link Conformance} resource will be provided, which is designed to be used with 
+	 * {@link ca.uhn.fhir.model.dstu.resource.Conformance} resource will be provided, which is designed to be used with 
 	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
 	 * page which can assist users of the service.
 	 */

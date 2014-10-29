@@ -19,6 +19,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -430,7 +431,7 @@ public List<Observation> searchByObservationNames(
 
    // The list here will contain 0..* codings, and any observations which match any of the 
    // given codings should be returned
-   List<CodingDt> wantedCodings = theCodings.getListAsCodings();
+   List<BaseCodingDt> wantedCodings = theCodings.getListAsCodings();
    
    List<Observation> retVal = new ArrayList<Observation>();
    // ...populate...

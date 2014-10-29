@@ -23,9 +23,9 @@ package ca.uhn.fhir.model.base.composite;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -38,83 +38,73 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	}
 
 	/**
-	 * Gets the value(s) for <b>system</b> (The namespace for the identifier).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>system</b> (The namespace for the identifier). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * Establishes the namespace in which set of possible id values is unique.
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> Establishes the namespace in which set of possible id values is unique.
+	 * </p>
 	 */
-	public abstract UriDt getSystem() ;
+	public abstract UriDt getSystemElement();
 
 	/**
-	 * Gets the value(s) for <b>value</b> (The value that is unique).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>value</b> (The value that is unique). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+	 * </p>
 	 */
-	public abstract StringDt getValue();	
+	public abstract StringDt getValueElement();
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public String getValueAsQueryToken() {
-		if (getSystem().getValueAsString() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem().getValueAsString())) + '|' + ParameterUtil.escape(getValue().getValueAsString()); 
-		} else {
-			return ParameterUtil.escape(getValue().getValueAsString());
-		}
-	}	
+			UriDt system = (UriDt) getSystemElement();
+			StringDt value = (StringDt) getValueElement();
+			if (system.getValueAsString() != null) {
+				return ParameterUtil.escape(StringUtils.defaultString(system.getValueAsString())) + '|' + ParameterUtil.escape(value.getValueAsString());
+			} else {
+				return ParameterUtil.escape(value.getValueAsString());
+			}
+	}
 
-	
 	/**
-	 * Returns true if <code>this</code> identifier has the same {@link IdentifierDt#getValue() value}
-	 * and {@link IdentifierDt#getSystem() system} (as compared by simple equals comparison).
-	 * Does not compare other values (e.g. {@link IdentifierDt#getUse() use}) or any extensions. 
+	 * Returns true if <code>this</code> identifier has the same {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getValue() value} and
+	 * {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getSystem() system} (as compared by simple equals comparison). Does not compare other values (e.g.
+	 * {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getUse() use}) or any extensions.
 	 */
 	public boolean matchesSystemAndValue(BaseIdentifierDt theIdentifier) {
 		if (theIdentifier == null) {
 			return false;
 		}
-		return getValue().equals(theIdentifier.getValue()) && getSystem().equals(theIdentifier.getSystem());
+		return getValueElement().equals(theIdentifier.getValueElement()) && getSystemElement().equals(theIdentifier.getSystemElement());
 	}
 
- 
-
- 	/**
+	/**
 	 * Sets the value for <b>system</b> (The namespace for the identifier)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * Establishes the namespace in which set of possible id values is unique.
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> Establishes the namespace in which set of possible id values is unique.
+	 * </p>
 	 */
-	public abstract BaseIdentifierDt setSystem( String theUri);
-	
-	
+	public abstract BaseIdentifierDt setSystem(String theUri);
+
 	/**
 	 * Sets the value for <b>value</b> (The value that is unique)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+	 * </p>
 	 */
-	public abstract BaseIdentifierDt setValue( String theString);
- 
+	public abstract BaseIdentifierDt setValue(String theString);
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter,'|');
+		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
 		if (barIndex != -1) {
 			setSystem(theParameter.substring(0, barIndex));
 			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
@@ -122,5 +112,5 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 			setValue(ParameterUtil.unescape(theParameter));
 		}
 	}
-	
+
 }

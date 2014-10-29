@@ -1496,6 +1496,11 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
+			myDepth++;
+		}
+
+		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			myDepth++;
 		}

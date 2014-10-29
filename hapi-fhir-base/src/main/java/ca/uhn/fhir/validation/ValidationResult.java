@@ -20,7 +20,7 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 /**
  * Encapsulates the results of validation
@@ -29,17 +29,17 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  * @since 0.7
  */
 public class ValidationResult {
-    private OperationOutcome myOperationOutcome;
+    private BaseOperationOutcome myOperationOutcome;
 
-    private ValidationResult(OperationOutcome myOperationOutcome) {
+    private ValidationResult(BaseOperationOutcome myOperationOutcome) {
         this.myOperationOutcome = myOperationOutcome;
     }
 
-    public static ValidationResult valueOf(OperationOutcome myOperationOutcome) {
+    public static ValidationResult valueOf(BaseOperationOutcome myOperationOutcome) {
         return new ValidationResult(myOperationOutcome);
     }
 
-    public OperationOutcome getOperationOutcome() {
+    public BaseOperationOutcome getOperationOutcome() {
         return myOperationOutcome;
     }
 
@@ -54,8 +54,8 @@ public class ValidationResult {
     private String toDescription() {
         StringBuilder b = new StringBuilder(100);
         if (myOperationOutcome != null) {
-            OperationOutcome.Issue issueFirstRep = myOperationOutcome.getIssueFirstRep();
-            b.append(issueFirstRep.getDetails().getValue());
+            BaseOperationOutcome.BaseIssue issueFirstRep = myOperationOutcome.getIssueFirstRep();
+            b.append(issueFirstRep.getDetailsElement().getValue());
             b.append(" - ");
             b.append(issueFirstRep.getLocationFirstRep().getValue());
         }

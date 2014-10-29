@@ -51,6 +51,45 @@
 	}
 
 #foreach ( $child in $childElements )
+#if ( $child.primitive && $child.repeatable == false )
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}Element() {  
+#if ( (${child.hasMultipleTypes} == false && ${child.singleChildInstantiable} == true) || (${child.resourceRef}) )
+		if (${child.variableName} == null) {
+#if ( ${child.boundCode} && ${child.repeatable} == false )
+			${child.variableName} = new ${child.referenceTypeForConstructor}(${child.bindingClass}.VALUESET_BINDER);
+#else
+			${child.variableName} = new ${child.referenceTypeForConstructor}();
+#end
+		}
+#end
+		return ${child.variableName};
+	}
+
+	
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * ${child.definition}
+     * </p> 
+	 */
+	public ${child.primitiveType} get${child.methodName}() {  
+		return get${child.methodName}Element().getValue();
+	}
+#else
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
 	 * creating it if it does
@@ -73,6 +112,7 @@
 #end
 		return ${child.variableName};
 	}
+#end
 
 	/**
 	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
@@ -86,6 +126,8 @@
 		${child.variableName} = theValue;
 		return this;
 	}
+	
+	
 
 #if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} == false && ${child.boundCode} == false )
 	/**
@@ -205,7 +247,11 @@
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
+#if ( $child.primitive && $child.repeatable == false )
+		get${child.methodName}Element().setValueAsEnum(theValue);
+#else
 		get${child.methodName}().setValueAsEnum(theValue);
+#end
 		return this;
 	}
 
@@ -307,7 +353,9 @@
      * </p> 
 	 */
 	@Block()	
-	public static class ${blockChild.className} extends BaseIdentifiableElement implements IResourceBlock {
+	public static class ${blockChild.className} 
+	    extends #{if}( ${className}=="OperationOutcome" && ${blockChild.className}=="Issue" ) Base${blockChild.className} #{else} BaseIdentifiableElement #{end} 
+	    implements IResourceBlock {
 	
 #childVars( $blockChild.children )
 #childAccessors( $blockChild.children )

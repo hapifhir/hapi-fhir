@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseConformance;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -115,14 +115,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public Conformance conformance() {
+	public BaseConformance conformance() {
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
-		ResourceResponseHandler<Conformance> binding = new ResourceResponseHandler<Conformance>(Conformance.class, null);
-		Conformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+		@SuppressWarnings("unchecked")
+		Class<BaseConformance> conformance = (Class<BaseConformance>) myContext.getResourceDefinition("Conformance").getImplementingClass();
+		
+		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance, null);
+		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
 	}
 
@@ -608,12 +611,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, OperationOutcome> implements IDelete, IDeleteTyped {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped {
 
 		private IdDt myId;
 
 		@Override
-		public OperationOutcome execute() {
+		public BaseOperationOutcome execute() {
 			HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(myId);
 			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
@@ -763,19 +766,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<OperationOutcome> {
+	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
 
 		@Override
-		public OperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
 				BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
 			}
 			IParser parser = respType.newParser(myContext);
-			OperationOutcome retVal;
+			BaseOperationOutcome retVal;
 			try {
-				retVal = parser.parseResource(OperationOutcome.class, theResponseReader);
+				// TODO: handle if something else than OO comes back
+				retVal = (BaseOperationOutcome) parser.parseResource(theResponseReader);
 			} catch (DataFormatException e) {
 				ourLog.warn("Failed to parse OperationOutcome response", e);
 				return null;
