@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,8 +32,11 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -84,6 +88,22 @@ public class IncludeTest {
 		assertEquals("Hello", p.getId().getIdPart());
 		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
+	
+	
+	@Test
+	public void testMixedContainedAndNonContained() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(4, bundle.size());
+	}
+	
 
 	@Test
 	public void testIIncludedResourcesNonContained() throws Exception {
@@ -239,7 +259,7 @@ public class IncludeTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		servlet.setFhirContext(ourCtx);
-		servlet.setResourceProviders(patientProvider);
+		servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -277,6 +297,56 @@ public class IncludeTest {
 		
 	}
 	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return DiagnosticReport.class;
+		}
+		
+		@Search(queryName = "stitchedInclude")
+		public List<DiagnosticReport> stitchedInclude() {
+			Practitioner pr1 = new Practitioner();
+			pr1.setId("Practitioner/001");
+			pr1.getName().addFamily("Pract1");
+
+			Practitioner pr2 = new Practitioner();
+			pr2.setId("Practitioner/002");
+			pr2.getName().addFamily("Pract2");
+
+			Practitioner pr3 = new Practitioner();
+			pr3.setId("Practitioner/003");
+			pr3.getName().addFamily("Pract3");
+
+			Observation o1 = new Observation();
+			o1.getName().setText("Obs1");
+			o1.addPerformer().setResource(pr1);
+			
+			Observation o2 = new Observation();
+			o2.getName().setText("Obs2");
+			o2.addPerformer().setResource(pr2);
+			
+			Observation o3 = new Observation();
+			o3.getName().setText("Obs3");
+			o3.addPerformer().setResource(pr3);
+
+			DiagnosticReport rep = new DiagnosticReport();
+			rep.setId("DiagnosticReport/999");
+			rep.getName().setText("Rep");
+			rep.addResult().setResource(o1);
+			rep.addResult().setResource(o2);
+			rep.addResult().setResource(o3);
+			
+			return Collections.singletonList(rep);
+		}
+		
+		
+		
+	}
+	
 	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
@@ -301,7 +371,7 @@ public class IncludeTest {
 
 			return Arrays.asList(p1, p2);
 		}
-
+		
 		
 		@Search(queryName = "extInclude")
 		public List<Patient> extInclude() {

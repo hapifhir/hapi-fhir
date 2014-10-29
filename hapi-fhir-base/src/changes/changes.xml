@@ -6,6 +6,12 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="0.8" date="TBD">
+			<action type="add" issue="38">
+				Profile generation on the server was not working due to IdDt being
+				incorrectly used. Thanks to Bill de Beaubien for the pull request!
+			</action>			
+		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
 				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,
