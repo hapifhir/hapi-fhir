@@ -182,6 +182,14 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit_version}</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 
