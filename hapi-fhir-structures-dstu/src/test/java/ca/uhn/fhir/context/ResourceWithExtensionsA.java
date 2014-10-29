@@ -6,10 +6,8 @@ import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -39,6 +37,11 @@ public class ResourceWithExtensionsA extends BaseResource {
 	@Extension(url = "http://foo/#f2", definedLocally=true, isModifier=true)
 	private StringDt myFoo2;
 
+	@Child(name="baz", type = CodeableConceptDt.class, order = 4)
+    @Extension(url= "http://baz/#baz", definedLocally=true, isModifier=false)
+    @Description(shortDefinition = "Contains a codeable concept")
+	private CodeableConceptDt myBaz;
+
 	@Child(name = "identifier", type = IdentifierDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IdentifierDt> myIdentifier;
 
@@ -57,6 +60,8 @@ public class ResourceWithExtensionsA extends BaseResource {
 	public StringDt getFoo2() {
 		return myFoo2;
 	}
+
+	public CodeableConceptDt getBaz() { return myBaz; }
 
 	public List<IdentifierDt> getIdentifier() {
 		return myIdentifier;
@@ -77,6 +82,8 @@ public class ResourceWithExtensionsA extends BaseResource {
 	public void setFoo2(StringDt theFoo2) {
 		myFoo2 = theFoo2;
 	}
+
+	public void setBaz(CodeableConceptDt myBaz) { this.myBaz = myBaz; }
 
 	public void setIdentifier(List<IdentifierDt> theValue) {
 		myIdentifier = theValue;
