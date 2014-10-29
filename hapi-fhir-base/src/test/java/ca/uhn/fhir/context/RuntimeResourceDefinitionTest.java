@@ -79,7 +79,8 @@ public class RuntimeResourceDefinitionTest {
 		assertEquals("ResourceWithExtensionsA.extension", element.get(2).getPath().getValue());
 		assertEquals("ResourceWithExtensionsA.extension", element.get(3).getPath().getValue());
 		assertEquals("ResourceWithExtensionsA.extension", element.get(4).getPath().getValue());
-		assertEquals("ResourceWithExtensionsA.modifierExtension", element.get(5).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.extension", element.get(5).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.modifierExtension", element.get(6).getPath().getValue());
 
 		assertEquals(DataTypeEnum.EXTENSION, element.get(1).getDefinition().getType().get(0).getCode().getValueAsEnum());
 		assertEquals("url", element.get(1).getSlicing().getDiscriminator().getValue());
@@ -87,7 +88,7 @@ public class RuntimeResourceDefinitionTest {
 		assertEquals(DataTypeEnum.EXTENSION, element.get(2).getDefinition().getType().get(0).getCode().getValueAsEnum());
 		assertEquals("#f1", element.get(2).getDefinition().getType().get(0).getProfile().getValueAsString());
 		
-		assertEquals("ResourceWithExtensionsA.identifier", element.get(12).getPath().getValue());
+		assertEquals("ResourceWithExtensionsA.identifier", element.get(13).getPath().getValue());
 
 	}
 

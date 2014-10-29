@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -364,6 +365,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
 				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
 				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
+			}
+			else if (nextChild.getChildType() != null && ICompositeDatatype.class.isAssignableFrom(nextChild.getChildType())) {
+				RuntimeCompositeDatatypeDefinition pdef = (RuntimeCompositeDatatypeDefinition) nextChild.getSingleChildOrThrow();
+				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
+
 			} else {
 				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
 				scanForExtensions(theProfile, pdef);
