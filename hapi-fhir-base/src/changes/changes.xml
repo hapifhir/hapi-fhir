@@ -11,6 +11,10 @@
 				Profile generation on the server was not working due to IdDt being
 				incorrectly used. Thanks to Bill de Beaubien for the pull request!
 			</action>			
+			<action type="add" issue="42">
+				Profiles did not generate correctly if a resource definition class had a 
+				defined extension which was of a composite type. Thanks to Bill de Beaubien for the pull request!
+			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

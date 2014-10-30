@@ -35,7 +35,7 @@
 				</p>
 			
 				<p>
-					If you are using Maven, this JAR is marked as optional so you will need to
+					If you are using Maven, you will need to
 					explicitly include it in your project pom.xml using the following dependency:
 				</p>
 				<source><![CDATA[<dependency>

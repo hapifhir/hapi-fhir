@@ -35,7 +35,7 @@
 			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
 			   font size
 			 -->
-			<link rel="shortcut icon" href="http://hl7api.sourceforge.net/images/favicon.png" />
+			<link rel="shortcut icon" href="https://github.com/jamesagnew/hapi-fhir/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 		</head>
 
@@ -85,8 +85,10 @@
 		</menu>
 
 		<menu name="JavaDocs">
-			<item name="API Documentation" href="./apidocs/index.html" />
-			<item name="JXR" href="./xref/index.html" />
+			<item name="API (Core)" href="./apidocs/index.html" />
+			<item name="API (DSTU Model)" href="./apidocs-dstu/index.html" />
+			<item name="API (DEV Model)" href="./apidocs-dev/index.html" />
+			<item name="Source Code" href=".https://github.com/jamesagnew/hapi-fhir" />
 		</menu>
 
 		<menu name="Reports">
