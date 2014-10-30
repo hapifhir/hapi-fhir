@@ -15,6 +15,10 @@
 				Profiles did not generate correctly if a resource definition class had a 
 				defined extension which was of a composite type. Thanks to Bill de Beaubien for the pull request!
 			</action>			
+			<action type="add" issue="44" dev="petromykhailysyn">
+				Remove unnessecary IOException from narrative generator API. Thanks to 
+				Petro Mykhailysyn for the pull request!  
+			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
