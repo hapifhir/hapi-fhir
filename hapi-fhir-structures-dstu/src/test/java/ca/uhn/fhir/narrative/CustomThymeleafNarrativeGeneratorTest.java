@@ -3,8 +3,6 @@ package ca.uhn.fhir.narrative;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
@@ -15,7 +13,7 @@ public class CustomThymeleafNarrativeGeneratorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorTest.class);
 
 	@Test
-	public void testGenerator() throws IOException {
+	public void testGenerator() {
 
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
 
