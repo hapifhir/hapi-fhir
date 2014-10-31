@@ -403,6 +403,19 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<version>1.12</version>
+				<inherited>true</inherited>
+				<configuration>
+					<signature>
+						<groupId>org.codehaus.mojo.signature</groupId>
+						<artifactId>java16</artifactId>
+						<version>1.01</version>
+					</signature>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
