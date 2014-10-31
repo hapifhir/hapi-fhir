@@ -970,7 +970,7 @@ public class FhirResourceDaoTest {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier("urn:system", "001");
-			patient.addName().addGiven("testSearchStringParamWithNonNormalized_höra");
+			patient.addName().addGiven("testSearchStringParamWithNonNormalized_h\u00F6ra");
 			ourPatientDao.create(patient);
 		}
 		{
