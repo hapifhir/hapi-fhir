@@ -448,7 +448,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
-				<version>2.10</version>
+				<version>2.11</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
@@ -460,9 +460,7 @@
 				<configuration>
 					<feedType>atom_1.0</feedType>
 					<issueLinkTemplatePerSystem>
-						<default>http://sourceforge.net/support/tracker.php?aid=%ISSUE%</default>
-						<newbugs>https://sourceforge.net/p/hl7api/bugs/%ISSUE%/</newbugs>
-						<newfeatures>https://sourceforge.net/p/hl7api/feature-requests/%ISSUE%/</newfeatures>
+						<default>https://github.com/jamesagnew/hapi-fhir/issues/%ISSUE%</default>
 					</issueLinkTemplatePerSystem>
 					<escapeHTML>false</escapeHTML>
 				</configuration>
