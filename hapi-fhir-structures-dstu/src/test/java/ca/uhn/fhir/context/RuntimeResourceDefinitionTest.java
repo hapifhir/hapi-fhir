@@ -92,4 +92,14 @@ public class RuntimeResourceDefinitionTest {
 
 	}
 
+	@Test
+	public void testProfileIdIsActualResourceName() {
+		FhirContext ctx = new FhirContext(CustomObservation.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(CustomObservation.class);
+
+		Profile profile = (Profile) def.toProfile();
+
+		assertEquals("customobservation", profile.getId().toString());
+	}
+
 }
