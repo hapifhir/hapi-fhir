@@ -21,7 +21,9 @@ public class ExampleTest {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		if (ourServer != null) {
+			ourServer.stop();
+		}
 		
 		System.clearProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS");
 		
