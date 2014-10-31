@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.provider;
+package ca.uhn.fhir.rest.server.provider.dev;
 
 /*
  * #%L

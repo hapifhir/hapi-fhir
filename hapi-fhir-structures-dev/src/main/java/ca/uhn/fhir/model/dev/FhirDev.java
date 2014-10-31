@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.dstu;
+package ca.uhn.fhir.model.dev;
 
 /*
  * #%L
@@ -29,8 +29,8 @@ import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
+import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
+import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
 
 public class FhirDev implements IFhirVersion {
 
