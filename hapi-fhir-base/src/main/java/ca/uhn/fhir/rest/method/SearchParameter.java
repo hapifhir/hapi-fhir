@@ -37,13 +37,12 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
-import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.CompositeAndListParam;
 import ca.uhn.fhir.rest.param.CompositeOrListParam;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -51,7 +50,6 @@ import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.IdentifierListParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.NumberOrListParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -306,16 +304,12 @@ public class SearchParameter extends BaseQueryParameter {
 			myParamType = SearchParamTypeEnum.STRING;
 		} else if (QualifiedDateParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.DATE;
-		} else if (CodingListParam.class.isAssignableFrom(type)) {
+		} else if (BaseIdentifierDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.TOKEN;
-		} else if (IdentifierDt.class.isAssignableFrom(type)) {
-			myParamType = SearchParamTypeEnum.TOKEN;
-		} else if (QuantityDt.class.isAssignableFrom(type)) {
+		} else if (BaseQuantityDt.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.QUANTITY;
 		} else if (ReferenceParam.class.isAssignableFrom(type)) {
 			myParamType = SearchParamTypeEnum.REFERENCE;
-		} else if (IdentifierListParam.class.isAssignableFrom(type)) {
-			myParamType = SearchParamTypeEnum.TOKEN;
 		} else {
 			throw new ConfigurationException("Unknown search parameter type: " + type);
 		}

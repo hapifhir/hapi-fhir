@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -44,7 +44,7 @@ public class ResourceVersionNotSpecifiedException extends BaseServerResponseExce
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceVersionNotSpecifiedException(String theMessage, OperationOutcome theOperationOutcome) {
+	public ResourceVersionNotSpecifiedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -160,7 +161,9 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 		try {
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setOperationOutcome(new OperationOutcome());
-			retVal.getOperationOutcome().addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Resource validates successfully");
+			BaseIssue issue = retVal.getOperationOutcome().addIssue();
+			issue.getSeverityElement().setValue("information");
+			issue.setDetails("Resource validates successfully");
 			return retVal;
 		} finally {
 			endRequest(theRequest);

@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -39,7 +38,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * <b>Definition:</b> A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
 	 * </p>
 	 */
-	public abstract CodeDt getCode();
+	public abstract CodeDt getCodeElement();
 
 	@Override
 	public String getQueryParameterQualifier() {
@@ -53,17 +52,17 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * <b>Definition:</b> The identification of the code system that defines the meaning of the symbol in the code.
 	 * </p>
 	 */
-	public abstract UriDt getSystem();
+	public abstract UriDt getSystemElement();
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public String getValueAsQueryToken() {
-		if (getSystem().getValueAsString() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem().getValueAsString())) + '|' + ParameterUtil.escape(getCode().getValueAsString());
+		if (getSystemElement().getValueAsString() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(getSystemElement().getValueAsString())) + '|' + ParameterUtil.escape(getCodeElement().getValueAsString());
 		} else {
-			return ParameterUtil.escape(getCode().getValueAsString());
+			return ParameterUtil.escape(getCodeElement().getValueAsString());
 		}
 	}
 
@@ -82,14 +81,14 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	}
 
 	/**
-	 * Returns true if <code>this</code> Coding has the same {@link CodingDt#getCode() Code} and {@link CodingDt#getSystem() system} (as compared by simple equals comparison). Does not compare other
-	 * Codes (e.g. {@link CodingDt#getUse() use}) or any extensions.
+	 * Returns true if <code>this</code> Coding has the same {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getCode() Code} and {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getSystem() system} (as compared by simple equals comparison). Does not compare other
+	 * Codes (e.g. {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getUse() use}) or any extensions.
 	 */
 	public boolean matchesSystemAndCode(BaseCodingDt theCoding) {
 		if (theCoding == null) {
 			return false;
 		}
-		return getCode().equals(theCoding.getCode()) && getSystem().equals(theCoding.getSystem());
+		return getCodeElement().equals(theCoding.getCodeElement()) && getSystemElement().equals(theCoding.getSystemElement());
 	}
 
 	/**

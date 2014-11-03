@@ -26,7 +26,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -41,10 +41,11 @@ import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
 
 public interface IGenericClient {
+	
 	/**
 	 * Retrieves and returns the server conformance statement
 	 */
-	Conformance conformance();
+	BaseConformance conformance();
 
 	/**
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server

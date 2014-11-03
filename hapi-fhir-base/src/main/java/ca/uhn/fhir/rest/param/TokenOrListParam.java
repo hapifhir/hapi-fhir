@@ -3,8 +3,8 @@ package ca.uhn.fhir.rest.param;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 
 /*
  * #%L
@@ -26,18 +26,62 @@ import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
  * #L%
  */
 
+/**
+ * This class represents a restful search operation parameter for an "OR list" of tokens (in other words, a 
+ * list which can contain one-or-more tokens, where the server should return results matching any of the tokens)
+ */
+public class TokenOrListParam extends BaseOrListParam<TokenParam> {
 
-public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
-
-	@Override
-	TokenParam newInstance() {
-		return new TokenParam();
+	/**
+	 * Create a new empty token "OR list"
+	 */
+	public TokenOrListParam() {
 	}
-	
-	public List<CodingDt> getListAsCodings() {
-		ArrayList<CodingDt> retVal = new ArrayList<CodingDt>();
+
+	/**
+	 * Create a new token "OR list" with a single token, or multiple tokens which have the same system value
+	 * 
+	 * @param theSystem
+	 *            The system to use for the one token to pre-populate in this list
+	 * @param theValues
+	 *            The values to use for the one token to pre-populate in this list
+	 */
+	public TokenOrListParam(String theSystem, String... theValues) {
+		for (String next : theValues) {
+			add(theSystem, next);
+		}
+	}
+
+	/**
+	 * Convenience method which adds a token to this OR list using the system and code from a coding
+	 */
+	public void add(BaseCodingDt theCodingDt) {
+		add(new TokenParam(theCodingDt));
+	}
+
+	/**
+	 * Convenience method which adds a token to this OR list using the system and value from an identifier
+	 */
+	public void add(BaseIdentifierDt theIdentifierDt) {
+		add(new TokenParam(theIdentifierDt));
+	}
+
+	/**
+	 * Add a new token to this list
+	 * 
+	 * @param theSystem
+	 *            The system to use for the one token to pre-populate in this list
+	 * @param theValue
+	 *            The value to use for the one token to pre-populate in this list
+	 */
+	public void add(String theSystem, String theValue) {
+		add(new TokenParam(theSystem, theValue));
+	}
+
+	public List<BaseCodingDt> getListAsCodings() {
+		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>();
 		for (TokenParam next : getValuesAsQueryTokens()) {
-			CodingDt nextCoding = next.getValueAsCoding();
+			InternalCodingDt nextCoding = next.getValueAsCoding();
 			if (!nextCoding.isEmpty()) {
 				retVal.add(nextCoding);
 			}
@@ -45,20 +89,9 @@ public class TokenOrListParam  extends BaseOrListParam<TokenParam> {
 		return retVal;
 	}
 
-	/**
-	 * Convenience method which adds a token to this OR list
-	 * using the system and code from a coding
-	 */
-	public void add(CodingDt theCodingDt) {
-		add(new TokenParam(theCodingDt));
-	}
-
-	/**
-	 * Convenience method which adds a token to this OR list
-	 * using the system and value from an identifier
-	 */
-	public void add(IdentifierDt theIdentifierDt) {
-		add(new TokenParam(theIdentifierDt));
+	@Override
+	TokenParam newInstance() {
+		return new TokenParam();
 	}
 
 }

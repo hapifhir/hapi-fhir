@@ -21,8 +21,8 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -38,7 +38,7 @@ public class ResourceGoneException extends BaseServerResponseException {
 		super(STATUS_CODE, "Resource " + (theId != null ? theId.getValue() : "") + " is gone/deleted");
 	}
 
-	public ResourceGoneException(Class<? extends IResource> theClass, IdentifierDt thePatientId) {
+	public ResourceGoneException(Class<? extends IResource> theClass, BaseIdentifierDt thePatientId) {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + thePatientId + " is gone/deleted");
 	}
 
@@ -53,7 +53,7 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceGoneException(String theMessage, OperationOutcome theOperationOutcome) {
+	public ResourceGoneException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

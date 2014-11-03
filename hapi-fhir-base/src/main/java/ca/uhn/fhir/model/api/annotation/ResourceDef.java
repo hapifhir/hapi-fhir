@@ -38,7 +38,7 @@ public @interface ResourceDef {
 	String name() default "";
 
 	/**
-	 * Not currently used
+	 * if set, will be used as the id for any profiles generated for this resource
 	 */
 	String id() default "";
 	

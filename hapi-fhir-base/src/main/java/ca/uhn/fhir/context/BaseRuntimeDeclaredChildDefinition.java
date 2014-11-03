@@ -81,10 +81,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		if (ourUseMethodAccessors == null) {
 			try {
 				myField.setAccessible(true);
-				ourUseMethodAccessors = true;
+				ourUseMethodAccessors = false;
 			} catch (SecurityException e) {
 				ourLog.info("Can not use field accessors/mutators, going to use methods instead");
-				ourUseMethodAccessors = false;
+				ourUseMethodAccessors = true;
 			}
 		}
 

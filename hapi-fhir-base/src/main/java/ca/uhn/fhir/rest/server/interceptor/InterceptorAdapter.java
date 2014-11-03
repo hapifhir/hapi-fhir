@@ -20,6 +20,9 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,6 +65,12 @@ public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+		return true;
+	}
+
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
+			IOException {
 		return true;
 	}
 

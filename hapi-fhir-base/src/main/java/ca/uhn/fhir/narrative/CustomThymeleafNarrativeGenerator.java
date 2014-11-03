@@ -20,7 +20,6 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,10 +38,8 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 *            <li>file:/path/to/file/file.properties</li>
 	 *            <li>classpath:/com/package/file.properties</li>
 	 *            </ul>
-	 * @throws IOException
-	 *             If the file can not be found/read
 	 */
-	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) throws IOException {
+	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) {
 		setPropertyFile(thePropertyFile);
 	}
 
@@ -55,8 +52,6 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 *            <li>file:/path/to/file/file.properties</li>
 	 *            <li>classpath:/com/package/file.properties</li>
 	 *            </ul>
-	 * @throws IOException
-	 *             If the file can not be found/read
 	 */
 	public void setPropertyFile(String... thePropertyFile) {
 		Validate.notNull(thePropertyFile, "Property file can not be null");

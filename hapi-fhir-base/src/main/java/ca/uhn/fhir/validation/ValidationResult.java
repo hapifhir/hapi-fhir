@@ -9,9 +9,9 @@ package ca.uhn.fhir.validation;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 /**
  * Encapsulates the results of validation
@@ -29,17 +29,17 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
  * @since 0.7
  */
 public class ValidationResult {
-    private OperationOutcome myOperationOutcome;
+    private BaseOperationOutcome myOperationOutcome;
 
-    private ValidationResult(OperationOutcome myOperationOutcome) {
+    private ValidationResult(BaseOperationOutcome myOperationOutcome) {
         this.myOperationOutcome = myOperationOutcome;
     }
 
-    public static ValidationResult valueOf(OperationOutcome myOperationOutcome) {
+    public static ValidationResult valueOf(BaseOperationOutcome myOperationOutcome) {
         return new ValidationResult(myOperationOutcome);
     }
 
-    public OperationOutcome getOperationOutcome() {
+    public BaseOperationOutcome getOperationOutcome() {
         return myOperationOutcome;
     }
 
@@ -54,8 +54,8 @@ public class ValidationResult {
     private String toDescription() {
         StringBuilder b = new StringBuilder(100);
         if (myOperationOutcome != null) {
-            OperationOutcome.Issue issueFirstRep = myOperationOutcome.getIssueFirstRep();
-            b.append(issueFirstRep.getDetails().getValue());
+            BaseOperationOutcome.BaseIssue issueFirstRep = myOperationOutcome.getIssueFirstRep();
+            b.append(issueFirstRep.getDetailsElement().getValue());
             b.append(" - ");
             b.append(issueFirstRep.getLocationFirstRep().getValue());
         }

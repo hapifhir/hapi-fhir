@@ -43,6 +43,11 @@ public class ValueSetGenerator {
 	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
 	private int myValueSetCount;
 	private int myConceptCount;
+	private String myVersion;
+
+	public ValueSetGenerator(String theVersion) {
+		myVersion =theVersion;
+	}
 
 	public String getClassForValueSetIdAndMarkAsNeeded(String theId) {
 		ValueSetTm vs = myValueSets.get(theId);
@@ -62,7 +67,7 @@ public class ValueSetGenerator {
 		IParser newXmlParser = new FhirContext(ValueSet.class).newXmlParser();
 
 		ourLog.info("Parsing built-in ValueSets");
-		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/all-valuesets-bundle.xml"));
+		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + myVersion + "/all-valuesets-bundle.xml"));
 		Bundle bundle = newXmlParser.parseBundle(vs);
 		for (BundleEntry next : bundle.getEntries()) {
 			ValueSet nextVs = (ValueSet) next.getResource();

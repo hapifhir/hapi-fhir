@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static ca.uhn.fhir.rest.param.ParameterUtil.*;
-import static org.apache.commons.lang3.StringUtils.*;
+import static ca.uhn.fhir.rest.param.ParameterUtil.escape;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,7 +31,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -42,7 +41,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	private boolean myApproximate;
-	private QuantityDt myQuantity = new QuantityDt();
+	private InternalQuantityDt myQuantity = new InternalQuantityDt();
 
 	/**
 	 * Constructor
@@ -144,7 +143,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	}
 
 	public QuantityCompararatorEnum getComparator() {
-		return myQuantity.getComparator().getValueAsEnum();
+		return myQuantity.getComparatorElement().getValueAsEnum();
 	}
 
 	@Override
@@ -153,15 +152,15 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	}
 
 	public UriDt getSystem() {
-		return myQuantity.getSystem();
+		return myQuantity.getSystemElement();
 	}
 
 	public String getUnits() {
-		return myQuantity.getUnits().getValue();
+		return myQuantity.getUnitsElement().getValue();
 	}
 
 	public DecimalDt getValue() {
-		return myQuantity.getValue();
+		return myQuantity.getValueElement();
 	}
 
 	@Override
@@ -174,19 +173,19 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 		if (myApproximate) {
 			b.append('~');
 		} else {
-			b.append(defaultString(escape(myQuantity.getComparator().getValue())));
+			b.append(defaultString(escape(myQuantity.getComparatorElement().getValue())));
 		}
 
-		if (!myQuantity.getValue().isEmpty()) {
-			b.append(defaultString(escape(myQuantity.getValue().getValueAsString())));
+		if (!myQuantity.getValueElement().isEmpty()) {
+			b.append(defaultString(escape(myQuantity.getValueElement().getValueAsString())));
 		}
 		b.append('|');
-		if (!myQuantity.getSystem().isEmpty()) {
-			b.append(defaultString(escape(myQuantity.getSystem().getValueAsString())));
+		if (!myQuantity.getSystemElement().isEmpty()) {
+			b.append(defaultString(escape(myQuantity.getSystemElement().getValueAsString())));
 		}
 		b.append('|');
-		if (!myQuantity.getUnits().isEmpty()) {
-			b.append(defaultString(escape(myQuantity.getUnits().getValueAsString())));
+		if (!myQuantity.getUnitsElement().isEmpty()) {
+			b.append(defaultString(escape(myQuantity.getUnitsElement().getValueAsString())));
 		}
 
 		return b.toString();
@@ -302,10 +301,10 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("cmp", myQuantity.getComparator().getValueAsString());
-		b.append("value", myQuantity.getValue().getValueAsString());
-		b.append("system", myQuantity.getSystem().getValueAsString());
-		b.append("units", myQuantity.getUnits().getValueAsString());
+		b.append("cmp", myQuantity.getComparatorElement().getValueAsString());
+		b.append("value", myQuantity.getValueElement().getValueAsString());
+		b.append("system", myQuantity.getSystemElement().getValueAsString());
+		b.append("units", myQuantity.getUnitsElement().getValueAsString());
 		if (getMissing() != null) {
 			b.append("missing", getMissing());
 		}

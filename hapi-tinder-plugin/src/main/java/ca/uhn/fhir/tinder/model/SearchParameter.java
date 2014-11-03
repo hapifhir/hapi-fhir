@@ -77,7 +77,11 @@ public class SearchParameter {
 	}
 
 	public void setName(String theName) {
-		myName = theName;
+		if (theName != null && Character.isUpperCase(theName.charAt(0))) {
+			myName = theName.substring(theName.indexOf('.')+1);
+		}else {
+			myName = theName;
+		}
 	}
 
 	public void setPath(String thePath) {

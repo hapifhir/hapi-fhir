@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.1.0 http://maven.apache.org/xsd/decoration-1.1.0.xsd" name="HAPI">
+	
+	<bannerLeft>
+		<name>HAPI</name>
+		<src>images/hapi_fhir_banner.png</src>
+		<href>http://jamesagnew.github.io/hapi-fhir/</href>
+	</bannerLeft>
+	
+	<bannerRight>
+		<name>FHIR</name>
+		<src>images/hapi_fhir_banner_right.png</src>
+		<href>http://jamesagnew.github.io/hapi-fhir/</href>
+	</bannerRight>
+	
+	<poweredBy>
+		<logo name="Hosted on GitHub" href="https://github.com/jamesagnew/hapi-fhir" img="./images/github-logo-mini.png"/>
+		<logo name="Built with Maven 3" href="http://maven.apache.org" img="./images/maven-logo-mini.png" />
+	</poweredBy>
+
+	<version position="left" />
+
+	<body>
+		<head>
+			<!-- Syntax Highlighter -->
+			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushBash.js"></script>
+			<script type="text/javascript" src="syntaxhighlighter/shBrushXml.js"></script>
+			<link href="syntaxhighlighter/shCore.css" rel="stylesheet" type="text/css" />
+			<link href="syntaxhighlighter/shThemeDefault.css" rel="stylesheet" type="text/css" />
+			
+			<!-- 
+			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
+			   font size
+			 -->
+			<link rel="shortcut icon" href="https://github.com/jamesagnew/hapi-fhir/images/favicon.png" />
+			<link rel="stylesheet" type="text/css" href="hapi.css" />
+		</head>
+
+		<links>
+			<item name="GitHub Page" href="https://github.com/jamesagnew/hapi-fhir/" />
+			<item name="hl7.org" href="http://hl7.org/" />
+			<item name="University Health Network" href="http://www.uhn.ca/" />
+		</links>
+
+		<menu name="Welcome">
+			<item name="Welcome" href="index.html" />
+			<item name="Download" href="./download.html" />
+			<item name="Upgrade Guide" href="./doc_upgrading.html" />
+			<item name="Changelog" href="./changes-report.html" />
+		</menu>
+
+		<menu name="Test Server">
+			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
+			<item name="Vagrant (Private) Test Server" href="doc_vagrant.html"/>
+		</menu>
+
+		<menu name="Documentation">
+			<item name="Introduction" href="./doc_intro.html" />
+			<item name="The Data Model" href="./doc_fhirobjects.html">
+				<item name="Profiles &amp; Extensions" href="./doc_extensions.html" />
+				<item name="Resource References" href="./doc_resource_references.html" />
+				<item name="Tags" href="./doc_tags.html" />
+				<item name="Validation" href="./doc_validation.html" />
+			</item>
+			<item name="RESTful Client" href="./doc_rest_client.html" >
+				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
+			</item>
+			<item name="RESTful Server" href="./doc_rest_server.html" >
+				<item name="RESTful Operations" href="./doc_rest_operations.html" />
+				<item name="Narrative Generator" href="./doc_narrative.html" />
+				<item name="CORS Support" href="./doc_cors.html" />
+				<item name="Interceptors (server)" href="./doc_rest_server_interceptor.html" />
+				<item name="Web Testing UI" href="./doc_server_tester.html" />
+			</item>
+			<item name="Logging" href="./doc_logging.html" />
+			<item name="Tinder Plugin" href="./doc_tinder.html" />
+		</menu>
+
+		<menu name="Community">
+			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
+			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
+		</menu>
+
+		<menu name="JavaDocs">
+			<item name="Core API" href="./apidocs/index.html" />
+			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
+			<item name="Model API (DEV)" href="./apidocs-dev/index.html" />
+			<item name="Source Code" href=".https://github.com/jamesagnew/hapi-fhir" />
+		</menu>
+
+		<menu name="Reports">
+			<item name="Developers" href="team-list.html" />
+			<item name="Unit Test Report" href="surefire-report.html" />
+			<item name="FindBugs" href="findbugs.html" />
+			<item name="License" href="license.html" />
+			<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
+		</menu>
+
+	</body>
+
+	<skin>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.3.1</version>
+	</skin>
+
+	<custom>
+		<fluidoSkin>
+			<googleSearch />
+			<!-- <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled> -->
+		</fluidoSkin>
+	</custom>
+
+</project>
+

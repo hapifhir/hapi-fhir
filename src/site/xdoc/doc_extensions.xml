@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Profiles and Extensions - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Adding Extensions">
+			
+			<macro name="toc">
+			</macro>
+			
+		</section>
+		
+		<section name="Undeclared Extensions">
+			
+			<p>
+				Extensions are a key part of the FHIR specification, providing a standardized
+				way of placing additional data in a resource. 
+			</p>
+
+			<p>
+				The simplest way to interact with extensions (i.e. to add them to resources you are creating, or
+				to read them from resources you are consuming) is to treat them as "undeclared extensions".
+				Undeclared extensions can be added to any of the built in FHIR resource types that come with HAPI-FHIR.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="resourceExtension" />
+				<param name="file" value="examples/src/main/java/example/Extensions.java" />
+			</macro>
+			
+			<p>
+				Undeclared extensions can also be added to datatypes (composite or primitive).
+			</p>
+			<macro name="snippet">
+				<param name="id" value="resourceStringExtension" />
+				<param name="file" value="examples/src/main/java/example/Extensions.java" />
+			</macro>
+			
+			<subsection name="Sub-Extensions">
+
+				<p>
+					Extensions may also have child extensions as their content, instead
+					of a datatype. This is done by adding a child undeclared extension to the
+					parent extension.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="subExtension" />
+					<param name="file" value="examples/src/main/java/example/Extensions.java" />
+				</macro>
+			
+			</subsection>
+
+			<subsection name="Retrieving Extension Values">
+
+				<p>
+					HAPI provides a few ways of accessing extension values in resources 
+					which are receieved from other sources (i.e. downloaded by a client).
+				</p>
+				<macro name="snippet">
+					<param name="id" value="parseExtension" />
+					<param name="file" value="examples/src/main/java/example/Extensions.java" />
+				</macro>
+			
+			</subsection>
+			
+		</section>
+		
+		<section name="Custom Resource Types">
+			
+				<p>
+					The most elegant way of adding extensions to a resource is through the
+					use of custom fields. The following example shows a custom type which
+					extends the FHIR Patient resource definition through two extensions.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="patientDef" />
+					<param name="file" value="examples/src/main/java/example/MyPatient.java" />
+				</macro>
+
+				<p>
+					Using this custom type is as simple as instantiating the type
+					and working with the new fields.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="patientUse" />
+					<param name="file" value="examples/src/main/java/example/MyPatientUse.java" />
+				</macro>
+			
+				<p>
+					This example produces the following output:
+				</p>
+				
+				<source><![CDATA[<Patient xmlns="http://hl7.org/fhir">
+   <modifierExtension url="http://example.com/dontuse#importantDates">
+      <valueDateTime value="2010-01-02"/>
+   </modifierExtension>
+   <modifierExtension url="http://example.com/dontuse#importantDates">
+      <valueDateTime value="2014-01-26T11:11:11"/>
+   </modifierExtension>
+   <extension url="http://example.com/dontuse#petname">
+      <valueString value="Fido"/>
+   </extension>
+   <name>
+      <family value="Smith"/>
+      <given value="John"/>
+      <given value="Quincy"/>
+      <suffix value="Jr"/>
+   </name>
+</Patient>]]></source>
+			
+				<p>
+					Parsing messages using your new custom type is equally simple.
+					These types can also be used as method return types in clients
+					and servers.
+				</p>
+			
+				<macro name="snippet">
+					<param name="id" value="patientParse" />
+					<param name="file" value="examples/src/main/java/example/MyPatientUse.java" />
+				</macro>
+
+			<subsection name="Documentation">
+				
+				<p>
+					Note in the example above the use of the <code>@Description</code>
+					annotation on the extension fields. This documentation is important,
+					as the FHIR Server will automatically add it to the generated Profile
+					resources which are exported by the server.  
+				</p>
+				
+				<p>
+					These bits of documentation will then be re-added to any automatically
+					generated clients built using <a href="./doc_tinder.html">Tinder</a>
+					against your server.
+				</p>
+				
+				<p>
+					The following is a snippet from the generated Profile resource
+					which is automatically created by a HAPI RESTful server using
+					your new type. (Don't worry if this part doens't make sense to you
+					yet, this is an advanced feature)
+				</p>
+				
+				<source><![CDATA[<element>
+   <path value="Patient.extension"/>
+   <name value="extension"/>
+   <slicing>
+      <discriminator value="url"/>
+      <ordered value="false"/>
+      <rules value="open"/>
+   </slicing>
+   <definition>
+      <type>
+         <code value="Extension"/>
+      </type>
+   </definition>
+</element>
+<element>
+   <path value="Patient.extension"/>
+   <name value="extension"/>
+   <definition>
+      <short value="The name of the patient's favourite pet"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+         <code value="Extension"/>
+         <profile value="http://example.com/dontuse#petname"/>
+      </type>
+      <isModifier value="false"/>
+   </definition>
+</element>
+<element>
+   <path value="Patient.modifierExtension"/>
+   <name value="modifierExtension"/>
+   <slicing>
+      <discriminator value="url"/>
+      <ordered value="false"/>
+      <rules value="open"/>
+   </slicing>
+   <definition>
+      <type>
+         <code value="Extension"/>
+      </type>
+   </definition>
+</element>
+<element>
+   <path value="Patient.modifierExtension"/>
+   <name value="modifierExtension"/>
+   <definition>
+      <short value="Some dates of note for the patient"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+         <code value="Extension"/>
+         <profile value="http://example.com/dontuse#importantDates"/>
+      </type>
+      <isModifier value="true"/>
+   </definition>
+</element>]]></source>	
+				
+			</subsection>
+			
+		</section>
+			
+	</body>
+
+</document>

@@ -1,0 +1,5 @@
+
+As of HAPI 0.8 -
+Tests have mostly moved to the hapi-fhir-structures-dstu subproject,
+since they depend on that project. There are also tests in other
+structures subprojects.
