@@ -50,6 +50,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.context.ProvidedResourceScanner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -132,7 +133,7 @@ public class RestfulServer extends HttpServlet {
 
 	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
 		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
-			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Class ust be public");
+			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Class must be public");
 		}
 	}
 
@@ -695,6 +696,9 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("No security manager has been provided");
 			}
 
+			ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
+			providedResourceScanner.scanForProvidedResources(this);
+
 			Collection<IResourceProvider> resourceProvider = getResourceProviders();
 			if (resourceProvider != null) {
 				Map<Class<? extends IResource>, IResourceProvider> typeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
@@ -707,6 +711,7 @@ public class RestfulServer extends HttpServlet {
 						throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
 					}
 					typeToProvider.put(resourceType, nextProvider);
+					providedResourceScanner.scanForProvidedResources(nextProvider);
 				}
 				ourLog.info("Got {} resource providers", typeToProvider.size());
 				for (IResourceProvider provider : typeToProvider.values()) {
