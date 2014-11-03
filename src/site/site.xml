@@ -60,7 +60,7 @@
 		<menu name="Documentation">
 			<item name="Introduction" href="./doc_intro.html" />
 			<item name="The Data Model" href="./doc_fhirobjects.html">
-				<item name="Extensions" href="./doc_extensions.html" />
+				<item name="Profiles &amp; Extensions" href="./doc_extensions.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />
 				<item name="Tags" href="./doc_tags.html" />
 				<item name="Validation" href="./doc_validation.html" />
@@ -85,9 +85,9 @@
 		</menu>
 
 		<menu name="JavaDocs">
-			<item name="API (Core)" href="./apidocs/index.html" />
-			<item name="API (DSTU Model)" href="./apidocs-dstu/index.html" />
-			<item name="API (DEV Model)" href="./apidocs-dev/index.html" />
+			<item name="Core API" href="./apidocs/index.html" />
+			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
+			<item name="Model API (DEV)" href="./apidocs-dev/index.html" />
 			<item name="Source Code" href=".https://github.com/jamesagnew/hapi-fhir" />
 		</menu>
 

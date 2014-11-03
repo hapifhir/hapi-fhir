@@ -540,6 +540,7 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dev</module>
+				<module>examples</module>
 			</modules>
 		</profile>
 		<profile>
@@ -551,7 +552,6 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-oauth2</module>
-				<module>hapi-fhir-base/examples</module>
 				<module>hapi-fhir-base/testmindeps</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>

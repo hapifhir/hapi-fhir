@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>Extensions - HAPI FHIR</title>
+		<title>Profiles and Extensions - HAPI FHIR</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -13,19 +13,21 @@
 			<macro name="toc">
 			</macro>
 			
-			<p>
-				Extensions are a key part of the FHIR specification, providing a standardized
-				way of placing additional data in a resource. 
-			</p>
-
 		</section>
 		
 		<section name="Undeclared Extensions">
 			
 			<p>
-				All HAPI FHIR Resource objects support "undeclared extensions",
-				which are arbitrary extensions you can add.
+				Extensions are a key part of the FHIR specification, providing a standardized
+				way of placing additional data in a resource. 
 			</p>
+
+			<p>
+				The simplest way to interact with extensions (i.e. to add them to resources you are creating, or
+				to read them from resources you are consuming) is to treat them as "undeclared extensions".
+				Undeclared extensions can be added to any of the built in FHIR resource types that come with HAPI-FHIR.
+			</p>
+			
 			<macro name="snippet">
 				<param name="id" value="resourceExtension" />
 				<param name="file" value="examples/src/main/java/example/Extensions.java" />
@@ -56,8 +58,8 @@
 			<subsection name="Retrieving Extension Values">
 
 				<p>
-					HAPI provides a few ways of getting data back out of
-					an extension value (i.e. from a received resource):
+					HAPI provides a few ways of accessing extension values in resources 
+					which are receieved from other sources (i.e. downloaded by a client).
 				</p>
 				<macro name="snippet">
 					<param name="id" value="parseExtension" />

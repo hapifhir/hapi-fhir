@@ -19,6 +19,15 @@
 				Remove unnessecary IOException from narrative generator API. Thanks to 
 				Petro Mykhailysyn for the pull request!  
 			</action>			
+			<action type="add" issue="48">
+				Introduced a new 
+				<![CDATA[<code>@ProvidesResources</code>]]> annotation which can be added to
+				resource provider and servers to allow them to declare additional resource
+				classes they are able to serve. This is useful if you have a server which can
+				serve up multiple classes for the same resource type (e.g. a server that sometimes
+				returns a default Patient, but sometimes uses a custom subclass). 
+				Thanks to Bill de Beaubien for the pull request!
+			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
