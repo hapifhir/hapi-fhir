@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
  * Created by Bill de Beaubien on 10/31/2014.
  */
 @ResourceDef(name="Observation", id="customobservation")
-public class CustomObservation extends Observation {
+class CustomObservation extends Observation {
     @Child(name = "valueUnits", order = 3)
     @Extension(url = "http://hapi.test.com/profile/customobservation#valueUnits", definedLocally = true, isModifier = false)
     @Description(shortDefinition = "Units on an observation whose type is of valueString")
