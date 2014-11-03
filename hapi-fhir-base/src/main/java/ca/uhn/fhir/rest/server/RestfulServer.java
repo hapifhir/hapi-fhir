@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -61,11 +61,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -82,8 +81,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
@@ -119,7 +116,7 @@ public class RestfulServer extends HttpServlet {
 
 	public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
-		myServerConformanceProvider = new ServerConformanceProvider(this);
+		myServerConformanceProvider = theCtx.getVersion().createServerConformanceProvider(this);
 	}
 
 	/**
@@ -375,7 +372,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public IResourceProvider getServerProfilesProvider() {
-		return new ServerProfileProvider(getFhirContext());
+		return myFhirContext.getVersion().createServerProfilesProvider(this);
 	}
 
 	/**
@@ -638,7 +635,7 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
-			OperationOutcome oo = null;
+			BaseOperationOutcome oo = null;
 			int statusCode = 500;
 
 			if (e instanceof BaseServerResponseException) {
@@ -647,20 +644,28 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			if (oo == null) {
-				oo = new OperationOutcome();
-				Issue issue = oo.addIssue();
-				issue.getSeverity().setValueAsEnum(IssueSeverityEnum.ERROR);
+				try {
+					oo = (BaseOperationOutcome) myFhirContext.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
+				} catch (Exception e1) {
+					ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
+					throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
+				}
+				
+				BaseIssue issue = oo.addIssue();
+				issue.getSeverityElement().setValue("error");
 				if (e instanceof InternalErrorException) {
 					ourLog.error("Failure during REST processing", e);
-					issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 				} else if (e instanceof BaseServerResponseException) {
 					ourLog.warn("Failure during REST processing: {}", e.toString());
 					statusCode = ((BaseServerResponseException) e).getStatusCode();
-					issue.getDetails().setValue(e.getMessage());
+					issue.getDetailsElement().setValue(e.getMessage());
 				} else {
 					ourLog.error("Failure during REST processing", e);
-					issue.getDetails().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 				}
+			} else {
+				ourLog.error("Unknown error during processing", e);
 			}
 
 			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
@@ -979,7 +984,7 @@ public class RestfulServer extends HttpServlet {
 
 		for (IResource next : resourceList) {
 			if (next.getId() == null || next.getId().isEmpty()) {
-				if (!(next instanceof OperationOutcome)) {
+				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
@@ -1179,6 +1184,11 @@ public class RestfulServer extends HttpServlet {
 		return EncodingEnum.XML;
 	}
 
+	/**
+	 * Determine whether a response should be given in JSON or XML format based on the
+	 * incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code>
+	 * HTTP header. 
+	 */
 	public static EncodingEnum determineResponseEncoding(HttpServletRequest theReq) {
 		String[] format = theReq.getParameterValues(Constants.PARAM_FORMAT);
 		if (format != null) {
