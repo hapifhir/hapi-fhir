@@ -24,7 +24,6 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -39,7 +38,7 @@ public interface IResource extends ICompositeElement {
 	 * encoding, and copying contained resources from this list to their
 	 * appropriate references when parsing) so it is generally not neccesary to
 	 * interact with this list directly. Instead, in a server you can place
-	 * resource instances in reference fields (such as {@link Patient#setManagingOrganization(ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt)})
+	 * resource instances in reference fields (such as {@link ca.uhn.fhir.model.dstu.resource.Patient#setManagingOrganization(ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt)})
 	 * and the resource will be automatically contained. In a client, contained resources will
 	 * be automatically populated into their appropriate fields by the HAPI parser.
 	 * </p>
