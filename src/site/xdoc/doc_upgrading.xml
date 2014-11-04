@@ -13,6 +13,41 @@
 			<macro name="toc">
 			</macro>
 			
+			<p>
+				<b>This section is still incomplete: </b> Note that HAPI 0.8 has not 
+				yet been released. This section provides details about how to use the
+				latest SNAPSHOT release, but it will continue to be enhanced as we move towards
+				the final 0.8 release.
+			</p>
+			
+			<subsection name="Importing Resources">
+			
+				<p>
+					Beginning in HAPI-FHIR 0.8, the main distribution has been split from one
+					JAR to a set of JAR files. You will need at least two to use HAPI:
+				</p>
+				<ul>
+					<li>
+						The <code>hapi-fhir-base-[version].jar</code> file containing the core library.
+					</li>
+					<li>
+						The <code>hapi-fhir-structures-dstu-[version].jar</code> file containing the FHIR model classes
+						for DSTU1 (all contents of this JAR were previously found in hapi-fhir-base).
+					</li>
+					<li>
+						<i>Optionally: </i>You may also choose to include the 
+						<code>hapi-fhir-structures-dev-[version].jar</code>. This JAR contains structures for the 
+						latest DEV version of FHIR. You may create a client/server which supports either DSTU1 or DEV
+						resources, or both depending on your needs. Note that using DEV resources may introduce 
+						incompatibilities with other frameworks however.<br/><br/>
+						<b>You must also include hapi-fhir-structures-dstu-[version].jar</b> if you include
+						the dev structures JAR at this time. Hopefully at some point soon this requirement
+						will be relaxed.
+					</li>
+				</ul>
+			
+			</subsection>
+			
 			<subsection name="Tinder Plugin">
 				
 				<p>
