@@ -39,21 +39,19 @@ public abstract class BaseOperationOutcome extends BaseResource implements IReso
 	public abstract BaseIssue getIssueFirstRep();
 
 	public static abstract class BaseIssue extends BaseIdentifiableElement implements IResourceBlock {
-	
+
 		public abstract CodeDt getSeverityElement();
-		
+
 		public abstract StringDt getDetailsElement();
 
 		public abstract BaseCodingDt getType();
 
-		public abstract BaseIssue addLocation( String theString);
+		public abstract BaseIssue addLocation(String theString);
 
 		public abstract BaseIssue setDetails(String theString);
 
 		public abstract StringDt getLocationFirstRep();
-		
+
 	}
 
-
-	
 }
