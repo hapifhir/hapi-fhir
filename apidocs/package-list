@@ -3,6 +3,7 @@ ca.uhn.fhir.i18n
 ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
 ca.uhn.fhir.model.base.composite
+ca.uhn.fhir.model.base.resource
 ca.uhn.fhir.model.dstu.composite
 ca.uhn.fhir.model.dstu.resource
 ca.uhn.fhir.model.dstu.valueset
@@ -22,6 +23,5 @@ ca.uhn.fhir.rest.param
 ca.uhn.fhir.rest.server
 ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.interceptor
-ca.uhn.fhir.rest.server.provider
 ca.uhn.fhir.util
 ca.uhn.fhir.validation

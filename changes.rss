@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <title>HAPI FHIR - Core Library: HAPI FHIR Changelog</title>
-  <link rel="alternate" href="http://jamesagnew.github.io/hapi-fhir//changes-report.html" />
-  <subtitle>These are the latest changes of the project.</subtitle>
-  <updated>2014-10-23T16:41:34Z</updated>
+  <title>HAPI-FHIR: HAPI FHIR Changelog</title>
+  <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html" />
+  <subtitle>These are the latest changes of this project.</subtitle>
+  <updated>2014-11-04T19:56:34Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2014-10-23T16:41:34Z</dc:date>
+  <dc:date>2014-11-04T19:56:34Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
-    <title>0.7</title>
-    <link rel="alternate" href="http://jamesagnew.github.io/hapi-fhir//changes-report.html#a0.7" />
+    <title>0.8</title>
+    <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html#a0.8" />
     <author>
       <name />
     </author>
-    <updated>2014-10-23T16:41:34Z</updated>
-    <published>2014-10-23T16:41:34Z</published>
-    <summary type="html">&lt;p&gt;Version 0.7 is available with 24 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2014-10-23T16:41:34Z</dc:date>
+    <updated>2014-11-04T19:56:34Z</updated>
+    <published>2014-11-04T19:56:34Z</published>
+    <summary type="html">&lt;p&gt;Version 0.8 is available with 4 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2014-11-04T19:56:34Z</dc:date>
   </entry>
 </feed>
 
