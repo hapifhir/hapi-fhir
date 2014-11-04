@@ -41,7 +41,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -4877,6 +4876,13 @@ public class Conformance extends BaseConformance implements IResource {
 
   
 
+	}
+
+
+
+	@Override
+	public String getResourceName() {
+		return Conformance.class.getName();
 	}
 
 

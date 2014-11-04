@@ -114,9 +114,9 @@ public interface IResource extends ICompositeElement {
 	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
 
 	/**
-	 * Returns a ResourceTypeEnum representing the type of this Resource
-	 * @return the ResourceType of this Resource
+	 * Returns a String representing the name of this Resource
+	 * @return the name of this Resource
 	 */
-	ResourceTypeEnum getResourceType();
+	String getResourceName();
 
 }

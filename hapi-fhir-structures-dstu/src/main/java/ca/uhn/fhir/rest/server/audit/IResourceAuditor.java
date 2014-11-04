@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.audit;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU (FHIR 0.80)
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -23,7 +23,8 @@ package ca.uhn.fhir.rest.server.audit;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectDetail;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
@@ -36,10 +37,10 @@ public interface IResourceAuditor<T extends IResource> {
 	public boolean isAuditable();
 	
 	public String getName();
-	public BaseIdentifierDt getIdentifier();
+	public IdentifierDt getIdentifier();
 	public SecurityEventObjectTypeEnum getType();	
 	public String getDescription();
-	//public List<ObjectDetail> getDetail(); //see operationoutcome -- need to move specifics insto dstu and keep base objects in core
+	public List<ObjectDetail> getDetail();
 	public SecurityEventObjectSensitivityEnum getSensitivity();
 
 }

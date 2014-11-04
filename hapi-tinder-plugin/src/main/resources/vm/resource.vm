@@ -8,7 +8,6 @@ import java.util.*;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 
 #foreach ( $import in $imports )
 import ${import};
@@ -41,7 +40,7 @@ import ${import};
  */
 @ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
 public class ${className} 
-    extends #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} BaseResource #{end} 
+    extends #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} BaseResource #{end} 
     implements IResource {
 
 #foreach ( $param in $searchParams )
@@ -90,8 +89,8 @@ public class ${className}
 #childExtensionTypes( $childExtensionTypes )
 
     @Override
-    public ResourceTypeEnum getResourceType() {
-        return ResourceTypeEnum.${className.toUpperCase().replaceAll("RESOURCE", "")};
+    public String getResourceName() {
+        return "${className.replaceAll("Resource", "")}";
     }
 
 }

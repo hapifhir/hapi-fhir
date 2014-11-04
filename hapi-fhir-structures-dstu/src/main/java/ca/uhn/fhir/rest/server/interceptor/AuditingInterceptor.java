@@ -2,7 +2,7 @@
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU (FHIR 0.80)
  * %%
  * Copyright (C) 2014 University Health Network
  * %%
@@ -66,7 +66,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuditingInterceptor.class);
 	
 	private IAuditDataStore myDataStore = null;	
-	private Map<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>> myAuditableResources = new HashMap<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>>();
+	private Map<String, Class<? extends IResourceAuditor<? extends IResource>>> myAuditableResources = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
 	private boolean myClientParamsOptional = false;
 	
 	public AuditingInterceptor() {
@@ -181,7 +181,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 */
 	protected ObjectElement getObjectElement(IResource resource, SecurityEventObjectLifecycleEnum lifecycle, byte[] query) throws InstantiationException, IllegalAccessException {
 
-		ResourceTypeEnum resourceType = resource.getResourceType();		
+		String resourceType = resource.getResourceName();		
 		if(myAuditableResources.containsKey(resourceType)){									
 			@SuppressWarnings("unchecked")
 			IResourceAuditor<IResource> auditableResource = (IResourceAuditor<IResource>) myAuditableResources.get(resourceType).newInstance();			
@@ -264,16 +264,16 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		myDataStore = theDataStore;
 	}
 		
-	public Map<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>> getAuditableResources() {
+	public Map<String, Class<? extends IResourceAuditor<? extends IResource>>> getAuditableResources() {
 		return myAuditableResources;
 	}
 	
-	public void setAuditableResources(Map<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>> theAuditableResources) {
+	public void setAuditableResources(Map<String, Class<? extends IResourceAuditor<? extends IResource>>> theAuditableResources) {
 		myAuditableResources = theAuditableResources;
 	}
 	
-	public void addAuditableResource(ResourceTypeEnum resourceType, Class<? extends IResourceAuditor<? extends IResource>> auditableResource){
-		if(myAuditableResources == null) myAuditableResources = new HashMap<ResourceTypeEnum, Class<? extends IResourceAuditor<? extends IResource>>>();
+	public void addAuditableResource(String resourceType, Class<? extends IResourceAuditor<? extends IResource>> auditableResource){
+		if(myAuditableResources == null) myAuditableResources = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
 		myAuditableResources.put(resourceType, auditableResource);
 	}
 }

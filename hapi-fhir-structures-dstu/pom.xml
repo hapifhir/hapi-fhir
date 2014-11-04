@@ -213,7 +213,7 @@
 						<baseResourceName>appointment</baseResourceName>
 						<baseResourceName>availability</baseResourceName>
 						<baseResourceName>careplan</baseResourceName>
-						<!-- <baseResourceName>claim</baseResourceName>  -->
+						<baseResourceName>claim</baseResourceName>  
 						<baseResourceName>composition</baseResourceName>
 						<baseResourceName>conceptmap</baseResourceName>
 						<baseResourceName>condition</baseResourceName>
