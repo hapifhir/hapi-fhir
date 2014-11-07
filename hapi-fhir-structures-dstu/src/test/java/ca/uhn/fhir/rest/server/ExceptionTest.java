@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -54,6 +55,21 @@ public class ExceptionTest {
 		ourExceptionType=null;
 	}
 
+	@Test
+	public void testThrowUnprocessableEntityWithMultipleMessages() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwUnprocessableEntityWithMultipleMessages=aaa");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(422, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("message1"));
+			assertEquals(3, oo.getIssue().size());
+		}
+	}
+	
 	@Test
 	public void testInternalError() throws Exception {
 		{
@@ -162,8 +178,13 @@ public class ExceptionTest {
 
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = "throwInternalError") StringParam theParam) {
+		public List<Patient> throwInternalError(@RequiredParam(name = "throwInternalError") StringParam theParam) {
 			throw new InternalErrorException("Exception Text");
+		}
+
+		@Search
+		public List<Patient> throwUnprocessableEntityWithMultipleMessages(@RequiredParam(name = "throwUnprocessableEntityWithMultipleMessages") StringParam theParam) {
+			throw new UnprocessableEntityException("message1", "message2", "message3");
 		}
 
 		@Override

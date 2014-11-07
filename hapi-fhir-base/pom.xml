@@ -15,13 +15,6 @@
  
 	<name>HAPI FHIR - Core Library</name>
 
-	<distributionManagement>
-		<site>
-			<id>git.server</id>
-			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
-		</site>
-	</distributionManagement>
-
 	<dependencies>
 
 		<!-- JSON -->
@@ -214,6 +207,8 @@
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>findbugs-maven-plugin</artifactId>
 						<version>3.0.0</version>
+						<configuration>
+						</configuration>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

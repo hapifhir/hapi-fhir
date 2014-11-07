@@ -64,7 +64,8 @@ public interface IServerInterceptor {
 	 * </p>
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theRequest
 	 *            The incoming request
 	 * @param theResponse
@@ -82,7 +83,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -124,7 +126,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -145,7 +148,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -171,7 +175,9 @@ public interface IServerInterceptor {
 	 * </p>
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            Contains either <code>null</code>, or a bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}. This parameter may be
+	 *            null if the request processing did not successfully parse the incoming request, but will generally not be null.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest

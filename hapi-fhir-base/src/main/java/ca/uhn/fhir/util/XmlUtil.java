@@ -357,6 +357,8 @@ public class XmlUtil {
 						case '"':
 						case '&':
 							hasEscapable = true;
+						default:
+							break;
 						}
 					}
 

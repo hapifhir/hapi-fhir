@@ -7,11 +7,19 @@
 	</properties>
 	<body>
 		<release version="0.8" date="TBD">
-			<action type="add" issue="38">
+			<action>
+				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
+				resources and composite datatypes) have been moved out of the core JAR into their
+				own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast
+				version is finalized. See
+				<![CDATA[<a href="./doc_upgrading.html">upgrading</a>]]> 
+				for more information.  
+			</action>
+			<action type="add" issue="38" dev="wdebeau1">
 				Profile generation on the server was not working due to IdDt being
 				incorrectly used. Thanks to Bill de Beaubien for the pull request!
 			</action>			
-			<action type="add" issue="42">
+			<action type="add" issue="42" dev="wdebeau1">
 				Profiles did not generate correctly if a resource definition class had a 
 				defined extension which was of a composite type. Thanks to Bill de Beaubien for the pull request!
 			</action>			
@@ -19,7 +27,7 @@
 				Remove unnessecary IOException from narrative generator API. Thanks to 
 				Petro Mykhailysyn for the pull request!  
 			</action>			
-			<action type="add" issue="48">
+			<action type="add" issue="48" dev="wdebeau1">
 				Introduced a new 
 				<![CDATA[<code>@ProvidesResources</code>]]> annotation which can be added to
 				resource provider and servers to allow them to declare additional resource
@@ -27,6 +35,16 @@
 				serve up multiple classes for the same resource type (e.g. a server that sometimes
 				returns a default Patient, but sometimes uses a custom subclass). 
 				Thanks to Bill de Beaubien for the pull request!
+			</action>
+			<action>
+				Add a new method <![CDATA[handleException]]> to the server interceptor
+				framework which allows interceptors to be notified of any exceptions and 
+				runtime errors within server methods. Interceptors may optionally also
+				override the default error handling behaviour of the RestfulServer.
+			</action>
+			<action dev="wdebeau1">
+				Add constants to BaseResource for the "_id" search parameter which all resources
+				should support.
 			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">

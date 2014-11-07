@@ -28,6 +28,13 @@
 		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
 	</issueManagement>
 
+	<distributionManagement>
+		<site>
+			<id>git.server</id>
+			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+		</site>
+	</distributionManagement>
+
 	<scm>
 		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
 		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
@@ -502,12 +509,33 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>findbugs</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+	
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
 				<version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
 
 	<profiles>
+		<profile>
+			<id>ROOT</id>
+			<modules>
+			</modules>
+		</profile>
 		<profile>
 			<id>SIGN_ARTIFACTS</id>
 			<activation>
