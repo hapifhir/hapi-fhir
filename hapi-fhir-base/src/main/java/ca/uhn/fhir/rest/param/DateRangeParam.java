@@ -95,10 +95,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * Constructor which takes two strings representing the lower and upper bounds of the range (inclusive on both ends)
 	 * 
 	 * @param theLowerBound
-	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *            An unqualified date param representing the lower date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00"
 	 * @param theUpperBound
-	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *            An unqualified date param representing the upper date bound (optionally may include time), e.g.
 	 *            "2011-02-22" or "2011-02-22T13:12:00"
 	 */
 	public DateRangeParam(String theLowerBound, String theUpperBound) {
@@ -211,7 +211,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 	@Override
 	public void setValuesAsQueryTokens(List<QualifiedParamList> theParameters) throws InvalidRequestException {
-		for (List<String> paramList : theParameters) {
+		
+		boolean haveHadUnqualifiedParameter = false;
+		for (QualifiedParamList paramList : theParameters) {
 			if (paramList.size() == 0) {
 				continue;
 			}
@@ -220,9 +222,18 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			}
 			String param = paramList.get(0);
 			DateParam parsed = new DateParam();
-			parsed.setValueAsQueryToken(null, param);
+			parsed.setValueAsQueryToken(paramList.getQualifier(), param);
 			addParam(parsed);
+			
+			if (parsed.getComparator() == null) {
+				if (haveHadUnqualifiedParameter) {
+					throw new InvalidRequestException("Multiple date parameters with the same name and no qualifier (>, <, etc.) is not supported");					
+				}
+				haveHadUnqualifiedParameter=true;
+			}
+			
 		}
+		
 	}
 
 	private void addParam(DateParam theParsed) throws InvalidRequestException {
@@ -231,10 +242,9 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				throw new InvalidRequestException("Can not have multiple date range parameters for the same param without a qualifier");
 			}
 
-			myLowerBound = theParsed;
-			myUpperBound = theParsed;
-			// TODO: in this case, should set lower and upper to exact moments
-			// using specified precision
+			myLowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theParsed.getValueAsString());
+			myUpperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theParsed.getValueAsString());
+			
 		} else {
 
 			switch (theParsed.getComparator()) {

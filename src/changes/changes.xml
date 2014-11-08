@@ -36,15 +36,28 @@
 				returns a default Patient, but sometimes uses a custom subclass). 
 				Thanks to Bill de Beaubien for the pull request!
 			</action>
-			<action>
+			<action type="add">
 				Add a new method <![CDATA[handleException]]> to the server interceptor
 				framework which allows interceptors to be notified of any exceptions and 
 				runtime errors within server methods. Interceptors may optionally also
 				override the default error handling behaviour of the RestfulServer.
 			</action>
-			<action dev="wdebeau1">
+			<action dev="wdebeau1" type="add">
 				Add constants to BaseResource for the "_id" search parameter which all resources
 				should support.
+			</action>			
+			<action type="fix">
+				DateRangeParam parameters on the server now return correct 
+				<![CDATA[<code>getLowerBoundAsInstant()</code>]]>
+				and 
+				<![CDATA[<code>getUpperBoundAsInstant()</code>]]>
+				values if a single unqualified value is passed in. For example, if
+				a query containing 
+				<![CDATA[<code>&birthdate=2012-10-01</code>]]> 
+				is received, previously these two methods would both return the same
+				value, but with this fix 
+				<![CDATA[<code>getUpperBoundAsInstant()</code>]]>
+				now returns the instant at 23:59:59.9999.				
 			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
