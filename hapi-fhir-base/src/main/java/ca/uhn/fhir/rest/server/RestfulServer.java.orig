@@ -631,6 +631,10 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
+<<<<<<< HEAD
+			BaseOperationOutcome oo = null;
+			int statusCode = 500;
+=======
 			/*
 			 * We have caught an exception while handling an incoming server request.
 			 * Start by notifying the interceptors..
@@ -645,6 +649,7 @@ public class RestfulServer extends HttpServlet {
 			
 			BaseOperationOutcome oo = null;
 			int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 
 			if (e instanceof BaseServerResponseException) {
 				oo = ((BaseServerResponseException) e).getOperationOutcome();
@@ -662,12 +667,17 @@ public class RestfulServer extends HttpServlet {
 					ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
 					throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
 				}
+<<<<<<< HEAD
+				
+=======
 
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 				BaseIssue issue = oo.addIssue();
 				issue.getSeverityElement().setValue("error");
 				if (e instanceof InternalErrorException) {
 					ourLog.error("Failure during REST processing", e);
 					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+<<<<<<< HEAD
 				} else if (e instanceof BaseServerResponseException) {
 					ourLog.warn("Failure during REST processing: {}", e.toString());
 					statusCode = ((BaseServerResponseException) e).getStatusCode();
@@ -675,6 +685,7 @@ public class RestfulServer extends HttpServlet {
 				} else {
 					ourLog.error("Failure during REST processing", e);
 					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
+=======
 					statusCode = ((InternalErrorException) e).getStatusCode();
 				} else if (e instanceof BaseServerResponseException) {
 					ourLog.warn("Failure during REST processing: {}", e.toString());
@@ -692,6 +703,7 @@ public class RestfulServer extends HttpServlet {
 					ourLog.error("Failure during REST processing: " + e.toString(), e);
 					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 					statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 				}
 			}
 
@@ -1194,7 +1206,13 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
+<<<<<<< HEAD
+	 * Determine whether a response should be given in JSON or XML format based on the
+	 * incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code>
+	 * HTTP header. 
+=======
 	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	 */
 	public static EncodingEnum determineResponseEncoding(HttpServletRequest theReq) {
 		String[] format = theReq.getParameterValues(Constants.PARAM_FORMAT);

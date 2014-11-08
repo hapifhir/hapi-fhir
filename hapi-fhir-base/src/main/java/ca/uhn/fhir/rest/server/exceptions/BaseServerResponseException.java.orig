@@ -50,7 +50,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(NotImplementedOperationException.STATUS_CODE, NotImplementedOperationException.class);
 	}
 
+<<<<<<< HEAD
+=======
 	private List<String> myAdditionalMessages = null;
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	private BaseOperationOutcome myBaseOperationOutcome;
 	private String myResponseBody;
 	private String myResponseMimeType;
@@ -68,6 +71,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
+<<<<<<< HEAD
+=======
 	}
 
 	/**
@@ -85,6 +90,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		if (theMessages != null && theMessages.length > 1) {
 			myAdditionalMessages = Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
 		}
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	}
 
 	/**
@@ -95,8 +101,12 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theMessage
 	 *            The message
 	 * @param theBaseOperationOutcome
+<<<<<<< HEAD
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome
 	 *            that was returned from the server (in a client)
+=======
+	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, BaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage);
@@ -130,8 +140,12 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theCause
 	 *            The underlying cause exception
 	 * @param theBaseOperationOutcome
+<<<<<<< HEAD
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome
 	 *            that was returned from the server (in a client)
+=======
+	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, BaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage, theCause);
@@ -161,17 +175,24 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theCause
 	 *            The underlying cause exception
 	 * @param theBaseOperationOutcome
+<<<<<<< HEAD
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome
 	 *            that was returned from the server (in a client)
+=======
+	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	 */
 	public BaseServerResponseException(int theStatusCode, Throwable theCause, BaseOperationOutcome theBaseOperationOutcome) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
+<<<<<<< HEAD
+=======
 	}
 
 	public List<String> getAdditionalMessages() {
 		return myAdditionalMessages;
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	}
 
 	/**
@@ -209,13 +230,19 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Sets the BaseOperationOutcome resource associated with this exception. In server
 	 * implementations, this is the OperartionOutcome resource to include with the HTTP response. In 
 	 * client implementations you should not call this method.
 	 * 
 	 * @param theBaseOperationOutcome The BaseOperationOutcome resource
+=======
 	 * Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include with the HTTP response. In client
 	 * implementations you should not call this method.
+	 * 
+	 * @param theBaseOperationOutcome
+	 *            The BaseOperationOutcome resource
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	 */
 	public void setOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
 		myBaseOperationOutcome = theBaseOperationOutcome;

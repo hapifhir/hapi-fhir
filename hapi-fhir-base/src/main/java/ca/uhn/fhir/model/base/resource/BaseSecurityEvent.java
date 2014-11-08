@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.model.base.resource;
 
 /*
  * #%L
@@ -20,13 +20,9 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import javax.servlet.http.HttpServletRequest;
+import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.api.IResource;
 
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+public abstract class BaseSecurityEvent extends BaseResource implements IResource {
 
-/**
- * @deprecated Use {@link ca.uhn.fhir.rest.server.security.ISecurityManager} instead
- */
-public interface ISecurityManager {
-	public void authenticate(HttpServletRequest request) throws AuthenticationException;
 }

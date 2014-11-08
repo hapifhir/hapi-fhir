@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class ServerInterceptors {
+public class Extensions {
 
 @SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {
@@ -35,12 +35,18 @@ patient.addUndeclaredExtension(ext);
 
 
 //START SNIPPET: resourceStringExtension
+// Continuing the example from above, we will add a name to the patient, and then
+// add an extension to part of that name
 HumanNameDt name = patient.addName();
 name.addFamily().setValue("Shmoe");
+
+// Add a new "given name", which is of type StringDt 
 StringDt given = name.addGiven();
 given.setValue("Joe");
-ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#moreext", new StringDt("Hello"));
-given.addUndeclaredExtension(ext2);
+
+// Create an extension and add it to the StringDt
+ExtensionDt givenExt = new ExtensionDt(false, "http://examples.com#moreext", new StringDt("Hello"));
+given.addUndeclaredExtension(givenExt);
 //END SNIPPET: resourceStringExtension
 
 String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
@@ -64,10 +70,12 @@ List<ExtensionDt> modExts = patient.getUndeclaredModifierExtensions();
 public void foo() {
 //START SNIPPET: subExtension
 Patient patient = new Patient();
-	
+
+// Add an extension (initially with no contents) to the resource 
 ExtensionDt parent = new ExtensionDt(false, "http://example.com#parent");
 patient.addUndeclaredExtension(parent);
 
+// Add two extensions as children to the parent extension
 ExtensionDt child1 = new ExtensionDt(false, "http://example.com#childOne", new StringDt("value1"));
 parent.addUndeclaredExtension(child1);
 

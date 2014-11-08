@@ -221,7 +221,11 @@ public class TinderStructuresMojo extends AbstractMojo {
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
 
 		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev", ".");
+<<<<<<< HEAD
+		rp.setBaseResourceNames(Arrays.asList("referralrequest", "patient","practitioner","encounter",
+=======
 		rp.setBaseResourceNames(Arrays.asList("conformance", "referralrequest", "patient","practitioner","encounter",
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 				"organization","location","relatedperson","appointment","slot","order","availability","device", "valueset"));
 		rp.parse();
 		rp.bindValueSets(vsp);

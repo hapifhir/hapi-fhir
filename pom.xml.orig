@@ -379,6 +379,7 @@
             	<td><div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://hl7api.sourceforge.net/"></div></td>
             	<td><div class="fb-like" data-href="http://hl7api.sourceforge.net/" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></div></td>
             	</tr></table>
+<<<<<<< HEAD
 
             	</p><p>
             	<!-- Place this tag after the last +1 button tag. -->
@@ -401,6 +402,30 @@
 								</replace>
 
 
+=======
+
+            	</p><p>
+            	<!-- Place this tag after the last +1 button tag. -->
+            	<script type="text/javascript">
+            	  (function() {
+            	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            	    po.src = 'https://apis.google.com/js/plusone.js';
+            	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+            	  })();
+            	</script>
+            	<div id="fb-root"></div>
+            	<script>(function(d, s, id) {
+            	  var js, fjs = d.getElementsByTagName(s)[0];
+            	  if (d.getElementById(id)) return;
+            	  js = d.createElement(s); js.id = id;
+            	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+            	  fjs.parentNode.insertBefore(js, fjs);
+            	}(document, 'script', 'facebook-jssdk'));</script>
+				]]></replacevalue>
+								</replace>
+
+
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 							</target>
 						</configuration>
 						<goals>
@@ -509,6 +534,8 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+<<<<<<< HEAD
+=======
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
@@ -525,6 +552,7 @@
 				</reportSets>
 			</plugin>
 	
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
 				<version>1.1</version> </plugin> -->
 		</plugins>
@@ -568,7 +596,10 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dev</module>
+<<<<<<< HEAD
+=======
 				<module>examples</module>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 			</modules>
 		</profile>
 		<profile>
@@ -580,6 +611,10 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-oauth2</module>
+<<<<<<< HEAD
+				<module>hapi-fhir-base/examples</module>
+=======
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 				<module>hapi-fhir-base/testmindeps</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>

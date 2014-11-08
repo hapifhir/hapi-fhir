@@ -85,9 +85,15 @@
 		</menu>
 
 		<menu name="JavaDocs">
+<<<<<<< HEAD:src/site/site.xml
+			<item name="API (Core)" href="./apidocs/index.html" />
+			<item name="API (DSTU Model)" href="./apidocs-dstu/index.html" />
+			<item name="API (DEV Model)" href="./apidocs-dev/index.html" />
+=======
 			<item name="Core API" href="./apidocs/index.html" />
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DEV)" href="./apidocs-dev/index.html" />
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2:src/site/site.xml
 			<item name="Source Code" href=".https://github.com/jamesagnew/hapi-fhir" />
 		</menu>
 

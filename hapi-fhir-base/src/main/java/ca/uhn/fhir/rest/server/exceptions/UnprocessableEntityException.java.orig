@@ -78,22 +78,10 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	 */
 	public UnprocessableEntityException(String... theMessage) {
 <<<<<<< HEAD
-		super(STATUS_CODE, DEFAULT_MESSAGE, toOperationOutcome(theMessage));
-	}
-
-	private static OperationOutcome toOperationOutcome(String... theMessage) {
-		OperationOutcome OperationOutcome = new OperationOutcome();
-		if (theMessage != null) {
-			for (String next : theMessage) {
-				OperationOutcome.addIssue().setDetails(next);
-			}
-		}
-		return OperationOutcome;
-=======
 		super(STATUS_CODE, theMessage[0]); // TODO: this used to generate an OperationOutcome - why?
->>>>>>> versions
+=======
+		super(STATUS_CODE, theMessage);
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 	}
 
-	
-	
 }

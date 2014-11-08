@@ -19,10 +19,17 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>2.7</version>
+<<<<<<< HEAD
+				<reportSets>
+					<reportSet>
+						<reports>
+=======
+				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
 						<reports>
 							<report>scm</report>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 						</reports>
 					</reportSet>
 				</reportSets>
@@ -40,7 +47,10 @@
 						<configuration>
 							<links>
 								<link>http://docs.oracle.com/javaee/7/api</link>
+<<<<<<< HEAD
+=======
 								<link>http://jamesagnew.github.io/hapi-fhir/apidocs</link>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
 							</links>
 						</configuration>
 					</reportSet>

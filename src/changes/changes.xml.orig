@@ -7,6 +7,13 @@
 	</properties>
 	<body>
 		<release version="0.8" date="TBD">
+<<<<<<< HEAD:src/changes/changes.xml
+			<action type="add" issue="38">
+				Profile generation on the server was not working due to IdDt being
+				incorrectly used. Thanks to Bill de Beaubien for the pull request!
+			</action>			
+			<action type="add" issue="42">
+=======
 			<action>
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
@@ -20,6 +27,7 @@
 				incorrectly used. Thanks to Bill de Beaubien for the pull request!
 			</action>			
 			<action type="add" issue="42" dev="wdebeau1">
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2:src/changes/changes.xml
 				Profiles did not generate correctly if a resource definition class had a 
 				defined extension which was of a composite type. Thanks to Bill de Beaubien for the pull request!
 			</action>			
@@ -27,6 +35,8 @@
 				Remove unnessecary IOException from narrative generator API. Thanks to 
 				Petro Mykhailysyn for the pull request!  
 			</action>			
+<<<<<<< HEAD:src/changes/changes.xml
+=======
 			<action type="add" issue="48" dev="wdebeau1">
 				Introduced a new 
 				<![CDATA[<code>@ProvidesResources</code>]]> annotation which can be added to
@@ -46,6 +56,7 @@
 				Add constants to BaseResource for the "_id" search parameter which all resources
 				should support.
 			</action>			
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2:src/changes/changes.xml
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

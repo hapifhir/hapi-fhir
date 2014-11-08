@@ -1378,11 +1378,6 @@ public class ResfulServerMethodTest {
 			return myResourceProviders;
 		}
 
-		@Override
-		public ISecurityManager getSecurityManager() {
-			return null;
-		}
-
 	}
 
 }
