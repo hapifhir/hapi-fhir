@@ -670,14 +670,6 @@ public class RestfulServer extends HttpServlet {
 					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
 				} else if (e instanceof BaseServerResponseException) {
 					ourLog.warn("Failure during REST processing: {}", e.toString());
-					statusCode = ((BaseServerResponseException) e).getStatusCode();
-					issue.getDetailsElement().setValue(e.getMessage());
-				} else {
-					ourLog.error("Failure during REST processing", e);
-					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
-					statusCode = ((InternalErrorException) e).getStatusCode();
-				} else if (e instanceof BaseServerResponseException) {
-					ourLog.warn("Failure during REST processing: {}", e.toString());
 					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) e;
 					statusCode = baseServerResponseException.getStatusCode();
 					issue.getDetailsElement().setValue(e.getMessage());
