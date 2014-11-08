@@ -20,11 +20,16 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import org.apache.commons.lang3.Validate;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -138,10 +143,19 @@ public class FhirValidator {
 	 */
     @Deprecated
 	public void validate(Bundle theBundle) {
-        ValidationResult validationResult = validateWithResult(theBundle);
-        if (!validationResult.isSuccessful()) {
-            throw new ValidationFailureException(validationResult.getOperationOutcome());
-        }
+		Validate.notNull(theBundle, "theBundle must not be null");
+
+		ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
+
+		for (IValidator next : myValidators) {
+			next.validateBundle(ctx);
+		}
+
+		BaseOperationOutcome oo = ctx.getOperationOutcome();
+		if (oo != null && oo.getIssue().size() > 0) {
+			throw new ValidationFailureException(oo);
+		}
+
 	}
 
 	/**
@@ -174,11 +188,11 @@ public class FhirValidator {
 
         ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
-        for (IValidator next : myValidators) {
-            next.validateBundle(ctx);
-        }
+		for (IValidator next : myValidators) {
+			next.validateBundle(ctx);
+		}
 
-        OperationOutcome oo = ctx.getOperationOutcome();
+        BaseOperationOutcome oo = ctx.getOperationOutcome();
         return ValidationResult.valueOf(oo);
     }
 
@@ -198,7 +212,7 @@ public class FhirValidator {
             next.validateResource(ctx);
         }
 
-        OperationOutcome oo = ctx.getOperationOutcome();
+        BaseOperationOutcome oo = ctx.getOperationOutcome();
         return ValidationResult.valueOf(oo);
     }
 }

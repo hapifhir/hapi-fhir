@@ -1,0 +1,133 @@
+
+#bodyColumn {
+	width: 78.5% !important;
+	/*
+	margin-left: 180px !important;
+	*/
+}
+
+#breadcrumbs {
+	background: white;
+	padding: 0px;
+	/*
+	border-bottom-width: 1px;
+	border-bottom-color: #C0C0C0;
+	border-bottom-style: solid;
+	*/
+	height: 40px;
+}
+
+#search-form {
+	width: 140px;
+}
+
+#navcolumn {
+	background-color: white !important;
+}
+
+#leftColumn {
+	border: none !important;
+	width: 19% !important;
+	margin: 0px;
+}
+
+#navcolumn h5 {
+	color: #806020;
+	background-color: #FFF0C0;
+	border-bottom: 1px solid #E3701A;
+}
+
+#navcolumn li.expanded {
+	background: url("") !important;
+}
+
+.nobr {
+	white-space: nowrap;
+}
+
+.section {
+	padding: 0px;
+}
+
+.section h2 {
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #CF4711;
+	background-color: #FF5721;
+	color: #FFA;
+	font-size: 1.5em;
+	line-height: 1.4em;
+}
+
+.section h3 {
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #993300;
+	width: 66%;
+	background-image: url('images/littlehapiface.png');
+	background-repeat: no-repeat;
+	padding-left: 25px;
+	font-size: 1.3em;
+	line-height: 1.3em;
+}
+
+.syntaxhighlighter {
+	font-size: 0.85em !important;
+}
+
+.syntaxhighlighter .line.alt1,
+.syntaxhighlighter .line.alt2 
+{
+	background-color: #F8F8F8 !important;
+}
+
+.table th, .table td {
+	padding: 2px;
+}
+
+tt {
+	white-space: pre;
+	color: #448;
+	margin-bottom: 5px;
+	margin-top: 10px;
+	padding: 2px;
+	border: 1px solid #AAA;
+}
+
+h1,h2,h3,h4,h5 {
+	color: #E3701A;
+	font-weight: bold;
+}
+
+h4 {
+	font-size: 1.2em;
+	padding: 0px;
+	margin-bottom: 0px;
+}
+
+li.expanded ul {
+	border-left: 2px solid #C0FFC0;
+	margin: 0px 0px 4px 0px !important;	
+}
+
+li.expanded ul li {
+	padding-left: 2px !important;
+}
+
+dfn {
+	color: #008000;
+	background-color: #E0FFE0;
+	border-bottom: 1px dotted #40A040;
+}
+
+a,a.externalLink,a:active,a:hover,a:link,a:visited {
+	color: #993300;
+}
+
+DIV.sidebar-nav UL LI UL LI {
+        /*
+        list-style: initial;
+        list-style-type: circle;
+        */
+        font-size: 0.9em;
+}

@@ -1,0 +1,85 @@
+<Conformance xmlns="http://hl7.org/fhir">
+  <extension url="http://hl7.org/fhir/Profile/tools-extensions#supported-system">
+    <valueUri value="http://snomed.info/sct"/>
+  </extension>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+    </div>
+  </text>
+  <publisher value="Health Intersections"/>
+  <date value="2014-03-12T01:00:56Z"/>
+  <software>
+    <name value="Reference Server"/>
+    <version value="0.80-2286"/>
+    <releaseDate value="2013-11-03"/>
+  </software>
+  <fhirVersion value="0.80-2286"/>
+  <format value="application/xml+fhir"/>
+  <format value="application/json+fhir"/>
+  <rest>
+    <mode value="server"/>
+    <resource>
+      <type value="AdverseReaction"/>
+      <profile>
+        <reference value="http://fhir.healthintersections.com.au/open/Profile/adversereaction"/>
+      </profile>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <readHistory value="true"/>
+    </resource>
+    <resource>
+      <type value="Alert"/>
+      <profile>
+        <reference value="http://fhir.healthintersections.com.au/open/Profile/alert"/>
+      </profile>
+      <operation>
+        <code value="read"/>
+      </operation>
+      <operation>
+        <code value="vread"/>
+      </operation>
+      <operation>
+        <code value="search-type"/>
+      </operation>
+      <operation>
+        <code value="update"/>
+      </operation>
+      <operation>
+        <code value="history-type"/>
+      </operation>
+      <operation>
+        <code value="create"/>
+      </operation>
+      <operation>
+        <code value="delete"/>
+      </operation>
+      <operation>
+        <code value="history-instance"/>
+      </operation>
+      <readHistory value="true"/>
+    </resource>
+  </rest>
+</Conformance>

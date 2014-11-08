@@ -47,7 +47,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -211,7 +211,7 @@ public abstract class BaseClient {
 				}
 
 				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
-				OperationOutcome oo=null;
+				BaseOperationOutcome oo=null;
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
@@ -219,9 +219,10 @@ public abstract class BaseClient {
 					if (enc != null) {
 						IParser p = enc.newParser(theContext);
 						try {
-							oo = p.parseResource(OperationOutcome.class, body);
-							if (oo.getIssueFirstRep().getDetails().isEmpty()==false) {
-								message = message + ": " + oo.getIssueFirstRep().getDetails().getValue();
+							// TODO: handle if something other than OO comes back
+							oo = (BaseOperationOutcome) p.parseResource( body);
+							if (oo.getIssueFirstRep().getDetailsElement().isEmpty()==false) {
+								message = message + ": " + oo.getIssueFirstRep().getDetailsElement().getValue();
 							}
 						} catch (Exception e) {
 							ourLog.debug("Failed to process OperationOutcome response");

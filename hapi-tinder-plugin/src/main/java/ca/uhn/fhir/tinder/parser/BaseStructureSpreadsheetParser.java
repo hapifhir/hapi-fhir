@@ -1,6 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,6 +31,11 @@ import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.util.XMLUtils;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
+
+	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) {
+		super(theVersion, theBaseDir);
+	}
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseStructureSpreadsheetParser.class);
 	private int myColBinding;
 	private int myColCard;

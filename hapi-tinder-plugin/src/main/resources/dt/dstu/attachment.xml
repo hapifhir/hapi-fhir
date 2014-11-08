@@ -1,0 +1,342 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Grahame</LastAuthor>
+  <Created>2012-03-19T11:25:39Z</Created>
+  <LastSaved>2013-08-12T11:30:54Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>9810</WindowHeight>
+  <WindowWidth>26235</WindowWidth>
+  <WindowTopX>1740</WindowTopX>
+  <WindowTopY>2310</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s70">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s62" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="117.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="33" ss:Span="1"/>
+   <Column ss:Index="4" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="60"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="69"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="62.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="163.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="192.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="85.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="192.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="161.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Column ss:Index="15" ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="81"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s64">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Example</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="78.75">
+    <Cell><Data ss:Type="String">Attachment</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Content in a format defined elsewhere</Data></Cell>
+    <Cell><Data ss:Type="String">For referring to data content defined in other formats.</Data></Cell>
+    <Cell ss:Index="10"><Data ss:Type="String">Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">ED</Data></Cell>
+    <Cell><Data ss:Type="String">ED/RP</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Attachment.contentType</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">MimeType</Data></Cell>
+    <Cell><Data ss:Type="String">Mime type of the content, with charset etc.</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate</Data></Cell>
+    <Cell><Data ss:Type="String">text/plain; charset=UTF-8, image/png</Data></Cell>
+    <Cell><Data ss:Type="String">Processors of the data need to be able to know how to interpret the data</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">./mediaType, ./charset</Data></Cell>
+    <Cell><Data ss:Type="String">ED.2+ED.3/RP.2+RP.3. Note conversion may be needed if old style values are being used</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Attachment.language</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">Language</Data></Cell>
+    <Cell><Data ss:Type="String">Human language of the content (BCP-47)</Data></Cell>
+    <Cell><Data ss:Type="String">The human language of the content. The value can be any valid value according to BCP 47</Data></Cell>
+    <Cell><Data ss:Type="String">en-AU</Data></Cell>
+    <Cell><Data ss:Type="String">Users need to be able to choose between the languages in a set of attachments</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">./language</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="44.25">
+    <Cell><Data ss:Type="String">Attachment.data</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">base64Binary</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Data inline, base64ed</Data></Cell>
+    <Cell><Data ss:Type="String">The actual data of the attachment - a sequence of bytes. In XML, represented using base64</Data></Cell>
+    <Cell ss:Index="10"><Data ss:Type="String">The data needs to able to be transmitted inline</Data></Cell>
+    <Cell><Data ss:Type="String">The base64-encoded data SHALL be expressed in the same character set as the base resource XML or JSON</Data></Cell>
+    <Cell><Data ss:Type="String">./data</Data></Cell>
+    <Cell><Data ss:Type="String">ED.5</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="150">
+    <Cell><Data ss:Type="String">Attachment.url</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Uri where the data can be found</Data></Cell>
+    <Cell><Data ss:Type="String">An alternative location where the data can be accessed</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">http://www.acme.com/logo-small.png</Data></Cell>
+    <Cell><Data ss:Type="String">The data needs to be transmitted by reference</Data></Cell>
+    <Cell><Data ss:Type="String">If both data and url are provided, the url SHALL point to the same content as the data contains. Urls may be relative references or may reference transient locations such as a wrapping envelope using cid: though this has ramifications for using signatures. Relative URLs are interpreted relative to the service url, like a resource reference, rather than relative to the resource itself. If a URL is provided, it SHALL resolve to actual data. </Data></Cell>
+    <Cell><Data ss:Type="String">./reference/literal</Data></Cell>
+    <Cell><Data ss:Type="String">RP.1+RP.2 - if they refer to a URL (see v2.6)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="150">
+    <Cell><Data ss:Type="String">Attachment.size</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Number of bytes of content (if url provided)</Data></Cell>
+    <Cell><Data ss:Type="String">The number of bytes of data that make up this attachment.</Data></Cell>
+    <Cell ss:StyleID="s66"/>
+    <Cell><Data ss:Type="String">Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all</Data></Cell>
+    <Cell><Data ss:Type="String">The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference</Data></Cell>
+    <Cell><Data ss:Type="String">N/A (needs data type R3 proposal)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="109.5">
+    <Cell><Data ss:Type="String">Attachment.hash</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">base64Binary</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Hash of the data (sha-1, base64ed )</Data></Cell>
+    <Cell><Data ss:Type="String">The calculated hash of the data using SHA-1. Represented using base64</Data></Cell>
+    <Cell ss:Index="10"><Data ss:Type="String">Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">.integrityCheck[parent::ED/integrityCheckAlgorithm=&quot;SHA-1&quot;]</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="String">!Attachment.lang</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">code</Data></Cell>
+    <Cell><Data ss:Type="String">Language</Data></Cell>
+    <Cell><Data ss:Type="String">ISO 639-3 language code</Data></Cell>
+    <Cell><Data ss:Type="String">The language that the attachment is in</Data></Cell>
+    <Cell><Data ss:Type="String">eng (English), esp (Spanish)</Data></Cell>
+    <Cell><Data ss:Type="String">May need to be able to pick the right language to render for a particular person from a list of attachments in different languages</Data></Cell>
+    <Cell><Data ss:Type="String">note that the v3 lang is ISO 639-2 and this is ISO 639-3</Data></Cell>
+    <Cell><Data ss:Type="String">./language</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">Attachment.title</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">Label to display in place of the data</Data></Cell>
+    <Cell><Data ss:Type="String">A label or set of text to display in place of the data</Data></Cell>
+    <Cell><Data ss:Type="String">&quot;Official Corporate Logo&quot;</Data></Cell>
+    <Cell><Data ss:Type="String">Applications need a label to display to a human user in place of the actual data if the data cannot be rendered or perceived by the viewer.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">./title/data</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Selected/>
+   <TopRowVisible>2</TopRowVisible>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>8</ActiveRow>
+     <ActiveCol>9</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s67" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="102"
+    ss:Span="1"/>
+   <Column ss:Index="4" ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="386.25"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="347.25"/>
+   <Column ss:StyleID="s67" ss:AutoFitWidth="0" ss:Width="292.5"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s64">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">!1</Data></Cell>
+    <Cell><Data ss:Type="String">Must Have Data</Data></Cell>
+    <Cell><Data ss:Type="String">Attachment</Data></Cell>
+    <Cell ss:StyleID="s68"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">Unless the Attachment element has a dataAbsentReason flag, it SHALL contain a </Font><I><Font
+        html:Color="#000000">data</Font></I><Font html:Color="#000000"> or a </Font><I><Font
+        html:Color="#000000">url</Font></I><Font html:Color="#000000"> (or both)</Font></ss:Data></Cell>
+    <Cell><Data ss:Type="String">dataAbsentReason.oclIsDefined or data.size &gt; 0 or url.size &gt; 0</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">exists(@dataAbsentReason) or exists(f:data) or exists(f:url)</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="3" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s70" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="94.5"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="130.5"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="180"/>
+   <Column ss:StyleID="s70" ss:Width="200.25"/>
+   <Column ss:StyleID="s70" ss:AutoFitWidth="0" ss:Width="386.25"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s64"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s71"><Data ss:Type="String">MimeType</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The mime type of an attachment</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">http://www.rfc-editor.org/bcp/bcp13.txt</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">BCP 13 (RFCs 2045, 2046, 2047, 4288, 4289 and 2049)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Language</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">A human language</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">http://tools.ietf.org/html/bcp47</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">IETF language tag</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>3</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

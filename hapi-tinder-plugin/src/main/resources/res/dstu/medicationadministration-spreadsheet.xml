@@ -1,0 +1,1104 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Lloyd McKenzie</LastAuthor>
+  <Created>2012-03-19T11:12:07Z</Created>
+  <LastSaved>2014-01-25T01:02:06Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>9600</WindowHeight>
+  <WindowWidth>19380</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Hyperlink">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#0000FF"
+    ss:Underline="Single"/>
+  </Style>
+  <Style ss:ID="s63" ss:Name="Normal 2">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s64" ss:Name="Normal 3">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s67">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s69" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s70" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s71" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s73" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat ss:Format="@"/>
+  </Style>
+  <Style ss:ID="s75" ss:Parent="s64">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <NumberFormat ss:Format="Fixed"/>
+  </Style>
+  <Style ss:ID="s77">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s78" ss:Parent="s63">
+   <Alignment ss:Vertical="Top"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s79">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s80">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s81">
+   <Alignment ss:Vertical="Top" ss:ShrinkToFit="1" ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Font ss:FontName="Verdana" x:Family="Swiss" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s83" ss:Parent="s63">
+   <Alignment ss:Vertical="Top"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s84">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#FF0000"/>
+  </Style>
+  <Style ss:ID="s85">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s87" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Interior ss:Color="#EEECE1" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s88">
+   <Alignment ss:Vertical="Top"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#FF0000"/>
+  </Style>
+  <Style ss:ID="s89" ss:Parent="s63">
+   <Alignment ss:Vertical="Top"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s90">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s91" ss:Parent="s63">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="16" ss:ExpandedRowCount="22" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s65" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s66" ss:AutoFitWidth="0" ss:Width="293.25"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="36.75"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="56.25"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="82.5"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="61.5"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="117.75"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="213.75"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="161.25"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="391.5"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="135"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="185.25"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="267.75"/>
+   <Column ss:StyleID="s65" ss:AutoFitWidth="0" ss:Width="144.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s67">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Is Modifier</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+    <Cell><Data ss:Type="String">Prov Mapping</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Administration of medication to a patient</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Describes the event of a patient being given a dose of a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.&#10;&#10;Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:Index="12" ss:StyleID="s72"><Data ss:Type="String">SubstanceAdministration</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:Index="16" ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.identifier</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="Boolean">1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">External identifier</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">External identifier - FHIR will generate its own internal IDs (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">id</Data></Cell>
+    <Cell><Data ss:Type="String">RXA-25-Administered Barcode Identifier? (V2 def'n of RXA-25 refers to the 'give' occurrence; appears not to discuss 'administer' cardinality which would seem to be 0..*) &#10;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.status</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="Boolean">1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">MedicationAdministrationStatus</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">in progress | on hold | completed | entered in error | stopped</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">statusCode</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-20-Completion Status</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.patient</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Resource(Patient)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Who received medication?</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The person or animal to whom the medication was given.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">subject-&gt;Patient</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">PID-3-Patient ID List</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.practitioner</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Who administered substance?</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The individual who was responsible for giving the medication to the patient.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">performer-&gt;Role</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-10-Administering Provider / PRT-5-Participation Person: PRT-4-Participation='AP' (RXA-10 is deprecated)&#10;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.encounter</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Resource(Encounter)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Encounter administered as part of</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The visit or admission the or other contact between patient and health care provider the medication administration was performed as part of.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">component-&gt;EncounterEvent</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">PV1-19-Visit Number</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.prescription</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Resource(MedicationPrescription)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Order administration performed against</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The original request, instruction or authority to perform the administration.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">InFullfillmentOf-&gt;SubstanceAdministration</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">ORC-3-Filler Order Number / ORC-2-Placer Order Number&#10;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.wasNotGiven</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="Boolean">1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">True if medication not administered</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">Set this to true if the record is saying that the medication was NOT administered.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">actionNegationInd</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-20-Completion Status='NA'</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.reasonNotGiven</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">MedicationAdministrationNegationReason</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Reason administration not performed</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">A code indicating why the administration was not performed.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Reason-&gt;Observation-&gt;Value</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-9-Administration Notes:RXA-20-Completion Status='NA'</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.whenGiven</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="4" ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Period</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Start and end time of administration</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">An interval of time during which the administration took place.  For many administrations, such as swallowing a tablet the lower and upper values of the interval will be the same.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">effectiveTime</Data></Cell>
+    <Cell><Data ss:Type="String">RXA-3-Date/Time Start of Administration / RXA-4-Date/Time End of Administration&#10;</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">MedicationAdministration.medication</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Resource(Medication)</Data></Cell>
+    <Cell ss:StyleID="s71"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">What was administered?</Data></Cell>
+    <Cell><Data ss:Type="String">Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Note: do not use Medication.name to describe the administered medication. When the only available information is a text description of the medication, Medication.code.text should be used</Data></Cell>
+    <Cell><Data ss:Type="String">Consumeable-&gt;AdministerableMedication</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-5-Administered Code</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.device</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">Resource(Device)</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Device used to administer</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">The device used in administering the medication to the patient.  E.g. a particular infusion pump</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">device-&gt;Access  OR device-&gt;AssignedDevice</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">PRT-10-Participation Device</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Medicine administration instructions to the patient/carer</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Provides details of how much of the medication was administered</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">component-&gt;SubstanceAdministrationEvent</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">The RMIM has priority code on the act relationship.  How do we handle this?</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.timing[x]</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">dateTime|Period</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">When dose(s) were given</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">The timing schedule for giving the medication to the patient.  This may be a single time point (using dateTime) or it may be a start and end dateTime (Period)</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">This is generally only relevant if the administration record represents a summary of multiple administrations</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">effectiveTime[TS or IVL_TS)</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RAS:TQ1</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Is this in the 80% for an administration record?  If so, need to explain how.&#10;2014/01/22 HG: Changed data type</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:Height="105">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.asNeeded[x]</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">boolean | CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">MedicationAsNeededReason</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Take &quot;as needed&quot; f(or x)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">boolean: precondition.negationInd (inversed - so negationInd = true means asNeeded=false&#10;&#10;CodeableConcept: precondition.observationEventCriterion[code=&quot;Assertion&quot;].value</Data></Cell>
+    <Cell ss:Index="14" ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.site</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">MedicationAdministrationSite</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Body site administered to</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">A coded specification of the anatomic site where the medication first entered the body.  E.g. &quot;left arm&quot;</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">approachSiteCode</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXR-2-Administration Site</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.route</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell><Data ss:Type="String">RouteOfAdministration</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Path of substance into body</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">A code specifying the route or physiological path of administration of a therapeutic agent into or onto the patient.   E.g. topical, intravenous, etc.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">routeCode</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXR-1-Route</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="90">
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.dosage.method</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"/>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s70"><Data ss:Type="String">MedicationAdministrationMethod</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">How drug was administered</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">A coded value indicating the method by which the medication was introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.&#10;&#10;Terminologies used often pre-coordinate this term with the route and or form of administration.</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">methodCode</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXR-4-Administration Method</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="135">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.quantity</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">Quantity</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Amount administered in one dose</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.  </Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">If the administration is not instantaneous (rate is present or timing has a duration), this can be specified to convey the total amount administered over period of time of a single administration (as indicated by schedule)</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">doseQuantity</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-6-Administered Amount / RXA-7.1-Administered Units.code / RXA-7.3-Administered Units.name of coding system (uri&lt;-&gt;code system mapping required)&#10;</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.rate</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">Ratio</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Dose quantity per unit of time</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Identifies the speed with which the medication was introduced into the patient. Typically the rate for an infusion e.g. 200ml in 2 hours.  May also expressed as a rate per unit of time such as 100ml per hour - the duration is then not specified, or is specified in the quantity.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">If the rate changes over time, each change should be captured as a distinct &quot;dosage&quot; repetition.  This element should *not* be used to convey an average rate.</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">rateQuantity</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">RXA-12-Administered Per (Time Unit)</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell><Data ss:Type="String">MedicationAdministration.dosage.maxDosePerPeriod</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell><Data ss:Type="String">Ratio</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">Total dose that was consumed per unit of time</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">The maximum total quantity of a therapeutic substance that was administered to the patient over the specified period of time. E.g. 1000mg in 24 hours.</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">maxDoseQuantity</Data></Cell>
+    <Cell><Data ss:Type="String">RXE-4-Give Amount - Maximum / RXE-5-Give Units</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">How is this relevant when capturing an administration already performed?  Is it in the 80%?</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s77" ss:DefaultRowHeight="15">
+   <Column ss:Index="3" ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="153"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="166.5"/>
+   <Column ss:Index="6" ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="288.75"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s67">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="60">
+    <Cell ss:StyleID="s72"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Dose</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">MedicationAdministration.dosage</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">SHALL have at least one of dosage.quantity and dosage.rate</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">exists(f:quantity) or exists(f:rate)</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s72"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Not given reason</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Reason not given is only permitted if wasNotGiven is true</Data></Cell>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s71"><Data ss:Type="String">not(exists(f:reasonNotGiven)) or f:wasNotGiven='true'</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s66"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+    <Cell ss:StyleID="s72"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s79" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s79" ss:AutoFitWidth="0" ss:Width="210" ss:Span="1"/>
+   <Column ss:Index="3" ss:StyleID="s80" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:Index="5" ss:StyleID="s79" ss:Width="157.5" ss:Span="1"/>
+   <Column ss:Index="7" ss:StyleID="s79" ss:AutoFitWidth="0" ss:Width="74.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="33">
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Category</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Notes</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell ss:StyleID="s81"><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration-Update</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Consequence</Data></Cell>
+    <Cell><Data ss:Type="String">Update a Medication Administration record.</Data></Cell>
+    <Cell ss:StyleID="s80"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="51">
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration-Nullification</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Consequence</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Someone wishes to record that the record of administration of a medication is in error and should be ignored.</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration-Complete</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Consequence</Data></Cell>
+    <Cell><Data ss:Type="String">Change the status of a Medication Administration to show that it is complete.</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration-Recording</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">Consequence</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Indicates that a medication has been recorded against the patient's record</Data></Cell>
+    <Cell ss:Index="5" ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">MedicationAdministration</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="40" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="116.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="382.5"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="338.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="16.5" ss:StyleID="s67">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">device</Data></Cell>
+    <Cell><Data ss:Type="String">Return administrations with this administration device identity</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.device</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">encounter</Data></Cell>
+    <Cell><Data ss:Type="String">Return administrations that share this encounter</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s85"><Data ss:Type="String">MedicationAdministration.encounter</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">identifier</Data></Cell>
+    <Cell><Data ss:Type="String">Return administrations with this external identity</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.identifier</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">medication</Data></Cell>
+    <Cell><Data ss:Type="String">Return administrations of this medication</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s85"><Data ss:Type="String">MedicationAdministration.medication</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">notgiven</Data></Cell>
+    <Cell><Data ss:Type="String">Administrations that were not made</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.wasNotGiven</Data></Cell>
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">patient</Data></Cell>
+    <Cell><Data ss:Type="String">The identity of a patient to list administrations  for</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.patient</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">prescription</Data></Cell>
+    <Cell><Data ss:Type="String">The identity of a prescription to list administrations from</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.prescription</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">status</Data></Cell>
+    <Cell><Data ss:Type="String">MedicationAdministration event status (for example one of active/paused/completed/nullified)</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.status</Data></Cell>
+    <Cell ss:StyleID="s84"/>
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">whengiven</Data></Cell>
+    <Cell><Data ss:Type="String">Date of administration</Data></Cell>
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministration.whenGiven</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="9" ss:StyleID="s66"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="18" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:Width="209.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="221.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="90"/>
+   <Column ss:AutoFitWidth="0" ss:Width="81.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="201.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="274.5"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.75">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s87" ss:HRef="#Sheet7!A1"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Example</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s83"><Data ss:Type="String">MedicationAdministrationStatus</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">A set of codes indicating the current status of a MedicationAdministration</Data></Cell>
+    <Cell ss:StyleID="s79"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">#medication-admin-status</Data></Cell>
+    <Cell ss:StyleID="s88"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"><Data ss:Type="String">MedicationAdministrationNegationReason</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">A set of codes indicating the reason why the MedicationAdministration is negated.</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Y</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">value set</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">valueset-reason-medication-not-given-codes</Data></Cell>
+    <Cell ss:StyleID="s80"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"/>
+    <Cell ss:StyleID="s82"/>
+    <Cell ss:StyleID="s79"/>
+    <Cell ss:StyleID="s80"/>
+    <Cell ss:Index="6" ss:StyleID="s80"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="3" ss:StyleID="s79"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+    <Cell ss:Index="3" ss:StyleID="s79"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+    <Cell ss:Index="3" ss:StyleID="s79"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+    <Cell ss:Index="3" ss:StyleID="s79"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s89"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s83"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>7</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="medication-admin-status">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s80" ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s80" ss:AutoFitWidth="0" ss:Width="33.75"/>
+   <Column ss:StyleID="s80" ss:Width="80.25"/>
+   <Column ss:StyleID="s80" ss:AutoFitWidth="0" ss:Width="330"/>
+   <Column ss:StyleID="s80" ss:Width="76.5"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Id</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s67"><Data ss:Type="String">RIM Equivalent</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s90"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">in progress</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">The administration has started but has not yet completed.</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="38.25">
+    <Cell ss:StyleID="s90"><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">on hold</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called &quot;suspended&quot;.</Data></Cell>
+    <Cell><Data ss:Type="String">Suspended</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="25.5">
+    <Cell ss:StyleID="s90"><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">completed</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">All actions that are implied by the administration have occurred.</Data></Cell>
+    <Cell><Data ss:Type="String">Completed</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s90"><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">entered in error</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">The administration was entered in error and therefore nullified.</Data></Cell>
+    <Cell><Data ss:Type="String">Nullified</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="25.5">
+    <Cell ss:StyleID="s90"><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">stopped</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">Actions implied by the administration have been permanently halted, before all of them occurred.</Data></Cell>
+    <Cell><Data ss:Type="String">Aborted</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>300</HorizontalResolution>
+    <VerticalResolution>300</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R6C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>RESTful Client - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<!-- The body of the document contains a number of sections -->
+		<section name="Creating a RESTful Client">
+
+			<macro name="toc">
+			</macro>
+
+			<p>
+				HAPI provides a built-in mechanism for connecting to FHIR RESTful
+				servers.
+				The HAPI RESTful client is designed to be easy to set up and
+				to allow strong
+				compile-time type checking wherever possible.
+			</p>
+
+			<p>
+				There are two types of clients provided by HAPI: Generic and Annotation-driven.
+				The generic client (introduced in HAPI-FHIR 0.3) is much simpler to create
+				and generally provides the faster way to get started. The annotation-driven
+				client can rely on code generation and static binding to specific operations to 
+				give better	compile-time checking against servers with a specific set of capabilities
+				exposed. 
+			</p>
+
+		</section>
+		
+		<section name="The Generic Client">
+		
+			<p>
+				Creating a generic client simply requires you to create an instance of
+				<code>FhirContext</code> and use that to instantiate a client.
+			</p>			
+			<p>
+				The following example shows how to create a client, and a few operations which
+				can be performed.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="simple" />
+				<param name="file"
+					value="examples/src/main/java/example/GenericClientExample.java" />
+			</macro>
+			
+			<p> 
+				<b>Performance Tip: </b> Note that FhirContext is an expensive object to create,
+				so you should try to keep an instance around for the lifetime of your application. It
+				is thread-safe so it can be passed as needed. Client instances, on the other hand, 
+				are very inexpensive to create so you can create a new one for each request if needed 
+				(although there is no requirement to do so, clients are reusable and thread-safe as well).  
+			</p>
+
+			<subsection name="Fluent Operations">
+				<p>
+					The generic client supports queries using a fluent interface
+					which is inspired by the fantastic 
+					<a href="http://ewoutkramer.github.io/fhir-net-api/client-search.html">.NET FHIR API</a>.
+					The fluent interface allows you to construct powerful queries by chaining
+					method calls together, leading to highly readable code. It also allows
+					you to take advantage of intellisense/code completion in your favourite
+					IDE.
+				</p>
+				<p>
+					Note that most fluent operations end with an <code>execute()</code>
+					statement which actually performs the invocation. You may also invoke
+					several configuration operations just prior to the execute() statement,
+					such as <code>encodedJson()</code> or <code>encodedXml()</code>.
+				</p>
+			</subsection>
+						
+			<subsection name="Type - Search/Query">
+				
+				<p>
+					Searching for resources is probably the most common initial scenario for
+					client applications, so we'll start the demonstration there.
+				</p>
+				<p>
+					The following example shows how to query using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="search" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<h4>Search - Multi-valued Parameters (ANY/OR)</h4>
+				<p>
+					To search for a set of possible values where <b>ANY</b> should be matched, 
+					you can provide multiple values to a parameter, as shown in the example below.
+					This leads to a URL resembling <code>?family=Smith,Smyth</code> 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchOr" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Multi-valued Parameters (ALL/AND)</h4>
+				<p>
+					To search for a set of possible values where <b>ALL</b> should be matched,
+					you can provide multiple instances of a marameter, as shown in the example below.
+					This leads to a URL resembling <code>?address=Toronto&amp;address=Ontario&amp;address=Canada</code> 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchOr" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Paging</h4>
+				<p>
+					If the server supports paging results, the client has a page method
+					which can be used to load subsequent pages.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchPaging" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<h4>Search - Composite Parameters</h4>
+				<p>
+					If a composite parameter is being searched on, the parameter
+					takes a "left" and "right" operand, each of which is
+					a parameter from the resource being seached. The following example shows the
+					syntax.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchComposite" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<h4>Search - Other Query Options</h4>
+				<p>
+					The fluent search also has methods for sorting, limiting, specifying
+					JSON encoding, etc.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchAdv" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Using HTTP POST or GET with _search</h4>
+				<p>
+					The FHIR specification allows several styles of search (HTTP POST, a GET with _search at the end of the URL, etc.)
+					The <code>usingStyle()</code> method controls which style to use. By default, GET style is used
+					unless the client detects that the request would result in a very long URL (over 8000 chars) in which
+					case the client automatically switches to POST.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchPost" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+
+				<h4>Search - Compartments</h4>
+				<p>
+					To search a 
+					<a href="http://www.hl7.org/implement/standards/fhir/extras.html#compartment">resource compartment</a>, 
+					simply use the <code>withIdAndCompartment</code>
+					method in your search. 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="searchCompartment" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+			</subsection>			
+
+			<subsection name="Type - Create">
+				<p>
+					The following example shows how to perform a create
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="create" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Instance - Read / VRead">
+				<p>
+					Given a resource name and ID, it is simple to retrieve
+					the latest version of that resource (a 'read')
+				</p>
+				<macro name="snippet">
+					<param name="id" value="read" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					By adding a version string, it is also possible to retrieve a 
+					specific version (a 'vread')
+				</p>
+				<macro name="snippet">
+					<param name="id" value="vread" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				<p>
+					It is also possible to retrieve a resource given its absolute
+					URL (this will override the base URL set on the client) 
+				</p>
+				<macro name="snippet">
+					<param name="id" value="readabsolute" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Instance - Delete">
+				<p>
+					The following example shows how to perform a delete
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="delete" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Instance - Update">
+				<p>
+					Updating a resource is similar to creating one, except that
+					an ID must be supplied since you are updating a previously
+					existing resource instance.
+				</p>
+				<p>
+					The following example shows how to perform an update
+					operation using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="update" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+
+			<subsection name="Server - Conformance">
+				<p>
+					To retrieve the server's conformance statement, simply call the <code>conformance()</code>
+					method as shown below.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="conformance" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+			
+			<subsection name="Server - Transaction">
+				<p>
+					The following example shows how to execute a transaction using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="transaction" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>			
+			
+		</section>
+		
+		<section name="The Annotation-Driven Client">
+
+			<p>
+				HAPI also provides a second style of client, called the <b>annotation-driven</b> client.
+			</p>
+
+			<p>
+				The design of the annotation-driven client
+				is intended to be similar to that of
+				JAX-WS, so users of that
+				specification should be comfortable with
+				this one. It uses a user-defined interface containing special
+				annotated methods which HAPI binds to calls against a server.
+			</p>
+
+			<p>
+				The annotation-driven client is particularly useful if you have a server that
+				exposes a set of specific operations (search parameter combinations, named queries, etc.)
+				and you want to let developers have a stongly/statically typed interface to that
+				server.
+			</p>
+			<p>
+				There is no difference in terms of capability between the two styles of 
+				client. There is simply a difference in programming style and complexity. It
+				is probably safe to say that the generic client is easier to use and leads to
+				more readable code, at the expense of not giving any visibility into the 
+				specific capabilities of the server you are interacting with.  
+			</p>
+			
+			<subsection name="Defining A Restful Client Interface">
+
+				<p>
+					The first step in creating an annotation-driven client is to define a
+					restful client interface.
+				</p>
+
+				<p>
+					A restful client interface class must extend the
+					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>
+					interface,
+					and will contain one or more methods which have been
+					annotated with special annotations indicating which RESTful
+					operation
+					that method supports. Below is a simple example of a
+					resource provider
+					which supports the
+					<a href="http://hl7.org/implement/standards/fhir/http.html#read">read</a>
+					operation (i.e. retrieve a single resource by ID) as well as the
+					<a href="http://hl7.org/implement/standards/fhir/http.html#search">search</a>
+					operation (i.e. find any resources matching a given criteria) for a
+					specific
+					search criteria.
+				</p>
+
+				<p>
+					You may notice that this interface looks a lot like the Resource
+					Provider
+					which is defined for use by the RESTful server. In fact, it
+					supports all
+					of the same annotations and is essentially identical,
+					other than the
+					fact that for a client you must use an interface but for a server you
+					must use a concrete class with method implementations.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="provider" />
+					<param name="file"
+						value="examples/src/main/java/example/IRestfulClient.java" />
+				</macro>
+
+				<p>
+					You will probably want to add more methods
+					to your client interface.
+					See
+					<a href="./doc_rest_operations.html">RESTful Operations</a>
+					for
+					lots more examples of how to add methods for various operations.
+				</p>
+
+			</subsection>
+
+			<subsection name="Instantiate the Client">
+
+				<p>
+					Once your client interface is created, all that is left is to
+					create a FhirContext and instantiate the client and you are
+					ready to
+					start using it.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="client" />
+					<param name="file"
+						value="examples/src/main/java/example/ExampleRestfulClient.java" />
+				</macro>
+
+			</subsection>
+
+			<subsection name="Configuring Encoding (JSON/XML)">
+
+				<p>
+					Restful client interfaces that you create will also extend
+					the interface 
+					<a href="./apidocs/ca/uhn/fhir/rest/client/api/IRestfulClient.html">IRestfulClient</a>,
+					which comes with some helpful methods for configuring the way that
+					the client will interact with the server.
+				</p>
+				<p>
+					The following snippet shows how to configure the cliet to explicitly 
+					request JSON or XML responses, and how to request "pretty printed" responses
+					on servers that support this (HAPI based servers currently).				
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="clientConfig" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+
+			</subsection>
+						
+			<subsection name="A Complete Example">
+	
+				<p>
+					The following is a complete example showing a RESTful client
+					using
+					HAPI FHIR.
+				</p>
+	
+				<macro name="snippet">
+					<param name="id" value="client" />
+					<param name="file"
+						value="examples/src/main/java/example/CompleteExampleClient.java" />
+				</macro>
+				
+			</subsection>
+			
+		</section>
+
+		<section name="Configuring the HTTP Client">
+		
+			<p>
+				RESTful clients (both Generic and Annotation-Driven) use 
+				<a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
+				as a provider. The Apache HTTP Client is very powerful and extremely flexible, 
+				but can be confusing at first to configure, because of the low-level approach that
+				the library uses. 
+			</p>
+
+			<p>
+				In many cases, the default configuration should suffice. However, if you require anything
+				more sophisticated (username/password, HTTP proxy settings, etc.) you will need
+				to configure the underlying client. 
+			</p>
+			
+			<p>
+				The underlying client configuration is provided by accessing the
+				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html">IRestfulClientFactory</a>
+				class from the FhirContext.
+			</p>
+		
+			<p>
+				Note that individual requests and responses
+				can be tweaked using <a href="./doc_rest_client_interceptor.html">Client Interceptors</a>.
+			</p>
+					
+			<subsection name="Configuring an HTTP Proxy">
+			
+				<p>
+					The following example shows how to configure the use of an HTTP
+					proxy in the client.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="proxy" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+			
+			</subsection>
+						
+		</section>
+
+	</body>
+
+</document>

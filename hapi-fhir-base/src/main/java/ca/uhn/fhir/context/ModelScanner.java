@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +45,7 @@ import java.util.TreeSet;
 
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
@@ -64,10 +65,8 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -91,17 +90,22 @@ class ModelScanner {
 
 	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 
-	ModelScanner(Class<? extends IResource> theResourceTypes) throws ConfigurationException {
+	private FhirContext myContext;
+
+	ModelScanner(FhirContext theContext, Class<? extends IResource> theResourceTypes) throws ConfigurationException {
+		myContext=theContext;
 		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
 		singleton.add(theResourceTypes);
 		init(null, singleton);
 	}
 
-	ModelScanner(Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+	ModelScanner(FhirContext theContext, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+		myContext=theContext;
 		init(null, new HashSet<Class<? extends IElement>>(theResourceTypes));
 	}
 
-	ModelScanner(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+	ModelScanner(FhirContext theContext, Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+		myContext=theContext;
 		init(theExistingDefinitions, new HashSet<Class<? extends IElement>>(theResourceTypes));
 	}
 
@@ -479,7 +483,7 @@ class ModelScanner {
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (choiceTypes.size() > 1 && !ResourceReferenceDt.class.isAssignableFrom(nextElementType)) {
+			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a choice element
 				 */
@@ -514,7 +518,7 @@ class ModelScanner {
 				List<Class<? extends IResource>> refTypesList = new ArrayList<Class<? extends IResource>>();
 				for (Class<? extends IElement> nextType : childAnnotation.type()) {
 					if (IResource.class.isAssignableFrom(nextType) == false) {
-						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + ResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
+						throw new ConfigurationException("Field '" + next.getName() + "' in class '" + next.getDeclaringClass().getCanonicalName() + "' is of type " + BaseResourceReferenceDt.class + " but contains a non-resource type: " + nextType.getCanonicalName());
 					}
 					refTypesList.add((Class<? extends IResource>) nextType);
 					addScanAlso(nextType);
@@ -551,7 +555,7 @@ class ModelScanner {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}
 				} else {
-					if (nextElementType.equals(BoundCodeableConceptDt.class)) {
+					if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
 					} else if (NarrativeDt.class.getSimpleName().equals(nextElementType.getSimpleName())) {
@@ -649,7 +653,7 @@ class ModelScanner {
 			}
 		}
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(resourceName, theClass, resourceDefinition);
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			myNameToResourceDefinitions.put(resourceName, resourceDef);

@@ -20,42 +20,41 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 public class ValidationFailureException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
-	private OperationOutcome myOperationOutcome;
+	private BaseOperationOutcome myOperationOutcome;
 
-	public ValidationFailureException(String theProblem) {
-		this(theProblem, IssueSeverityEnum.FATAL, null);
-	}
+//	public ValidationFailureException(String theProblem) {
+//		this(theProblem, IssueSeverityEnum.FATAL, null);
+//	}
 
-	private static String toDescription(OperationOutcome theOo) {
+	private static String toDescription(BaseOperationOutcome theOo) {
 		StringBuilder b = new StringBuilder();
-		b.append(theOo.getIssueFirstRep().getDetails().getValue());
-		b.append(" - ");
-		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
+		b.append(theOo.getIssueFirstRep().getDetailsElement().getValue());
+//		b.append(" - ");
+//		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
 		return b.toString();
 	}
 
-	public ValidationFailureException(String theProblem, Exception theCause) {
-		this(theProblem, IssueSeverityEnum.FATAL, theCause);
-	}
+//	public ValidationFailureException(String theProblem, Exception theCause) {
+//		this(theProblem, IssueSeverityEnum.FATAL, theCause);
+//	}
 
-	public ValidationFailureException(String theProblem, IssueSeverityEnum theSeverity, Exception theCause) {
-		super(theProblem, theCause);
-		myOperationOutcome = new OperationOutcome();
-		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
-	}
+//	public ValidationFailureException(String theProblem, IssueSeverityEnum theSeverity, Exception theCause) {
+//		super(theProblem, theCause);
+//		myOperationOutcome = new OperationOutcome();
+//		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
+//	}
 
-	public ValidationFailureException(OperationOutcome theOperationOutcome) {
+	public ValidationFailureException(BaseOperationOutcome theOperationOutcome) {
 		super(toDescription(theOperationOutcome));
 		myOperationOutcome = theOperationOutcome;
 	}
 
-	public OperationOutcome getOperationOutcome() {
+	public BaseOperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
 	}
 

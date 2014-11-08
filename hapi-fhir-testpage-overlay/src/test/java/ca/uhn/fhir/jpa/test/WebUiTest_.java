@@ -43,9 +43,9 @@ import ca.uhn.test.jpasrv.OrganizationResourceProvider;
 import ca.uhn.test.jpasrv.PatientResourceProvider;
 import ca.uhn.test.jpasrv.QuestionnaireResourceProvider;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+//import com.gargoylesoftware.htmlunit.BrowserVersion;
+//import com.gargoylesoftware.htmlunit.WebClient;
+//import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 public class WebUiTest_ {
 
@@ -57,17 +57,17 @@ private static ClassPathXmlApplicationContext appCtx;
 //	@Test
 	public void homePage() throws Exception {
 		
-	    final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
-	    final HtmlPage page = webClient.getPage("http://localhost:8888/");
-	    Assert.assertEquals("HtmlUnit - Welcome to HtmlUnit", page.getTitleText());
-
-	    final String pageAsXml = page.asXml();
-	    Assert.assertTrue(pageAsXml.contains("<body class=\"composite\">"));
-
-	    final String pageAsText = page.asText();
-	    Assert.assertTrue(pageAsText.contains("Support for the HTTP and HTTPS protocols"));
-
-	    webClient.closeAllWindows();
+//	    final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+//	    final HtmlPage page = webClient.getPage("http://localhost:8888/");
+//	    Assert.assertEquals("HtmlUnit - Welcome to HtmlUnit", page.getTitleText());
+//
+//	    final String pageAsXml = page.asXml();
+//	    Assert.assertTrue(pageAsXml.contains("<body class=\"composite\">"));
+//
+//	    final String pageAsText = page.asText();
+//	    Assert.assertTrue(pageAsText.contains("Support for the HTTP and HTTPS protocols"));
+//
+//	    webClient.closeAllWindows();
 	}
 	
 	@SuppressWarnings("unchecked")

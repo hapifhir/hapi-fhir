@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Download - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Downloading HAPI FHIR">
+
+			<p>
+				<b>Important note to users of HAPI 0.7 and before:</b> The section below
+				references "hapi-fhir-structures-dstu-[version].jar", which was added for
+				HAPI 0.8 (and this version has not yet been released). If you are using HAPI 
+				FHIR 0.7 or before, you only need to include the <code>hapi-fhir-base</code>
+				JAR, not the structures one. 
+			</p>
+
+			<p>
+				To use HAPI in your application, at a minimum you need to include the HAPI-FHIR core
+				JAR <code>hapi-fhir-base-[version].jar</code>, as well as at least one "structures" JAR.
+				The structures JAR contains classes with the resource and datatype definitions for a given
+				version of FHIR. At this time, the only official release of FHIR is the "DSTU1" release,
+				which is available by including the <code>hapi-fhir-structures-dstu-[version].jar</code>.
+			</p>
+			<p>
+				If you use Maven, you can include these JARs with the following dependency tags:
+			</p>
+			<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-base</artifactId>
+   <version>${project.version}</version>
+</dependency>
+<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-structures-dstu</artifactId>
+   <version>${project.version}</version>
+</dependency>]]></source>
+			
+			<subsection name="Supporting DEV Resources">
+			
+				<p>
+					HAPI also has a <code>hapi-fhir-structures-dev-[version].jar</code>, which 
+					contains the latest versions of the releases. You can include this JAR on
+					your classpath if you want to use resources that were created or updated by
+					HL7 after the DSTU1 release. Be warned though that using these resources
+					<b>can lead to incompatibility</b> between your application and other applications
+					if those applications use libraries that do not support DEV resources.
+				</p>
+				
+				<p>
+					If you are using Maven, ad the following dependency to include DEV resources:
+				</p>
+			<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-structures-dev</artifactId>
+   <version>${project.version}</version>
+</dependency>]]></source>
+				
+			</subsection>
+			
+			<subsection name="Non-Maven Users">
+				
+				<p>
+					Non-maven users can grab the binary releases from the
+					<a href="https://github.com/jamesagnew/hapi-fhir/releases">GitHub Release Section</a>.
+				</p>
+			
+			</subsection>
+
+		</section>
+
+		<section name="Using Snapshot Builds">
+			
+			<p>
+				Snapshot builds of HAPI are pre-release builds which can contain
+				fixes and new features not yet released in a formal release. To use 
+				snapshot builds of HAPI you may need to add a reference to the OSS snapshot
+				repository to your project pom.xml:
+			</p>
+			
+			<source><![CDATA[<repositories>
+	<repository>
+		<id>oss-snapshots</id>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+		<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+	</repository>
+</repositories>]]></source>
+
+			<p>
+				Non Maven users can often also find snapshot builds in the Maven repository
+				manually by searching
+				<a href="https://oss.sonatype.org/content/repositories/snapshots/ca/uhn/hapi/fhir/">here</a>.
+			</p>
+			
+		</section>
+
+		<section name="Dependencies">
+			
+			<p>
+				The HAPI-FHIR library depends on other libraries to provide specific functionality.
+				Some of those libraries are listed here:
+			</p>
+			
+			<subsection name="Logging (SLF4j, Logback, etc.)">
+				
+				<p>
+					HAPI requires SLF4j for logging support, and it is recommended to include
+					an underlying logging framework such as Logback. See the
+					<a href="./doc_logging.html">logging documentation</a> for
+					more information.
+				</p>
+			
+			</subsection>
+
+			<subsection name="StAX / Woodstox">
+				
+				<p>
+					XML processing (for resource marshalling and unmarshalling) uses the
+					Java StAX API, which is a fast and efficient API for XML processing.
+					HAPI bundles (for release archives) and depends on (for Maven builds)
+					the <a href="http://woodstox.codehaus.org/">Woodstox</a> library, which
+					is a good implementation of StAX.  
+				</p>				
+				<p>
+					Upon starting up, HAPI will emit a log line indicating which StAX implementation
+					is being used, e.g:
+				</p>
+				<source>08:01:32.044 [main] INFO  ca.uhn.fhir.util.XmlUtil - FHIR XML procesing will use StAX implementation 'Woodstox XML-processor' version '4.4.0'</source>
+				<p>
+					If a different implementation is being used, you may want to consider using
+					Woodstox instead by setting the following system properties:	
+				</p>				
+				<source>System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+System.setProperty("javax.xml.stream.XMLEventFactory", "com.ctc.wstx.stax.WstxEventFactory");</source>
+
+			</subsection>
+			
+			<subsection name="Phloc-Schematron">
+			
+				<p>
+					If you are using the 
+					<a href="./doc_validation.html">Schematron Validatioon</a>
+					module, you will also need to include the Phloc library on your 
+					classpath. 
+				</p>
+				<p>
+					If you are using Maven, this library is not added by default (it is
+					marked as an optional dependency) since not all applications need Schematron
+					support. As a result you will need to manually add the following 
+					dependencies to your project POM.xml
+				</p>			
+				<source><![CDATA[<dependency>
+    <groupId>com.phloc</groupId>
+    <artifactId>phloc-schematron</artifactId>
+    <version>${phloc_schematron_version}</version>
+</dependency>
+<dependency>
+    <groupId>com.phloc</groupId>
+    <artifactId>phloc-commons</artifactId>
+    <version>${phloc_commons_version}</version>
+</dependency>]]></source>
+
+			</subsection>
+			
+			
+		</section>
+
+	</body>
+
+</document>

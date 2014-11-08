@@ -50,7 +50,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 	
 	@Override
 	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		getComparator().setValue(null);
+		getComparatorElement().setValue(null);
 		setCode( null);
 		setSystem(null);
 		setUnits( null);
@@ -62,16 +62,16 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 		String[] parts = theValue.split("\\|");
 		if (parts.length > 0 && StringUtils.isNotBlank(parts[0])) {
 			if (parts[0].startsWith("<=")) {
-				getComparator().setValue(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS.getCode());
+				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS.getCode());
 				setValue(new BigDecimal(parts[0].substring(2)));
 			} else if (parts[0].startsWith("<")) {
-				getComparator().setValue(QuantityCompararatorEnum.LESSTHAN.getCode());
+				getComparatorElement().setValue(QuantityCompararatorEnum.LESSTHAN.getCode());
 				setValue(new BigDecimal(parts[0].substring(1)));
 			} else if (parts[0].startsWith(">=")) {
-				getComparator().setValue(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS.getCode());
+				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS.getCode());
 				setValue(new BigDecimal(parts[0].substring(2)));
 			} else if (parts[0].startsWith(">")) {
-				getComparator().setValue(QuantityCompararatorEnum.GREATERTHAN.getCode());
+				getComparatorElement().setValue(QuantityCompararatorEnum.GREATERTHAN.getCode());
 				setValue(new BigDecimal(parts[0].substring(1)));
 			} else {
 				setValue(new BigDecimal(parts[0]));
@@ -96,24 +96,24 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
-	public abstract BoundCodeDt<?> getComparator();
+	public abstract BoundCodeDt<?> getComparatorElement();
 
 	@Override
 	public String getValueAsQueryToken() {
 		StringBuilder b= new StringBuilder();
-		if (getComparator() != null) {
-			b.append(getComparator().getValue());
+		if (getComparatorElement() != null) {
+			b.append(getComparatorElement().getValue());
 		}
-		if (!getValue().isEmpty()) {
-			b.append(getValue().getValueAsString());
-		}
-		b.append('|');
-		if (!getSystem().isEmpty()) {
-		b.append(getSystem().getValueAsString());
+		if (!getValueElement().isEmpty()) {
+			b.append(getValueElement().getValueAsString());
 		}
 		b.append('|');
-		if (!getUnits().isEmpty()) {
-		b.append(getUnits().getValueAsString());
+		if (!getSystemElement().isEmpty()) {
+		b.append(getSystemElement().getValueAsString());
+		}
+		b.append('|');
+		if (!getUnitsElement().isEmpty()) {
+		b.append(getUnitsElement().getValueAsString());
 		}
 		
 		return b.toString();
@@ -150,7 +150,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public abstract UriDt getSystem();
+	public abstract UriDt getSystemElement();
 
 	
 
@@ -174,7 +174,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * A computer processable form of the units in some unit representation system
      * </p> 
 	 */
-	public abstract CodeDt getCode();
+	public abstract CodeDt getCodeElement();
 
  	/**
 	 * Sets the value for <b>code</b> (Coded form of the unit)
@@ -195,7 +195,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * A human-readable form of the units
      * </p> 
 	 */
-	public abstract StringDt getUnits() ;
+	public abstract StringDt getUnitsElement() ;
 	/**
 	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
 	 * creating it if it does
@@ -206,5 +206,5 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public abstract DecimalDt getValue();
+	public abstract DecimalDt getValueElement();
 }

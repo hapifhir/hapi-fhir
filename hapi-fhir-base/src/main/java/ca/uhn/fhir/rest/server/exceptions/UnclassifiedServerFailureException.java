@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 /*
  * #%L
@@ -49,7 +49,7 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 	 *            The message to add to the status line
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, OperationOutcome theOperationOutcome) {
+	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 

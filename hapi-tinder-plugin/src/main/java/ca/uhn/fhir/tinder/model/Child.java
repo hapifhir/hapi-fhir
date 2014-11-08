@@ -1,11 +1,14 @@
 package ca.uhn.fhir.tinder.model;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
@@ -38,11 +41,10 @@ public abstract class Child extends BaseElement {
 			return getCardMax();
 		}
 	}
-	
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"[" + getName() + "]";
+		return getClass().getSimpleName() + "[" + getName() + "]";
 	}
 
 	/**
@@ -62,9 +64,9 @@ public abstract class Child extends BaseElement {
 		if ("Class".equals(elementName)) {
 			elementName = "ClassElement";
 		}
-//		if ("Language".equals(elementName)) {
-//			elementName = "LanguageElement";
-//		}
+		// if ("Language".equals(elementName)) {
+		// elementName = "LanguageElement";
+		// }
 		return elementName;
 	}
 
@@ -75,7 +77,7 @@ public abstract class Child extends BaseElement {
 		} else if (this.getType().size() == 1 || this instanceof ResourceBlock) {
 			if (isBoundCode()) {
 				retVal = "Bound" + getSingleType() + "<" + getBindingClass() + ">";
-			}else {
+			} else {
 				retVal = getSingleType();
 			}
 		} else {
@@ -96,7 +98,7 @@ public abstract class Child extends BaseElement {
 	public String getReferenceTypeForConstructor() {
 		return getReferenceType().replaceAll("^java.util.List<", "java.util.ArrayList<");
 	}
-	
+
 	public List<String> getReferenceTypesForMultiple() {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (String next : getType()) {
@@ -104,11 +106,11 @@ public abstract class Child extends BaseElement {
 				next = "IResource";
 			}
 			retVal.add(next);
-//			retVal.add(next + getTypeSuffix());
+			// retVal.add(next + getTypeSuffix());
 		}
 		return retVal;
 	}
-	
+
 	public List<SimpleSetter> getSimpleSetters() {
 		if (isBoundCode()) {
 			return Collections.emptyList();
@@ -120,11 +122,11 @@ public abstract class Child extends BaseElement {
 		String retVal;
 		String elemName = this.getType().get(0);
 		elemName = elemName.substring(0, 1).toUpperCase() + elemName.substring(1);
-//		if (this instanceof ResourceBlock) {
-			retVal = (elemName);
-//		} else {
-//			retVal = (elemName + getTypeSuffix());
-//		}
+		// if (this instanceof ResourceBlock) {
+		retVal = (elemName);
+		// } else {
+		// retVal = (elemName + getTypeSuffix());
+		// }
 		return retVal;
 	}
 
@@ -144,6 +146,36 @@ public abstract class Child extends BaseElement {
 		return false;
 	}
 
+	public boolean isPrimitive() {
+		
+		if (IDatatype.class.getSimpleName().equals(getReferenceType())) {
+			return false;
+		}
+		
+		try {
+			String name = "ca.uhn.fhir.model.primitive." + getSingleType();
+			Class.forName(name);
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
+	public String getPrimitiveType() throws ClassNotFoundException {
+		String name = "ca.uhn.fhir.model.primitive." + getSingleType();
+		Class<?> clazz = Class.forName(name);
+		while (!clazz.getSuperclass().equals(BasePrimitive.class)) {
+			clazz = clazz.getSuperclass();
+			if (clazz.equals(Object.class)) {
+				throw new Error("Parent of " + name + " is not BasePrimitive");
+			}
+		}
+
+		ParameterizedType type = (ParameterizedType) clazz.getGenericSuperclass();
+		Class<?> rawType = (Class<?>) type.getActualTypeArguments()[0];
+		return rawType.getSimpleName();
+	}
+
 	public boolean isBoundCode() {
 		String singleType = getSingleType();
 		if ("CodeDt".equals(singleType) || "CodeableConceptDt".equals(singleType)) {
@@ -161,6 +193,5 @@ public abstract class Child extends BaseElement {
 	public boolean isSingleChildInstantiable() {
 		return true;
 	}
-
 
 }

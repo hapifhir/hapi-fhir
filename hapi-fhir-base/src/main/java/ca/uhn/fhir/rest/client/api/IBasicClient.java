@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.rest.annotation.Metadata;
 
 /**
@@ -35,6 +35,6 @@ public interface IBasicClient extends IRestfulClient {
 	 * @see See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
 	 */
 	@Metadata
-	Conformance getServerConformanceStatement();
+	BaseConformance getServerConformanceStatement();
 
 }

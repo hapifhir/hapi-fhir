@@ -1,13 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.7</version>
+		<version>0.8-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
+
 	<repositories>
 		<repository>
 			<id>maven.java.net</id>
@@ -19,22 +20,12 @@
 			</releases>
 			<url>https://maven.java.net/service/local/repositories/snapshots/content/</url>
 		</repository>
-		<!-- 
-		<repository>
-			<id>UOM</id>
-			<url>https://github.com/unitsofmeasurement/repository</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</repository>
-		<repository>
-            <id>maven-geotoolkit.org</id>
-            <name>GeoToolkit Repository for Maven</name>
-            <url>http://maven.geotoolkit.org/</url> 
-        </repository>
-         -->
+		<!-- <repository> <id>UOM</id> <url>https://github.com/unitsofmeasurement/repository</url> 
+			<releases> <enabled>true</enabled> </releases> </repository> <repository> 
+			<id>maven-geotoolkit.org</id> <name>GeoToolkit Repository for Maven</name> 
+			<url>http://maven.geotoolkit.org/</url> </repository> -->
 	</repositories>
-	
+
 	<artifactId>hapi-fhir-jpaserver-base</artifactId>
 	<packaging>jar</packaging>
 
@@ -44,7 +35,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.7</version>
+			<version>0.8-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -52,11 +43,16 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.8-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>jcl-over-slf4j</artifactId>
-		    <version>${slf4j_version}</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j_version}</version>
 		</dependency>
 
 		<dependency>
@@ -74,58 +70,25 @@
 
 		<!-- For UCUM -->
 		<dependency>
-		    <groupId>org.jscience</groupId>
-		    <artifactId>jscience</artifactId>
-		    <version>${jscience_version}</version>
+			<groupId>org.jscience</groupId>
+			<artifactId>jscience</artifactId>
+			<version>${jscience_version}</version>
 		</dependency>
-		
-		<!-- 
-		FHIR RI is pulled in for UCUM support, but we don't want any
-		of its dependencies.
-		-->
-		    	<!-- 
-		<dependency>
-		    <groupId>me.fhir</groupId>
-		    <artifactId>fhir-dstu1</artifactId>
-		    <version>0.0.81.2489</version>
-		    <exclusions>
-		    	<exclusion>
-		    		<artifactId>Saxon-HE</artifactId>
-		    		<groupId>net.sf.saxon</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>commons-discovery</artifactId>
-		    		<groupId>commons-discovery</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>commons-codec</artifactId>
-		    		<groupId>commons-codec</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>commons-logging</artifactId>
-		    		<groupId>commons-logging</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>xpp3</artifactId>
-		    		<groupId>xpp3</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>junit</artifactId>
-		    		<groupId>junit</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>jdom</artifactId>
-		    		<groupId>org.jdom</groupId>
-		    	</exclusion>
-		    	<exclusion>
-		    		<artifactId>gson</artifactId>
-		    		<groupId>com.google.code.gson</groupId>
-		    	</exclusion>
-		    </exclusions>
-		</dependency>
-		    	 -->
 
-				
+		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its 
+			dependencies. -->
+		<!-- <dependency> <groupId>me.fhir</groupId> <artifactId>fhir-dstu1</artifactId> 
+			<version>0.0.81.2489</version> <exclusions> <exclusion> <artifactId>Saxon-HE</artifactId> 
+			<groupId>net.sf.saxon</groupId> </exclusion> <exclusion> <artifactId>commons-discovery</artifactId> 
+			<groupId>commons-discovery</groupId> </exclusion> <exclusion> <artifactId>commons-codec</artifactId> 
+			<groupId>commons-codec</groupId> </exclusion> <exclusion> <artifactId>commons-logging</artifactId> 
+			<groupId>commons-logging</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> 
+			<groupId>xpp3</groupId> </exclusion> <exclusion> <artifactId>junit</artifactId> 
+			<groupId>junit</groupId> </exclusion> <exclusion> <artifactId>jdom</artifactId> 
+			<groupId>org.jdom</groupId> </exclusion> <exclusion> <artifactId>gson</artifactId> 
+			<groupId>com.google.code.gson</groupId> </exclusion> </exclusions> </dependency> -->
+
+
 		<!-- Test Database -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -145,16 +108,17 @@
 			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		
-		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> <version>2.3.2</version> </dependency> -->
+
+
+		<!-- <dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> 
+			<version>2.3.2</version> </dependency> -->
 
 		<!-- Spring -->
 		<dependency>
@@ -254,21 +218,21 @@
 			<version>1.1.0.Final</version>
 		</dependency>
 		<dependency>
-		   <groupId>javax.el</groupId>
-		   <artifactId>javax.el-api</artifactId>
-		   <version>3.0.0</version>
+			<groupId>javax.el</groupId>
+			<artifactId>javax.el-api</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
-		   <groupId>org.glassfish</groupId>
-		   <artifactId>javax.el</artifactId>
-		   <version>3.0.0</version>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.el</artifactId>
+			<version>3.0.0</version>
 		</dependency>
-		
+
 		<!-- Misc -->
 		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>${guava_version}</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava_version}</version>
 		</dependency>
 	</dependencies>
 
@@ -282,10 +246,10 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
+					<artifactId>maven-site-plugin</artifactId>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+						<skip>true</skip>
+						<skipDeploy>true</skipDeploy>
 					</configuration>
 				</plugin>
 			</plugins>

@@ -1,0 +1,263 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" xmlns="http://maven.apache.org/changes/1.0.0" targetNamespace="http://maven.apache.org/changes/1.0.0">
+  <xs:element name="document" type="ChangesDocument">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        Record every release with their subsequent changes.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="ChangesDocument">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        Record every release with their subsequent changes.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:all>
+      <xs:element minOccurs="0" name="properties" type="Properties">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">
+            Contains the properties of this document.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="body" type="Body">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">
+            Contains the releases of this project with the actions taken
+            for each of the releases.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="Body">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="release" type="Release" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">The list of releases for this project.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Release">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">A single release of this project.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="action" type="Action" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">The list of actions taken for this release.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            The version number associated with this release.
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="date" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+            &lt;p&gt;The date of this release.&lt;/p&gt;
+            &lt;p&gt;This field can be any String, such as &quot;in SVN&quot; when the version isn&apos;t yet released. &lt;/p&gt;
+          
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="description" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            A short description of this release.
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Action" mixed="true">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        A single action done on the project, during this release.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" name="fixes" type="FixedIssue" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">A list of fix issues.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="dueto" type="DueTo" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">A list of contibutors for this issue.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="dev" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+            &lt;p&gt;Name of developer who committed the change.&lt;/p&gt;
+            &lt;p&gt;This &lt;b&gt;MUST&lt;/b&gt; be the name of the developer as described in the developers section of the pom.xml file.&lt;/p&gt;
+            
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="due-to" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            Name of the person to be credited for this change. This can be used when a patch is submitted by a non-committer.
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="due-to-email" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            Email of the person to be credited for this change.
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="issue" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+              &lt;p&gt;Id of the issue related to this change. This is the id in your issue tracking system.&lt;/p&gt;
+              &lt;p&gt;The Changes plugin will generate a URL out of this id. The URL is constructed using the value of the issueLinkTemplate parameter.&lt;/p&gt;
+              &lt;p&gt;See the &lt;a href=&quot;changes-report.html&quot;&gt;changes-report mojo&lt;/a&gt; for more details.&lt;/p&gt;
+            
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="type" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+            Supported action types are the following:
+            &lt;ul&gt;
+              &lt;li&gt;add : added functionnality to the project.&lt;/li&gt;
+              &lt;li&gt;fix : bug fix for the project.&lt;/li&gt;
+              &lt;li&gt;update : updated some part of the project.&lt;/li&gt;
+              &lt;li&gt;remove : removed some functionnality from the project.&lt;/li&gt;
+            &lt;/ul&gt;
+            
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="system" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+              &lt;p&gt;Id of issue tracking system. If empty &apos;default&apos; value will be use.&lt;/p&gt;
+              &lt;p&gt;The Changes plugin will generate a URL out of this id. The URL is constructed using the value of the issueLinkTemplatePerSystem parameter.&lt;/p&gt;
+              &lt;p&gt;See the &lt;a href=&quot;changes-report.html&quot;&gt;changes-report mojo&lt;/a&gt; for more details.&lt;/p&gt;
+            
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="date" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">fix date</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="FixedIssue">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        A fixed issue.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="issue" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            
+              &lt;p&gt;Id of the issue related to this change. This is the id in your issue tracking system.&lt;/p&gt;
+              &lt;p&gt;The Changes plugin will generate a URL out of this id. The URL is constructed using the value of the issueLinkTemplate parameter.&lt;/p&gt;
+              &lt;p&gt;See the &lt;a href=&quot;changes-report.html&quot;&gt;changes-report mojo&lt;/a&gt; for more details.&lt;/p&gt;
+            
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DueTo">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        Name and Email of the person to be credited for this change. This can be used when a patch is submitted by a non-committer.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">Name of the person to be credited for this change.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="email" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">Email of the person to be credited for this change.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Properties">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+    </xs:annotation>
+    <xs:all>
+      <xs:element minOccurs="0" name="title" type="xs:string">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">Page Title.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="author" type="Author">
+        <xs:annotation>
+          <xs:documentation source="version">1.0.0</xs:documentation>
+          <xs:documentation source="description">Page Author</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="Author" mixed="true">
+    <xs:annotation>
+      <xs:documentation source="version">1.0.0</xs:documentation>
+      <xs:documentation source="description">
+        A description of the author page.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:all/>
+    <xs:attribute name="email" type="xs:string">
+      <xs:annotation>
+        <xs:documentation source="version">1.0.0</xs:documentation>
+        <xs:documentation source="description">
+            The page author email.
+          </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>

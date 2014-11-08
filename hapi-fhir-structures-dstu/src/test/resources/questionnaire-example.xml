@@ -1,0 +1,200 @@
+<Questionnaire xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://hl7.org/fhir ../../schema/questionnaire.xsd">
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <pre>
+            Comorbidity? YES
+              Cardial Comorbidity? YES
+                Angina? YES
+                MI? NO
+              Vascular Comorbidity?
+                (no answers)
+              ...
+            Histopathology
+              Abdominal
+                pT category: 1a
+              ...
+          </pre>
+    </div>
+  </text>
+  <contained>
+    <Patient id="patsub">
+      <identifier>
+        <system value="http://cancer.questionnaire.org/systems/id/patientnr"/>
+        <value value="A34442332"/>
+      </identifier>
+      <identifier>
+        <label value="Dutch BSN"/>
+        <system value="urn:oid:2.16.840.1.113883.2.4.6.3"/>
+        <value value="188912345"/>
+      </identifier>
+      <gender>
+        <coding>
+          <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+          <code value="M"/>
+        </coding>
+      </gender>
+      <birthDate value="1972-11-30"/>
+
+    </Patient>
+  </contained>
+  <contained>
+    <Practitioner id="questauth">
+      <identifier>
+        <label value="AUMC, Den Helder"/>
+        <system value="http://cancer.questionnaire.org/systems/id/org"/>
+        <value value="AUMC"/>
+      </identifier>
+    </Practitioner>
+  </contained>
+  <contained>
+    <Observation id="obs.pt-category">
+      <name>
+        <coding>
+          <system value="http://snomed.info/sct"/>
+          <code value="53786006"/>
+          <display value="pT1 category"/>
+        </coding>
+      </name>
+      <valueCodeableConcept>
+        <coding>
+          <system value="http://snomed.info/sct"/>
+          <code value="443357004" />
+          <display value="pT1a category" />
+        </coding>
+      </valueCodeableConcept>
+      <status value="final"/>
+      <reliability value="unknown"/>
+    </Observation>
+  </contained>
+  <status value="completed"/>
+  <authored value="2013-02-19T14:15:00"/>
+  <subject>
+    <reference value="#patsub"/>
+  </subject>
+  <author>
+    <reference value="#questauth"/>
+  </author>
+  <name>
+    <text value="Cancer Quality Forum Questionnaire 2012"/>
+  </name>
+  <group>
+    <group>
+      <!-- COMORBIDITY -->
+      <!-- First main section of the form, questions about comorbidity -->
+      <name>
+        <coding>
+          <system value="http://cancer.questionnaire.org/system/code/sections"/>
+          <code value="COMORBIDITY"/>
+        </coding>
+      </name>
+      <!-- section contains one question: whether there is comorbidity -->
+      <question>
+        <name>
+          <coding>
+            <system value="http://cancer.questionnaire.org/system/code/questions"/>
+            <code value="COMORB"/>
+          </coding>
+        </name>
+        <choice>
+          <system value="http://cancer.questionnaire.org/system/code/yesno"/>
+          <code value="1"/>
+          <display value="Yes"/>
+        </choice>
+        <group>
+          <!-- COMORBIDITY/CARDIAL -->
+          <!-- Subsection about specific comorbidity: cardial -->
+          <name>
+            <coding>
+              <system value="http://cancer.questionnaire.org/system/code/sections"/>
+              <code value="CARDIAL"/>
+            </coding>
+          </name>
+          <question>
+            <name>
+              <coding>
+                <system value="http://cancer.questionnaire.org/system/code/questions"/>
+                <code value="COMORBCAR"/>
+              </coding>
+            </name>
+            <choice>
+              <system value="http://cancer.questionnaire.org/system/code/yesno"/>
+              <code value="1"/>
+            </choice>
+          </question>
+          <question>
+            <!-- This answer carries both the questionnaire-specific name and an equivalent SNOMED CT code -->
+            <name>
+              <coding>
+                <system value="http://cancer.questionnaire.org/system/code/questions"/>
+                <code value="COMCAR00"/>
+                <display value="Angina Pectoris"/>
+              </coding>
+              <coding>
+                <system value="http://snomed.info/sct"/>
+                <code value="194828000"/>
+                <display value="Angina (disorder)"/>
+              </coding>
+            </name>
+            <choice>
+              <system value="http://cancer.questionnaire.org/system/code/yesno"/>
+              <code value="1"/>
+            </choice>
+          </question>
+          <question>
+            <name>
+              <coding>
+                <system value="http://snomed.info/sct"/>
+                <code value="22298006"/>
+                <display value="Myocardial infarction (disorder)"/>
+              </coding>
+            </name>
+            <choice>
+              <system value="http://cancer.questionnaire.org/system/code/yesno"/>
+              <code value="0"/>
+            </choice>
+          </question>
+        </group>
+        <group>
+          <!-- COMORBIDITY/VASCULAR -->
+          <name>
+            <coding>
+              <system value="http://cancer.questionnaire.org/system/code/sections"/>
+              <code value="VASCULAR"/>
+            </coding>
+          </name>
+        </group>
+      </question>
+    </group>
+    <group>
+      <!-- HISTOPATHOLOGY -->
+      <name>
+        <coding>
+          <system value="http://cancer.questionnaire.org/system/code/sections"/>
+          <code value="HISTOPATHOLOGY"/>
+        </coding>
+      </name>
+      <group>
+        <name>
+          <coding>
+            <system value="http://cancer.questionnaire.org/system/code/sections"/>
+            <code value="ABDOMINAL"/>
+          </coding>
+        </name>
+        <question>
+          <name>
+            <coding>
+              <system value="http://cancer.questionnaire.org/system/code/questions"/>
+              <code value="STADPT"/>
+              <display value="pT category"/>
+            </coding>
+          </name>
+          <dataResource>
+            <reference value="#obs.pt-category"/>
+          </dataResource>
+        </question>
+      </group>
+    </group>
+  </group>
+</Questionnaire>

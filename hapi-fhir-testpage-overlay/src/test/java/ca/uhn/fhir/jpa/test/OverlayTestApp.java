@@ -32,8 +32,8 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.param.CodingListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -173,7 +173,7 @@ public class OverlayTestApp {
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
-				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_NAME) TokenOrListParam theNames,
 				@OptionalParam(name=DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
 				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
 				) throws Exception {
@@ -184,7 +184,7 @@ public class OverlayTestApp {
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatientIssued (
 				@RequiredParam(name=DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) IdentifierDt thePatientId, 
-				@OptionalParam(name=DiagnosticReport.SP_NAME) CodingListParam theNames,
+				@OptionalParam(name=DiagnosticReport.SP_NAME) TokenOrListParam theNames,
 				@OptionalParam(name=DiagnosticReport.SP_ISSUED) DateRangeParam theDateRange,
 				@IncludeParam(allow= {"DiagnosticReport.result"}) Set<Include> theIncludes
 				) throws Exception {

@@ -25,7 +25,7 @@ package ca.uhn.fhir.rest.server;
  * 
  * @see RestfulServer#setAddProfileTag(AddProfileTagEnum)
  */
-enum AddProfileTagEnum {
+public enum AddProfileTagEnum {
 	/**
 	 * Do not add profile tags automatically
 	 */

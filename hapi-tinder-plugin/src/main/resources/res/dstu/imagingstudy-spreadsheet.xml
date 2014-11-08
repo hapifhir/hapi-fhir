@@ -1,0 +1,1956 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Lloyd McKenzie</LastAuthor>
+  <Created>2012-03-19T11:12:07Z</Created>
+  <LastSaved>2014-01-28T21:29:06Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>12480</WindowHeight>
+  <WindowWidth>28815</WindowWidth>
+  <WindowTopX>-15</WindowTopX>
+  <WindowTopY>45</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior/>
+   <NumberFormat ss:Format="@"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s66">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+   <NumberFormat ss:Format="@"/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s69">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <NumberFormat ss:Format="@"/>
+  </Style>
+  <Style ss:ID="s73">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s74">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s75">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s77">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+  <Style ss:ID="s78">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s79">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s80">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s81">
+   <Font ss:FontName="Arial" x:Family="Swiss" ss:Color="#333333"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s83">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s106">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s107">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s114">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s115">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s116">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s117">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+   <NumberFormat ss:Format="@"/>
+  </Style>
+  <Style ss:ID="s118">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s119">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="18" ss:ExpandedRowCount="49" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s62" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="337.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="39"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="24.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="32.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="33.75"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="95.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="78"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="327"/>
+   <Column ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="161.25" ss:Span="1"/>
+   <Column ss:Index="11" ss:StyleID="s64" ss:AutoFitWidth="0" ss:Width="278.25"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="184.5"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:StyleID="s62" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Row ss:Height="60" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Must Understand</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">DICOM Mapping</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Aliases</Data></Cell>
+    <Cell ss:StyleID="s66"><Data ss:Type="String">Value</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">A set of images produced in single study (one or more series of references images)</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Reference IHE radiology TF vol 2 table 4.14.1</Data></Cell>
+    <Cell><Data ss:Type="String">Manifest,XDS-I summary, Key Images</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Manifest of a set of images produced in study. The set of images may include every image in the study, or it may be an incomplete sample, such as a list of key images</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">Act[classCode=COMPOSITION, moodCode=EVN]</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">ImagingStudy.dateTime</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">When the study was performed</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0008,0020+0008,0030</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">StudyDate, StudyTime</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">2011-01-01T11:01:20.000000</Data></Cell>
+    <Cell><Data ss:Type="String">Date and Time the study took place</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.subject</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Patient)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Who the images are of</Data></Cell>
+    <Cell><Data ss:Type="String">0010/*</Data></Cell>
+    <Cell ss:Index="11" ss:StyleID="s62"/>
+    <Cell><Data ss:Type="String">Who the images are of</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.participation[typeCode=SBJ].role</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.uid</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">oid</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Formal identifier for the study (0020,000D)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,000D</Data></Cell>
+    <Cell><Data ss:Type="String">StudyInstanceUID</Data></Cell>
+    <Cell><Data ss:Type="String">urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045</Data></Cell>
+    <Cell><Data ss:Type="String">Formal identifier for the study</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.id</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">ImagingStudy.accessionNo</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Accession Number (0008,0050)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0050</Data></Cell>
+    <Cell><Data ss:Type="String">AccessionNumber</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">Accession Number</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.inboundRelationship[typeCode=COMP].source[classCode=ACSN, moodCode=EVN].id</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.identifier</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Other identifiers for the study (0020,0010)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,0010</Data></Cell>
+    <Cell><Data ss:Type="String">Study ID</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Other identifiers for the study</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.id (no means to distinguish from uid)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="150">
+    <Cell><Data ss:Type="String">ImagingStudy.order</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(DiagnosticOrder)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Order(s) that caused this study to be performed</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">A list of the diagnostic orders that resulted in this imaging study being performed</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">To support grouped procedures (one imaging study supporting multiple ordered procedures, e.g., chest/abdomen/pelvis CT)</Data></Cell>
+    <Cell><Data ss:Type="String">The order(s) can be inferred from information such as accession numbers, but the details of this depend on local workflow management. &#10;Note that there is a many-many relationship between orders and studies</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO]</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy.modality</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">ImagingModality</Data></Cell>
+    <Cell><Data ss:Type="String">All series.modality if actual acquisition modalities</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0061</Data></Cell>
+    <Cell><Data ss:Type="String">ModalitiesInStudy</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy.referrer</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Referring physician (0008,0090)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0090</Data></Cell>
+    <Cell><Data ss:Type="String">ReferringPhysiciansName</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">The requesting/referring physician</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=FLFS].target[classCode=DGIMG, moodCode=RQO].participation[typeCode=AUT].role</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.availability</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell><Data ss:Type="String">ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0056</Data></Cell>
+    <Cell><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Availability of study (online, offline or nearline)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">Not supported</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.url</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Retrieve URI (0008,1190)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,1190</Data></Cell>
+    <Cell><Data ss:Type="String">RetrieveURI</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">WADO-RS URI where Study is available</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.text.reference</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">ImagingStudy.numberOfSeries</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Number of Study Related Series (0020,1206)</Data></Cell>
+    <Cell><Data ss:Type="String">(0020,1206)</Data></Cell>
+    <Cell><Data ss:Type="String">NumberOfStudyRelatedSeries</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Number of Series in Study</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=OBSSER, moodCode=EVN].repeatNumber</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">ImagingStudy.numberOfInstances</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Number of Study Related Instances (0020,1208)</Data></Cell>
+    <Cell><Data ss:Type="String">(0020,1208)</Data></Cell>
+    <Cell><Data ss:Type="String">NumberOfStudyRelatedInstances</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Number of SOP Instances in Study</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.clinicalInformation</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Diagnoses etc with request (0040,1002)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">0040,1002, 0008,1080</Data></Cell>
+    <Cell><Data ss:Type="String">Admitting Diagnoses Description</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">Diagnoses etc provided with request</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=PERT].target</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">ImagingStudy.procedure</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Type of procedure performed (0008,1032)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,1032</Data></Cell>
+    <Cell><Data ss:Type="String">Procedure Code Sequence</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">Type of procedure performed</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP].target[classCode=PROC, moodCode=EVN]</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.interpreter</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Practitioner)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Who interpreted images (0008,1060)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">0008,1060</Data></Cell>
+    <Cell><Data ss:Type="String">Name of Physician(s) Reading Study</Data></Cell>
+    <Cell><Data ss:Type="String">n/a</Data></Cell>
+    <Cell><Data ss:Type="String">Who read study and interpreted the images</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">or is this 4008,010C?</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">.participation[typeCode=PRF].role</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">ImagingStudy.description</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Institution-generated description (0008,1030)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,1030</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Institution-generated description or classification of the Study (component) performed</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.text</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">ImagingStudy.series</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Each study has one or more series of instances</Data></Cell>
+    <Cell ss:StyleID="s62"/>
+    <Cell ss:StyleID="s62"/>
+    <Cell ss:StyleID="s62"/>
+    <Cell><Data ss:Type="String">Each study has one or more series of image instances</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP].target[classCode=OBSSER, moodCode=EVN]</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">ImagingStudy.series.number</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Number of this series in overall sequence (0020,0011)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,0011</Data></Cell>
+    <Cell><Data ss:Type="String">SeriesNumber</Data></Cell>
+    <Cell><Data ss:Type="String">3</Data></Cell>
+    <Cell><Data ss:Type="String">The number of this series in the overall sequence</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.inboundRelationship[type=COMP, source[classCode=COMPOSITION, moodCode=EVN]].sequenceNumber</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.modality</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">Modality</Data></Cell>
+    <Cell><Data ss:Type="String">The modality of the instances in the series (0008,0060)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0060</Data></Cell>
+    <Cell><Data ss:Type="String">Modality</Data></Cell>
+    <Cell><Data ss:Type="String">CT</Data></Cell>
+    <Cell><Data ss:Type="String">The modality of this series sequence</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.uid</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">oid</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Formal identifier for this series (0020,000E)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,000E</Data></Cell>
+    <Cell><Data ss:Type="String">SeriesInstanceUID</Data></Cell>
+    <Cell><Data ss:Type="String">2.16.124.113543.6003.2588828330.45298.17418.2723805630</Data></Cell>
+    <Cell><Data ss:Type="String">Formal identifier for this series</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.id</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.description</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">A description of the series (0008,103E)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,103E</Data></Cell>
+    <Cell><Data ss:Type="String">SeriesDescription </Data></Cell>
+    <Cell><Data ss:Type="String">CT Surview 180</Data></Cell>
+    <Cell><Data ss:Type="String">A description of the series</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.text</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="90">
+    <Cell><Data ss:Type="String">ImagingStudy.series.numberOfInstances</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Number of Series Related Instances (0020,1209)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,1209</Data></Cell>
+    <Cell><Data ss:Type="String">NumberOfSeriesRelatedInstances</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Sequence that contains attributes from the</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP, subsetCode=SUMM].target[classCode=DGIMG, moodCode=EVN].repeatNumber</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.requestSequence</Data></Cell>
+    <Cell><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Request Attributes Sequence (0040,0275)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0040,0275)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">RequestAttributesSequence</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.requestSequence.requestedProcedureStepId</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Requested Procedure Step ID (0040,1001)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0040,1001)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">RequestedProcedureID</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.requestSequence.scheduledProcedureStepId</Data></Cell>
+    <Cell><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Scheduled Procedure Step ID (0040,0009)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0040,0009)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">ScheduledProcedureID</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.ppsdateTime</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Performed Procedure Step Start Date (0040,0244) + Performed Procedure Step Start Time (0040,0245)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0040,0244) + (0040,0245)</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy.series.availability</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell><Data ss:Type="String">ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0056</Data></Cell>
+    <Cell><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Availability of series (online, offline or nearline)</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;availability&quot;].value</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="String">ImagingStudy.series.url</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Retrieve URI (0008,1115 &gt; 0008,1190)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,1115 &gt; 0008,1190</Data></Cell>
+    <Cell><Data ss:Type="String">RetrieveURI</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">WADO-RS URI where Series is available</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.text.reference</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.retrieveAE</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Retrieve AE Title (0008,0054)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">0008,0054</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">RetrieveAETitle</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.locationUID</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">oid</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Retrieve Location UID (0040,E011)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">0040,E011</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">RetrieveLocationUID</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">ImagingStudy.series.bodySite</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">BodySite</Data></Cell>
+    <Cell><Data ss:Type="String">Body part examined (Map from 0018,0015)</Data></Cell>
+    <Cell><Data ss:Type="String">0018,0015</Data></Cell>
+    <Cell><Data ss:Type="String">BodyPartExamined</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">Body part examined. See  DICOM Part 16 Annex L for the mapping from DICOM to Snomed</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.targetSiteCode</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.dateTime</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">When the series started</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="60">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">1..*</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">A single instance taken from a patient (image or other)</Data></Cell>
+    <Cell ss:Index="12"><Data ss:Type="String">A single image taken from a patient</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.outboundRelationship[typeCode=COMP].target[classCode=DGIMG, moodCode=EVN]</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.number</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">The number of this instance in the series (0020,0013)</Data></Cell>
+    <Cell><Data ss:Type="String">0020,0013</Data></Cell>
+    <Cell><Data ss:Type="String">Instance Number</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">The number of this image in the series</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.inboundRelationship[typeCode=COMP, source[classCode=OBSSER, moodCode=EVN]].sequenceNumber</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.uid</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">oid</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Formal identifier for this instance (0008,0018)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0018</Data></Cell>
+    <Cell><Data ss:Type="String">SOP Instance UID</Data></Cell>
+    <Cell><Data ss:Type="String">2.16.124.113543.6003.189642796.63084.16748.2599092903</Data></Cell>
+    <Cell><Data ss:Type="String">Formal identifier for this image</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.id</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.sopclass</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">oid</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">DICOM class type (0008,0016)</Data></Cell>
+    <Cell><Data ss:Type="String">0008,0016</Data></Cell>
+    <Cell><Data ss:Type="String">SOP Class UID</Data></Cell>
+    <Cell><Data ss:Type="String">1.2.840.10008.5.1.4.1.1.2</Data></Cell>
+    <Cell><Data ss:Type="String">DICOM Image type</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.inboundRelationship[typeCode=COMP]. source[classCode=OBS, moodCode=EVN, code=&quot;sop class&quot;].value</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.type </Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Type of instance (image etc) (0004,1430)</Data></Cell>
+    <Cell><Data ss:Type="String" x:Ticked="1">0004,1430</Data></Cell>
+    <Cell><Data ss:Type="String">Directory Record Type</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.code</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.title</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Description (0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008)</Data></Cell>
+    <Cell><Data ss:Type="String">0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008</Data></Cell>
+    <Cell ss:Index="13" ss:StyleID="s106"/>
+    <Cell ss:Index="15" ss:StyleID="s106"><Data ss:Type="String">.title</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="30" ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.availability</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell><Data ss:Type="String">ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">0008,0056</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell><Data ss:Type="String">Availability of instance (online, offline or nearline)</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.dateTime</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">When this image was taken</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"><Data ss:Type="String">.effectiveTime</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:Height="60" ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.image</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">left</Data></Cell>
+    <Cell ss:Index="7" ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">When instance is an image</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">This is deletd until a use case is found</Data></Cell>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.image.rows</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Rows (0028,0010)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0028,0010)</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.image.columns</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Columns (0028,0011)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0028,0011)</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.image.bitsAllocated</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Bits Allocated (0028,0100)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0028,0100)</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:StyleID="s115">
+    <Cell ss:StyleID="s114"><Data ss:Type="String">!ImagingStudy.series.instance.image.numberOfFrames</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">integer</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell><Data ss:Type="String">Number of Frames (0028,0008)</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">(0028,0008)</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:Index="13" ss:StyleID="s118"/>
+    <Cell ss:Index="15" ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+   </Row>
+   <Row ss:Height="135">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.url</Data></Cell>
+    <Cell ss:StyleID="s107"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">WADO-RS service where instance is available  (0008,1199 &gt; 0008,1190)</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">0008,1199 &gt; 0008,1190</Data></Cell>
+    <Cell ss:StyleID="s62"/>
+    <Cell ss:StyleID="s62"/>
+    <Cell><Data ss:Type="String">WADO-RS url where image is available</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell><Data ss:Type="String">Each instance may have a url and an attachment. Both represent the same information, but using different approaches. The URL is a reference to a WADO-RS service that makes the instance available</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">.text.reference</Data></Cell>
+    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s106"/>
+   </Row>
+   <Row ss:Height="120">
+    <Cell><Data ss:Type="String">ImagingStudy.series.instance.attachment</Data></Cell>
+    <Cell><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">Resource(Any)</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A FHIR resource with content for this instance</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="String">Each instance may have a url and an attachment. Both represent the same information, but using different approaches. The attachment is a reference to a FHIR resource (Media, Document, etc).</Data></Cell>
+    <Cell><Data ss:Type="String">.text.binary</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <Zoom>110</Zoom>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>26</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>11</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>29</ActiveRow>
+     <ActiveCol>14</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="6" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s73" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="116.25"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="153"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="204.75"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s73" ss:AutoFitWidth="0" ss:Width="188.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s74">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>2</SplitVertical>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="83.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="158.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="162.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="195.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="74.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="33">
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Notes</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s75"/>
+    <Cell ss:StyleID="s75"/>
+    <Cell ss:StyleID="s75"/>
+    <Cell ss:StyleID="s75"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="41" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="105.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="383.25"/>
+   <Column ss:Index="4" ss:AutoFitWidth="0" ss:Width="317.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="375"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s74">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Path</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">subject</Data></Cell>
+    <Cell><Data ss:Type="String">Who the study is about</Data></Cell>
+    <Cell><Data ss:Type="String">reference</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.subject</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">The date the study was done was taken</Data></Cell>
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.dateTime</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">accession</Data></Cell>
+    <Cell><Data ss:Type="String">The accession id for the image</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.accessionNo</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">study</Data></Cell>
+    <Cell><Data ss:Type="String">The study id for the image</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.uid</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">series</Data></Cell>
+    <Cell><Data ss:Type="String">The series id for the image</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.series.uid</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">modality</Data></Cell>
+    <Cell><Data ss:Type="String">The modality of the image</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.series.modality</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">size</Data></Cell>
+    <Cell><Data ss:Type="String">The size of the image in MB - may include &gt; or &lt; in the value</Data></Cell>
+    <Cell><Data ss:Type="String">number</Data></Cell>
+    <Cell ss:StyleID="s77"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">bodysite</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.series.bodySite</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">uid</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.series.instance.uid</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s76"><Data ss:Type="String">dicom-class</Data></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s76"><Data ss:Type="String">ImagingStudy.series.instance.sopclass</Data></Cell>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:Index="5" ss:StyleID="s68"/>
+    <Cell ss:Index="8" ss:StyleID="s68"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>-3</VerticalResolution>
+   </Print>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>8</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="93"/>
+   <Column ss:AutoFitWidth="0" ss:Width="221.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="81.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="107.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="275.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="120.75"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s74"><Data ss:Type="String">Description</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Oid</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Copyright</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Modality</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Type of data in the instance</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">code list</Data></Cell>
+    <Cell><Data ss:Type="String">#modality</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">1.2.840.10008.6.1.811</Data></Cell>
+    <Cell><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright 2011 by the National Electrical Manufacturers Association</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">InstanceAvailability</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Availability of the resource</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">#instance-availability</Data></Cell>
+    <Cell ss:Index="7"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright 2011 by the National Electrical Manufacturers Association</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s79"><Data ss:Type="String">ImagingModality</Data></Cell>
+    <Cell ss:StyleID="s79"><Data ss:Type="String">Type of acquired image data in the instance</Data></Cell>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">code list</Data></Cell>
+    <Cell><Data ss:Type="String">#imaging-modality</Data></Cell>
+    <Cell ss:Index="6" ss:StyleID="s81"><Data ss:Type="String">1.2.840.10008.6.1.19</Data></Cell>
+    <Cell><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright 2011 by the National Electrical Manufacturers Association</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>1</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>6</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="modality">
+  <Table ss:ExpandedColumnCount="3" ss:ExpandedRowCount="54" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="166.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="44.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="251.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s82">
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell><Data ss:Type="String">Code</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">AR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">AU</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">BDUS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">BI</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">BMD</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">CR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">CT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">DG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">DX</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">ECG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">EPS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">ES</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">GM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">HC</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">HD</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IVOCT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IVUS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">KER</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">KO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">LEN</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">LS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">MG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">MR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">NM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OAM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OCT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OP</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPV</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">PR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">PT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">PX</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">REG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RF</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RTDOSE</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RTIMAGE</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RTPLAN</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RTRECORD</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RTSTRUCT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SEG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SMR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SRF</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">TG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">US</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">VA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">XA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">XC</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>34</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="instance-availability">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="210"/>
+   <Column ss:AutoFitWidth="0" ss:Width="76.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="368.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s82">
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell><Data ss:Type="String">Code</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">ONLINE</Data></Cell>
+    <Cell><Data ss:Type="String">Resources are immediately available,</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OFFLINE</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Resources need to be retrieved by manual intervention</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">NEARLINE</Data></Cell>
+    <Cell ss:StyleID="s83"><Data ss:Type="String">Resources need to be retrieved from relatively slow media</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">UNAVAILABLE</Data></Cell>
+    <Cell><Data ss:Type="String">Resources cannot be retrieved.</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>1</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R2C2:R5C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="imaging-modality">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="37" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="166.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="44.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="338.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="167.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="60.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="14.4375" ss:StyleID="s82">
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell><Data ss:Type="String">Code</Data></Cell>
+    <Cell><Data ss:Type="String">Comment</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.4375">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">AR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">BMD </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">BDUS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">EPS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">CR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">CT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">DX</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">ECG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">ES</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">XC</Data></Cell>
+    <Cell><Data ss:Type="String">Use this for general photography</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">GM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">HD</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IO</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IVOCT </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">IVUS</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">KER</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">LEN</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">MR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">MG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">NM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OAM </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OCT </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OP</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPR</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPT</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">OPV </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">PX</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">PT </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RF</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">RG</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SM</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">SRF</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">US</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">VA</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">http://nema.org/dicom/dcid</Data></Cell>
+    <Cell><Data ss:Type="String">XA</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>11</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

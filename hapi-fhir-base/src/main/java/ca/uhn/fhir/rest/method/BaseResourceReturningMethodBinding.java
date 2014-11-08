@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.method;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,7 +74,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	private String myResourceName;
 	private Class<? extends IResource> myResourceType;
 
-	public BaseResourceReturningMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
+	@SuppressWarnings("unchecked")
+	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(theMethod, theConetxt, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
@@ -100,12 +102,17 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 		if (theReturnResourceType != null) {
 			if (IResource.class.isAssignableFrom(theReturnResourceType)) {
-				myResourceType = theReturnResourceType;
 				ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
 				if (resourceDefAnnotation == null) {
-					throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+					if (Modifier.isAbstract(theReturnResourceType.getModifiers())) {
+//						 If we're returning an abstract type, that's ok
+					}else {
+						throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
+					}
+				} else {
+					myResourceType = (Class<? extends IResource>) theReturnResourceType;
+					myResourceName = resourceDefAnnotation.name();
 				}
-				myResourceName = resourceDefAnnotation.name();
 			}
 		}
 	}

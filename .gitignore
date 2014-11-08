@@ -1,5 +1,13 @@
 /bin
 /target
+target/
+.idea/
+.project/
+.settings/
+.metadata/
+RemoteSystemsTempFiles/
+Servers/
+*.iml
 *.log
 *.log*
 nohup.out

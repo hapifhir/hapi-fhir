@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -34,7 +35,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -303,8 +304,8 @@ public class MethodUtil {
 				if (reader != null) {
 					IParser parser = ct.newParser(theContext);
 					IResource outcome = parser.parseResource(reader);
-					if (outcome instanceof OperationOutcome) {
-						retVal.setOperationOutcome((OperationOutcome) outcome);
+					if (outcome instanceof BaseOperationOutcome) {
+						retVal.setOperationOutcome((BaseOperationOutcome) outcome);
 					}
 				}
 

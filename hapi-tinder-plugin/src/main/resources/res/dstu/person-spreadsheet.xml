@@ -1,0 +1,1008 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Grahame</Author>
+  <LastAuthor>Ewout Kramer</LastAuthor>
+  <Created>2012-03-19T09:39:52Z</Created>
+  <LastSaved>2012-11-19T11:20:37Z</LastSaved>
+  <Version>14.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>9060</WindowHeight>
+  <WindowWidth>7995</WindowWidth>
+  <WindowTopX>-15</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62" ss:Name="Goed">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#008000"/>
+   <Interior ss:Color="#CCFFCC" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s64">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s65">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/>
+   </Borders>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="s67" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s68">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s69" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s71">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+  </Style>
+  <Style ss:ID="s72" ss:Parent="s62">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="12" ss:Color="#000000"
+    ss:Bold="1"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s73">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:ShrinkToFit="1"
+    ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior/>
+  </Style>
+  <Style ss:ID="s74">
+   <Alignment ss:Vertical="Bottom" ss:ShrinkToFit="1" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s75">
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s76">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Bottom"/>
+  </Style>
+  <Style ss:ID="s77">
+   <Alignment ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="s78">
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Data Elements">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="15" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s63" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s64" ss:Width="239.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="35.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="30.75"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="36" ss:Span="1"/>
+   <Column ss:Index="6" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="74.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="83.25"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="213.75" ss:Span="1"/>
+   <Column ss:Index="10" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="161.25"
+    ss:Span="1"/>
+   <Column ss:Index="12" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="225.75"/>
+   <Column ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="135" ss:Span="1"/>
+   <Column ss:Index="15" ss:StyleID="s63" ss:AutoFitWidth="0" ss:Width="150"/>
+   <Row ss:AutoFitHeight="0" ss:Height="42.9375" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Element</Data></Cell>
+    <Cell><Data ss:Type="String">Card.</Data></Cell>
+    <Cell><Data ss:Type="String">Inv.</Data></Cell>
+    <Cell><Data ss:Type="String">Must Understand</Data></Cell>
+    <Cell><Data ss:Type="String">UML</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Binding</Data></Cell>
+    <Cell><Data ss:Type="String">Short Name</Data></Cell>
+    <Cell><Data ss:Type="String">Definition</Data></Cell>
+    <Cell><Data ss:Type="String">Requirements</Data></Cell>
+    <Cell><Data ss:Type="String">Comments</Data></Cell>
+    <Cell><Data ss:Type="String">RIM Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">v2 Mapping</Data></Cell>
+    <Cell><Data ss:Type="String">To Do</Data></Cell>
+    <Cell><Data ss:Type="String">Committee Notes</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="237.9375">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Person involved in healthcare</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">A person who is involved in the healthcare process</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Need to track persons potentially across multiple roles</Data></Cell>
+    <Cell ss:StyleID="s68"><ss:Data ss:Type="String"
+      xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">The Person resource does justice to Person registries that keep track of Persons regardless of their role. The Person resource is also a primary resource to point to for people acting in a particular role such as SubjectofCare, Practitioner, and Agent. Very few attributes are specific to </Font><I><Font
+        html:Color="#000000">any</Font></I><Font html:Color="#000000"> role and so Person is kept lean. Most attributes are expected to be tied to the role the Person plays rather than the Person himself. Examples of that are Guardian (SubjectofCare), ContactParty (SubjectOfCare, Practitioner), and multipleBirthInd (SubjectofCare)</Font></ss:Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Person(classCode=&quot;PSN&quot; and determinerCode=&quot;INST&quot; and quantity=&quot;1&quot;)</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="120">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.identifier</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Identifier</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">A Human identifier for this person</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Identifier for a person within a particular scope.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">People are known by a variety of ids. Some institutions maintain several, and most collect identifiers for exchange with other organizations concerning the patient. Examples are national person identifier and local identifier</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">.plays:Role(classCode='IDENT').id</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-3</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Keeping Person.id cardinality as a matter of safety in the same manner as Person Activate</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="140.0625">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.name</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">HumanName</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">A name associated with the person</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">A name associated with the person</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Need to be able to track the person by multiple names. Examples are your official name and a partner name.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Person may have multiple names with different uses or applicable periods.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./name</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-5, PID-9</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Committee does not fully grasp implications of HumanName datatype, so as a matter of safety decided to have cardinality 0..*. It is not clear to the committee whether or not all 80% name parts can be conveyed in one name instance</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="98.0625">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.telecom</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Contact</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">A contact detail for the person</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">A contact detail for the person, e.g. a telephone number or an email address.</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">People have (primary) ways to contact them in some way such as phone, email.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Person may have multiple ways to be contacted with different uses or applicable periods. &#13;May need to have options for contacting the person urgently, and also to help with identification</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./telecom</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-13, PID-14</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">renamed from contact, because that suggested &quot;contact party&quot; at first sight. &quot;telecom&quot; is a well-worn path, so without a really good working alternative we want to stick to it</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.gender</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Coding</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">AdministrativeGender</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Administrative Gender</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Administrative Gender</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">Needed for identification of the person, in combination with (at least) name and birth date. Gender of person drives many clinical processes.</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./administrativeGender</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-8</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">'gender' is still the administrative gender, but this is reflected in its description rather than its name.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="69.9375">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.birthDate</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s69"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">dateTime</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">The birth date for the person</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">The birth date for the person.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Age of person drives many clinical processes. Next to the common use case of capturing someone birth date, also in some common cases time is registered.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">At least an estimated year should be provided as a guess if the real dob is unknown</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./birthTime</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-7</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">renamed from dob, because the abbreviation is not obvious to non-English speakers</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="153.9375">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.deceased</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Indicates if the Person is deceased or not</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Indicates if the Person is deceased or not</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">If there's no value in the instance it means there is no statement on whether or not the person deceased. Most systems will interpret the absence of a value as a sign of the person being alive.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./deceasedInd</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-30</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">there are two choices (a) deceased and date are two separate notions, one who could go in core and one who does not, and not all usecases need both, (b) its one piece of information, and to avoid inconsistencies its better to have one field with a nullflavor saying that there is a date, but it is not available/known.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="75">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.address</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Address</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">One or more addresses for the person</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">One or more addresses for the person</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">May need to keep track of persons addresses for contacting, billing or reporting requirements and also to help with identification</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Person may have multiple addresses with different uses or applicable periods</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./addr</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-11</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="113.0625" ss:StyleID="s71">
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Person.maritalStatus</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s73"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s73"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">MaritalStatus</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">Marital (civil) status of the person</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">This field contains the patient's marital (civil) status.</Data></Cell>
+    <Cell ss:StyleID="s73"/>
+    <Cell ss:StyleID="s73"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">./maritalStatus</Data></Cell>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">PID-16</Data></Cell>
+    <Cell ss:StyleID="s73"/>
+    <Cell ss:StyleID="s73"><Data ss:Type="String">We discussed moving this onto the SubjectOfCare role, since its most relevant there, but most attendees felt it was so much a characteristic of a person, that it should remain in Person and is just not strictly patient-only </Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="195.9375">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.language</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..*</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">right</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">The person's  proficiency level of a language</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">A language spoken by the person, with proficiency</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">If a patient does not speak the local language, interpreters may be required, so languages spoken and proficiency is an important things to keep track of both for patient and other persons of interest</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">If no language is specified, this *implies* that the default local language is spoken.&#13;If you need to convey proficiency for multiple modes than you need multiple Person.language associations.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">.LanguageCommunication</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Rationale for putting this in the core is based on input from Canada. Other persons on call are from single language countries. Committee felt uncomfortable with leaving any of the 3 optional attributes modeCode, proficiencyLevelCode, or preferenceInd up to extensions. Instead we said that isModifier is &quot;no&quot; on modeCode, and preferenceInd.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.language.language</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">1..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Language</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Language with optional region</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case. E.g. &quot;en&quot; for English, or &quot;en-US&quot; for American English versus &quot;en-EN&quot; for England English</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Most systems in multilingual countries will want to convey language. Not all systems actually need the regional dialect.</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./languageCode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-15, NK1-20, LAN-2</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">So just ISO 639-3?  ISO-639-1 alpha 2 is actually somewhat outdated and ISO-639-2 alpha 3 has support for more languages/dialects.</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="140.0625">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.language.mode</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">n</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">LanguageAbilityMode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Language method of expression</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">A value representing the person's method of expression of this language. Examples: expressed spoken, expressed written, expressed signed, received spoken, received written, received signed</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">A Person that can write English fairly well, but is not capable to understand</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">It's expected that modeCode and proficiencyLevelCode work in conjunction. It makes less sense to convey modeCode unless you want to distinctly denote someone proficiency for a particular mode. It's however perfectly acceptable to have a proficiencyLevelCode without a modeCode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./modeCode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">LAN-3</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.language.proficiencyLevel</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">LanguageAbilityProficiency</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Proficiency level of the language</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">A code that describes how well the language is spoken</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">See comments for Person.language.modeCode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./proficiencyLanguageCode</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">LAN-4</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s67"><Data ss:Type="String">Person.language.preference</Data></Cell>
+    <Cell ss:StyleID="s69"><Data ss:Type="String">0..1</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">n</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Language preference indicator</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">Indicates whether or not the Person prefers this language (over other languages he masters up a certain level)</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">People that master multiple languages up to certain level may prefer one or more, i.e. feel more confident in communicating in a particular language making other languages sort of a fallback method</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">./preferenceInd</Data></Cell>
+    <Cell ss:StyleID="s68"><Data ss:Type="String">PID-15, NK1-20</Data></Cell>
+    <Cell ss:StyleID="s68"/>
+    <Cell ss:StyleID="s68"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-4</HorizontalResolution>
+    <VerticalResolution>-4</VerticalResolution>
+   </Print>
+   <Zoom>90</Zoom>
+   <Selected/>
+   <FreezePanes/>
+   <FrozenNoSplit/>
+   <SplitHorizontal>1</SplitHorizontal>
+   <TopRowBottomPane>10</TopRowBottomPane>
+   <SplitVertical>1</SplitVertical>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <ActivePane>0</ActivePane>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+    </Pane>
+    <Pane>
+     <Number>1</Number>
+    </Pane>
+    <Pane>
+     <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
+    </Pane>
+    <Pane>
+     <Number>0</Number>
+     <ActiveRow>11</ActiveRow>
+     <ActiveCol>9</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Invariants">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="1" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s74" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Id</Data></Cell>
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Context</Data></Cell>
+    <Cell><Data ss:Type="String">English</Data></Cell>
+    <Cell><Data ss:Type="String">OCL</Data></Cell>
+    <Cell><Data ss:Type="String">XPath</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-4</HorizontalResolution>
+    <VerticalResolution>-4</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <RangeSelection>R1</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Events">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="2" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s75" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="99.75"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="171"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="96.75"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="107.25"/>
+   <Column ss:StyleID="s75" ss:AutoFitWidth="0" ss:Width="69.75"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Event Code</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Request Resources</Data></Cell>
+    <Cell><Data ss:Type="String">Response Resources</Data></Cell>
+    <Cell><Data ss:Type="String">Follow Ups</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="105">
+    <Cell><Data ss:Type="String">admin-notify</Data></Cell>
+    <Cell><Data ss:Type="String">Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use</Data></Cell>
+    <Cell><Data ss:Type="String">Person</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Search">
+  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="9" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="71.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="383.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">Repeats</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375">
+    <Cell><Data ss:Type="String">identifier</Data></Cell>
+    <Cell><Data ss:Type="String">A patient Identifier</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">name</Data></Cell>
+    <Cell><Data ss:Type="String">a portion of name in any name part</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">phonetic</Data></Cell>
+    <Cell><Data ss:Type="String">a portion of name using some kind of phonetic matching algorithm</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">telecom</Data></Cell>
+    <Cell><Data ss:Type="String">the value in any kind of contact</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">address</Data></Cell>
+    <Cell><Data ss:Type="String">an address in any kind of address/part</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">gender</Data></Cell>
+    <Cell><Data ss:Type="String">gender of the person</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">single</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">language</Data></Cell>
+    <Cell><Data ss:Type="String">language code (irrespective of use value)</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">union</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">birthdate</Data></Cell>
+    <Cell><Data ss:Type="String">the patient's date of birth</Data></Cell>
+    <Cell><Data ss:Type="String">date</Data></Cell>
+    <Cell><Data ss:Type="String">single</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>15</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+     <RangeSelection>R16C2:R19C2</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Examples">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="116.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="251.25"/>
+   <Column ss:StyleID="s76" ss:AutoFitWidth="0" ss:Width="78.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="188.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15.9375" ss:StyleID="s65">
+    <Cell><Data ss:Type="String">Name</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+    <Cell><Data ss:Type="String">Identity</Data></Cell>
+    <Cell><Data ss:Type="String">Filename</Data></Cell>
+    <Cell><Data ss:Type="String">Type</Data></Cell>
+    <Cell><Data ss:Type="String">In Book</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">General</Data></Cell>
+    <Cell><Data ss:Type="String">General Person Example</Data></Cell>
+    <Cell><Data ss:Type="String">101a</Data></Cell>
+    <Cell><Data ss:Type="String">person-example.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Patient1</Data></Cell>
+    <Cell><Data ss:Type="String">Person 1 for patient linking</Data></Cell>
+    <Cell><Data ss:Type="String">pat1</Data></Cell>
+    <Cell><Data ss:Type="String">person-example-a.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Patient2</Data></Cell>
+    <Cell><Data ss:Type="String">Person 2 for patient linking</Data></Cell>
+    <Cell><Data ss:Type="String">pat2</Data></Cell>
+    <Cell><Data ss:Type="String">person-example-b.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">y</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Publishing</Data></Cell>
+    <Cell><Data ss:Type="String">Stock people (defined by HL7 publishing)</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">person-examples.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Cypress</Data></Cell>
+    <Cell><Data ss:Type="String">Example People from cypress project</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">person-examples-cypress-template.xml</Data></Cell>
+    <Cell><Data ss:Type="String">csv</Data></Cell>
+    <Cell><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">cda</Data></Cell>
+    <Cell><Data ss:Type="String">CDA Example Person</Data></Cell>
+    <Cell><Data ss:Type="String">xcda</Data></Cell>
+    <Cell><Data ss:Type="String">person-xcda.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">xds</Data></Cell>
+    <Cell><Data ss:Type="String">XDS Example Person</Data></Cell>
+    <Cell><Data ss:Type="String">xds</Data></Cell>
+    <Cell><Data ss:Type="String">person-xds.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">cda author</Data></Cell>
+    <Cell><Data ss:Type="String">CDA Example Author</Data></Cell>
+    <Cell><Data ss:Type="String">xcda-author</Data></Cell>
+    <Cell><Data ss:Type="String">person-xcda-author.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Grahame</Data></Cell>
+    <Cell><Data ss:Type="String">Grahame's person resource</Data></Cell>
+    <Cell><Data ss:Type="String">grahame</Data></Cell>
+    <Cell><Data ss:Type="String">person-grahame.xml</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String">n</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>2</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="Bindings">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:StyleID="s77" ss:DefaultColumnWidth="65.25"
+   ss:DefaultRowHeight="15">
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="137.25"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="180"/>
+   <Column ss:Index="5" ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="95.25"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="126"/>
+   <Column ss:StyleID="s77" ss:AutoFitWidth="0" ss:Width="260.25"/>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding Name</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Extensibility</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Binding Strength</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Reference</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">AdministrativeGender</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The gender of a person used for administrative purposes  </Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">complete</Data></Cell>
+    <Cell><Data ss:Type="String">required</Data></Cell>
+    <Cell><Data ss:Type="String">#administrative-gender</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="27.9375">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">MaritalStatus</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">The domestic partnership status of a person</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">extensible</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">preferred</Data></Cell>
+    <Cell><Data ss:Type="String">#marital-status</Data></Cell>
+    <Cell ss:StyleID="s75"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s75"><Data ss:Type="String">LanguageAbilityMode</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">A value representing the person's method of expression of this language</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">complete</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">#language-ability-mode</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s63"><Data ss:Type="String">LanguageAbilityProficiency</Data></Cell>
+    <Cell ss:StyleID="s63"><Data ss:Type="String">A code that describes how well the language is spoken</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">complete</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s75"><Data ss:Type="String">#language-ability-proficiency</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="language-ability-mode">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="8" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="288"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s77">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">ESGN</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Expressed signed</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">ESP</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Expressed spoken</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">EWR</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Expressed written</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">RSGN</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Received signed</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">RSP</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Received spoken</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">RWR</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">Received written</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"/>
+    <Cell ss:StyleID="s78"/>
+    <Cell ss:StyleID="s78"/>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>3</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="language-ability-proficiency">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="5" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="15">
+   <Column ss:Index="2" ss:AutoFitWidth="0" ss:Width="419.25"/>
+   <Row ss:AutoFitHeight="0" ss:StyleID="s77">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">E</Data></Cell>
+    <Cell><Data ss:Type="String">Excellent</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">F</Data></Cell>
+    <Cell><Data ss:Type="String">Fair</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">G</Data></Cell>
+    <Cell><Data ss:Type="String">Good</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s78"><Data ss:Type="String">P</Data></Cell>
+    <Cell><Data ss:Type="String">Poor</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>600</HorizontalResolution>
+    <VerticalResolution>600</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <RangeSelection>R1</RangeSelection>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="marital-status">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="10" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="14.4375">
+   <Column ss:AutoFitWidth="0" ss:Width="92.25"/>
+   <Column ss:Width="353.25"/>
+   <Column ss:Width="209.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s77">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">A</Data></Cell>
+    <Cell><Data ss:Type="String">Annulled - Marriage contract has been declared null and to not have existed</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">D</Data></Cell>
+    <Cell><Data ss:Type="String">Divorced - Marriage contract has been declared dissolved and inactive</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">I</Data></Cell>
+    <Cell><Data ss:Type="String">Interlocutory - Subject to an Interlocutory Decree.</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">L</Data></Cell>
+    <Cell><Data ss:Type="String">Legally Separated</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">M</Data></Cell>
+    <Cell><Data ss:Type="String">Married - A current marriage contract is active</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">P</Data></Cell>
+    <Cell><Data ss:Type="String">Polygamous - More than 1 current spouse</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">S</Data></Cell>
+    <Cell><Data ss:Type="String">Never married - No marriage contract has ever been entered</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">T</Data></Cell>
+    <Cell><Data ss:Type="String">Domestic Partner - Person declares that a domestic partner relationship exists</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">W</Data></Cell>
+    <Cell><Data ss:Type="String">Widowed - The spouse has died</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>14</ActiveRow>
+     <ActiveCol>1</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="administrative-gender">
+  <Table ss:ExpandedColumnCount="6" ss:ExpandedRowCount="4" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultColumnWidth="65.25" ss:DefaultRowHeight="14.4375">
+   <Column ss:AutoFitWidth="0" ss:Width="92.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="128.25"/>
+   <Column ss:Width="296.25"/>
+   <Row ss:AutoFitHeight="0" ss:Height="15" ss:StyleID="s77">
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Code</Data></Cell>
+    <Cell ss:StyleID="s65"><Data ss:Type="String">Definition</Data></Cell>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+    <Cell ss:StyleID="s65"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">F</Data></Cell>
+    <Cell><Data ss:Type="String">Female</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">M</Data></Cell>
+    <Cell><Data ss:Type="String">Male</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="14.0625">
+    <Cell><Data ss:Type="String">UN</Data></Cell>
+    <Cell><Data ss:Type="String">Undifferentiated</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Unsynced/>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-3</HorizontalResolution>
+    <VerticalResolution>0</VerticalResolution>
+   </Print>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>18</ActiveRow>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+   <x:PageLayoutZoom>0</x:PageLayoutZoom>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>

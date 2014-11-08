@@ -27,8 +27,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -57,13 +57,13 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link CodingDt#getSystem() system} and {@link CodingDt#getCode() code} from a {@link CodingDt} instance and adds it as a parameter
+	 * Constructor which copies the {@link InternalCodingDt#getSystem() system} and {@link InternalCodingDt#getCode() code} from a {@link InternalCodingDt} instance and adds it as a parameter
 	 * 
 	 * @param theCodingDt
 	 *            The coding
 	 */
-	public TokenParam(CodingDt theCodingDt) {
-		this(toSystemValue(theCodingDt.getSystem()), theCodingDt.getCode().getValue());
+	public TokenParam(BaseCodingDt theCodingDt) {
+		this(toSystemValue(theCodingDt.getSystemElement()), theCodingDt.getCodeElement().getValue());
 	}
 
 	/**
@@ -72,8 +72,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	 * @param theCodingDt
 	 *            The coding
 	 */
-	public TokenParam(IdentifierDt theIdentifierDt) {
-		this(toSystemValue(theIdentifierDt.getSystem()), theIdentifierDt.getValue().getValue());
+	public TokenParam(BaseIdentifierDt theIdentifierDt) {
+		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
 	}
 
 	private static String toSystemValue(UriDt theSystem) {
@@ -170,8 +170,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return builder.toString();
 	}
 
-	public CodingDt getValueAsCoding() {
-		return new CodingDt(mySystem, myValue);
+	public InternalCodingDt getValueAsCoding() {
+		return new InternalCodingDt(mySystem, myValue);
 	}
 
 }

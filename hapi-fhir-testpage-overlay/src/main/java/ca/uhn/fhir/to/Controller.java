@@ -1009,7 +1009,7 @@ public class Controller {
 		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString + ".0", theReq, theQuery, theClientCodeJsonWriter);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery , theClientCodeJsonWriter);
 		}
 
 		return true;
@@ -1020,7 +1020,7 @@ public class Controller {
 
 		Conformance conformance;
 		try {
-			conformance = client.conformance();
+			conformance = (Conformance)client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());

@@ -6,6 +6,8 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.resource.BaseConformance;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
@@ -82,19 +84,19 @@ public class GenericClientExample {
          // START SNIPPET: conformance
          // Retrieve the server's conformance statement and print its
          // description
-         Conformance conf = client.conformance();
-         System.out.println(conf.getDescription().getValue());
+         BaseConformance conf = client.conformance();
+         System.out.println(conf.getDescriptionElement().getValue());
          // END SNIPPET: conformance
       }
       {
          // START SNIPPET: delete
          // Retrieve the server's conformance statement and print its
          // description
-         OperationOutcome outcome = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+         BaseOperationOutcome outcome = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
          if (outcome != null) {
-            System.out.println(outcome.getIssueFirstRep().getDetails().getValue());
+            System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
          }
          // END SNIPPET: delete
       }
