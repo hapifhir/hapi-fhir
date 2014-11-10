@@ -20,48 +20,10 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import ca.uhn.fhir.context.ProvidedResourceScanner;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -69,13 +31,9 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
-import ca.uhn.fhir.rest.method.Request;
-import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.*;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -83,6 +41,28 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.VersionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.zip.GZIPOutputStream;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RestfulServer extends HttpServlet {
 
@@ -280,9 +260,35 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+    private void invokeDestroy(Object theProvider) {
+        Class<?> clazz = theProvider.getClass();
+        invokeDestroy(theProvider, clazz);
+    }
+
+	private void invokeDestroy(Object theProvider, Class<?> clazz) {
+		for (Method m : clazz.getDeclaredMethods()) {
+            Destroy destroy = m.getAnnotation(Destroy.class);
+            if (destroy != null) {
+                try {
+                    m.invoke(theProvider);
+                } catch (IllegalAccessException e) {
+                    ourLog.error("Exception occurred in destroy ", e);
+                } catch (InvocationTargetException e) {
+                    ourLog.error("Exception occurred in destroy ", e);
+                }
+                return;
+            }
+		}
+
+        Class<?> supertype = clazz.getSuperclass();
+        if (!Object.class.equals(supertype)) {
+            invokeDestroy(theProvider, supertype);
+        }
+	}
+
 	/**
 	 * Returns the setting for automatically adding profile tags
-	 * 
+	 *
 	 * @see #setAddProfileTag(AddProfileTagEnum)
 	 */
 	public AddProfileTagEnum getAddProfileTag() {
@@ -314,7 +320,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Provides the non-resource specific providers which implement method calls on this server
-	 * 
+	 *
 	 * @see #getResourceProviders()
 	 */
 	public Collection<Object> getPlainProviders() {
@@ -351,7 +357,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
-	 * 
+	 *
 	 * @see RestfulServer#setServerName(String)
 	 */
 	public String getServerName() {
@@ -642,7 +648,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			
+
 			BaseOperationOutcome oo = null;
 			int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
@@ -761,7 +767,16 @@ public class RestfulServer extends HttpServlet {
 		// nothing by default
 	}
 
-	public boolean isUseBrowserFriendlyContentTypes() {
+    @Override
+    public void destroy() {
+        if (getResourceProviders() != null) {
+            for (IResourceProvider iResourceProvider : getResourceProviders()) {
+                invokeDestroy(iResourceProvider);
+            }
+        }
+    }
+
+    public boolean isUseBrowserFriendlyContentTypes() {
 		return myUseBrowserFriendlyContentTypes;
 	}
 
@@ -778,7 +793,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER} (which is the default), the server will automatically add a profile tag based
 	 * on the class of the resource(s) being returned.
-	 * 
+	 *
 	 * @param theAddProfileTag
 	 *            The behaviour enum (must not be null)
 	 */
@@ -798,7 +813,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets (or clears) the list of interceptors
-	 * 
+	 *
 	 * @param theList
 	 *            The list of interceptors (may be null)
 	 */
@@ -811,7 +826,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets (or clears) the list of interceptors
-	 * 
+	 *
 	 * @param theList
 	 *            The list of interceptors (may be null)
 	 */
@@ -831,7 +846,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on this server.
-	 * 
+	 *
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setPlainProviders(Collection<Object> theProviders) {
@@ -840,7 +855,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on this server.
-	 * 
+	 *
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setPlainProviders(Object... theProv) {
@@ -849,7 +864,7 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Sets the non-resource specific providers which implement method calls on this server
-	 * 
+	 *
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setProviders(Object... theProviders) {
@@ -884,7 +899,7 @@ public class RestfulServer extends HttpServlet {
 	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
-	 * 
+	 *
 	 * @throws IllegalStateException
 	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
 	 */

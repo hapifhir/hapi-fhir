@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import ca.uhn.fhir.rest.annotation.*;
 import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -44,18 +45,6 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.AddTags;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.DeleteTags;
-import ca.uhn.fhir.rest.annotation.GetTags;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -257,6 +246,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
+
 		// ** if you add another annotation above, also add it to the next line:
 		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction)) {
 			return null;
