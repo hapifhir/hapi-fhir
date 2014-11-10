@@ -59,6 +59,10 @@
 				<![CDATA[<code>getUpperBoundAsInstant()</code>]]>
 				now returns the instant at 23:59:59.9999.				
 			</action>			
+			<action type="fix">
+				Resource fields with a type of "*" (or Any) sometimes failed to parse if a 
+				value type of "code" was used. Thanks to Bill de Beaubien for reporting!
+			</action>			
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
