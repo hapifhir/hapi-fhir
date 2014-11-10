@@ -34,6 +34,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -167,7 +168,12 @@ public class FhirContext {
 			try {
 				String className = myNameToResourceType.get(resourceName.toLowerCase());
 				if (className == null) {
-					throw new DataFormatException("Unknown resource name[" + resourceName + "]");
+					if ("binary".equals(resourceName.toLowerCase())) {
+						// Binary is not generated so it's not in the list of potential resources
+						className = Binary.class.getName();
+					} else {
+						throw new DataFormatException("Unknown resource name[" + resourceName + "]");
+					}
 				}
 				Class<?> clazz = Class.forName(className);
 				if (IResource.class.isAssignableFrom(clazz)) {

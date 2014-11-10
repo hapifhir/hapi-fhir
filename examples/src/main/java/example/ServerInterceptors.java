@@ -3,6 +3,9 @@ package example;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
@@ -11,12 +14,13 @@ import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
 public class ServerInterceptors {
 
 @SuppressWarnings("unused")
 public static void main(String[] args) throws DataFormatException, IOException {
-
+   
 	
 // START SNIPPET: resourceExtension
 // Create an example patient

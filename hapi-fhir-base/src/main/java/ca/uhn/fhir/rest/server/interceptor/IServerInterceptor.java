@@ -37,6 +37,11 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use {@link InterceptorAdapter} in order to not need to implement every method.
+ * <p>
+ * <b>See:</b> See the 
+ * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server interceptor documentation</a>
+ * for more information on how to use this class.
+ * </p>
  */
 public interface IServerInterceptor {
 
@@ -64,7 +69,8 @@ public interface IServerInterceptor {
 	 * </p>
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theRequest
 	 *            The incoming request
 	 * @param theResponse
@@ -82,7 +88,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -124,7 +131,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -145,7 +153,8 @@ public interface IServerInterceptor {
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the response back to the client
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest
@@ -171,7 +180,9 @@ public interface IServerInterceptor {
 	 * </p>
 	 * 
 	 * @param theRequestDetails
-	 *            A bean containing details about the request that is about to be processed, including
+	 *            Contains either <code>null</code>, or a bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}. This parameter may be
+	 *            null if the request processing did not successfully parse the incoming request, but will generally not be null.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
 	 * @param theRequest

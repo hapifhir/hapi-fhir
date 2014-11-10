@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ca.uhn.hapi.fhir</groupId>
+	<artifactId>hapi-fhir</artifactId>
+	<packaging>pom</packaging>
+	<version>0.8-SNAPSHOT</version>
+	<name>HAPI-FHIR</name>
+	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
+
+	<organization>
+		<name>University Health Network</name>
+		<url>http://www.uhn.ca</url>
+	</organization>
+
+	<inceptionYear>2014</inceptionYear>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
+	</issueManagement>
+
+	<distributionManagement>
+		<site>
+			<id>git.server</id>
+			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+		</site>
+	</distributionManagement>
+
+	<scm>
+		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
+		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
+	</scm>
+
+	<description>
+	</description>
+
+	<dependencies>
+	</dependencies>
+
+	<prerequisites>
+		<maven>3.0.1</maven>
+	</prerequisites>
+
+	<developers>
+		<developer>
+			<id>jamesagnew</id>
+			<name>James Agnew</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>Dmitri Sotnikov</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>Lisa Wong</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>Josh Mandel</name>
+			<organization>Boston Children's Hospital</organization>
+		</developer>
+		<developer>
+			<name>Laura MacDougall Sookraj</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>Neal Acharya</name>
+			<organization>University Health Network</organization>
+		</developer>
+		<developer>
+			<name>David Hay</name>
+			<organization>Orion Health</organization>
+		</developer>
+		<developer>
+			<id>suranga</id>
+			<name>Suranga Nath Kasthurirathne</name>
+			<organization>OpenMRS / Regenstrief Center for Biomedical Informatics</organization>
+		</developer>
+		<developer>
+			<id>dougmartin</id>
+			<name>Doug Martin</name>
+			<organization>Regenstrief Center for Biomedical Informatics</organization>
+		</developer>
+		<developer>
+			<id>akley</id>
+			<name>Alexander Kley</name>
+		</developer>
+		<developer>
+			<id>preston</id>
+			<name>Preston Lee</name>
+			<organization>Arizona State University</organization>
+		</developer>
+		<developer>
+			<id>jathman</id>
+			<name>Joe Athman</name>
+		</developer>
+		<developer>
+			<id>petromykhailysyn</id>
+			<name>Petro Mykhailyshyn</name>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache Software License 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
+		<!-- For site-deploy -->
+		<siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
+		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
+
+		<!-- Plugin Versions -->
+		<commons_lang_version>3.3.2</commons_lang_version>
+		<derby_version>10.11.1.1</derby_version>
+		<guava_version>18.0</guava_version>
+		<hamcrest_version>1.3</hamcrest_version>
+		<hibernate_version>4.2.12.Final</hibernate_version>
+		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
+		<jetty_version>9.2.2.v20140723</jetty_version>
+		<jscience_version>4.3.1</jscience_version>
+		<junit_version>4.11</junit_version>
+		<logback_version>1.1.2</logback_version>
+		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
+		<maven_javadoc_plugin_version>2.9.1</maven_javadoc_plugin_version>
+		<maven_license_plugin_version>1.7</maven_license_plugin_version>
+		<maven_surefire_plugin_version>2.17</maven_surefire_plugin_version>
+		<maven_site_plugin_version>3.4</maven_site_plugin_version>
+		<maven_source_plugin_version>2.3</maven_source_plugin_version>
+		<mitreid-connect-version>1.1.8</mitreid-connect-version>
+		<mockito_version>1.9.5</mockito_version>
+		<phloc_schematron_version>2.7.1</phloc_schematron_version>
+		<phloc_commons_version>4.3.3</phloc_commons_version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<servlet_api_version>3.1.0</servlet_api_version>
+		<slf4j_version>1.7.7</slf4j_version>
+		<spring_version>4.1.0.RELEASE</spring_version>
+		<spring_security_version>3.2.4.RELEASE</spring_security_version>
+		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
+		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+		<woodstox_version>4.4.0</woodstox_version>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${maven_surefire_plugin_version}</version>
+					<configuration>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<runOrder>random</runOrder>
+						<!--<argLine>-Dfile.encoding=ISO-8859-1</argLine> -->
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven_site_plugin_version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.wagon</groupId>
+							<artifactId>wagon-ssh</artifactId>
+							<version>1.0</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.doxia</groupId>
+							<artifactId>doxia-module-markdown</artifactId>
+							<version>1.6</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<skip>true</skip>
+						<skipDeploy>true</skipDeploy>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven_javadoc_plugin_version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven_source_plugin_version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>${maven_license_plugin_version}</version>
+					<configuration>
+						<verbose>true</verbose>
+						<addSvnKeyWords>false</addSvnKeyWords>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven_site_plugin_version}</version>
+					<configuration>
+						<skip>false</skip>
+						<skipDeploy>true</skipDeploy>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.wagon</groupId>
+							<artifactId>wagon-scm</artifactId>
+							<version>2.2</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-manager-plexus</artifactId>
+							<version>1.9</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.9</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-api</artifactId>
+							<version>1.9</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>copySubProjects</id>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<copy todir="target/site/apidocs">
+									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dstu">
+									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-dev">
+									<fileset dir="hapi-fhir-structures-dev/target/site/apidocs"/>
+								</copy>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>addSyntaxHighlighter</id>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo>Adding Syntax Highlighter</echo>
+								<replace dir="target/site" summary="true">
+									<include name="*.html"></include>
+									<replacetoken><![CDATA[</body>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script type="text/javascript">
+	var elements = document.getElementsByClassName("source");
+	for (var i=0; i < elements.length; i++) {
+		var pres = elements[i].getElementsByTagName("pre");
+		for (var j = 0; j < pres.length; j++) {
+			var pre = pres[j];
+			if (pre.innerHTML.match(/\/\*/)) {
+				pre.className = 'brush: java';
+			} else if (pre.innerHTML.match(/^\/\//)) {
+				pre.className = 'brush: java';
+			} else if (pre.innerHTML.match(/^\{/)) {
+				pre.className = 'brush: jscript';
+			} else if (pre.innerHTML.match(/^\#/)) {
+				pre.className = 'brush: bash';
+			} else if (pre.innerHTML.match(/\&lt\;\//)) {
+				pre.className = 'brush: xml';
+			} else {
+				pre.className = 'brush: java';
+			}
+		}
+	}
+
+	SyntaxHighlighter.all();
+</script>
+</body>
+									]]></replacevalue>
+								</replace>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>addAnalytics</id>
+						<phase>post-site</phase>
+						<configuration>
+							<target>
+								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
+								<replace dir="target/site" summary="true">
+									<include name="**/*.html"></include>
+									<replacefilter token="#build#" value="${label}" />
+									<replacefilter token="#version#" value="${project.version}" />
+									<replacetoken><![CDATA[</body>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
+                </body >
+                ]]></replacevalue>
+								</replace>
+								<echo>Adding Google analytics in target/site for &lt;BODY&gt;</echo>
+								<replace dir="target/site" summary="true">
+									<include name="**/*.html"></include>
+									<replacetoken><![CDATA[</BODY>]]></replacetoken>
+									<replacevalue><![CDATA[
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
+                </BODY >
+                ]]></replacevalue>
+								</replace>
+								<echo>Adding social plugins for HAPI</echo>
+								<replace dir="target/site/" summary="true">
+									<include name="**/*.html"></include>
+									<replacetoken><![CDATA[SOCIALPLUGINSHEREFHIR]]></replacetoken>
+									<replacevalue><![CDATA[
+            	<table cellpadding="0" cellspacing="0" border="0"><tr>
+            	<td><div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://hl7api.sourceforge.net/"></div></td>
+            	<td><div class="fb-like" data-href="http://hl7api.sourceforge.net/" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></div></td>
+            	</tr></table>
+<<<<<<< HEAD
+
+            	</p><p>
+            	<!-- Place this tag after the last +1 button tag. -->
+            	<script type="text/javascript">
+            	  (function() {
+            	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            	    po.src = 'https://apis.google.com/js/plusone.js';
+            	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+            	  })();
+            	</script>
+            	<div id="fb-root"></div>
+            	<script>(function(d, s, id) {
+            	  var js, fjs = d.getElementsByTagName(s)[0];
+            	  if (d.getElementById(id)) return;
+            	  js = d.createElement(s); js.id = id;
+            	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+            	  fjs.parentNode.insertBefore(js, fjs);
+            	}(document, 'script', 'facebook-jssdk'));</script>
+				]]></replacevalue>
+								</replace>
+
+
+=======
+
+            	</p><p>
+            	<!-- Place this tag after the last +1 button tag. -->
+            	<script type="text/javascript">
+            	  (function() {
+            	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            	    po.src = 'https://apis.google.com/js/plusone.js';
+            	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+            	  })();
+            	</script>
+            	<div id="fb-root"></div>
+            	<script>(function(d, s, id) {
+            	  var js, fjs = d.getElementsByTagName(s)[0];
+            	  if (d.getElementById(id)) return;
+            	  js = d.createElement(s); js.id = id;
+            	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+            	  fjs.parentNode.insertBefore(js, fjs);
+            	}(document, 'script', 'facebook-jssdk'));</script>
+				]]></replacevalue>
+								</replace>
+
+
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<version>1.12</version>
+				<inherited>true</inherited>
+				<configuration>
+					<signature>
+						<groupId>org.codehaus.mojo.signature</groupId>
+						<artifactId>java16</artifactId>
+						<version>1.01</version>
+					</signature>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-site-plugin</artifactId>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>stage-for-scm-publish</id>
+						<phase>post-site</phase>
+						<goals>
+							<goal>stage</goal>
+						</goals>
+						<configuration>
+							<stagingDirectory>${siteMainDirectory}</stagingDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-publish-plugin</artifactId>
+				<version>1.1</version>
+				<inherited>false</inherited>
+				<configuration>
+					<checkoutDirectory>${scmPubCheckoutDirectory}</checkoutDirectory>
+					<content>\${siteMainDirectory}</content>
+					<tryUpdate>true</tryUpdate>
+					<scmBranch>gh-pages</scmBranch>
+					<pubScmUrl>scm:git:git@github.com:jamesagnew/hapi-fhir.git</pubScmUrl>
+				</configuration>
+				<executions>
+					<execution>
+						<id>scm-publish</id>
+						<phase>site-deploy</phase>
+						<goals>
+							<goal>publish-scm</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changes-plugin</artifactId>
+				<version>2.11</version>
+				<inherited>false</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
+					<feedType>atom_1.0</feedType>
+					<issueLinkTemplatePerSystem>
+						<default>https://github.com/jamesagnew/hapi-fhir/issues/%ISSUE%</default>
+					</issueLinkTemplatePerSystem>
+					<escapeHTML>false</escapeHTML>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>${maven_surefire_plugin_version}</version>
+				<configuration>
+					<aggregate>true</aggregate>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+				<inherited>false</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>project-team</report>
+							<report>issue-tracking</report>
+							<report>license</report>
+							<report>scm</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+<<<<<<< HEAD
+=======
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>findbugs</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+	
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
+				<version>1.1</version> </plugin> -->
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>ROOT</id>
+			<modules>
+			</modules>
+		</profile>
+		<profile>
+			<id>SIGN_ARTIFACTS</id>
+			<activation>
+				<property>
+					<name>gpg.passphrase</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>SITE</id>
+			<modules>
+				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-structures-dstu</module>
+				<module>hapi-fhir-structures-dev</module>
+<<<<<<< HEAD
+=======
+				<module>examples</module>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+			</modules>
+		</profile>
+		<profile>
+			<id>ALLMODULES</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>hapi-deployable-pom</module>
+				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-oauth2</module>
+<<<<<<< HEAD
+				<module>hapi-fhir-base/examples</module>
+=======
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+				<module>hapi-fhir-base/testmindeps</module>
+				<module>hapi-tinder-plugin</module>
+				<module>hapi-tinder-test</module>
+				<module>hapi-fhir-structures-dstu</module>
+				<module>hapi-fhir-structures-dev</module>
+				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-jpaserver-test</module>
+				<module>restful-server-example</module>
+				<module>restful-server-example-test</module>
+				<module>hapi-fhir-testpage-overlay</module>
+				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
+			</modules>
+		</profile>
+	</profiles>
+
+</project>

@@ -207,10 +207,11 @@ public class ParameterUtil {
 			case ',':
 			case '|':
 				b.append('\\');
-				// fall through
+				break;
 			default:
-				b.append(next);
+				break;
 			}
+			b.append(next);
 		}
 
 		return b.toString();

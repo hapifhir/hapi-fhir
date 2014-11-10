@@ -22,6 +22,7 @@
 				<reportSets>
 					<reportSet>
 						<reports>
+							<report>scm</report>
 						</reports>
 					</reportSet>
 				</reportSets>
@@ -39,6 +40,7 @@
 						<configuration>
 							<links>
 								<link>http://docs.oracle.com/javaee/7/api</link>
+								<link>http://jamesagnew.github.io/hapi-fhir/apidocs</link>
 							</links>
 						</configuration>
 					</reportSet>

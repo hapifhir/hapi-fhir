@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.api;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -49,6 +50,17 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	 */
 	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="string"  )
 	public static final String SP_RES_ID = "_id";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>_id</b>
+	 * <p>
+	 * Description: <b>the _id of a resource</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>Resource._id</b><br/>
+	 * </p>
+	 */
+	public static final StringClientParam RES_ID = new StringClientParam(BaseResource.SP_RES_ID);
+
 
 	@Child(name = "contained", order = 2, min = 0, max = 1)
 	private ContainedDt myContained;

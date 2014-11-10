@@ -18,14 +18,11 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.8-SNAPSHOT</version>
-<<<<<<< HEAD
-=======
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>0.8-SNAPSHOT</version>
->>>>>>> versions
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

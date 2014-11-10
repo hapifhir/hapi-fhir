@@ -1,0 +1,780 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Profile xmlns="http://hl7.org/fhir">
+  <version value="1.0" />
+  <name value="Audit Exception Profile" />
+  <description value="DMIXFP-10   v1.0  Initial version" />
+  <status value="draft" />
+  <fhirVersion value="0.0.81" />
+  <mapping>
+    <identity value="rim" />
+    <uri value="http://hl7.org/v3" />
+    <name value="RIM" />
+  </mapping>
+  <mapping>
+    <identity value="dicom" />
+    <uri value="http://nema.org/dicom" />
+    <name value="DICOM" />
+  </mapping>
+  <structure>
+    <type value="SecurityEvent" />
+    <name value="MySecurityEvent" />
+    <publish value="true" />
+    <element>
+      <path value="SecurityEvent" />
+      <definition>
+        <short value="Event record kept for security purposes" />
+        <formal value="A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage." />
+        <comments value="Based on ATNA (RFC 3881)." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="Resource" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="ControlAct[moodCode=EVN]" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="Message" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event" />
+      <definition>
+        <short value="What was done" />
+        <formal value="Identifies the name, action type, time, and disposition of the audited event." />
+        <min value="1" />
+        <max value="1" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="N/A (no nesting in v3)" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="EventIdentification" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.type" />
+      <definition>
+        <short value="Type/identifier of event" />
+        <formal value="Identifier for a family of the event." />
+        <comments value="e.g., a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="CodeableConcept" />
+        </type>
+        <isModifier value="false" />
+        <binding>
+          <name value="SecurityEventType" />
+          <isExtensible value="true" />
+          <conformance value="preferred" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/security-event-type" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value=".code (type, subtype and action are pre-coordinated or sent as translations)" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@EventId" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.type.coding" />
+      <definition>
+        <short value="Code defined by a terminology system" />
+        <formal value="A reference to a code defined by a terminology system." />
+        <comments value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information.  Ordering of codings is undefined and SHALL not be used to infer meaning." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="Coding" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="union(., ./translation)" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.1-8, C*E.10-22" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.type.coding.system" />
+      <definition>
+        <short value="Identity of the terminology system" />
+        <formal value="The identification of the code system that defines the meaning of the symbol in the code." />
+        <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="uri" />
+        </type>
+        <valueUri value="http://dmix.gov/fhir/securityprofile" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="./codeSystem" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.3" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.type.coding.code" />
+      <definition>
+        <short value="Symbol in syntax defined by the system" />
+        <formal value="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="code" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="./code" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.1" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.subtype" />
+      <definition>
+        <short value="More specific type/id for the event" />
+        <formal value="Identifier for the category of event." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="CodeableConcept" />
+        </type>
+        <isModifier value="false" />
+        <binding>
+          <name value="SecurityEventSubType" />
+          <isExtensible value="true" />
+          <conformance value="preferred" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/security-event-sub-type" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value=".code (type, subtype and action are pre-coordinated or sent as translations)" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@EventTypeCode" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.subtype.coding" />
+      <definition>
+        <short value="Code defined by a terminology system" />
+        <formal value="A reference to a code defined by a terminology system." />
+        <comments value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information.  Ordering of codings is undefined and SHALL not be used to infer meaning." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="Coding" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="union(., ./translation)" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.1-8, C*E.10-22" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.event.subtype.coding.system" />
+      <definition>
+        <short value="Identity of the terminology system" />
+        <formal value="The identification of the code system that defines the meaning of the symbol in the code." />
+        <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="uri" />
+        </type>
+        <valueUri value="http://dmix.gov/fhir/securityprofile" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="./codeSystem" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.3" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.participant" />
+      <definition>
+        <short value="A person, a hardware device or software process" />
+        <formal value="A person, a hardware device or software process." />
+        <comments value="There may be more than one user per event, for example, in cases of actions initiated by one user for other users, or in events that involve more than one user, hardware device, or system process. However, only one user may be the initiator/requestor for the event." />
+        <min value="1" />
+        <max value="*" />
+        <constraint>
+          <key value="3" />
+          <name value="Participant Identification" />
+          <severity value="error" />
+          <human value="Either a userId or a reference, but not both" />
+          <xpath value="exists(f:userId) != exists(f:reference)" />
+        </constraint>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".participation" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="ActiveParticipant" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.participant.role" />
+      <definition>
+        <short value="User roles (e.g. local RBAC codes)" />
+        <formal value="Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="CodeableConcept" />
+        </type>
+        <isModifier value="false" />
+        <binding>
+          <name value="DICOMRoleId" />
+          <isExtensible value="true" />
+          <conformance value="preferred" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/dicm-402-roleid" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value=".typeCode and/or .functionCode" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="RoleIdCode" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.participant.role.coding" />
+      <definition>
+        <short value="Code defined by a terminology system" />
+        <formal value="A reference to a code defined by a terminology system." />
+        <comments value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information.  Ordering of codings is undefined and SHALL not be used to infer meaning." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="Coding" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="union(., ./translation)" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.1-8, C*E.10-22" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.participant.role.coding.system" />
+      <definition>
+        <short value="Identity of the terminology system" />
+        <formal value="The identification of the code system that defines the meaning of the symbol in the code." />
+        <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="uri" />
+        </type>
+        <valueUri value="http://dmix.gov/fhir/securityprofile" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="./codeSystem" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.3" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.source" />
+      <definition>
+        <short value="Application systems and processes" />
+        <formal value="Application systems and processes." />
+        <comments value="Since multi-tier, distributed, or composite applications make source identification ambiguous, this collection of fields may repeat for each application or process actively involved in the event. For example, multiple value-sets can identify participating web servers, application processes, and database server threads in an n-tier distributed application. Passive event participants, e.g., low-level network transports, need not be identified." />
+        <min value="1" />
+        <max value="1" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".participation[typeCode=INF].role[classCode=ASSIGN].player[classCode=DEV, determinerCode=INSTANCE]" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="AuditSourceIdentification" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.source.site" />
+      <definition>
+        <short value="Logical source location within the enterprise" />
+        <formal value="Logical source location within the healthcare enterprise network." />
+        <comments value="a hospital or other provider location within a multi-entity provider group." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="string" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".scopedRole[classCode=LOCE].player.desc" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@AuditEnterpriseSiteId" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object" />
+      <definition>
+        <short value="Specific instances of data or objects that have been accessed" />
+        <formal value="Specific instances of data or objects that have been accessed." />
+        <comments value="required unless the values for Event Identification, Active Participant Identification, and Audit Source Identification are sufficient to document the entire auditable event. Because events may have more than one participant object, this group can be a repeating set of values." />
+        <min value="0" />
+        <max value="*" />
+        <constraint>
+          <key value="2" />
+          <name value="Object Identification" />
+          <severity value="error" />
+          <human value="Either an identifier or a reference, but not both" />
+          <xpath value="exists(f:identifier) != exists(f:reference)" />
+        </constraint>
+        <constraint>
+          <key value="1" />
+          <name value="Object Name" />
+          <severity value="error" />
+          <human value="Either a name or a query (or both)" />
+          <xpath value="not(exists(f:name)) or not(exists(f:query))" />
+        </constraint>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".outboundRelationship[typeCode=SUBJ].target  or  .participation[typeCode=SBJ].role" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="ParticipantObjectIdentification" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.identifier" />
+      <definition>
+        <short value="Specific instance of object (e.g. versioned)" />
+        <formal value="Identifies a specific instance of the participant object. The reference should always be version specific." />
+        <comments value="Identifier details depends on object type." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="Identifier" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".id.extension" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@ParticipantObjectID" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.identifier.use" />
+      <definition>
+        <short value="usual | official | temp | secondary (If known)" />
+        <formal value="The purpose of this identifier." />
+        <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary id for a permanent one. Applications can assume that an identifier is permanent unless it explicitly says that it is temporary." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="code" />
+        </type>
+        <valueCode value="official" />
+        <isModifier value="true" />
+        <binding>
+          <name value="IdentifierUse" />
+          <isExtensible value="false" />
+          <conformance value="required" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/identifier-use" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value="N/A - this is sometimes implied by context" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="CX.5" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.identifier.label" />
+      <definition>
+        <short value="Description of identifier" />
+        <formal value="A text string for the identifier that can be displayed to a human so they can recognize the identifier." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="string" />
+        </type>
+        <valueString value="VDS Invoked" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="N/A - this is sometimes implied by context" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="N/A" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.identifier.system" />
+      <definition>
+        <short value="The namespace for the identifier" />
+        <formal value="Establishes the namespace in which set of possible id values is unique." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="uri" />
+        </type>
+        <valueUri value="http://dmix.gov/fhir/securityprofile" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="II.root" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="CX.4 / EI-2-4" />
+        </mapping>
+        <mapping>
+          <identity value="servd" />
+          <map value="./IdentifierType" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.type" />
+      <definition>
+        <short value="Object type being audited" />
+        <formal value="Object type being audited." />
+        <comments value="This value is distinct from the user's role or any user relationship to the participant object." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="code" />
+        </type>
+        <isModifier value="false" />
+        <binding>
+          <name value="SecurityEventObjectType" />
+          <isExtensible value="false" />
+          <conformance value="required" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/object-type" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value="[self::Act].code or role.player.code" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@ParticipantObjectTypeCode" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.sensitivity" />
+      <definition>
+        <short value="Policy-defined sensitivity for the object" />
+        <formal value="Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics." />
+        <comments value="Values from ATNA are institution- and implementation-defined text strings (in sensitivity.text). HL7 defines confidentiality codes for records, documents etc. that can also be used here." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="CodeableConcept" />
+        </type>
+        <isModifier value="false" />
+        <binding>
+          <name value="SecurityEventObjectSensitivity" />
+          <isExtensible value="true" />
+          <conformance value="example" />
+          <referenceResource>
+            <reference value="http://hl7.org/fhir/vs/security-event-sensitivity" />
+          </referenceResource>
+        </binding>
+        <mapping>
+          <identity value="rim" />
+          <map value=".confidentialityCode" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="@ParticipantObjectSensitivity" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.sensitivity.coding" />
+      <definition>
+        <short value="Code defined by a terminology system" />
+        <formal value="A reference to a code defined by a terminology system." />
+        <comments value="Codes may be defined very casually in enumerations, or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information.  Ordering of codings is undefined and SHALL not be used to infer meaning." />
+        <min value="0" />
+        <max value="*" />
+        <type>
+          <code value="Coding" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="union(., ./translation)" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.1-8, C*E.10-22" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.sensitivity.coding.system" />
+      <definition>
+        <short value="Identity of the terminology system" />
+        <formal value="The identification of the code system that defines the meaning of the symbol in the code." />
+        <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7's list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously." />
+        <min value="0" />
+        <max value="1" />
+        <type>
+          <code value="uri" />
+        </type>
+        <valueUri value="http://hl7.org/fhir/v3/Confidentiality" />
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value="./codeSystem" />
+        </mapping>
+        <mapping>
+          <identity value="v2" />
+          <map value="C*E.3" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.object.name" />
+      <definition>
+        <short value="Instance-specific descriptor for Object" />
+        <formal value="An instance-specific descriptor of the Participant Object ID audited, such as a person's name." />
+        <comments value="This field may be used in a query/report to identify audit events for a specific person, e.g., where multiple synonymous Participant Object IDs (patient number, medical record number, encounter number, etc.) have been used." />
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="string" />
+        </type>
+        <isModifier value="false" />
+        <mapping>
+          <identity value="rim" />
+          <map value=".title" />
+        </mapping>
+        <mapping>
+          <identity value="dicom" />
+          <map value="ParticipantObjectName" />
+        </mapping>
+      </definition>
+    </element>
+    <element>
+      <path value="SecurityEvent.extension" />
+      <slicing>
+        <discriminator value="url" />
+        <ordered value="true" />
+        <rules value="openAtEnd" />
+      </slicing>
+    </element>
+    <element>
+      <path value="SecurityEvent.extension" />
+      <name value="aeExtension" />
+      <definition>
+        <min value="1" />
+        <max value="1" />
+        <type>
+          <code value="Extension" />
+          <profile value="#aeExtension" />
+        </type>
+      </definition>
+    </element>
+  </structure>
+  <extensionDefn>
+    <code value="aeExtension" />
+    <display value="aeExtension" />
+    <definition>
+      <min value="1" />
+      <max value="1" />
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.patientID" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Unique identifier for patient" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+      <maxLength value="10" />
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.buildRelease" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.eventType" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Audit|Exception" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.eventUnique" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Unique identifier for this audit record" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="uuid" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.eventGroupUnique" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Unique identifier for DMS RLUS/FHIR transaction for a consumer" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="uuid" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.eventMessageData" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Message describing auditable transaction" />
+      <min value="1" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.debugSignal" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="1 means WMB uses its debug code. 0 means no debug. Other values TBD" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="integer" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.actionCode" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="NV means no schema validation. Other values TBD" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </definition>
+  </extensionDefn>
+  <extensionDefn>
+    <code value="aeExtension.specialContent" />
+    <contextType value="extension" />
+    <context value="#aeExtension" />
+    <definition>
+      <short value="Additional informative text can be included here" />
+      <min value="0" />
+      <max value="1" />
+      <type>
+        <code value="string" />
+      </type>
+    </definition>
+  </extensionDefn>
+</Profile>

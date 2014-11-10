@@ -77,7 +77,7 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	 * Constructor which accepts an array of Strings describing the issue. This strings will be translated into an {@link BaseOperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String... theMessage) {
-		super(STATUS_CODE, theMessage[0]); // TODO: this used to generate an OperationOutcome - why?
+		super(STATUS_CODE, theMessage);
 	}
 
 }

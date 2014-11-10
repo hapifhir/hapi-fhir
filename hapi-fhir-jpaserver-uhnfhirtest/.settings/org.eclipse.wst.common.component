@@ -15,7 +15,7 @@
         <dependent-module archiveName="hapi-fhir-structures-dstu-0.8-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/" handle="module:/overlay/var/M2_REPO/ca/uhn/hapi/fhir/hapi-fhir-testpage-overlay/0.8-SNAPSHOT/hapi-fhir-testpage-overlay-0.8-SNAPSHOT.war?unpackFolder=target/m2e-wtp/overlays&amp;includes=**/**&amp;excludes=META-INF/MANIFEST.MF">
+        <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-testpage-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">
             <dependency-type>consumes</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/" handle="module:/overlay/slf/?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">

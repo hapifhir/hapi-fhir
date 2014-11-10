@@ -28,6 +28,13 @@
 		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
 	</issueManagement>
 
+	<distributionManagement>
+		<site>
+			<id>git.server</id>
+			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+		</site>
+	</distributionManagement>
+
 	<scm>
 		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
 		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
@@ -244,6 +251,58 @@
 							<version>1.9</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											ca.uhn.hapi.fhir
+										</groupId>
+										<artifactId>
+											hapi-tinder-plugin
+										</artifactId>
+										<versionRange>
+											[0.8-SNAPSHOT,)
+										</versionRange>
+										<goals>
+											<goal>
+												generate-jparest-server
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.7,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -502,12 +561,33 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<configuration>
+					<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
+				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>findbugs</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+	
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
 				<version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
 
 	<profiles>
+		<profile>
+			<id>ROOT</id>
+			<modules>
+			</modules>
+		</profile>
 		<profile>
 			<id>SIGN_ARTIFACTS</id>
 			<activation>
@@ -551,7 +631,7 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-oauth2</module>
+				<!--<module>hapi-fhir-oauth2</module>-->
 				<module>hapi-fhir-base/testmindeps</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>

@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>0.8-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-base-examples</artifactId>
+	<packaging>jar</packaging>
+
+	<name>HAPI FHIR - Examples (for site)</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>0.8-SNAPSHOT</version>
+<<<<<<< HEAD:hapi-fhir-base/examples/pom.xml
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2:examples/pom.xml.orig
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.8-SNAPSHOT</version>
+<<<<<<< HEAD:hapi-fhir-base/examples/pom.xml
+=======
+>>>>>>> versions
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2:examples/pom.xml.orig
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit_version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

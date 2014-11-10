@@ -31,13 +31,33 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+/**
+ * Keys in this map refer to <b>resource metadata keys</b>, which are keys used to access information about specific resource instances that live outside of the resource body. Typically, these are
+ * data elements which are sent/receieved in HTTP Headers along with read/create resource requests, or properties which can be found in bundle entries.
+ * <p>
+ * To access or set resource metadata values, every resource has a metadata map, and this class provides convenient getters/setters for interacting with that map. For example, to get a resource's
+ * {@link UPDATED} value, which is the "last updated" time for that resource, use the following code:
+ * </p>
+ * <p>
+ * <code>InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(resource);</code>
+ * <p>
+ * <p>
+ * To set this value, use the following:
+ * </p>
+ * <p>
+ * <code>InstantDt update = new InstantDt("2011-01-02T11:22:33.0000Z"); // populate with the actual time<br/>
+ * ResourceMetadataKeyEnum.UPDATED.put(resource, update);</code>
+ * </p>
+ * <p>
+ * Note that this class is not a Java Enum, and can therefore be extended (this is why it is not actually an Enum). Users of HAPI-FHIR are able to create their own classes extending this class to
+ * define their own keys for storage in resource metadata if needed.
+ * </p>
+ */
 public abstract class ResourceMetadataKeyEnum<T> {
-		
+
 	/**
-	 * If present and populated with a date/time (as an instance of {@link InstantDt}),
-	 * this value is an indication that the resource is in the deleted state. This key
-	 * is only used in a limited number of scenarios, such as POSTing transaction bundles
-	 * to a server, or returning resource history.  
+	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number
+	 * of scenarios, such as POSTing transaction bundles to a server, or returning resource history.
 	 * <p>
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
@@ -55,9 +75,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	};
 
 	/**
-	 * The value for this key represents a previous ID used to identify
-	 * this resource. This key is currently only used internally during
-	 * transaction method processing. 
+	 * The value for this key represents a previous ID used to identify this resource. This key is currently only used internally during transaction method processing.
 	 * <p>
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
@@ -73,18 +91,14 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(PREVIOUS_ID, theObject);
 		}
 	};
-	
+
 	/**
-	 * The value for this key is the bundle entry <b>Published</b> time. This is
-	 * defined by FHIR as "Time resource copied into the feed", which is
-	 * generally best left to the current time.
+	 * The value for this key is the bundle entry <b>Published</b> time. This is defined by FHIR as "Time resource copied into the feed", which is generally best left to the current time.
 	 * <p>
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 * <p>
-	 * <b>Server Note</b>: In servers, it is generally advisable to leave this
-	 * value <code>null</code>, in which case the server will substitute the
-	 * current time automatically.
+	 * <b>Server Note</b>: In servers, it is generally advisable to leave this value <code>null</code>, in which case the server will substitute the current time automatically.
 	 * </p>
 	 * 
 	 * @see InstantDt
@@ -122,7 +136,8 @@ public abstract class ResourceMetadataKeyEnum<T> {
 					return (TagList) retValObj;
 				}
 			}
-			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected " + TagList.class.getCanonicalName());
+			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + TAG_LIST.name() + " - Expected "
+					+ TagList.class.getCanonicalName());
 		}
 
 		@Override
@@ -132,9 +147,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	};
 
 	/**
-	 * If present and populated with a string (as an instance of {@link String}),
-	 * this value contains the title for this resource, as supplied in any bundles containing the
-	 * resource.  
+	 * If present and populated with a string (as an instance of {@link String}), this value contains the title for this resource, as supplied in any bundles containing the resource.
 	 * <p>
 	 * Values for this key are of type <b>{@link String}</b>
 	 * </p>
@@ -150,13 +163,10 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(TITLE, theObject);
 		}
 	};
-	
-	
+
 	/**
-	 * The value for this key is the bundle entry <b>Updated</b> time. This is
-	 * defined by FHIR as "Last Updated for resource". This value is also used
-	 * for populating the "Last-Modified" header in the case of methods that
-	 * return a single resource (read, vread, etc.)
+	 * The value for this key is the bundle entry <b>Updated</b> time. This is defined by FHIR as "Last Updated for resource". This value is also used for populating the "Last-Modified" header in the
+	 * case of methods that return a single resource (read, vread, etc.)
 	 * <p>
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
@@ -173,9 +183,8 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		public void put(IResource theResource, InstantDt theObject) {
 			theResource.getResourceMetadata().put(UPDATED, theObject);
 		}
-	}; 
-	
-	
+	};
+
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
@@ -196,14 +205,11 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(VERSION_ID, theObject);
 		}
 	};
-	
+
 	/**
-	 * If present and populated with a string, provides the "search link" (the link
-	 * element in the bundle entry with <code>rel="search"</code>). Server implementations
-	 * may populate this with a complete URL, in which case the URL will be
-	 * placed as-is in the bundle. They may alternately specify a
-	 * resource relative URL (e.g. "Patient?name=tester") in which case the
-	 * server will convert this to an absolute URL at runtime.  
+	 * If present and populated with a string, provides the "search link" (the link element in the bundle entry with <code>rel="search"</code>). Server implementations may populate this with a
+	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient?name=tester") in which case the server will convert
+	 * this to an absolute URL at runtime.
 	 * <p>
 	 * Values for this key are of type <b>{@link String}</b>
 	 * </p>
@@ -221,12 +227,9 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	};
 
 	/**
-	 * If present and populated with a string, provides the "alternate link" (the link
-	 * element in the bundle entry with <code>rel="alternate"</code>). Server implementations
-	 * may populate this with a complete URL, in which case the URL will be
-	 * placed as-is in the bundle. They may alternately specify a
-	 * resource relative URL (e.g. "Patient/1243") in which case the
-	 * server will convert this to an absolute URL at runtime.  
+	 * If present and populated with a string, provides the "alternate link" (the link element in the bundle entry with <code>rel="alternate"</code>). Server implementations may populate this with a
+	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient/1243") in which case the server will convert this to
+	 * an absolute URL at runtime.
 	 * <p>
 	 * Values for this key are of type <b>{@link String}</b>
 	 * </p>
@@ -242,14 +245,13 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			theResource.getResourceMetadata().put(LINK_ALTERNATE, theObject);
 		}
 	};
-	
+
 	private final String myValue;
 
 	public ResourceMetadataKeyEnum(String theValue) {
 		myValue = theValue;
 	}
 
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -266,8 +268,6 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			return false;
 		return true;
 	}
-
-
 
 	public abstract T get(IResource theResource);
 
@@ -307,39 +307,42 @@ public abstract class ResourceMetadataKeyEnum<T> {
 				return (IdDt) retValObj;
 			}
 		} else if (retValObj instanceof Number) {
-			return new IdDt(((Number)retValObj).toString());
+			return new IdDt(((Number) retValObj).toString());
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + IdDt.class.getCanonicalName());
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ IdDt.class.getCanonicalName());
 	}
 
-		private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
-			Object retValObj = theResourceMetadata.get(theKey);
-			if (retValObj == null) {
+	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof Date) {
+			return new InstantDt((Date) retValObj);
+		} else if (retValObj instanceof InstantDt) {
+			if (((InstantDt) retValObj).isEmpty()) {
 				return null;
-			} else if (retValObj instanceof Date) {
-				return new InstantDt((Date) retValObj);
-			} else if (retValObj instanceof InstantDt) {
-				if (((InstantDt) retValObj).isEmpty()) {
-					return null;
-				} else {
-					return (InstantDt) retValObj;
-				}
+			} else {
+				return (InstantDt) retValObj;
 			}
-			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + InstantDt.class.getCanonicalName());
 		}
-		
-		private static String getStringFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<String> theKey) {
-			Object retValObj = theResourceMetadata.get(theKey);
-			if (retValObj == null) {
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
+	private static String getStringFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<String> theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (StringUtils.isBlank(((String) retValObj))) {
 				return null;
-			} else if (retValObj instanceof String) {
-				if (StringUtils.isBlank(((String) retValObj))) {
-					return null;
-				} else {
-					return (String) retValObj;
-				}
+			} else {
+				return (String) retValObj;
 			}
-			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected " + String.class.getCanonicalName());
 		}
-		
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ String.class.getCanonicalName());
+	}
+
 }

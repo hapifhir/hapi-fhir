@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -27,9 +29,8 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
  */
 
 /**
- * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are
- * subclasses of this exception type, and RESTful server methods should also only call subclasses of this exception
- * type.
+ * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are subclasses of this exception type, and RESTful server methods should also only call
+ * subclasses of this exception type.
  */
 public abstract class BaseServerResponseException extends RuntimeException {
 
@@ -49,11 +50,12 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(NotImplementedOperationException.STATUS_CODE, NotImplementedOperationException.class);
 	}
 
+	private List<String> myAdditionalMessages = null;
 	private BaseOperationOutcome myBaseOperationOutcome;
 	private String myResponseBody;
 	private String myResponseMimeType;
 	private int myStatusCode;
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -67,7 +69,24 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
 	}
-	
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theStatusCode
+	 *            The HTTP status code corresponding to this problem
+	 * @param theMessage
+	 *            The message
+	 */
+	public BaseServerResponseException(int theStatusCode, String... theMessages) {
+		super(theMessages != null && theMessages.length > 0 ? theMessages[0] : null);
+		myStatusCode = theStatusCode;
+		myBaseOperationOutcome = null;
+		if (theMessages != null && theMessages.length > 1) {
+			myAdditionalMessages = Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
+		}
+	}
+
 	/**
 	 * Constructor
 	 * 
@@ -151,6 +170,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 
+	public List<String> getAdditionalMessages() {
+		return myAdditionalMessages;
+	}
+
 	/**
 	 * Returns the {@link BaseOperationOutcome} resource if any which was supplied in the response, or <code>null</code>
 	 */
@@ -159,8 +182,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * In a RESTful client, this method will be populated with the body of the HTTP respone if one was provided by the
-	 * server, or <code>null</code> otherwise.
+	 * In a RESTful client, this method will be populated with the body of the HTTP respone if one was provided by the server, or <code>null</code> otherwise.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
 	 * </p>
@@ -170,8 +192,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * In a RESTful client, this method will be populated with the HTTP status code that was returned with the HTTP
-	 * response.
+	 * In a RESTful client, this method will be populated with the HTTP status code that was returned with the HTTP response.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
 	 * </p>
@@ -193,6 +214,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * client implementations you should not call this method.
 	 * 
 	 * @param theBaseOperationOutcome The BaseOperationOutcome resource
+	 * Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include with the HTTP response. In client
+	 * implementations you should not call this method.
 	 */
 	public void setOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
 		myBaseOperationOutcome = theBaseOperationOutcome;

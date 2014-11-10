@@ -1,0 +1,127 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>0.8-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-deployable-pom</artifactId>
+	<packaging>pom</packaging>
+	
+	<name>HAPI FHIR - Deployable Artifact Parent POM</name>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.7</version>
+<<<<<<< HEAD
+				<reportSets>
+					<reportSet>
+						<reports>
+=======
+				<inherited>false</inherited>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>scm</report>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven_javadoc_plugin_version}</version>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+						<configuration>
+							<links>
+								<link>http://docs.oracle.com/javaee/7/api</link>
+<<<<<<< HEAD
+=======
+								<link>http://jamesagnew.github.io/hapi-fhir/apidocs</link>
+>>>>>>> d22a35788f57e9f7ce64bc8afc2ee7eaf29d94f2
+							</links>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>DIST</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<inherited>true</inherited>
+						<configuration>
+							<minmemory>128m</minmemory>
+							<maxmemory>1g</maxmemory>
+							<linksource>true</linksource>
+							<verbose>false</verbose>
+							<debug>false</debug>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven_source_plugin_version}</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<version>${maven_license_plugin_version}</version>
+						<executions>
+							<execution>
+								<id>first</id>
+								<goals>
+									<goal>update-file-header</goal>
+								</goals>
+								<phase>process-sources</phase>
+								<configuration>
+									<licenseName>apache_v2</licenseName>
+									<canUpdateDescription>true</canUpdateDescription>
+									<canUpdateCopyright>true</canUpdateCopyright>
+									<roots>
+										<root>src/main/java</root>
+									</roots>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

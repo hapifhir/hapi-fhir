@@ -88,6 +88,13 @@ public class XmlParserTest {
 	}
 	
 	@Test
+	public void testProfileWithBoundCode() throws IOException {
+		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/DMIXAuditException.xml"));
+		ourCtx.newXmlParser().parseResource(Profile.class, content);	
+	}
+	
+	
+	@Test
 	public void testEncodeNonContained() {
 		// Create an organization
 		Organization org = new Organization();

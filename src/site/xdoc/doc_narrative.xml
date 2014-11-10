@@ -120,7 +120,7 @@
 			</p>
 		
 			<macro name="snippet">
-				<param name="file" value="src/test/resources/narrative/Practitioner.html" />
+				<param name="file" value="hapi-fhir-structures-dstu/src/test/resources/narrative/Practitioner.html" />
 			</macro>
 
 			<p>

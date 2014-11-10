@@ -69,6 +69,32 @@
 					of the operation being invoked (resource, bundle, etc.)
 				</li>
 			</ul>
+
+			<br clear="all"/>
+			<subsection name="Exception Handling">
+			
+				<img src="svg/restful-server-interceptors-exception.svg" alt="Interceptors" align="right"/>
+				
+				<p>
+					In the event of an exception being thrown within the server, the interceptor
+					method 
+					<code><a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/IServerInterceptor.html#handleException(ca.uhn.fhir.rest.method.RequestDetails,%20java.lang.Throwable,%20javax.servlet.http.HttpServletRequest,%20javax.servlet.http.HttpServletResponse)">handleException</a></code>
+					will be called. This applies both to HAPI-FHIR defined exceptions thrown within resource provider methods 
+					you have created as well as unexpected exceptions such as NullPointerException thrown 
+					at any point in the handling chain.
+				</p>
+				<p>
+					In general, you will want to return <code>true</code> from the <code>handleException</code>
+					method, which means that processing continues normally (RestfulServer will return an 
+					HTTP 4xx or 5xx response automatically depending on the specific exception which was thrown). 
+				</p>
+				<p>
+					However, you may override the server's built-in exception handling by returning
+					<code>false</code>. In this case, you must provide your own response by
+					interacting with the <code>HttpServletResponse</code> object which is
+					passed in.
+				</p>
+			</subsection>
 			
 			<br clear="all"/>
 			<subsection name="Registering Interceptors">
@@ -126,6 +152,29 @@
 2014-09-04 03:30:00.443 Source[127.0.0.1] Operation[search-type Organization] UA[Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)] Params[]]]></source>
 				
 			</subsection>
+			
+		</section>
+		
+		<section name="Creating Interceptors">
+		
+			<p>
+				Creating your own interceptors is easy. HAPI-FHIR provides a class called
+				<code>InterceptorAdapter</code> which you can extend and then override any
+				methods you wish. The following example shows a simple request counter.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="interceptor" />
+				<param name="file" value="examples/src/main/java/example/RequestCounterInterceptor.java" />
+			</macro>
+		
+			<p>
+				The following example shows an exception handling interceptor which
+				overrides the built-in exception handling by providing a custom response.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="interceptor" />
+				<param name="file" value="examples/src/main/java/example/RequestExceptionInterceptor.java" />
+			</macro>
 			
 		</section>
 		

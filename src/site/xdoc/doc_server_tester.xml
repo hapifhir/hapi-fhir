@@ -86,7 +86,7 @@
 					and copy in the following contents:
 				</p>
 				<macro name="snippet">
-					<param name="file" value="../restful-server-example/src/main/webapp/WEB-INF/hapi-fhir-tester-config.xml" />
+					<param name="file" value="restful-server-example/src/main/webapp/WEB-INF/hapi-fhir-tester-config.xml" />
 				</macro>
 
 				<p>
