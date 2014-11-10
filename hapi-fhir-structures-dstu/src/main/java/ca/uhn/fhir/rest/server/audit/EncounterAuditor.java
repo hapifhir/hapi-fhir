@@ -20,12 +20,11 @@ package ca.uhn.fhir.rest.server.audit;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectDetail;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
@@ -54,7 +53,7 @@ public class EncounterAuditor implements IResourceAuditor<Encounter> {
 			String id = myEncounter.getIdentifierFirstRep().getValue().getValue();
 			String system = myEncounter.getIdentifierFirstRep().getSystem().getValueAsString();
 			String service = myEncounter.getServiceProvider().getDisplay().getValue();
-			return id + "/" + system + ": " + service;
+			return "Encounter: " + id + "/" + system + ": " + service;
 		}
 		return null;
 	}
@@ -79,29 +78,20 @@ public class EncounterAuditor implements IResourceAuditor<Encounter> {
 			String status = myEncounter.getStatus().getValueAsString();
 			String startDate = myEncounter.getPeriod().getStart().getValueAsString();
 			String endDate = myEncounter.getPeriod().getEnd().getValueAsString();
-			return type + ": " + status +", "+ startDate + " - " + endDate; 			
+			return "Encounter: " + type + ": " + status +", "+ startDate + " - " + endDate; 			
 		}
 		return null;
 	}
 
 	@Override
-	public List<ObjectDetail> getDetail() {
-		List<ObjectDetail> details = new ArrayList<ObjectDetail>();		
-		details.add(makeObjectDetail("startDate", myEncounter.getPeriod().getStart().getValueAsString()));
-		details.add(makeObjectDetail("endDate", myEncounter.getPeriod().getEnd().getValueAsString()));
-		details.add(makeObjectDetail("service", myEncounter.getServiceProvider().getDisplay().getValue()));
-		details.add(makeObjectDetail("type", myEncounter.getTypeFirstRep().getText().getValue()));
-		details.add(makeObjectDetail("status", myEncounter.getStatus().getValueAsString()));
+	public Map<String, String> getDetail() {
+		Map<String, String> details = new HashMap<String, String>();		
+		details.put("startDate", myEncounter.getPeriod().getStart().getValueAsString());
+		details.put("endDate", myEncounter.getPeriod().getEnd().getValueAsString());
+		details.put("service", myEncounter.getServiceProvider().getDisplay().getValue());
+		details.put("type", myEncounter.getTypeFirstRep().getText().getValue());
+		details.put("status", myEncounter.getStatus().getValueAsString());
 		return details;
-	}
-
-	private ObjectDetail makeObjectDetail(String type, String value) {	
-		ObjectDetail detail = new ObjectDetail();
-		if(type != null)
-			detail.setType(type);
-		if(value != null)
-			detail.setValue(value.getBytes());
-		return detail;
 	}
 
 	@Override

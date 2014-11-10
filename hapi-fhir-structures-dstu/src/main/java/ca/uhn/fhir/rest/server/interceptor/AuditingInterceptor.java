@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,19 +36,23 @@ import org.apache.commons.lang3.NotImplementedException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent.Event;
+import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectDetail;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectElement;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent.Participant;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ParticipantNetwork;
 import ca.uhn.fhir.model.dstu.resource.SecurityEvent.Source;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventOutcomeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventParticipantNetworkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventSourceTypeEnum;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
@@ -68,12 +73,20 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	private IAuditDataStore myDataStore = null;	
 	private Map<String, Class<? extends IResourceAuditor<? extends IResource>>> myAuditableResources = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
 	private boolean myClientParamsOptional = false;
+	protected String mySiteId;
 	
 	public AuditingInterceptor() {
-		myClientParamsOptional = false;
+		mySiteId = "NONE";
+		myClientParamsOptional = false;		
 	}
 	
-	public AuditingInterceptor(boolean theClientParamsOptional){
+	public AuditingInterceptor(String theSiteId) {
+		mySiteId = theSiteId;
+		myClientParamsOptional = false;		
+	}
+	
+	public AuditingInterceptor(String theSiteId, boolean theClientParamsOptional){
+		mySiteId = theSiteId;
 		myClientParamsOptional = theClientParamsOptional;
 	}
 	
@@ -91,8 +104,14 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			auditEvent.setEvent(getEventInfo(theRequestDetails));			
 			//get user info from request if available			
 			Participant participant = getParticipant(theServletRequest);
-			if(participant == null) return true; //no user to audit - throws exception if client params are required
-						
+			if(participant == null){
+				log.debug("No participant to audit");
+				return true; //no user to audit - throws exception if client params are required
+			}
+			List<Participant> participants = new ArrayList<SecurityEvent.Participant>(1);
+			participants.add(participant);
+			auditEvent.setParticipant(participants);
+			
 			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());			
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
 			List<ObjectElement> auditableObjects = new ArrayList<SecurityEvent.ObjectElement>();
@@ -101,8 +120,14 @@ public class AuditingInterceptor extends InterceptorAdapter {
 				ObjectElement auditableObject = getObjectElement(resource, lifecycle , query);
 				if(auditableObject != null) auditableObjects.add(auditableObject);				
 			}
-			if(!auditableObjects.isEmpty()) return true; //no PHI to audit
+			if(auditableObjects.isEmpty()){
+				log.debug("No auditable resources to audit.");
+				return true; //no PHI to audit
+			}else{
+				log.debug("Auditing " + auditableObjects.size() + " resources.");
+			}
 			auditEvent.setObject(auditableObjects);
+			auditEvent.setSource(getSourceElement(theServletRequest));
 			store(auditEvent);
 			return true; //success
 		}catch(Exception e){
@@ -126,15 +151,26 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			
 			//get user info from request if available			
 			Participant participant = getParticipant(theServletRequest);
-			if(participant == null) return true; //no user to audit - throws exception if client params are required
+			if(participant == null){
+				log.debug("No participant to audit");
+				return true; //no user to audit - throws exception if client params are required
+			}
+			List<Participant> participants = new ArrayList<SecurityEvent.Participant>(1);
+			participants.add(participant);
+			auditEvent.setParticipant(participants);
 			
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
 			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());
 			ObjectElement auditableObject = getObjectElement(theResponseObject, lifecycle , query);
-			if(auditableObject == null) return true; //nothing to audit
+			if(auditableObject == null){
+				log.debug("No auditable resources to audit");
+				return true; 
+			}
 			List<ObjectElement> auditableObjects = new ArrayList<SecurityEvent.ObjectElement>(1);
 			auditableObjects.add(auditableObject);
 			auditEvent.setObject(auditableObjects);
+			auditEvent.setSource(getSourceElement(theServletRequest));
+			log.debug("Auditing one resource.");
 			store(auditEvent);	
 			return true;
 		}catch(Exception e){
@@ -142,7 +178,6 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return false;
 		}
 	}
-
 
 	protected void store(SecurityEvent auditEvent) throws Exception {
 		if(myDataStore == null) throw new InternalErrorException("No data store provided to persist audit events");
@@ -182,7 +217,8 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	protected ObjectElement getObjectElement(IResource resource, SecurityEventObjectLifecycleEnum lifecycle, byte[] query) throws InstantiationException, IllegalAccessException {
 
 		String resourceType = resource.getResourceName();		
-		if(myAuditableResources.containsKey(resourceType)){									
+		if(myAuditableResources.containsKey(resourceType)){		
+			log.debug("Found auditable resource of type: " + resourceType);
 			@SuppressWarnings("unchecked")
 			IResourceAuditor<IResource> auditableResource = (IResourceAuditor<IResource>) myAuditableResources.get(resourceType).newInstance();			
 			auditableResource.setResource(resource);
@@ -192,19 +228,44 @@ public class AuditingInterceptor extends InterceptorAdapter {
 				object.setLifecycle(lifecycle);
 				object.setQuery(query);
 				object.setName(auditableResource.getName());
-				object.setIdentifier(auditableResource.getIdentifier());
+				object.setIdentifier((IdentifierDt) auditableResource.getIdentifier());
 				object.setType(auditableResource.getType());
 				object.setDescription(auditableResource.getDescription());
-				object.setDetail(auditableResource.getDetail());
-				object.setSensitivity(auditableResource.getSensitivity());
+				Map<String, String> detailMap = auditableResource.getDetail();
+				if(detailMap != null && !detailMap.isEmpty()){
+					List<ObjectDetail> details = new ArrayList<SecurityEvent.ObjectDetail>();
+					for(Entry<String, String> entry: detailMap.entrySet()){
+						ObjectDetail detail = makeObjectDetail(entry.getKey(), entry.getValue());
+						details.add(detail);
+					}				
+					object.setDetail(details);	
+				}				
+				object.setSensitivity(auditableResource.getSensitivity());				
 				return object;	
-			}			
-		}		
+			}else{
+				log.debug("Resource is not auditable");
+			}
+		}else{
+			log.debug("No auditor configured for resource type " + resourceType);
+		}
 		return null; //not something we care to audit
+	}
+	
+	protected ObjectDetail makeObjectDetail(String type, String value) {	
+		ObjectDetail detail = new ObjectDetail();
+		if(type != null)
+			detail.setType(type);
+		if(value != null)
+			detail.setValue(value.getBytes());
+		return detail;
 	}
 	
 	protected Participant getParticipant(HttpServletRequest theServletRequest) throws InvalidRequestException, NotImplementedException {		
 		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
+			if(myClientParamsOptional){
+				log.debug("OAuth request received but no auditing required.");
+				return null; 
+			}
 			//TODO: get user info from token
 			throw new NotImplementedException("OAuth user auditing not yet implemented.");
 		}else { //no auth or basic auth or anything else, use HTTP headers for user info
@@ -224,7 +285,38 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			network.setIdentifier(userIp);
 			return participant;
 		}
-		
+	}
+	
+	protected Source getSourceElement(HttpServletRequest theServletRequest) {
+		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
+			if(myClientParamsOptional) return null; //no auditing required
+			//TODO: get application info from token
+			throw new NotImplementedException("OAuth auditing not yet implemented.");
+		}else { //no auth or basic auth or anything else, use HTTP headers for audit info
+			String appId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_APPLICATION_NAME); 			
+			Source source = new Source();
+			source.setIdentifier(appId);
+			source.setType(getAccessType(theServletRequest));
+			source.setSite(getSiteId(theServletRequest));
+			return source;
+		}		
+	}
+
+	protected StringDt getSiteId(HttpServletRequest theServletRequest) {
+		return new StringDt(mySiteId); //override this method to pull the site id from the request info
+	}
+
+	protected List<CodingDt> getAccessType(HttpServletRequest theServletRequest) {
+		List<CodingDt> types = new ArrayList<CodingDt>();		
+		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
+			types.add(new CodingDt(SecurityEventSourceTypeEnum.USER_DEVICE.getSystem(), SecurityEventSourceTypeEnum.USER_DEVICE.getCode()));			
+		}else{
+			String userId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_USER_ID); 
+			String appId = theServletRequest.getHeader(UserInfoInterceptor.HEADER_APPLICATION_NAME);
+			if (userId == null && appId != null) types.add(new CodingDt(SecurityEventSourceTypeEnum.APPLICATION_SERVER.getSystem(), SecurityEventSourceTypeEnum.APPLICATION_SERVER.getCode()));
+			else types.add(new CodingDt(SecurityEventSourceTypeEnum.USER_DEVICE.getSystem(), SecurityEventSourceTypeEnum.USER_DEVICE.getCode()));
+		}
+		return types;		
 	}
 
 	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {

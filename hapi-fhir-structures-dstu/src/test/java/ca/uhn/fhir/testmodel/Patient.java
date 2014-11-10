@@ -108,8 +108,8 @@ public class Patient extends BaseResource implements IResource {
 
 
 	@Override
-	public ResourceTypeEnum getResourceType() {
-		return ResourceTypeEnum.PATIENT;
+	public String getResourceName() {
+		return Patient.class.getName();
 	}
 
   

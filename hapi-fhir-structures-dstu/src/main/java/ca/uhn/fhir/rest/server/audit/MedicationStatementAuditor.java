@@ -20,12 +20,11 @@ package ca.uhn.fhir.rest.server.audit;
  * #L%
  */
 
-import java.util.List;
+import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Medication;
 import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
-import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectDetail;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
@@ -43,9 +42,9 @@ public class MedicationStatementAuditor implements IResourceAuditor<MedicationSt
 		if(myMedicationStatement != null){
 			Medication m = (Medication) myMedicationStatement.getMedication().getResource();
 			if(m != null){
-				return m.getName().getValue();
+				return "Medication Statement: " + m.getName().getValue();
 			}			
-			return myMedicationStatement.getId().getValueAsString(); //if we don't have a medication name, use the id as the name
+			return "Medication Statement: " + myMedicationStatement.getId().getValueAsString(); //if we don't have a medication name, use the id as the name
 		}
 		return null; 		
 	}
@@ -79,7 +78,7 @@ public class MedicationStatementAuditor implements IResourceAuditor<MedicationSt
 	}
 
 	@Override
-	public List<ObjectDetail> getDetail() {
+	public Map<String, String> getDetail() {
 		return null; //no additional details required for audit?
 	}
 

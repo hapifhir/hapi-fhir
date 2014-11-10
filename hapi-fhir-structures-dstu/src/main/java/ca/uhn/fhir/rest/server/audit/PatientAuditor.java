@@ -20,13 +20,12 @@ package ca.uhn.fhir.rest.server.audit;
  * #L%
  */
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.resource.SecurityEvent.ObjectDetail;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
@@ -52,7 +51,7 @@ public class PatientAuditor implements IResourceAuditor<Patient> {
 	@Override
 	public String getName() {
 		if(myPatient != null){
-			return myPatient.getNameFirstRep().getText().getValue();
+			return "Patient: " + myPatient.getNameFirstRep().getText().getValue();
 		}
 		return null;
 	}
@@ -76,22 +75,17 @@ public class PatientAuditor implements IResourceAuditor<Patient> {
 	}
 
 	@Override
-	public List<ObjectDetail> getDetail() {
+	public Map<String, String> getDetail() {
 		if(myPatient != null){
 			List<IdentifierDt> ids = myPatient.getIdentifier();
 			if(ids != null && !ids.isEmpty()){
-				List<ObjectDetail> detailList = new ArrayList<ObjectDetail>(ids.size());
+				Map<String, String> detailMap = new HashMap<String, String>();
 				for(IdentifierDt id: ids){
-					ObjectDetail detail = new ObjectDetail();
-					detail.setType(id.getSystem().getValueAsString());
-					try {
-						detail.setValue(id.getValue().getValueAsString().getBytes("UTF-8"));
-					} catch (UnsupportedEncodingException e) {
-						detail.setValue(id.getValue().getValueAsString().getBytes());
-					}
-					detailList.add(detail);
+					String key = id.getSystem().getValueAsString();
+					String value = id.getValue().getValueAsString();
+					detailMap.put(key, value);
 				}
-				return detailList;
+				return detailMap;
 			}
 			
 		}

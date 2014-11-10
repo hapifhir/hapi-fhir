@@ -201,7 +201,7 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 	@Override
-	public ResourceTypeEnum getResourceType() {		
+	public String getResourceName() {
 		return null; //not implemented
 	}
 

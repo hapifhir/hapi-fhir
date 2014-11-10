@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server.audit;
  * #L%
  */
 
-import java.util.List;
+import java.util.Map;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
@@ -29,17 +29,53 @@ import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 
 public interface IResourceAuditor<T extends IResource> {
-		
+	
+	/**
+	 * @return the resource to be audited
+	 */
 	public T getResource();
+	
+	/**
+	 * @param resource the resource to be audited by this auditor
+	 */
 	public void setResource(T resource);
 	
+	/**
+	 * @return true if this resource is to be audited, false otherwise
+	 */
 	public boolean isAuditable();
 	
+	/**
+	 * An instance-specific descriptor of the Participant Object ID audited, such as a person's name
+	 * @return the descriptive name of the resource object
+	 */
 	public String getName();
+	
+	/**
+	 * @return the identifier of the resource to be audited
+	 */
 	public BaseIdentifierDt getIdentifier();
+	
+	/**
+	 * @return the SecurityEventObjectTypeEnum of this resource
+	 */
 	public SecurityEventObjectTypeEnum getType();	
+	
+	/**
+	 * @return a text description of the resource
+	 */
 	public String getDescription();
-	//public List<ObjectDetail> getDetail(); //see operationoutcome -- need to move specifics insto dstu and keep base objects in core
+	
+	/**
+	 * @return a map of additional details to be audited
+	 */
+	public Map<String, String> getDetail();
+	
+	/**
+	 * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics
+	 * @return the sensitivity of this resource
+	 */
 	public SecurityEventObjectSensitivityEnum getSensitivity();
+	
 
 }

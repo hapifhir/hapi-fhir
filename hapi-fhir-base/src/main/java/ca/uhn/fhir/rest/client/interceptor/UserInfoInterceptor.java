@@ -38,20 +38,24 @@ public class UserInfoInterceptor implements IClientInterceptor {
 	
 	public static final String HEADER_USER_ID = "fhir-user-id";
 	public static final String HEADER_USER_NAME = "fhir-user-name";	
-
+	public static final String HEADER_APPLICATION_NAME = "fhir-app-name";
+	
 	private String myUserId;
 	private String myUserName;		
+	private String myAppName;
 	
-    public UserInfoInterceptor(String theUserId, String theUserName) {
+    public UserInfoInterceptor(String theUserId, String theUserName, String theAppName) {
 		super();
 		myUserId = theUserId;
 		myUserName = theUserName;		
+		myAppName = theAppName;
 	}
 
 	@Override
 	public void interceptRequest(HttpRequestBase theRequest) {
 		if(myUserId != null) theRequest.addHeader(HEADER_USER_ID, myUserId);
-		if(myUserName != null) theRequest.addHeader(HEADER_USER_NAME, myUserName);			
+		if(myUserName != null) theRequest.addHeader(HEADER_USER_NAME, myUserName);		
+		if(myAppName != null) theRequest.addHeader(HEADER_APPLICATION_NAME, myAppName);
 	}
 
 	@Override
