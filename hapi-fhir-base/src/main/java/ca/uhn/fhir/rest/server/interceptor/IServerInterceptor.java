@@ -37,6 +37,11 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 
 /**
  * Provides methods to intercept requests and responses. Note that implementations of this interface may wish to use {@link InterceptorAdapter} in order to not need to implement every method.
+ * <p>
+ * <b>See:</b> See the 
+ * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server interceptor documentation</a>
+ * for more information on how to use this class.
+ * </p>
  */
 public interface IServerInterceptor {
 

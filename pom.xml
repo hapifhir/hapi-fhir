@@ -631,7 +631,7 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<module>hapi-fhir-oauth2</module>
+				<!--<module>hapi-fhir-oauth2</module>-->
 				<module>hapi-fhir-base/testmindeps</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>

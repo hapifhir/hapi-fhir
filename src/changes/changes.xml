@@ -15,6 +15,21 @@
 				<![CDATA[<a href="./doc_upgrading.html">upgrading</a>]]> 
 				for more information.  
 			</action>
+			<action type="fix">
+				<![CDATA[
+					<b>Deprocated API Removal</b>: The following classes (which were deprocated previously)
+					have now been removed:
+					<ul>
+						<li><b>ISecurityManager</b>: If you are using this class, the same functionality
+						is available through the more general purpose
+						<a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server interceptor</a>
+						capabilities.
+						<li><b>CodingListParam</b>: This class was made redundant by the
+						<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/param/TokenOrListParam.html">TokenOrListParam</a>
+						class, which can be used in its place.
+					</ul>
+				]]> 
+			</action>			
 			<action type="add" issue="38" dev="wdebeau1">
 				Profile generation on the server was not working due to IdDt being
 				incorrectly used. Thanks to Bill de Beaubien for the pull request!
