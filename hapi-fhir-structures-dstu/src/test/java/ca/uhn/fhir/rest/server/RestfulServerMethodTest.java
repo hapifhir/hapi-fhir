@@ -75,11 +75,11 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ResfulServerMethodTest {
+public class RestfulServerMethodTest {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerMethodTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerMethodTest.class);
 	private static int ourPort;
 	private static DummyDiagnosticReportResourceProvider ourReportProvider;
 	private static Server ourServer;

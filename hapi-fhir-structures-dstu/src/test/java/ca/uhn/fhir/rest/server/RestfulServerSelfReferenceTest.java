@@ -41,9 +41,9 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ResfulServerSelfReferenceTest {
+public class RestfulServerSelfReferenceTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResfulServerSelfReferenceTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerSelfReferenceTest.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
 
