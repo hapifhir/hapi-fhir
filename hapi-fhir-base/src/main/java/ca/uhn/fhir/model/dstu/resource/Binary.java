@@ -29,7 +29,6 @@ import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 
 @ResourceDef(name = "Binary", profile = "http://hl7.org/fhir/profiles/Binary", id = "binary")
