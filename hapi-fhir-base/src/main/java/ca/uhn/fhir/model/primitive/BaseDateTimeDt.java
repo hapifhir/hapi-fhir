@@ -29,8 +29,6 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -49,6 +47,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final Pattern ourYearMonthDayPattern = Pattern.compile("[0-9]{4}[0-9]{2}[0-9]{2}");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
 	private static final FastDateFormat ourYearMonthDayTimeMilliFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	private static final FastDateFormat ourYearMonthDayTimeUTCZFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"));
+	private static final FastDateFormat ourYearMonthDayTimeMilliUTCZFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", TimeZone.getTimeZone("UTC"));
 	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
@@ -217,39 +217,65 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
-			} else if (theValue.length() >= 18) {
+			} else if (theValue.length() >= 18) { //date and time with possible time zone
 				int dotIndex = theValue.indexOf('.', 18);
-				if (dotIndex == -1 && !isPrecisionAllowed(SECOND)) {
+				boolean hasMillis = dotIndex > -1;
+
+				if (!hasMillis && !isPrecisionAllowed(SECOND)) {
 					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
-				} else if (dotIndex > -1 && !isPrecisionAllowed(MILLI)) {
+				} else if (hasMillis && !isPrecisionAllowed(MILLI)) {
 					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
 				}
 
-				Calendar cal;
-				try {
-					cal = DatatypeConverter.parseDateTime(theValue);
-				} catch (IllegalArgumentException e) {
-					throw new DataFormatException("Invalid data/time string (" + e.getMessage() + "): " + theValue);
-				}
-				myValue = cal.getTime();
-				if (dotIndex == -1) {
-					setPrecision(TemporalPrecisionEnum.SECOND);
-				} else {
+				if(hasMillis){
+					try {
+						myValue = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
+					} catch (ParseException p){
+						try{
+							if(theValue.endsWith("Z"))
+								myValue = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
+							else 
+								myValue = ourYearMonthDayTimeMilliFormat.parse(theValue);
+						}catch(ParseException p2){
+							throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
+						}
+					}
+					setTimeZone(theValue, hasMillis);
 					setPrecision(TemporalPrecisionEnum.MILLI);
+				}else{
+					try{
+						myValue = ourYearMonthDayTimeZoneFormat.parse(theValue);
+					}catch(ParseException p){
+						try{
+							if(theValue.endsWith("Z"))
+								myValue = ourYearMonthDayTimeUTCZFormat.parse(theValue);
+							else
+								myValue = ourYearMonthDayTimeFormat.parse(theValue);
+						}catch(ParseException p2){
+							throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
+						}
+					}
+					setTimeZone(theValue, hasMillis);
+					setPrecision(TemporalPrecisionEnum.SECOND);
 				}
-
-				clearTimeZone();
-				if (theValue.endsWith("Z")) {
-					myTimeZoneZulu = true;
-				} else if (theValue.indexOf('+', 19) != -1 || theValue.indexOf('-', 19) != -1) {
-					myTimeZone = cal.getTimeZone();
-				}
-
 			} else {
 				throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
 			}
 		} catch (ParseException e) {
 			throw new DataFormatException("Invalid date string (" + e.getMessage() + "): " + theValue);
+		}
+	}
+
+	private void setTimeZone(String theValueString, boolean hasMillis) {
+		clearTimeZone();
+		int timeZoneStart = 19;
+		if(hasMillis) timeZoneStart += 4;
+		if (theValueString.endsWith("Z")) {
+			setTimeZoneZulu(true);
+		} else if (theValueString.indexOf("GMT", timeZoneStart) != -1) {
+			setTimeZone(TimeZone.getTimeZone(theValueString.substring(timeZoneStart)));
+		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
+			setTimeZone(TimeZone.getTimeZone("GMT"+theValueString.substring(timeZoneStart)));
 		}
 	}
 
