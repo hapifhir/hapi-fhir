@@ -411,7 +411,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myCopyright, myStatus, myExperimental, myExtensible, myDate, myDefine, myCompose, myExpansion);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this value set).
@@ -1104,7 +1103,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCaseSensitive, myConcept);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (URI to identify the code system).
@@ -1357,7 +1355,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myAbstract, myDisplay, myDefinition, myConcept);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Code that identifies concept).
@@ -1642,7 +1639,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myImport, myInclude, myExclude);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>import</b> (Import the contents of another value set).
@@ -1894,7 +1890,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myVersion, myCode, myFilter);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (The system the codes come from).
@@ -2167,7 +2162,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myProperty, myOp, myValue);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>property</b> ().
@@ -2349,7 +2343,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myTimestamp, myContains);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Uniquely identifies this expansion).
@@ -2446,8 +2439,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestampWithMillisPrecision( Date theDate) {
-		myTimestamp = new InstantDt(theDate); 
+	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myTimestamp = new InstantDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -2459,8 +2452,8 @@ public class ValueSet extends BaseResource implements IResource {
      * 
      * </p> 
 	 */
-	public Expansion setTimestamp( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myTimestamp = new InstantDt(theDate, thePrecision); 
+	public Expansion setTimestampWithMillisPrecision( Date theDate) {
+		myTimestamp = new InstantDt(theDate); 
 		return this; 
 	}
 
@@ -2577,7 +2570,6 @@ public class ValueSet extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySystem, myCode, myDisplay, myContains);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>system</b> (System value for the code).
