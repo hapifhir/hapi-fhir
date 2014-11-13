@@ -20,16 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**

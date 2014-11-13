@@ -237,7 +237,6 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		@SuppressWarnings("unchecked")
 		@Override
 		public List<? extends IElement> getValues(Object theTarget) {
-			@SuppressWarnings("unchecked")
 			List<? extends IElement> retVal;
 			try {
 				retVal = (List<? extends IElement>) myField.get(theTarget);
