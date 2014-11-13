@@ -39,8 +39,8 @@
 						</reports>
 						<configuration>
 							<links>
-								<link>http://docs.oracle.com/javaee/7/api</link>
-								<link>http://jamesagnew.github.io/hapi-fhir/apidocs</link>
+								<link>http://jamesagnew.github.io/hapi-fhir/apidocs/</link>
+								<link>https://docs.oracle.com/javaee/7/api/</link>
 							</links>
 						</configuration>
 					</reportSet>

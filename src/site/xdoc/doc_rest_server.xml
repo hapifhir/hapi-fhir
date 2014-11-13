@@ -471,7 +471,22 @@
 				<param name="id" value="serverMethod" />
 				<param name="file" value="examples/src/main/java/example/ServerMetadataExamples.java" />
 			</macro>
-				
+
+		</section>
+
+		<section name="Server Lifecycle Methods">
+
+			<p>
+				Resource providers may optionally want to be notified when the server they are registered
+				with is being destroyed, so that they can perform cleanup. In this case, a method
+				annotated with the 
+				<code>@Destroy</code> annotation can be added (this method should be public, return <code>void</code>,
+				and take no parameters).
+			</p>
+			<p>
+				This method will be invoked once by the RestfulServer when it is shutting down.
+			</p>		
+			
 		</section>
 
 		<section name="A Complete Example">
@@ -479,7 +494,7 @@
 			<p>
 				A complete example showing how to implement a RESTful server can
 				be found in our Git repo here:
-				<a href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/restful-server-example/">http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/restful-server-example/</a>
+				<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/restful-server-example">https://github.com/jamesagnew/hapi-fhir/tree/master/restful-server-example</a>
 			</p>
 			
 			<p>

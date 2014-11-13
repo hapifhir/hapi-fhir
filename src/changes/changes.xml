@@ -51,6 +51,14 @@
 				returns a default Patient, but sometimes uses a custom subclass). 
 				Thanks to Bill de Beaubien for the pull request!
 			</action>
+			<action type="add" issue="49" dev="wdebeau1">
+				Introduced a new 
+				<![CDATA[<code>@Destroy</code>]]> annotation which can be added to
+				a resource provider method. This method will be called by the server when it
+				is being closed/destroyed (e.g. when the application is being undeployed, the
+				container is being shut down, etc.) 
+				Thanks to Bill de Beaubien for the pull request!
+			</action>
 			<action type="add">
 				Add a new method <![CDATA[handleException]]> to the server interceptor
 				framework which allows interceptors to be notified of any exceptions and 

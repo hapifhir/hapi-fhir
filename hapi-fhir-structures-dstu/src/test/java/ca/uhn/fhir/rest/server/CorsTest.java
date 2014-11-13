@@ -29,7 +29,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.rest.server.ResfulServerSelfReferenceTest.DummyPatientResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServerSelfReferenceTest.DummyPatientResourceProvider;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
