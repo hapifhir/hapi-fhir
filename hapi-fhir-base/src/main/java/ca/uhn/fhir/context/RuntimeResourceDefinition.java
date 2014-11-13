@@ -23,7 +23,6 @@ package ca.uhn.fhir.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinition.class);
 	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
 	private IResource myProfileDef;

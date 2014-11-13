@@ -20,12 +20,8 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +30,6 @@ import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.codehaus.stax2.io.EscapingWriterFactory;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.BasePrimitive;

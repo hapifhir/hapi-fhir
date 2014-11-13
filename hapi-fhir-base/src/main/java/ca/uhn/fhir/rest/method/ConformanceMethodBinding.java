@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.method;
  */
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
