@@ -75,22 +75,38 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	private boolean myClientParamsOptional = false;
 	protected String mySiteId;
 	
+	/**
+	 * Create a new AuditingInterceptor with auditing required by default and a siteid of "NONE"
+	 */
 	public AuditingInterceptor() {
 		mySiteId = "NONE";
 		myClientParamsOptional = false;		
 	}
 	
+	/**
+	 * Create a new AuditingInterceptor with auditing required by default and a site ID as specified
+	 * @param theSiteId the name of the site producing the audit data (will be set as SecurityEvent.Source.siteid)
+	 */
 	public AuditingInterceptor(String theSiteId) {
 		mySiteId = theSiteId;
 		myClientParamsOptional = false;		
 	}
 	
+	/**
+	 * Create a new AuditingInterceptor with the specified site ID and indicating if auditing is optional or required
+	 * @param theSiteId theSiteId the name of the site producing the audit data (will be set as SecurityEvent.Source.siteid)
+	 * @param theClientParamsOptional - true if auditing is optional, false if auditing is required (will throw exception if
+	 * user params are not specified or audit store is not set)
+	 */
 	public AuditingInterceptor(String theSiteId, boolean theClientParamsOptional){
 		mySiteId = theSiteId;
 		myClientParamsOptional = theClientParamsOptional;
 	}
 	
-	@Override
+	/**
+	 * Intercept the outgoing response to perform auditing of the request data if the bundle contains auditable resources.
+	 */
+	@Override	
 	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException {
 		if(myClientParamsOptional && myDataStore == null){
@@ -132,10 +148,13 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true; //success
 		}catch(Exception e){
 			log.error("Unable to audit resource: " + theResponseObject + " from request: " + theRequestDetails, e);
-			return false; //fail request
+			throw new InternalErrorException("Auditing failed, unable to complete request", e);
 		}
 	}
 	
+	/**
+	 * Intercept the outgoing response to perform auditing of the request data if the resource is auditable.
+	 */
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException {
@@ -175,15 +194,25 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true;
 		}catch(Exception e){
 			log.error("Unable to audit resource: " + theResponseObject + " from request: " + theRequestDetails, e);
-			return false;
+			throw new InternalErrorException("Auditing failed, unable to complete request", e);
 		}
 	}
 
+	/**
+	 * Store the SecurityEvent generated for this request to a persistent store (database, file, JMS, etc)
+	 * @param auditEvent the SecurityEvent generated for this request
+	 * @throws Exception if the data store is not configured or if an error occurs during storage
+	 */
 	protected void store(SecurityEvent auditEvent) throws Exception {
 		if(myDataStore == null) throw new InternalErrorException("No data store provided to persist audit events");
 		myDataStore.store(auditEvent);
 	}
 
+	/**
+	 * Generates the Event segment of the SecurityEvent based on the incoming request details
+	 * @param theRequestDetails the RequestDetails of the incoming request
+	 * @return an Event populated with the action, date, and outcome
+	 */
 	protected Event getEventInfo(RequestDetails theRequestDetails) {
 		Event event = new Event();
 		event.setAction(mapResourceTypeToSecurityEventAction(theRequestDetails.getResourceOperationType()));
@@ -193,6 +222,11 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		
 	}
 	
+	/**
+	 * Return the query URL encoded to bytes to be set as the Object.query on the Security Event
+	 * @param theRequestDetails the RequestDetails of the incoming request
+	 * @return the query URL of the request encoded to bytes
+	 */
 	protected byte[] getQueryFromRequestDetails(RequestDetails theRequestDetails) {
 		byte[] query;
 		try {
@@ -206,13 +240,12 @@ public class AuditingInterceptor extends InterceptorAdapter {
 
 	/**
 	 * If the resource is considered an auditable resource containing PHI, create an ObjectElement, otherwise return null
-	 * @param auditEvent
-	 * @param resource
-	 * @param lifecycle
-	 * @param query
-	 * @return
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * @param resource the resource to be audited
+	 * @param lifecycle the SecurityEventObjectLifecycleEnum of the request
+	 * @param query the byte encoded query string of the request
+	 * @return an ObjectElement populated with information about the resource
+	 * @throws IllegalAccessException if the auditor for this resource cannot be instantiated
+	 * @throws InstantiationException if the auditor for this resource cannot be instantiated
 	 */
 	protected ObjectElement getObjectElement(IResource resource, SecurityEventObjectLifecycleEnum lifecycle, byte[] query) throws InstantiationException, IllegalAccessException {
 
@@ -251,6 +284,12 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		return null; //not something we care to audit
 	}
 	
+	/**
+	 * Helper method to create an ObjectDetail from a pair of Strings.
+	 * @param type the type of the ObjectDetail
+	 * @param value the value of the ObejctDetail to be encoded
+	 * @return an ObjectDetail of the given type and value
+	 */
 	protected ObjectDetail makeObjectDetail(String type, String value) {	
 		ObjectDetail detail = new ObjectDetail();
 		if(type != null)
@@ -260,7 +299,15 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		return detail;
 	}
 	
-	protected Participant getParticipant(HttpServletRequest theServletRequest) throws InvalidRequestException, NotImplementedException {		
+	/**
+	 * Create a particpant object based on information from the incoming servlet request
+	 * @param theServletRequest the incoming request
+	 * @return a Particpant object populated with the user id, user name, and IP
+	 * @throws InvalidRequestException if auditing is required but userId is not specified as a request header
+	 * @throws NotImplementedException if the authorization type is OAuth
+	 */
+	protected Participant getParticipant(HttpServletRequest theServletRequest) throws InvalidRequestException, NotImplementedException {
+		//TODO: move the specification of auth params into another interceptor separate from auditing?
 		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
 			if(myClientParamsOptional){
 				log.debug("OAuth request received but no auditing required.");
@@ -287,7 +334,13 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		}
 	}
 	
-	protected Source getSourceElement(HttpServletRequest theServletRequest) {
+	/**
+	 * Create a Source object based on information in the incoming request
+	 * @param theServletRequest the incoming request
+	 * @return a Source object with the identifier, type, and site specified
+	 * @throws NotImplementedException if the authorization type is OAuth
+	 */
+	protected Source getSourceElement(HttpServletRequest theServletRequest) throws NotImplementedException{
 		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
 			if(myClientParamsOptional) return null; //no auditing required
 			//TODO: get application info from token
@@ -302,10 +355,20 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		}		
 	}
 
+	/**
+	 * Returns the site ID (for SecurityEvent.source.siteid)
+	 * @param theServletRequest the incoming request
+	 * @return the site ID to audit. By default, uses the value set in the constructor. Override this method to set the value via request parameters.
+	 */
 	protected StringDt getSiteId(HttpServletRequest theServletRequest) {
 		return new StringDt(mySiteId); //override this method to pull the site id from the request info
 	}
 
+	/**
+	 * Return the access type for this request
+	 * @param theServletRequest the incoming request
+	 * @return the SecurityEventSourceTypeEnum representing the type of request being made
+	 */
 	protected List<CodingDt> getAccessType(HttpServletRequest theServletRequest) {
 		List<CodingDt> types = new ArrayList<CodingDt>();		
 		if(theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION) != null && theServletRequest.getHeader(Constants.HEADER_AUTHORIZATION).startsWith("OAuth")){
@@ -319,6 +382,11 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		return types;		
 	}
 
+	/**
+	 * Returns the SecurityEventActionEnum corresponding to the specified RestfulOperationTypeEnum
+	 * @param resourceOperationType the type of operation (Read, Create, Delete, etc)
+	 * @return the corresponding SecurityEventActionEnum (Read/View/Print, Create, Delete, etc)
+	 */
 	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {
 		switch (resourceOperationType) {
 		case READ: return SecurityEventActionEnum.READ_VIEW_PRINT;
@@ -335,7 +403,11 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		}
 	}
 	
-	//do we need both SecurityEventObjectLifecycleEnum and SecurityEventActionEnum? probably not
+	/**
+	 * Returns the SecurityEventObjectLifecycleEnum corresponding to the specified RestfulOperationTypeEnum
+	 * @param resourceOperationType the type of operation (Read, Create, Delete, etc)
+	 * @return the corresponding SecurityEventObjectLifecycleEnum (Access/Use, Origination/Creation, Logical Deletion, etc)
+	 */
 	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(RestfulOperationTypeEnum resourceOperationType) {
 		switch (resourceOperationType) {
 		case READ: return SecurityEventObjectLifecycleEnum.ACCESS_OR_USE;
@@ -352,18 +424,35 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		}
 	}
 	
+	/**
+	 * Provide a persistent store implementing IAuditDataStore to store the audit events
+	 * @param theDataStore an implementation of IAuditDataStore to be used to store the audit events
+	 */
 	public void setDataStore(IAuditDataStore theDataStore) {
 		myDataStore = theDataStore;
 	}
-		
+	
+	/**
+	 * Get this auditor's map of auditable resources and auditors
+	 * @return the map of auditable resource types to auditors
+	 */
 	public Map<String, Class<? extends IResourceAuditor<? extends IResource>>> getAuditableResources() {
 		return myAuditableResources;
 	}
 	
+	/**
+	 * Specify which types of resources are to be audited (Patient, Encounter, etc) and provide an IResourceAuditor for each type
+	 * @param theAuditableResources a map of resources to be audited and their corresponding IResouceAuditors
+	 */
 	public void setAuditableResources(Map<String, Class<? extends IResourceAuditor<? extends IResource>>> theAuditableResources) {
 		myAuditableResources = theAuditableResources;
 	}
 	
+	/**
+	 * Add a type of auditable resource and its auditor to this AuditingInterceptor's resource map
+	 * @param resourceType the type of resource to be audited (Patient, Encounter, etc)
+	 * @param auditableResource an implementation of IResourceAuditor that can audit resources of the given type
+	 */
 	public void addAuditableResource(String resourceType, Class<? extends IResourceAuditor<? extends IResource>> auditableResource){
 		if(myAuditableResources == null) myAuditableResources = new HashMap<String, Class<? extends IResourceAuditor<? extends IResource>>>();
 		myAuditableResources.put(resourceType, auditableResource);
