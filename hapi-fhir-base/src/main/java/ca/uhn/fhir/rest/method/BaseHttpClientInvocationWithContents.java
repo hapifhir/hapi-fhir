@@ -176,7 +176,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myParams != null) {
 			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 			for (Entry<String, List<String>> nextParam : myParams.entrySet()) {
-				parameters.add(new BasicNameValuePair(nextParam.getKey(), StringUtils.join(nextParam.getValue(), ',')));
+				List<String> value = nextParam.getValue();
+				for(String s: value){
+					parameters.add(new BasicNameValuePair(nextParam.getKey(), s));	
+				}
 			}
 			try {
 				entity = new UrlEncodedFormEntity(parameters, "UTF-8");

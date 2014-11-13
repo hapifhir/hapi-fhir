@@ -263,14 +263,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		IdDt id = (IdDt) (myIdParamIndex != null ? theArgs[myIdParamIndex] : null);
 
 		String resourceName = getResourceName();
-		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
-
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs, retVal);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs);
 			}
 		}
+
+		BaseHttpClientInvocation retVal = createSearchInvocation(getContext(), resourceName, queryStringArgs, id, myCompartmentName, null);
 
 		return retVal;
 	}

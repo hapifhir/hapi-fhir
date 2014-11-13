@@ -156,7 +156,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, retVal);
+			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null);
 		}
 
 		return retVal;
