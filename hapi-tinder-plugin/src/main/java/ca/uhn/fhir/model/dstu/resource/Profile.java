@@ -464,7 +464,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentifier, myVersion, myName, myPublisher, myTelecom, myDescription, myCode, myStatus, myExperimental, myDate, myRequirements, myFhirVersion, myMapping, myStructure, myExtensionDefn, myQuery);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this profile).
@@ -1364,7 +1363,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myUri, myName, myComments);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>identity</b> (Internal id when this mapping is used).
@@ -1609,7 +1607,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myType, myName, myPublish, myPurpose, myElement, mySearchParam);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>type</b> (The Resource or Data Type being described).
@@ -1966,7 +1963,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPath, myRepresentation, myName, mySlicing, myDefinition);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>path</b> (The path of the element (see the formal definitions)).
@@ -2255,7 +2251,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myDiscriminator, myOrdered, myRules);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices).
@@ -2540,7 +2535,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myShort, myFormal, myComments, myRequirements, mySynonym, myMin, myMax, myType, myNameReference, myValue, myExample, myMaxLength, myCondition, myConstraint, myMustSupport, myIsModifier, myBinding, myMapping);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>short</b> (Concise definition for xml presentation).
@@ -3450,7 +3444,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myProfile, myAggregation);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Name of Data type or Resource).
@@ -3692,7 +3685,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myKey, myName, mySeverity, myHuman, myXpath);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>key</b> (Target of 'condition' reference above).
@@ -3975,7 +3967,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myIsExtensible, myConformance, myDescription, myReference);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Descriptive Name).
@@ -4220,7 +4211,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myIdentity, myMap);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>identity</b> (Reference to mapping declaration).
@@ -4372,7 +4362,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myType, myDocumentation, myXpath, myTarget);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Name of search parameter).
@@ -4703,7 +4692,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myCode, myDisplay, myContextType, myContext, myDefinition);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>code</b> (Identifies the extension in this profile).
@@ -4992,7 +4980,6 @@ public class Profile extends BaseResource implements IResource {
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myName, myDocumentation, myParameter);
 	}
-	
 
 	/**
 	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
