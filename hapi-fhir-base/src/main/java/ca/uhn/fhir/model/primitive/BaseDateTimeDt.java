@@ -59,11 +59,55 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
 	private TimeZone myTimeZone;
 	private boolean myTimeZoneZulu = false;
-	private Date myValue;
+
+	private void clearTimeZone() {
+		myTimeZone = null;
+		myTimeZoneZulu = false;
+	}
+
+	@Override
+	protected String encode(Date theValue) {
+		if (theValue == null) {
+			return null;
+		} else {
+			switch (myPrecision) {
+			case DAY:
+				return ourYearMonthDayFormat.format(theValue);
+			case MONTH:
+				return ourYearMonthFormat.format(theValue);
+			case YEAR:
+				return ourYearFormat.format(theValue);
+			case SECOND:
+				if (myTimeZoneZulu) {
+					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+					cal.setTime(theValue);
+					return ourYearMonthDayTimeFormat.format(cal) + "Z";
+				} else if (myTimeZone != null) {
+					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
+					cal.setTime(theValue);
+					return ourYearMonthDayTimeZoneFormat.format(cal);
+				} else {
+					return ourYearMonthDayTimeFormat.format(theValue);
+				}
+			case MILLI:
+				if (myTimeZoneZulu) {
+					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+					cal.setTime(theValue);
+					return ourYearMonthDayTimeMilliFormat.format(cal) + "Z";
+				} else if (myTimeZone != null) {
+					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
+					cal.setTime(theValue);
+					return ourYearMonthDayTimeMilliZoneFormat.format(cal);
+				} else {
+					return ourYearMonthDayTimeMilliFormat.format(theValue);
+				}
+			}
+			throw new IllegalStateException("Invalid precision (this is a HAPI bug, shouldn't happen): " + myPrecision);
+		}
+	}
 
 	/**
-	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}.
-	 * Default is {@link Calendar#DAY_OF_MONTH}
+	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}. Default is {@link Calendar#DAY_OF_MONTH}
 	 * 
 	 * @see #setPrecision(int)
 	 */
@@ -75,51 +119,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		return myTimeZone;
 	}
 
-	@Override
-	public Date getValue() {
-		return myValue;
-	}
-
-	@Override
-	public String getValueAsString() {
-		if (myValue == null) {
-			return null;
-		} else {
-			switch (myPrecision) {
-			case DAY:
-				return ourYearMonthDayFormat.format(myValue);
-			case MONTH:
-				return ourYearMonthFormat.format(myValue);
-			case YEAR:
-				return ourYearFormat.format(myValue);
-			case SECOND:
-				if (myTimeZoneZulu) {
-					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-					cal.setTime(myValue);
-					return ourYearMonthDayTimeFormat.format(cal) + "Z";
-				} else if (myTimeZone != null) {
-					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
-					cal.setTime(myValue);
-					return ourYearMonthDayTimeZoneFormat.format(cal);
-				} else {
-					return ourYearMonthDayTimeFormat.format(myValue);
-				}
-			case MILLI:
-				if (myTimeZoneZulu) {
-					GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
-					cal.setTime(myValue);
-					return ourYearMonthDayTimeMilliFormat.format(cal) + "Z";
-				} else if (myTimeZone != null) {
-					GregorianCalendar cal = new GregorianCalendar(myTimeZone);
-					cal.setTime(myValue);
-					return ourYearMonthDayTimeMilliZoneFormat.format(cal);
-				} else {
-					return ourYearMonthDayTimeMilliFormat.format(myValue);
-				}
-			}
-			throw new IllegalStateException("Invalid precision (this is a HAPI bug, shouldn't happen): " + myPrecision);
-		}
-	}
+	/**
+	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
+	 */
+	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
 
 	public boolean isTimeZoneZulu() {
 		return myTimeZoneZulu;
@@ -132,8 +135,91 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 *             if {@link #getValue()} returns <code>null</code>
 	 */
 	public boolean isToday() {
-		Validate.notNull(myValue, getClass().getSimpleName() + " contains null value");
-		return DateUtils.isSameDay(new Date(), myValue);
+		Validate.notNull(getValue(), getClass().getSimpleName() + " contains null value");
+		return DateUtils.isSameDay(new Date(), getValue());
+	}
+
+	@Override
+	protected Date parse(String theValue) throws DataFormatException {
+		try {
+			if (theValue.length() == 4 && ourYearPattern.matcher(theValue).matches()) {
+				if (isPrecisionAllowed(YEAR)) {
+					setPrecision(YEAR);
+					clearTimeZone();
+					return ((ourYearFormat).parse(theValue));
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
+				}
+			} else if (theValue.length() == 6 && ourYearMonthPattern.matcher(theValue).matches()) {
+				// Eg. 198401 (allow this just to be lenient)
+				if (isPrecisionAllowed(MONTH)) {
+					setPrecision(MONTH);
+					clearTimeZone();
+					return ((ourYearMonthNoDashesFormat).parse(theValue));
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
+			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
+				// E.g. 1984-01 (this is valid according to the spec)
+				if (isPrecisionAllowed(MONTH)) {
+					setPrecision(MONTH);
+					clearTimeZone();
+					return ((ourYearMonthFormat).parse(theValue));
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
+				}
+			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
+				// Eg. 19840101 (allow this just to be lenient)
+				if (isPrecisionAllowed(DAY)) {
+					setPrecision(DAY);
+					clearTimeZone();
+					return ((ourYearMonthDayNoDashesFormat).parse(theValue));
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
+			} else if (theValue.length() == 10 && ourYearDashMonthDashDayPattern.matcher(theValue).matches()) {
+				// E.g. 1984-01-01 (this is valid according to the spec)
+				if (isPrecisionAllowed(DAY)) {
+					setPrecision(DAY);
+					clearTimeZone();
+					return ((ourYearMonthDayFormat).parse(theValue));
+				} else {
+					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				}
+			} else if (theValue.length() >= 18) {
+				int dotIndex = theValue.indexOf('.', 18);
+				if (dotIndex == -1 && !isPrecisionAllowed(SECOND)) {
+					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
+				} else if (dotIndex > -1 && !isPrecisionAllowed(MILLI)) {
+					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
+				}
+
+				Calendar cal;
+				try {
+					cal = DatatypeConverter.parseDateTime(theValue);
+				} catch (IllegalArgumentException e) {
+					throw new DataFormatException("Invalid data/time string (" + e.getMessage() + "): " + theValue);
+				}
+				if (dotIndex == -1) {
+					setPrecision(TemporalPrecisionEnum.SECOND);
+				} else {
+					setPrecision(TemporalPrecisionEnum.MILLI);
+				}
+
+				clearTimeZone();
+				if (theValue.endsWith("Z")) {
+					myTimeZoneZulu = true;
+				} else if (theValue.indexOf('+', 19) != -1 || theValue.indexOf('-', 19) != -1) {
+					myTimeZone = cal.getTimeZone();
+				}
+
+				return cal.getTime();
+			} else {
+				throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
+			}
+		} catch (ParseException e) {
+			throw new DataFormatException("Invalid date string (" + e.getMessage() + "): " + theValue);
+		}
 	}
 
 	/**
@@ -164,103 +250,14 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	@Override
 	public void setValue(Date theValue) throws DataFormatException {
-		myValue = theValue;
+		clearTimeZone();
+		super.setValue(theValue);
 	}
 
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
-		try {
-			if (theValue == null) {
-				myValue = null;
-				clearTimeZone();
-			} else if (theValue.length() == 4 && ourYearPattern.matcher(theValue).matches()) {
-				if (isPrecisionAllowed(YEAR)) {
-					setValue((ourYearFormat).parse(theValue));
-					setPrecision(YEAR);
-					clearTimeZone();
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
-				}
-			} else if (theValue.length() == 6 && ourYearMonthPattern.matcher(theValue).matches()) {
-				// Eg. 198401 (allow this just to be lenient)
-				if (isPrecisionAllowed(MONTH)) {
-					setValue((ourYearMonthNoDashesFormat).parse(theValue));
-					setPrecision(MONTH);
-					clearTimeZone();
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-				}
-			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
-				// E.g. 1984-01 (this is valid according to the spec)
-				if (isPrecisionAllowed(MONTH)) {
-					setValue((ourYearMonthFormat).parse(theValue));
-					setPrecision(MONTH);
-					clearTimeZone();
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
-				}
-			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
-				// Eg. 19840101 (allow this just to be lenient)
-				if (isPrecisionAllowed(DAY)) {
-					setValue((ourYearMonthDayNoDashesFormat).parse(theValue));
-					setPrecision(DAY);
-					clearTimeZone();
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-				}
-			} else if (theValue.length() == 10 && ourYearDashMonthDashDayPattern.matcher(theValue).matches()) {
-				// E.g. 1984-01-01 (this is valid according to the spec)
-				if (isPrecisionAllowed(DAY)) {
-					setValue((ourYearMonthDayFormat).parse(theValue));
-					setPrecision(DAY);
-					clearTimeZone();
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
-				}
-			} else if (theValue.length() >= 18) {
-				int dotIndex = theValue.indexOf('.', 18);
-				if (dotIndex == -1 && !isPrecisionAllowed(SECOND)) {
-					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
-				} else if (dotIndex > -1 && !isPrecisionAllowed(MILLI)) {
-					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
-				}
-
-				Calendar cal;
-				try {
-					cal = DatatypeConverter.parseDateTime(theValue);
-				} catch (IllegalArgumentException e) {
-					throw new DataFormatException("Invalid data/time string (" + e.getMessage() + "): " + theValue);
-				}
-				myValue = cal.getTime();
-				if (dotIndex == -1) {
-					setPrecision(TemporalPrecisionEnum.SECOND);
-				} else {
-					setPrecision(TemporalPrecisionEnum.MILLI);
-				}
-
-				clearTimeZone();
-				if (theValue.endsWith("Z")) {
-					myTimeZoneZulu = true;
-				} else if (theValue.indexOf('+', 19) != -1 || theValue.indexOf('-', 19) != -1) {
-					myTimeZone = cal.getTimeZone();
-				}
-
-			} else {
-				throw new DataFormatException("Invalid date/time string (invalid length): " + theValue);
-			}
-		} catch (ParseException e) {
-			throw new DataFormatException("Invalid date string (" + e.getMessage() + "): " + theValue);
-		}
+		clearTimeZone();
+		super.setValueAsString(theValue);
 	}
-
-	private void clearTimeZone() {
-		myTimeZone = null;
-		myTimeZoneZulu = false;
-	}
-
-	/**
-	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
-	 */
-	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
 
 }

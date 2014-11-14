@@ -28,8 +28,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 @DatatypeDef(name = "boolean")
 public class BooleanDt extends BasePrimitive<Boolean> {
 
-	private Boolean myValue;
-
 	/**
 	 * Constructor
 	 */
@@ -41,45 +39,28 @@ public class BooleanDt extends BasePrimitive<Boolean> {
 	 * Constructor
 	 */
 	@SimpleSetter
-	public BooleanDt(@SimpleSetter.Parameter(name="theBoolean") boolean theBoolean) {
+	public BooleanDt(@SimpleSetter.Parameter(name = "theBoolean") boolean theBoolean) {
 		setValue(theBoolean);
 	}
-	
-	
+
 	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
+	protected Boolean parse(String theValue) {
 		if ("true".equals(theValue)) {
-			myValue = Boolean.TRUE;
+			return Boolean.TRUE;
 		} else if ("false".equals(theValue)) {
-			myValue = Boolean.FALSE;
+			return Boolean.FALSE;
 		} else {
 			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
 
 	@Override
-	public String getValueAsString() {
-		if (myValue == null) {
-			return null;
-		} else if (Boolean.TRUE.equals(myValue)) {
+	protected String encode(Boolean theValue) {
+		if (Boolean.TRUE.equals(theValue)) {
 			return "true";
 		} else {
 			return "false";
 		}
-
 	}
-
-	@Override
-	public void setValue(Boolean theValue) {
-		myValue = theValue;
-	}
-
-	@Override
-	public Boolean getValue() {
-		return myValue;
-	}
-	
-	
-	
 
 }

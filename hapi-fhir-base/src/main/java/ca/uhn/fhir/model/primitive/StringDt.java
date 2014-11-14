@@ -26,12 +26,9 @@ import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "string")
 public class StringDt extends BasePrimitive<String> implements IQueryParameterType {
-
-	private String myValue;
 
 	/**
 	 * Create a new String
@@ -45,31 +42,11 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 */
 	@SimpleSetter
 	public StringDt(@SimpleSetter.Parameter(name = "theString") String theValue) {
-		myValue = theValue;
-	}
-
-	@Override
-	public String getValue() {
-		return myValue;
+		setValue(theValue);
 	}
 
 	public String getValueNotNull() {
-		return StringUtils.defaultString(myValue);
-	}
-
-	@Override
-	public String getValueAsString() {
-		return myValue;
-	}
-
-	@Override
-	public void setValue(String theValue) throws DataFormatException {
-		myValue = theValue;
-	}
-
-	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
-		myValue = theValue;
+		return StringUtils.defaultString(getValue());
 	}
 
 	/**
@@ -77,14 +54,14 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	 */
 	@Override
 	public String toString() {
-		return myValue;
+		return getValue();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
+		result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
 		return result;
 	}
 
@@ -97,10 +74,10 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 		if (getClass() != obj.getClass())
 			return false;
 		StringDt other = (StringDt) obj;
-		if (myValue == null) {
-			if (other.myValue != null)
+		if (getValue() == null) {
+			if (other.getValue() != null)
 				return false;
-		} else if (!myValue.equals(other.myValue))
+		} else if (!getValue().equals(other.getValue()))
 			return false;
 		return true;
 	}
@@ -133,6 +110,16 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	@Override
 	public String getQueryParameterQualifier() {
 		return null;
+	}
+
+	@Override
+	protected String parse(String theValue) {
+		return theValue;
+	}
+
+	@Override
+	protected String encode(String theValue) {
+		return theValue;
 	}
 
 }
