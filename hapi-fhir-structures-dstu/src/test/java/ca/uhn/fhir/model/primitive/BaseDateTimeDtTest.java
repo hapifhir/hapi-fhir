@@ -2,7 +2,11 @@ package ca.uhn.fhir.model.primitive;
 
 import static org.junit.Assert.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -15,13 +19,32 @@ import ca.uhn.fhir.parser.DataFormatException;
 public class BaseDateTimeDtTest {
 	private SimpleDateFormat myDateInstantParser;
 	private FastDateFormat myDateInstantZoneParser;
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtTest.class);
+	
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
 
+	@Test
+	public void testFormats() throws Exception {
+		Date instant = myDateInstantParser.parse("2001-02-03 13:01:02.555");
+		for (FastDateFormat next : BaseDateTimeDt.getFormatters()) {
+			
+			GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("EST"));
+			cal.setTime(instant);
+			String value = next.format(cal);
+			ourLog.info("String: {}", value);
+			
+			DateTimeDt dt = new DateTimeDt(value);
+			String reEncoded = next.format(dt.getValue());
+			
+			assertEquals(value, reEncoded);
+
+		}
+	}
+	
 	@Test
 	public void testParseYear() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();

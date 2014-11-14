@@ -23,9 +23,12 @@ package ca.uhn.fhir.model.primitive;
 import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.*;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -39,6 +42,10 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
+	/*
+	 * Add any new formatters to the static block below!!
+	 */
+	private static final List<FastDateFormat> ourFormatters;
 	private static final Pattern ourYearDashMonthDashDayPattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
 	private static final Pattern ourYearDashMonthPattern = Pattern.compile("[0-9]{4}-[0-9]{2}");
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
@@ -47,23 +54,43 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final Pattern ourYearMonthDayPattern = Pattern.compile("[0-9]{4}[0-9]{2}[0-9]{2}");
 	private static final FastDateFormat ourYearMonthDayTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
 	private static final FastDateFormat ourYearMonthDayTimeMilliFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	private static final FastDateFormat ourYearMonthDayTimeUTCZFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"));
 	private static final FastDateFormat ourYearMonthDayTimeMilliUTCZFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", TimeZone.getTimeZone("UTC"));
 	private static final FastDateFormat ourYearMonthDayTimeMilliZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+	private static final FastDateFormat ourYearMonthDayTimeUTCZFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"));
 	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthNoDashesFormat = FastDateFormat.getInstance("yyyyMM");
 	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
 	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
 
+	static {
+		ArrayList<FastDateFormat> formatters = new ArrayList<FastDateFormat>();
+		formatters.add(ourYearFormat);
+		formatters.add(ourYearMonthDayFormat);
+		formatters.add(ourYearMonthDayNoDashesFormat);
+		formatters.add(ourYearMonthDayTimeFormat);
+		formatters.add(ourYearMonthDayTimeMilliFormat);
+		formatters.add(ourYearMonthDayTimeUTCZFormat);
+		formatters.add(ourYearMonthDayTimeMilliUTCZFormat);
+		formatters.add(ourYearMonthDayTimeMilliZoneFormat);
+		formatters.add(ourYearMonthDayTimeZoneFormat);
+		formatters.add(ourYearMonthFormat);
+		formatters.add(ourYearMonthNoDashesFormat);
+		ourFormatters = Collections.unmodifiableList(formatters);
+	}
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
+
 	private TimeZone myTimeZone;
 	private boolean myTimeZoneZulu = false;
 	private Date myValue;
 
+	private void clearTimeZone() {
+		myTimeZone = null;
+		myTimeZoneZulu = false;
+	}
+
 	/**
-	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}.
-	 * Default is {@link Calendar#DAY_OF_MONTH}
+	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}. Default is {@link Calendar#DAY_OF_MONTH}
 	 * 
 	 * @see #setPrecision(int)
 	 */
@@ -121,6 +148,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
+	/**
+	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
+	 */
+	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
+
 	public boolean isTimeZoneZulu() {
 		return myTimeZoneZulu;
 	}
@@ -152,6 +184,20 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			throw new NullPointerException("Precision may not be null");
 		}
 		myPrecision = thePrecision;
+	}
+
+	private void setTimeZone(String theValueString, boolean hasMillis) {
+		clearTimeZone();
+		int timeZoneStart = 19;
+		if (hasMillis)
+			timeZoneStart += 4;
+		if (theValueString.endsWith("Z")) {
+			setTimeZoneZulu(true);
+		} else if (theValueString.indexOf("GMT", timeZoneStart) != -1) {
+			setTimeZone(TimeZone.getTimeZone(theValueString.substring(timeZoneStart)));
+		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
+			setTimeZone(TimeZone.getTimeZone("GMT" + theValueString.substring(timeZoneStart)));
+		}
 	}
 
 	public void setTimeZone(TimeZone theTimeZone) {
@@ -217,7 +263,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 				} else {
 					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
-			} else if (theValue.length() >= 18) { //date and time with possible time zone
+			} else if (theValue.length() >= 18) { // date and time with possible time zone
 				int dotIndex = theValue.indexOf('.', 18);
 				boolean hasMillis = dotIndex > -1;
 
@@ -227,34 +273,32 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
 				}
 
-				if(hasMillis){
+				if (hasMillis) {
 					try {
-						myValue = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
-					} catch (ParseException p){
-						try{
-							if(theValue.endsWith("Z"))
-								myValue = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
-							else 
-								myValue = ourYearMonthDayTimeMilliFormat.parse(theValue);
-						}catch(ParseException p2){
-							throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
-						}
+						if (hasOffset(theValue)) {
+							myValue = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
+						} else if (theValue.endsWith("Z"))
+							myValue = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
+						else
+							myValue = ourYearMonthDayTimeMilliFormat.parse(theValue);
+					} catch (ParseException p2) {
+						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
 					setTimeZone(theValue, hasMillis);
 					setPrecision(TemporalPrecisionEnum.MILLI);
-				}else{
-					try{
-						myValue = ourYearMonthDayTimeZoneFormat.parse(theValue);
-					}catch(ParseException p){
-						try{
-							if(theValue.endsWith("Z"))
-								myValue = ourYearMonthDayTimeUTCZFormat.parse(theValue);
-							else
-								myValue = ourYearMonthDayTimeFormat.parse(theValue);
-						}catch(ParseException p2){
-							throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
+				} else {
+					try {
+						if (hasOffset(theValue)) {
+							myValue = ourYearMonthDayTimeZoneFormat.parse(theValue);
+						} else if (theValue.endsWith("Z")) {
+							myValue = ourYearMonthDayTimeUTCZFormat.parse(theValue);
+						} else {
+							myValue = ourYearMonthDayTimeFormat.parse(theValue);
 						}
+					} catch (ParseException p2) {
+						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
+
 					setTimeZone(theValue, hasMillis);
 					setPrecision(TemporalPrecisionEnum.SECOND);
 				}
@@ -266,27 +310,29 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
-	private void setTimeZone(String theValueString, boolean hasMillis) {
-		clearTimeZone();
-		int timeZoneStart = 19;
-		if(hasMillis) timeZoneStart += 4;
-		if (theValueString.endsWith("Z")) {
-			setTimeZoneZulu(true);
-		} else if (theValueString.indexOf("GMT", timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone(theValueString.substring(timeZoneStart)));
-		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
-			setTimeZone(TimeZone.getTimeZone("GMT"+theValueString.substring(timeZoneStart)));
+	private boolean hasOffset(String theValue) {
+		boolean inTime = false;
+		for (int i = 0; i < theValue.length(); i++) {
+			switch (theValue.charAt(i)) {
+			case 'T':
+				inTime = true;
+				break;
+			case '+':
+			case '-':
+				if (inTime) {
+					return true;
+				}
+				break;
+			}
 		}
-	}
-
-	private void clearTimeZone() {
-		myTimeZone = null;
-		myTimeZoneZulu = false;
+		return false;
 	}
 
 	/**
-	 * To be implemented by subclasses to indicate whether the given precision is allowed by this type
+	 * For unit tests only
 	 */
-	abstract boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision);
+	static List<FastDateFormat> getFormatters() {
+		return ourFormatters;
+	}
 
 }
