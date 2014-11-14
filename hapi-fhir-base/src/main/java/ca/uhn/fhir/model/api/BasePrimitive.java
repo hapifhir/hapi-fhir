@@ -23,23 +23,13 @@ package ca.uhn.fhir.model.api;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import ca.uhn.fhir.parser.DataFormatException;
+
 public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T> {
 
-	@Override
-	public boolean isEmpty() {
-		return super.isBaseEmpty() && getValue() == null;
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + "[" + getValueAsString() + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder().append(getValue()).toHashCode();
-	}
-
+	private T myCoercedValue;
+	private String myStringValue;
+	
 	@Override
 	public boolean equals(Object theObj) {
 		if (theObj == null) {
@@ -54,5 +44,66 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getValue(), o.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	public T getValue() {
+		return myCoercedValue;
+	}
+
+	@Override
+	public String getValueAsString() throws DataFormatException {
+		return myStringValue;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(getValue()).toHashCode();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && getValue() == null;
+	}
+
+	@Override
+	public void setValue(T theValue) throws DataFormatException {
+		myCoercedValue = theValue;
+		if (theValue == null) {
+			myStringValue = null;
+		} else {
+			myStringValue = encode(theValue);
+		}
+	}
+
+	@Override
+	public void setValueAsString(String theValue) throws DataFormatException {
+		myStringValue = theValue;
+		if (theValue == null) {
+			myCoercedValue = null;
+		} else {
+			myCoercedValue = parse(theValue);
+		}
+	}
+
+	/**
+	 * Subclasses must override to convert an encoded representation of
+	 * this datatype into a "coerced" one
+	 * 
+	 * @param theValue Will not be null
+	 */
+	protected abstract T parse(String theValue);
+
+	/**
+	 * Subclasses must override to convert a "coerced" value into an
+	 * encoded one.
+	 * 
+	 * @param theValue Will not be null
+	 */
+	protected abstract String encode(T theValue);
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + getValueAsString() + "]";
 	}
 }

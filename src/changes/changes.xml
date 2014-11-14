@@ -7,7 +7,7 @@
 	</properties>
 	<body>
 		<release version="0.8" date="TBD">
-			<action>
+			<action tyle="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
 				own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast
@@ -85,7 +85,13 @@
 			<action type="fix">
 				Resource fields with a type of "*" (or Any) sometimes failed to parse if a 
 				value type of "code" was used. Thanks to Bill de Beaubien for reporting!
-			</action>			
+			</action>
+			<action type="add" dev="lmds">
+				Remove dependency on JAXB libraries, which were used to parse and encode
+				dates and times (even in the JSON parser). JAXB is built in to most JDKs
+				but the version bundled with IBM's JDK is flaky and resulted in a number
+				of problems when deploying to Websphere.
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
