@@ -50,6 +50,15 @@ public class XhtmlDtTest {
 		assertEquals("<div>amp &amp;</div>", x.getValueAsString());
 	}
 
+	@Test
+	public void testOnlyProcessingDirective() {
+		XhtmlDt x = new XhtmlDt();
+		x.setValueAsString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
+		assertEquals(null, x.getValue());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>", x.getValueAsString());
+	}
+
+	
 	
 	@Test
 	public void testCharacterEntities() {

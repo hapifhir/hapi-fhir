@@ -29,7 +29,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 
 	private T myCoercedValue;
 	private String myStringValue;
-	
+
 	@Override
 	public boolean equals(Object theObj) {
 		if (theObj == null) {
@@ -72,6 +72,7 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 		if (theValue == null) {
 			myStringValue = null;
 		} else {
+			// NB this might be null
 			myStringValue = encode(theValue);
 		}
 	}
@@ -82,23 +83,26 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 		if (theValue == null) {
 			myCoercedValue = null;
 		} else {
+			// NB this might be null
 			myCoercedValue = parse(theValue);
 		}
 	}
 
 	/**
-	 * Subclasses must override to convert an encoded representation of
-	 * this datatype into a "coerced" one
+	 * Subclasses must override to convert an encoded representation of this datatype into a "coerced" one
 	 * 
-	 * @param theValue Will not be null
+	 * @param theValue
+	 *            Will not be null
+	 * @return May return null if the value does not correspond to anything
 	 */
 	protected abstract T parse(String theValue);
 
 	/**
-	 * Subclasses must override to convert a "coerced" value into an
-	 * encoded one.
+	 * Subclasses must override to convert a "coerced" value into an encoded one.
 	 * 
-	 * @param theValue Will not be null
+	 * @param theValue
+	 *            Will not be null
+	 * @return May return null if the value does not correspond to anything
 	 */
 	protected abstract String encode(T theValue);
 

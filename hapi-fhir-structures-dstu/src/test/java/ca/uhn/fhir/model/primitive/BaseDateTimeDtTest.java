@@ -37,9 +37,10 @@ public class BaseDateTimeDtTest {
 	@Test()
 	public void testParseMalformatted() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt("20120102");
-		assertEquals("2012-01-02",dt.getValueAsString());
-	}
-
+		assertEquals("20120102", dt.getValueAsString());
+		assertEquals("2012-01-02", new SimpleDateFormat("yyyy-MM-dd").format(dt.getValue()));
+	}	
+	
 	@Test
 	public void testParseMonth() throws DataFormatException {
 		DateTimeDt dt = new DateTimeDt();

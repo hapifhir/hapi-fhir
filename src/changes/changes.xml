@@ -92,6 +92,16 @@
 				but the version bundled with IBM's JDK is flaky and resulted in a number
 				of problems when deploying to Websphere.
 			</action>
+			<action type="fix" issue="50">
+				Primitive datatypes now preserve their original string value when parsing resources,
+				as well as containing the "parsed value". For instance, a DecimalDt field value of
+				<![CDATA[<code>1.0000</code>]]> will be parsed into the corresponding 
+				decimal value, but will also retain the original value with the corresponding
+				level of precision. This allows vadliator rules to be applied to 
+				original values as received "over the wire", such as well formatted but
+				invalid dates, e.g. "2001-15-01". Thanks to Joe Athman for reporting and 
+				helping to come up with a fix!
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
