@@ -70,6 +70,7 @@
 			<organization>Boston Children's Hospital</organization>
 		</developer>
 		<developer>
+			<id>lmds</id>
 			<name>Laura MacDougall Sookraj</name>
 			<organization>University Health Network</organization>
 		</developer>

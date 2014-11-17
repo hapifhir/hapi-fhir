@@ -20,15 +20,17 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -47,7 +49,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * </p>
  */
 @DatatypeDef(name = "id")
-public class IdDt extends BasePrimitive<String> {
+public class IdDt implements IPrimitiveDatatype<String> {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -164,6 +166,24 @@ public class IdDt extends BasePrimitive<String> {
 			return isEmpty();
 		}
 		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
+	}
+
+
+	
+	@Override
+	public boolean equals(Object theArg0) {
+		if (!(theArg0 instanceof IdDt)) {
+			return false;
+		}
+		IdDt id = (IdDt)theArg0;
+		return StringUtils.equals(getValueAsString(), id.getValueAsString());
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getValueAsString());
+		return b.toHashCode();
 	}
 
 	/**
@@ -312,7 +332,6 @@ public class IdDt extends BasePrimitive<String> {
 	/**
 	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
 	 */
-	@Override
 	public void setId(IdDt theId) {
 		setValue(theId.getValue());
 	}
@@ -479,6 +498,11 @@ public class IdDt extends BasePrimitive<String> {
 			throw new NullPointerException("BigDecimal ID can not be null");
 		}
 		return theIdPart.toPlainString();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return isBlank(getValue());
 	}
 
 }

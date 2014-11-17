@@ -41,8 +41,6 @@ import ca.uhn.fhir.util.XmlUtil;
 @DatatypeDef(name = "xhtml")
 public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
-	private List<XMLEvent> myValue;
-
 	/**
 	 * Constructor
 	 */
@@ -73,18 +71,27 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	 */
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
-		if (theValue == null) {
-			myValue = null;
-			return;
+		String value = theValue.trim();
+		if (value.charAt(0) != '<') {
+			value = "<div>" + value + "</div>";
 		}
+		
+		super.setValueAsString(value);
+	}
 
+
+	public boolean hasContent() {
+		return getValue() != null && getValue().size() > 0;
+	}
+
+	@Override
+	protected List<XMLEvent> parse(String theValue) {
 		String val = theValue.trim();
 		if (!val.startsWith("<")) {
 			val = "<div>" + val + "</div>";
 		}
 		if (val.startsWith("<?") && val.endsWith("?>")) {
-			myValue = null;
-			return;
+			return null;
 		}
 
 		try {
@@ -103,7 +110,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 					value.add(next);
 				}
 			}
-			setValue(value);
+			return value;
 
 		} catch (XMLStreamException e) {
 			throw new DataFormatException("String does not appear to be valid XML/XHTML (error is \"" + e.getMessage() + "\"): " + theValue, e);
@@ -113,14 +120,11 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	}
 
 	@Override
-	public String getValueAsString() throws DataFormatException {
-		if (myValue == null) {
-			return null;
-		}
+	protected String encode(List<XMLEvent> theValue) {
 		try {
 			StringWriter w = new StringWriter();
 			XMLEventWriter ew = XmlUtil.createXmlWriter(w);
-			for (XMLEvent next : myValue) {
+			for (XMLEvent next : getValue()) {
 				if (next.isCharacters()) {
 					ew.add(next);
 				} else {
@@ -134,20 +138,6 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		} catch (FactoryConfigurationError e) {
 			throw new ConfigurationException(e);
 		}
-	}
-
-	@Override
-	public List<XMLEvent> getValue() {
-		return myValue;
-	}
-
-	@Override
-	public void setValue(List<XMLEvent> theValue) throws DataFormatException {
-		myValue = theValue;
-	}
-
-	public boolean hasContent() {
-		return myValue != null && myValue.size() > 0;
 	}
 
 }
