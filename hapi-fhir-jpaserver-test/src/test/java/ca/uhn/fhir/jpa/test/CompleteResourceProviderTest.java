@@ -3,8 +3,10 @@ package ca.uhn.fhir.jpa.test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.Date;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -23,6 +25,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.test.jpasrv.EncounterResourceProvider;
+import ca.uhn.test.jpasrv.ImagingStudyResourceProvider;
 import ca.uhn.test.jpasrv.LocationResourceProvider;
 import ca.uhn.test.jpasrv.ObservationResourceProvider;
 import ca.uhn.test.jpasrv.OrganizationResourceProvider;
@@ -49,58 +53,52 @@ import ca.uhn.test.jpasrv.PatientResourceProvider;
 
 public class CompleteResourceProviderTest {
 
-	private static IFhirResourceDao<Observation> observationDao;
 	private static ClassPathXmlApplicationContext ourAppCtx;
-
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
+	private static IFhirResourceDao<Observation> ourObservationDao;
+	private static IFhirResourceDao<Patient> ourPatientDao;
+	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
+	private static IFhirResourceDao<ImagingStudy> ourImagingStudyDao;
 	private static Server ourServer;
-	private static IFhirResourceDao<Patient> patientDao;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
-	// @Test
-	// public void test01UploadTestResources() throws Exception {
-	//
-	// IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8888/fhir/context");
-	//
-	// File[] files = new File("src/test/resources/resources").listFiles(new PatternFilenameFilter(".*patient.*"));
-	// for (File file : files) {
-	// ourLog.info("Uploading: {}", file);
-	// Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, new FileReader(file));
-	// client.create(patient);
-	// }
-	//
-	// files = new File("src/test/resources/resources").listFiles(new PatternFilenameFilter(".*questionnaire.*"));
-	// for (File file : files) {
-	// ourLog.info("Uploading: {}", file);
-	// Questionnaire patient = ourCtx.newXmlParser().parseResource(Questionnaire.class, new FileReader(file));
-	// client.create(patient);
-	// }
-	//
-	// }
-
-	private static IFhirResourceDao<Questionnaire> questionnaireDao;
-
+	/**
+	 * See issue #52
+	 */
 	@Test
-	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist");
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExist");
-		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExist").execute();
-		assertEquals(true, outcome.getCreated().booleanValue());
-		IdDt p1Id = outcome.getId();
-
-		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExist/_history"));
-
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
-
+	public void testImagingStudyResources() throws Exception {
+		IGenericClient client = ourClient;
+		
+		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
+		
+		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/imagingstudy.json"));
+		client.create().resource(resBody).execute();
+		
+		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
+		
+		assertEquals(1, newSize - initialSize);
+		
 	}
-	
+
+	private void delete(String theResourceType, String theParamName, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
+		}
+	}
+
+	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
+		}
+	}
+
 	@Test
 	public void testCreateWithClientSuppliedId() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testCreateWithId01");
@@ -130,134 +128,6 @@ public class CompleteResourceProviderTest {
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
 
-	@Test
-	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testTryToCreateResourceWithReferenceThatDoesntExist01");
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
-		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt("Organization/1323123232349875324987529835"));
-
-		try {
-			ourClient.create(p1).getId();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Organization/1323123232349875324987529835"));
-		}
-
-	}
-
-	@Test
-	public void testSaveAndRetrieveExistingNarrative() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSaveAndRetrieveExistingNarrative01");
-
-		Patient p1 = new Patient();
-		p1.getText().setStatus(NarrativeStatusEnum.GENERATED);
-		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
-		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
-
-		IdDt newId = ourClient.create(p1).getId();
-
-		Patient actual = ourClient.read(Patient.class, newId);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
-	}
-
-	@Test
-	public void testSaveAndRetrieveWithoutNarrative() {
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
-
-		IdDt newId = ourClient.create(p1).getId();
-
-		Patient actual = ourClient.read(Patient.class, newId);
-		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
-	}
-
-	@Test
-	public void testSaveAndRetrieveWithContained() {
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained01");
-
-		Organization o1 = new Organization();
-		o1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained02");
-		
-		p1.getManagingOrganization().setResource(o1);
-		
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
-
-		Patient actual = ourClient.read(Patient.class, newId);
-		assertEquals(1, actual.getContained().getContainedResources().size());
-		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
-		
-		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system","testSaveAndRetrieveWithContained01")).execute();
-		assertEquals(1, b.size());
-		
-	}
-	
-	
-	@Test
-	public void testSearchByIdentifier() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
-		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
-		IdDt p1Id = ourClient.create(p1).getId();
-
-		Patient p2 = new Patient();
-		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
-		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
-		ourClient.create(p2).getId();
-
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
-	}
-
-	@Test
-	public void testSearchByIdentifierWithoutSystem() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "", "testSearchByIdentifierWithoutSystem01");
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
-		IdDt p1Id = ourClient.create(p1).getId();
-
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
-
-	}
-
-	@Test
-	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
-		
-		Patient p1 = new Patient();
-		p1.addIdentifier("urn:system", "testUpdateRejectsInvalidTypes");
-		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = ourClient.create().resource(p1).execute().getId();
-
-		Organization p2 = new Organization();
-		p2.getName().setValue("testUpdateRejectsInvalidTypes");
-		try {
-			ourClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			// good
-		}
-
-		try {
-			ourClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			// good
-		}
-
-	}
-	
-	
 	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");
@@ -297,20 +167,86 @@ public class CompleteResourceProviderTest {
 
 	}
 
-	private void delete(String theResourceType, String theParamName, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
+	@Test
+	public void testSaveAndRetrieveExistingNarrative() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSaveAndRetrieveExistingNarrative01");
+
+		Patient p1 = new Patient();
+		p1.getText().setStatus(NarrativeStatusEnum.GENERATED);
+		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
+		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
+
+		IdDt newId = ourClient.create(p1).getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
-	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
+	@Test
+	public void testSaveAndRetrieveWithContained() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained01");
+
+		Organization o1 = new Organization();
+		o1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveWithContained02");
+
+		p1.getManagingOrganization().setResource(o1);
+
+		IdDt newId = ourClient.create().resource(p1).execute().getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertEquals(1, actual.getContained().getContainedResources().size());
+		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
+
+		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSaveAndRetrieveWithContained01")).execute();
+		assertEquals(1, b.size());
+
+	}
+
+	@Test
+	public void testSaveAndRetrieveWithoutNarrative() {
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
+
+		IdDt newId = ourClient.create(p1).getId();
+
+		Patient actual = ourClient.read(Patient.class, newId);
+		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
+	}
+
+	@Test
+	public void testSearchByIdentifier() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
+		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
+		IdDt p1Id = ourClient.create(p1).getId();
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
+		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
+		ourClient.create(p2).getId();
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+	}
+
+	@Test
+	public void testSearchByIdentifierWithoutSystem() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "", "testSearchByIdentifierWithoutSystem01");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
+		IdDt p1Id = ourClient.create(p1).getId();
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+
 	}
 
 	@Test
@@ -348,6 +284,70 @@ public class CompleteResourceProviderTest {
 
 	}
 
+	@Test
+	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testTryToCreateResourceWithReferenceThatDoesntExist01");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
+		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
+		p1.setManagingOrganization(new ResourceReferenceDt("Organization/1323123232349875324987529835"));
+
+		try {
+			ourClient.create(p1).getId();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Organization/1323123232349875324987529835"));
+		}
+
+	}
+
+	@Test
+	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("urn:system", "testUpdateRejectsInvalidTypes");
+		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
+		IdDt p1id = ourClient.create().resource(p1).execute().getId();
+
+		Organization p2 = new Organization();
+		p2.getName().setValue("testUpdateRejectsInvalidTypes");
+		try {
+			ourClient.update().resource(p2).withId("Organization/" + p1id.getIdPart()).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+		try {
+			ourClient.update().resource(p2).withId("Patient/" + p1id.getIdPart()).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			// good
+		}
+
+	}
+
+	@Test
+	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
+		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist");
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExist");
+		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExist").execute();
+		assertEquals(true, outcome.getCreated().booleanValue());
+		IdDt p1Id = outcome.getId();
+
+		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExist/_history"));
+
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson()
+				.prettyPrint().execute();
+		assertEquals(1, actual.size());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -364,17 +364,17 @@ public class CompleteResourceProviderTest {
 		if (true) {
 			ourAppCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
 
-			patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
+			ourPatientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
 			PatientResourceProvider patientRp = new PatientResourceProvider();
-			patientRp.setDao(patientDao);
+			patientRp.setDao(ourPatientDao);
 
-			questionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDao", IFhirResourceDao.class);
+			ourQuestionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDao", IFhirResourceDao.class);
 			QuestionnaireResourceProvider questionnaireRp = new QuestionnaireResourceProvider();
-			questionnaireRp.setDao(questionnaireDao);
+			questionnaireRp.setDao(ourQuestionnaireDao);
 
-			observationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDao", IFhirResourceDao.class);
+			ourObservationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDao", IFhirResourceDao.class);
 			ObservationResourceProvider observationRp = new ObservationResourceProvider();
-			observationRp.setDao(observationDao);
+			observationRp.setDao(ourObservationDao);
 
 			IFhirResourceDao<Location> locationDao = (IFhirResourceDao<Location>) ourAppCtx.getBean("myLocationDao", IFhirResourceDao.class);
 			LocationResourceProvider locationRp = new LocationResourceProvider();
@@ -388,7 +388,11 @@ public class CompleteResourceProviderTest {
 			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 			organizationRp.setDao(organizationDao);
 
-			restServer.setResourceProviders(encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp);
+			IFhirResourceDao<ImagingStudy> imagingStudyDao = (IFhirResourceDao<ImagingStudy>) ourAppCtx.getBean("myImagingStudyDao", IFhirResourceDao.class);
+			ImagingStudyResourceProvider imagingStudyRp = new ImagingStudyResourceProvider();
+			imagingStudyRp.setDao(imagingStudyDao);
+
+			restServer.setResourceProviders(encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp, imagingStudyRp);
 			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
@@ -414,7 +418,7 @@ public class CompleteResourceProviderTest {
 		}
 
 		ourCtx = restServer.getFhirContext();
-//		ourCtx.getRestfulClientFactory().setProxy("localhost", 8888);
+		// ourCtx.getRestfulClientFactory().setProxy("localhost", 8888);
 
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
 		// ourClient = ourCtx.newRestfulGenericClient("http://fhir.healthintersections.com.au/open");

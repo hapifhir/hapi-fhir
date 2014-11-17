@@ -24,6 +24,9 @@
 	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticReport"/>
 	</bean>
+	<bean id="myImagingStudyDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.ImagingStudy"/>
+	</bean>
 	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Location"/>
 	</bean>

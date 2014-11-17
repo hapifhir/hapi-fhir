@@ -140,6 +140,7 @@
 								<baseResourceName>device</baseResourceName>
 								<baseResourceName>encounter</baseResourceName>
 								<baseResourceName>diagnosticreport</baseResourceName>
+								<baseResourceName>imagingstudy</baseResourceName>
 								<baseResourceName>location</baseResourceName>
 								<baseResourceName>observation</baseResourceName>
 								<baseResourceName>organization</baseResourceName>

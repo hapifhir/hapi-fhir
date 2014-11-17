@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.apache.http.util.EncodingUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -198,6 +199,56 @@ public class GenericClientTest {
 
 	}
 
+	
+	@Test
+	public void testCreateWithStringAutoDetectsEncoding() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int count = 0;
+		client.create().resource(myCtx.newXmlParser().encodeResourceToString(p1)).execute();
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count++).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+
+		client.create().resource(myCtx.newJsonParser().encodeResourceToString(p1)).execute();
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count++).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+	}
+
+	@Test
+	public void testUpdateWithStringAutoDetectsEncoding() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int count = 0;
+		client.update().resource(myCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count++).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+
+		client.update().resource(myCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count++).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+	}
+
+	
 	@Test
 	public void testCreateWithTagNonFluent() throws Exception {
 

@@ -313,6 +313,9 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
@@ -392,6 +395,9 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
@@ -447,6 +453,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -526,6 +536,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -572,12 +586,13 @@ public abstract class BaseFhirDao implements IDao {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
 				continue;
 			}
-			if (nextSpDef.getPath().isEmpty()) {
-				continue; // TODO: implement phoenetic, and any others that have
-							// no path
-			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				// TODO: implement phoenetic, and any others that have no path
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -663,9 +678,9 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
-			if (nextPath.isEmpty()) {
+			if (isBlank(nextPath)) {
 				continue;
-			}
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
