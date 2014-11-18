@@ -116,6 +116,10 @@
 			<action type="fix">
 				Generic/Fluent Client "create" and "update" method requests were not setting a content type header
 			</action>
+			<action type="add" issue="53" dev="petromykhailysyn">
+				DateDt left precision value as null in the constructor
+				<![CDATA[DateDt(Date)]]>.
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
