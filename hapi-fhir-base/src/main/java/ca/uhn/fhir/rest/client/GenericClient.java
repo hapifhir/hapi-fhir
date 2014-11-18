@@ -511,6 +511,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return resp;
 		}
 
+		protected EncodingEnum getParamEncoding() {
+			return myParamEncoding;
+		}
+
 		protected IResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = null;
 			for (int i = 0; i < theResourceBody.length() && encoding == null; i++) {
@@ -571,6 +575,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			myId = getPreferredId(myResource, myId);
 
+			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
+			if (getParamEncoding() != null) {
+				myResourceBody = null;
+			}
+			
 			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
@@ -1101,6 +1110,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myId == null || myId.hasIdPart() == false) {
 				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
 			}
+
+			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
+			if (getParamEncoding() != null) {
+				myResourceBody = null;
+			}			
 
 			BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 

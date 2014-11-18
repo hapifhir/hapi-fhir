@@ -113,6 +113,9 @@
 				(although the server does not yet process these params, and it should). Thanks to
 				GitHub user shvoidlee for reporting and help with analysis!
 			</action>
+			<action type="fix">
+				Generic/Fluent Client "create" and "update" method requests were not setting a content type header
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

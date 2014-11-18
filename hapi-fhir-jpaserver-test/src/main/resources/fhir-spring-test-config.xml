@@ -46,6 +46,17 @@
 		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Encounter"/>
 	</bean>
 
+	<bean id="myDiagnosticOrderDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticOrder"/>
+	</bean>
+	<bean id="myDocumentManifestDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DocumentManifest"/>
+	</bean>
+	<bean id="myDocumentReferenceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DocumentReference"/>
+	</bean>
+
+
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
 		<!-- <property name="url" value="jdbc:derby:directory:myUnitTestDB;create=true" />  -->

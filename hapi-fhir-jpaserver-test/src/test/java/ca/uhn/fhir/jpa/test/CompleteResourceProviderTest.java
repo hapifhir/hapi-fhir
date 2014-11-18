@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
@@ -24,6 +26,9 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
 import ca.uhn.fhir.model.dstu.resource.Location;
@@ -44,6 +49,9 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.test.jpasrv.DiagnosticOrderResourceProvider;
+import ca.uhn.test.jpasrv.DocumentManifestResourceProvider;
+import ca.uhn.test.jpasrv.DocumentReferenceResourceProvider;
 import ca.uhn.test.jpasrv.EncounterResourceProvider;
 import ca.uhn.test.jpasrv.ImagingStudyResourceProvider;
 import ca.uhn.test.jpasrv.LocationResourceProvider;
@@ -83,6 +91,28 @@ public class CompleteResourceProviderTest {
 		
 	}
 
+	
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDiagnosticOrderResources() throws Exception {
+		IGenericClient client = ourClient;
+		
+		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		
+		DiagnosticOrder res = new DiagnosticOrder();
+		res.addIdentifier("urn:foo", "123");
+		
+		client.create().resource(res).execute();
+		
+		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+		
+		assertEquals(1, newSize - initialSize);
+		
+	}
+
+	
 	private void delete(String theResourceType, String theParamName, String theParamValue) {
 		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
 		for (IResource next : resources.toListOfResources()) {
@@ -392,7 +422,19 @@ public class CompleteResourceProviderTest {
 			ImagingStudyResourceProvider imagingStudyRp = new ImagingStudyResourceProvider();
 			imagingStudyRp.setDao(imagingStudyDao);
 
-			restServer.setResourceProviders(encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp, imagingStudyRp);
+			IFhirResourceDao<DiagnosticOrder> diagnosticOrderDao =ourAppCtx.getBean("myDiagnosticOrderDao", IFhirResourceDao.class);
+			DiagnosticOrderResourceProvider diagnosticOrderRp = new DiagnosticOrderResourceProvider();
+			diagnosticOrderRp.setDao(diagnosticOrderDao);
+			
+			IFhirResourceDao<DocumentManifest> documentManifestDao =ourAppCtx.getBean("myDocumentManifestDao", IFhirResourceDao.class);
+			DocumentManifestResourceProvider documentManifestRp = new DocumentManifestResourceProvider();
+			documentManifestRp.setDao(documentManifestDao);
+			
+			IFhirResourceDao<DocumentReference> documentReferenceDao =ourAppCtx.getBean("myDocumentReferenceDao", IFhirResourceDao.class);
+			DocumentReferenceResourceProvider documentReferenceRp = new DocumentReferenceResourceProvider();
+			documentReferenceRp.setDao(documentReferenceDao);
+
+			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp, imagingStudyRp);
 			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);

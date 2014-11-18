@@ -115,7 +115,7 @@ public class MethodUtil {
 		}
 
 		addTagsToPostOrPut(theResource, retVal);
-		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 		
 		return retVal;
 	}
@@ -261,22 +261,21 @@ public class MethodUtil {
 		}
 		addTagsToPostOrPut(theResource, retVal);
 
-		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 		
 		return retVal;
 	}
 
-	private static void addContentTypeHeaderBasedOnDetectedType(BaseHttpClientInvocationWithContents theHttpMethod, String theBody) {
+	public static EncodingEnum detectEncoding(String theBody) {
 		for (int i = 0; i < theBody.length(); i++) {
 			switch (theBody.charAt(i)) {
 			case '<':
-				theHttpMethod.addHeader(Constants.HEADER_CONTENT_TYPE, EncodingEnum.XML.getResourceContentType());
-				return;
+				return EncodingEnum.XML;
 			case '{':
-				theHttpMethod.addHeader(Constants.HEADER_CONTENT_TYPE, EncodingEnum.JSON.getResourceContentType());
-				return;
+				return EncodingEnum.JSON;
 			}
 		}
+		return EncodingEnum.XML;
 	}
 
 	public static HttpGetClientInvocation createConformanceInvocation() {

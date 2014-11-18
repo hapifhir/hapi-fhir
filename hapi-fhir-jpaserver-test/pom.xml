@@ -138,7 +138,10 @@
 							<packageBase>ca.uhn.test.jpasrv</packageBase>
 							<baseResourceNames>
 								<baseResourceName>device</baseResourceName>
+								<baseResourceName>documentmanifest</baseResourceName>
+								<baseResourceName>documentreference</baseResourceName>
 								<baseResourceName>encounter</baseResourceName>
+								<baseResourceName>diagnosticorder</baseResourceName>
 								<baseResourceName>diagnosticreport</baseResourceName>
 								<baseResourceName>imagingstudy</baseResourceName>
 								<baseResourceName>location</baseResourceName>

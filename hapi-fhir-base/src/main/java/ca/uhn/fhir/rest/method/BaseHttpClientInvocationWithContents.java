@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -165,6 +166,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		EncodingEnum encoding = null;
 		encoding = theEncoding;
 
+		if (myContents != null) {
+			encoding = MethodUtil.detectEncoding(myContents);
+		}
+		
 		if (encoding == EncodingEnum.JSON) {
 			parser = myContext.newJsonParser();
 		} else {
@@ -174,6 +179,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		AbstractHttpEntity entity;
 		if (myParams != null) {
+			contentType= null;
 			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 			for (Entry<String, List<String>> nextParam : myParams.entrySet()) {
 				List<String> value = nextParam.getValue();
@@ -215,7 +221,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
 
-		// retVal.addHeader(Constants.HEADER_CONTENT_TYPE, con);
+		if (contentType != null) {
+			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType);
+		}
 
 		return retVal;
 	}
