@@ -120,6 +120,12 @@
 				DateDt left precision value as null in the constructor
 				<![CDATA[DateDt(Date)]]>.
 			</action>
+			<action type="fix">
+				RESTful server now doesn't overwrite resource IDs if they are absolute. In other words, if
+				a server's Resource Provider returns a resource with ID "Patient/123" it will be translated to
+				"[base url]/Patient/123" but if the RP returns ID "http://foo/Patient/123" the ID will be
+				returned exactly as is. Thanks to Bill de Beaubien for the suggestion!
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
