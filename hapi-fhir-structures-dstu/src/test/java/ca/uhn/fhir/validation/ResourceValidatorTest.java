@@ -5,10 +5,14 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +35,7 @@ public class ResourceValidatorTest {
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
 		val.setValidateAgainstStandardSchematron(false);
-		
+
 		val.validate(p);
 
 		p.getAnimal().getBreed().setText("The Breed");
@@ -45,18 +49,43 @@ public class ResourceValidatorTest {
 		}
 	}
 
+	/**
+	 * See issue #50
+	 */
+	@Test
+	public void testOutOfBoundsDate() {
+		Patient p = new Patient();
+		p.setBirthDate(new DateTimeDt("2000-15-31"));
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		assertThat(encoded, StringContains.containsString("2000-15-31"));
+
+		p = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
+		assertEquals("2000-15-31", p.getBirthDate().getValueAsString());
+		assertEquals("2001-03-31", new SimpleDateFormat("yyyy-MM-dd").format(p.getBirthDate().getValue()));
+
+		ValidationResult result = ourCtx.newValidator().validateWithResult(p);
+		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
+		ourLog.info(resultString);
+
+		assertEquals(2, result.getOperationOutcome().getIssue().size());
+		assertThat(resultString, StringContains.containsString("cvc-datatype-valid.1.2.3"));
+	}
+
 	@Test
 	public void testSchemaBundleValidator() throws IOException {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
 		Bundle b = ourCtx.newXmlParser().parseBundle(res);
 
-        FhirValidator val = createFhirValidator();
+		FhirValidator val = createFhirValidator();
 
 		val.validate(b);
 
 		Patient p = (Patient) b.getEntries().get(0).getResource();
 		p.getTelecomFirstRep().setValue("123-4567");
-		
+
 		try {
 			val.validate(b);
 			fail();
@@ -76,60 +105,63 @@ public class ResourceValidatorTest {
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(true);
 
-        ValidationResult validationResult = val.validateWithResult(p);
-        assertTrue(validationResult.isSuccessful());
+		ValidationResult validationResult = val.validateWithResult(p);
+		assertTrue(validationResult.isSuccessful());
 
-        p.getTelecomFirstRep().setValue("123-4567");
-        validationResult = val.validateWithResult(p);
-        assertFalse(validationResult.isSuccessful());
-        OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
-        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-        assertEquals(1, operationOutcome.getIssue().size());
-        assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+		p.getTelecomFirstRep().setValue("123-4567");
+		validationResult = val.validateWithResult(p);
+		assertFalse(validationResult.isSuccessful());
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
 
 		p.getTelecomFirstRep().setSystem(ContactSystemEnum.EMAIL);
-        validationResult = val.validateWithResult(p);
-        assertTrue(validationResult.isSuccessful());
+		validationResult = val.validateWithResult(p);
+		assertTrue(validationResult.isSuccessful());
 	}
 
-    @Test
-    public void testSchemaBundleValidatorIsSuccessful() throws IOException {
-        String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
-        Bundle b = ourCtx.newXmlParser().parseBundle(res);
+	@Test
+	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(res);
 
-        FhirValidator val = createFhirValidator();
+		FhirValidator val = createFhirValidator();
 
-        ValidationResult result = val.validateWithResult(b);
-        assertTrue(result.isSuccessful());
-        OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-        assertNotNull(operationOutcome);
-        assertEquals(0, operationOutcome.getIssue().size());
-    }
+		ValidationResult result = val.validateWithResult(b);
+		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		
+		
+		assertTrue(result.isSuccessful());
+		assertNotNull(operationOutcome);
+		assertEquals(0, operationOutcome.getIssue().size());
+	}
 
-    @Test
-    public void testSchemaBundleValidatorFails() throws IOException {
-        String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
-        Bundle b = ourCtx.newXmlParser().parseBundle(res);
+	@Test
+	public void testSchemaBundleValidatorFails() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("atom-document-large.xml"));
+		Bundle b = ourCtx.newXmlParser().parseBundle(res);
 
-        FhirValidator val = createFhirValidator();
+		FhirValidator val = createFhirValidator();
 
-        ValidationResult validationResult = val.validateWithResult(b);
-        assertTrue(validationResult.isSuccessful());
+		ValidationResult validationResult = val.validateWithResult(b);
+		assertTrue(validationResult.isSuccessful());
 
-        Patient p = (Patient) b.getEntries().get(0).getResource();
-        p.getTelecomFirstRep().setValue("123-4567");
-        validationResult = val.validateWithResult(b);
-        assertFalse(validationResult.isSuccessful());
-        OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
-        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-        assertEquals(1, operationOutcome.getIssue().size());
-        assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
-    }
+		Patient p = (Patient) b.getEntries().get(0).getResource();
+		p.getTelecomFirstRep().setValue("123-4567");
+		validationResult = val.validateWithResult(b);
+		assertFalse(validationResult.isSuccessful());
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+	}
 
-    private FhirValidator createFhirValidator() {
-        FhirValidator val = ourCtx.newValidator();
-        val.setValidateAgainstStandardSchema(true);
-        val.setValidateAgainstStandardSchematron(true);
-        return val;
-    }
+	private FhirValidator createFhirValidator() {
+		FhirValidator val = ourCtx.newValidator();
+		val.setValidateAgainstStandardSchema(true);
+		val.setValidateAgainstStandardSchematron(true);
+		return val;
+	}
 }

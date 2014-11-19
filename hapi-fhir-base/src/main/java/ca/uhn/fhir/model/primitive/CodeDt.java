@@ -29,8 +29,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 @DatatypeDef(name = "code")
 public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Comparable<CodeDt> {
 
-	private String myValue;
-
 	/**
 	 * Constructor
 	 */
@@ -47,36 +45,21 @@ public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Com
 	}
 
 	@Override
-	public String getValue() {
-		return myValue;
-	}
-
-	@Override
-	public void setValue(String theValue) throws DataFormatException {
-		if (theValue == null) {
-			myValue = null;
-		} else {
-			String newValue = theValue.trim();
-			myValue = newValue;
-		}
-	}
-
-	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
-		setValue(theValue);
-	}
-
-	@Override
-	public String getValueAsString() {
-		return getValue();
-	}
-
-	@Override
 	public int compareTo(CodeDt theCode) {
 		if (theCode == null) {
 			return 1;
 		}
 		return defaultString(getValue()).compareTo(defaultString(theCode.getValue()));
+	}
+
+	@Override
+	protected String parse(String theValue) {
+		return theValue.trim();
+	}
+
+	@Override
+	protected String encode(String theValue) {
+		return theValue;
 	}
 
 }

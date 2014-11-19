@@ -27,12 +27,9 @@ import java.math.RoundingMode;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "decimal")
 public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<DecimalDt> {
-
-	private BigDecimal myValue;
 
 	/**
 	 * Constructor
@@ -41,10 +38,6 @@ public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<D
 		super();
 	}
 
-	public Number getValueAsNumber() {
-		return myValue; 
-	}
-	
 	/**
 	 * Constructor
 	 */
@@ -64,31 +57,6 @@ public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<D
 	}
 
 	/**
-	 * Rounds the value to the given prevision
-	 * 
-	 * @see MathContext#getPrecision()
-	 */
-	public void round(int thePrecision) {
-		if (getValue()!=null) {
-			BigDecimal newValue = getValue().round(new MathContext(thePrecision));
-			setValue(newValue);
-		}
-	}
-
-	/**
-	 * Rounds the value to the given prevision
-	 * 
-	 * @see MathContext#getPrecision()
-	 * @see MathContext#getRoundingMode()
-	 */
-	public void round(int thePrecision, RoundingMode theRoundingMode) {
-		if (getValue()!=null) {
-			BigDecimal newValue = getValue().round(new MathContext(thePrecision, theRoundingMode));
-			setValue(newValue);
-		}
-	}
-
-	/**
 	 * Constructor
 	 */
 	@SimpleSetter
@@ -104,58 +72,70 @@ public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<D
 	}
 
 	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
-		if (theValue == null) {
-			myValue = null;
-		} else {
-			myValue = new BigDecimal(theValue);
+	public int compareTo(DecimalDt theObj) {
+		if (getValue() == null && theObj.getValue() == null) {
+			return 0;
 		}
-	}
-
-	@Override
-	public String getValueAsString() {
-		if (myValue == null) {
-			return null;
+		if (getValue() != null && theObj.getValue() == null) {
+			return 1;
 		}
-		return myValue.toPlainString();
+		if (getValue() == null && theObj.getValue() != null) {
+			return -1;
+		}
+		return getValue().compareTo(theObj.getValue());
 	}
 
 	@Override
-	public BigDecimal getValue() {
-		return myValue;
-	}
-
-	@Override
-	public void setValue(BigDecimal theValue) throws DataFormatException {
-		myValue = theValue;
-	}
-
-	/**
-	 * Sets a new value using an integer
-	 */
-	public void setValueAsInteger(int theValue) {
-		myValue = new BigDecimal(theValue);
+	protected String encode(BigDecimal theValue) {
+		return getValue().toPlainString();
 	}
 
 	/**
 	 * Gets the value as an integer, using {@link BigDecimal#intValue()}
 	 */
 	public int getValueAsInteger() {
-		return myValue.intValue();
+		return getValue().intValue();
+	}
+
+	public Number getValueAsNumber() {
+		return getValue();
 	}
 
 	@Override
-	public int compareTo(DecimalDt theObj) {
-		if (myValue == null && theObj.getValue() == null) {
-			return 0;
+	protected BigDecimal parse(String theValue) {
+		return new BigDecimal(theValue);
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 */
+	public void round(int thePrecision) {
+		if (getValue() != null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision));
+			setValue(newValue);
 		}
-		if (myValue != null && theObj.getValue() == null) {
-			return 1;
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 * @see MathContext#getRoundingMode()
+	 */
+	public void round(int thePrecision, RoundingMode theRoundingMode) {
+		if (getValue() != null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision, theRoundingMode));
+			setValue(newValue);
 		}
-		if (myValue == null && theObj.getValue() != null) {
-			return -1;
-		}
-		return myValue.compareTo(theObj.getValue());
+	}
+
+	/**
+	 * Sets a new value using an integer
+	 */
+	public void setValueAsInteger(int theValue) {
+		setValue(new BigDecimal(theValue));
 	}
 
 }

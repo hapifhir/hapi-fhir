@@ -29,8 +29,6 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 @DatatypeDef(name = "base64Binary")
 public class Base64BinaryDt extends BasePrimitive<byte[]> {
 
-	private byte[] myValue;
-
 	/**
 	 * Constructor
 	 */
@@ -42,36 +40,18 @@ public class Base64BinaryDt extends BasePrimitive<byte[]> {
 	 * Constructor
 	 */
 	@SimpleSetter
-	public Base64BinaryDt(@SimpleSetter.Parameter(name="theBytes") byte[] theBytes) {
+	public Base64BinaryDt(@SimpleSetter.Parameter(name = "theBytes") byte[] theBytes) {
 		setValue(theBytes);
 	}
 
 	@Override
-	public void setValueAsString(String theValue) {
-		if (theValue == null) {
-			myValue = null;
-		} else {
-			myValue = Base64.decodeBase64(theValue);
-		}
+	protected byte[] parse(String theValue) {
+		return Base64.decodeBase64(theValue);
 	}
 
 	@Override
-	public String getValueAsString() {
-		if (myValue == null) {
-			return null;
-		} else {
-			return Base64.encodeBase64String(myValue);
-		}
-	}
-
-	@Override
-	public void setValue(byte[] theValue) {
-		myValue = theValue;
-	}
-
-	@Override
-	public byte[] getValue() {
-		return myValue;
+	protected String encode(byte[] theValue) {
+		return Base64.encodeBase64String(theValue);
 	}
 
 }

@@ -18,6 +18,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -257,9 +258,11 @@ public class JsonParserTest {
 		//@formatter:on
 
 		Patient res = (Patient) ourCtx.newJsonParser().parseResource(text);
-		String value = res.getText().getDiv().getValueAsString();
+		XhtmlDt div = res.getText().getDiv();
+		String value = div.getValueAsString();
 
-		assertNull(value);
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", value);
+		assertEquals(null, div.getValue());
 	}
 
 	@Test
@@ -612,7 +615,7 @@ public class JsonParserTest {
 		JSON expected = JSONSerializer.toJSON(msg.trim());
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		String exp = expected.toString().replace("\\r\\n", "\\n").replace("&sect;", "§");
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
 		String act = actual.toString().replace("\\r\\n", "\\n");
 
 		ourLog.info("Expected: {}", exp);

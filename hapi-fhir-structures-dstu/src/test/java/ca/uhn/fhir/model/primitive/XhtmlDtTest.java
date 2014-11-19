@@ -31,7 +31,11 @@ public class XhtmlDtTest {
 		XhtmlDt x = new XhtmlDt();
 		x.setValueAsString(div);
 
-		String actual = x.getValueAsString();
+		
+		XhtmlDt x2 = new XhtmlDt();
+		x2.setValue(x.getValue());
+		
+		String actual = x2.getValueAsString();
 
 		ourLog.info("Expected {}", div.replace("\r", "").replace("\n", "\\n"));
 		ourLog.info("Actual   {}", actual.replace("\r\n", "\\r\\n").replace("\n", "\\n"));
@@ -50,6 +54,15 @@ public class XhtmlDtTest {
 		assertEquals("<div>amp &amp;</div>", x.getValueAsString());
 	}
 
+	@Test
+	public void testOnlyProcessingDirective() {
+		XhtmlDt x = new XhtmlDt();
+		x.setValueAsString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
+		assertEquals(null, x.getValue());
+		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>", x.getValueAsString());
+	}
+
+	
 	
 	@Test
 	public void testCharacterEntities() {
@@ -60,7 +73,11 @@ public class XhtmlDtTest {
 
 		// <div>Sect: § uuml: ü Ü</div>
 		// <div>Sect: &sect; uuml: &uuml; &Uuml;</div>
-		assertEquals("<div>Sect: § uuml: ü Ü</div>", x.getValueAsString());
+		assertEquals("<div>"+input+"</div>", x.getValueAsString());
+		
+		XhtmlDt x2 = new XhtmlDt();
+		x2.setValue(x.getValue());
+		assertEquals("<div>Sect: § uuml: ü Ü</div>", x2.getValueAsString());
 
 	}
 	

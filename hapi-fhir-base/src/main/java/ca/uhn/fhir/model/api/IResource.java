@@ -22,11 +22,23 @@ package ca.uhn.fhir.model.api;
 
 import java.util.Map;
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
+/**
+ * This interface is the parent interface for all FHIR Resource definition
+ * classes. Classes implementing this interface should be annotated
+ * with the {@link ResourceDef @ResourceDef} annotation.
+ * 
+ * <p>
+ * Note that this class is a part of HAPI's model API, used to define
+ * structure classes. Users will often interact with this interface, but
+ * should not need to implement it directly.
+ * <p>
+ */
 public interface IResource extends ICompositeElement {
 
 	/**
@@ -113,8 +125,11 @@ public interface IResource extends ICompositeElement {
 	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
 
 	/**
-	 * Returns a String representing the name of this Resource
-	 * @return the name of this Resource
+	 * Returns a String representing the name of this Resource. This return
+	 * value is not used for anything by HAPI itself, but is provided as a 
+	 * convenience to developers using the API.
+	 * 
+	 * @return the name of this resource, e.g. "Patient", or "Observation"
 	 */
 	String getResourceName();
 

@@ -1131,7 +1131,7 @@ public class XmlParserTest {
 
 		assertEquals("FHIR Core Valuesets", bundle.getTitle().getValue());
 		assertEquals("http://hl7.org/implement/standards/fhir/valuesets.xml", bundle.getLinkSelf().getValue());
-		assertEquals("2014-02-10T04:11:24.435+00:00", bundle.getUpdated().getValueAsString());
+		assertEquals("2014-02-10T04:11:24.435-00:00", bundle.getUpdated().getValueAsString());
 		assertEquals(1, bundle.getEntries().size());
 
 		BundleEntry entry = bundle.getEntries().get(0);

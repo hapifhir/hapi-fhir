@@ -31,4 +31,9 @@ public interface ITransaction {
 	
 	ITransactionTyped<Bundle> withBundle(Bundle theResources);
 
+	// *****
+	// TODO: add withString version
+	// If we add a withString version, make sure to auto-detect content type!
+	// *****
+	
 }

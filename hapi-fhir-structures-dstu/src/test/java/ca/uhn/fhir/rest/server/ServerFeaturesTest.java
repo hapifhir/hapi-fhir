@@ -25,9 +25,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -224,6 +226,27 @@ public class ServerFeaturesTest {
 	}
 
 	@Test
+	public void testSearchReturnWithAbsoluteIdSpecified() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=findPatientsWithAbsoluteIdSpecified");
+		httpGet.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		Bundle bundle = servlet.getFhirContext().newXmlParser().parseBundle(responseContent);
+		assertEquals(2,bundle.size());
+		
+		assertEquals("http://absolute.com/Patient/123", bundle.getEntries().get(0).getId().getValue());
+		assertEquals("http://absolute.com/Patient/123/_history/22", bundle.getEntries().get(0).getLinkSelf().getValue());
+
+		assertEquals("http://foo.com/Organization/222",bundle.getEntries().get(1).getId().getValue());
+		assertEquals("http://foo.com/Organization/222/_history/333",bundle.getEntries().get(1).getLinkSelf().getValue());
+	}
+	
+	@Test
 	public void testSearchWithWildcardRetVal() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/?_query=searchWithWildcardRetVal");
@@ -345,6 +368,20 @@ public class ServerFeaturesTest {
 			return Collections.singletonList(p);
 		}
 
+		@Search(queryName = "findPatientsWithAbsoluteIdSpecified")
+		public List<Patient> findPatientsWithAbsoluteIdSpecified() {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("foo");
+			p.setId("http://absolute.com/Patient/123/_history/22");
+			
+			Organization o = new Organization();
+			o.setId("http://foo.com/Organization/222/_history/333");
+			p.getManagingOrganization().setResource(o);
+			
+			return Collections.singletonList(p);
+		}
+
+		
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;

@@ -179,8 +179,15 @@ public class FhirTerser {
 		switch (theDefinition.getChildType()) {
 		case PRIMITIVE_XHTML:
 		case PRIMITIVE_DATATYPE:
-		case RESOURCE_REF:
 			// These are primitive types
+			break;
+		case RESOURCE_REF:
+			ResourceReferenceDt resRefDt = (ResourceReferenceDt)theElement;
+			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
+				IResource theResource = resRefDt.getResource();
+				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+				visit(theResource, null, def, theCallback);
+			}
 			break;
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE:

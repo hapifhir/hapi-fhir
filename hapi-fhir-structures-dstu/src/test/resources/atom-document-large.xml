@@ -237,7 +237,7 @@
 					</coding>
 					<text value="Male" />
 				</gender>
-				<birthDate value="19840101" />
+				<birthDate value="1984-01-01" />
 				<address>
 					<text value="4016 Canal St." />
 					<city value="New Orleans" />
@@ -284,7 +284,7 @@
 					</coding>
 					<text value="Male" />
 				</gender>
-				<birthDate value="19840101" />
+				<birthDate value="1984-01-01" />
 				<address>
 					<text value="4016 Canal St." />
 					<city value="New Orleans" />
@@ -362,7 +362,7 @@
 					</coding>
 					<text value="Male" />
 				</gender>
-				<birthDate value="19840101" />
+				<birthDate value="1984-01-01" />
 				<address>
 					<text value="4016 Canal St." />
 					<city value="New Orleans" />
@@ -409,7 +409,7 @@
 					</coding>
 					<text value="Male" />
 				</gender>
-				<birthDate value="19840101" />
+				<birthDate value="1984-01-01" />
 				<address>
 					<text value="4016 Canal St." />
 					<city value="New Orleans" />
@@ -456,7 +456,7 @@
 					</coding>
 					<text value="Male" />
 				</gender>
-				<birthDate value="19840101" />
+				<birthDate value="1984-01-01" />
 				<address>
 					<text value="4016 Canal St." />
 					<city value="New Orleans" />
