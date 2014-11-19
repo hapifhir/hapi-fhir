@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -23,6 +24,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.apache.http.util.EncodingUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -177,25 +179,133 @@ public class GenericClientTest {
 		assertEquals("44", outcome.getId().getIdPart());
 		assertEquals("22", outcome.getId().getVersionIdPart());
 
+		int count = 0;
+		
 		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
 		assertEquals("POST", capt.getValue().getMethod());
 		Header catH = capt.getValue().getFirstHeader("Category");
 		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
 		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
-
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		count++;
+		
 		/*
 		 * Try fluent options
 		 */
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		client.create().resource(p1).withId("123").execute();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(1).getURI().toString());
-
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		count++;
+		
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		client.create().resource(resourceText).withId("123").execute();
 		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
 		assertEquals(resourceText, IOUtils.toString(((HttpPost) capt.getAllValues().get(2)).getEntity().getContent()));
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		count++;
+	}
 
+	@Test
+	public void testCreateWithStringAutoDetectsEncoding() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int count = 0;
+		client.create().resource(myCtx.newXmlParser().encodeResourceToString(p1)).execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("value=\"John\""));
+		count++;
+
+		client.create().resource(myCtx.newJsonParser().encodeResourceToString(p1)).execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
+		count++;
+
+		/*
+		 * e.g. Now try with reversed encoding (provide a string that's in JSON and ask the client to use XML)
+		 */
+		
+		client.create().resource(myCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
+		count++;
+
+		client.create().resource(myCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("value=\"John\""));
+		count++;
+
+	}
+
+	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
+		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(count)).getEntity().getContent());
+		return body;
+	}
+
+	@Test
+	public void testUpdateWithStringAutoDetectsEncoding() throws Exception {
+
+		Patient p1 = new Patient();
+		p1.addIdentifier("foo:bar", "12345");
+		p1.addName().addFamily("Smith").addGiven("John");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int count = 0;
+		client.update().resource(myCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("value=\"John\""));
+		count++;
+
+		client.update().resource(myCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
+		count++;
+
+		/*
+		 * e.g. Now try with reversed encoding (provide a string that's in JSON and ask the client to use XML)
+		 */
+		
+		client.update().resource(myCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.JSON.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
+		count++;
+
+		client.update().resource(myCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(extractBody(capt, count), containsString("value=\"John\""));
+		count++;
 	}
 
 	@Test
@@ -503,8 +613,7 @@ public class GenericClientTest {
 				capt.getValue().getURI().toString());
 
 	}
-	
-	
+
 	@Test
 	public void testSearchWithAbsoluteUrl() throws Exception {
 
@@ -518,7 +627,9 @@ public class GenericClientTest {
 
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Bundle response = client.search(new UriDt("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json"));
+		Bundle response = client
+				.search(new UriDt(
+						"http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json"));
 
 		assertEquals(
 				"http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json",
@@ -527,7 +638,6 @@ public class GenericClientTest {
 		assertEquals(1, response.size());
 	}
 
-	
 	@Test
 	public void testSearchWithAbsoluteUrlAndType() throws Exception {
 
@@ -541,7 +651,10 @@ public class GenericClientTest {
 
 		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		Bundle response = client.search(Patient.class, new UriDt("http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json"));
+		Bundle response = client
+				.search(Patient.class,
+						new UriDt(
+								"http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json"));
 
 		assertEquals(
 				"http://example.com/fhir/Patient?birthdate=%3C%3D2012-01-22&birthdate=%3E2011-01-01&_include=Patient.managingOrganization&_sort%3Aasc=birthdate&_sort%3Adesc=name&_count=123&_format=json",
@@ -549,7 +662,7 @@ public class GenericClientTest {
 
 		assertEquals(1, response.size());
 	}
-	
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByNumberExact() throws Exception {
@@ -975,19 +1088,26 @@ public class GenericClientTest {
 		p1.setId("44");
 		client.update().resource(p1).execute();
 
+		int count = 0;
+		
 		assertEquals(1, capt.getAllValues().size());
-
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		count++;
+		
 		MethodOutcome outcome = client.update().resource(p1).execute();
 		assertEquals("44", outcome.getId().getIdPart());
 		assertEquals("22", outcome.getId().getVersionIdPart());
 
 		assertEquals(2, capt.getAllValues().size());
-
+		
 		assertEquals("http://example.com/fhir/Patient/44", capt.getValue().getURI().toString());
 		assertEquals("PUT", capt.getValue().getMethod());
 		Header catH = capt.getValue().getFirstHeader("Category");
 		assertNotNull(Arrays.asList(capt.getValue().getAllHeaders()).toString(), catH);
 		assertEquals("urn:happytag; label=\"This is a happy resource\"; scheme=\"http://hl7.org/fhir/tag\"", catH.getValue());
+		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType(), capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 		/*
 		 * Try fluent options

@@ -47,6 +47,7 @@ public class DateDt extends BaseDateTimeDt {
 	@SimpleSetter(suffix="WithDayPrecision")
 	public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
 		setValue(theDate);
+		setPrecision(DEFAULT_PRECISION);
 	}
 
 	/**

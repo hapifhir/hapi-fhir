@@ -312,14 +312,28 @@ public abstract class BaseFhirDao implements IDao {
 				continue;
 			}
 
-			String nextPath = nextSpDef.getPath();
+			String nextPathsUnsplit = nextSpDef.getPath();
+			if (isBlank(nextPathsUnsplit)) {
+				continue;
+			}			
 
 			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
+			if (nextPathsUnsplit.endsWith("[x]")) {
 				multiType = true;
 			}
-
-			List<Object> values = t.getValues(theResource, nextPath);
+			
+			List<Object> values = new ArrayList<Object>();
+			
+			String[] nextPathsSplit = nextPathsUnsplit.split("\\|");
+			for (String nextPath : nextPathsSplit) {
+				String nextPathTrimmed = nextPath.trim();
+				try {
+					values.addAll(t.getValues(theResource, nextPathTrimmed));
+				} catch (Exception e) {
+					ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", nextPathTrimmed, def.getName(), e.toString());
+				}
+			}
+			
 			for (Object nextObject : values) {
 				if (nextObject == null) {
 					continue;
@@ -338,7 +352,7 @@ public abstract class BaseFhirDao implements IDao {
 
 					String typeString = nextValue.getReference().getResourceType();
 					if (isBlank(typeString)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPath + "] - Does not contain resource type - " + nextValue.getReference().getValue());
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
@@ -355,14 +369,14 @@ public abstract class BaseFhirDao implements IDao {
 						valueOf = translateForcedIdToPid(nextValue.getReference());
 					} catch (Exception e) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath + " (this is an invalid ID, must be numeric on this server)");
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit + " (this is an invalid ID, must be numeric on this server)");
 					}
 					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath);
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
-					nextEntity = new ResourceLink(nextPath, theEntity, target);
+					nextEntity = new ResourceLink(nextPathsUnsplit, theEntity, target);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
@@ -392,6 +406,9 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
@@ -447,6 +464,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -526,6 +547,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -572,12 +597,13 @@ public abstract class BaseFhirDao implements IDao {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
 				continue;
 			}
-			if (nextSpDef.getPath().isEmpty()) {
-				continue; // TODO: implement phoenetic, and any others that have
-							// no path
-			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				// TODO: implement phoenetic, and any others that have no path
+				continue;
+			}
+			
 			List<Object> values = t.getValues(theResource, nextPath);
 			for (Object nextObject : values) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
@@ -663,9 +689,9 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			String nextPath = nextSpDef.getPath();
-			if (nextPath.isEmpty()) {
+			if (isBlank(nextPath)) {
 				continue;
-			}
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {

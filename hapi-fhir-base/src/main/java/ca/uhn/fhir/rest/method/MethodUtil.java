@@ -115,7 +115,8 @@ public class MethodUtil {
 		}
 
 		addTagsToPostOrPut(theResource, retVal);
-
+//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+		
 		return retVal;
 	}
 
@@ -260,7 +261,21 @@ public class MethodUtil {
 		}
 		addTagsToPostOrPut(theResource, retVal);
 
+//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+		
 		return retVal;
+	}
+
+	public static EncodingEnum detectEncoding(String theBody) {
+		for (int i = 0; i < theBody.length(); i++) {
+			switch (theBody.charAt(i)) {
+			case '<':
+				return EncodingEnum.XML;
+			case '{':
+				return EncodingEnum.JSON;
+			}
+		}
+		return EncodingEnum.XML;
 	}
 
 	public static HttpGetClientInvocation createConformanceInvocation() {
