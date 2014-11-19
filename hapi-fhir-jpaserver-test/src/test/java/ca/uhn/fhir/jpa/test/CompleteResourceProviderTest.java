@@ -233,7 +233,7 @@ public class CompleteResourceProviderTest {
 	@Test
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
-		
+
 		Patient p1 = new Patient();
 		p1.addIdentifier("urn:system", "testUpdateRejectsInvalidTypes");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
