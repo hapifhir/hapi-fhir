@@ -1,18 +1,19 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.parser.DataFormatException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class BaseDateTimeDtTest {
 	private SimpleDateFormat myDateInstantParser;
@@ -39,7 +40,7 @@ public class BaseDateTimeDtTest {
 		Date instant = myDateInstantParser.parse("2001-02-03 13:01:02.555");
 		for (FastDateFormat next : BaseDateTimeDt.getFormatters()) {
 			
-			GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("EST"));
+			Calendar cal = Calendar.getInstance();
 			cal.setTime(instant);
 			String value = next.format(cal);
 			ourLog.info("String: {}", value);
