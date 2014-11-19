@@ -102,6 +102,30 @@
 				invalid dates, e.g. "2001-15-01". Thanks to Joe Athman for reporting and 
 				helping to come up with a fix!
 			</action>
+			<action type="add">
+				When using Generic Client, if performing a
+				<![CDATA[create]]> or <![CDATA[update]]> operation using a String as the resource body,
+				the client will auto-detect the FHIR encoding style and send an appropriate Content-Type header.
+			</action>
+			<action type="fix" issue="52">
+				JPA module (and public HAPI-FHIR test server) were unable to process resource types
+				where at least one search parameter has no path specified. These now correctly save
+				(although the server does not yet process these params, and it should). Thanks to
+				GitHub user shvoidlee for reporting and help with analysis!
+			</action>
+			<action type="fix">
+				Generic/Fluent Client "create" and "update" method requests were not setting a content type header
+			</action>
+			<action type="add" issue="53" dev="petromykhailysyn">
+				DateDt left precision value as null in the constructor
+				<![CDATA[DateDt(Date)]]>.
+			</action>
+			<action type="fix">
+				RESTful server now doesn't overwrite resource IDs if they are absolute. In other words, if
+				a server's Resource Provider returns a resource with ID "Patient/123" it will be translated to
+				"[base url]/Patient/123" but if the RP returns ID "http://foo/Patient/123" the ID will be
+				returned exactly as is. Thanks to Bill de Beaubien for the suggestion!
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

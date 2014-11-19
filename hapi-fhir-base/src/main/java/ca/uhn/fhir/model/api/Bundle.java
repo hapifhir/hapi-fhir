@@ -117,56 +117,63 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			entry.getTitle().setValue(def.getName() + " " + StringUtils.defaultString(theResource.getId().getValue(), "(no ID)"));
 		}
 
-		if (theResource.getId() != null && StringUtils.isNotBlank(theResource.getId().getValue())) {
+		if (theResource.getId() != null) {
+			if (theResource.getId().isAbsolute()) {
+				
+				entry.getLinkSelf().setValue(theResource.getId().getValue());
+				entry.getId().setValue(theResource.getId().toVersionless().getValue());
+				
+			} else if (StringUtils.isNotBlank(theResource.getId().getValue())) {
 
-			StringBuilder b = new StringBuilder();
-			b.append(theServerBase);
-			if (b.length() > 0 && b.charAt(b.length() - 1) != '/') {
+				StringBuilder b = new StringBuilder();
+				b.append(theServerBase);
+				if (b.length() > 0 && b.charAt(b.length() - 1) != '/') {
+					b.append('/');
+				}
+				b.append(def.getName());
 				b.append('/');
-			}
-			b.append(def.getName());
-			b.append('/');
-			String resId = theResource.getId().getIdPart();
-			b.append(resId);
+				String resId = theResource.getId().getIdPart();
+				b.append(resId);
 
-			entry.getId().setValue(b.toString());
+				entry.getId().setValue(b.toString());
 
-			if (isNotBlank(theResource.getId().getVersionIdPart())) {
-				b.append('/');
-				b.append(Constants.PARAM_HISTORY);
-				b.append('/');
-				b.append(theResource.getId().getVersionIdPart());
-			} else {
-				IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(theResource);
-				if (versionId != null) {
+				if (isNotBlank(theResource.getId().getVersionIdPart())) {
 					b.append('/');
 					b.append(Constants.PARAM_HISTORY);
 					b.append('/');
-					b.append(versionId.getValue());
+					b.append(theResource.getId().getVersionIdPart());
+				} else {
+					IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(theResource);
+					if (versionId != null) {
+						b.append('/');
+						b.append(Constants.PARAM_HISTORY);
+						b.append('/');
+						b.append(versionId.getValue());
+					}
 				}
-			}
 
-			String qualifiedId = b.toString();
-			entry.getLinkSelf().setValue(qualifiedId);
+				String qualifiedId = b.toString();
+				entry.getLinkSelf().setValue(qualifiedId);
 
-			// String resourceType = theContext.getResourceDefinition(theResource).getName();
+				// String resourceType = theContext.getResourceDefinition(theResource).getName();
 
-			String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
-			if (isNotBlank(linkSearch)) {
-				if (!UrlUtil.isAbsolute(linkSearch)) {
-					linkSearch = (theServerBase + "/" + linkSearch);
+				String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
+				if (isNotBlank(linkSearch)) {
+					if (!UrlUtil.isAbsolute(linkSearch)) {
+						linkSearch = (theServerBase + "/" + linkSearch);
+					}
+					entry.getLinkSearch().setValue(linkSearch);
 				}
-				entry.getLinkSearch().setValue(linkSearch);
-			}
 
-			String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
-			if (isNotBlank(linkAlternate)) {
-				if (!UrlUtil.isAbsolute(linkAlternate)) {
-					linkSearch = (theServerBase + "/" + linkAlternate);
+				String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
+				if (isNotBlank(linkAlternate)) {
+					if (!UrlUtil.isAbsolute(linkAlternate)) {
+						linkSearch = (theServerBase + "/" + linkAlternate);
+					}
+					entry.getLinkAlternate().setValue(linkSearch);
 				}
-				entry.getLinkAlternate().setValue(linkSearch);
-			}
 
+			}
 		}
 
 		InstantDt published = ResourceMetadataKeyEnum.PUBLISHED.get(theResource);

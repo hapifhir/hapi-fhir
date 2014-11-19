@@ -160,4 +160,15 @@ public class InstantDt extends BaseDateTimeDt {
 		return new InstantDt(new Date(), TemporalPrecisionEnum.MILLI);
 	}
 
+	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
+	}
+
+
 }

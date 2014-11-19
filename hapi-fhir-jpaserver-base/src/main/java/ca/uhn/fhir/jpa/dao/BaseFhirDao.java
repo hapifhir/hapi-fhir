@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,6 +80,7 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -306,21 +308,22 @@ public abstract class BaseFhirDao implements IDao {
 		ArrayList<ResourceLink> retVal = new ArrayList<ResourceLink>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.REFERENCE) {
 				continue;
 			}
 
-			String nextPath = nextSpDef.getPath();
+			String nextPathsUnsplit = nextSpDef.getPath();
+			if (isBlank(nextPathsUnsplit)) {
+				continue;
+			}			
 
 			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
+			if (nextPathsUnsplit.endsWith("[x]")) {
 				multiType = true;
 			}
-
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
+			
+			for (Object nextObject : extractValues(nextPathsUnsplit, theResource)) {
 				if (nextObject == null) {
 					continue;
 				}
@@ -338,7 +341,7 @@ public abstract class BaseFhirDao implements IDao {
 
 					String typeString = nextValue.getReference().getResourceType();
 					if (isBlank(typeString)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPath + "] - Does not contain resource type - " + nextValue.getReference().getValue());
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
@@ -355,14 +358,14 @@ public abstract class BaseFhirDao implements IDao {
 						valueOf = translateForcedIdToPid(nextValue.getReference());
 					} catch (Exception e) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath + " (this is an invalid ID, must be numeric on this server)");
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit + " (this is an invalid ID, must be numeric on this server)");
 					}
 					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPath);
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
-					nextEntity = new ResourceLink(nextPath, theEntity, target);
+					nextEntity = new ResourceLink(nextPathsUnsplit, theEntity, target);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
@@ -381,25 +384,42 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
+	private List<Object> extractValues(String thePaths, IResource theResource) {
+		List<Object> values = new ArrayList<Object>();
+		String[] nextPathsSplit = thePaths.split("\\|");
+		FhirTerser t = getContext().newTerser();
+		for (String nextPath : nextPathsSplit) {
+			String nextPathTrimmed = nextPath.trim();
+			try {
+				values.addAll(t.getValues(theResource, nextPathTrimmed));
+			} catch (Exception e) {
+				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", nextPathTrimmed, def.getName(), e.toString());
+			}
+		}
+		return values;
+	}
+
 	protected List<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamDate> retVal = new ArrayList<ResourceIndexedSearchParamDate>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.DATE) {
 				continue;
 			}
 
 			String nextPath = nextSpDef.getPath();
+			if (isBlank(nextPath)) {
+				continue;
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
 				multiType = true;
 			}
 
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
+			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null) {
 					continue;
 				}
@@ -440,15 +460,17 @@ public abstract class BaseFhirDao implements IDao {
 		ArrayList<ResourceIndexedSearchParamNumber> retVal = new ArrayList<ResourceIndexedSearchParamNumber>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.NUMBER) {
 				continue;
 			}
 
 			String nextPath = nextSpDef.getPath();
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
+			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
@@ -500,6 +522,15 @@ public abstract class BaseFhirDao implements IDao {
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue().getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
+				} else if (nextObject instanceof IntegerDt) {
+					IntegerDt nextValue = (IntegerDt) nextObject;
+					if (nextValue.getValue()==null) {
+						continue;
+					}
+
+					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, new BigDecimal(nextValue.getValue()));
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
@@ -519,15 +550,17 @@ public abstract class BaseFhirDao implements IDao {
 		ArrayList<ResourceIndexedSearchParamQuantity> retVal = new ArrayList<ResourceIndexedSearchParamQuantity>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.QUANTITY) {
 				continue;
 			}
 
 			String nextPath = nextSpDef.getPath();
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
+			if (isBlank(nextPath)) {
+				continue;
+			}
+			
+			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
@@ -567,19 +600,18 @@ public abstract class BaseFhirDao implements IDao {
 		ArrayList<ResourceIndexedSearchParamString> retVal = new ArrayList<ResourceIndexedSearchParamString>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
 				continue;
 			}
-			if (nextSpDef.getPath().isEmpty()) {
-				continue; // TODO: implement phoenetic, and any others that have
-							// no path
-			}
 
 			String nextPath = nextSpDef.getPath();
-			List<Object> values = t.getValues(theResource, nextPath);
-			for (Object nextObject : values) {
+			if (isBlank(nextPath)) {
+				// TODO: implement phoenetic, and any others that have no path
+				continue;
+			}
+			
+			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
@@ -656,26 +688,25 @@ public abstract class BaseFhirDao implements IDao {
 		ArrayList<BaseResourceIndexedSearchParam> retVal = new ArrayList<BaseResourceIndexedSearchParam>();
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
-		FhirTerser t = getContext().newTerser();
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.TOKEN) {
 				continue;
 			}
 
 			String nextPath = nextSpDef.getPath();
-			if (nextPath.isEmpty()) {
+			if (isBlank(nextPath)) {
 				continue;
-			}
+			}			
 
 			boolean multiType = false;
 			if (nextPath.endsWith("[x]")) {
 				multiType = true;
 			}
 
-			List<Object> values = t.getValues(theResource, nextPath);
 			List<String> systems = new ArrayList<String>();
 			List<String> codes = new ArrayList<String>();
-			for (Object nextObject : values) {
+
+			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject instanceof IdentifierDt) {
 					IdentifierDt nextValue = (IdentifierDt) nextObject;
 					if (nextValue.isEmpty()) {
