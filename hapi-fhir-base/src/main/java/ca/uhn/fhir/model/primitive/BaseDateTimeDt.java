@@ -138,13 +138,21 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 
 	/**
-	 * Gets the precision for this datatype using field values from {@link Calendar}, such as {@link Calendar#MONTH}. Default is {@link Calendar#DAY_OF_MONTH}
+	 * Gets the precision for this datatype (using the default for the given type if not set)
 	 * 
-	 * @see #setPrecision(int)
+	 * @see #setPrecision(TemporalPrecisionEnum)
 	 */
 	public TemporalPrecisionEnum getPrecision() {
+		if (myPrecision == null) {
+			return getDefaultPrecisionForDatatype();
+		}
 		return myPrecision;
 	}
+
+	/**
+	 * Returns the default precision for the given datatype
+	 */
+	protected abstract TemporalPrecisionEnum getDefaultPrecisionForDatatype();
 
 	/**
 	 * Returns the TimeZone associated with this dateTime's value. May return
@@ -337,9 +345,22 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	@Override
-	public void setValue(Date theValue) throws DataFormatException {
+	public void setValue(Date theValue) {
 		clearTimeZone();
 		super.setValue(theValue);
+	}
+
+	/**
+	 * Sets the value of this date/time using the specified level of precision
+	 * 
+	 * @param theValue The date value
+	 * @param thePrecision The precision
+	 * @throws DataFormatException 
+	 */
+	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {
+		clearTimeZone();
+		super.setValue(theValue);
+		myPrecision = thePrecision;
 	}
 
 	@Override

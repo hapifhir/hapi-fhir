@@ -76,4 +76,14 @@ public class DateDt extends BaseDateTimeDt {
 		}
 	}
 
+	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
+	}
+
 }

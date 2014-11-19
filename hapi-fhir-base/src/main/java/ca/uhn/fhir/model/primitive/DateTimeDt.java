@@ -98,4 +98,15 @@ public class DateTimeDt extends BaseDateTimeDt {
 		return new DateTimeDt(new Date(), TemporalPrecisionEnum.SECOND);
 	}
 
+	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
+	}
+
+
 }
