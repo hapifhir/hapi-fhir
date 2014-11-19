@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.test;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Date;
 
@@ -68,7 +65,6 @@ public class CompleteResourceProviderTest {
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
-	private static IFhirResourceDao<ImagingStudy> ourImagingStudyDao;
 	private static Server ourServer;
 
 	// private static JpaConformanceProvider ourConfProvider;
@@ -91,6 +87,41 @@ public class CompleteResourceProviderTest {
 		
 	}
 
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDocumentManifestResources() throws Exception {
+		IGenericClient client = ourClient;
+		
+		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
+		
+		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentmanifest.json"));
+		client.create().resource(resBody).execute();
+		
+		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
+		
+		assertEquals(1, newSize - initialSize);
+		
+	}
+
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDocumentReferenceResources() throws Exception {
+		IGenericClient client = ourClient;
+		
+		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
+		
+		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentreference.json"));
+		client.create().resource(resBody).execute();
+		
+		int newSize = client.search().forResource(DocumentReference.class).execute().size();
+		
+		assertEquals(1, newSize - initialSize);
+		
+	}
 	
 	/**
 	 * See issue #52
@@ -206,7 +237,7 @@ public class CompleteResourceProviderTest {
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IdDt newId = ourClient.create(p1).getId();
+		IdDt newId = ourClient.create().resource(p1).execute().getId();
 
 		Patient actual = ourClient.read(Patient.class, newId);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
@@ -238,7 +269,7 @@ public class CompleteResourceProviderTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 
-		IdDt newId = ourClient.create(p1).getId();
+		IdDt newId = ourClient.create().resource(p1).execute().getId();
 
 		Patient actual = ourClient.read(Patient.class, newId);
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
@@ -252,12 +283,12 @@ public class CompleteResourceProviderTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
-		IdDt p1Id = ourClient.create(p1).getId();
+		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
 		p2.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven02");
-		ourClient.create(p2).getId();
+		ourClient.create().resource(p2).execute().getId();
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
@@ -270,7 +301,7 @@ public class CompleteResourceProviderTest {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
-		IdDt p1Id = ourClient.create(p1).getId();
+		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
 				.execute();
@@ -286,19 +317,19 @@ public class CompleteResourceProviderTest {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IdDt o1id = ourClient.create(o1).getId();
+		IdDt o1id = ourClient.create().resource(o1).execute().getId();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new ResourceReferenceDt(o1id));
-		IdDt p1Id = ourClient.create(p1).getId();
+		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
 				.where(Patient.PROVIDER.hasId(o1id.getIdPart()))
-				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
+				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
@@ -307,7 +338,7 @@ public class CompleteResourceProviderTest {
 		actual = ourClient.search()
 				.forResource(Patient.class)
 				.where(Patient.PROVIDER.hasId(o1id.getValue()))
-				.encodedJson().andLogRequestAndResponse(true).prettyPrint().execute();
+				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
@@ -324,7 +355,7 @@ public class CompleteResourceProviderTest {
 		p1.setManagingOrganization(new ResourceReferenceDt("Organization/1323123232349875324987529835"));
 
 		try {
-			ourClient.create(p1).getId();
+			ourClient.create().resource(p1).execute().getId();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Organization/1323123232349875324987529835"));

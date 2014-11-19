@@ -1,0 +1,140 @@
+{
+  "resourceType" : "DocumentReference",
+  "text" : {
+    "status" : "generated",
+    "div" : "<div xmlns=\"http://www.w3.org/1999/xhtml\">&#xA;      <p>&#xA;        <b>Generated Narrative</b>&#xA;      </p>&#xA;      <p>&#xA;        <b>masterIdentifier</b>: urn:oid:1.3.6.1.4.1.21367.2005.3.7&#xA;      </p>&#xA;      <p>&#xA;        <b>subject</b>: &#xA;        <a href=\"Patient/xcda\">MRN = 12345 (usual); Henry Levin ; Male; birthDate: 24-Sep 1932; active</a>&#xA;      </p>&#xA;      <p>&#xA;        <b>type</b>: &#xA;        <span title=\"Codes: {http://loinc.org 34108-1}\">Outpatient Note</span>&#xA;      </p>&#xA;      <p>&#xA;        <b>author</b>: Sherry Dopplemeyer ; Primary Surgon; Orthopedic, Gerald Smitty ; Attending; Orthopedic&#xA;      </p>&#xA;      <p>&#xA;        <b>created</b>: 24-Dec 2005 9:35&#xA;      </p>&#xA;      <p>&#xA;        <b>indexed</b>: 24-Dec 2005 9:43&#xA;      </p>&#xA;      <p>&#xA;        <b>status</b>: current&#xA;      </p>&#xA;      <p>&#xA;        <b>description</b>: Physical&#xA;      </p>&#xA;      <p>&#xA;        <b>confidentiality</b>: &#xA;        <span title=\"Codes: {http://ihe.net/xds/connectathon/confidentialityCodes 1.3.6.1.4.1.21367.2006.7.101}\">Clinical-Staff</span>&#xA;      </p>&#xA;      <p>&#xA;        <b>primaryLanguage</b>: en-US&#xA;      </p>&#xA;      <p>&#xA;        <b>mimeType</b>: application/hl7-v3+xml&#xA;      </p>&#xA;      <p>&#xA;        <b>size</b>: 3654&#xA;      </p>&#xA;      <p>&#xA;        <b>hash</b>: da39a3ee5e6b4b0d3255bfef95601890afd80709&#xA;      </p>&#xA;      <p>&#xA;        <b>location</b>: &#xA;        <a href=\"http://example.org/xds/mhd/Binary/@07a6483f-732b-461e-86b6-edb665c45510\">http://example.org/xds/mhd/Binary/@07a6483f-732b-461e-86b6-edb665c45510</a>&#xA;      </p>&#xA;      <h3>Contexts</h3>&#xA;      <table class=\"grid\">&#xA;        <tr>&#xA;          <td>&#xA;            <b>Event</b>&#xA;          </td>&#xA;          <td>&#xA;            <b>Period</b>&#xA;          </td>&#xA;          <td>&#xA;            <b>FacilityType</b>&#xA;          </td>&#xA;        </tr>&#xA;        <tr>&#xA;          <td>&#xA;            <span title=\"Codes: {http://ihe.net/xds/connectathon/eventCodes T-D8200}\">Arm</span>&#xA;          </td>&#xA;          <td>23-Dec 2004 8:0 --&gt; 23-Dec 2004 8:1</td>&#xA;          <td>&#xA;            <span title=\"Codes: {http://www.ihe.net/xds/connectathon/healthcareFacilityTypeCodes Outpatient}\">Outpatient</span>&#xA;          </td>&#xA;        </tr>&#xA;      </table>&#xA;    </div>"
+  },
+  "contained" : [
+    {
+      "resourceType" : "Practitioner",
+      "id" : "a1",
+      "name" : {
+        "family" : [
+          "Dopplemeyer"
+        ],
+        "given" : [
+          "Sherry"
+        ]
+      },
+      "telecom" : [
+        {
+          "system" : "email",
+          "value" : "john.doe@healthcare.example.org"
+        }
+      ],
+      "organization" : {
+        "display" : "Cleveland Clinic"
+      },
+      "role" : [
+        {
+          "text" : "Primary Surgon"
+        }
+      ],
+      "specialty" : [
+        {
+          "text" : "Orthopedic"
+        }
+      ]
+    },
+    {
+      "resourceType" : "Practitioner",
+      "id" : "a2",
+      "name" : {
+        "family" : [
+          "Smitty"
+        ],
+        "given" : [
+          "Gerald"
+        ]
+      },
+      "telecom" : [
+        {
+          "system" : "email",
+          "value" : "john.doe@healthcare.example.org"
+        }
+      ],
+      "organization" : {
+        "display" : "Cleveland Clinic"
+      },
+      "role" : [
+        {
+          "text" : "Attending"
+        }
+      ],
+      "specialty" : [
+        {
+          "text" : "Orthopedic"
+        }
+      ]
+    }
+  ],
+  "masterIdentifier" : {
+    "system" : "urn:ietf:rfc:3986",
+    "value" : "urn:oid:1.3.6.1.4.1.21367.2005.3.7"
+  },
+  "subject" : {
+  },
+  "type" : {
+    "coding" : [
+      {
+        "system" : "http://loinc.org",
+        "code" : "34108-1",
+        "display" : "Outpatient Note"
+      }
+    ]
+  },
+  "author" : [
+    {
+      "reference" : "#a1"
+    },
+    {
+      "reference" : "#a2"
+    }
+  ],
+  "created" : "2005-12-24T09:35:00+11:00",
+  "indexed" : "2005-12-24T09:43:41+11:00",
+  "status" : "current",
+  "description" : "Physical",
+  "confidentiality" : [
+    {
+      "coding" : [
+        {
+          "system" : "http://ihe.net/xds/connectathon/confidentialityCodes",
+          "code" : "1.3.6.1.4.1.21367.2006.7.101",
+          "display" : "Clinical-Staff"
+        }
+      ]
+    }
+  ],
+  "primaryLanguage" : "en-US",
+  "mimeType" : "application/hl7-v3+xml",
+  "size" : 3654,
+  "hash" : "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+  "location" : "http://example.org/xds/mhd/Binary/@07a6483f-732b-461e-86b6-edb665c45510",
+  "context" : {
+    "event" : [
+      {
+        "coding" : [
+          {
+            "system" : "http://ihe.net/xds/connectathon/eventCodes",
+            "code" : "T-D8200",
+            "display" : "Arm"
+          }
+        ]
+      }
+    ],
+    "period" : {
+      "start" : "2004-12-23T08:00:00",
+      "end" : "2004-12-23T08:01:00"
+    },
+    "facilityType" : {
+      "coding" : [
+        {
+          "system" : "http://www.ihe.net/xds/connectathon/healthcareFacilityTypeCodes",
+          "code" : "Outpatient",
+          "display" : "Outpatient"
+        }
+      ]
+    }
+  }
+}
