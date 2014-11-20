@@ -8,9 +8,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -120,8 +118,8 @@ public class GenericClientExample {
          response = client.search()
                .forResource(Patient.class)
                .where(Patient.ADDRESS.matches().values("Toronto"))
-               .where(Patient.ADDRESS.matches().values("Ontario"))
-               .where(Patient.ADDRESS.matches().values("Canada"))
+               .and(Patient.ADDRESS.matches().values("Ontario"))
+               .and(Patient.ADDRESS.matches().values("Canada"))
                .execute();
          // END SNIPPET: searchAnd
 

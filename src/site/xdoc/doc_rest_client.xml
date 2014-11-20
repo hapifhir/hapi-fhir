@@ -111,7 +111,7 @@
 					This leads to a URL resembling <code>?address=Toronto&amp;address=Ontario&amp;address=Canada</code> 
 				</p>
 				<macro name="snippet">
-					<param name="id" value="searchOr" />
+					<param name="id" value="searchAnd" />
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>

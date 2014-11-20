@@ -85,7 +85,11 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 
 			if (entity == null) {
 				entity = toEntity(nextResource);
-				createForcedIdIfNeeded(entity, nextId);
+				if (!nextId.isEmpty() && nextId.getIdPart().startsWith("cid:")) {
+					ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
+				} else {
+					createForcedIdIfNeeded(entity, nextId);
+				}
 				myEntityManager.persist(entity);
 				if (entity.getForcedId() != null) {
 					myEntityManager.persist(entity.getForcedId());

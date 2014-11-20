@@ -1113,7 +1113,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				}
 
 				if (isBlank(ref.getChain())) {
-					Long targetPid = Long.valueOf(resourceId);
+					Long targetPid = translateForcedIdToPid(new IdDt(resourceId));
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
 

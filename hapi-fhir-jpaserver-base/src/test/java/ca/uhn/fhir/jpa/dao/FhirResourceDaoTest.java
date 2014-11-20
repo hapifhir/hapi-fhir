@@ -630,7 +630,7 @@ public class FhirResourceDaoTest {
 			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedId");
 			patient.setId("Patient/testHistoryByForcedId");
 			idv1 = ourPatientDao.create(patient).getId();
-			
+
 			patient.addName().addFamily("Tester").addGiven("testHistoryByForcedIdName2");
 			idv2 = ourPatientDao.update(patient, idv1.toUnqualifiedVersionless()).getId();
 		}
@@ -642,8 +642,6 @@ public class FhirResourceDaoTest {
 		assertEquals("Patient/testHistoryByForcedId/_history/1", patients.get(1).getId().toUnqualified().getValue());
 	}
 
-	
-	
 	@Test
 	public void testSearchByIdParam() {
 		IdDt id1;
@@ -857,6 +855,57 @@ public class FhirResourceDaoTest {
 
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChainXX")));
 		assertEquals(2, result.size());
+
+	}
+
+	@Test
+	public void testSearchResourceLinkWithTextLogicalId() {
+		Patient patient = new Patient();
+		patient.setId("testSearchResourceLinkWithTextLogicalId01");
+		patient.addIdentifier("urn:system", "testSearchResourceLinkWithTextLogicalIdXX");
+		patient.addIdentifier("urn:system", "testSearchResourceLinkWithTextLogicalId01");
+		IdDt patientId01 = ourPatientDao.create(patient).getId();
+
+		Patient patient02 = new Patient();
+		patient02.setId("testSearchResourceLinkWithTextLogicalId02");
+		patient02.addIdentifier("urn:system", "testSearchResourceLinkWithTextLogicalIdXX");
+		patient02.addIdentifier("urn:system", "testSearchResourceLinkWithTextLogicalId02");
+		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+
+		Observation obs01 = new Observation();
+		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setSubject(new ResourceReferenceDt(patientId01));
+		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+
+		Observation obs02 = new Observation();
+		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setSubject(new ResourceReferenceDt(patientId02));
+		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+
+		// Create another type, that shouldn't be returned
+		DiagnosticReport dr01 = new DiagnosticReport();
+		dr01.setSubject(new ResourceReferenceDt(patientId01));
+		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+
+		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
+
+		List<Observation> result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId01")));
+		assertEquals(1, result.size());
+		assertEquals(obsId01.getIdPart(), result.get(0).getId().getIdPart());
+
+		try {
+			ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
+		/*
+		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list for numeric IDs that don't exist
+		 */
+
+		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999999")));
+		assertEquals(0, result.size());
 
 	}
 
@@ -1222,9 +1271,9 @@ public class FhirResourceDaoTest {
 
 		ourPatientDao.addTag(patientId, "http://foo", "Cat", "Kittens");
 		ourPatientDao.addTag(patientId, "http://foo", "Cow", "Calves");
-		
-		 retrieved = ourPatientDao.read(patientId);
-		 published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+
+		retrieved = ourPatientDao.read(patientId);
+		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
 		assertEquals(3, published.size());
 		assertEquals("Dog", published.get(0).getTerm());
 		assertEquals("Puppies", published.get(0).getLabel());
@@ -1235,8 +1284,7 @@ public class FhirResourceDaoTest {
 		assertEquals("Cow", published.get(2).getTerm());
 		assertEquals("Calves", published.get(2).getLabel());
 		assertEquals("http://foo", published.get(2).getScheme());
-		
-		
+
 	}
 
 	@Test
@@ -1412,14 +1460,14 @@ public class FhirResourceDaoTest {
 		p2.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId02");
 		IdDt p2id = ourPatientDao.create(p2).getId();
 		long p1longId = p2id.getIdPartAsLong() - 1;
-		
+
 		try {
 			ourPatientDao.read(new IdDt("Patient/" + p1longId));
 			fail();
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
-		
+
 		try {
 			ourPatientDao.update(p1, new IdDt("Patient/" + p1longId));
 			fail();
@@ -1428,7 +1476,6 @@ public class FhirResourceDaoTest {
 		}
 
 	}
-
 
 	@Test
 	public void testReadForcedIdVersionHistory() throws InterruptedException {
@@ -1441,18 +1488,17 @@ public class FhirResourceDaoTest {
 		p1.addIdentifier("urn:system", "testReadVorcedIdVersionHistory02");
 		IdDt p1idv2 = ourPatientDao.update(p1, p1id).getId();
 		assertEquals("testReadVorcedIdVersionHistory", p1idv2.getIdPart());
-		
-		assertNotEquals(p1id.getValue(),  p1idv2.getValue());
+
+		assertNotEquals(p1id.getValue(), p1idv2.getValue());
 
 		Patient v1 = ourPatientDao.read(p1id);
 		assertEquals(1, v1.getIdentifier().size());
-		
+
 		Patient v2 = ourPatientDao.read(p1idv2);
 		assertEquals(2, v2.getIdentifier().size());
 
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
 		return (List<T>) theSearch.getResources(0, theSearch.size());
