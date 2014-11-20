@@ -30,13 +30,16 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
  */
 public class ValidationResult {
     private BaseOperationOutcome myOperationOutcome;
+    private boolean isSuccessful;
 
-    private ValidationResult(BaseOperationOutcome myOperationOutcome) {
+    private ValidationResult(BaseOperationOutcome myOperationOutcome, boolean isSuccessful) {
         this.myOperationOutcome = myOperationOutcome;
+        this.isSuccessful = isSuccessful;
     }
 
     public static ValidationResult valueOf(BaseOperationOutcome myOperationOutcome) {
-        return new ValidationResult(myOperationOutcome);
+        boolean noIssues = myOperationOutcome == null || myOperationOutcome.getIssue().isEmpty();
+        return new ValidationResult(myOperationOutcome, noIssues);
     }
 
     public BaseOperationOutcome getOperationOutcome() {
@@ -47,6 +50,7 @@ public class ValidationResult {
     public String toString() {
         return "ValidationResult{" +
                 "myOperationOutcome=" + myOperationOutcome +
+                ", isSuccessful=" + isSuccessful +
                 ", description='" + toDescription() + '\'' +
                 '}';
     }
@@ -67,6 +71,6 @@ public class ValidationResult {
      * @return true if the validation was successful
      */
     public boolean isSuccessful() {
-        return myOperationOutcome == null || myOperationOutcome.getIssue().isEmpty();
+        return isSuccessful;
     }
 }
