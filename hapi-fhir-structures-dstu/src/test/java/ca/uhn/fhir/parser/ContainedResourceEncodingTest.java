@@ -12,13 +12,20 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Composition.Section;
 import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
@@ -26,6 +33,7 @@ import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.RestfulServer;
 
 /**
  * Initially contributed by Alexander Kley for bug #29
@@ -154,6 +162,85 @@ public class ContainedResourceEncodingTest {
 		Assert.assertEquals(expectedCompXml.length(), actualCompXml.length());
 		Assert.assertArrayEquals(expectedCompXml.getBytes(), actualCompXml.getBytes());
 
+	}
+	
+	
+	@Test
+	public void testBundleWithContained() {	
+		
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(new IdDt("DiagnosticReport","123"));
+		
+		Observation observation = new Observation();
+		 
+        CodeableConceptDt obsName = new CodeableConceptDt();
+        obsName.setText("name");
+        observation.setName(obsName);
+        
+        ResourceReferenceDt result = dr.addResult();
+        result.setResource(observation);
+        
+        ArrayList<ResourceReferenceDt> performers = new ArrayList<ResourceReferenceDt>();
+        ResourceReferenceDt performer = new ResourceReferenceDt();
+        
+        Practitioner p = new Practitioner();
+		p.setId(new IdDt(UUID.randomUUID().toString()));
+		p.addIdentifier().setSystem("DoctorID").setValue("4711");
+		p.addRole(PractitionerRoleEnum.DOCTOR);
+		p.setName(new HumanNameDt().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
+        
+        performer.setResource(p);
+        performers.add(performer);
+        observation.setPerformer(performers);
+        
+        
+        List<IResource> list = new ArrayList<IResource>();
+		list.add(dr);
+		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+        
+        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
+        String xml = parser.encodeBundleToString(bundle);
+        Assert.assertTrue(xml.contains("Mueller"));
+        
+	}
+	
+	@Test
+	public void testBundleWithContainedWithNoIdDt() {	
+		
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(new IdDt("DiagnosticReport","123"));
+		
+		Observation observation = new Observation();
+		 
+        CodeableConceptDt obsName = new CodeableConceptDt();
+        obsName.setText("name");
+        observation.setName(obsName);
+        
+        ResourceReferenceDt result = dr.addResult();
+        result.setResource(observation);
+        
+        ArrayList<ResourceReferenceDt> performers = new ArrayList<ResourceReferenceDt>();
+        ResourceReferenceDt performer = new ResourceReferenceDt();
+        
+        Practitioner p = new Practitioner();
+		// no idDt on practitioner p
+		p.addIdentifier().setSystem("DoctorID").setValue("4711");
+		p.addRole(PractitionerRoleEnum.DOCTOR);
+		p.setName(new HumanNameDt().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
+        
+        performer.setResource(p);
+        performers.add(performer);
+        observation.setPerformer(performers);
+        
+        
+        List<IResource> list = new ArrayList<IResource>();
+		list.add(dr);
+		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+        
+        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
+        String xml = parser.encodeBundleToString(bundle);
+        Assert.assertTrue(xml.contains("Mueller"));
+        
 	}
 
 }

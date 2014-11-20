@@ -91,6 +91,7 @@ public class EncounterAuditor implements IResourceAuditor<Encounter> {
 		details.put("service", myEncounter.getServiceProvider().getDisplay().getValue());
 		details.put("type", myEncounter.getTypeFirstRep().getText().getValue());
 		details.put("status", myEncounter.getStatus().getValueAsString());
+		details.put("subject", myEncounter.getSubject().getReference().getValue());
 		return details;
 	}
 

@@ -78,6 +78,7 @@ public class DiagnosticReportAuditor implements IResourceAuditor<DiagnosticRepor
 		Map<String, String> details = new HashMap<String, String>();
 		details.put("dateIssued", myDiagnosticReport.getIssued().getValueAsString());
 		details.put("version", myDiagnosticReport.getId().getVersionIdPart());
+		details.put("subject", myDiagnosticReport.getSubject().getReference().getValue());
 		return details;
 	}
 

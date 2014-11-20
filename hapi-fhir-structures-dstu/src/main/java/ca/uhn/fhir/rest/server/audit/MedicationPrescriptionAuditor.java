@@ -81,7 +81,7 @@ public class MedicationPrescriptionAuditor implements IResourceAuditor<Medicatio
 
 	@Override
 	public Map<String, String> getDetail() {
-		return null; //no additional details required for audit?
+		return null; //no additional details required for audit
 	}
 
 	@Override
