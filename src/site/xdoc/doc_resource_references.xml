@@ -97,7 +97,7 @@ patient.getManagingOrganization().setReference("Organization/124362");]]></sourc
 					To do this, you can implement your server method to simply return 
 					<code>List&lt;IResource&gt;</code> and then simply add your extra resources to
 					the list. Another technique however, is to populate the reference as shown
-					in the example above, but ensure that the referenced resource has an ID set.
+					in the example below, but ensure that the referenced resource has an ID set.
 				</p>
 			
 				<p>

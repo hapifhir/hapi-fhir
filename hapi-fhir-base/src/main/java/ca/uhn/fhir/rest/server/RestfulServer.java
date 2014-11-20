@@ -1009,8 +1009,7 @@ public class RestfulServer extends HttpServlet {
 		}
 
 		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (int i = 0; i < resourceList.size(); i++) {
-				IResource nextRes = resourceList.get(i);
+			for (IResource nextRes : resourceList) {
 				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
 				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
 					addProfileToBundleEntry(theServer.getFhirContext(), nextRes);
@@ -1088,7 +1087,7 @@ public class RestfulServer extends HttpServlet {
 								continue;
 							}
 
-							IdDt id = nextRes.getId().toVersionless();
+							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
 								String resName = theContext.getResourceDefinition(nextRes).getName();
 								id = id.withResourceType(resName);
@@ -1099,8 +1098,6 @@ public class RestfulServer extends HttpServlet {
 								addedResourcesThisPass.add(nextRes);
 							}
 
-							nextRef.setResource(null);
-							nextRef.setReference(id);
 						}
 					}
 				}

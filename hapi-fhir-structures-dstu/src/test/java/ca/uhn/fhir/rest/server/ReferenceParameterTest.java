@@ -1,14 +1,22 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
+import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.PortUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -22,32 +30,54 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
-import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.PortUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
 public class ReferenceParameterTest {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx;
+
+	@AfterClass
+	public static void afterClass() throws Exception {
+		ourServer.stop();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer();
+		ourCtx = servlet.getFhirContext();
+		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+		ourCtx = servlet.getFhirContext();
+	}
 
 	@Test
 	public void testSearchWithValue() throws Exception {
@@ -64,6 +94,42 @@ public class ReferenceParameterTest {
 		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
 		assertEquals("1", p.getName().get(1).getFamilyFirstRep().getValue());
 		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
+	}
+
+	@Test
+	public void testSearchReturnVersionedReferenceInResponse() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findPatientWithVersion");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(2, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+
+		assertEquals(0, p.getContained().getContainedResources().size());
+		assertEquals("22", p.getId().getIdPart());
+		assertEquals("33", p.getId().getVersionIdPart());
+
+		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
+		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
+	}
+
+	@Test
+	public void testReadReturnVersionedReferenceInResponse() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/22");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
+
+		assertThat(status.getFirstHeader("Content-Location").getValue(), containsString("Patient/22/_history/33"));
+
+		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
+		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
 	}
 
 	@Test
@@ -129,7 +195,7 @@ public class ReferenceParameterTest {
 		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
 		assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
 	}
-
+	
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName4() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.fooChain=po123&partof.name=poname");
@@ -160,7 +226,7 @@ public class ReferenceParameterTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("value=\"theBarId Organization/po123 bar\""));
 	}
-	
+
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName7() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof:Organization=po123");
@@ -179,7 +245,6 @@ public class ReferenceParameterTest {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
-	
 	@Test
 	public void testSearchWithValueAndChain() throws Exception {
 		{
@@ -197,8 +262,6 @@ public class ReferenceParameterTest {
 			assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
 		}
 	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 
 	@Test
 	public void testParamTypesInConformanceStatement() throws Exception {
@@ -220,35 +283,6 @@ public class ReferenceParameterTest {
 
 		assertEquals(1, param.getTarget().size());
 		assertEquals(ResourceTypeEnum.ORGANIZATION, param.getTarget().get(0).getValueAsEnum());
-	}
-
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-		ourCtx = servlet.getFhirContext();
 	}
 
 	public static class DummyOrganizationResourceProvider implements IResourceProvider {
@@ -348,6 +382,34 @@ public class ReferenceParameterTest {
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		@Search(queryName="findPatientWithVersion")
+		public List<Patient> findPatientWithVersion() {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient p = createPatient();
+
+			retVal.add(p);
+
+			return retVal;
+		}
+
+		@Read
+		public Patient read(@IdParam IdDt theId) {
+			return createPatient();
+		}
+
+		private Patient createPatient() {
+			Patient p = new Patient();
+			p.setId("Patient/22/_history/33");
+			p.addIdentifier("urn:foo", "findPatientWithVersion");
+
+			Observation org = new Observation();
+			org.setId("Observation/44/_history/55");
+			p.setManagingOrganization(new ResourceReferenceDt(org));
+			return p;
+		}
+
 
 		@Search
 		public List<Patient> findPatient(@OptionalParam(name = Patient.SP_PROVIDER, targetTypes = { Organization.class }) ReferenceParam theParam) {

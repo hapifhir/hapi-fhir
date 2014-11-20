@@ -109,6 +109,11 @@
 			<id>petromykhailysyn</id>
 			<name>Petro Mykhailyshyn</name>
 		</developer>
+		<developer>
+			<id>tahurac</id>
+			<name>Tahura Chaudhry</name>
+			<organization>University Health Network</organization>
+		</developer>
 	</developers>
 
 	<licenses>

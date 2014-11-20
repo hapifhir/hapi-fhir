@@ -43,93 +43,33 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirTerser {
 
+	private FhirContext myContext;
+
 	public FhirTerser(FhirContext theContext) {
 		super();
 		myContext = theContext;
 	}
 
-	private FhirContext myContext;
-
-	public BaseRuntimeChildDefinition getDefinition(Class<? extends IResource> theResourceType, String thePath) {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
-
-		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
-
-		List<String> parts = Arrays.asList(thePath.split("\\."));
-		List<String> subList = parts.subList(1, parts.size());
-		if (subList.size() < 1) {
-			throw new ConfigurationException("Invalid path: " + thePath);
-		}
-		return getDefinition(currentDef, subList);
-
-	}
-
-	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
-		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
-
-		if (theSubList.size() == 1) {
-			return nextDef;
-		} else {
-			BaseRuntimeElementCompositeDefinition<?> cmp = (BaseRuntimeElementCompositeDefinition<?>) nextDef.getChildByName(theSubList.get(0));
-			return getDefinition(cmp, theSubList.subList(1, theSubList.size()));
-		}
-	}
-
-	public List<Object> getValues(IResource theResource, String thePath) {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-
-		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
-		Object currentObj = theResource;
-
-		List<String> parts = Arrays.asList(thePath.split("\\."));
-		List<String> subList = parts.subList(1, parts.size());
-		if (subList.size() < 1) {
-			throw new ConfigurationException("Invalid path: " + thePath);
-		}
-		return getValues(currentDef, currentObj, subList);
-
-	}
-
-	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
-		String name = theSubList.get(0);
-		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
-		List<? extends IElement> values = nextDef.getAccessor().getValues(theCurrentObj);
-		List<Object> retVal = new ArrayList<Object>();
-
-		if (theSubList.size() == 1) {
-			retVal.addAll(values);
-		} else {
-			for (IElement nextElement : values) {
-				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
-				List<?> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()));
-				retVal.addAll(foundValues);
+	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition,
+			IModelVisitor theCallback) {
+		if (theElement instanceof ISupportsUndeclaredExtensions) {
+			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
+			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
+				theCallback.acceptUndeclaredExtension(containingElement, theChildDefinition, theDefinition, nextExt);
+				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
 		}
-		return retVal;
 	}
 
 	/**
-	 * Visit all elements in a given resource
-	 * 
-	 * @param theResource The resource to visit
-	 * @param theVisitor The visitor
-	 */
-	public void visit(IResource theResource, IModelVisitor theVisitor) {
-		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, def, theVisitor);
-	}
-
-	/**
-	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b> and are
-	 * either of the exact type specified, or are a subclass of that type.
+	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b> and are either of the exact type specified, or are a subclass of that type.
 	 * <p>
-	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within the
-	 * message. Specifying a type of {@link IResource} would return the resource itself, as well as any contained
-	 * resources.
+	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within the message. Specifying a type of {@link IResource} would return the resource itself, as
+	 * well as any contained resources.
 	 * </p>
 	 * <p>
-	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not
-	 * decend into linked resources (e.g. {@link ResourceReferenceDt#getResource()})
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not decend into linked resources (e.g.
+	 * {@link ResourceReferenceDt#getResource()})
 	 * </p>
 	 * 
 	 * @param theResource
@@ -156,7 +96,8 @@ public class FhirTerser {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
+					ExtensionDt theNextExt) {
 				if (theType.isAssignableFrom(theNextExt.getClass())) {
 					retVal.add((T) theNextExt);
 				}
@@ -168,25 +109,85 @@ public class FhirTerser {
 		return retVal;
 	}
 
+	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
+		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
+
+		if (theSubList.size() == 1) {
+			return nextDef;
+		} else {
+			BaseRuntimeElementCompositeDefinition<?> cmp = (BaseRuntimeElementCompositeDefinition<?>) nextDef.getChildByName(theSubList.get(0));
+			return getDefinition(cmp, theSubList.subList(1, theSubList.size()));
+		}
+	}
+
+	public BaseRuntimeChildDefinition getDefinition(Class<? extends IResource> theResourceType, String thePath) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+
+		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
+
+		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> subList = parts.subList(1, parts.size());
+		if (subList.size() < 1) {
+			throw new ConfigurationException("Invalid path: " + thePath);
+		}
+		return getDefinition(currentDef, subList);
+
+	}
+
+	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
+		String name = theSubList.get(0);
+		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
+		List<? extends IElement> values = nextDef.getAccessor().getValues(theCurrentObj);
+		List<Object> retVal = new ArrayList<Object>();
+
+		if (theSubList.size() == 1) {
+			retVal.addAll(values);
+		} else {
+			for (IElement nextElement : values) {
+				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
+				List<?> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()));
+				retVal.addAll(foundValues);
+			}
+		}
+		return retVal;
+	}
+
+	public List<Object> getValues(IResource theResource, String thePath) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+
+		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
+		Object currentObj = theResource;
+
+		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<String> subList = parts.subList(1, parts.size());
+		if (subList.size() < 1) {
+			throw new ConfigurationException("Invalid path: " + thePath);
+		}
+		return getValues(currentDef, currentObj, subList);
+
+	}
+
 	private <T extends IElement> void visit(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
-//		if (theElement.isEmpty()) {
-//			return;
-//		}
-		
+		// if (theElement.isEmpty()) {
+		// return;
+		// }
+
 		switch (theDefinition.getChildType()) {
 		case PRIMITIVE_XHTML:
 		case PRIMITIVE_DATATYPE:
 			// These are primitive types
 			break;
 		case RESOURCE_REF:
-			ResourceReferenceDt resRefDt = (ResourceReferenceDt)theElement;
+			ResourceReferenceDt resRefDt = (ResourceReferenceDt) theElement;
 			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
 				IResource theResource = resRefDt.getResource();
-				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-				visit(theResource, null, def, theCallback);
+				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
+					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+					visit(theResource, null, def, theCallback);
+				}
 			}
 			break;
 		case RESOURCE_BLOCK:
@@ -205,7 +206,7 @@ public class FhirTerser {
 						}
 						BaseRuntimeElementDefinition<?> childElementDef;
 						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
-						
+
 						if (childElementDef == null) {
 							StringBuilder b = new StringBuilder();
 							b.append("Found value of type[");
@@ -244,14 +245,17 @@ public class FhirTerser {
 		}
 	}
 
-	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition, IModelVisitor theCallback) {
-		if (theElement instanceof ISupportsUndeclaredExtensions) {
-			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
-			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
-				theCallback.acceptUndeclaredExtension(containingElement, theChildDefinition, theDefinition, nextExt);
-				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
-			}
-		}
+	/**
+	 * Visit all elements in a given resource
+	 * 
+	 * @param theResource
+	 *            The resource to visit
+	 * @param theVisitor
+	 *            The visitor
+	 */
+	public void visit(IResource theResource, IModelVisitor theVisitor) {
+		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		visit(theResource, null, def, theVisitor);
 	}
 
 }
