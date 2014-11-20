@@ -13,7 +13,7 @@
 
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-example-skeleton-project</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.8-uhn-branch</version>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR Example - Skeleton Project</name>
@@ -34,13 +34,13 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.8-uhn-branch</version>
 		</dependency>
 		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.8-uhn-branch</version>
 		</dependency>
 
 		<!-- 

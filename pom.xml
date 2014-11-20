@@ -12,7 +12,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.8-uhn-branch</version>
 	<name>HAPI-FHIR</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
