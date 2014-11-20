@@ -92,7 +92,7 @@
 				but the version bundled with IBM's JDK is flaky and resulted in a number
 				of problems when deploying to Websphere.
 			</action>
-			<action type="fix" issue="50">
+			<action type="fix" issue="50" dev="jjathman">
 				Primitive datatypes now preserve their original string value when parsing resources,
 				as well as containing the "parsed value". For instance, a DecimalDt field value of
 				<![CDATA[<code>1.0000</code>]]> will be parsed into the corresponding 
@@ -145,6 +145,11 @@
 			<action type="fix">
 				Do not strip version from resource references in resources returned
 				from server search methods. Thanks to Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" dev="jjathman" issue="54">
+				Correct an issue with the validator where changes to the underlying
+				OperationOutcome produced by a validation cycle cause the validation
+				results to be incorrect.
 			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
@@ -260,7 +265,7 @@
 				trying out the HAPI server modules. Thanks to Preston Lee for the pull request, and for 
 				offering to maintain this! 
 			</action>
-			<action type="add" issue="32" dev="jathman">
+			<action type="add" issue="32" dev="jjathman">
 				Change validation API so that it uses a return type instead of exceptions to communicate 
 				validation failures. Thanks to Joe Athman for the pull request!
 			</action>
