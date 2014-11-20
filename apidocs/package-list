@@ -21,7 +21,9 @@ ca.uhn.fhir.rest.gclient
 ca.uhn.fhir.rest.method
 ca.uhn.fhir.rest.param
 ca.uhn.fhir.rest.server
+ca.uhn.fhir.rest.server.audit
 ca.uhn.fhir.rest.server.exceptions
 ca.uhn.fhir.rest.server.interceptor
+ca.uhn.fhir.store
 ca.uhn.fhir.util
 ca.uhn.fhir.validation
