@@ -138,6 +138,9 @@ public class MethodOutcome {
 	/**
 	 * If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called whether the
 	 * result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
+	 * <p>
+	 * Users of HAPI should only interact with this method in Server applications
+	 * </p>
 	 * 
 	 * @param theCreated
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
