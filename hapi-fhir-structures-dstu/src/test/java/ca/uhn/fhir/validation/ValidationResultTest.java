@@ -2,7 +2,6 @@ package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-
 import org.junit.Test;
 
 import java.util.List;
@@ -44,5 +43,18 @@ public class ValidationResultTest {
         assertEquals(errorMessage, issues.get(0).getDetailsElement().getValue());
 
         assertThat("ValidationResult#toString should contain the issue description", result.toString(), containsString(errorMessage));
+    }
+
+    /*
+      Test for https://github.com/jamesagnew/hapi-fhir/issues/51
+     */
+    @Test
+    public void toString_ShouldNotCauseResultToBecomeFailure() {
+        OperationOutcome operationOutcome = new OperationOutcome();
+        ValidationResult result = ValidationResult.valueOf(operationOutcome);
+        assertEquals(true, result.isSuccessful());
+        // need to call toString to make sure any unwanted side effects are generated
+        @SuppressWarnings("UnusedDeclaration") String unused = result.toString();
+        assertEquals(true, result.isSuccessful());
     }
 }
