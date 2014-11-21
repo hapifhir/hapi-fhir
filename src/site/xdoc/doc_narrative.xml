@@ -97,13 +97,13 @@
 					templates and create new ones, and share these back with us so that
 					we can continue to build out the library. To see the current
 					template library, see the source repository 
-					<a href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/">here</a>.
+					<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative">here</a>.
 				</p>
 
 				<p>
 					Note that these templates expect a few specific CSS definitions
 					to be present in your site's CSS file. See the 
-					<a href="http://sourceforge.net/p/hl7api/fhircode/ci/master/tree/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/narrative.css">narrative CSS</a>
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css">narrative CSS</a>
 					to see these. 
 				</p>
 			

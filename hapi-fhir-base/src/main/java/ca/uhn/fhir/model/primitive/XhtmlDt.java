@@ -65,7 +65,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	 * surrounding the text.
 	 * </p>
 	 * <p>
-	 * Also note that if the parsed text contains any entities (&foo;) which are not a part of the entities defined in core XML (e.g. &sect; which
+	 * Also note that if the parsed text contains any entities (&foo;) which are not a part of the entities defined in core XML (e.g. &amp;sect; which
 	 * is valid in XHTML 1.0 but not in XML 1.0) they will be parsed and converted to their equivalent unicode character.
 	 * </p>
 	 */
