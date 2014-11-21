@@ -22,47 +22,28 @@ package ca.uhn.fhir.rest.client;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.client.HttpClient;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.ClientInvocationHandlerFactory.ILambda;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public class ClientInvocationHandler extends BaseClient implements InvocationHandler {
+class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
-	private final Map<Method, BaseMethodBinding<?>> myBindings = new HashMap<Method, BaseMethodBinding<?>>();
-
-	private final Map<Method, ILambda> myMethodToLambda = new HashMap<Method, ILambda>();
-
-	private final Map<Method, Object> myMethodToReturnValue = new HashMap<Method, Object>();
-
+	private final Map<Method, BaseMethodBinding<?>> myBindings;
+	private final Map<Method, Object> myMethodToReturnValue;
 	private FhirContext myContext;
+	private Map<Method, ILambda> myMethodToLambda;
 
-	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Class<? extends IRestfulClient> theClientType) {
+	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda) {
 		super(theClient, theUrlBase);
 
 		myContext =theContext;
-		
-		try {
-			myMethodToReturnValue.put(theClientType.getMethod("getFhirContext"), theContext);
-			myMethodToReturnValue.put(theClientType.getMethod("getHttpClient"), theClient);
-			myMethodToReturnValue.put(theClientType.getMethod("getServerBase"), theUrlBase);
-
-			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
-			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", boolean.class), new SetPrettyPrintLambda());
-			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
-			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
-
-		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
-		} catch (SecurityException e) {
-			throw new ConfigurationException("Failed to find methods on client. This is a HAPI bug!", e);
-		}
+		myMethodToReturnValue = theMethodToReturnValue;
+		myBindings = theBindings;
+		myMethodToLambda=theMethodToLambda;
 	}
 
 	public void addBinding(Method theMethod, BaseMethodBinding<?> theBinding) {
@@ -84,49 +65,11 @@ public class ClientInvocationHandler extends BaseClient implements InvocationHan
 
 		ILambda lambda = myMethodToLambda.get(theMethod);
 		if (lambda != null) {
-			return lambda.handle(theArgs);
+			return lambda.handle(this, theArgs);
 		}
 
 		throw new UnsupportedOperationException("The method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getSimpleName() + " has no handler. Did you forget to annotate it with a RESTful method annotation?");
 	}
 
-	private interface ILambda {
-		Object handle(Object[] theArgs);
-	}
-
-	private class SetEncodingLambda implements ILambda {
-		@Override
-		public Object handle(Object[] theArgs) {
-			EncodingEnum encoding = (EncodingEnum) theArgs[0];
-			setEncoding(encoding);
-			return null;
-		}
-	}
-
-	private class SetPrettyPrintLambda implements ILambda {
-		@Override
-		public Object handle(Object[] theArgs) {
-			Boolean prettyPrint = (Boolean) theArgs[0];
-			setPrettyPrint(prettyPrint);
-			return null;
-		}
-	}
-	private class UnregisterInterceptorLambda implements ILambda {
-		@Override
-		public Object handle(Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
-			unregisterInterceptor(interceptor);
-			return null;
-		}
-	}
-
-	private class RegisterInterceptorLambda implements ILambda {
-		@Override
-		public Object handle(Object[] theArgs) {
-			IClientInterceptor interceptor = (IClientInterceptor) theArgs[0];
-			registerInterceptor(interceptor);
-			return null;
-		}
-	}
 
 }

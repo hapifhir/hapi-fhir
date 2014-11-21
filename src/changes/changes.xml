@@ -126,6 +126,38 @@
 				"[base url]/Patient/123" but if the RP returns ID "http://foo/Patient/123" the ID will be
 				returned exactly as is. Thanks to Bill de Beaubien for the suggestion!
 			</action>
+<<<<<<< HEAD
+=======
+			<action type="fix" issue="55">
+				JPA module Transaction operation was not correctly replacing logical IDs
+				beginning with "cid:" with server assigned IDs, as required by the
+				specification.
+			</action>
+			<action type="fix" dev="tahurac">
+				<![CDATA[FhirTerser]]> did not visit or find children in contained resources when 
+				searching a resource. This caused server implementations to not always return contained
+				resources when they are included with a resource being returned.
+			</action>
+			<action type="add" dev="lmds">
+				Add a method <![CDATA[String IResource#getResourceName()]]> which returns the name of the
+				resource in question (e.g. "Patient", or "Observation"). This is intended as a 
+				convenience to users. 
+			</action>
+			<action type="fix">
+				Do not strip version from resource references in resources returned
+				from server search methods. Thanks to Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" dev="jjathman" issue="54">
+				Correct an issue with the validator where changes to the underlying
+				OperationOutcome produced by a validation cycle cause the validation
+				results to be incorrect.
+			</action>
+			<action type="fix">
+				Client interceptors registered to an interface based client instance 
+				were applied to other client instances for the same client interface as well. (Issue
+				did not affect generic/fluent clients)
+			</action>
+>>>>>>> 51f2ce1... Do not share interceptors between individual interface based client
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

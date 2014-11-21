@@ -44,7 +44,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	private int myConnectTimeout = 10000;
 	private FhirContext myContext;
 	private HttpClient myHttpClient;
-	private Map<Class<? extends IRestfulClient>, ClientInvocationHandler> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandler>();
+	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory>();
 	private int mySocketTimeout = 10000;
 	private HttpHost myProxy;
 
@@ -146,9 +146,9 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			serverBase = serverBase + "/";
 		}
 
-		ClientInvocationHandler invocationHandler = myInvocationHandlers.get(theClientType);
+		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
-			invocationHandler = new ClientInvocationHandler(client, myContext, serverBase, theClientType);
+			invocationHandler = new ClientInvocationHandlerFactory(client, myContext, serverBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
 				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
 				invocationHandler.addBinding(nextMethod, binding);
@@ -156,7 +156,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			myInvocationHandlers.put(theClientType, invocationHandler);
 		}
 
-		T proxy = instantiateProxy(theClientType, invocationHandler);
+		T proxy = instantiateProxy(theClientType, invocationHandler.newInvocationHandler());
 
 		return proxy;
 	}
