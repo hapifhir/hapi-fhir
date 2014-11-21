@@ -151,6 +151,11 @@
 				OperationOutcome produced by a validation cycle cause the validation
 				results to be incorrect.
 			</action>
+			<action type="fix">
+				Client interceptors registered to an interface based client instance 
+				were applied to other client instances for the same client interface as well. (Issue
+				did not affect generic/fluent clients)
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

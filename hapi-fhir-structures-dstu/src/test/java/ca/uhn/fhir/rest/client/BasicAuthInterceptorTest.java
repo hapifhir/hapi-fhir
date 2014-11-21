@@ -75,8 +75,23 @@ public class BasicAuthInterceptorTest {
 		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
 		client.getPatientById(new IdDt("111"));
 
-		HttpUriRequest req = capt.getValue();
+		assertEquals(1, capt.getAllValues().size());
+		HttpUriRequest req = capt.getAllValues().get(0);
+		assertEquals(1, req.getHeaders("Authorization").length);
 		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
+
+		// Create a second client and make sure we get the same results
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
+		client.registerInterceptor(new BasicAuthInterceptor("myuser", "mypass"));
+		client.getPatientById(new IdDt("111"));
+
+		assertEquals(2, capt.getAllValues().size());
+		req = capt.getAllValues().get(1);
+		assertEquals(1, req.getHeaders("Authorization").length);
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
+
 	}
 
 	@BeforeClass
