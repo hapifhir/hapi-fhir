@@ -71,14 +71,16 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 	 */
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
-		String value = theValue.trim();
-		if (value.charAt(0) != '<') {
-			value = "<div>" + value + "</div>";
+		if (theValue == null || theValue.isEmpty()) {
+			super.setValueAsString(null);
+		} else {
+			String value = theValue.trim();
+			if (value.charAt(0) != '<') {
+				value = "<div>" + value + "</div>";
+			}
+			super.setValueAsString(value);
 		}
-		
-		super.setValueAsString(value);
 	}
-
 
 	public boolean hasContent() {
 		return getValue() != null && getValue().size() > 0;
