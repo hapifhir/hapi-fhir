@@ -89,7 +89,7 @@ public class XmlParserTest {
 	
 	@Test
 	public void testProfileWithBoundCode() throws IOException {
-		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/DMIXAuditException.xml"));
+		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/DMIXAuditException.xml"), "UTF-8");
 		ourCtx.newXmlParser().parseResource(Profile.class, content);	
 	}
 	
