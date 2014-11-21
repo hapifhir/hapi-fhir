@@ -1,4 +1,4 @@
-package ca.uhn.fhir.example.ex1;
+package ca.uhn.fhir.example.ex2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,17 +12,19 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 /**
- * Note, this is an incomplete example of a resource provider. It shows a
- * read method which reads from a HashMap, but does not have any way
- * of putting things in that HashMap.
+ * This is the most basic resource provider, showing only a single
+ * read method on a resource provider
  */
 public class Example02_PatientResourceProvider implements IResourceProvider {
 
-	private Map<IdDt, Patient> myPatients = new HashMap<IdDt, Patient>();
+	private Map<Long, Patient> myPatients = new HashMap<Long, Patient>();
 	
 	/** Constructor */
 	public Example02_PatientResourceProvider() {
-//		Patient
+		Patient pat1 = new Patient();
+		pat1.addIdentifier().setSystem("http://acme.com/MRNs").setValue("7000135");
+		pat1.addName().addFamily("Simpson").addGiven("Homer").addGiven("J");
+		myPatients.put(1L, pat1);
 	}
 	
 	/** All Resource Providers must implement this method */
@@ -34,11 +36,11 @@ public class Example02_PatientResourceProvider implements IResourceProvider {
 	/** Simple implementation of the "read" method */
 	@Read()
 	public Patient read(@IdParam IdDt theId) {
-		Patient retVal = myPatients.get(theId);
+		Patient retVal = myPatients.get(theId.getIdPartAsLong());
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 		return retVal;
 	}
-	
+
 }
