@@ -19,7 +19,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 public class Example02_PatientResourceProvider implements IResourceProvider {
 
 	private Map<IdDt, Patient> myPatients = new HashMap<IdDt, Patient>();
-
+	
+	/** Constructor */
+	public Example02_PatientResourceProvider() {
+//		Patient
+	}
+	
 	/** All Resource Providers must implement this method */
 	@Override
 	public Class<? extends IResource> getResourceType() {
