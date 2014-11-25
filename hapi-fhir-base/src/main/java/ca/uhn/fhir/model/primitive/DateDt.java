@@ -25,7 +25,16 @@ import java.util.Date;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.parser.DataFormatException;
 
+/**
+ * Represents a FHIR date datatype. Valid precisions values for this type are:
+ * <ul>
+ * <li>{@link TemporalPrecisionEnum#YEAR}
+ * <li>{@link TemporalPrecisionEnum#MONTH}
+ * <li>{@link TemporalPrecisionEnum#DAY}
+ * </ul>
+ */
 @DatatypeDef(name = "date")
 public class DateDt extends BaseDateTimeDt {
 
@@ -44,10 +53,9 @@ public class DateDt extends BaseDateTimeDt {
 	/**
 	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type
 	 */
-	@SimpleSetter(suffix="WithDayPrecision")
+	@SimpleSetter(suffix = "WithDayPrecision")
 	public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
-		setValue(theDate);
-		setPrecision(DEFAULT_PRECISION);
+		super(theDate, DEFAULT_PRECISION);
 	}
 
 	/**
@@ -57,11 +65,23 @@ public class DateDt extends BaseDateTimeDt {
 	 * <li>{@link TemporalPrecisionEnum#MONTH}
 	 * <li>{@link TemporalPrecisionEnum#DAY}
 	 * </ul>
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
 	 */
 	@SimpleSetter
 	public DateDt(@SimpleSetter.Parameter(name = "theDate") Date theDate, @SimpleSetter.Parameter(name = "thePrecision") TemporalPrecisionEnum thePrecision) {
-		setValue(theDate);
-		setPrecision(thePrecision);
+		super(theDate, thePrecision);
+	}
+
+	/**
+	 * Constructor which accepts a date as a string in FHIR format
+	 * 
+	 * @throws DataFormatException
+	 *             If the precision in the date string is not allowed for this type
+	 */
+	public DateDt(String theDate) {
+		super(theDate);
 	}
 
 	@Override

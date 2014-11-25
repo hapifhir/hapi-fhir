@@ -29,6 +29,13 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
+/**
+ * Represents a FHIR instant datatype. Valid precisions values for this type are:
+ * <ul>
+ * <li>{@link TemporalPrecisionEnum#SECOND}
+ * <li>{@link TemporalPrecisionEnum#MILLI}
+ * </ul>
+ */
 @DatatypeDef(name = "instant")
 public class InstantDt extends BaseDateTimeDt {
 
@@ -54,31 +61,39 @@ public class InstantDt extends BaseDateTimeDt {
 	 * Create a new DateTimeDt
 	 */
 	public InstantDt(Calendar theCalendar) {
-		setValue(theCalendar.getTime());
-		setPrecision(DEFAULT_PRECISION);
-		setTimeZone(theCalendar.getTimeZone());
+		super(theCalendar.getTime(), DEFAULT_PRECISION, theCalendar.getTimeZone());
 	}
+
+	/**
+	 * Create a new instance using the given date, precision level, and time zone
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public InstantDt(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimezone) {
+		super(theDate, thePrecision, theTimezone);
+	}
+
 
 	/**
 	 * Create a new DateTimeDt using an existing value. <b>Use this constructor with caution</b>,
 	 * as it may create more precision than warranted (since for example it is possible to pass in
 	 * a DateTime with only a year, and this constructor will convert to an InstantDt with 
-	 * milliseconds precision).  
+	 * milliseconds precision).
 	 */
 	public InstantDt(BaseDateTimeDt theDateTime) {
+		// Do not call super(foo) here, we don't want to trigger a DataFormatException
 		setValue(theDateTime.getValue());
 		setPrecision(DEFAULT_PRECISION);
 		setTimeZone(theDateTime.getTimeZone());
 	}
 
 	/**
-	 * Create a new DateTimeDt
+	 * Create a new DateTimeDt with the given date/time and {@link TemporalPrecisionEnum#MILLI} precision
 	 */
 	@SimpleSetter(suffix = "WithMillisPrecision")
 	public InstantDt(@SimpleSetter.Parameter(name = "theDate") Date theDate) {
-		setValue(theDate);
-		setPrecision(DEFAULT_PRECISION);
-		setTimeZone(TimeZone.getDefault());
+		super(theDate, DEFAULT_PRECISION, TimeZone.getDefault());
 	}
 
 	/**
@@ -105,7 +120,7 @@ public class InstantDt extends BaseDateTimeDt {
 	 * @throws DataFormatException
 	 */
 	public InstantDt(String theString) {
-		setValueAsString(theString);
+		super(theString);
 	}
 
 	/**
@@ -154,10 +169,10 @@ public class InstantDt extends BaseDateTimeDt {
 
 	/**
 	 * Factory method which creates a new InstantDt with millisecond precision and initializes it with the
-	 * current time.
+	 * current time and the system local timezone.
 	 */
 	public static InstantDt withCurrentTime() {
-		return new InstantDt(new Date(), TemporalPrecisionEnum.MILLI);
+		return new InstantDt(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
 	}
 
 	/**

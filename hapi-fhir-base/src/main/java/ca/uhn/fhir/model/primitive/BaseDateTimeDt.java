@@ -42,16 +42,11 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
-	/**
-	 * For unit tests only
-	 */
-	static List<FastDateFormat> getFormatters() {
-		return ourFormatters;
-	}
 	/*
 	 * Add any new formatters to the static block below!!
 	 */
 	private static final List<FastDateFormat> ourFormatters;
+
 	private static final Pattern ourYearDashMonthDashDayPattern = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}");
 	private static final Pattern ourYearDashMonthPattern = Pattern.compile("[0-9]{4}-[0-9]{2}");
 	private static final FastDateFormat ourYearFormat = FastDateFormat.getInstance("yyyy");
@@ -67,8 +62,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthNoDashesFormat = FastDateFormat.getInstance("yyyyMM");
 	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
-
 	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
+
 	static {
 		ArrayList<FastDateFormat> formatters = new ArrayList<FastDateFormat>();
 		formatters.add(ourYearFormat);
@@ -86,9 +81,51 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	private TemporalPrecisionEnum myPrecision = TemporalPrecisionEnum.SECOND;
-	private TimeZone myTimeZone;
 
+	private TimeZone myTimeZone;
 	private boolean myTimeZoneZulu = false;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDt.class);
+
+	/**
+	 * Constructor
+	 */
+	public BaseDateTimeDt() {
+		// nothing
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public BaseDateTimeDt(Date theDate, TemporalPrecisionEnum thePrecision) {
+		setValue(theDate, thePrecision);
+		if (isPrecisionAllowed(thePrecision) == false) {
+			throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + thePrecision + " precision): " + theDate);
+		}
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public BaseDateTimeDt(String theString) {
+		setValueAsString(theString);
+		if (isPrecisionAllowed(getPrecision()) == false) {
+			throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support " + getPrecision() + " precision): " + theString);
+		}
+	}
+
+	/**
+	 * Constructor
+	 */
+	public BaseDateTimeDt(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimeZone) {
+		this(theDate, thePrecision);
+		setTimeZone(theTimeZone);
+	}
 
 	private void clearTimeZone() {
 		myTimeZone = null;
@@ -136,6 +173,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
+	/**
+	 * Returns the default precision for the given datatype
+	 */
+	protected abstract TemporalPrecisionEnum getDefaultPrecisionForDatatype();
 
 	/**
 	 * Gets the precision for this datatype (using the default for the given type if not set)
@@ -150,13 +191,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Returns the default precision for the given datatype
-	 */
-	protected abstract TemporalPrecisionEnum getDefaultPrecisionForDatatype();
-
-	/**
-	 * Returns the TimeZone associated with this dateTime's value. May return
-	 * <code>null</code> if no timezone was supplied.
+	 * Returns the TimeZone associated with this dateTime's value. May return <code>null</code> if no timezone was
+	 * supplied.
 	 */
 	public TimeZone getTimeZone() {
 		return myTimeZone;
@@ -204,57 +240,52 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	protected Date parse(String theValue) throws DataFormatException {
 		try {
 			if (theValue.length() == 4 && ourYearPattern.matcher(theValue).matches()) {
-				if (isPrecisionAllowed(YEAR)) {
-					setPrecision(YEAR);
-					clearTimeZone();
-					return ((ourYearFormat).parse(theValue));
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
+				if (!isPrecisionAllowed(YEAR)) {
+					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support YEAR precision): " + theValue);
 				}
+				setPrecision(YEAR);
+				clearTimeZone();
+				return ((ourYearFormat).parse(theValue));
 			} else if (theValue.length() == 6 && ourYearMonthPattern.matcher(theValue).matches()) {
 				// Eg. 198401 (allow this just to be lenient)
-				if (isPrecisionAllowed(MONTH)) {
-					setPrecision(MONTH);
-					clearTimeZone();
-					return ((ourYearMonthNoDashesFormat).parse(theValue));
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				if (!isPrecisionAllowed(MONTH)) {
+					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
+				setPrecision(MONTH);
+				clearTimeZone();
+				return ((ourYearMonthNoDashesFormat).parse(theValue));
 			} else if (theValue.length() == 7 && ourYearDashMonthPattern.matcher(theValue).matches()) {
 				// E.g. 1984-01 (this is valid according to the spec)
-				if (isPrecisionAllowed(MONTH)) {
-					setPrecision(MONTH);
-					clearTimeZone();
-					return ((ourYearMonthFormat).parse(theValue));
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
+				if (!isPrecisionAllowed(MONTH)) {
+					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support MONTH precision): " + theValue);
 				}
+				setPrecision(MONTH);
+				clearTimeZone();
+				return ((ourYearMonthFormat).parse(theValue));
 			} else if (theValue.length() == 8 && ourYearMonthDayPattern.matcher(theValue).matches()) {
 				// Eg. 19840101 (allow this just to be lenient)
-				if (isPrecisionAllowed(DAY)) {
-					setPrecision(DAY);
-					clearTimeZone();
-					return ((ourYearMonthDayNoDashesFormat).parse(theValue));
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				if (!isPrecisionAllowed(DAY)) {
+					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
+				setPrecision(DAY);
+				clearTimeZone();
+				return ((ourYearMonthDayNoDashesFormat).parse(theValue));
 			} else if (theValue.length() == 10 && ourYearDashMonthDashDayPattern.matcher(theValue).matches()) {
 				// E.g. 1984-01-01 (this is valid according to the spec)
-				if (isPrecisionAllowed(DAY)) {
-					setPrecision(DAY);
-					clearTimeZone();
-					return ((ourYearMonthDayFormat).parse(theValue));
-				} else {
-					throw new DataFormatException("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
+				if (!isPrecisionAllowed(DAY)) {
+					ourLog.debug("Invalid date/time string (datatype " + getClass().getSimpleName() + " does not support DAY precision): " + theValue);
 				}
+				setPrecision(DAY);
+				clearTimeZone();
+				return ((ourYearMonthDayFormat).parse(theValue));
 			} else if (theValue.length() >= 18) { // date and time with possible time zone
 				int dotIndex = theValue.indexOf('.', 18);
 				boolean hasMillis = dotIndex > -1;
 
 				if (!hasMillis && !isPrecisionAllowed(SECOND)) {
-					throw new DataFormatException("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
+					ourLog.debug("Invalid date/time string (data type does not support SECONDS precision): " + theValue);
 				} else if (hasMillis && !isPrecisionAllowed(MILLI)) {
-					throw new DataFormatException("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
+					ourLog.debug("Invalid date/time string (data type " + getClass().getSimpleName() + " does not support MILLIS precision):" + theValue);
 				}
 
 				Date retVal;
@@ -262,10 +293,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 					try {
 						if (hasOffset(theValue)) {
 							retVal = ourYearMonthDayTimeMilliZoneFormat.parse(theValue);
-						} else if (theValue.endsWith("Z"))
+						} else if (theValue.endsWith("Z")) {
 							retVal = ourYearMonthDayTimeMilliUTCZFormat.parse(theValue);
-						else
+						} else {
 							retVal = ourYearMonthDayTimeMilliFormat.parse(theValue);
+						}
 					} catch (ParseException p2) {
 						throw new DataFormatException("Invalid data/time string (" + p2.getMessage() + "): " + theValue);
 					}
@@ -316,8 +348,6 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		updateStringValue();
 	}
 
-	
-
 	private void setTimeZone(String theValueString, boolean hasMillis) {
 		clearTimeZone();
 		int timeZoneStart = 19;
@@ -332,13 +362,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 	}
 
-	
 	public void setTimeZone(TimeZone theTimeZone) {
 		myTimeZone = theTimeZone;
 		updateStringValue();
 	}
 
-	
 	public void setTimeZoneZulu(boolean theTimeZoneZulu) {
 		myTimeZoneZulu = theTimeZoneZulu;
 		updateStringValue();
@@ -353,9 +381,11 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	/**
 	 * Sets the value of this date/time using the specified level of precision
 	 * 
-	 * @param theValue The date value
-	 * @param thePrecision The precision
-	 * @throws DataFormatException 
+	 * @param theValue
+	 *            The date value
+	 * @param thePrecision
+	 *            The precision
+	 * @throws DataFormatException
 	 */
 	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {
 		clearTimeZone();
@@ -367,6 +397,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	public void setValueAsString(String theValue) throws DataFormatException {
 		clearTimeZone();
 		super.setValueAsString(theValue);
+	}
+
+	/**
+	 * For unit tests only
+	 */
+	static List<FastDateFormat> getFormatters() {
+		return ourFormatters;
 	}
 
 }
