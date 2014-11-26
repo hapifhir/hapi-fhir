@@ -388,6 +388,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * @return the corresponding SecurityEventActionEnum (Read/View/Print, Create, Delete, etc)
 	 */
 	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {
+		if(resourceOperationType == null) return null;
 		switch (resourceOperationType) {
 		case READ: return SecurityEventActionEnum.READ_VIEW_PRINT;
 		case CREATE: return SecurityEventActionEnum.CREATE;
@@ -409,6 +410,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * @return the corresponding SecurityEventObjectLifecycleEnum (Access/Use, Origination/Creation, Logical Deletion, etc)
 	 */
 	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(RestfulOperationTypeEnum resourceOperationType) {
+		if(resourceOperationType == null) return null;
 		switch (resourceOperationType) {
 		case READ: return SecurityEventObjectLifecycleEnum.ACCESS_OR_USE;
 		case CREATE: return SecurityEventObjectLifecycleEnum.ORIGINATION_OR_CREATION;
