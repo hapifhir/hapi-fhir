@@ -300,9 +300,9 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	}
 	
 	/**
-	 * Create a particpant object based on information from the incoming servlet request
+	 * Create a participant object based on information from the incoming servlet request
 	 * @param theServletRequest the incoming request
-	 * @return a Particpant object populated with the user id, user name, and IP
+	 * @return a Participant object populated with the user id, user name, and IP
 	 * @throws InvalidRequestException if auditing is required but userId is not specified as a request header
 	 * @throws NotImplementedException if the authorization type is OAuth
 	 */
