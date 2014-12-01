@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,20 +93,26 @@ class ModelScanner {
 	private FhirContext myContext;
 
 	ModelScanner(FhirContext theContext, Class<? extends IResource> theResourceTypes) throws ConfigurationException {
-		myContext=theContext;
+		myContext = theContext;
 		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
 		singleton.add(theResourceTypes);
 		init(null, singleton);
 	}
 
 	ModelScanner(FhirContext theContext, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
-		myContext=theContext;
+		myContext = theContext;
 		init(null, new HashSet<Class<? extends IElement>>(theResourceTypes));
 	}
 
 	ModelScanner(FhirContext theContext, Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
-		myContext=theContext;
-		init(theExistingDefinitions, new HashSet<Class<? extends IElement>>(theResourceTypes));
+		myContext = theContext;
+		Set<Class<? extends IElement>> toScan;
+		if (theResourceTypes != null) {
+			toScan = new HashSet<Class<? extends IElement>>(theResourceTypes);
+		} else {
+			toScan = new HashSet<Class<? extends IElement>>();
+		}
+		init(theExistingDefinitions, toScan);
 	}
 
 	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
@@ -175,13 +181,7 @@ class ModelScanner {
 		int startSize = myClassToElementDefinitions.size();
 		long start = System.currentTimeMillis();
 
-		InputStream str = ModelScanner.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
-		if (str == null) {
-			str = ModelScanner.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
-		}
-		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
-		}
+		InputStream str = myContext.getVersion().getFhirVersionPropertiesFile(); 
 		Properties prop = new Properties();
 		try {
 			prop.load(str);
@@ -386,13 +386,13 @@ class ModelScanner {
 		for (Field next : theClass.getDeclaredFields()) {
 
 			if (Modifier.isFinal(next.getModifiers())) {
-				ourLog.trace("Ignoring constant {} on target type {}",  next.getName(), theClass);
+				ourLog.trace("Ignoring constant {} on target type {}", next.getName(), theClass);
 				continue;
 			}
-			
+
 			Child childAnnotation = next.getAnnotation(Child.class);
 			if (childAnnotation == null) {
-				ourLog.trace("Ignoring non @Child field {} on target type {}",next.getName() , theClass);
+				ourLog.trace("Ignoring non @Child field {} on target type {}", next.getName(), theClass);
 				continue;
 			}
 
@@ -422,8 +422,8 @@ class ModelScanner {
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT + ") but no parent element with extension URL " + extensionAttr.url()
-								+ " could be found on type " + next.getDeclaringClass().getSimpleName());
+						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT + ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type "
+								+ next.getDeclaringClass().getSimpleName());
 					}
 
 				} else {
@@ -454,7 +454,7 @@ class ModelScanner {
 			int min = childAnnotation.min();
 			int max = childAnnotation.max();
 			/*
-			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict wityh any
+			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any
 			 * given IDs and can be figured out later
 			 */
 			while (order == Child.ORDER_UNKNOWN && orderMap.containsKey(order)) {

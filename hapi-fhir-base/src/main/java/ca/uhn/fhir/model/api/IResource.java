@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.api;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -88,7 +89,7 @@ public interface IResource extends ICompositeElement {
 	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object
 	 *      types that values of a given key must use.
 	 */
-	Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata();
+	ResourceMetadataMap getResourceMetadata();
 
 	/**
 	 * Returns the narrative block for this resource
@@ -122,7 +123,7 @@ public interface IResource extends ICompositeElement {
 	 * @throws NullPointerException
 	 *             The map must not be null
 	 */
-	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
+	void setResourceMetadata(ResourceMetadataMap theMap);
 
 	/**
 	 * Returns a String representing the name of this Resource. This return

@@ -50,16 +50,20 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.FhirValidator;
 
 /**
- * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then used as a factory for various other types of objects (parsers, clients, etc.).
+ * The FHIR context is the central starting point for the use of the HAPI FHIR API. It should be created once, and then
+ * used as a factory for various other types of objects (parsers, clients, etc.).
  * 
  * <p>
  * Important usage notes:
  * <ul>
  * <li>Thread safety: <b>This class is thread safe</b> and may be shared between multiple processing threads.</li>
  * <li>
- * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode to build up an internal model of those classes. For that reason, you should try
- * to create one FhirContext instance which remains for the life of your application and reuse that instance. Note that it will not cause problems to create multiple instances (ie. resources
- * originating from one FhirContext may be passed to parsers originating from another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.</li>
+ * Performance: <b>This class is expensive</b> to create, as it scans every resource class it needs to parse or encode
+ * to build up an internal model of those classes. For that reason, you should try to create one FhirContext instance
+ * which remains for the life of your application and reuse that instance. Note that it will not cause problems to
+ * create multiple instances (ie. resources originating from one FhirContext may be passed to parsers originating from
+ * another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.
+ * </li>
  * </ul>
  * </p>
  */
@@ -74,7 +78,7 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
-	private IFhirVersion myVersion;
+	private final IFhirVersion myVersion;
 
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
@@ -92,18 +96,31 @@ public class FhirContext {
 	}
 
 	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
-		scanResourceTypes(theResourceTypes);
-		
-		if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
+		this(null, theResourceTypes);
+	}
+
+	public FhirContext(FhirVersionEnum theVersion) {
+		this(theVersion, null);
+	}
+
+	private FhirContext(FhirVersionEnum theVersion, Collection<Class<? extends IResource>> theResourceTypes) {
+		if (theVersion != null) {
+			if (!theVersion.isPresentOnClasspath()) {
+				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion"));
+			}
+			myVersion = theVersion.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
 		} else {
-			throw new IllegalStateException("Could not find any HAPI-FHIR structure JARs on the classpath. Note that as of HAPI-FHIR v0.8, a separate FHIR strcture JAR must be added to your classpath or project pom.xml");
+			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
 		
+		scanResourceTypes(theResourceTypes);
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
@@ -115,7 +132,8 @@ public class FhirContext {
 	}
 
 	/**
-	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
+	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with
+	 * caution
 	 */
 	public HapiLocalizer getLocalizer() {
 		if (myLocalizer == null) {
@@ -129,7 +147,8 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
@@ -140,21 +159,24 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
 		String resourceName = theResourceName;
 
 		/*
-		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or something so that we can detect names like diagnosticreport
+		 * TODO: this is a bit of a hack, really we should have a translation table based on a property file or
+		 * something so that we can detect names like diagnosticreport
 		 */
 		if (Character.isLowerCase(resourceName.charAt(0))) {
 			resourceName = WordUtils.capitalize(resourceName);
@@ -188,14 +210,16 @@ public class FhirContext {
 	}
 
 	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
 	 */
 	public RuntimeResourceDefinition getResourceDefinitionById(String theId) {
 		return myIdToResourceDefinition.get(theId);
 	}
 
 	/**
-	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the core library.
+	 * Returns the scanned runtime models. This is an advanced feature which is generally only needed for extending the
+	 * core library.
 	 */
 	public Collection<RuntimeResourceDefinition> getResourceDefinitions() {
 		return myIdToResourceDefinition.values();
@@ -220,10 +244,12 @@ public class FhirContext {
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
-	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or every message being parsed/encoded.
+	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread
+	 * or every message being parsed/encoded.
 	 * </p>
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+	 * without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newJsonParser() {
@@ -231,12 +257,16 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use cases to contain methods for each of the RESTful operations you wish to
-	 * implement (e.g. "read ImagingStudy", "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its sub-interface {@link IBasicClient}). See the <a
-	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more information on how to define this interface.
+	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
+	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
+	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its
+	 * sub-interface {@link IBasicClient}). See the <a
+	 * href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html">RESTful Client</a> documentation for more
+	 * information on how to define this interface.
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
+	 * without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theClientType
@@ -252,11 +282,13 @@ public class FhirContext {
 	}
 
 	/**
-	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against a compliant server, but does not have methods defining the specific
-	 * functionality required (as is the case with {@link #newRestfulClient(Class, String) non-generic clients}).
+	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against
+	 * a compliant server, but does not have methods defining the specific functionality required (as is the case with
+	 * {@link #newRestfulClient(Class, String) non-generic clients}).
 	 * 
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
+	 * without incurring any performance penalty
 	 * </p>
 	 * 
 	 * @param theServerBase
@@ -283,10 +315,12 @@ public class FhirContext {
 	 * Create and return a new XML parser.
 	 * 
 	 * <p>
-	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or every message being parsed/encoded.
+	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread
+	 * or every message being parsed/encoded.
 	 * </p>
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed without incurring any performance penalty
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+	 * without incurring any performance penalty
 	 * </p>
 	 */
 	public IParser newXmlParser() {
@@ -328,7 +362,8 @@ public class FhirContext {
 	}
 
 	/**
-	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with caution
+	 * This feature is not yet in its final state and should be considered an internal part of HAPI for now - use with
+	 * caution
 	 */
 	public void setLocalizer(HapiLocalizer theMessages) {
 		myLocalizer = theMessages;
@@ -354,6 +389,20 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1}
+	 */
+	public static FhirContext forDstu1() {
+		return new FhirContext(FhirVersionEnum.DSTU1);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
+	 */
+	public static FhirContext forDev() {
+		return new FhirContext(FhirVersionEnum.DEV);
 	}
 
 }

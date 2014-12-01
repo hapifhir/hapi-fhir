@@ -20,9 +20,9 @@ package ca.uhn.fhir.model.dstu;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,12 +31,30 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -317,5 +335,25 @@ public class FhirDstu1 implements IFhirVersion {
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
 		return new ServerProfileProvider(theRestfulServer.getFhirContext());
 	}
+	
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU1;
+	}
+
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		InputStream str = FhirDstu1.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
+		if (str == null) {
+			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+		return str;
+	}
+	
+
+
 
 }

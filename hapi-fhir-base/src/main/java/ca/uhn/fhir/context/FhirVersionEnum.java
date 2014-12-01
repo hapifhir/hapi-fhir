@@ -25,7 +25,15 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public enum FhirVersionEnum {
 
-	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1");
+	/*
+	 * ***********************
+	 * Don't sort this type!!!
+	 * ***********************
+	 */
+	
+	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1"), 
+	
+	DEV("ca.uhn.fhir.model.dev.FhirDev");
 	
 	private final String myVersionClass;
 	private volatile Boolean myPresentOnClasspath;
@@ -33,6 +41,10 @@ public enum FhirVersionEnum {
 
 	FhirVersionEnum(String theVersionClass) {
 		myVersionClass = theVersionClass;
+	}
+	
+	public boolean isNewerThan(FhirVersionEnum theVersion) {
+		return ordinal() > theVersion.ordinal();
 	}
 	
 	/**

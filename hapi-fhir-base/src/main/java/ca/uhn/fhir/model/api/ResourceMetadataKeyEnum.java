@@ -207,6 +207,24 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	};
 
 	/**
+	 * The value for this key is the version ID of the resource object.
+	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<String>("VERSION") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(VERSION, theObject);
+		}
+	};
+
+	/**
 	 * If present and populated with a string, provides the "search link" (the link element in the bundle entry with <code>rel="search"</code>). Server implementations may populate this with a
 	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient?name=tester") in which case the server will convert
 	 * this to an absolute URL at runtime.

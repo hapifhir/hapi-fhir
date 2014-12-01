@@ -38,6 +38,7 @@ import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
@@ -56,6 +57,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
@@ -86,22 +88,32 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class JsonParser extends BaseParser implements IParser {
 
-	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN;
+	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN_DSTU1;
+	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN_DSTU2;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParser.HeldExtension.class);
 
 	static {
-		HashSet<String> hashSet = new HashSet<String>();
-		hashSet.add("title");
-		hashSet.add("id");
-		hashSet.add("updated");
-		hashSet.add("published");
-		BUNDLE_TEXTNODE_CHILDREN = Collections.unmodifiableSet(hashSet);
+		HashSet<String> hashSetDstu1 = new HashSet<String>();
+		hashSetDstu1.add("title");
+		hashSetDstu1.add("id");
+		hashSetDstu1.add("updated");
+		hashSetDstu1.add("published");
+		BUNDLE_TEXTNODE_CHILDREN_DSTU1 = Collections.unmodifiableSet(hashSetDstu1);
+
+		HashSet<String> hashSetDstu2 = new HashSet<String>();
+		hashSetDstu2.add("type");
+		hashSetDstu2.add("base");
+		hashSetDstu2.add("total");
+		BUNDLE_TEXTNODE_CHILDREN_DSTU2 = Collections.unmodifiableSet(hashSetDstu2);
 	}
 
 	private FhirContext myContext;
-
 	private boolean myPrettyPrint;
 
+	/**
+	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
+	 * {@link FhirContext#newJsonParser()}.
+	 */
 	public JsonParser(FhirContext theContext) {
 		super(theContext);
 		myContext = theContext;
@@ -126,7 +138,7 @@ public class JsonParser extends BaseParser implements IParser {
 		if (theResourceTypeObj == null) {
 			throw new DataFormatException("Invalid JSON content detected, missing required element: '" + thePosition + "'");
 		}
-		
+
 		if (theResourceTypeObj.getValueType() != theValueType) {
 			throw new DataFormatException("Invalid content of element " + thePosition + ", expected " + theValueType);
 		}
@@ -145,6 +157,15 @@ public class JsonParser extends BaseParser implements IParser {
 	@Override
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
+		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			encodeBundleToWriterInDstu2Format(theBundle, eventWriter);
+		}else {
+		encodeBundleToWriterInDstu1Format(theBundle, eventWriter);
+		}
+		eventWriter.flush();
+	}
+
+	private void encodeBundleToWriterInDstu1Format(Bundle theBundle, JsonGenerator eventWriter) throws IOException {
 		eventWriter.writeStartObject();
 
 		eventWriter.write("resourceType", "Bundle");
@@ -155,16 +176,16 @@ public class JsonParser extends BaseParser implements IParser {
 		writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
 
 		boolean linkStarted = false;
-		linkStarted = writeAtomLink(eventWriter, "self", theBundle.getLinkSelf(), linkStarted);
-		linkStarted = writeAtomLink(eventWriter, "first", theBundle.getLinkFirst(), linkStarted);
-		linkStarted = writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious(), linkStarted);
-		linkStarted = writeAtomLink(eventWriter, "next", theBundle.getLinkNext(), linkStarted);
-		linkStarted = writeAtomLink(eventWriter, "last", theBundle.getLinkLast(), linkStarted);
-		linkStarted = writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "self", theBundle.getLinkSelf(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "first", theBundle.getLinkFirst(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "previous", theBundle.getLinkPrevious(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "next", theBundle.getLinkNext(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "last", theBundle.getLinkLast(), linkStarted);
+		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "fhir-base", theBundle.getLinkBase(), linkStarted);
 		if (linkStarted) {
 			eventWriter.writeEnd();
 		}
-		
+
 		writeCategories(eventWriter, theBundle.getCategories());
 
 		writeOptionalTagWithTextNode(eventWriter, "totalResults", theBundle.getTotalResults());
@@ -183,9 +204,9 @@ public class JsonParser extends BaseParser implements IParser {
 			writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
 
 			linkStarted = false;
-			linkStarted = writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
-			linkStarted = writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate(), linkStarted);
-			linkStarted = writeAtomLink(eventWriter, "search", nextEntry.getLinkSearch(), linkStarted);
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "alternate", nextEntry.getLinkAlternate(), linkStarted);
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "search", nextEntry.getLinkSearch(), linkStarted);
 			if (linkStarted) {
 				eventWriter.writeEnd();
 			}
@@ -203,34 +224,80 @@ public class JsonParser extends BaseParser implements IParser {
 				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content", false);
 			}
 
-			if (nextEntry.getSummary().isEmpty()==false) {
+			if (nextEntry.getSummary().isEmpty() == false) {
 				eventWriter.write("summary", nextEntry.getSummary().getValueAsString());
 			}
-			
+
 			eventWriter.writeEnd(); // entry object
 		}
 		eventWriter.writeEnd(); // entry array
 
 		eventWriter.writeEnd();
-		eventWriter.flush();
 	}
 
-	private void writeCategories(JsonGenerator eventWriter, TagList categories) {
-		if (categories != null && categories.size() > 0) {
-			eventWriter.writeStartArray("category");
-			for (Tag next : categories) {
-				eventWriter.writeStartObject();
-				eventWriter.write("term", defaultString(next.getTerm()));
-				eventWriter.write("label", defaultString(next.getLabel()));
-				eventWriter.write("scheme", defaultString(next.getScheme()));
-				eventWriter.writeEnd();
-			}
+	private void encodeBundleToWriterInDstu2Format(Bundle theBundle, JsonGenerator eventWriter) throws IOException {
+		eventWriter.writeStartObject();
+
+		eventWriter.write("resourceType", "Bundle");
+
+		writeTagWithTextNode(eventWriter, "id", theBundle.getId().getIdPart());
+		writeOptionalTagWithTextNode(eventWriter, "type", theBundle.getType());
+		writeOptionalTagWithTextNode(eventWriter, "base", theBundle.getLinkBase());
+		writeOptionalTagWithNumberNode(eventWriter, "base", theBundle.getTotalResults());
+		
+		boolean linkStarted = false;
+		linkStarted = writeAtomLinkInDstu2Format(eventWriter, "self", theBundle.getLinkSelf(), linkStarted);
+		linkStarted = writeAtomLinkInDstu2Format(eventWriter, "first", theBundle.getLinkFirst(), linkStarted);
+		linkStarted = writeAtomLinkInDstu2Format(eventWriter, "previous", theBundle.getLinkPrevious(), linkStarted);
+		linkStarted = writeAtomLinkInDstu2Format(eventWriter, "next", theBundle.getLinkNext(), linkStarted);
+		linkStarted = writeAtomLinkInDstu2Format(eventWriter, "last", theBundle.getLinkLast(), linkStarted);
+		if (linkStarted) {
 			eventWriter.writeEnd();
 		}
+
+		eventWriter.writeStartArray("entry");
+		for (BundleEntry nextEntry : theBundle.getEntries()) {
+			eventWriter.writeStartObject();
+
+			writeOptionalTagWithTextNode(eventWriter, "base", nextEntry.getLinkBase());
+			writeOptionalTagWithTextNode(eventWriter, "status", nextEntry.getStatus());
+			writeOptionalTagWithTextNode(eventWriter, "search", nextEntry.getLinkSearch());
+			writeOptionalTagWithDecimalNode(eventWriter, "score", nextEntry.getScore());
+			
+			linkStarted = false;
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "self", nextEntry.getLinkSelf(), linkStarted);
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "alternate", nextEntry.getLinkAlternate(), linkStarted);
+			linkStarted = writeAtomLinkInDstu1Format(eventWriter, "search", nextEntry.getLinkSearch(), linkStarted);
+			if (linkStarted) {
+				eventWriter.writeEnd();
+			}
+
+			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
+			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
+
+			writeCategories(eventWriter, nextEntry.getCategories());
+
+			writeAuthor(nextEntry, eventWriter);
+
+			IResource resource = nextEntry.getResource();
+			if (resource != null && !resource.isEmpty() && !deleted) {
+				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
+				encodeResourceToJsonStreamWriter(resDef, resource, eventWriter, "content", false);
+			}
+
+			if (nextEntry.getSummary().isEmpty() == false) {
+				eventWriter.write("summary", nextEntry.getSummary().getValueAsString());
+			}
+
+			eventWriter.writeEnd(); // entry object
+		}
+		eventWriter.writeEnd(); // entry array
+
+		eventWriter.writeEnd();
 	}
 
-	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef,
-			String theChildName, boolean theIsSubElementWithinResource) throws IOException {
+	
+	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theWriter, IElement theValue, BaseRuntimeElementDefinition<?> theChildDef, String theChildName, boolean theIsSubElementWithinResource) throws IOException {
 
 		switch (theChildDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
@@ -238,7 +305,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (isBlank(value.getValueAsString())) {
 				break;
 			}
-			
+
 			if (value instanceof IntegerDt) {
 				if (theChildName != null) {
 					theWriter.write(theChildName, ((IntegerDt) value).getValue());
@@ -290,8 +357,8 @@ public class JsonParser extends BaseParser implements IParser {
 				theWriter.writeStartObject();
 			}
 
-			String reference = determineReferenceText(referenceDt); 
-					
+			String reference = determineReferenceText(referenceDt);
+
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
@@ -305,7 +372,7 @@ public class JsonParser extends BaseParser implements IParser {
 			theWriter.writeStartArray(theChildName);
 			ContainedDt value = (ContainedDt) theValue;
 			for (IResource next : value.getContainedResources()) {
-				if (getContainedResources().getResourceId(next)!=null) {
+				if (getContainedResources().getResourceId(next) != null) {
 					continue;
 				}
 				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(next.getId().getValue()));
@@ -341,8 +408,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			List<? extends BaseRuntimeChildDefinition> theChildren, boolean theIsSubElementWithinResource) throws IOException {
+	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, List<? extends BaseRuntimeChildDefinition> theChildren, boolean theIsSubElementWithinResource) throws IOException {
 		for (BaseRuntimeChildDefinition nextChild : theChildren) {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
@@ -388,19 +454,20 @@ public class JsonParser extends BaseParser implements IParser {
 					super.throwExceptionForUnknownChildType(nextChild, type);
 				}
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
-				
+
 				if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && theIsSubElementWithinResource) {
 					continue;
 				}
-				
+
 				if (nextChild instanceof RuntimeChildDeclaredExtensionDefinition) {
 					// Don't encode extensions
-//					RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition) nextChild;
-//					if (extDef.isModifier()) {
-//						addToHeldExtensions(valueIdx, modifierExtensions, extDef, nextValue);
-//					} else {
-//						addToHeldExtensions(valueIdx, extensions, extDef, nextValue);
-//					}
+					// RuntimeChildDeclaredExtensionDefinition extDef = (RuntimeChildDeclaredExtensionDefinition)
+					// nextChild;
+					// if (extDef.isModifier()) {
+					// addToHeldExtensions(valueIdx, modifierExtensions, extDef, nextValue);
+					// } else {
+					// addToHeldExtensions(valueIdx, extensions, extDef, nextValue);
+					// }
 				} else {
 
 					if (currentChildName == null || !currentChildName.equals(childName)) {
@@ -465,15 +532,13 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter,
-			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIsSubElementWithinResource) throws IOException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIsSubElementWithinResource) throws IOException, DataFormatException {
 		extractAndWriteExtensionsAsDirectChild(theElement, theEventWriter, resDef, theResDef, theResource);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions(), theIsSubElementWithinResource);
-		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren(),theIsSubElementWithinResource);
+		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren(), theIsSubElementWithinResource);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
-			boolean theIsSubElementWithinResource) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource) throws IOException {
 		String resourceId = null;
 		if (theIsSubElementWithinResource && StringUtils.isNotBlank(theResource.getId().getValue())) {
 			resourceId = theResource.getId().getValue();
@@ -482,8 +547,7 @@ public class JsonParser extends BaseParser implements IParser {
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theIsSubElementWithinResource, resourceId);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource,
-			String theResourceId) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theIsSubElementWithinResource, String theResourceId) throws IOException {
 		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -553,10 +617,10 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	/**
-	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object called _name): resource extensions, and extension extensions
+	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
+	 * called _name): resource extensions, and extension extensions
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
-			IResource theResource) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IElement theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IResource theResource) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
@@ -645,9 +709,9 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public <T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader) {
-		JsonReader reader;		
+		JsonReader reader;
 		JsonObject object;
-		
+
 		try {
 			reader = Json.createReader(theReader);
 			object = reader.readObject();
@@ -665,7 +729,11 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		ParserState<Bundle> state = ParserState.getPreAtomInstance(myContext, theResourceType, true);
-		state.enteringNewElement(null, "feed");
+		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			state.enteringNewElement(null, "Bundle");
+		} else {
+			state.enteringNewElement(null, "feed");
+		}
 
 		parseBundleChildren(object, state);
 
@@ -680,18 +748,6 @@ public class JsonParser extends BaseParser implements IParser {
 		for (String nextName : theObject.keySet()) {
 			if ("resourceType".equals(nextName)) {
 				continue;
-			} else if ("link".equals(nextName)) {
-				JsonArray entries = theObject.getJsonArray(nextName);
-				for (JsonValue jsonValue : entries) {
-					theState.enteringNewElement(null, "link");
-					JsonObject linkObj = (JsonObject) jsonValue;
-					String rel = linkObj.getString("rel", null);
-					String href = linkObj.getString("href", null);
-					theState.attributeValue("rel", rel);
-					theState.attributeValue("href", href);
-					theState.endingElement();
-				}
-				continue;
 			} else if ("entry".equals(nextName)) {
 				JsonArray entries = theObject.getJsonArray(nextName);
 				for (JsonValue jsonValue : entries) {
@@ -700,11 +756,60 @@ public class JsonParser extends BaseParser implements IParser {
 					theState.endingElement();
 				}
 				continue;
-			} else if (BUNDLE_TEXTNODE_CHILDREN.contains(nextName)) {
-				theState.enteringNewElement(null, nextName);
-				theState.string(theObject.getString(nextName, null));
-				theState.endingElement();
-				continue;
+			} else if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				if ("link".equals(nextName)) {
+					JsonArray entries = theObject.getJsonArray(nextName);
+					for (JsonValue jsonValue : entries) {
+						theState.enteringNewElement(null, "link");
+						JsonObject linkObj = (JsonObject) jsonValue;
+						String rel = linkObj.getString("rel", null);
+						String href = linkObj.getString("href", null);
+						theState.attributeValue("rel", rel);
+						theState.attributeValue("href", href);
+						theState.endingElement();
+					}
+					continue;
+				} else if (BUNDLE_TEXTNODE_CHILDREN_DSTU1.contains(nextName)) {
+					theState.enteringNewElement(null, nextName);
+					theState.string(theObject.getString(nextName, null));
+					theState.endingElement();
+					continue;
+				}
+			} else {
+				if ("link".equals(nextName)) {
+					JsonArray entries = theObject.getJsonArray(nextName);
+					for (JsonValue jsonValue : entries) {
+						theState.enteringNewElement(null, "link");
+						JsonObject linkObj = (JsonObject) jsonValue;
+						String rel = linkObj.getString("relation", null);
+						String href = linkObj.getString("url", null);
+						theState.enteringNewElement(null, "relation");
+						theState.attributeValue("value", rel);
+						theState.endingElement();
+						theState.enteringNewElement(null, "url");
+						theState.attributeValue("value", href);
+						theState.endingElement();
+						theState.endingElement();
+					}
+					continue;
+				} else if (BUNDLE_TEXTNODE_CHILDREN_DSTU2.contains(nextName)) {
+					theState.enteringNewElement(null, nextName);
+//					String obj = theObject.getString(nextName, null);
+					
+					JsonValue obj = theObject.get(nextName);
+					if (obj == null) {
+						theState.attributeValue("value", null);
+					} else if (obj instanceof JsonString) {
+						theState.attributeValue("value", theObject.getString(nextName, null));
+					} else if (obj instanceof JsonNumber) {
+						theState.attributeValue("value", obj.toString());
+					} else {
+						throw new DataFormatException("Unexpected JSON object for entry '" + nextName + "'");
+					}
+					
+					theState.endingElement();
+					continue;
+				}
 			}
 
 			JsonValue nextVal = theObject.get(nextName);
@@ -720,7 +825,9 @@ public class JsonParser extends BaseParser implements IParser {
 				continue;
 			} else if ("id".equals(nextName)) {
 				elementId = theObject.getString(nextName);
-				continue;
+				// if (myContext.getVersion().getVersion()==FhirVersionEnum.DSTU1) {
+				// continue;
+				// }
 			} else if ("_id".equals(nextName)) {
 				// _id is incorrect, but some early examples in the FHIR spec used it
 				elementId = theObject.getString(nextName);
@@ -893,7 +1000,7 @@ public class JsonParser extends BaseParser implements IParser {
 		return this;
 	}
 
-	private boolean writeAtomLink(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
+	private boolean writeAtomLinkInDstu1Format(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
 		boolean retVal = theStarted;
 		if (isNotBlank(theLink.getValue())) {
 			if (theStarted == false) {
@@ -908,7 +1015,22 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 		return retVal;
 	}
+	
+	private boolean writeAtomLinkInDstu2Format(JsonGenerator theEventWriter, String theRel, StringDt theLink, boolean theStarted) {
+		boolean retVal = theStarted;
+		if (isNotBlank(theLink.getValue())) {
+			if (theStarted == false) {
+				theEventWriter.writeStartArray("link");
+				retVal = true;
+			}
 
+			theEventWriter.writeStartObject();
+			theEventWriter.write("relation", theRel);
+			theEventWriter.write("url", theLink.getValue());
+			theEventWriter.writeEnd();
+		}
+		return retVal;
+	}
 	private void writeAuthor(BaseBundle theBundle, JsonGenerator eventWriter) {
 		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
 			eventWriter.writeStartArray("author");
@@ -920,8 +1042,21 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
-			List<HeldExtension> modifierExtensions) throws IOException {
+	private void writeCategories(JsonGenerator eventWriter, TagList categories) {
+		if (categories != null && categories.size() > 0) {
+			eventWriter.writeStartArray("category");
+			for (Tag next : categories) {
+				eventWriter.writeStartObject();
+				eventWriter.write("term", defaultString(next.getTerm()));
+				eventWriter.write("label", defaultString(next.getLabel()));
+				eventWriter.write("scheme", defaultString(next.getScheme()));
+				eventWriter.writeEnd();
+			}
+			eventWriter.writeEnd();
+		}
+	}
+
+	private void writeExtensionsAsDirectChild(IResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions) throws IOException {
 		if (extensions.isEmpty() == false) {
 			theEventWriter.writeStartArray("extension");
 			for (HeldExtension next : extensions) {
@@ -938,6 +1073,17 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
+	private void writeOptionalTagWithNumberNode(JsonGenerator theEventWriter, String theElementName, IntegerDt theValue) {
+		if (theValue != null && theValue.isEmpty()==false) {
+			theEventWriter.write(theElementName, theValue.getValue().intValue());
+		}
+	}
+
+	private void writeOptionalTagWithDecimalNode(JsonGenerator theEventWriter, String theElementName, DecimalDt theValue) {
+		if (theValue != null && theValue.isEmpty()==false) {
+			theEventWriter.write(theElementName, theValue.getValue());
+		}
+	}
 	private void writeOptionalTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theInstantDt) {
 		String str = theInstantDt.getValueAsString();
 		if (StringUtils.isNotBlank(str)) {
@@ -948,6 +1094,14 @@ public class JsonParser extends BaseParser implements IParser {
 	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, IPrimitiveDatatype<?> theIdDt) {
 		if (theIdDt != null && !theIdDt.isEmpty()) {
 			theEventWriter.write(theElementName, theIdDt.getValueAsString());
+		} else {
+			theEventWriter.writeNull(theElementName);
+		}
+	}
+
+	private void writeTagWithTextNode(JsonGenerator theEventWriter, String theElementName, String theValue) {
+		if (theValue != null && !theValue.isEmpty()) {
+			theEventWriter.write(theElementName, theValue);
 		} else {
 			theEventWriter.writeNull(theElementName);
 		}
@@ -995,7 +1149,7 @@ public class JsonParser extends BaseParser implements IParser {
 					// theEventWriter, myValue, def, "value" +
 					// WordUtils.capitalize(def.getName()));
 					String childName = myDef.getChildNameByDatatype(myValue.getClass());
-					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName,false);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, myValue, def, childName, false);
 				}
 
 				// theEventWriter.name(myUndeclaredExtension.get);
@@ -1026,7 +1180,7 @@ public class JsonParser extends BaseParser implements IParser {
 					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + value.getClass().getCanonicalName());
 				}
 				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
-				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName,true);
+				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, true);
 			}
 
 			// theEventWriter.name(myUndeclaredExtension.get);

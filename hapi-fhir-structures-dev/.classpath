@@ -6,6 +6,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="src" path="target/generated-resources/tinder"/>
 	<classpathentry kind="src" path="target/generated-sources/tinder"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
