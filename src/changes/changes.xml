@@ -156,6 +156,10 @@
 				were applied to other client instances for the same client interface as well. (Issue
 				did not affect generic/fluent clients)
 			</action>
+			<action type="fix">
+				Encoding a Binary resource without a content type set should not result in a NullPointerException. Thanks
+				to Alexander Kley for reporting!
+			</action>
 		</release>			
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

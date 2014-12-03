@@ -618,7 +618,9 @@ public class XmlParser extends BaseParser implements IParser {
 
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
-			theEventWriter.writeAttribute("contentType", bin.getContentType());
+			if (bin.getContentType() != null) {
+				theEventWriter.writeAttribute("contentType", bin.getContentType());
+			}
 			theEventWriter.writeCharacters(bin.getContentAsBase64());
 		} else {
 			encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);

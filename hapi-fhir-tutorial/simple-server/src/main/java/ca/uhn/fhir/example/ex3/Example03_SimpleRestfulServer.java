@@ -1,12 +1,12 @@
-package ca.uhn.fhir.example.ex2;
+package ca.uhn.fhir.example.ex3;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-@WebServlet("/example02/*")
-public class Example02_SimpleRestfulServer extends RestfulServer {
+@WebServlet("/example03/*")
+public class Example03_SimpleRestfulServer extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,7 +14,7 @@ public class Example02_SimpleRestfulServer extends RestfulServer {
 	protected void initialize() throws ServletException {
 
 		// Set the resource providers used by this server 
-		setResourceProviders(new Example02_PatientResourceProvider());
+		setResourceProviders(new Example03_PatientResourceProvider());
 		
 		/* This just means to use Content-Types which are not technically
 		 * FHIR compliant if a browser is detected (so that they display

@@ -93,6 +93,17 @@ public class XmlParserTest {
 		ourCtx.newXmlParser().parseResource(Profile.class, content);	
 	}
 	
+	@Test
+	public void testEncodeBinaryWithNoContentType() {
+		Binary b = new Binary();
+		b.setContent(new byte[] {1,2,3,4});
+		
+		String output = ourCtx.newXmlParser().encodeResourceToString(b);
+		ourLog.info(output);
+		
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\">AQIDBA==</Binary>", output);
+	}
+	
 	
 	@Test
 	public void testEncodeNonContained() {
