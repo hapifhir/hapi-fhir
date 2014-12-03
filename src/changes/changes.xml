@@ -156,6 +156,15 @@
 				were applied to other client instances for the same client interface as well. (Issue
 				did not affect generic/fluent clients)
 			</action>
+			<action type="fix" issue="57">
+				DateDt, DateTimeDt and types InstantDt types now do not throw an exception
+				if they are used to parse a value with the wrong level of precision for
+				the given type but do throw an exception if the wrong level of precision
+				is passed into their constructors.<![CDATA[<br/><br/>]]>
+				This means that HAPI FHIR can now successfully parse resources from external 
+				sources that have the wrong level of precision, but will generate a validation
+				error if the resource is validated. Thanks to Alexander Kley for the suggestion!
+			</action>
 			<action type="fix">
 				Encoding a Binary resource without a content type set should not result in a NullPointerException. Thanks
 				to Alexander Kley for reporting!

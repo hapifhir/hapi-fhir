@@ -14,7 +14,7 @@
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-example-simple-server</artifactId>
-	<version>0.8-SNAPSHOT</version>
+	<version>0.7</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Example - Simple Server</name>
@@ -35,14 +35,20 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.7</version>
 		</dependency>
-		<!-- At least one "structures" JAR must also be included -->
+
+		<!-- 
+		Beginning in HAPI 0.8, at least one "structures" JAR must also be included.
+		For now it is commented out. 
+		-->
+		<!-- 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>0.8-SNAPSHOT</version>
 		</dependency>
+		-->
 
 		<!-- 
 		HAPI-FHIR uses Logback for logging support. The logback library is included 

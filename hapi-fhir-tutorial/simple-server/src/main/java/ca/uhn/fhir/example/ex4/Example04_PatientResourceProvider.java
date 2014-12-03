@@ -1,4 +1,4 @@
-package ca.uhn.fhir.example.ex3;
+package ca.uhn.fhir.example.ex4;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,13 +10,10 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
@@ -24,20 +21,17 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * This is the most basic resource provider, showing only a single
  * read method on a resource provider
  */
-public class Example03_PatientResourceProvider implements IResourceProvider {
+public class Example04_PatientResourceProvider implements IResourceProvider {
 
 	private Map<Long, Patient> myPatients = new HashMap<Long, Patient>();
 	private Long myNextId = 1L;
 	
 	/** Constructor */
-	public Example03_PatientResourceProvider() {
-		Long id = myNextId++;
-		
+	public Example04_PatientResourceProvider() {
 		Patient pat1 = new Patient();
-		pat1.setId(new IdDt(id));
 		pat1.addIdentifier().setSystem("http://acme.com/MRNs").setValue("7000135");
 		pat1.addName().addFamily("Simpson").addGiven("Homer").addGiven("J");
-		myPatients.put(id, pat1);
+		myPatients.put(myNextId++, pat1);
 	}
 	
 	/** All Resource Providers must implement this method */
@@ -76,23 +70,6 @@ public class Example03_PatientResourceProvider implements IResourceProvider {
 		List<Patient> retVal = new ArrayList<Patient>();
 		retVal.addAll(myPatients.values());
 		return retVal;
-	}
-	
-	/** A search with a parameter */
-	@Search
-	public List<Patient> search(@RequiredParam(name="family") StringParam theParam) {
-		List<Patient> retVal = new ArrayList<Patient>();
-
-		// Loop through the patients looking for matches
-		for (Patient next : myPatients.values()) {
-			String familyName = next.getNameFirstRep().getFamilyAsSingleString().toLowerCase();
-			if (familyName.contains(theParam.getValue().toLowerCase()) == false) {
-				continue;
-			}
-			retVal.add(next);
-		}
-		
-		return retVal;		
 	}
 
 }

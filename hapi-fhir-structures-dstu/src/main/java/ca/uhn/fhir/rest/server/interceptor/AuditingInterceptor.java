@@ -300,9 +300,9 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	}
 	
 	/**
-	 * Create a particpant object based on information from the incoming servlet request
+	 * Create a participant object based on information from the incoming servlet request
 	 * @param theServletRequest the incoming request
-	 * @return a Particpant object populated with the user id, user name, and IP
+	 * @return a Participant object populated with the user id, user name, and IP
 	 * @throws InvalidRequestException if auditing is required but userId is not specified as a request header
 	 * @throws NotImplementedException if the authorization type is OAuth
 	 */
@@ -388,6 +388,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * @return the corresponding SecurityEventActionEnum (Read/View/Print, Create, Delete, etc)
 	 */
 	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {
+		if(resourceOperationType == null) return null;
 		switch (resourceOperationType) {
 		case READ: return SecurityEventActionEnum.READ_VIEW_PRINT;
 		case CREATE: return SecurityEventActionEnum.CREATE;
@@ -409,6 +410,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * @return the corresponding SecurityEventObjectLifecycleEnum (Access/Use, Origination/Creation, Logical Deletion, etc)
 	 */
 	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(RestfulOperationTypeEnum resourceOperationType) {
+		if(resourceOperationType == null) return null;
 		switch (resourceOperationType) {
 		case READ: return SecurityEventObjectLifecycleEnum.ACCESS_OR_USE;
 		case CREATE: return SecurityEventObjectLifecycleEnum.ORIGINATION_OR_CREATION;

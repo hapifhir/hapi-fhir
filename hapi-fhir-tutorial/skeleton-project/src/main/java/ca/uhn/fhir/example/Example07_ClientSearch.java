@@ -19,13 +19,13 @@ public class Example07_ClientSearch {
 		Patient patient = client.read(Patient.class, "4529");
 	
 		// Print the ID of the newly created resource
-		System.out.println(patient.getId());
+		System.out.println("Found ID:    " + patient.getId());
 		
 		// Change the gender and send an update to the server
 		patient.setGender(AdministrativeGenderCodesEnum.F);
 		MethodOutcome outcome = client.update().resource(patient).execute();
 		
-		System.out.println(outcome.getId());
+		System.out.println("Now have ID: " + outcome.getId());
 		
 	}
 }

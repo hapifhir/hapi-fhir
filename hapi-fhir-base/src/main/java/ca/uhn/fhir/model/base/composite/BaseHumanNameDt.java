@@ -20,6 +20,9 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -99,6 +102,28 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public String getSuffixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
 	}
+	
+	/**
+	 * Gets the value(s) for <b>text</b> (Text representation of the full name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A full text representation of the name
+     * </p> 
+	 */
+	public abstract StringDt getText() ;
+
+	/**
+	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A full text representation of the name
+     * </p> 
+	 */
+	public abstract BaseHumanNameDt setText(StringDt theValue);	
 
 	@Override
 	public String toString() {
@@ -106,6 +131,16 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		b.append("family", getFamilyAsSingleString());
 		b.append("given", getGivenAsSingleString());
 		return b.toString();
+	}
+	
+	public String getNameAsSingleString(){
+		List<StringDt> nameParts = new ArrayList<StringDt>();
+		nameParts.addAll(getPrefix());
+		nameParts.addAll(getGiven());
+		nameParts.addAll(getFamily());
+		nameParts.addAll(getSuffix());
+		if(nameParts.size() > 0) return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
+		else return getText().getValue();
 	}
 	
 }
