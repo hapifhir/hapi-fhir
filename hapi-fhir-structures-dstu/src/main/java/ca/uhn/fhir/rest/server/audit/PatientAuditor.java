@@ -51,7 +51,7 @@ public class PatientAuditor implements IResourceAuditor<Patient> {
 	@Override
 	public String getName() {
 		if(myPatient != null){
-			return "Patient: " + myPatient.getNameFirstRep().getText().getValue();
+			return "Patient: " + myPatient.getNameFirstRep().getNameAsSingleString();
 		}
 		return null;
 	}

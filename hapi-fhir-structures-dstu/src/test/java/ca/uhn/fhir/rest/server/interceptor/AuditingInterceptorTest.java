@@ -158,7 +158,7 @@ public class AuditingInterceptorTest {
 			if("00001".equals(object.getIdentifier().getValue().getValue())){
 				assertEquals("Patient: PatientOne Test", object.getName().getValue());	
 			}else if("00002".equals(object.getIdentifier().getValue().getValue())){
-				assertEquals("Patient: PatientTwo Test", object.getName().getValue());
+				assertEquals("Patient: Ms Laura Elizabeth MacDougall Sookraj B.Sc.", object.getName().getValue());
 			}else{
 				fail("Unexpected patient identifier being audited: " + object.getIdentifier().getValue().getValue());
 			}
@@ -219,10 +219,14 @@ public class AuditingInterceptorTest {
 				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
 				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
 				patient.getIdentifier().get(0).setValue("00002");
-				patient.getName().add(new HumanNameDt());
-				patient.getName().get(0).addFamily("Test");
-				patient.getName().get(0).addGiven("PatientTwo");
-				patient.getName().get(0).setText("PatientTwo Test");
+				HumanNameDt name = new HumanNameDt();
+				name.addPrefix("Ms");
+				name.addGiven("Laura");
+				name.addGiven("Elizabeth");
+				name.addFamily("MacDougall");
+				name.addFamily("Sookraj");
+				name.addSuffix("B.Sc.");
+				patient.getName().add(name);				
 				patient.getGender().setText("F");
 				patient.getId().setValue("2");
 				idToPatient.put("2", patient);
@@ -279,7 +283,6 @@ public class AuditingInterceptorTest {
 			patient.addName();
 			patient.getName().get(0).addFamily("Test");
 			patient.getName().get(0).addGiven("PatientOne");
-			patient.getName().get(0).setText("PatientOne Test");
 			patient.getGender().setText("M");
 			patient.getId().setValue("1");
 			return patient;
