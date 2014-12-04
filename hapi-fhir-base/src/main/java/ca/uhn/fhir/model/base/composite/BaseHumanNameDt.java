@@ -102,28 +102,24 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	public String getSuffixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
 	}
-	
+
 	/**
-	 * Gets the value(s) for <b>text</b> (Text representation of the full name).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>text</b> (Text representation of the full name). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A full text representation of the name
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A full text representation of the name
+	 * </p>
 	 */
-	public abstract StringDt getText() ;
+	public abstract StringDt getTextElement();
 
 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A full text representation of the name
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A full text representation of the name
+	 * </p>
 	 */
-	public abstract BaseHumanNameDt setText(StringDt theValue);	
+	public abstract BaseHumanNameDt setText(StringDt theValue);
 
 	@Override
 	public String toString() {
@@ -132,15 +128,26 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		b.append("given", getGivenAsSingleString());
 		return b.toString();
 	}
-	
-	public String getNameAsSingleString(){
+
+	/**
+	 * Returns all of the components of the name (prefix, given, family, suffix) as a 
+	 * single string with a single spaced string separating each part. 
+	 * <p>
+	 * If none of the parts are populated, returns the {@link #getTextElement() text}
+	 * element value instead.
+	 * </p>
+	 */
+	public String getNameAsSingleString() {
 		List<StringDt> nameParts = new ArrayList<StringDt>();
 		nameParts.addAll(getPrefix());
 		nameParts.addAll(getGiven());
 		nameParts.addAll(getFamily());
 		nameParts.addAll(getSuffix());
-		if(nameParts.size() > 0) return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
-		else return getText().getValue();
+		if (nameParts.size() > 0) {
+			return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
+		} else {
+			return getTextElement().getValue();
+		}
 	}
-	
+
 }
