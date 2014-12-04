@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.VersionUtil;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -50,6 +51,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -723,16 +725,19 @@ public class RestfulServer extends HttpServlet {
 
 			Collection<IResourceProvider> resourceProvider = getResourceProviders();
 			if (resourceProvider != null) {
-				Map<Class<? extends IResource>, IResourceProvider> typeToProvider = new HashMap<Class<? extends IResource>, IResourceProvider>();
+				Map<String, IResourceProvider> typeToProvider = new HashMap<String, IResourceProvider>();
 				for (IResourceProvider nextProvider : resourceProvider) {
+					
 					Class<? extends IResource> resourceType = nextProvider.getResourceType();
 					if (resourceType == null) {
 						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
 					}
-					if (typeToProvider.containsKey(resourceType)) {
-						throw new ServletException("Multiple providers for type: " + resourceType.getCanonicalName());
+					
+					String resourceName = myFhirContext.getResourceDefinition(resourceType).getName();
+					if (typeToProvider.containsKey(resourceName)) {
+						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + typeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + nextProvider.getClass().getCanonicalName() + "]");
 					}
-					typeToProvider.put(resourceType, nextProvider);
+					typeToProvider.put(resourceName, nextProvider);
 					providedResourceScanner.scanForProvidedResources(nextProvider);
 				}
 				ourLog.info("Got {} resource providers", typeToProvider.size());

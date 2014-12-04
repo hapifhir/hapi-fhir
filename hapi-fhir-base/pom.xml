@@ -223,6 +223,13 @@
 		</profile>
 		<profile>
 			<id>ANDROID</id>
+			<dependencies>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-structures-dstu</artifactId>
+					<version>0.8-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
@@ -238,6 +245,18 @@
 								<configuration>
 									<shadedArtifactAttached>false</shadedArtifactAttached>
 									<createDependencyReducedPom>true</createDependencyReducedPom>
+									<artifactSet>
+										<includes>
+											<!-- 
+											<include>javax.json:javax.json-api</include>
+											-->
+											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
+											<include>org.glassfish:javax.json</include>
+											<include>org.codehaus.woodstox:woodstox-core-asl</include>
+											<include>javax.xml.stream:stax-api</include>
+											<include>org.codehaus.woodstox:stax2-api</include>
+										</includes>
+									</artifactSet>
 									<relocations>
 										<relocation>
 											<pattern>javax.xml.stream</pattern>

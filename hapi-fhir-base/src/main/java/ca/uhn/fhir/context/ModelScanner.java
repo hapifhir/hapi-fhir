@@ -294,7 +294,7 @@ class ModelScanner {
 		}
 
 		if (blockDefinition == null && datatypeDefinition == null && resourceDefinition == null) {
-			throw new ConfigurationException("Resource type does not contain any valid HAPI-FHIR annotations: " + theClass.getCanonicalName());
+			throw new ConfigurationException("Resource class[" + theClass.getName() + "] does not contain any valid HAPI-FHIR annotations");
 		}
 	}
 
