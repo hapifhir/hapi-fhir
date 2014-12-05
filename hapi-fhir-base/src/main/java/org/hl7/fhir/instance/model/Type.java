@@ -33,11 +33,8 @@ package org.hl7.fhir.instance.model;
  */
 public abstract class Type extends Element {
 
-  private static final long serialVersionUID = 4623040030733049991L;
+	private static final long serialVersionUID = 4623040030733049991L;
 
-	public Type copy() {
-		return typedCopy();
-	}
+	public abstract Type copy();
 
-	protected abstract Type typedCopy();
 }

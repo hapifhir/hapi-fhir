@@ -32,58 +32,90 @@ package org.hl7.fhir.instance.model;
 /**
  * Primitive type "date" in FHIR: any day in a gregorian calendar
  */
-public class DateType extends PrimitiveType {
 
-  private static final long serialVersionUID = 9219236095594689166L;
-	/**
-	 * The value of the date
-	 */
-	private DateAndTime value;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
-	public DateType(DateAndTime value) {
-    this.value = value;  
-  }
+import java.util.Date;
 
-  public DateType() {
-  }
-
-  /**
-	 * @return The value of the date
-	 */
-	public DateAndTime getValue() {
-		return value;
-	}
+/**
+ * Represents a FHIR date datatype. Valid precisions values for this type are:
+ * <ul>
+ * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#YEAR}
+ * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#MONTH}
+ * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}
+ * </ul>
+ */
+@DatatypeDef(name = "date")
+public class DateType extends BaseDateTimeType {
 
 	/**
-	 * @param value The value of the date
+	 * The default precision for this type
 	 */
-	public void setValue(DateAndTime value) {
-		this.value = value;
+	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.DAY;
+
+	/**
+	 * Constructor
+	 */
+	public DateType() {
+		super();
 	}
-	
-	@Override
-  protected Type typedCopy() {
-		return copy();
+
+	/**
+	 * Constructor which accepts a date value and uses the {@link #DEFAULT_PRECISION} for this type
+	 */
+	public DateType(Date theDate) {
+		super(theDate, DEFAULT_PRECISION);
+	}
+
+	/**
+	 * Constructor which accepts a date value and a precision value. Valid precisions values for this type are:
+	 * <ul>
+	 * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#YEAR}
+	 * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#MONTH}
+	 * <li>{@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}
+	 * </ul>
+	 *
+	 * @throws ca.uhn.fhir.parser.DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public DateType(Date theDate, TemporalPrecisionEnum thePrecision) {
+		super(theDate, thePrecision);
+	}
+
+	/**
+	 * Constructor which accepts a date as a string in FHIR format
+	 *
+	 * @throws ca.uhn.fhir.parser.DataFormatException
+	 *             If the precision in the date string is not allowed for this type
+	 */
+	public DateType(String theDate) {
+		super(theDate);
 	}
 
 	@Override
-  public DateType copy() {
-		DateType dst = new DateType();
-		dst.value = value;
-		return dst;
+	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+		switch (thePrecision) {
+			case YEAR:
+			case MONTH:
+			case DAY:
+				return true;
+			default:
+				return false;
+		}
 	}
 
-  @Override
-  public String asStringValue() {
-    return value.toString();  
-  }
-
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	/**
+	 * Returns the default precision for this datatype
+	 *
+	 * @see #DEFAULT_PRECISION
+	 */
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
 	}
 
-	public boolean hasValue() {
-		return value != null;
+	@Override
+	public DateType copy() {
+		return new DateType(getValue());
 	}
-	
 }

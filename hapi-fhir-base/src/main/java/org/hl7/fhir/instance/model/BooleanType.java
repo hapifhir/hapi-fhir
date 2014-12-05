@@ -33,67 +33,60 @@ package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
+import ca.uhn.fhir.parser.DataFormatException;
+
 /**
  * Primitive type "boolean" in FHIR "true" or "false"
  */
 @DatatypeDef(name="boolean")
-public class BooleanType extends PrimitiveType {
+public class BooleanType extends PrimitiveType<Boolean> {
 
-  private static final long serialVersionUID = 2983474044199586731L;
+	private static final long serialVersionUID = 1L;
+
 	/**
-	 * The value of the boolean
+	 * Constructor
 	 */
-	private java.lang.Boolean value;
-	
-	public BooleanType(Boolean value) {
-    this.value = value;  
-  }
-
-  public BooleanType() {
-  }
-
-  /**
-	 * @return The value of the boolean
-	 */
-	public java.lang.Boolean getValue() {
-		return value;
+	public BooleanType() {
+		super();
 	}
 
 	/**
-	 * @param value The value of the boolean
+	 * Constructor
 	 */
-	public void setValue(java.lang.Boolean value) {
-	  this.value = value;
+	public BooleanType(boolean theBoolean) {
+		setValue(theBoolean);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public BooleanType(Boolean theBoolean) {
+		setValue(theBoolean);
 	}
 
 	@Override
-  public BooleanType copy() {
-		BooleanType dst = new BooleanType();
-		dst.value = value;
-		return dst;
+	protected Boolean parse(String theValue) {
+		if ("true".equals(theValue)) {
+			return Boolean.TRUE;
+		} else if ("false".equals(theValue)) {
+			return Boolean.FALSE;
+		} else {
+			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
+		}
 	}
-	
+
 	@Override
-  protected Type typedCopy() {
-		return copy();
+	protected String encode(Boolean theValue) {
+		if (Boolean.TRUE.equals(theValue)) {
+			return "true";
+		} else {
+			return "false";
+		}
 	}
 
-	public String getStringValue() {
-		return value == null ? null : value.toString();
-	}
-
-  @Override
-  public String asStringValue() {
-    return value.toString();
-  }
-	
-
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
-	}
-
-	public boolean hasValue() {
-		return value != null;
+	@Override
+	public BooleanType copy() {
+		return new BooleanType(getValue());
 	}
 	
 }

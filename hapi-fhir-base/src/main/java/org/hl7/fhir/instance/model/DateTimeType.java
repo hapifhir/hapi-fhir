@@ -29,61 +29,124 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.instance.model;
 
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
+import ca.uhn.fhir.parser.DataFormatException;
+
 /**
- * Primitive type "dateTime" in FHIR: any day in a gregorian calendar, along with the time in a 24hour clock, and possibly a timezone
+ * Represents a FHIR dateTime datatype. Valid precisions values for this type are:
+ * <ul>
+ * <li>{@link TemporalPrecisionEnum#YEAR}
+ * <li>{@link TemporalPrecisionEnum#MONTH}
+ * <li>{@link TemporalPrecisionEnum#DAY}
+ * <li>{@link TemporalPrecisionEnum#SECOND}
+ * <li>{@link TemporalPrecisionEnum#MILLI}
+ * </ul>
  */
-public class DateTimeType extends PrimitiveType {
+@DatatypeDef(name = "dateTime")
+public class DateTimeType extends BaseDateTimeType {
 
-  private static final long serialVersionUID = 7592289953733558372L;
+	private static final long serialVersionUID = 1L;
+	
 	/**
-	 * The value of the dateTime
+	 * The default precision for this type
 	 */
-	private DateAndTime value;
+	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.SECOND;
 
-	public DateTimeType(DateAndTime value) {
-    this.value = value;  
-  }
-
-  public DateTimeType() {
-  }
-
-  /**
-	 * @return The value of the dateTime
+	/**
+	 * Constructor
 	 */
-	public DateAndTime getValue() {
-		return value;
+	public DateTimeType() {
+		super();
 	}
 
 	/**
-	 * @param value The value of the dateTime
+	 * Create a new DateTimeDt with seconds precision and the local time zone
 	 */
-	public void setValue(DateAndTime value) {
-		this.value = value;
+	public DateTimeType(Date theDate) {
+		super(theDate, DEFAULT_PRECISION, TimeZone.getDefault());
 	}
-	
+
+	/**
+	 * Constructor which accepts a date value and a precision value. Valid precisions values for this type are:
+	 * <ul>
+	 * <li>{@link TemporalPrecisionEnum#YEAR}
+	 * <li>{@link TemporalPrecisionEnum#MONTH}
+	 * <li>{@link TemporalPrecisionEnum#DAY}
+	 * <li>{@link TemporalPrecisionEnum#SECOND}
+	 * <li>{@link TemporalPrecisionEnum#MILLI}
+	 * </ul>
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public DateTimeType(Date theDate, TemporalPrecisionEnum thePrecision) {
+		super(theDate, thePrecision, TimeZone.getDefault());
+	}
+
+	/**
+	 * Create a new instance using a string date/time
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public DateTimeType(String theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor which accepts a date value, precision value, and time zone. Valid precisions values for this type
+	 * are:
+	 * <ul>
+	 * <li>{@link TemporalPrecisionEnum#YEAR}
+	 * <li>{@link TemporalPrecisionEnum#MONTH}
+	 * <li>{@link TemporalPrecisionEnum#DAY}
+	 * <li>{@link TemporalPrecisionEnum#SECOND}
+	 * <li>{@link TemporalPrecisionEnum#MILLI}
+	 * </ul>
+	 */
+	public DateTimeType(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimezone) {
+		super(theDate, thePrecision, theTimezone);
+	}
+
 	@Override
-  public DateTimeType copy() {
-		DateTimeType dst = new DateTimeType();
-		dst.value = value;
-		return dst;
+	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+		switch (thePrecision) {
+		case YEAR:
+		case MONTH:
+		case DAY:
+		case SECOND:
+		case MILLI:
+			return true;
+		default:
+			return false;
+		}
 	}
-	
+
+	/**
+	 * Returns a new instance of DateTimeDt with the current system time and SECOND precision and the system local time
+	 * zone
+	 */
+	public static DateTimeType withCurrentTime() {
+		return new DateTimeType(new Date(), TemporalPrecisionEnum.SECOND, TimeZone.getDefault());
+	}
+
+	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
 	@Override
-  protected Type typedCopy() {
-		return copy();
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
 	}
 
-  @Override
-  public String asStringValue() {
-    return value.toString();  
-  }
-
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	@Override
+	public DateTimeType copy() {
+		return new DateTimeType(getValueAsString());
 	}
 
-	public boolean hasValue() {
-		return value != null;
-	}
-	
 }

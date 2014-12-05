@@ -30,10 +30,10 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 /**
- * Primitive type "code" in FHIR, where the code is tied to an enumerated list of possible valuse
+ * Primitive type "code" in FHIR, where the code is tied to an enumerated list of possible values
  * 
  */
-public class Enumeration<T extends Enum<?>> extends PrimitiveType {
+public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> {
 
   private static final long serialVersionUID = 5502756236610771914L;
   
@@ -65,18 +65,24 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType {
   public void setValue(T value) {
     this.value = value;
   }
-  
-	@Override
+
+  @Override
+  protected T parse(String theValue) {
+    return null;
+  }
+
+  @Override
+  protected String encode(T theValue) {
+    return null;
+  }
+
+  @Override
   public Enumeration<T> copy() {
 		Enumeration<T> dst = new Enumeration<T>();
 		dst.value = value;
 		return dst;
 	}
 
-	@Override
-  protected Type typedCopy() {
-	  return copy();
-  }
 
   @Override
   public String asStringValue() {

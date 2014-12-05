@@ -28,61 +28,53 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.instance.model;
 
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /**
  * Primitive type "code" in FHIR, when not bound to an enumerated list of codes
  */
-public class CodeType extends PrimitiveType {
+@DatatypeDef(name = "code")
+public class CodeType extends PrimitiveType<String> implements Comparable<CodeType> {
 
-  private static final long serialVersionUID = 5312948828142916756L;
 	/**
-	 * The value of the code
+	 * Constructor
 	 */
-	private String value;
-
-	public CodeType(String value) {
-    this.value = value;  
-  }
-
-  public CodeType() {
-  }
-
-  /**
-	 * @return The value of the code
-	 */
-	public String getValue() {
-		return value;
+	public CodeType() {
+		super();
 	}
 
 	/**
-	 * @param value The value of the code
+	 * Constructor which accepts a string code
 	 */
-	public CodeType setValue(String value) {
-		this.value = value;
-		return this;
-	}
-	
-	@Override
-  public CodeType copy() {
-		CodeType dst = new CodeType();
-		dst.value = value;
-		return dst;
-	}
-	
-	@Override
-  protected Type typedCopy() {
-		return copy();
+	public CodeType(String theCode) {
+		setValue(theCode);
 	}
 
-  @Override
-  public String asStringValue() {
-    return value;
-  }
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	@Override
+	public int compareTo(CodeType theCode) {
+		if (theCode == null) {
+			return 1;
+		}
+		return defaultString(getValue()).compareTo(defaultString(theCode.getValue()));
 	}
 
-	public boolean hasValue() {
-		return value != null;
+	@Override
+	protected String parse(String theValue) {
+		return theValue.trim();
 	}
-	
+
+	@Override
+	protected String encode(String theValue) {
+		return theValue;
+	}
+
+	@Override
+	public CodeType copy() {
+		return new CodeType(getValue());
+	}
+
 }

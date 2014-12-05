@@ -31,64 +31,168 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.instance.model;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import ca.uhn.fhir.parser.DataFormatException;
+
 /**
- * Primitive type "instant" in FHIR: a value date time with a known timezone
- * @author Grahame
- *
+ * Represents a FHIR instant datatype. Valid precisions values for this type are:
+ * <ul>
+ * <li>{@link TemporalPrecisionEnum#SECOND}
+ * <li>{@link TemporalPrecisionEnum#MILLI}
+ * </ul>
  */
-public class InstantType extends PrimitiveType {
+public class InstantType extends BaseDateTimeType {
 
-  private static final long serialVersionUID = -2336693958779190094L;
 	/**
-	 * The value for the instant
+	 * The default precision for this type
 	 */
-	private DateAndTime value;
+	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.MILLI;
 
-	public InstantType(DateAndTime value) {
-    this.value = value;  
-  }
-
-  public InstantType() {
-  }
-
-  /**
-	 * @return the instant
+	/**
+	 * Constructor which creates an InstantDt with <b>no timne value</b>. Note
+	 * that unlike the default constructor for the Java {@link Date} or
+	 * {@link Calendar} objects, this constructor does not initialize the object
+	 * with the current time.
+	 * 
+	 * @see #withCurrentTime() to create a new object that has been initialized
+	 *      with the current time.
 	 */
-	public DateAndTime getValue() {
-		return value;
+	public InstantType() {
+		super();
 	}
 
 	/**
-	 * @param value the instant
+	 * Create a new DateTimeDt
 	 */
-	public void setValue(DateAndTime value) {
-		this.value = value;
-	} 
+	public InstantType(Calendar theCalendar) {
+		super(theCalendar.getTime(), DEFAULT_PRECISION, theCalendar.getTimeZone());
+	}
+
+	/**
+	 * Create a new instance using the given date, precision level, and time zone
+	 * 
+	 * @throws DataFormatException
+	 *             If the specified precision is not allowed for this type
+	 */
+	public InstantType(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimezone) {
+		super(theDate, thePrecision, theTimezone);
+	}
+
+
+	/**
+	 * Create a new DateTimeDt using an existing value. <b>Use this constructor with caution</b>,
+	 * as it may create more precision than warranted (since for example it is possible to pass in
+	 * a DateTime with only a year, and this constructor will convert to an InstantDt with 
+	 * milliseconds precision).
+	 */
+	public InstantType(BaseDateTimeType theDateTime) {
+		// Do not call super(foo) here, we don't want to trigger a DataFormatException
+		setValue(theDateTime.getValue());
+		setPrecision(DEFAULT_PRECISION);
+		setTimeZone(theDateTime.getTimeZone());
+	}
+
+	/**
+	 * Create a new DateTimeDt with the given date/time and {@link TemporalPrecisionEnum#MILLI} precision
+	 */
+	public InstantType(Date theDate) {
+		super(theDate, DEFAULT_PRECISION, TimeZone.getDefault());
+	}
+
+	/**
+	 * Constructor which accepts a date value and a precision value. Valid
+	 * precisions values for this type are:
+	 * <ul>
+	 * <li>{@link TemporalPrecisionEnum#SECOND}
+	 * <li>{@link TemporalPrecisionEnum#MILLI}
+	 * </ul>
+	 */
+	public InstantType(Date theDate, TemporalPrecisionEnum thePrecision) {
+		setValue(theDate);
+		setPrecision(thePrecision);
+		setTimeZone(TimeZone.getDefault());
+	}
+
+	/**
+	 * Create a new InstantDt from a string value
+	 * 
+	 * @param theString
+	 *            The string representation of the string. Must be in a valid
+	 *            format according to the FHIR specification
+	 * @throws DataFormatException
+	 */
+	public InstantType(String theString) {
+		super(theString);
+	}
+
+	/**
+	 * Invokes {@link Date#after(Date)} on the contained Date against the given
+	 * date
+	 * 
+	 * @throws NullPointerException
+	 *             If the {@link #getValue() contained Date} is null
+	 */
+	public boolean after(Date theDate) {
+		return getValue().after(theDate);
+	}
+
+	/**
+	 * Invokes {@link Date#before(Date)} on the contained Date against the given
+	 * date
+	 * 
+	 * @throws NullPointerException
+	 *             If the {@link #getValue() contained Date} is null
+	 */
+	public boolean before(Date theDate) {
+		return getValue().before(theDate);
+	}
+
+	/**
+	 * Sets the value of this instant to the current time (from the system
+	 * clock) and the local/default timezone (as retrieved using
+	 * {@link TimeZone#getDefault()}. This TimeZone is generally obtained from
+	 * the underlying OS.
+	 */
+	public void setToCurrentTimeInLocalTimeZone() {
+		setValue(new Date());
+		setTimeZone(TimeZone.getDefault());
+	}
+
 	@Override
-  protected Type typedCopy() {
-		return copy();
+	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
+		switch (thePrecision) {
+		case SECOND:
+		case MILLI:
+			return true;
+		default:
+			return false;
+		}
 	}
+
+	/**
+	 * Factory method which creates a new InstantDt with millisecond precision and initializes it with the
+	 * current time and the system local timezone.
+	 */
+	public static InstantType withCurrentTime() {
+		return new InstantType(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
+	}
+
+	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
 	@Override
-  public InstantType copy() {
-		InstantType dst = new InstantType();
-		dst.value = value;
-		return dst;
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
 	}
 
-	public String getStringValue() {
-	  return value == null ? null : value.toString();
-  }
 
-  @Override
-  public String asStringValue() {
-    return value.toString();
-  }
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	@Override
+	public InstantType copy() {
+		return new InstantType(getValue());
 	}
-
-	public boolean hasValue() {
-		return value != null;
-	}
-	
 }

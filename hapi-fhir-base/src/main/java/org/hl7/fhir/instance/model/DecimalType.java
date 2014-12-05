@@ -32,90 +32,124 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.instance.model;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
 /**
  * Primitive type "decimal" in FHIR: A rational number
  */
-public class DecimalType extends PrimitiveType {
-
-  private static final long serialVersionUID = 2006555241525096267L;
+@DatatypeDef(name = "decimal")
+public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable<DecimalType> {
 
 	/**
-	 * The actual value of the decimal
+	 * Constructor
 	 */
-  private BigDecimal value;
-  
-  /**
-   * The exact way to represent this on the wire. In the absent of a specified representation, the natural representation of the BigDecimal value will be used.
-   */
-  private String original;
-
-  public DecimalType(BigDecimal value) {
-    this.value = value;  
-    if (value != null)
-      original = value.toString();
-  }
-
-  public DecimalType() {
-    // TODO Auto-generated constructor stub
-  }
-
-  /**
-   * @return the value of the decimal
-   */
-  public BigDecimal getValue() {
-    return value;
-  }
-
-  /**
-   * @param value the value of the decimal
-   */
-  public void setValue(BigDecimal value) {
-    this.value = value;
-    this.original = null;
-  } 
-
-  /**
-   * @return the exact representation of the decimal
-   */
-  public String getOriginal() {
-    return original;
-  }
-
-  /**
-   * @param original the exact representation of the decimal
-   */
-  public void setOriginal(String original) {
-    this.original = original;
-  } 
-
-	@Override
-  public DecimalType copy() {
-		DecimalType dst = new DecimalType();
-		dst.value = value;
-		dst.original = original;
-		return dst;
-	}
-	@Override
-  protected Type typedCopy() {
-		return copy();
+	public DecimalType() {
+		super();
 	}
 
-	public String getStringValue() {
-	  return value == null ? null : value.toString();
-  }
-
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	/**
+	 * Constructor
+	 */
+	public DecimalType(BigDecimal theValue) {
+		setValue(theValue);
 	}
 
-	public boolean hasValue() {
-		return value != null;
+	/**
+	 * Constructor
+	 */
+	public DecimalType(double theValue) {
+		// Use the valueOf here because the constructor gives crazy precision
+		// changes due to the floating point conversion
+		setValue(BigDecimal.valueOf(theValue));
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DecimalType(long theValue) {
+		setValue(new BigDecimal(theValue));
+	}
+
+	/**
+	 * Constructor
+	 */
+	public DecimalType(String theValue) {
+		setValue(new BigDecimal(theValue));
 	}
 
 	@Override
-  public String asStringValue() {
-	  return hasValue() ? value.toString() : "";
-  }
-	
+	public int compareTo(DecimalType theObj) {
+		if (getValue() == null && theObj.getValue() == null) {
+			return 0;
+		}
+		if (getValue() != null && theObj.getValue() == null) {
+			return 1;
+		}
+		if (getValue() == null && theObj.getValue() != null) {
+			return -1;
+		}
+		return getValue().compareTo(theObj.getValue());
+	}
+
+	@Override
+	protected String encode(BigDecimal theValue) {
+		return getValue().toPlainString();
+	}
+
+	/**
+	 * Gets the value as an integer, using {@link BigDecimal#intValue()}
+	 */
+	public int getValueAsInteger() {
+		return getValue().intValue();
+	}
+
+	public Number getValueAsNumber() {
+		return getValue();
+	}
+
+	@Override
+	protected BigDecimal parse(String theValue) {
+		return new BigDecimal(theValue);
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 */
+	public void round(int thePrecision) {
+		if (getValue() != null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision));
+			setValue(newValue);
+		}
+	}
+
+	/**
+	 * Rounds the value to the given prevision
+	 * 
+	 * @see MathContext#getPrecision()
+	 * @see MathContext#getRoundingMode()
+	 */
+	public void round(int thePrecision, RoundingMode theRoundingMode) {
+		if (getValue() != null) {
+			BigDecimal newValue = getValue().round(new MathContext(thePrecision, theRoundingMode));
+			setValue(newValue);
+		}
+	}
+
+	/**
+	 * Sets a new value using an integer
+	 */
+	public void setValueAsInteger(int theValue) {
+		setValue(new BigDecimal(theValue));
+	}
+
+	@Override
+	public DecimalType copy() {
+		return new DecimalType(getValue());
+	}
+
 }

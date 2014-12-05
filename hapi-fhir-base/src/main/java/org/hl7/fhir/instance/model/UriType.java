@@ -28,61 +28,136 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.instance.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
+import ca.uhn.fhir.parser.DataFormatException;
+
 /**
  * Primitive type "uri" in FHIR: any valid URI. Sometimes constrained to be only an absolute URI, and sometimes constrained to be a literal reference
  */
-public class UriType extends PrimitiveType {
+@DatatypeDef(name = "uri")
+public class UriType extends PrimitiveType<URI> {
+
+	private static final long serialVersionUID = 1L;
 	
-  private static final long serialVersionUID = -4774715915772053479L;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UriType.class);
+
 	/**
-	 * any valid URI
+	 * Constructor
 	 */
-	protected String value;
-
-  public UriType() {
-  }
-
-  public UriType(String uri) {
-    this.value = uri;
-  }
-
-  /**
-	 * @return - the URI value
-	 */
-	public String getValue() {
-		return value;
+	public UriType() {
+		// nothing
 	}
 
 	/**
-	 * @param value any valid URI
+	 * Constructor
 	 */
-	public void setValue(String value) {
-		this.value = value;
+	public UriType(String theValue) {
+		setValueAsString(theValue);
 	}
-	
+
+	/**
+	 * Constructor
+	 */
+	public UriType(URI theValue) {
+		setValue(theValue);
+	}
+
 	@Override
-  public UriType copy() {
-		UriType dst = new UriType();
-		dst.value = value;
-		return dst;
+	public UriType copy() {
+		return new UriType(getValue());
 	}
-	
+
 	@Override
-  protected Type typedCopy() {
-		return copy();
+	protected String encode(URI theValue) {
+		return getValue().toASCIIString();
 	}
 
-  @Override
-  public String asStringValue() {
-    return value;
-  }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+		UriType other = (UriType) obj;
+		if (getValue() == null && other.getValue() == null) {
+			return true;
+		}
+		if (getValue() == null || other.getValue() == null) {
+			return false;
+		}
+
+		URI normalize = normalize(getValue());
+		URI normalize2 = normalize(other.getValue());
+		return normalize.equals(normalize2);
 	}
 
-	public boolean hasValue() {
-		return value != null;
+	/**
+	 * Compares the given string to the string representation of this URI. In many cases it is preferable to use this
+	 * instead of the standard {@link #equals(Object)} method, since that method returns <code>false</code> unless it is
+	 * passed an instance of {@link UriType}
+	 */
+	public boolean equals(String theString) {
+		return StringUtils.equals(getValueAsString(), theString);
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+
+		URI normalize = normalize(getValue());
+		result = prime * result + ((normalize == null) ? 0 : normalize.hashCode());
+
+		return result;
+	}
+
+	private URI normalize(URI theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		URI retVal = (theValue.normalize());
+		String urlString = retVal.toString();
+		if (urlString.endsWith("/") && urlString.length() > 1) {
+			try {
+				retVal = new URI(urlString.substring(0, urlString.length() - 1));
+			} catch (URISyntaxException e) {
+				ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
+			}
+		}
+		return retVal;
+	}
+
+	@Override
+	protected URI parse(String theValue) {
+		try {
+			return new URI(theValue);
+		} catch (URISyntaxException e) {
+			throw new DataFormatException("Unable to parse URI value", e);
+		}
+	}
+
+	/**
+	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
+	 * in the value of the newly created UriDt, per the FHIR specification).
+	 * 
+	 * @param theOid
+	 *            The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
+	 *            <code>null</code> value)
+	 * @return A new UriDt instance
+	 */
+	public static UriType fromOid(String theOid) {
+		if (theOid == null) {
+			return new UriType();
+		}
+		return new UriType("urn:oid:" + theOid);
+	}
+
 }
