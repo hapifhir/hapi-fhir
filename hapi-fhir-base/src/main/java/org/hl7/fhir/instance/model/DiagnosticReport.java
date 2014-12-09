@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="DiagnosticReport", profile="http://hl7.org/fhir/Profile/DiagnosticReport")
 public class DiagnosticReport extends DomainResource {
 
-    public enum DiagnosticReportStatus {
+    public enum DiagnosticReportStatus implements FhirEnum {
         /**
          * The existence of the report is registered, but there is nothing yet available.
          */
@@ -82,7 +82,10 @@ public class DiagnosticReport extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticReportStatus fromCode(String codeString) throws Exception {
+
+      public static final DiagnosticReportStatusEnumFactory ENUM_FACTORY = new DiagnosticReportStatusEnumFactory();
+
+        public static DiagnosticReportStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("registered".equals(codeString))
@@ -101,8 +104,9 @@ public class DiagnosticReport extends DomainResource {
           return CANCELLED;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown DiagnosticReportStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticReportStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REGISTERED: return "registered";
@@ -157,8 +161,8 @@ public class DiagnosticReport extends DomainResource {
         }
     }
 
-  public static class DiagnosticReportStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DiagnosticReportStatusEnumFactory implements EnumFactory<DiagnosticReportStatus> {
+    public DiagnosticReportStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -178,9 +182,9 @@ public class DiagnosticReport extends DomainResource {
           return DiagnosticReportStatus.CANCELLED;
         if ("entered in error".equals(codeString))
           return DiagnosticReportStatus.ENTEREDINERROR;
-        throw new Exception("Unknown DiagnosticReportStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticReportStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DiagnosticReportStatus code) throws IllegalArgumentException {
       if (code == DiagnosticReportStatus.REGISTERED)
         return "registered";
       if (code == DiagnosticReportStatus.PARTIAL)
@@ -569,7 +573,7 @@ public class DiagnosticReport extends DomainResource {
      */
     public DiagnosticReport setStatus(DiagnosticReportStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<DiagnosticReportStatus>();
+          this.status = new Enumeration<DiagnosticReportStatus>(DiagnosticReportStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -605,14 +609,14 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @return The date and/or time that this version of the report was released from the source diagnostic service.
      */
-    public DateAndTime getIssued() { 
+    public Date getIssued() { 
       return this.issued == null ? null : this.issued.getValue();
     }
 
     /**
      * @param value The date and/or time that this version of the report was released from the source diagnostic service.
      */
-    public DiagnosticReport setIssued(DateAndTime value) { 
+    public DiagnosticReport setIssued(Date value) { 
         if (this.issued == null)
           this.issued = new DateTimeType();
         this.issued.setValue(value);
@@ -1230,12 +1234,12 @@ public class DiagnosticReport extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="patient", path="DiagnosticReport.subject", description="The subject of the report if a patient", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="What was requested", type="reference" )
+  public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
   @SearchParamDefinition(name="name", path="DiagnosticReport.name", description="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)", type="token" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="What was requested", type="reference" )
-  public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report", type="token" )
   public static final String SP_SERVICE = "service";
   @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )

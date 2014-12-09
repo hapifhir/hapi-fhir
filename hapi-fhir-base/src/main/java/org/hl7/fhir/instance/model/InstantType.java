@@ -34,8 +34,7 @@ package org.hl7.fhir.instance.model;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import ca.uhn.fhir.parser.DataFormatException;
+import java.util.zip.DataFormatException;
 
 /**
  * Represents a FHIR instant datatype. Valid precisions values for this type are:
@@ -46,6 +45,8 @@ import ca.uhn.fhir.parser.DataFormatException;
  */
 public class InstantType extends BaseDateTimeType {
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * The default precision for this type
 	 */
@@ -195,4 +196,22 @@ public class InstantType extends BaseDateTimeType {
 	public InstantType copy() {
 		return new InstantType(getValue());
 	}
+
+	/**
+	 * Returns a new instance of DateTimeType with the current system time and MILLI precision and the system local time
+	 * zone
+	 */
+	public static InstantType now() {
+		return new InstantType(new Date(), TemporalPrecisionEnum.MILLI, TimeZone.getDefault());
+	}
+
+	/**
+	 * Creates a new instance by parsing an HL7 v3 format date time string
+	 */
+	public static InstantType parseV3(String theV3String) {
+		InstantType retVal = new InstantType();
+		retVal.setValueAsV3String(theV3String);
+		return retVal;
+	}
+
 }

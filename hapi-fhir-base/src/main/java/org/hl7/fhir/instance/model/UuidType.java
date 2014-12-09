@@ -28,16 +28,39 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.instance.model;
 
+import java.net.URI;
+
 public class UuidType extends UriType {
 
-  public UuidType(String value) {
-    this.value = value;
-  }
+	private static final long serialVersionUID = 2L;
 
-  public UuidType() {
-  }
+	/**
+	 * Constructor
+	 */
+	public UuidType() {
+		super();
+	}
 
-  private static final long serialVersionUID = -2355185818258961443L;
+	/**
+	 * Constructor
+	 */
+	public UuidType(String theValue) {
+		super(theValue);
+	}
 
+	/**
+	 * Constructor
+	 */
+	public UuidType(URI theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@Override
+	public UuidType copy() {
+		return new UuidType(getValue());
+	}
 	
 }

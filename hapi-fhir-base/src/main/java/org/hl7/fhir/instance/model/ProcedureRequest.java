@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="ProcedureRequest", profile="http://hl7.org/fhir/Profile/ProcedureRequest")
 public class ProcedureRequest extends DomainResource {
 
-    public enum ProcedureRequestStatus {
+    public enum ProcedureRequestStatus implements FhirEnum {
         /**
          * The request has been placed.
          */
@@ -86,7 +86,10 @@ public class ProcedureRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRequestStatus fromCode(String codeString) throws Exception {
+
+      public static final ProcedureRequestStatusEnumFactory ENUM_FACTORY = new ProcedureRequestStatusEnumFactory();
+
+        public static ProcedureRequestStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -107,8 +110,9 @@ public class ProcedureRequest extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new Exception("Unknown ProcedureRequestStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUESTED: return "requested";
@@ -167,8 +171,8 @@ public class ProcedureRequest extends DomainResource {
         }
     }
 
-  public static class ProcedureRequestStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ProcedureRequestStatusEnumFactory implements EnumFactory<ProcedureRequestStatus> {
+    public ProcedureRequestStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -190,9 +194,9 @@ public class ProcedureRequest extends DomainResource {
           return ProcedureRequestStatus.REJECTED;
         if ("failed".equals(codeString))
           return ProcedureRequestStatus.FAILED;
-        throw new Exception("Unknown ProcedureRequestStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ProcedureRequestStatus code) throws IllegalArgumentException {
       if (code == ProcedureRequestStatus.REQUESTED)
         return "requested";
       if (code == ProcedureRequestStatus.RECEIVED)
@@ -215,7 +219,7 @@ public class ProcedureRequest extends DomainResource {
       }
     }
 
-    public enum ProcedureRequestMode {
+    public enum ProcedureRequestMode implements FhirEnum {
         /**
          * planned.
          */
@@ -232,7 +236,10 @@ public class ProcedureRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRequestMode fromCode(String codeString) throws Exception {
+
+      public static final ProcedureRequestModeEnumFactory ENUM_FACTORY = new ProcedureRequestModeEnumFactory();
+
+        public static ProcedureRequestMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("planned".equals(codeString))
@@ -241,8 +248,9 @@ public class ProcedureRequest extends DomainResource {
           return PROPOSED;
         if ("ordered".equals(codeString))
           return ORDERED;
-        throw new Exception("Unknown ProcedureRequestMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PLANNED: return "planned";
@@ -277,8 +285,8 @@ public class ProcedureRequest extends DomainResource {
         }
     }
 
-  public static class ProcedureRequestModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ProcedureRequestModeEnumFactory implements EnumFactory<ProcedureRequestMode> {
+    public ProcedureRequestMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -288,9 +296,9 @@ public class ProcedureRequest extends DomainResource {
           return ProcedureRequestMode.PROPOSED;
         if ("ordered".equals(codeString))
           return ProcedureRequestMode.ORDERED;
-        throw new Exception("Unknown ProcedureRequestMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ProcedureRequestMode code) throws IllegalArgumentException {
       if (code == ProcedureRequestMode.PLANNED)
         return "planned";
       if (code == ProcedureRequestMode.PROPOSED)
@@ -301,7 +309,7 @@ public class ProcedureRequest extends DomainResource {
       }
     }
 
-    public enum ProcedureRequestPriority {
+    public enum ProcedureRequestPriority implements FhirEnum {
         /**
          * The request has a normal priority.
          */
@@ -322,7 +330,10 @@ public class ProcedureRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRequestPriority fromCode(String codeString) throws Exception {
+
+      public static final ProcedureRequestPriorityEnumFactory ENUM_FACTORY = new ProcedureRequestPriorityEnumFactory();
+
+        public static ProcedureRequestPriority fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("routine".equals(codeString))
@@ -333,8 +344,9 @@ public class ProcedureRequest extends DomainResource {
           return STAT;
         if ("asap".equals(codeString))
           return ASAP;
-        throw new Exception("Unknown ProcedureRequestPriority code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestPriority code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ROUTINE: return "routine";
@@ -373,8 +385,8 @@ public class ProcedureRequest extends DomainResource {
         }
     }
 
-  public static class ProcedureRequestPriorityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ProcedureRequestPriorityEnumFactory implements EnumFactory<ProcedureRequestPriority> {
+    public ProcedureRequestPriority fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -386,9 +398,9 @@ public class ProcedureRequest extends DomainResource {
           return ProcedureRequestPriority.STAT;
         if ("asap".equals(codeString))
           return ProcedureRequestPriority.ASAP;
-        throw new Exception("Unknown ProcedureRequestPriority code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRequestPriority code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ProcedureRequestPriority code) throws IllegalArgumentException {
       if (code == ProcedureRequestPriority.ROUTINE)
         return "routine";
       if (code == ProcedureRequestPriority.URGENT)
@@ -868,7 +880,7 @@ public class ProcedureRequest extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<ProcedureRequestStatus>();
+          this.status = new Enumeration<ProcedureRequestStatus>(ProcedureRequestStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -917,7 +929,7 @@ public class ProcedureRequest extends DomainResource {
         this.mode = null;
       else {
         if (this.mode == null)
-          this.mode = new Enumeration<ProcedureRequestMode>();
+          this.mode = new Enumeration<ProcedureRequestMode>(ProcedureRequestMode.ENUM_FACTORY);
         this.mode.setValue(value);
       }
       return this;
@@ -1045,14 +1057,14 @@ public class ProcedureRequest extends DomainResource {
     /**
      * @return The time when the request was made.
      */
-    public DateAndTime getOrderedOn() { 
+    public Date getOrderedOn() { 
       return this.orderedOn == null ? null : this.orderedOn.getValue();
     }
 
     /**
      * @param value The time when the request was made.
      */
-    public ProcedureRequest setOrderedOn(DateAndTime value) { 
+    public ProcedureRequest setOrderedOn(Date value) { 
       if (value == null)
         this.orderedOn = null;
       else {
@@ -1145,7 +1157,7 @@ public class ProcedureRequest extends DomainResource {
         this.priority = null;
       else {
         if (this.priority == null)
-          this.priority = new Enumeration<ProcedureRequestPriority>();
+          this.priority = new Enumeration<ProcedureRequestPriority>(ProcedureRequestPriority.ENUM_FACTORY);
         this.priority.setValue(value);
       }
       return this;

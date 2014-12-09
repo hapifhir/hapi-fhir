@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="DeviceComponent", profile="http://hl7.org/fhir/Profile/DeviceComponent")
 public class DeviceComponent extends DomainResource {
 
-    public enum MeasurementPrinciple {
+    public enum MeasurementPrinciple implements FhirEnum {
         /**
          * Measurement principle isn't in the list.
          */
@@ -94,7 +94,10 @@ public class DeviceComponent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MeasurementPrinciple fromCode(String codeString) throws Exception {
+
+      public static final MeasurementPrincipleEnumFactory ENUM_FACTORY = new MeasurementPrincipleEnumFactory();
+
+        public static MeasurementPrinciple fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("other".equals(codeString))
@@ -119,8 +122,9 @@ public class DeviceComponent extends DomainResource {
           return ACOUSTICAL;
         if ("manual".equals(codeString))
           return MANUAL;
-        throw new Exception("Unknown MeasurementPrinciple code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MeasurementPrinciple code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case OTHER: return "other";
@@ -187,8 +191,8 @@ public class DeviceComponent extends DomainResource {
         }
     }
 
-  public static class MeasurementPrincipleEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MeasurementPrincipleEnumFactory implements EnumFactory<MeasurementPrinciple> {
+    public MeasurementPrinciple fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -214,9 +218,9 @@ public class DeviceComponent extends DomainResource {
           return MeasurementPrinciple.ACOUSTICAL;
         if ("manual".equals(codeString))
           return MeasurementPrinciple.MANUAL;
-        throw new Exception("Unknown MeasurementPrinciple code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MeasurementPrinciple code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MeasurementPrinciple code) throws IllegalArgumentException {
       if (code == MeasurementPrinciple.OTHER)
         return "other";
       if (code == MeasurementPrinciple.CHEMICAL)
@@ -564,14 +568,14 @@ public class DeviceComponent extends DomainResource {
     /**
      * @return Describes the timestamp for the most recent system change which includes device configuration or setting change.
      */
-    public DateAndTime getLastSystemChange() { 
+    public Date getLastSystemChange() { 
       return this.lastSystemChange == null ? null : this.lastSystemChange.getValue();
     }
 
     /**
      * @param value Describes the timestamp for the most recent system change which includes device configuration or setting change.
      */
-    public DeviceComponent setLastSystemChange(DateAndTime value) { 
+    public DeviceComponent setLastSystemChange(Date value) { 
         if (this.lastSystemChange == null)
           this.lastSystemChange = new InstantType();
         this.lastSystemChange.setValue(value);
@@ -763,7 +767,7 @@ public class DeviceComponent extends DomainResource {
         this.measurementPrinciple = null;
       else {
         if (this.measurementPrinciple == null)
-          this.measurementPrinciple = new Enumeration<MeasurementPrinciple>();
+          this.measurementPrinciple = new Enumeration<MeasurementPrinciple>(MeasurementPrinciple.ENUM_FACTORY);
         this.measurementPrinciple.setValue(value);
       }
       return this;

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Fri, Dec 5, 2014 09:17+1100 for FHIR v0.3.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-
 /**
  * Base Resource for everything.
  */
@@ -168,14 +168,14 @@ public abstract class Resource extends Base {
         /**
          * @return When the resource last changed - e.g. when the version changed.
          */
-        public DateAndTime getLastUpdated() { 
+        public Date getLastUpdated() { 
           return this.lastUpdated == null ? null : this.lastUpdated.getValue();
         }
 
         /**
          * @param value When the resource last changed - e.g. when the version changed.
          */
-        public ResourceMetaComponent setLastUpdated(DateAndTime value) { 
+        public ResourceMetaComponent setLastUpdated(Date value) { 
           if (value == null)
             this.lastUpdated = null;
           else {

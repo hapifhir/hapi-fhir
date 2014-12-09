@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Alert", profile="http://hl7.org/fhir/Profile/Alert")
 public class Alert extends DomainResource {
 
-    public enum AlertStatus {
+    public enum AlertStatus implements FhirEnum {
         /**
          * A current alert that should be displayed to a user. A system may use the category to determine which roles should view the alert.
          */
@@ -62,7 +62,10 @@ public class Alert extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AlertStatus fromCode(String codeString) throws Exception {
+
+      public static final AlertStatusEnumFactory ENUM_FACTORY = new AlertStatusEnumFactory();
+
+        public static AlertStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -71,8 +74,9 @@ public class Alert extends DomainResource {
           return INACTIVE;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown AlertStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AlertStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ACTIVE: return "active";
@@ -107,8 +111,8 @@ public class Alert extends DomainResource {
         }
     }
 
-  public static class AlertStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AlertStatusEnumFactory implements EnumFactory<AlertStatus> {
+    public AlertStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class Alert extends DomainResource {
           return AlertStatus.INACTIVE;
         if ("entered in error".equals(codeString))
           return AlertStatus.ENTEREDINERROR;
-        throw new Exception("Unknown AlertStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AlertStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AlertStatus code) throws IllegalArgumentException {
       if (code == AlertStatus.ACTIVE)
         return "active";
       if (code == AlertStatus.INACTIVE)
@@ -290,7 +294,7 @@ public class Alert extends DomainResource {
      */
     public Alert setStatus(AlertStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<AlertStatus>();
+          this.status = new Enumeration<AlertStatus>(AlertStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

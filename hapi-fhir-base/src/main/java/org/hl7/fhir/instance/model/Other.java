@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -263,14 +263,14 @@ public class Other extends DomainResource {
     /**
      * @return Identifies when the resource was first created.
      */
-    public DateAndTime getCreated() { 
+    public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value Identifies when the resource was first created.
      */
-    public Other setCreated(DateAndTime value) { 
+    public Other setCreated(Date value) { 
       if (value == null)
         this.created = null;
       else {

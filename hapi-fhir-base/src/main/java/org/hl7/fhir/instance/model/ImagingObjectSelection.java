@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -1103,14 +1103,14 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
     /**
      * @return Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource.
      */
-    public DateAndTime getAuthoringTime() { 
+    public Date getAuthoringTime() { 
       return this.authoringTime == null ? null : this.authoringTime.getValue();
     }
 
     /**
      * @param value Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource.
      */
-    public ImagingObjectSelection setAuthoringTime(DateAndTime value) { 
+    public ImagingObjectSelection setAuthoringTime(Date value) { 
       if (value == null)
         this.authoringTime = null;
       else {

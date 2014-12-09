@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Condition", profile="http://hl7.org/fhir/Profile/Condition")
 public class Condition extends DomainResource {
 
-    public enum ConditionStatus {
+    public enum ConditionStatus implements FhirEnum {
         /**
          * This is a tentative diagnosis - still a candidate that is under consideration.
          */
@@ -66,7 +66,10 @@ public class Condition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ConditionStatus fromCode(String codeString) throws Exception {
+
+      public static final ConditionStatusEnumFactory ENUM_FACTORY = new ConditionStatusEnumFactory();
+
+        public static ConditionStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("provisional".equals(codeString))
@@ -77,8 +80,9 @@ public class Condition extends DomainResource {
           return CONFIRMED;
         if ("refuted".equals(codeString))
           return REFUTED;
-        throw new Exception("Unknown ConditionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConditionStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PROVISIONAL: return "provisional";
@@ -117,8 +121,8 @@ public class Condition extends DomainResource {
         }
     }
 
-  public static class ConditionStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ConditionStatusEnumFactory implements EnumFactory<ConditionStatus> {
+    public ConditionStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class Condition extends DomainResource {
           return ConditionStatus.CONFIRMED;
         if ("refuted".equals(codeString))
           return ConditionStatus.REFUTED;
-        throw new Exception("Unknown ConditionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConditionStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ConditionStatus code) throws IllegalArgumentException {
       if (code == ConditionStatus.PROVISIONAL)
         return "provisional";
       if (code == ConditionStatus.WORKING)
@@ -1055,14 +1059,14 @@ public class Condition extends DomainResource {
     /**
      * @return Estimated or actual date the condition/problem/diagnosis was first detected/suspected.
      */
-    public DateAndTime getDateAsserted() { 
+    public Date getDateAsserted() { 
       return this.dateAsserted == null ? null : this.dateAsserted.getValue();
     }
 
     /**
      * @param value Estimated or actual date the condition/problem/diagnosis was first detected/suspected.
      */
-    public Condition setDateAsserted(DateAndTime value) { 
+    public Condition setDateAsserted(Date value) { 
       if (value == null)
         this.dateAsserted = null;
       else {
@@ -1161,7 +1165,7 @@ public class Condition extends DomainResource {
      */
     public Condition setStatus(ConditionStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ConditionStatus>();
+          this.status = new Enumeration<ConditionStatus>(ConditionStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

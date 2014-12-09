@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -68,7 +68,14 @@ public class Parameters extends Resource {
         @Description(shortDefinition="If parameter is a whole resource", formalDefinition="If the parameter is a whole resource." )
         protected Resource resource;
 
-        private static final long serialVersionUID = 1120601371L;
+        /**
+         * A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".
+         */
+        @Child(name="part", type={}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a 'Tuple'." )
+        protected List<ParametersParameterPartComponent> part;
+
+        private static final long serialVersionUID = 2101270343L;
 
       public ParametersParameterComponent() {
         super();
@@ -162,11 +169,42 @@ public class Parameters extends Resource {
           return this;
         }
 
+        /**
+         * @return {@link #part} (A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".)
+         */
+        public List<ParametersParameterPartComponent> getPart() { 
+          if (this.part == null)
+            this.part = new ArrayList<ParametersParameterPartComponent>();
+          return this.part;
+        }
+
+        public boolean hasPart() { 
+          if (this.part == null)
+            return false;
+          for (ParametersParameterPartComponent item : this.part)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #part} (A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".)
+         */
+    // syntactic sugar
+        public ParametersParameterPartComponent addPart() { //3
+          ParametersParameterPartComponent t = new ParametersParameterPartComponent();
+          if (this.part == null)
+            this.part = new ArrayList<ParametersParameterPartComponent>();
+          this.part.add(t);
+          return t;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("value[x]", "*", "If the parameter is a data type.", 0, java.lang.Integer.MAX_VALUE, value));
           childrenList.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("part", "", "A named part of a parameter. In many implementation context, a set of named parts is known as a 'Tuple'.", 0, java.lang.Integer.MAX_VALUE, part));
         }
 
       public ParametersParameterComponent copy() {
@@ -175,12 +213,130 @@ public class Parameters extends Resource {
         dst.name = name == null ? null : name.copy();
         dst.value = value == null ? null : value.copy();
         dst.resource = resource == null ? null : resource.copy();
+        if (part != null) {
+          dst.part = new ArrayList<ParametersParameterPartComponent>();
+          for (ParametersParameterPartComponent i : part)
+            dst.part.add(i.copy());
+        };
         return dst;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-           && (resource == null || resource.isEmpty());
+           && (resource == null || resource.isEmpty()) && (part == null || part.isEmpty());
+      }
+
+  }
+
+    @Block()
+    public static class ParametersParameterPartComponent extends BackboneElement {
+        /**
+         * The name of the parameter (reference to the operation definition).
+         */
+        @Child(name="name", type={StringType.class}, order=1, min=1, max=1)
+        @Description(shortDefinition="Name from the definition", formalDefinition="The name of the parameter (reference to the operation definition)." )
+        protected StringType name;
+
+        /**
+         * The value of the parameter.
+         */
+        @Child(name="value", type={}, order=2, min=1, max=1)
+        @Description(shortDefinition="Value of the part", formalDefinition="The value of the parameter." )
+        protected org.hl7.fhir.instance.model.Type value;
+
+        private static final long serialVersionUID = 2130806097L;
+
+      public ParametersParameterPartComponent() {
+        super();
+      }
+
+      public ParametersParameterPartComponent(StringType name, org.hl7.fhir.instance.model.Type value) {
+        super();
+        this.name = name;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #name} (The name of the parameter (reference to the operation definition).). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ParametersParameterPartComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType();
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (The name of the parameter (reference to the operation definition).). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public ParametersParameterPartComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return The name of the parameter (reference to the operation definition).
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value The name of the parameter (reference to the operation definition).
+         */
+        public ParametersParameterPartComponent setName(String value) { 
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The value of the parameter.)
+         */
+        public org.hl7.fhir.instance.model.Type getValue() { 
+          return this.value;
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The value of the parameter.)
+         */
+        public ParametersParameterPartComponent setValue(org.hl7.fhir.instance.model.Type value) { 
+          this.value = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("value[x]", "*", "The value of the parameter.", 0, java.lang.Integer.MAX_VALUE, value));
+        }
+
+      public ParametersParameterPartComponent copy() {
+        ParametersParameterPartComponent dst = new ParametersParameterPartComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          ;
       }
 
   }

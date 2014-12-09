@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="HumanName")
 public class HumanName extends Type {
 
-    public enum NameUse {
+    public enum NameUse implements FhirEnum {
         /**
          * Known as/conventional/the one you normally use.
          */
@@ -76,7 +76,10 @@ public class HumanName extends Type {
          * added to help the parsers
          */
         NULL;
-        public static NameUse fromCode(String codeString) throws Exception {
+
+      public static final NameUseEnumFactory ENUM_FACTORY = new NameUseEnumFactory();
+
+        public static NameUse fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("usual".equals(codeString))
@@ -93,8 +96,9 @@ public class HumanName extends Type {
           return OLD;
         if ("maiden".equals(codeString))
           return MAIDEN;
-        throw new Exception("Unknown NameUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NameUse code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case USUAL: return "usual";
@@ -145,8 +149,8 @@ public class HumanName extends Type {
         }
     }
 
-  public static class NameUseEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NameUseEnumFactory implements EnumFactory<NameUse> {
+    public NameUse fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -164,9 +168,9 @@ public class HumanName extends Type {
           return NameUse.OLD;
         if ("maiden".equals(codeString))
           return NameUse.MAIDEN;
-        throw new Exception("Unknown NameUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NameUse code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NameUse code) throws IllegalArgumentException {
       if (code == NameUse.USUAL)
         return "usual";
       if (code == NameUse.OFFICIAL)
@@ -283,7 +287,7 @@ public class HumanName extends Type {
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<NameUse>();
+          this.use = new Enumeration<NameUse>(NameUse.ENUM_FACTORY);
         this.use.setValue(value);
       }
       return this;

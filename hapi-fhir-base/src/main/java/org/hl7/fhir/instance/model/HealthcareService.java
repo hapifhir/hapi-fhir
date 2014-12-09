@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -297,14 +297,14 @@ public class HealthcareService extends DomainResource {
         /**
          * @return The opening time of day (the date is not included). Note: If the AllDay flag is set, then this time is ignored.
          */
-        public DateAndTime getAvailableStartTime() { 
+        public Date getAvailableStartTime() { 
           return this.availableStartTime == null ? null : this.availableStartTime.getValue();
         }
 
         /**
          * @param value The opening time of day (the date is not included). Note: If the AllDay flag is set, then this time is ignored.
          */
-        public HealthcareServiceAvailableTimeComponent setAvailableStartTime(DateAndTime value) { 
+        public HealthcareServiceAvailableTimeComponent setAvailableStartTime(Date value) { 
           if (value == null)
             this.availableStartTime = null;
           else {
@@ -346,14 +346,14 @@ public class HealthcareService extends DomainResource {
         /**
          * @return The closing time of day (the date is not included). Note: If the AllDay flag is set, then this time is ignored.
          */
-        public DateAndTime getAvailableEndTime() { 
+        public Date getAvailableEndTime() { 
           return this.availableEndTime == null ? null : this.availableEndTime.getValue();
         }
 
         /**
          * @param value The closing time of day (the date is not included). Note: If the AllDay flag is set, then this time is ignored.
          */
-        public HealthcareServiceAvailableTimeComponent setAvailableEndTime(DateAndTime value) { 
+        public HealthcareServiceAvailableTimeComponent setAvailableEndTime(Date value) { 
           if (value == null)
             this.availableEndTime = null;
           else {
@@ -504,14 +504,14 @@ public class HealthcareService extends DomainResource {
         /**
          * @return Service is not available (seasonally or for a public holiday) from this date.
          */
-        public DateAndTime getStartDate() { 
+        public Date getStartDate() { 
           return this.startDate == null ? null : this.startDate.getValue();
         }
 
         /**
          * @param value Service is not available (seasonally or for a public holiday) from this date.
          */
-        public HealthcareServiceNotAvailableTimeComponent setStartDate(DateAndTime value) { 
+        public HealthcareServiceNotAvailableTimeComponent setStartDate(Date value) { 
           if (value == null)
             this.startDate = null;
           else {
@@ -553,14 +553,14 @@ public class HealthcareService extends DomainResource {
         /**
          * @return Service is not available (seasonally or for a public holiday) until this date.
          */
-        public DateAndTime getEndDate() { 
+        public Date getEndDate() { 
           return this.endDate == null ? null : this.endDate.getValue();
         }
 
         /**
          * @param value Service is not available (seasonally or for a public holiday) until this date.
          */
-        public HealthcareServiceNotAvailableTimeComponent setEndDate(DateAndTime value) { 
+        public HealthcareServiceNotAvailableTimeComponent setEndDate(Date value) { 
           if (value == null)
             this.endDate = null;
           else {

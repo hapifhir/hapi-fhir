@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -51,114 +51,123 @@ public class Contract extends DomainResource {
         /**
          * Party or role who is signing.
          */
-        @Child(name="type", type={Coding.class}, order=1, min=1, max=1)
+        @Child(name="type", type={Coding.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Signer Type", formalDefinition="Party or role who is signing." )
-        protected Coding type;
+        protected List<Coding> type;
 
         /**
          * The DSIG signature contents in Base64.
          */
-        @Child(name="singnature", type={StringType.class}, order=2, min=1, max=1)
+        @Child(name="signature", type={StringType.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Documentation Signature", formalDefinition="The DSIG signature contents in Base64." )
-        protected StringType singnature;
+        protected StringType signature;
 
-        private static final long serialVersionUID = -825583495L;
+        private static final long serialVersionUID = 584509693L;
 
       public ContractSignerComponent() {
         super();
       }
 
-      public ContractSignerComponent(Coding type, StringType singnature) {
+      public ContractSignerComponent(StringType signature) {
         super();
-        this.type = type;
-        this.singnature = singnature;
+        this.signature = signature;
       }
 
         /**
          * @return {@link #type} (Party or role who is signing.)
          */
-        public Coding getType() { 
+        public List<Coding> getType() { 
           if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ContractSignerComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new Coding();
+            this.type = new ArrayList<Coding>();
           return this.type;
         }
 
         public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
+          if (this.type == null)
+            return false;
+          for (Coding item : this.type)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
         /**
-         * @param value {@link #type} (Party or role who is signing.)
+         * @return {@link #type} (Party or role who is signing.)
          */
-        public ContractSignerComponent setType(Coding value) { 
-          this.type = value;
-          return this;
+    // syntactic sugar
+        public Coding addType() { //3
+          Coding t = new Coding();
+          if (this.type == null)
+            this.type = new ArrayList<Coding>();
+          this.type.add(t);
+          return t;
         }
 
         /**
-         * @return {@link #singnature} (The DSIG signature contents in Base64.). This is the underlying object with id, value and extensions. The accessor "getSingnature" gives direct access to the value
+         * @return {@link #signature} (The DSIG signature contents in Base64.). This is the underlying object with id, value and extensions. The accessor "getSignature" gives direct access to the value
          */
-        public StringType getSingnatureElement() { 
-          if (this.singnature == null)
+        public StringType getSignatureElement() { 
+          if (this.signature == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ContractSignerComponent.singnature");
+              throw new Error("Attempt to auto-create ContractSignerComponent.signature");
             else if (Configuration.doAutoCreate())
-              this.singnature = new StringType();
-          return this.singnature;
+              this.signature = new StringType();
+          return this.signature;
         }
 
-        public boolean hasSingnatureElement() { 
-          return this.singnature != null && !this.singnature.isEmpty();
+        public boolean hasSignatureElement() { 
+          return this.signature != null && !this.signature.isEmpty();
         }
 
-        public boolean hasSingnature() { 
-          return this.singnature != null && !this.singnature.isEmpty();
+        public boolean hasSignature() { 
+          return this.signature != null && !this.signature.isEmpty();
         }
 
         /**
-         * @param value {@link #singnature} (The DSIG signature contents in Base64.). This is the underlying object with id, value and extensions. The accessor "getSingnature" gives direct access to the value
+         * @param value {@link #signature} (The DSIG signature contents in Base64.). This is the underlying object with id, value and extensions. The accessor "getSignature" gives direct access to the value
          */
-        public ContractSignerComponent setSingnatureElement(StringType value) { 
-          this.singnature = value;
+        public ContractSignerComponent setSignatureElement(StringType value) { 
+          this.signature = value;
           return this;
         }
 
         /**
          * @return The DSIG signature contents in Base64.
          */
-        public String getSingnature() { 
-          return this.singnature == null ? null : this.singnature.getValue();
+        public String getSignature() { 
+          return this.signature == null ? null : this.signature.getValue();
         }
 
         /**
          * @param value The DSIG signature contents in Base64.
          */
-        public ContractSignerComponent setSingnature(String value) { 
-            if (this.singnature == null)
-              this.singnature = new StringType();
-            this.singnature.setValue(value);
+        public ContractSignerComponent setSignature(String value) { 
+            if (this.signature == null)
+              this.signature = new StringType();
+            this.signature.setValue(value);
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "Coding", "Party or role who is signing.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("singnature", "string", "The DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, singnature));
+          childrenList.add(new Property("signature", "string", "The DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature));
         }
 
       public ContractSignerComponent copy() {
         ContractSignerComponent dst = new ContractSignerComponent();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.singnature = singnature == null ? null : singnature.copy();
+        if (type != null) {
+          dst.type = new ArrayList<Coding>();
+          for (Coding i : type)
+            dst.type.add(i.copy());
+        };
+        dst.signature = signature == null ? null : signature.copy();
         return dst;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (singnature == null || singnature.isEmpty())
+        return super.isEmpty() && (type == null || type.isEmpty()) && (signature == null || signature.isEmpty())
           ;
       }
 
@@ -181,10 +190,10 @@ public class Contract extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * The subttype of the term which is appropriate to the term type.
+         * The subtype of the term which is appropriate to the term type.
          */
         @Child(name="subtype", type={CodeableConcept.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Term subtype", formalDefinition="The subttype of the term which is appropriate to the term type." )
+        @Description(shortDefinition="Term subtype", formalDefinition="The subtype of the term which is appropriate to the term type." )
         protected CodeableConcept subtype;
 
         /**
@@ -203,10 +212,59 @@ public class Contract extends DomainResource {
          * Human readable form of the term of the contract.
          */
         @Child(name="text", type={StringType.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="Human readable term text", formalDefinition="Human readable form of the term of the contract." )
+        @Description(shortDefinition="Human readable Term text", formalDefinition="Human readable form of the term of the contract." )
         protected StringType text;
 
-        private static final long serialVersionUID = -697165954L;
+        /**
+         * When this term was issued.
+         */
+        @Child(name="issued", type={DateTimeType.class}, order=6, min=0, max=1)
+        @Description(shortDefinition="When issued", formalDefinition="When this term was issued." )
+        protected DateTimeType issued;
+
+        /**
+         * Relevant time/time-period when the term is applicable.
+         */
+        @Child(name="applies", type={Period.class}, order=7, min=0, max=1)
+        @Description(shortDefinition="When effective", formalDefinition="Relevant time/time-period when the term is applicable." )
+        protected Period applies;
+
+        /**
+         * The number of repetitions of a service or product.
+         */
+        @Child(name="quantity", type={Quantity.class}, order=8, min=0, max=1)
+        @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
+        protected Quantity quantity;
+
+        /**
+         * The unit price product.
+         */
+        @Child(name="unitPrice", type={Money.class}, order=9, min=0, max=1)
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The unit price product." )
+        protected Money unitPrice;
+
+        /**
+         * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        @Child(name="factor", type={DecimalType.class}, order=10, min=0, max=1)
+        @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
+        protected DecimalType factor;
+
+        /**
+         * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
+         */
+        @Child(name="points", type={DecimalType.class}, order=11, min=0, max=1)
+        @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
+        protected DecimalType points;
+
+        /**
+         * The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         */
+        @Child(name="net", type={Money.class}, order=12, min=0, max=1)
+        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        protected Money net;
+
+        private static final long serialVersionUID = -1958595473L;
 
       public ContractTermComponent() {
         super();
@@ -261,7 +319,7 @@ public class Contract extends DomainResource {
         }
 
         /**
-         * @return {@link #subtype} (The subttype of the term which is appropriate to the term type.)
+         * @return {@link #subtype} (The subtype of the term which is appropriate to the term type.)
          */
         public CodeableConcept getSubtype() { 
           if (this.subtype == null)
@@ -277,7 +335,7 @@ public class Contract extends DomainResource {
         }
 
         /**
-         * @param value {@link #subtype} (The subttype of the term which is appropriate to the term type.)
+         * @param value {@link #subtype} (The subtype of the term which is appropriate to the term type.)
          */
         public ContractTermComponent setSubtype(CodeableConcept value) { 
           this.subtype = value;
@@ -372,13 +430,263 @@ public class Contract extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #issued} (When this term was issued.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
+         */
+        public DateTimeType getIssuedElement() { 
+          if (this.issued == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.issued");
+            else if (Configuration.doAutoCreate())
+              this.issued = new DateTimeType();
+          return this.issued;
+        }
+
+        public boolean hasIssuedElement() { 
+          return this.issued != null && !this.issued.isEmpty();
+        }
+
+        public boolean hasIssued() { 
+          return this.issued != null && !this.issued.isEmpty();
+        }
+
+        /**
+         * @param value {@link #issued} (When this term was issued.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
+         */
+        public ContractTermComponent setIssuedElement(DateTimeType value) { 
+          this.issued = value;
+          return this;
+        }
+
+        /**
+         * @return When this term was issued.
+         */
+        public Date getIssued() { 
+          return this.issued == null ? null : this.issued.getValue();
+        }
+
+        /**
+         * @param value When this term was issued.
+         */
+        public ContractTermComponent setIssued(Date value) { 
+          if (value == null)
+            this.issued = null;
+          else {
+            if (this.issued == null)
+              this.issued = new DateTimeType();
+            this.issued.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #applies} (Relevant time/time-period when the term is applicable.)
+         */
+        public Period getApplies() { 
+          if (this.applies == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.applies");
+            else if (Configuration.doAutoCreate())
+              this.applies = new Period();
+          return this.applies;
+        }
+
+        public boolean hasApplies() { 
+          return this.applies != null && !this.applies.isEmpty();
+        }
+
+        /**
+         * @param value {@link #applies} (Relevant time/time-period when the term is applicable.)
+         */
+        public ContractTermComponent setApplies(Period value) { 
+          this.applies = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public Quantity getQuantity() { 
+          if (this.quantity == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.quantity");
+            else if (Configuration.doAutoCreate())
+              this.quantity = new Quantity();
+          return this.quantity;
+        }
+
+        public boolean hasQuantity() { 
+          return this.quantity != null && !this.quantity.isEmpty();
+        }
+
+        /**
+         * @param value {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public ContractTermComponent setQuantity(Quantity value) { 
+          this.quantity = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #unitPrice} (The unit price product.)
+         */
+        public Money getUnitPrice() { 
+          if (this.unitPrice == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.unitPrice");
+            else if (Configuration.doAutoCreate())
+              this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+
+        public boolean hasUnitPrice() { 
+          return this.unitPrice != null && !this.unitPrice.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unitPrice} (The unit price product.)
+         */
+        public ContractTermComponent setUnitPrice(Money value) { 
+          this.unitPrice = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public DecimalType getFactorElement() { 
+          if (this.factor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.factor");
+            else if (Configuration.doAutoCreate())
+              this.factor = new DecimalType();
+          return this.factor;
+        }
+
+        public boolean hasFactorElement() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        public boolean hasFactor() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public ContractTermComponent setFactorElement(DecimalType value) { 
+          this.factor = value;
+          return this;
+        }
+
+        /**
+         * @return A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public BigDecimal getFactor() { 
+          return this.factor == null ? null : this.factor.getValue();
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public ContractTermComponent setFactor(BigDecimal value) { 
+          if (value == null)
+            this.factor = null;
+          else {
+            if (this.factor == null)
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #points} (An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.). This is the underlying object with id, value and extensions. The accessor "getPoints" gives direct access to the value
+         */
+        public DecimalType getPointsElement() { 
+          if (this.points == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.points");
+            else if (Configuration.doAutoCreate())
+              this.points = new DecimalType();
+          return this.points;
+        }
+
+        public boolean hasPointsElement() { 
+          return this.points != null && !this.points.isEmpty();
+        }
+
+        public boolean hasPoints() { 
+          return this.points != null && !this.points.isEmpty();
+        }
+
+        /**
+         * @param value {@link #points} (An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.). This is the underlying object with id, value and extensions. The accessor "getPoints" gives direct access to the value
+         */
+        public ContractTermComponent setPointsElement(DecimalType value) { 
+          this.points = value;
+          return this;
+        }
+
+        /**
+         * @return An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
+         */
+        public BigDecimal getPoints() { 
+          return this.points == null ? null : this.points.getValue();
+        }
+
+        /**
+         * @param value An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
+         */
+        public ContractTermComponent setPoints(BigDecimal value) { 
+          if (value == null)
+            this.points = null;
+          else {
+            if (this.points == null)
+              this.points = new DecimalType();
+            this.points.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #net} (The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public Money getNet() { 
+          if (this.net == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ContractTermComponent.net");
+            else if (Configuration.doAutoCreate())
+              this.net = new Money();
+          return this.net;
+        }
+
+        public boolean hasNet() { 
+          return this.net != null && !this.net.isEmpty();
+        }
+
+        /**
+         * @param value {@link #net} (The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public ContractTermComponent setNet(Money value) { 
+          this.net = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "Identifier", "Unique Id for this particular term.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("type", "CodeableConcept", "The type of the term.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("subtype", "CodeableConcept", "The subttype of the term which is appropriate to the term type.", 0, java.lang.Integer.MAX_VALUE, subtype));
+          childrenList.add(new Property("subtype", "CodeableConcept", "The subtype of the term which is appropriate to the term type.", 0, java.lang.Integer.MAX_VALUE, subtype));
           childrenList.add(new Property("subject", "Reference(Any)", "Who or what the contract term is about.", 0, java.lang.Integer.MAX_VALUE, subject));
           childrenList.add(new Property("text", "string", "Human readable form of the term of the contract.", 0, java.lang.Integer.MAX_VALUE, text));
+          childrenList.add(new Property("issued", "dateTime", "When this term was issued.", 0, java.lang.Integer.MAX_VALUE, issued));
+          childrenList.add(new Property("applies", "Period", "Relevant time/time-period when the term is applicable.", 0, java.lang.Integer.MAX_VALUE, applies));
+          childrenList.add(new Property("quantity", "Quantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("unitPrice", "Money", "The unit price product.", 0, java.lang.Integer.MAX_VALUE, unitPrice));
+          childrenList.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, java.lang.Integer.MAX_VALUE, factor));
+          childrenList.add(new Property("points", "decimal", "An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.", 0, java.lang.Integer.MAX_VALUE, points));
+          childrenList.add(new Property("net", "Money", "The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, java.lang.Integer.MAX_VALUE, net));
         }
 
       public ContractTermComponent copy() {
@@ -389,13 +697,22 @@ public class Contract extends DomainResource {
         dst.subtype = subtype == null ? null : subtype.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.text = text == null ? null : text.copy();
+        dst.issued = issued == null ? null : issued.copy();
+        dst.applies = applies == null ? null : applies.copy();
+        dst.quantity = quantity == null ? null : quantity.copy();
+        dst.unitPrice = unitPrice == null ? null : unitPrice.copy();
+        dst.factor = factor == null ? null : factor.copy();
+        dst.points = points == null ? null : points.copy();
+        dst.net = net == null ? null : net.copy();
         return dst;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
            && (subtype == null || subtype.isEmpty()) && (subject == null || subject.isEmpty()) && (text == null || text.isEmpty())
-          ;
+           && (issued == null || issued.isEmpty()) && (applies == null || applies.isEmpty()) && (quantity == null || quantity.isEmpty())
+           && (unitPrice == null || unitPrice.isEmpty()) && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty())
+           && (net == null || net.isEmpty());
       }
 
   }
@@ -420,72 +737,96 @@ public class Contract extends DomainResource {
 
 
     /**
+     * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
+     */
+    @Child(name="authority", type={Organization.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Authority", formalDefinition="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc." )
+    protected List<Reference> authority;
+    /**
+     * The actual objects that are the target of the reference (A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.)
+     */
+    protected List<Organization> authorityTarget;
+
+
+    /**
+     * A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.
+     */
+    @Child(name="domain", type={Location.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Domain", formalDefinition="A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations." )
+    protected List<Reference> domain;
+    /**
+     * The actual objects that are the target of the reference (A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.)
+     */
+    protected List<Location> domainTarget;
+
+
+    /**
      * Type of contract (Privacy-Security, Agreement, Insurance).
      */
-    @Child(name="type", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Type of contract", formalDefinition="Type of contract (Privacy-Security, Agreement, Insurance)." )
     protected CodeableConcept type;
 
     /**
      * More specific type of contract (Privacy, Disclosure-Authorization, Advanced-Directive, DNR, Authorization-to-Treat).
      */
-    @Child(name="subtype", type={CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="subtype", type={CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Subtype of contract", formalDefinition="More specific type of contract (Privacy, Disclosure-Authorization, Advanced-Directive, DNR, Authorization-to-Treat)." )
     protected List<CodeableConcept> subtype;
 
     /**
      * When this was issued.
      */
-    @Child(name="issued", type={DateTimeType.class}, order=3, min=0, max=1)
+    @Child(name="issued", type={DateTimeType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="When this was issued", formalDefinition="When this was issued." )
     protected DateTimeType issued;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="applies", type={Period.class}, order=4, min=0, max=1)
+    @Child(name="applies", type={Period.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Effective time", formalDefinition="Relevant time/time-period when applicable." )
     protected Period applies;
 
     /**
      * The number of repetitions of a service or product.
      */
-    @Child(name="quantity", type={Quantity.class}, order=5, min=0, max=1)
+    @Child(name="quantity", type={Quantity.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
     protected Quantity quantity;
 
     /**
      * The unit price product.
      */
-    @Child(name="unitPrice", type={Money.class}, order=6, min=0, max=1)
+    @Child(name="unitPrice", type={Money.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The unit price product." )
     protected Money unitPrice;
 
     /**
      * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
      */
-    @Child(name="factor", type={DecimalType.class}, order=7, min=0, max=1)
+    @Child(name="factor", type={DecimalType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
     protected DecimalType factor;
 
     /**
      * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
      */
-    @Child(name="points", type={DecimalType.class}, order=8, min=0, max=1)
+    @Child(name="points", type={DecimalType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
     protected DecimalType points;
 
     /**
      * The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
      */
-    @Child(name="net", type={Money.class}, order=9, min=0, max=1)
+    @Child(name="net", type={Money.class}, order=11, min=0, max=1)
     @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
     protected Money net;
 
     /**
      * Contract author or responsible party.
      */
-    @Child(name="author", type={Practitioner.class, RelatedPerson.class, Organization.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="author", type={Practitioner.class, RelatedPerson.class, Organization.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contract author or responsible party", formalDefinition="Contract author or responsible party." )
     protected List<Reference> author;
     /**
@@ -497,7 +838,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="grantor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="grantor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="First Party or delegator", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> grantor;
     /**
@@ -509,7 +850,7 @@ public class Contract extends DomainResource {
     /**
      * The Second party to the contract, may be the party who accepts obligations or be that to which rights are delegated.
      */
-    @Child(name="grantee", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="grantee", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Second Party or delegatee", formalDefinition="The Second party to the contract, may be the party who accepts obligations or be that to which rights are delegated." )
     protected List<Reference> grantee;
     /**
@@ -521,7 +862,7 @@ public class Contract extends DomainResource {
     /**
      * Who witnesses the contract.
      */
-    @Child(name="witness", type={Practitioner.class, RelatedPerson.class, Patient.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="witness", type={Practitioner.class, RelatedPerson.class, Patient.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Witness to the contract", formalDefinition="Who witnesses the contract." )
     protected List<Reference> witness;
     /**
@@ -533,7 +874,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="executor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="executor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Trustee", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> executor;
     /**
@@ -545,7 +886,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="notary", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="notary", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Notary Public", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> notary;
     /**
@@ -557,39 +898,74 @@ public class Contract extends DomainResource {
     /**
      * List or contract signatures.
      */
-    @Child(name="signer", type={}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="signer", type={}, order=18, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Signer", formalDefinition="List or contract signatures." )
     protected List<ContractSignerComponent> signer;
 
     /**
-     * A contract provision.
+     * The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time.
      */
-    @Child(name="term", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Contract provisions", formalDefinition="A contract provision." )
+    @Child(name="term", type={}, order=19, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="The terms of the Contract", formalDefinition="The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time." )
     protected List<ContractTermComponent> term;
+
+    /**
+     * Legally binding contract.
+     */
+    @Child(name="binding", type={Attachment.class}, order=20, min=0, max=1)
+    @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding contract." )
+    protected Attachment binding;
+
+    /**
+     * Relevant time/time-period when applicable.
+     */
+    @Child(name="bindingDateTime", type={DateTimeType.class}, order=21, min=0, max=1)
+    @Description(shortDefinition="Binding Contract effective time", formalDefinition="Relevant time/time-period when applicable." )
+    protected DateTimeType bindingDateTime;
 
     /**
      * Friendly Human readable form (might be a reference to the UI used to capture the contract).
      */
-    @Child(name="friendly", type={Attachment.class}, order=18, min=0, max=1)
+    @Child(name="friendly", type={Attachment.class}, order=22, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Human readable contract text", formalDefinition="Friendly Human readable form (might be a reference to the UI used to capture the contract)." )
-    protected Attachment friendly;
+    protected List<Attachment> friendly;
+
+    /**
+     * Relevant time/time-period when applicable.
+     */
+    @Child(name="friendlyDateTime", type={DateTimeType.class}, order=23, min=0, max=1)
+    @Description(shortDefinition="Human readable contract text effective time", formalDefinition="Relevant time/time-period when applicable." )
+    protected DateTimeType friendlyDateTime;
 
     /**
      * Legal text in Human readable form.
      */
-    @Child(name="legal", type={Attachment.class}, order=19, min=0, max=1)
+    @Child(name="legal", type={Attachment.class}, order=24, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Legal contract text", formalDefinition="Legal text in Human readable form." )
-    protected Attachment legal;
+    protected List<Attachment> legal;
+
+    /**
+     * Relevant time/time-period when applicable.
+     */
+    @Child(name="legalDateTime", type={DateTimeType.class}, order=25, min=0, max=1)
+    @Description(shortDefinition="Legal contract text date time", formalDefinition="Relevant time/time-period when applicable." )
+    protected DateTimeType legalDateTime;
 
     /**
      * Computable Policy rules (e.g. XACML, DKAL, SecPal).
      */
-    @Child(name="rule", type={Attachment.class}, order=20, min=0, max=1)
+    @Child(name="rule", type={Attachment.class}, order=26, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Computable contract text", formalDefinition="Computable Policy rules (e.g. XACML, DKAL, SecPal)." )
-    protected Attachment rule;
+    protected List<Attachment> rule;
 
-    private static final long serialVersionUID = -1421847454L;
+    /**
+     * Relevant time/time-period when applicable.
+     */
+    @Child(name="ruleDateTime", type={DateTimeType.class}, order=27, min=0, max=1)
+    @Description(shortDefinition="Computable contract text effect time", formalDefinition="Relevant time/time-period when applicable." )
+    protected DateTimeType ruleDateTime;
+
+    private static final long serialVersionUID = -467568093L;
 
     public Contract() {
       super();
@@ -662,6 +1038,108 @@ public class Contract extends DomainResource {
       if (this.subjectTarget == null)
         this.subjectTarget = new ArrayList<Resource>();
       return this.subjectTarget;
+    }
+
+    /**
+     * @return {@link #authority} (A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.)
+     */
+    public List<Reference> getAuthority() { 
+      if (this.authority == null)
+        this.authority = new ArrayList<Reference>();
+      return this.authority;
+    }
+
+    public boolean hasAuthority() { 
+      if (this.authority == null)
+        return false;
+      for (Reference item : this.authority)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #authority} (A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.)
+     */
+    // syntactic sugar
+    public Reference addAuthority() { //3
+      Reference t = new Reference();
+      if (this.authority == null)
+        this.authority = new ArrayList<Reference>();
+      this.authority.add(t);
+      return t;
+    }
+
+    /**
+     * @return {@link #authority} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.)
+     */
+    public List<Organization> getAuthorityTarget() { 
+      if (this.authorityTarget == null)
+        this.authorityTarget = new ArrayList<Organization>();
+      return this.authorityTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #authority} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.)
+     */
+    public Organization addAuthorityTarget() { 
+      Organization r = new Organization();
+      if (this.authorityTarget == null)
+        this.authorityTarget = new ArrayList<Organization>();
+      this.authorityTarget.add(r);
+      return r;
+    }
+
+    /**
+     * @return {@link #domain} (A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.)
+     */
+    public List<Reference> getDomain() { 
+      if (this.domain == null)
+        this.domain = new ArrayList<Reference>();
+      return this.domain;
+    }
+
+    public boolean hasDomain() { 
+      if (this.domain == null)
+        return false;
+      for (Reference item : this.domain)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #domain} (A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.)
+     */
+    // syntactic sugar
+    public Reference addDomain() { //3
+      Reference t = new Reference();
+      if (this.domain == null)
+        this.domain = new ArrayList<Reference>();
+      this.domain.add(t);
+      return t;
+    }
+
+    /**
+     * @return {@link #domain} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.)
+     */
+    public List<Location> getDomainTarget() { 
+      if (this.domainTarget == null)
+        this.domainTarget = new ArrayList<Location>();
+      return this.domainTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #domain} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.)
+     */
+    public Location addDomainTarget() { 
+      Location r = new Location();
+      if (this.domainTarget == null)
+        this.domainTarget = new ArrayList<Location>();
+      this.domainTarget.add(r);
+      return r;
     }
 
     /**
@@ -749,14 +1227,14 @@ public class Contract extends DomainResource {
     /**
      * @return When this was issued.
      */
-    public DateAndTime getIssued() { 
+    public Date getIssued() { 
       return this.issued == null ? null : this.issued.getValue();
     }
 
     /**
      * @param value When this was issued.
      */
-    public Contract setIssued(DateAndTime value) { 
+    public Contract setIssued(Date value) { 
       if (value == null)
         this.issued = null;
       else {
@@ -1226,7 +1704,7 @@ public class Contract extends DomainResource {
     }
 
     /**
-     * @return {@link #term} (A contract provision.)
+     * @return {@link #term} (The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time.)
      */
     public List<ContractTermComponent> getTerm() { 
       if (this.term == null)
@@ -1244,7 +1722,7 @@ public class Contract extends DomainResource {
     }
 
     /**
-     * @return {@link #term} (A contract provision.)
+     * @return {@link #term} (The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time.)
      */
     // syntactic sugar
     public ContractTermComponent addTerm() { //3
@@ -1256,74 +1734,312 @@ public class Contract extends DomainResource {
     }
 
     /**
+     * @return {@link #binding} (Legally binding contract.)
+     */
+    public Attachment getBinding() { 
+      if (this.binding == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.binding");
+        else if (Configuration.doAutoCreate())
+          this.binding = new Attachment();
+      return this.binding;
+    }
+
+    public boolean hasBinding() { 
+      return this.binding != null && !this.binding.isEmpty();
+    }
+
+    /**
+     * @param value {@link #binding} (Legally binding contract.)
+     */
+    public Contract setBinding(Attachment value) { 
+      this.binding = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #bindingDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getBindingDateTime" gives direct access to the value
+     */
+    public DateTimeType getBindingDateTimeElement() { 
+      if (this.bindingDateTime == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.bindingDateTime");
+        else if (Configuration.doAutoCreate())
+          this.bindingDateTime = new DateTimeType();
+      return this.bindingDateTime;
+    }
+
+    public boolean hasBindingDateTimeElement() { 
+      return this.bindingDateTime != null && !this.bindingDateTime.isEmpty();
+    }
+
+    public boolean hasBindingDateTime() { 
+      return this.bindingDateTime != null && !this.bindingDateTime.isEmpty();
+    }
+
+    /**
+     * @param value {@link #bindingDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getBindingDateTime" gives direct access to the value
+     */
+    public Contract setBindingDateTimeElement(DateTimeType value) { 
+      this.bindingDateTime = value;
+      return this;
+    }
+
+    /**
+     * @return Relevant time/time-period when applicable.
+     */
+    public Date getBindingDateTime() { 
+      return this.bindingDateTime == null ? null : this.bindingDateTime.getValue();
+    }
+
+    /**
+     * @param value Relevant time/time-period when applicable.
+     */
+    public Contract setBindingDateTime(Date value) { 
+      if (value == null)
+        this.bindingDateTime = null;
+      else {
+        if (this.bindingDateTime == null)
+          this.bindingDateTime = new DateTimeType();
+        this.bindingDateTime.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #friendly} (Friendly Human readable form (might be a reference to the UI used to capture the contract).)
      */
-    public Attachment getFriendly() { 
+    public List<Attachment> getFriendly() { 
       if (this.friendly == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Contract.friendly");
-        else if (Configuration.doAutoCreate())
-          this.friendly = new Attachment();
+        this.friendly = new ArrayList<Attachment>();
       return this.friendly;
     }
 
     public boolean hasFriendly() { 
-      return this.friendly != null && !this.friendly.isEmpty();
+      if (this.friendly == null)
+        return false;
+      for (Attachment item : this.friendly)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #friendly} (Friendly Human readable form (might be a reference to the UI used to capture the contract).)
+     * @return {@link #friendly} (Friendly Human readable form (might be a reference to the UI used to capture the contract).)
      */
-    public Contract setFriendly(Attachment value) { 
-      this.friendly = value;
+    // syntactic sugar
+    public Attachment addFriendly() { //3
+      Attachment t = new Attachment();
+      if (this.friendly == null)
+        this.friendly = new ArrayList<Attachment>();
+      this.friendly.add(t);
+      return t;
+    }
+
+    /**
+     * @return {@link #friendlyDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getFriendlyDateTime" gives direct access to the value
+     */
+    public DateTimeType getFriendlyDateTimeElement() { 
+      if (this.friendlyDateTime == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.friendlyDateTime");
+        else if (Configuration.doAutoCreate())
+          this.friendlyDateTime = new DateTimeType();
+      return this.friendlyDateTime;
+    }
+
+    public boolean hasFriendlyDateTimeElement() { 
+      return this.friendlyDateTime != null && !this.friendlyDateTime.isEmpty();
+    }
+
+    public boolean hasFriendlyDateTime() { 
+      return this.friendlyDateTime != null && !this.friendlyDateTime.isEmpty();
+    }
+
+    /**
+     * @param value {@link #friendlyDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getFriendlyDateTime" gives direct access to the value
+     */
+    public Contract setFriendlyDateTimeElement(DateTimeType value) { 
+      this.friendlyDateTime = value;
+      return this;
+    }
+
+    /**
+     * @return Relevant time/time-period when applicable.
+     */
+    public Date getFriendlyDateTime() { 
+      return this.friendlyDateTime == null ? null : this.friendlyDateTime.getValue();
+    }
+
+    /**
+     * @param value Relevant time/time-period when applicable.
+     */
+    public Contract setFriendlyDateTime(Date value) { 
+      if (value == null)
+        this.friendlyDateTime = null;
+      else {
+        if (this.friendlyDateTime == null)
+          this.friendlyDateTime = new DateTimeType();
+        this.friendlyDateTime.setValue(value);
+      }
       return this;
     }
 
     /**
      * @return {@link #legal} (Legal text in Human readable form.)
      */
-    public Attachment getLegal() { 
+    public List<Attachment> getLegal() { 
       if (this.legal == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Contract.legal");
-        else if (Configuration.doAutoCreate())
-          this.legal = new Attachment();
+        this.legal = new ArrayList<Attachment>();
       return this.legal;
     }
 
     public boolean hasLegal() { 
-      return this.legal != null && !this.legal.isEmpty();
+      if (this.legal == null)
+        return false;
+      for (Attachment item : this.legal)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #legal} (Legal text in Human readable form.)
+     * @return {@link #legal} (Legal text in Human readable form.)
      */
-    public Contract setLegal(Attachment value) { 
-      this.legal = value;
+    // syntactic sugar
+    public Attachment addLegal() { //3
+      Attachment t = new Attachment();
+      if (this.legal == null)
+        this.legal = new ArrayList<Attachment>();
+      this.legal.add(t);
+      return t;
+    }
+
+    /**
+     * @return {@link #legalDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getLegalDateTime" gives direct access to the value
+     */
+    public DateTimeType getLegalDateTimeElement() { 
+      if (this.legalDateTime == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.legalDateTime");
+        else if (Configuration.doAutoCreate())
+          this.legalDateTime = new DateTimeType();
+      return this.legalDateTime;
+    }
+
+    public boolean hasLegalDateTimeElement() { 
+      return this.legalDateTime != null && !this.legalDateTime.isEmpty();
+    }
+
+    public boolean hasLegalDateTime() { 
+      return this.legalDateTime != null && !this.legalDateTime.isEmpty();
+    }
+
+    /**
+     * @param value {@link #legalDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getLegalDateTime" gives direct access to the value
+     */
+    public Contract setLegalDateTimeElement(DateTimeType value) { 
+      this.legalDateTime = value;
+      return this;
+    }
+
+    /**
+     * @return Relevant time/time-period when applicable.
+     */
+    public Date getLegalDateTime() { 
+      return this.legalDateTime == null ? null : this.legalDateTime.getValue();
+    }
+
+    /**
+     * @param value Relevant time/time-period when applicable.
+     */
+    public Contract setLegalDateTime(Date value) { 
+      if (value == null)
+        this.legalDateTime = null;
+      else {
+        if (this.legalDateTime == null)
+          this.legalDateTime = new DateTimeType();
+        this.legalDateTime.setValue(value);
+      }
       return this;
     }
 
     /**
      * @return {@link #rule} (Computable Policy rules (e.g. XACML, DKAL, SecPal).)
      */
-    public Attachment getRule() { 
+    public List<Attachment> getRule() { 
       if (this.rule == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Contract.rule");
-        else if (Configuration.doAutoCreate())
-          this.rule = new Attachment();
+        this.rule = new ArrayList<Attachment>();
       return this.rule;
     }
 
     public boolean hasRule() { 
-      return this.rule != null && !this.rule.isEmpty();
+      if (this.rule == null)
+        return false;
+      for (Attachment item : this.rule)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #rule} (Computable Policy rules (e.g. XACML, DKAL, SecPal).)
+     * @return {@link #rule} (Computable Policy rules (e.g. XACML, DKAL, SecPal).)
      */
-    public Contract setRule(Attachment value) { 
-      this.rule = value;
+    // syntactic sugar
+    public Attachment addRule() { //3
+      Attachment t = new Attachment();
+      if (this.rule == null)
+        this.rule = new ArrayList<Attachment>();
+      this.rule.add(t);
+      return t;
+    }
+
+    /**
+     * @return {@link #ruleDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getRuleDateTime" gives direct access to the value
+     */
+    public DateTimeType getRuleDateTimeElement() { 
+      if (this.ruleDateTime == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Contract.ruleDateTime");
+        else if (Configuration.doAutoCreate())
+          this.ruleDateTime = new DateTimeType();
+      return this.ruleDateTime;
+    }
+
+    public boolean hasRuleDateTimeElement() { 
+      return this.ruleDateTime != null && !this.ruleDateTime.isEmpty();
+    }
+
+    public boolean hasRuleDateTime() { 
+      return this.ruleDateTime != null && !this.ruleDateTime.isEmpty();
+    }
+
+    /**
+     * @param value {@link #ruleDateTime} (Relevant time/time-period when applicable.). This is the underlying object with id, value and extensions. The accessor "getRuleDateTime" gives direct access to the value
+     */
+    public Contract setRuleDateTimeElement(DateTimeType value) { 
+      this.ruleDateTime = value;
+      return this;
+    }
+
+    /**
+     * @return Relevant time/time-period when applicable.
+     */
+    public Date getRuleDateTime() { 
+      return this.ruleDateTime == null ? null : this.ruleDateTime.getValue();
+    }
+
+    /**
+     * @param value Relevant time/time-period when applicable.
+     */
+    public Contract setRuleDateTime(Date value) { 
+      if (value == null)
+        this.ruleDateTime = null;
+      else {
+        if (this.ruleDateTime == null)
+          this.ruleDateTime = new DateTimeType();
+        this.ruleDateTime.setValue(value);
+      }
       return this;
     }
 
@@ -1331,6 +2047,8 @@ public class Contract extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique Id for this contract.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("subject", "Reference(Any)", "Who and/or what this is about: typically Patient, Organization, property.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("authority", "Reference(Organization)", "A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.", 0, java.lang.Integer.MAX_VALUE, authority));
+        childrenList.add(new Property("domain", "Reference(Location)", "A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.", 0, java.lang.Integer.MAX_VALUE, domain));
         childrenList.add(new Property("type", "CodeableConcept", "Type of contract (Privacy-Security, Agreement, Insurance).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("subtype", "CodeableConcept", "More specific type of contract (Privacy, Disclosure-Authorization, Advanced-Directive, DNR, Authorization-to-Treat).", 0, java.lang.Integer.MAX_VALUE, subtype));
         childrenList.add(new Property("issued", "dateTime", "When this was issued.", 0, java.lang.Integer.MAX_VALUE, issued));
@@ -1347,10 +2065,15 @@ public class Contract extends DomainResource {
         childrenList.add(new Property("executor", "Reference(Practitioner|RelatedPerson|Organization|Patient)", "First Party to the contract, may be the party who confers or delegates the rights defined in the contract.", 0, java.lang.Integer.MAX_VALUE, executor));
         childrenList.add(new Property("notary", "Reference(Practitioner|RelatedPerson|Organization|Patient)", "First Party to the contract, may be the party who confers or delegates the rights defined in the contract.", 0, java.lang.Integer.MAX_VALUE, notary));
         childrenList.add(new Property("signer", "", "List or contract signatures.", 0, java.lang.Integer.MAX_VALUE, signer));
-        childrenList.add(new Property("term", "", "A contract provision.", 0, java.lang.Integer.MAX_VALUE, term));
+        childrenList.add(new Property("term", "", "The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time.", 0, java.lang.Integer.MAX_VALUE, term));
+        childrenList.add(new Property("binding", "Attachment", "Legally binding contract.", 0, java.lang.Integer.MAX_VALUE, binding));
+        childrenList.add(new Property("bindingDateTime", "dateTime", "Relevant time/time-period when applicable.", 0, java.lang.Integer.MAX_VALUE, bindingDateTime));
         childrenList.add(new Property("friendly", "Attachment", "Friendly Human readable form (might be a reference to the UI used to capture the contract).", 0, java.lang.Integer.MAX_VALUE, friendly));
+        childrenList.add(new Property("friendlyDateTime", "dateTime", "Relevant time/time-period when applicable.", 0, java.lang.Integer.MAX_VALUE, friendlyDateTime));
         childrenList.add(new Property("legal", "Attachment", "Legal text in Human readable form.", 0, java.lang.Integer.MAX_VALUE, legal));
+        childrenList.add(new Property("legalDateTime", "dateTime", "Relevant time/time-period when applicable.", 0, java.lang.Integer.MAX_VALUE, legalDateTime));
         childrenList.add(new Property("rule", "Attachment", "Computable Policy rules (e.g. XACML, DKAL, SecPal).", 0, java.lang.Integer.MAX_VALUE, rule));
+        childrenList.add(new Property("ruleDateTime", "dateTime", "Relevant time/time-period when applicable.", 0, java.lang.Integer.MAX_VALUE, ruleDateTime));
       }
 
       public Contract copy() {
@@ -1365,6 +2088,16 @@ public class Contract extends DomainResource {
           dst.subject = new ArrayList<Reference>();
           for (Reference i : subject)
             dst.subject.add(i.copy());
+        };
+        if (authority != null) {
+          dst.authority = new ArrayList<Reference>();
+          for (Reference i : authority)
+            dst.authority.add(i.copy());
+        };
+        if (domain != null) {
+          dst.domain = new ArrayList<Reference>();
+          for (Reference i : domain)
+            dst.domain.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
         if (subtype != null) {
@@ -1419,9 +2152,26 @@ public class Contract extends DomainResource {
           for (ContractTermComponent i : term)
             dst.term.add(i.copy());
         };
-        dst.friendly = friendly == null ? null : friendly.copy();
-        dst.legal = legal == null ? null : legal.copy();
-        dst.rule = rule == null ? null : rule.copy();
+        dst.binding = binding == null ? null : binding.copy();
+        dst.bindingDateTime = bindingDateTime == null ? null : bindingDateTime.copy();
+        if (friendly != null) {
+          dst.friendly = new ArrayList<Attachment>();
+          for (Attachment i : friendly)
+            dst.friendly.add(i.copy());
+        };
+        dst.friendlyDateTime = friendlyDateTime == null ? null : friendlyDateTime.copy();
+        if (legal != null) {
+          dst.legal = new ArrayList<Attachment>();
+          for (Attachment i : legal)
+            dst.legal.add(i.copy());
+        };
+        dst.legalDateTime = legalDateTime == null ? null : legalDateTime.copy();
+        if (rule != null) {
+          dst.rule = new ArrayList<Attachment>();
+          for (Attachment i : rule)
+            dst.rule.add(i.copy());
+        };
+        dst.ruleDateTime = ruleDateTime == null ? null : ruleDateTime.copy();
         return dst;
       }
 
@@ -1431,13 +2181,17 @@ public class Contract extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
-           && (type == null || type.isEmpty()) && (subtype == null || subtype.isEmpty()) && (issued == null || issued.isEmpty())
-           && (applies == null || applies.isEmpty()) && (quantity == null || quantity.isEmpty()) && (unitPrice == null || unitPrice.isEmpty())
+           && (authority == null || authority.isEmpty()) && (domain == null || domain.isEmpty()) && (type == null || type.isEmpty())
+           && (subtype == null || subtype.isEmpty()) && (issued == null || issued.isEmpty()) && (applies == null || applies.isEmpty())
+           && (quantity == null || quantity.isEmpty()) && (unitPrice == null || unitPrice.isEmpty())
            && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty()) && (net == null || net.isEmpty())
            && (author == null || author.isEmpty()) && (grantor == null || grantor.isEmpty()) && (grantee == null || grantee.isEmpty())
            && (witness == null || witness.isEmpty()) && (executor == null || executor.isEmpty()) && (notary == null || notary.isEmpty())
-           && (signer == null || signer.isEmpty()) && (term == null || term.isEmpty()) && (friendly == null || friendly.isEmpty())
-           && (legal == null || legal.isEmpty()) && (rule == null || rule.isEmpty());
+           && (signer == null || signer.isEmpty()) && (term == null || term.isEmpty()) && (binding == null || binding.isEmpty())
+           && (bindingDateTime == null || bindingDateTime.isEmpty()) && (friendly == null || friendly.isEmpty())
+           && (friendlyDateTime == null || friendlyDateTime.isEmpty()) && (legal == null || legal.isEmpty())
+           && (legalDateTime == null || legalDateTime.isEmpty()) && (rule == null || rule.isEmpty())
+           && (ruleDateTime == null || ruleDateTime.isEmpty());
       }
 
   @Override

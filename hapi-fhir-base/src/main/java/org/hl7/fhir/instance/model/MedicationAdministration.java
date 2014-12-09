@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ Related resources tie this event to the authorizing prescription, and the specif
 @ResourceDef(name="MedicationAdministration", profile="http://hl7.org/fhir/Profile/MedicationAdministration")
 public class MedicationAdministration extends DomainResource {
 
-    public enum MedicationAdminStatus {
+    public enum MedicationAdminStatus implements FhirEnum {
         /**
          * The administration has started but has not yet completed.
          */
@@ -72,7 +72,10 @@ public class MedicationAdministration extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationAdminStatus fromCode(String codeString) throws Exception {
+
+      public static final MedicationAdminStatusEnumFactory ENUM_FACTORY = new MedicationAdminStatusEnumFactory();
+
+        public static MedicationAdminStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in progress".equals(codeString))
@@ -85,8 +88,9 @@ public class MedicationAdministration extends DomainResource {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
-        throw new Exception("Unknown MedicationAdminStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationAdminStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in progress";
@@ -129,8 +133,8 @@ public class MedicationAdministration extends DomainResource {
         }
     }
 
-  public static class MedicationAdminStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MedicationAdminStatusEnumFactory implements EnumFactory<MedicationAdminStatus> {
+    public MedicationAdminStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -144,9 +148,9 @@ public class MedicationAdministration extends DomainResource {
           return MedicationAdminStatus.ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return MedicationAdminStatus.STOPPED;
-        throw new Exception("Unknown MedicationAdminStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationAdminStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MedicationAdminStatus code) throws IllegalArgumentException {
       if (code == MedicationAdminStatus.INPROGRESS)
         return "in progress";
       if (code == MedicationAdminStatus.ONHOLD)
@@ -683,7 +687,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
      */
     public MedicationAdministration setStatus(MedicationAdminStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<MedicationAdminStatus>();
+          this.status = new Enumeration<MedicationAdminStatus>(MedicationAdminStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

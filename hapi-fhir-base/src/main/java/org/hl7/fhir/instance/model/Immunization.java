@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -221,14 +221,14 @@ public class Immunization extends DomainResource {
         /**
          * @return Date of reaction to the immunization.
          */
-        public DateAndTime getDate() { 
+        public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
          * @param value Date of reaction to the immunization.
          */
-        public ImmunizationReactionComponent setDate(DateAndTime value) { 
+        public ImmunizationReactionComponent setDate(Date value) { 
           if (value == null)
             this.date = null;
           else {
@@ -1001,14 +1001,14 @@ public class Immunization extends DomainResource {
     /**
      * @return Date vaccine administered or was to be administered.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value Date vaccine administered or was to be administered.
      */
-    public Immunization setDate(DateAndTime value) { 
+    public Immunization setDate(Date value) { 
         if (this.date == null)
           this.date = new DateTimeType();
         this.date.setValue(value);
@@ -1429,14 +1429,14 @@ public class Immunization extends DomainResource {
     /**
      * @return Date vaccine batch expires.
      */
-    public DateAndTime getExpirationDate() { 
+    public Date getExpirationDate() { 
       return this.expirationDate == null ? null : this.expirationDate.getValue();
     }
 
     /**
      * @param value Date vaccine batch expires.
      */
-    public Immunization setExpirationDate(DateAndTime value) { 
+    public Immunization setExpirationDate(Date value) { 
       if (value == null)
         this.expirationDate = null;
       else {
@@ -1684,10 +1684,10 @@ public class Immunization extends DomainResource {
 
   @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference" )
   public static final String SP_REACTION = "reaction";
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="What dose number within series?", type="number" )
-  public static final String SP_DOSESEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference" )
   public static final String SP_REQUESTER = "requester";
+  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="What dose number within series?", type="number" )
+  public static final String SP_DOSESEQUENCE = "dose-sequence";
   @SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered", type="token" )
   public static final String SP_VACCINETYPE = "vaccine-type";
   @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )

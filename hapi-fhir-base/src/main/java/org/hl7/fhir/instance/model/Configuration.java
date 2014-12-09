@@ -90,9 +90,9 @@ POSSIBILITY OF SUCH DAMAGE.
 public class Configuration {
 
 	private static int status = 0;
-  // 0: auto-create  
-  // 1: error
-  // 2: return null
+	  // 0: auto-create  
+	  // 1: error
+	  // 2: return null
 
 	public static boolean errorOnAutoCreate() {
 	  return status == 1;

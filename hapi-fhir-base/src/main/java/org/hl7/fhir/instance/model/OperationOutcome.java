@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/Profile/OperationOutcome")
 public class OperationOutcome extends DomainResource {
 
-    public enum IssueSeverity {
+    public enum IssueSeverity implements FhirEnum {
         /**
          * The issue caused the action to fail, and no further checking could be performed.
          */
@@ -66,7 +66,10 @@ public class OperationOutcome extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static IssueSeverity fromCode(String codeString) throws Exception {
+
+      public static final IssueSeverityEnumFactory ENUM_FACTORY = new IssueSeverityEnumFactory();
+
+        public static IssueSeverity fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("fatal".equals(codeString))
@@ -77,8 +80,9 @@ public class OperationOutcome extends DomainResource {
           return WARNING;
         if ("information".equals(codeString))
           return INFORMATION;
-        throw new Exception("Unknown IssueSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown IssueSeverity code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case FATAL: return "fatal";
@@ -117,8 +121,8 @@ public class OperationOutcome extends DomainResource {
         }
     }
 
-  public static class IssueSeverityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class IssueSeverityEnumFactory implements EnumFactory<IssueSeverity> {
+    public IssueSeverity fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class OperationOutcome extends DomainResource {
           return IssueSeverity.WARNING;
         if ("information".equals(codeString))
           return IssueSeverity.INFORMATION;
-        throw new Exception("Unknown IssueSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown IssueSeverity code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(IssueSeverity code) throws IllegalArgumentException {
       if (code == IssueSeverity.FATAL)
         return "fatal";
       if (code == IssueSeverity.ERROR)
@@ -226,7 +230,7 @@ public class OperationOutcome extends DomainResource {
          */
         public OperationOutcomeIssueComponent setSeverity(IssueSeverity value) { 
             if (this.severity == null)
-              this.severity = new Enumeration<IssueSeverity>();
+              this.severity = new Enumeration<IssueSeverity>(IssueSeverity.ENUM_FACTORY);
             this.severity.setValue(value);
           return this;
         }

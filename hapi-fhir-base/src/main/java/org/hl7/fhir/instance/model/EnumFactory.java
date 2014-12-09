@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /**
  * Helper class to help manage generic enumerated types
  */
-public interface EnumFactory {
+public interface EnumFactory<T extends Enum<?>> {
 
 	/**
 	 * Read an enumeration value from the string that represents it on the XML or JSON
@@ -41,7 +41,7 @@ public interface EnumFactory {
 	 * @return the enumeration value
 	 * @throws Exception is the value is not known
 	 */
-  public Enum<?> fromCode(String codeString) throws Exception;
+  public T fromCode(String codeString) throws IllegalArgumentException;
   
   /**
    * Get the XML/JSON representation for an enumerated value
@@ -49,6 +49,6 @@ public interface EnumFactory {
    * @return the XML/JSON representation
    * @throws Exception if the enumeration is not valid (would usually indicate a code generation bug)
    */
-  public String toCode(Enum<?> code) throws Exception;
+  public String toCode(T code) throws IllegalArgumentException;
 
 }

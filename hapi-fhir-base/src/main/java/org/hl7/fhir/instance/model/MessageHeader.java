@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="MessageHeader", profile="http://hl7.org/fhir/Profile/MessageHeader")
 public class MessageHeader extends DomainResource {
 
-    public enum ResponseCode {
+    public enum ResponseCode implements FhirEnum {
         /**
          * The message was accepted and processed without error.
          */
@@ -62,7 +62,10 @@ public class MessageHeader extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ResponseCode fromCode(String codeString) throws Exception {
+
+      public static final ResponseCodeEnumFactory ENUM_FACTORY = new ResponseCodeEnumFactory();
+
+        public static ResponseCode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("ok".equals(codeString))
@@ -71,8 +74,9 @@ public class MessageHeader extends DomainResource {
           return TRANSIENTERROR;
         if ("fatal-error".equals(codeString))
           return FATALERROR;
-        throw new Exception("Unknown ResponseCode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResponseCode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case OK: return "ok";
@@ -107,8 +111,8 @@ public class MessageHeader extends DomainResource {
         }
     }
 
-  public static class ResponseCodeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ResponseCodeEnumFactory implements EnumFactory<ResponseCode> {
+    public ResponseCode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class MessageHeader extends DomainResource {
           return ResponseCode.TRANSIENTERROR;
         if ("fatal-error".equals(codeString))
           return ResponseCode.FATALERROR;
-        throw new Exception("Unknown ResponseCode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResponseCode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ResponseCode code) throws IllegalArgumentException {
       if (code == ResponseCode.OK)
         return "ok";
       if (code == ResponseCode.TRANSIENTERROR)
@@ -256,7 +260,7 @@ public class MessageHeader extends DomainResource {
          */
         public MessageHeaderResponseComponent setCode(ResponseCode value) { 
             if (this.code == null)
-              this.code = new Enumeration<ResponseCode>();
+              this.code = new Enumeration<ResponseCode>(ResponseCode.ENUM_FACTORY);
             this.code.setValue(value);
           return this;
         }
@@ -1019,14 +1023,14 @@ public class MessageHeader extends DomainResource {
     /**
      * @return The time that the message was sent.
      */
-    public DateAndTime getTimestamp() { 
+    public Date getTimestamp() { 
       return this.timestamp == null ? null : this.timestamp.getValue();
     }
 
     /**
      * @param value The time that the message was sent.
      */
-    public MessageHeader setTimestamp(DateAndTime value) { 
+    public MessageHeader setTimestamp(Date value) { 
         if (this.timestamp == null)
           this.timestamp = new InstantType();
         this.timestamp.setValue(value);

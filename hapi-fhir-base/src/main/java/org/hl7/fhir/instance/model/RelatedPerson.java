@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="RelatedPerson", profile="http://hl7.org/fhir/Profile/RelatedPerson")
 public class RelatedPerson extends DomainResource {
 
-    public enum AdministrativeGender {
+    public enum AdministrativeGender implements FhirEnum {
         /**
          * Male
          */
@@ -66,7 +66,10 @@ public class RelatedPerson extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AdministrativeGender fromCode(String codeString) throws Exception {
+
+      public static final AdministrativeGenderEnumFactory ENUM_FACTORY = new AdministrativeGenderEnumFactory();
+
+        public static AdministrativeGender fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("male".equals(codeString))
@@ -77,8 +80,9 @@ public class RelatedPerson extends DomainResource {
           return OTHER;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown AdministrativeGender code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AdministrativeGender code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case MALE: return "male";
@@ -117,8 +121,8 @@ public class RelatedPerson extends DomainResource {
         }
     }
 
-  public static class AdministrativeGenderEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AdministrativeGenderEnumFactory implements EnumFactory<AdministrativeGender> {
+    public AdministrativeGender fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class RelatedPerson extends DomainResource {
           return AdministrativeGender.OTHER;
         if ("unknown".equals(codeString))
           return AdministrativeGender.UNKNOWN;
-        throw new Exception("Unknown AdministrativeGender code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AdministrativeGender code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AdministrativeGender code) throws IllegalArgumentException {
       if (code == AdministrativeGender.MALE)
         return "male";
       if (code == AdministrativeGender.FEMALE)
@@ -412,7 +416,7 @@ public class RelatedPerson extends DomainResource {
         this.gender = null;
       else {
         if (this.gender == null)
-          this.gender = new Enumeration<AdministrativeGender>();
+          this.gender = new Enumeration<AdministrativeGender>(AdministrativeGender.ENUM_FACTORY);
         this.gender.setValue(value);
       }
       return this;

@@ -25,38 +25,45 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package org.hl7.fhir.instance.model;
+
+import java.net.URI;
 
 /**
  * Primitive type "oid" in FHIR: an OID represented as urn:oid:0.1.2.3.4...
  */
 public class OidType extends UriType {
 
-  private static final long serialVersionUID = -6684415951360862202L;
+	private static final long serialVersionUID = 2L;
 
-	public OidType(String value) {
-    this.value = value;  
-  }
-
-  public OidType() {
-  }
-
-  @Override
-  protected Type typedCopy() {
-		return copy();
+	/**
+	 * Constructor
+	 */
+	public OidType() {
+		super();
 	}
-	
+
+	/**
+	 * Constructor
+	 */
+	public OidType(String theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public OidType(URI theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
 	@Override
-  public OidType copy() {
-		OidType dst = new OidType();
-		dst.value = value;
-		return dst;
+	public OidType copy() {
+		return new OidType(getValue());
 	}
-	
-	
-	public boolean hasValue() {
-		return value != null;
-	}
-	
+
 }

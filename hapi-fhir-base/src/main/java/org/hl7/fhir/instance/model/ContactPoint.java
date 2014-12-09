@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="ContactPoint")
 public class ContactPoint extends Type {
 
-    public enum ContactPointSystem {
+    public enum ContactPointSystem implements FhirEnum {
         /**
          * The value is a telephone number used for voice calls. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.
          */
@@ -64,7 +64,10 @@ public class ContactPoint extends Type {
          * added to help the parsers
          */
         NULL;
-        public static ContactPointSystem fromCode(String codeString) throws Exception {
+
+      public static final ContactPointSystemEnumFactory ENUM_FACTORY = new ContactPointSystemEnumFactory();
+
+        public static ContactPointSystem fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("phone".equals(codeString))
@@ -75,8 +78,9 @@ public class ContactPoint extends Type {
           return EMAIL;
         if ("url".equals(codeString))
           return URL;
-        throw new Exception("Unknown ContactPointSystem code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ContactPointSystem code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PHONE: return "phone";
@@ -115,8 +119,8 @@ public class ContactPoint extends Type {
         }
     }
 
-  public static class ContactPointSystemEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ContactPointSystemEnumFactory implements EnumFactory<ContactPointSystem> {
+    public ContactPointSystem fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -128,9 +132,9 @@ public class ContactPoint extends Type {
           return ContactPointSystem.EMAIL;
         if ("url".equals(codeString))
           return ContactPointSystem.URL;
-        throw new Exception("Unknown ContactPointSystem code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ContactPointSystem code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ContactPointSystem code) throws IllegalArgumentException {
       if (code == ContactPointSystem.PHONE)
         return "phone";
       if (code == ContactPointSystem.FAX)
@@ -143,7 +147,7 @@ public class ContactPoint extends Type {
       }
     }
 
-    public enum ContactPointUse {
+    public enum ContactPointUse implements FhirEnum {
         /**
          * A communication contact point at a home; attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available.
          */
@@ -168,7 +172,10 @@ public class ContactPoint extends Type {
          * added to help the parsers
          */
         NULL;
-        public static ContactPointUse fromCode(String codeString) throws Exception {
+
+      public static final ContactPointUseEnumFactory ENUM_FACTORY = new ContactPointUseEnumFactory();
+
+        public static ContactPointUse fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("home".equals(codeString))
@@ -181,8 +188,9 @@ public class ContactPoint extends Type {
           return OLD;
         if ("mobile".equals(codeString))
           return MOBILE;
-        throw new Exception("Unknown ContactPointUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ContactPointUse code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case HOME: return "home";
@@ -225,8 +233,8 @@ public class ContactPoint extends Type {
         }
     }
 
-  public static class ContactPointUseEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ContactPointUseEnumFactory implements EnumFactory<ContactPointUse> {
+    public ContactPointUse fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -240,9 +248,9 @@ public class ContactPoint extends Type {
           return ContactPointUse.OLD;
         if ("mobile".equals(codeString))
           return ContactPointUse.MOBILE;
-        throw new Exception("Unknown ContactPointUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ContactPointUse code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ContactPointUse code) throws IllegalArgumentException {
       if (code == ContactPointUse.HOME)
         return "home";
       if (code == ContactPointUse.WORK)
@@ -334,7 +342,7 @@ public class ContactPoint extends Type {
         this.system = null;
       else {
         if (this.system == null)
-          this.system = new Enumeration<ContactPointSystem>();
+          this.system = new Enumeration<ContactPointSystem>(ContactPointSystem.ENUM_FACTORY);
         this.system.setValue(value);
       }
       return this;
@@ -432,7 +440,7 @@ public class ContactPoint extends Type {
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<ContactPointUse>();
+          this.use = new Enumeration<ContactPointUse>(ContactPointUse.ENUM_FACTORY);
         this.use.setValue(value);
       }
       return this;

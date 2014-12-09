@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -69,9 +69,9 @@ public class PendedRequest extends DomainResource {
     /**
      * The date when this resource was created.
      */
-    @Child(name="date", type={DateType.class}, order=2, min=0, max=1)
+    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
-    protected DateType date;
+    protected DateTimeType created;
 
     /**
      * The Insurer who is target  of the request.
@@ -125,17 +125,24 @@ public class PendedRequest extends DomainResource {
      * Names of resource types to include.
      */
     @Child(name="include", type={StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Resource type to include", formalDefinition="Names of resource types to include." )
+    @Description(shortDefinition="Resource type(s) to include", formalDefinition="Names of resource types to include." )
     protected List<StringType> include;
 
     /**
      * Names of resource types to exclude.
      */
     @Child(name="exclude", type={StringType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Resource type to exclude", formalDefinition="Names of resource types to exclude." )
+    @Description(shortDefinition="Resource type(s) to exclude", formalDefinition="Names of resource types to exclude." )
     protected List<StringType> exclude;
 
-    private static final long serialVersionUID = 426386451L;
+    /**
+     * A period of time during which the fulfilling resources would have been created.
+     */
+    @Child(name="period", type={Period.class}, order=9, min=0, max=1)
+    @Description(shortDefinition="Period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
+    protected Period period;
+
+    private static final long serialVersionUID = 1211492560L;
 
     public PendedRequest() {
       super();
@@ -220,50 +227,50 @@ public class PendedRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #created} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
-    public DateType getDateElement() { 
-      if (this.date == null)
+    public DateTimeType getCreatedElement() { 
+      if (this.created == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PendedRequest.date");
+          throw new Error("Attempt to auto-create PendedRequest.created");
         else if (Configuration.doAutoCreate())
-          this.date = new DateType();
-      return this.date;
+          this.created = new DateTimeType();
+      return this.created;
     }
 
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasCreatedElement() { 
+      return this.created != null && !this.created.isEmpty();
     }
 
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasCreated() { 
+      return this.created != null && !this.created.isEmpty();
     }
 
     /**
-     * @param value {@link #date} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #created} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
-    public PendedRequest setDateElement(DateType value) { 
-      this.date = value;
+    public PendedRequest setCreatedElement(DateTimeType value) { 
+      this.created = value;
       return this;
     }
 
     /**
      * @return The date when this resource was created.
      */
-    public DateAndTime getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public Date getCreated() { 
+      return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value The date when this resource was created.
      */
-    public PendedRequest setDate(DateAndTime value) { 
+    public PendedRequest setCreated(Date value) { 
       if (value == null)
-        this.date = null;
+        this.created = null;
       else {
-        if (this.date == null)
-          this.date = new DateType();
-        this.date.setValue(value);
+        if (this.created == null)
+          this.created = new DateTimeType();
+        this.created.setValue(value);
       }
       return this;
     }
@@ -547,18 +554,43 @@ public class PendedRequest extends DomainResource {
       return false;
     }
 
+    /**
+     * @return {@link #period} (A period of time during which the fulfilling resources would have been created.)
+     */
+    public Period getPeriod() { 
+      if (this.period == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PendedRequest.period");
+        else if (Configuration.doAutoCreate())
+          this.period = new Period();
+      return this.period;
+    }
+
+    public boolean hasPeriod() { 
+      return this.period != null && !this.period.isEmpty();
+    }
+
+    /**
+     * @param value {@link #period} (A period of time during which the fulfilling resources would have been created.)
+     */
+    public PendedRequest setPeriod(Period value) { 
+      this.period = value;
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response Business Identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The style (standard) and version of the original material which was converted into this resource.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
-        childrenList.add(new Property("date", "date", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("created", "dateTime", "The date when this resource was created.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, organization));
         childrenList.add(new Property("request", "Reference(Any)", "Reference of resource to reverse.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("include", "string", "Names of resource types to include.", 0, java.lang.Integer.MAX_VALUE, include));
         childrenList.add(new Property("exclude", "string", "Names of resource types to exclude.", 0, java.lang.Integer.MAX_VALUE, exclude));
+        childrenList.add(new Property("period", "Period", "A period of time during which the fulfilling resources would have been created.", 0, java.lang.Integer.MAX_VALUE, period));
       }
 
       public PendedRequest copy() {
@@ -571,7 +603,7 @@ public class PendedRequest extends DomainResource {
         };
         dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.originalRuleset = originalRuleset == null ? null : originalRuleset.copy();
-        dst.date = date == null ? null : date.copy();
+        dst.created = created == null ? null : created.copy();
         dst.target = target == null ? null : target.copy();
         dst.provider = provider == null ? null : provider.copy();
         dst.organization = organization == null ? null : organization.copy();
@@ -586,6 +618,7 @@ public class PendedRequest extends DomainResource {
           for (StringType i : exclude)
             dst.exclude.add(i.copy());
         };
+        dst.period = period == null ? null : period.copy();
         return dst;
       }
 
@@ -595,10 +628,10 @@ public class PendedRequest extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ruleset == null || ruleset.isEmpty())
-           && (originalRuleset == null || originalRuleset.isEmpty()) && (date == null || date.isEmpty())
+           && (originalRuleset == null || originalRuleset.isEmpty()) && (created == null || created.isEmpty())
            && (target == null || target.isEmpty()) && (provider == null || provider.isEmpty()) && (organization == null || organization.isEmpty())
            && (request == null || request.isEmpty()) && (include == null || include.isEmpty()) && (exclude == null || exclude.isEmpty())
-          ;
+           && (period == null || period.isEmpty());
       }
 
   @Override

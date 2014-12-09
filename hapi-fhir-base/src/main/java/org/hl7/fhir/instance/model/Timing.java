@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="Timing")
 public class Timing extends Type {
 
-    public enum EventTiming {
+    public enum EventTiming implements FhirEnum {
         /**
          * event occurs [duration] before the hour of sleep (or trying to).
          */
@@ -89,7 +89,10 @@ public class Timing extends Type {
          * added to help the parsers
          */
         NULL;
-        public static EventTiming fromCode(String codeString) throws Exception {
+
+      public static final EventTimingEnumFactory ENUM_FACTORY = new EventTimingEnumFactory();
+
+        public static EventTiming fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("HS".equals(codeString))
@@ -112,8 +115,9 @@ public class Timing extends Type {
           return PCD;
         if ("PCV".equals(codeString))
           return PCV;
-        throw new Exception("Unknown EventTiming code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EventTiming code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case HS: return "HS";
@@ -176,8 +180,8 @@ public class Timing extends Type {
         }
     }
 
-  public static class EventTimingEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class EventTimingEnumFactory implements EnumFactory<EventTiming> {
+    public EventTiming fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -201,9 +205,9 @@ public class Timing extends Type {
           return EventTiming.PCD;
         if ("PCV".equals(codeString))
           return EventTiming.PCV;
-        throw new Exception("Unknown EventTiming code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EventTiming code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(EventTiming code) throws IllegalArgumentException {
       if (code == EventTiming.HS)
         return "HS";
       if (code == EventTiming.WAKE)
@@ -228,7 +232,7 @@ public class Timing extends Type {
       }
     }
 
-    public enum UnitsOfTime {
+    public enum UnitsOfTime implements FhirEnum {
         /**
          * second.
          */
@@ -261,7 +265,10 @@ public class Timing extends Type {
          * added to help the parsers
          */
         NULL;
-        public static UnitsOfTime fromCode(String codeString) throws Exception {
+
+      public static final UnitsOfTimeEnumFactory ENUM_FACTORY = new UnitsOfTimeEnumFactory();
+
+        public static UnitsOfTime fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("s".equals(codeString))
@@ -278,8 +285,9 @@ public class Timing extends Type {
           return MO;
         if ("a".equals(codeString))
           return A;
-        throw new Exception("Unknown UnitsOfTime code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown UnitsOfTime code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case S: return "s";
@@ -330,8 +338,8 @@ public class Timing extends Type {
         }
     }
 
-  public static class UnitsOfTimeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class UnitsOfTimeEnumFactory implements EnumFactory<UnitsOfTime> {
+    public UnitsOfTime fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -349,9 +357,9 @@ public class Timing extends Type {
           return UnitsOfTime.MO;
         if ("a".equals(codeString))
           return UnitsOfTime.A;
-        throw new Exception("Unknown UnitsOfTime code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown UnitsOfTime code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(UnitsOfTime code) throws IllegalArgumentException {
       if (code == UnitsOfTime.S)
         return "s";
       if (code == UnitsOfTime.MIN)
@@ -517,7 +525,7 @@ public class Timing extends Type {
             this.when = null;
           else {
             if (this.when == null)
-              this.when = new Enumeration<EventTiming>();
+              this.when = new Enumeration<EventTiming>(EventTiming.ENUM_FACTORY);
             this.when.setValue(value);
           }
           return this;
@@ -608,7 +616,7 @@ public class Timing extends Type {
          */
         public TimingRepeatComponent setUnits(UnitsOfTime value) { 
             if (this.units == null)
-              this.units = new Enumeration<UnitsOfTime>();
+              this.units = new Enumeration<UnitsOfTime>(UnitsOfTime.ENUM_FACTORY);
             this.units.setValue(value);
           return this;
         }
@@ -693,14 +701,14 @@ public class Timing extends Type {
         /**
          * @return When to stop repeating the timing schedule.
          */
-        public DateAndTime getEnd() { 
+        public Date getEnd() { 
           return this.end == null ? null : this.end.getValue();
         }
 
         /**
          * @param value When to stop repeating the timing schedule.
          */
-        public TimingRepeatComponent setEnd(DateAndTime value) { 
+        public TimingRepeatComponent setEnd(Date value) { 
           if (value == null)
             this.end = null;
           else {

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/Profile/Conformance")
 public class Conformance extends DomainResource {
 
-    public enum ConformanceStatementStatus {
+    public enum ConformanceStatementStatus implements FhirEnum {
         /**
          * This conformance statement is still under development.
          */
@@ -62,7 +62,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ConformanceStatementStatus fromCode(String codeString) throws Exception {
+
+      public static final ConformanceStatementStatusEnumFactory ENUM_FACTORY = new ConformanceStatementStatusEnumFactory();
+
+        public static ConformanceStatementStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -71,8 +74,9 @@ public class Conformance extends DomainResource {
           return ACTIVE;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown ConformanceStatementStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConformanceStatementStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DRAFT: return "draft";
@@ -107,8 +111,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class ConformanceStatementStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ConformanceStatementStatusEnumFactory implements EnumFactory<ConformanceStatementStatus> {
+    public ConformanceStatementStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class Conformance extends DomainResource {
           return ConformanceStatementStatus.ACTIVE;
         if ("retired".equals(codeString))
           return ConformanceStatementStatus.RETIRED;
-        throw new Exception("Unknown ConformanceStatementStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConformanceStatementStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ConformanceStatementStatus code) throws IllegalArgumentException {
       if (code == ConformanceStatementStatus.DRAFT)
         return "draft";
       if (code == ConformanceStatementStatus.ACTIVE)
@@ -131,7 +135,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum RestfulConformanceMode {
+    public enum RestfulConformanceMode implements FhirEnum {
         /**
          * The application acts as a server for this resource.
          */
@@ -144,15 +148,19 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static RestfulConformanceMode fromCode(String codeString) throws Exception {
+
+      public static final RestfulConformanceModeEnumFactory ENUM_FACTORY = new RestfulConformanceModeEnumFactory();
+
+        public static RestfulConformanceMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("client".equals(codeString))
           return CLIENT;
         if ("server".equals(codeString))
           return SERVER;
-        throw new Exception("Unknown RestfulConformanceMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown RestfulConformanceMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CLIENT: return "client";
@@ -183,8 +191,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class RestfulConformanceModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class RestfulConformanceModeEnumFactory implements EnumFactory<RestfulConformanceMode> {
+    public RestfulConformanceMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -192,9 +200,9 @@ public class Conformance extends DomainResource {
           return RestfulConformanceMode.CLIENT;
         if ("server".equals(codeString))
           return RestfulConformanceMode.SERVER;
-        throw new Exception("Unknown RestfulConformanceMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown RestfulConformanceMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(RestfulConformanceMode code) throws IllegalArgumentException {
       if (code == RestfulConformanceMode.CLIENT)
         return "client";
       if (code == RestfulConformanceMode.SERVER)
@@ -203,7 +211,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum TypeRestfulInteraction {
+    public enum TypeRestfulInteraction implements FhirEnum {
         /**
          * 
          */
@@ -244,7 +252,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static TypeRestfulInteraction fromCode(String codeString) throws Exception {
+
+      public static final TypeRestfulInteractionEnumFactory ENUM_FACTORY = new TypeRestfulInteractionEnumFactory();
+
+        public static TypeRestfulInteraction fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("read".equals(codeString))
@@ -265,8 +276,9 @@ public class Conformance extends DomainResource {
           return CREATE;
         if ("search-type".equals(codeString))
           return SEARCHTYPE;
-        throw new Exception("Unknown TypeRestfulInteraction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown TypeRestfulInteraction code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case READ: return "read";
@@ -325,8 +337,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class TypeRestfulInteractionEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class TypeRestfulInteractionEnumFactory implements EnumFactory<TypeRestfulInteraction> {
+    public TypeRestfulInteraction fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -348,9 +360,9 @@ public class Conformance extends DomainResource {
           return TypeRestfulInteraction.CREATE;
         if ("search-type".equals(codeString))
           return TypeRestfulInteraction.SEARCHTYPE;
-        throw new Exception("Unknown TypeRestfulInteraction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown TypeRestfulInteraction code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(TypeRestfulInteraction code) throws IllegalArgumentException {
       if (code == TypeRestfulInteraction.READ)
         return "read";
       if (code == TypeRestfulInteraction.VREAD)
@@ -373,7 +385,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum VersioningPolicy {
+    public enum VersioningPolicy implements FhirEnum {
         /**
          * VersionId meta-property is not suppoerted (server) or used (client).
          */
@@ -390,7 +402,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static VersioningPolicy fromCode(String codeString) throws Exception {
+
+      public static final VersioningPolicyEnumFactory ENUM_FACTORY = new VersioningPolicyEnumFactory();
+
+        public static VersioningPolicy fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("no-version".equals(codeString))
@@ -399,8 +414,9 @@ public class Conformance extends DomainResource {
           return VERSIONED;
         if ("versioned-update".equals(codeString))
           return VERSIONEDUPDATE;
-        throw new Exception("Unknown VersioningPolicy code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown VersioningPolicy code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case NOVERSION: return "no-version";
@@ -435,8 +451,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class VersioningPolicyEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class VersioningPolicyEnumFactory implements EnumFactory<VersioningPolicy> {
+    public VersioningPolicy fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -446,9 +462,9 @@ public class Conformance extends DomainResource {
           return VersioningPolicy.VERSIONED;
         if ("versioned-update".equals(codeString))
           return VersioningPolicy.VERSIONEDUPDATE;
-        throw new Exception("Unknown VersioningPolicy code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown VersioningPolicy code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(VersioningPolicy code) throws IllegalArgumentException {
       if (code == VersioningPolicy.NOVERSION)
         return "no-version";
       if (code == VersioningPolicy.VERSIONED)
@@ -459,7 +475,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum SearchParamType {
+    public enum SearchParamType implements FhirEnum {
         /**
          * Search parameter SHALL be a number (a whole number, or a decimal).
          */
@@ -492,7 +508,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SearchParamType fromCode(String codeString) throws Exception {
+
+      public static final SearchParamTypeEnumFactory ENUM_FACTORY = new SearchParamTypeEnumFactory();
+
+        public static SearchParamType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("number".equals(codeString))
@@ -509,8 +528,9 @@ public class Conformance extends DomainResource {
           return COMPOSITE;
         if ("quantity".equals(codeString))
           return QUANTITY;
-        throw new Exception("Unknown SearchParamType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SearchParamType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case NUMBER: return "number";
@@ -561,8 +581,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class SearchParamTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SearchParamTypeEnumFactory implements EnumFactory<SearchParamType> {
+    public SearchParamType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -580,9 +600,9 @@ public class Conformance extends DomainResource {
           return SearchParamType.COMPOSITE;
         if ("quantity".equals(codeString))
           return SearchParamType.QUANTITY;
-        throw new Exception("Unknown SearchParamType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SearchParamType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SearchParamType code) throws IllegalArgumentException {
       if (code == SearchParamType.NUMBER)
         return "number";
       if (code == SearchParamType.DATE)
@@ -601,7 +621,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum SystemRestfulInteraction {
+    public enum SystemRestfulInteraction implements FhirEnum {
         /**
          * 
          */
@@ -618,7 +638,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SystemRestfulInteraction fromCode(String codeString) throws Exception {
+
+      public static final SystemRestfulInteractionEnumFactory ENUM_FACTORY = new SystemRestfulInteractionEnumFactory();
+
+        public static SystemRestfulInteraction fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("transaction".equals(codeString))
@@ -627,8 +650,9 @@ public class Conformance extends DomainResource {
           return SEARCHSYSTEM;
         if ("history-system".equals(codeString))
           return HISTORYSYSTEM;
-        throw new Exception("Unknown SystemRestfulInteraction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SystemRestfulInteraction code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case TRANSACTION: return "transaction";
@@ -663,8 +687,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class SystemRestfulInteractionEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SystemRestfulInteractionEnumFactory implements EnumFactory<SystemRestfulInteraction> {
+    public SystemRestfulInteraction fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -674,9 +698,9 @@ public class Conformance extends DomainResource {
           return SystemRestfulInteraction.SEARCHSYSTEM;
         if ("history-system".equals(codeString))
           return SystemRestfulInteraction.HISTORYSYSTEM;
-        throw new Exception("Unknown SystemRestfulInteraction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SystemRestfulInteraction code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SystemRestfulInteraction code) throws IllegalArgumentException {
       if (code == SystemRestfulInteraction.TRANSACTION)
         return "transaction";
       if (code == SystemRestfulInteraction.SEARCHSYSTEM)
@@ -687,7 +711,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum MessageSignificanceCategory {
+    public enum MessageSignificanceCategory implements FhirEnum {
         /**
          * The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment.
          */
@@ -704,7 +728,10 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MessageSignificanceCategory fromCode(String codeString) throws Exception {
+
+      public static final MessageSignificanceCategoryEnumFactory ENUM_FACTORY = new MessageSignificanceCategoryEnumFactory();
+
+        public static MessageSignificanceCategory fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("Consequence".equals(codeString))
@@ -713,8 +740,9 @@ public class Conformance extends DomainResource {
           return CURRENCY;
         if ("Notification".equals(codeString))
           return NOTIFICATION;
-        throw new Exception("Unknown MessageSignificanceCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CONSEQUENCE: return "Consequence";
@@ -749,8 +777,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class MessageSignificanceCategoryEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MessageSignificanceCategoryEnumFactory implements EnumFactory<MessageSignificanceCategory> {
+    public MessageSignificanceCategory fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -760,9 +788,9 @@ public class Conformance extends DomainResource {
           return MessageSignificanceCategory.CURRENCY;
         if ("Notification".equals(codeString))
           return MessageSignificanceCategory.NOTIFICATION;
-        throw new Exception("Unknown MessageSignificanceCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MessageSignificanceCategory code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MessageSignificanceCategory code) throws IllegalArgumentException {
       if (code == MessageSignificanceCategory.CONSEQUENCE)
         return "Consequence";
       if (code == MessageSignificanceCategory.CURRENCY)
@@ -773,7 +801,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum MessageConformanceEventMode {
+    public enum MessageConformanceEventMode implements FhirEnum {
         /**
          * The application sends requests and receives responses.
          */
@@ -786,15 +814,19 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MessageConformanceEventMode fromCode(String codeString) throws Exception {
+
+      public static final MessageConformanceEventModeEnumFactory ENUM_FACTORY = new MessageConformanceEventModeEnumFactory();
+
+        public static MessageConformanceEventMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("sender".equals(codeString))
           return SENDER;
         if ("receiver".equals(codeString))
           return RECEIVER;
-        throw new Exception("Unknown MessageConformanceEventMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MessageConformanceEventMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case SENDER: return "sender";
@@ -825,8 +857,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class MessageConformanceEventModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MessageConformanceEventModeEnumFactory implements EnumFactory<MessageConformanceEventMode> {
+    public MessageConformanceEventMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -834,9 +866,9 @@ public class Conformance extends DomainResource {
           return MessageConformanceEventMode.SENDER;
         if ("receiver".equals(codeString))
           return MessageConformanceEventMode.RECEIVER;
-        throw new Exception("Unknown MessageConformanceEventMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MessageConformanceEventMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MessageConformanceEventMode code) throws IllegalArgumentException {
       if (code == MessageConformanceEventMode.SENDER)
         return "sender";
       if (code == MessageConformanceEventMode.RECEIVER)
@@ -845,7 +877,7 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum DocumentMode {
+    public enum DocumentMode implements FhirEnum {
         /**
          * The application produces documents of the specified type.
          */
@@ -858,15 +890,19 @@ public class Conformance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DocumentMode fromCode(String codeString) throws Exception {
+
+      public static final DocumentModeEnumFactory ENUM_FACTORY = new DocumentModeEnumFactory();
+
+        public static DocumentMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("producer".equals(codeString))
           return PRODUCER;
         if ("consumer".equals(codeString))
           return CONSUMER;
-        throw new Exception("Unknown DocumentMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PRODUCER: return "producer";
@@ -897,8 +933,8 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class DocumentModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DocumentModeEnumFactory implements EnumFactory<DocumentMode> {
+    public DocumentMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -906,9 +942,9 @@ public class Conformance extends DomainResource {
           return DocumentMode.PRODUCER;
         if ("consumer".equals(codeString))
           return DocumentMode.CONSUMER;
-        throw new Exception("Unknown DocumentMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DocumentMode code) throws IllegalArgumentException {
       if (code == DocumentMode.PRODUCER)
         return "producer";
       if (code == DocumentMode.CONSUMER)
@@ -1076,14 +1112,14 @@ public class Conformance extends DomainResource {
         /**
          * @return Date this version of the software released.
          */
-        public DateAndTime getReleaseDate() { 
+        public Date getReleaseDate() { 
           return this.releaseDate == null ? null : this.releaseDate.getValue();
         }
 
         /**
          * @param value Date this version of the software released.
          */
-        public ConformanceSoftwareComponent setReleaseDate(DateAndTime value) { 
+        public ConformanceSoftwareComponent setReleaseDate(Date value) { 
           if (value == null)
             this.releaseDate = null;
           else {
@@ -1361,7 +1397,7 @@ public class Conformance extends DomainResource {
          */
         public ConformanceRestComponent setMode(RestfulConformanceMode value) { 
             if (this.mode == null)
-              this.mode = new Enumeration<RestfulConformanceMode>();
+              this.mode = new Enumeration<RestfulConformanceMode>(RestfulConformanceMode.ENUM_FACTORY);
             this.mode.setValue(value);
           return this;
         }
@@ -2237,7 +2273,7 @@ public class Conformance extends DomainResource {
             this.versioning = null;
           else {
             if (this.versioning == null)
-              this.versioning = new Enumeration<VersioningPolicy>();
+              this.versioning = new Enumeration<VersioningPolicy>(VersioningPolicy.ENUM_FACTORY);
             this.versioning.setValue(value);
           }
           return this;
@@ -2540,7 +2576,7 @@ public class Conformance extends DomainResource {
          */
         public ResourceInteractionComponent setCode(TypeRestfulInteraction value) { 
             if (this.code == null)
-              this.code = new Enumeration<TypeRestfulInteraction>();
+              this.code = new Enumeration<TypeRestfulInteraction>(TypeRestfulInteraction.ENUM_FACTORY);
             this.code.setValue(value);
           return this;
         }
@@ -2805,7 +2841,7 @@ public class Conformance extends DomainResource {
          */
         public ConformanceRestResourceSearchParamComponent setType(SearchParamType value) { 
             if (this.type == null)
-              this.type = new Enumeration<SearchParamType>();
+              this.type = new Enumeration<SearchParamType>(SearchParamType.ENUM_FACTORY);
             this.type.setValue(value);
           return this;
         }
@@ -3072,7 +3108,7 @@ public class Conformance extends DomainResource {
          */
         public SystemInteractionComponent setCode(SystemRestfulInteraction value) { 
             if (this.code == null)
-              this.code = new Enumeration<SystemRestfulInteraction>();
+              this.code = new Enumeration<SystemRestfulInteraction>(SystemRestfulInteraction.ENUM_FACTORY);
             this.code.setValue(value);
           return this;
         }
@@ -3683,7 +3719,7 @@ public class Conformance extends DomainResource {
             this.category = null;
           else {
             if (this.category == null)
-              this.category = new Enumeration<MessageSignificanceCategory>();
+              this.category = new Enumeration<MessageSignificanceCategory>(MessageSignificanceCategory.ENUM_FACTORY);
             this.category.setValue(value);
           }
           return this;
@@ -3729,7 +3765,7 @@ public class Conformance extends DomainResource {
          */
         public ConformanceMessagingEventComponent setMode(MessageConformanceEventMode value) { 
             if (this.mode == null)
-              this.mode = new Enumeration<MessageConformanceEventMode>();
+              this.mode = new Enumeration<MessageConformanceEventMode>(MessageConformanceEventMode.ENUM_FACTORY);
             this.mode.setValue(value);
           return this;
         }
@@ -4065,7 +4101,7 @@ public class Conformance extends DomainResource {
          */
         public ConformanceDocumentComponent setMode(DocumentMode value) { 
             if (this.mode == null)
-              this.mode = new Enumeration<DocumentMode>();
+              this.mode = new Enumeration<DocumentMode>(DocumentMode.ENUM_FACTORY);
             this.mode.setValue(value);
           return this;
         }
@@ -4645,7 +4681,7 @@ public class Conformance extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<ConformanceStatementStatus>();
+          this.status = new Enumeration<ConformanceStatementStatus>(ConformanceStatementStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -4731,14 +4767,14 @@ public class Conformance extends DomainResource {
     /**
      * @return The date  (and optionally time) when the conformance statement was published.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date  (and optionally time) when the conformance statement was published.
      */
-    public Conformance setDate(DateAndTime value) { 
+    public Conformance setDate(Date value) { 
         if (this.date == null)
           this.date = new DateTimeType();
         this.date.setValue(value);

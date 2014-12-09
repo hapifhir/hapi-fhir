@@ -25,11 +25,42 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 package org.hl7.fhir.instance.model;
+
+import java.net.URI;
 
 public class SidType extends UriType {
 
-  private static final long serialVersionUID = 5486832330986493589L;
-	
+	private static final long serialVersionUID = 2L;
+
+	/**
+	 * Constructor
+	 */
+	public SidType() {
+		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	public SidType(String theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public SidType(URI theValue) {
+		super(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	@Override
+	public SidType copy() {
+		return new SidType(getValue());
+	}
+
 }

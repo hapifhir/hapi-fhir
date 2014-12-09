@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -139,14 +139,14 @@ public class Contraindication extends DomainResource {
         /**
          * @return Indicates when the mitigating action was documented.
          */
-        public DateAndTime getDate() { 
+        public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
          * @param value Indicates when the mitigating action was documented.
          */
-        public ContraindicationMitigationComponent setDate(DateAndTime value) { 
+        public ContraindicationMitigationComponent setDate(Date value) { 
           if (value == null)
             this.date = null;
           else {
@@ -551,14 +551,14 @@ public class Contraindication extends DomainResource {
     /**
      * @return The date or date-time when the contraindication was initially identified.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date or date-time when the contraindication was initially identified.
      */
-    public Contraindication setDate(DateAndTime value) { 
+    public Contraindication setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {

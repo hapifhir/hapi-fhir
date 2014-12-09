@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="AppointmentResponse", profile="http://hl7.org/fhir/Profile/AppointmentResponse")
 public class AppointmentResponse extends DomainResource {
 
-    public enum Participantstatus {
+    public enum Participantstatus implements FhirEnum {
         /**
          * The appointment participant has accepted that they can attend the appointment at the time specified in the AppointmentResponse.
          */
@@ -74,7 +74,10 @@ public class AppointmentResponse extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Participantstatus fromCode(String codeString) throws Exception {
+
+      public static final ParticipantstatusEnumFactory ENUM_FACTORY = new ParticipantstatusEnumFactory();
+
+        public static Participantstatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("accepted".equals(codeString))
@@ -89,8 +92,9 @@ public class AppointmentResponse extends DomainResource {
           return COMPLETED;
         if ("needs-action".equals(codeString))
           return NEEDSACTION;
-        throw new Exception("Unknown Participantstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participantstatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ACCEPTED: return "accepted";
@@ -137,8 +141,8 @@ public class AppointmentResponse extends DomainResource {
         }
     }
 
-  public static class ParticipantstatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ParticipantstatusEnumFactory implements EnumFactory<Participantstatus> {
+    public Participantstatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -154,9 +158,9 @@ public class AppointmentResponse extends DomainResource {
           return Participantstatus.COMPLETED;
         if ("needs-action".equals(codeString))
           return Participantstatus.NEEDSACTION;
-        throw new Exception("Unknown Participantstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participantstatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Participantstatus code) throws IllegalArgumentException {
       if (code == Participantstatus.ACCEPTED)
         return "accepted";
       if (code == Participantstatus.DECLINED)
@@ -453,7 +457,7 @@ public class AppointmentResponse extends DomainResource {
      */
     public AppointmentResponse setParticipantStatus(Participantstatus value) { 
         if (this.participantStatus == null)
-          this.participantStatus = new Enumeration<Participantstatus>();
+          this.participantStatus = new Enumeration<Participantstatus>(Participantstatus.ENUM_FACTORY);
         this.participantStatus.setValue(value);
       return this;
     }
@@ -538,14 +542,14 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @return Date/Time that the appointment is to take place.
      */
-    public DateAndTime getStart() { 
+    public Date getStart() { 
       return this.start == null ? null : this.start.getValue();
     }
 
     /**
      * @param value Date/Time that the appointment is to take place.
      */
-    public AppointmentResponse setStart(DateAndTime value) { 
+    public AppointmentResponse setStart(Date value) { 
       if (value == null)
         this.start = null;
       else {
@@ -587,14 +591,14 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @return Date/Time that the appointment is to conclude.
      */
-    public DateAndTime getEnd() { 
+    public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value Date/Time that the appointment is to conclude.
      */
-    public AppointmentResponse setEnd(DateAndTime value) { 
+    public AppointmentResponse setEnd(Date value) { 
       if (value == null)
         this.end = null;
       else {
@@ -675,14 +679,14 @@ public class AppointmentResponse extends DomainResource {
     /**
      * @return Date when the response was recorded or last updated.
      */
-    public DateAndTime getLastModified() { 
+    public Date getLastModified() { 
       return this.lastModified == null ? null : this.lastModified.getValue();
     }
 
     /**
      * @param value Date when the response was recorded or last updated.
      */
-    public AppointmentResponse setLastModified(DateAndTime value) { 
+    public AppointmentResponse setLastModified(Date value) { 
       if (value == null)
         this.lastModified = null;
       else {

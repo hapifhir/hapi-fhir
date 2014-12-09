@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -44,7 +44,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="Narrative")
 public class Narrative extends Element {
 
-    public enum NarrativeStatus {
+    public enum NarrativeStatus implements FhirEnum {
         /**
          * The contents of the narrative are entirely generated from the structured data in the resource.
          */
@@ -65,7 +65,10 @@ public class Narrative extends Element {
          * added to help the parsers
          */
         NULL;
-        public static NarrativeStatus fromCode(String codeString) throws Exception {
+
+      public static final NarrativeStatusEnumFactory ENUM_FACTORY = new NarrativeStatusEnumFactory();
+
+        public static NarrativeStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("generated".equals(codeString))
@@ -76,8 +79,9 @@ public class Narrative extends Element {
           return ADDITIONAL;
         if ("empty".equals(codeString))
           return EMPTY;
-        throw new Exception("Unknown NarrativeStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NarrativeStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case GENERATED: return "generated";
@@ -116,8 +120,8 @@ public class Narrative extends Element {
         }
     }
 
-  public static class NarrativeStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NarrativeStatusEnumFactory implements EnumFactory<NarrativeStatus> {
+    public NarrativeStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -129,9 +133,9 @@ public class Narrative extends Element {
           return NarrativeStatus.ADDITIONAL;
         if ("empty".equals(codeString))
           return NarrativeStatus.EMPTY;
-        throw new Exception("Unknown NarrativeStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NarrativeStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NarrativeStatus code) throws IllegalArgumentException {
       if (code == NarrativeStatus.GENERATED)
         return "generated";
       if (code == NarrativeStatus.EXTENSIONS)
@@ -210,7 +214,7 @@ public class Narrative extends Element {
      */
     public Narrative setStatus(NarrativeStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<NarrativeStatus>();
+          this.status = new Enumeration<NarrativeStatus>(NarrativeStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

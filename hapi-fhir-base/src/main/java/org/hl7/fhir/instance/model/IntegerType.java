@@ -25,96 +25,81 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWIS
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 /**
  * 
  */
 package org.hl7.fhir.instance.model;
 
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+
 /**
- * Primitive type "integer" in FHIR: A signed 32-bit integer 
- * @author Grahame
- *
+ * Primitive type "integer" in FHIR: A signed 32-bit integer
  */
-public class IntegerType extends PrimitiveType {
+@DatatypeDef(name = "integer")
+public class IntegerType extends PrimitiveType<Integer> {
 
-  private static final long serialVersionUID = -553171308047944356L;
+	private static final long serialVersionUID = 1L;
+
 	/**
-	 * the actual value of the number
+	 * Constructor
 	 */
-	private java.lang.Integer value;
-	/**
-	 * The exact representation of the number on the wire. i.e. does it have leading zeros. 
-	 * This SHOULD not be used, but is provided in case it's absolutely needed
-	 */
-	private String original;
-	
-	public IntegerType(Integer value) {
-    if (value != null) {
-      this.value = value;
-      original = value.toString();
-    }
-  }
-
-  public IntegerType() {
-  }
-
-  /**
-	 * @return the integer value
-	 */
-	public int getValue() {
-		return value;
+	public IntegerType() {
+		// nothing
 	}
 
 	/**
-	 * @param value the integer value
+	 * Constructor
 	 */
-	public void setValue(int value) {
-		this.value = value;
-		this.original = null;
+	public IntegerType(int theInteger) {
+		setValue(theInteger);
 	}
 
 	/**
-	 * @return The exact representation of the number on the wire
+	 * Constructor
+	 * 
+	 * @param theIntegerAsString
+	 *            A string representation of an integer
+	 * @throws IllegalArgumentException
+	 *             If the string is not a valid integer representation
 	 */
-  public String getOriginal() {
-    return original;
-  }
+	public IntegerType(String theIntegerAsString) {
+		setValueAsString(theIntegerAsString);
+	}
 
-  /**
-   * @param original The exact representation of the number on the wire
-   */
-  public void setOriginal(String original) {
-    this.original = original;
-  } 
-	
+	/**
+	 * Constructor
+	 * 
+	 * @param theValue The value
+	 * @throws IllegalArgumentException If the value is too large to fit in a signed integer
+	 */
+	public IntegerType(Long theValue) {
+	    if (theValue < java.lang.Integer.MIN_VALUE || theValue > java.lang.Integer.MAX_VALUE) {
+	        throw new IllegalArgumentException
+	            (theValue + " cannot be cast to int without changing its value.");
+	    }
+	    if(theValue!=null) {
+	    	setValue((int)theValue.longValue());
+	    }
+	}
+
 	@Override
-  public IntegerType copy() {
-		IntegerType dst = new IntegerType();
-		dst.value = value;
-		dst.original = original;
-		return dst;
+	protected Integer parse(String theValue) {
+		try {
+			return Integer.parseInt(theValue);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
-	
+
 	@Override
-  protected Type typedCopy() {
-		return copy();
+	protected String encode(Integer theValue) {
+		return Integer.toString(theValue);
 	}
 
-	public String getStringValue() {
-	  return java.lang.Integer.toString(value);
-  }
-
-  @Override
-  public String asStringValue() {
-    return original != null ? original : java.lang.Integer.toString(value);
-  }
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	@Override
+	public IntegerType copy() {
+		return new IntegerType(getValue());
 	}
-
-  public boolean hasValue() {
-    return value != null;
-  }
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Composition", profile="http://hl7.org/fhir/Profile/Composition")
 public class Composition extends DomainResource {
 
-    public enum CompositionStatus {
+    public enum CompositionStatus implements FhirEnum {
         /**
          * This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.
          */
@@ -70,7 +70,10 @@ public class Composition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CompositionStatus fromCode(String codeString) throws Exception {
+
+      public static final CompositionStatusEnumFactory ENUM_FACTORY = new CompositionStatusEnumFactory();
+
+        public static CompositionStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("preliminary".equals(codeString))
@@ -83,8 +86,9 @@ public class Composition extends DomainResource {
           return AMENDED;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown CompositionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CompositionStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PRELIMINARY: return "preliminary";
@@ -127,8 +131,8 @@ public class Composition extends DomainResource {
         }
     }
 
-  public static class CompositionStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CompositionStatusEnumFactory implements EnumFactory<CompositionStatus> {
+    public CompositionStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -142,9 +146,9 @@ public class Composition extends DomainResource {
           return CompositionStatus.AMENDED;
         if ("entered in error".equals(codeString))
           return CompositionStatus.ENTEREDINERROR;
-        throw new Exception("Unknown CompositionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CompositionStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CompositionStatus code) throws IllegalArgumentException {
       if (code == CompositionStatus.PRELIMINARY)
         return "preliminary";
       if (code == CompositionStatus.FINAL)
@@ -159,7 +163,7 @@ public class Composition extends DomainResource {
       }
     }
 
-    public enum CompositionAttestationMode {
+    public enum CompositionAttestationMode implements FhirEnum {
         /**
          * The person authenticated the content in their personal capacity.
          */
@@ -180,7 +184,10 @@ public class Composition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CompositionAttestationMode fromCode(String codeString) throws Exception {
+
+      public static final CompositionAttestationModeEnumFactory ENUM_FACTORY = new CompositionAttestationModeEnumFactory();
+
+        public static CompositionAttestationMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("personal".equals(codeString))
@@ -191,8 +198,9 @@ public class Composition extends DomainResource {
           return LEGAL;
         if ("official".equals(codeString))
           return OFFICIAL;
-        throw new Exception("Unknown CompositionAttestationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CompositionAttestationMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PERSONAL: return "personal";
@@ -231,8 +239,8 @@ public class Composition extends DomainResource {
         }
     }
 
-  public static class CompositionAttestationModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CompositionAttestationModeEnumFactory implements EnumFactory<CompositionAttestationMode> {
+    public CompositionAttestationMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -244,9 +252,9 @@ public class Composition extends DomainResource {
           return CompositionAttestationMode.LEGAL;
         if ("official".equals(codeString))
           return CompositionAttestationMode.OFFICIAL;
-        throw new Exception("Unknown CompositionAttestationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CompositionAttestationMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CompositionAttestationMode code) throws IllegalArgumentException {
       if (code == CompositionAttestationMode.PERSONAL)
         return "personal";
       if (code == CompositionAttestationMode.PROFESSIONAL)
@@ -378,14 +386,14 @@ public class Composition extends DomainResource {
         /**
          * @return When composition was attested by the party.
          */
-        public DateAndTime getTime() { 
+        public Date getTime() { 
           return this.time == null ? null : this.time.getValue();
         }
 
         /**
          * @param value When composition was attested by the party.
          */
-        public CompositionAttesterComponent setTime(DateAndTime value) { 
+        public CompositionAttesterComponent setTime(Date value) { 
           if (value == null)
             this.time = null;
           else {
@@ -1020,14 +1028,14 @@ public class Composition extends DomainResource {
     /**
      * @return The composition editing time, when the composition was last logically changed by the author.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The composition editing time, when the composition was last logically changed by the author.
      */
-    public Composition setDate(DateAndTime value) { 
+    public Composition setDate(Date value) { 
         if (this.date == null)
           this.date = new DateTimeType();
         this.date.setValue(value);
@@ -1171,7 +1179,7 @@ public class Composition extends DomainResource {
      */
     public Composition setStatus(CompositionStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<CompositionStatus>();
+          this.status = new Enumeration<CompositionStatus>(CompositionStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1536,12 +1544,12 @@ public class Composition extends DomainResource {
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
+  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
+  public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
-  public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="section", path="Composition.section.content", description="The Content of the section", type="reference" )
   public static final String SP_SECTION = "section";
   @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )

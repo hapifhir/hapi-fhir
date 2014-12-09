@@ -51,6 +51,13 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
 		setValue(theBytes);
 	}
 
+	/**
+	 * Constructor
+	 */
+	public Base64BinaryType(String theValue) {
+		setValueAsString(theValue);
+	}
+
 	@Override
 	protected byte[] parse(String theValue) {
 		return Base64.decodeBase64(theValue);

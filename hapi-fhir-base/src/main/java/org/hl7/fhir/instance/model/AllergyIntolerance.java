@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="AllergyIntolerance", profile="http://hl7.org/fhir/Profile/AllergyIntolerance")
 public class AllergyIntolerance extends DomainResource {
 
-    public enum AllergyIntoleranceStatus {
+    public enum AllergyIntoleranceStatus implements FhirEnum {
         /**
          * A low level of certainty about the propensity for a reaction to the identified Substance.
          */
@@ -66,7 +66,10 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceStatus fromCode(String codeString) throws Exception {
+
+      public static final AllergyIntoleranceStatusEnumFactory ENUM_FACTORY = new AllergyIntoleranceStatusEnumFactory();
+
+        public static AllergyIntoleranceStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unconfirmed".equals(codeString))
@@ -77,8 +80,9 @@ public class AllergyIntolerance extends DomainResource {
           return RESOLVED;
         if ("refuted".equals(codeString))
           return REFUTED;
-        throw new Exception("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case UNCONFIRMED: return "unconfirmed";
@@ -117,8 +121,8 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class AllergyIntoleranceStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AllergyIntoleranceStatusEnumFactory implements EnumFactory<AllergyIntoleranceStatus> {
+    public AllergyIntoleranceStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceStatus.RESOLVED;
         if ("refuted".equals(codeString))
           return AllergyIntoleranceStatus.REFUTED;
-        throw new Exception("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AllergyIntoleranceStatus code) throws IllegalArgumentException {
       if (code == AllergyIntoleranceStatus.UNCONFIRMED)
         return "unconfirmed";
       if (code == AllergyIntoleranceStatus.CONFIRMED)
@@ -145,32 +149,43 @@ public class AllergyIntolerance extends DomainResource {
       }
     }
 
-    public enum AllergyIntoleranceCriticality {
+    public enum AllergyIntoleranceCriticality implements FhirEnum {
         /**
-         * The potential clinical impact of a future reaction is estimated as low risk. Future exposure to the Substance is considered a relative contra-indication.
+         * The potential clinical impact of a future reaction is estimated as low risk: exposure to substance is unlikely to result in a life threatening or organ system threatening outcome. Future exposure to the Substance is considered a relative contra-indication.
          */
         LOW, 
         /**
-         * The potential clinical impact of a future reaction is estimated as high risk. Future exposure to the Substance may be considered an absolute contra-indication.
+         * The potential clinical impact of a future reaction is estimated as high risk: exposure to substance may result in a life threatening or organ system threatening outcome. Future exposure to the Substance may be considered an absolute contra-indication.
          */
         HIGH, 
+        /**
+         * Unable to assess the potential clinical impact with the information available.
+         */
+        UNASSESSIBLE, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceCriticality fromCode(String codeString) throws Exception {
+
+      public static final AllergyIntoleranceCriticalityEnumFactory ENUM_FACTORY = new AllergyIntoleranceCriticalityEnumFactory();
+
+        public static AllergyIntoleranceCriticality fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("low".equals(codeString))
           return LOW;
         if ("high".equals(codeString))
           return HIGH;
-        throw new Exception("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
+        if ("unassessible".equals(codeString))
+          return UNASSESSIBLE;
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case LOW: return "low";
             case HIGH: return "high";
+            case UNASSESSIBLE: return "unassessible";
             default: return "?";
           }
         }
@@ -178,13 +193,15 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case LOW: return "";
             case HIGH: return "";
+            case UNASSESSIBLE: return "";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case LOW: return "The potential clinical impact of a future reaction is estimated as low risk. Future exposure to the Substance is considered a relative contra-indication.";
-            case HIGH: return "The potential clinical impact of a future reaction is estimated as high risk. Future exposure to the Substance may be considered an absolute contra-indication.";
+            case LOW: return "The potential clinical impact of a future reaction is estimated as low risk: exposure to substance is unlikely to result in a life threatening or organ system threatening outcome. Future exposure to the Substance is considered a relative contra-indication.";
+            case HIGH: return "The potential clinical impact of a future reaction is estimated as high risk: exposure to substance may result in a life threatening or organ system threatening outcome. Future exposure to the Substance may be considered an absolute contra-indication.";
+            case UNASSESSIBLE: return "Unable to assess the potential clinical impact with the information available.";
             default: return "?";
           }
         }
@@ -192,13 +209,14 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case LOW: return "Low Risk";
             case HIGH: return "High Risk";
+            case UNASSESSIBLE: return "Unable to determine";
             default: return "?";
           }
         }
     }
 
-  public static class AllergyIntoleranceCriticalityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AllergyIntoleranceCriticalityEnumFactory implements EnumFactory<AllergyIntoleranceCriticality> {
+    public AllergyIntoleranceCriticality fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -206,18 +224,22 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCriticality.LOW;
         if ("high".equals(codeString))
           return AllergyIntoleranceCriticality.HIGH;
-        throw new Exception("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
+        if ("unassessible".equals(codeString))
+          return AllergyIntoleranceCriticality.UNASSESSIBLE;
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceCriticality code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AllergyIntoleranceCriticality code) throws IllegalArgumentException {
       if (code == AllergyIntoleranceCriticality.LOW)
         return "low";
       if (code == AllergyIntoleranceCriticality.HIGH)
         return "high";
+      if (code == AllergyIntoleranceCriticality.UNASSESSIBLE)
+        return "unassessible";
       return "?";
       }
     }
 
-    public enum AllergyIntoleranceType {
+    public enum AllergyIntoleranceType implements FhirEnum {
         /**
          * Immune mediated reaction, including allergic reactions and hypersensitivities.
          */
@@ -230,15 +252,19 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceType fromCode(String codeString) throws Exception {
+
+      public static final AllergyIntoleranceTypeEnumFactory ENUM_FACTORY = new AllergyIntoleranceTypeEnumFactory();
+
+        public static AllergyIntoleranceType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("immune".equals(codeString))
           return IMMUNE;
         if ("non-immune".equals(codeString))
           return NONIMMUNE;
-        throw new Exception("Unknown AllergyIntoleranceType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case IMMUNE: return "immune";
@@ -269,8 +295,8 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class AllergyIntoleranceTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AllergyIntoleranceTypeEnumFactory implements EnumFactory<AllergyIntoleranceType> {
+    public AllergyIntoleranceType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -278,9 +304,9 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceType.IMMUNE;
         if ("non-immune".equals(codeString))
           return AllergyIntoleranceType.NONIMMUNE;
-        throw new Exception("Unknown AllergyIntoleranceType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AllergyIntoleranceType code) throws IllegalArgumentException {
       if (code == AllergyIntoleranceType.IMMUNE)
         return "immune";
       if (code == AllergyIntoleranceType.NONIMMUNE)
@@ -289,7 +315,7 @@ public class AllergyIntolerance extends DomainResource {
       }
     }
 
-    public enum AllergyIntoleranceCategory {
+    public enum AllergyIntoleranceCategory implements FhirEnum {
         /**
          * Any substance consumed to provide nutritional support for the body.
          */
@@ -306,7 +332,10 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AllergyIntoleranceCategory fromCode(String codeString) throws Exception {
+
+      public static final AllergyIntoleranceCategoryEnumFactory ENUM_FACTORY = new AllergyIntoleranceCategoryEnumFactory();
+
+        public static AllergyIntoleranceCategory fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("food".equals(codeString))
@@ -315,8 +344,9 @@ public class AllergyIntolerance extends DomainResource {
           return MEDICATION;
         if ("environment".equals(codeString))
           return ENVIRONMENT;
-        throw new Exception("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case FOOD: return "food";
@@ -351,8 +381,8 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class AllergyIntoleranceCategoryEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AllergyIntoleranceCategoryEnumFactory implements EnumFactory<AllergyIntoleranceCategory> {
+    public AllergyIntoleranceCategory fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -362,9 +392,9 @@ public class AllergyIntolerance extends DomainResource {
           return AllergyIntoleranceCategory.MEDICATION;
         if ("environment".equals(codeString))
           return AllergyIntoleranceCategory.ENVIRONMENT;
-        throw new Exception("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceCategory code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AllergyIntoleranceCategory code) throws IllegalArgumentException {
       if (code == AllergyIntoleranceCategory.FOOD)
         return "food";
       if (code == AllergyIntoleranceCategory.MEDICATION)
@@ -375,7 +405,7 @@ public class AllergyIntolerance extends DomainResource {
       }
     }
 
-    public enum ReactionEventCertainty {
+    public enum ReactionEventCertainty implements FhirEnum {
         /**
          * There is a low level of clinical certainty that the reaction was caused by the identified Substance.
          */
@@ -392,7 +422,10 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ReactionEventCertainty fromCode(String codeString) throws Exception {
+
+      public static final ReactionEventCertaintyEnumFactory ENUM_FACTORY = new ReactionEventCertaintyEnumFactory();
+
+        public static ReactionEventCertainty fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unlikely".equals(codeString))
@@ -401,8 +434,9 @@ public class AllergyIntolerance extends DomainResource {
           return LIKELY;
         if ("confirmed".equals(codeString))
           return CONFIRMED;
-        throw new Exception("Unknown ReactionEventCertainty code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ReactionEventCertainty code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case UNLIKELY: return "unlikely";
@@ -437,8 +471,8 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class ReactionEventCertaintyEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ReactionEventCertaintyEnumFactory implements EnumFactory<ReactionEventCertainty> {
+    public ReactionEventCertainty fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -448,9 +482,9 @@ public class AllergyIntolerance extends DomainResource {
           return ReactionEventCertainty.LIKELY;
         if ("confirmed".equals(codeString))
           return ReactionEventCertainty.CONFIRMED;
-        throw new Exception("Unknown ReactionEventCertainty code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ReactionEventCertainty code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ReactionEventCertainty code) throws IllegalArgumentException {
       if (code == ReactionEventCertainty.UNLIKELY)
         return "unlikely";
       if (code == ReactionEventCertainty.LIKELY)
@@ -461,7 +495,7 @@ public class AllergyIntolerance extends DomainResource {
       }
     }
 
-    public enum ReactionEventSeverity {
+    public enum ReactionEventSeverity implements FhirEnum {
         /**
          * Causes mild physiological effects.
          */
@@ -478,7 +512,10 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ReactionEventSeverity fromCode(String codeString) throws Exception {
+
+      public static final ReactionEventSeverityEnumFactory ENUM_FACTORY = new ReactionEventSeverityEnumFactory();
+
+        public static ReactionEventSeverity fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("mild".equals(codeString))
@@ -487,8 +524,9 @@ public class AllergyIntolerance extends DomainResource {
           return MODERATE;
         if ("severe".equals(codeString))
           return SEVERE;
-        throw new Exception("Unknown ReactionEventSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ReactionEventSeverity code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case MILD: return "mild";
@@ -523,8 +561,8 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class ReactionEventSeverityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ReactionEventSeverityEnumFactory implements EnumFactory<ReactionEventSeverity> {
+    public ReactionEventSeverity fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -534,9 +572,9 @@ public class AllergyIntolerance extends DomainResource {
           return ReactionEventSeverity.MODERATE;
         if ("severe".equals(codeString))
           return ReactionEventSeverity.SEVERE;
-        throw new Exception("Unknown ReactionEventSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ReactionEventSeverity code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ReactionEventSeverity code) throws IllegalArgumentException {
       if (code == ReactionEventSeverity.MILD)
         return "mild";
       if (code == ReactionEventSeverity.MODERATE)
@@ -685,7 +723,7 @@ public class AllergyIntolerance extends DomainResource {
             this.certainty = null;
           else {
             if (this.certainty == null)
-              this.certainty = new Enumeration<ReactionEventCertainty>();
+              this.certainty = new Enumeration<ReactionEventCertainty>(ReactionEventCertainty.ENUM_FACTORY);
             this.certainty.setValue(value);
           }
           return this;
@@ -801,14 +839,14 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @return Record of the date and/or time of the onset of the Reaction.
          */
-        public DateAndTime getOnset() { 
+        public Date getOnset() { 
           return this.onset == null ? null : this.onset.getValue();
         }
 
         /**
          * @param value Record of the date and/or time of the onset of the Reaction.
          */
-        public AllergyIntoleranceEventComponent setOnset(DateAndTime value) { 
+        public AllergyIntoleranceEventComponent setOnset(Date value) { 
           if (value == null)
             this.onset = null;
           else {
@@ -886,7 +924,7 @@ public class AllergyIntolerance extends DomainResource {
             this.severity = null;
           else {
             if (this.severity == null)
-              this.severity = new Enumeration<ReactionEventSeverity>();
+              this.severity = new Enumeration<ReactionEventSeverity>(ReactionEventSeverity.ENUM_FACTORY);
             this.severity.setValue(value);
           }
           return this;
@@ -1063,7 +1101,7 @@ public class AllergyIntolerance extends DomainResource {
      * Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.
      */
     @Child(name="criticality", type={CodeType.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="low | high - Estimated potential clinical harm", formalDefinition="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance." )
+    @Description(shortDefinition="low | high | unassessible - Estimated potential clinical harm", formalDefinition="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance." )
     protected Enumeration<AllergyIntoleranceCriticality> criticality;
 
     /**
@@ -1174,14 +1212,14 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @return Date when the sensitivity was recorded.
      */
-    public DateAndTime getRecordedDate() { 
+    public Date getRecordedDate() { 
       return this.recordedDate == null ? null : this.recordedDate.getValue();
     }
 
     /**
      * @param value Date when the sensitivity was recorded.
      */
-    public AllergyIntolerance setRecordedDate(DateAndTime value) { 
+    public AllergyIntolerance setRecordedDate(Date value) { 
       if (value == null)
         this.recordedDate = null;
       else {
@@ -1342,7 +1380,7 @@ public class AllergyIntolerance extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<AllergyIntoleranceStatus>();
+          this.status = new Enumeration<AllergyIntoleranceStatus>(AllergyIntoleranceStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -1391,7 +1429,7 @@ public class AllergyIntolerance extends DomainResource {
         this.criticality = null;
       else {
         if (this.criticality == null)
-          this.criticality = new Enumeration<AllergyIntoleranceCriticality>();
+          this.criticality = new Enumeration<AllergyIntoleranceCriticality>(AllergyIntoleranceCriticality.ENUM_FACTORY);
         this.criticality.setValue(value);
       }
       return this;
@@ -1440,7 +1478,7 @@ public class AllergyIntolerance extends DomainResource {
         this.type = null;
       else {
         if (this.type == null)
-          this.type = new Enumeration<AllergyIntoleranceType>();
+          this.type = new Enumeration<AllergyIntoleranceType>(AllergyIntoleranceType.ENUM_FACTORY);
         this.type.setValue(value);
       }
       return this;
@@ -1489,7 +1527,7 @@ public class AllergyIntolerance extends DomainResource {
         this.category = null;
       else {
         if (this.category == null)
-          this.category = new Enumeration<AllergyIntoleranceCategory>();
+          this.category = new Enumeration<AllergyIntoleranceCategory>(AllergyIntoleranceCategory.ENUM_FACTORY);
         this.category.setValue(value);
       }
       return this;
@@ -1526,14 +1564,14 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * @return Represents the date and/or time of the last known occurence of a reaction event.
      */
-    public DateAndTime getLastOccurence() { 
+    public Date getLastOccurence() { 
       return this.lastOccurence == null ? null : this.lastOccurence.getValue();
     }
 
     /**
      * @param value Represents the date and/or time of the last known occurence of a reaction event.
      */
-    public AllergyIntolerance setLastOccurence(DateAndTime value) { 
+    public AllergyIntolerance setLastOccurence(Date value) { 
       if (value == null)
         this.lastOccurence = null;
       else {
@@ -1692,13 +1730,13 @@ public class AllergyIntolerance extends DomainResource {
   public static final String SP_LASTDATE = "last-date";
   @SearchParamDefinition(name="severity", path="AllergyIntolerance.event.severity", description="mild | moderate | severe (of event as a whole)", type="token" )
   public static final String SP_SEVERITY = "severity";
-  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="immune | non-immune - Underlying mechanism (if known)", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date" )
   public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="immune | non-immune - Underlying mechanism (if known)", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance|AllergyIntolerance.event.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
   public static final String SP_SUBSTANCE = "substance";
-  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high - Estimated potential clinical harm", type="token" )
+  @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unassessible - Estimated potential clinical harm", type="token" )
   public static final String SP_CRITICALITY = "criticality";
   @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment - Category of Substance", type="token" )
   public static final String SP_CATEGORY = "category";

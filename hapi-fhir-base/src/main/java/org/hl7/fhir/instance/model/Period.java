@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -93,14 +93,14 @@ public class Period extends Type {
     /**
      * @return The start of the period. The boundary is inclusive.
      */
-    public DateAndTime getStart() { 
+    public Date getStart() { 
       return this.start == null ? null : this.start.getValue();
     }
 
     /**
      * @param value The start of the period. The boundary is inclusive.
      */
-    public Period setStart(DateAndTime value) { 
+    public Period setStart(Date value) { 
       if (value == null)
         this.start = null;
       else {
@@ -142,14 +142,14 @@ public class Period extends Type {
     /**
      * @return The end of the period. If the end of the period is missing, it means that the period is ongoing.
      */
-    public DateAndTime getEnd() { 
+    public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value The end of the period. If the end of the period is missing, it means that the period is ongoing.
      */
-    public Period setEnd(DateAndTime value) { 
+    public Period setEnd(Date value) { 
       if (value == null)
         this.end = null;
       else {

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Appointment", profile="http://hl7.org/fhir/Profile/Appointment")
 public class Appointment extends DomainResource {
 
-    public enum Participantrequired {
+    public enum Participantrequired implements FhirEnum {
         /**
          * The participant is required to attend the appointment.
          */
@@ -62,7 +62,10 @@ public class Appointment extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Participantrequired fromCode(String codeString) throws Exception {
+
+      public static final ParticipantrequiredEnumFactory ENUM_FACTORY = new ParticipantrequiredEnumFactory();
+
+        public static Participantrequired fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("required".equals(codeString))
@@ -71,8 +74,9 @@ public class Appointment extends DomainResource {
           return OPTIONAL;
         if ("information-only".equals(codeString))
           return INFORMATIONONLY;
-        throw new Exception("Unknown Participantrequired code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participantrequired code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUIRED: return "required";
@@ -107,8 +111,8 @@ public class Appointment extends DomainResource {
         }
     }
 
-  public static class ParticipantrequiredEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ParticipantrequiredEnumFactory implements EnumFactory<Participantrequired> {
+    public Participantrequired fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class Appointment extends DomainResource {
           return Participantrequired.OPTIONAL;
         if ("information-only".equals(codeString))
           return Participantrequired.INFORMATIONONLY;
-        throw new Exception("Unknown Participantrequired code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participantrequired code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Participantrequired code) throws IllegalArgumentException {
       if (code == Participantrequired.REQUIRED)
         return "required";
       if (code == Participantrequired.OPTIONAL)
@@ -131,7 +135,7 @@ public class Appointment extends DomainResource {
       }
     }
 
-    public enum Participationstatus {
+    public enum Participationstatus implements FhirEnum {
         /**
          * The participant has accepted the appointment.
          */
@@ -160,7 +164,10 @@ public class Appointment extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Participationstatus fromCode(String codeString) throws Exception {
+
+      public static final ParticipationstatusEnumFactory ENUM_FACTORY = new ParticipationstatusEnumFactory();
+
+        public static Participationstatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("accepted".equals(codeString))
@@ -175,8 +182,9 @@ public class Appointment extends DomainResource {
           return COMPLETED;
         if ("needs-action".equals(codeString))
           return NEEDSACTION;
-        throw new Exception("Unknown Participationstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participationstatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ACCEPTED: return "accepted";
@@ -223,8 +231,8 @@ public class Appointment extends DomainResource {
         }
     }
 
-  public static class ParticipationstatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ParticipationstatusEnumFactory implements EnumFactory<Participationstatus> {
+    public Participationstatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -240,9 +248,9 @@ public class Appointment extends DomainResource {
           return Participationstatus.COMPLETED;
         if ("needs-action".equals(codeString))
           return Participationstatus.NEEDSACTION;
-        throw new Exception("Unknown Participationstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Participationstatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Participationstatus code) throws IllegalArgumentException {
       if (code == Participationstatus.ACCEPTED)
         return "accepted";
       if (code == Participationstatus.DECLINED)
@@ -417,7 +425,7 @@ public class Appointment extends DomainResource {
             this.required = null;
           else {
             if (this.required == null)
-              this.required = new Enumeration<Participantrequired>();
+              this.required = new Enumeration<Participantrequired>(Participantrequired.ENUM_FACTORY);
             this.required.setValue(value);
           }
           return this;
@@ -463,7 +471,7 @@ public class Appointment extends DomainResource {
          */
         public AppointmentParticipantComponent setStatus(Participationstatus value) { 
             if (this.status == null)
-              this.status = new Enumeration<Participationstatus>();
+              this.status = new Enumeration<Participationstatus>(Participationstatus.ENUM_FACTORY);
             this.status.setValue(value);
           return this;
         }
@@ -890,14 +898,14 @@ public class Appointment extends DomainResource {
     /**
      * @return Date/Time that the appointment is to take place.
      */
-    public DateAndTime getStart() { 
+    public Date getStart() { 
       return this.start == null ? null : this.start.getValue();
     }
 
     /**
      * @param value Date/Time that the appointment is to take place.
      */
-    public Appointment setStart(DateAndTime value) { 
+    public Appointment setStart(Date value) { 
         if (this.start == null)
           this.start = new InstantType();
         this.start.setValue(value);
@@ -935,14 +943,14 @@ public class Appointment extends DomainResource {
     /**
      * @return Date/Time that the appointment is to conclude.
      */
-    public DateAndTime getEnd() { 
+    public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value Date/Time that the appointment is to conclude.
      */
-    public Appointment setEnd(DateAndTime value) { 
+    public Appointment setEnd(Date value) { 
         if (this.end == null)
           this.end = new InstantType();
         this.end.setValue(value);
@@ -1237,14 +1245,14 @@ public class Appointment extends DomainResource {
     /**
      * @return Date when the appointment was recorded.
      */
-    public DateAndTime getLastModified() { 
+    public Date getLastModified() { 
       return this.lastModified == null ? null : this.lastModified.getValue();
     }
 
     /**
      * @param value Date when the appointment was recorded.
      */
-    public Appointment setLastModified(DateAndTime value) { 
+    public Appointment setLastModified(Date value) { 
       if (value == null)
         this.lastModified = null;
       else {

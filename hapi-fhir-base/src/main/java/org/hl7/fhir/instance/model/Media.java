@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Media", profile="http://hl7.org/fhir/Profile/Media")
 public class Media extends DomainResource {
 
-    public enum MediaType {
+    public enum MediaType implements FhirEnum {
         /**
          * The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents.
          */
@@ -62,7 +62,10 @@ public class Media extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MediaType fromCode(String codeString) throws Exception {
+
+      public static final MediaTypeEnumFactory ENUM_FACTORY = new MediaTypeEnumFactory();
+
+        public static MediaType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("photo".equals(codeString))
@@ -71,8 +74,9 @@ public class Media extends DomainResource {
           return VIDEO;
         if ("audio".equals(codeString))
           return AUDIO;
-        throw new Exception("Unknown MediaType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MediaType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PHOTO: return "photo";
@@ -107,8 +111,8 @@ public class Media extends DomainResource {
         }
     }
 
-  public static class MediaTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MediaTypeEnumFactory implements EnumFactory<MediaType> {
+    public MediaType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class Media extends DomainResource {
           return MediaType.VIDEO;
         if ("audio".equals(codeString))
           return MediaType.AUDIO;
-        throw new Exception("Unknown MediaType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MediaType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MediaType code) throws IllegalArgumentException {
       if (code == MediaType.PHOTO)
         return "photo";
       if (code == MediaType.VIDEO)
@@ -284,7 +288,7 @@ public class Media extends DomainResource {
      */
     public Media setType(MediaType value) { 
         if (this.type == null)
-          this.type = new Enumeration<MediaType>();
+          this.type = new Enumeration<MediaType>(MediaType.ENUM_FACTORY);
         this.type.setValue(value);
       return this;
     }
@@ -374,14 +378,14 @@ public class Media extends DomainResource {
     /**
      * @return The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
      */
-    public DateAndTime getCreated() { 
+    public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
      */
-    public Media setCreated(DateAndTime value) { 
+    public Media setCreated(Date value) { 
       if (value == null)
         this.created = null;
       else {

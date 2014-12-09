@@ -3,9 +3,6 @@ package org.hl7.fhir.instance.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import ca.uhn.fhir.model.api.BasePrimitive;
-import ca.uhn.fhir.parser.DataFormatException;
-
 public abstract class PrimitiveType<T> extends Type {
 
 	private static final long serialVersionUID = 2L;
@@ -22,7 +19,7 @@ public abstract class PrimitiveType<T> extends Type {
 			return false;
 		}
 
-		BasePrimitive<?> o = (BasePrimitive<?>) theObj;
+		PrimitiveType<?> o = (PrimitiveType<?>) theObj;
 
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getValue(), o.getValue());
@@ -33,7 +30,7 @@ public abstract class PrimitiveType<T> extends Type {
 		return myCoercedValue;
 	}
 
-	public String asStringValue() throws DataFormatException {
+	public String asStringValue() {
 		return myStringValue;
 	}
 
@@ -47,9 +44,10 @@ public abstract class PrimitiveType<T> extends Type {
 		return super.isEmpty() && getValue() == null;
 	}
 
-	public void setValue(T theValue) throws DataFormatException {
+	public PrimitiveType<T> setValue(T theValue) {
 		myCoercedValue = theValue;
 		updateStringValue();
+		return this;
 	}
 
 	protected void updateStringValue() {
@@ -61,7 +59,7 @@ public abstract class PrimitiveType<T> extends Type {
 		}
 	}
 
-	public void fromStringValue(String theValue) throws DataFormatException {
+	public void fromStringValue(String theValue) {
 		if (theValue == null) {
 			myCoercedValue = null;
 		} else {
@@ -105,4 +103,13 @@ public abstract class PrimitiveType<T> extends Type {
 	public void setValueAsString(String theValue) {
 		fromStringValue(theValue);
 	}
+	
+	
+	protected Type typedCopy() {
+		return copy();
+	}
+
+	public abstract Type copy();
+
+
 }

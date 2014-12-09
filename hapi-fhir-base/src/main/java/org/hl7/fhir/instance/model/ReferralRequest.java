@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="ReferralRequest", profile="http://hl7.org/fhir/Profile/ReferralRequest")
 public class ReferralRequest extends DomainResource {
 
-    public enum Referralstatus {
+    public enum Referralstatus implements FhirEnum {
         /**
          * A draft referral that has yet to be send.
          */
@@ -74,7 +74,10 @@ public class ReferralRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Referralstatus fromCode(String codeString) throws Exception {
+
+      public static final ReferralstatusEnumFactory ENUM_FACTORY = new ReferralstatusEnumFactory();
+
+        public static Referralstatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -89,8 +92,9 @@ public class ReferralRequest extends DomainResource {
           return REFUSED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new Exception("Unknown Referralstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Referralstatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DRAFT: return "draft";
@@ -137,8 +141,8 @@ public class ReferralRequest extends DomainResource {
         }
     }
 
-  public static class ReferralstatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ReferralstatusEnumFactory implements EnumFactory<Referralstatus> {
+    public Referralstatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -154,9 +158,9 @@ public class ReferralRequest extends DomainResource {
           return Referralstatus.REFUSED;
         if ("completed".equals(codeString))
           return Referralstatus.COMPLETED;
-        throw new Exception("Unknown Referralstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Referralstatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Referralstatus code) throws IllegalArgumentException {
       if (code == Referralstatus.DRAFT)
         return "draft";
       if (code == Referralstatus.SENT)
@@ -354,7 +358,7 @@ public class ReferralRequest extends DomainResource {
      */
     public ReferralRequest setStatus(Referralstatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<Referralstatus>();
+          this.status = new Enumeration<Referralstatus>(Referralstatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -658,14 +662,14 @@ public class ReferralRequest extends DomainResource {
     /**
      * @return Date/DateTime the request for referral or transfer of care is sent by the author.
      */
-    public DateAndTime getDateSent() { 
+    public Date getDateSent() { 
       return this.dateSent == null ? null : this.dateSent.getValue();
     }
 
     /**
      * @param value Date/DateTime the request for referral or transfer of care is sent by the author.
      */
-    public ReferralRequest setDateSent(DateAndTime value) { 
+    public ReferralRequest setDateSent(Date value) { 
       if (value == null)
         this.dateSent = null;
       else {

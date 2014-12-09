@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/Profile/CarePlan")
 public class CarePlan extends DomainResource {
 
-    public enum CarePlanStatus {
+    public enum CarePlanStatus implements FhirEnum {
         /**
          * The plan is in development or awaiting use but is not yet intended to be acted upon.
          */
@@ -62,7 +62,10 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanStatus fromCode(String codeString) throws Exception {
+
+      public static final CarePlanStatusEnumFactory ENUM_FACTORY = new CarePlanStatusEnumFactory();
+
+        public static CarePlanStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("planned".equals(codeString))
@@ -71,8 +74,9 @@ public class CarePlan extends DomainResource {
           return ACTIVE;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new Exception("Unknown CarePlanStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PLANNED: return "planned";
@@ -107,8 +111,8 @@ public class CarePlan extends DomainResource {
         }
     }
 
-  public static class CarePlanStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CarePlanStatusEnumFactory implements EnumFactory<CarePlanStatus> {
+    public CarePlanStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class CarePlan extends DomainResource {
           return CarePlanStatus.ACTIVE;
         if ("completed".equals(codeString))
           return CarePlanStatus.COMPLETED;
-        throw new Exception("Unknown CarePlanStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CarePlanStatus code) throws IllegalArgumentException {
       if (code == CarePlanStatus.PLANNED)
         return "planned";
       if (code == CarePlanStatus.ACTIVE)
@@ -131,7 +135,7 @@ public class CarePlan extends DomainResource {
       }
     }
 
-    public enum CarePlanGoalStatus {
+    public enum CarePlanGoalStatus implements FhirEnum {
         /**
          * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).
          */
@@ -152,7 +156,10 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanGoalStatus fromCode(String codeString) throws Exception {
+
+      public static final CarePlanGoalStatusEnumFactory ENUM_FACTORY = new CarePlanGoalStatusEnumFactory();
+
+        public static CarePlanGoalStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in progress".equals(codeString))
@@ -163,8 +170,9 @@ public class CarePlan extends DomainResource {
           return SUSTAINING;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown CarePlanGoalStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanGoalStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in progress";
@@ -203,8 +211,8 @@ public class CarePlan extends DomainResource {
         }
     }
 
-  public static class CarePlanGoalStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CarePlanGoalStatusEnumFactory implements EnumFactory<CarePlanGoalStatus> {
+    public CarePlanGoalStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -216,9 +224,9 @@ public class CarePlan extends DomainResource {
           return CarePlanGoalStatus.SUSTAINING;
         if ("cancelled".equals(codeString))
           return CarePlanGoalStatus.CANCELLED;
-        throw new Exception("Unknown CarePlanGoalStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanGoalStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CarePlanGoalStatus code) throws IllegalArgumentException {
       if (code == CarePlanGoalStatus.INPROGRESS)
         return "in progress";
       if (code == CarePlanGoalStatus.ACHIEVED)
@@ -231,7 +239,7 @@ public class CarePlan extends DomainResource {
       }
     }
 
-    public enum CarePlanActivityStatus {
+    public enum CarePlanActivityStatus implements FhirEnum {
         /**
          * Activity is planned but no action has yet been taken.
          */
@@ -260,7 +268,10 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanActivityStatus fromCode(String codeString) throws Exception {
+
+      public static final CarePlanActivityStatusEnumFactory ENUM_FACTORY = new CarePlanActivityStatusEnumFactory();
+
+        public static CarePlanActivityStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("not started".equals(codeString))
@@ -275,8 +286,9 @@ public class CarePlan extends DomainResource {
           return COMPLETED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown CarePlanActivityStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case NOTSTARTED: return "not started";
@@ -323,8 +335,8 @@ public class CarePlan extends DomainResource {
         }
     }
 
-  public static class CarePlanActivityStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CarePlanActivityStatusEnumFactory implements EnumFactory<CarePlanActivityStatus> {
+    public CarePlanActivityStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -340,9 +352,9 @@ public class CarePlan extends DomainResource {
           return CarePlanActivityStatus.COMPLETED;
         if ("cancelled".equals(codeString))
           return CarePlanActivityStatus.CANCELLED;
-        throw new Exception("Unknown CarePlanActivityStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CarePlanActivityStatus code) throws IllegalArgumentException {
       if (code == CarePlanActivityStatus.NOTSTARTED)
         return "not started";
       if (code == CarePlanActivityStatus.SCHEDULED)
@@ -359,7 +371,7 @@ public class CarePlan extends DomainResource {
       }
     }
 
-    public enum CarePlanActivityCategory {
+    public enum CarePlanActivityCategory implements FhirEnum {
         /**
          * Plan for the patient to consume food of a specified nature.
          */
@@ -392,7 +404,10 @@ public class CarePlan extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CarePlanActivityCategory fromCode(String codeString) throws Exception {
+
+      public static final CarePlanActivityCategoryEnumFactory ENUM_FACTORY = new CarePlanActivityCategoryEnumFactory();
+
+        public static CarePlanActivityCategory fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("diet".equals(codeString))
@@ -409,8 +424,9 @@ public class CarePlan extends DomainResource {
           return SUPPLY;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown CarePlanActivityCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanActivityCategory code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DIET: return "diet";
@@ -461,8 +477,8 @@ public class CarePlan extends DomainResource {
         }
     }
 
-  public static class CarePlanActivityCategoryEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CarePlanActivityCategoryEnumFactory implements EnumFactory<CarePlanActivityCategory> {
+    public CarePlanActivityCategory fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -480,9 +496,9 @@ public class CarePlan extends DomainResource {
           return CarePlanActivityCategory.SUPPLY;
         if ("other".equals(codeString))
           return CarePlanActivityCategory.OTHER;
-        throw new Exception("Unknown CarePlanActivityCategory code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CarePlanActivityCategory code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CarePlanActivityCategory code) throws IllegalArgumentException {
       if (code == CarePlanActivityCategory.DIET)
         return "diet";
       if (code == CarePlanActivityCategory.DRUG)
@@ -751,7 +767,7 @@ public class CarePlan extends DomainResource {
             this.status = null;
           else {
             if (this.status == null)
-              this.status = new Enumeration<CarePlanGoalStatus>();
+              this.status = new Enumeration<CarePlanGoalStatus>(CarePlanGoalStatus.ENUM_FACTORY);
             this.status.setValue(value);
           }
           return this;
@@ -1055,7 +1071,7 @@ public class CarePlan extends DomainResource {
             this.status = null;
           else {
             if (this.status == null)
-              this.status = new Enumeration<CarePlanActivityStatus>();
+              this.status = new Enumeration<CarePlanActivityStatus>(CarePlanActivityStatus.ENUM_FACTORY);
             this.status.setValue(value);
           }
           return this;
@@ -1429,7 +1445,7 @@ public class CarePlan extends DomainResource {
          */
         public CarePlanActivitySimpleComponent setCategory(CarePlanActivityCategory value) { 
             if (this.category == null)
-              this.category = new Enumeration<CarePlanActivityCategory>();
+              this.category = new Enumeration<CarePlanActivityCategory>(CarePlanActivityCategory.ENUM_FACTORY);
             this.category.setValue(value);
           return this;
         }
@@ -1969,7 +1985,7 @@ public class CarePlan extends DomainResource {
      */
     public CarePlan setStatus(CarePlanStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<CarePlanStatus>();
+          this.status = new Enumeration<CarePlanStatus>(CarePlanStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -2029,14 +2045,14 @@ public class CarePlan extends DomainResource {
     /**
      * @return Identifies the most recent date on which the plan has been revised.
      */
-    public DateAndTime getModified() { 
+    public Date getModified() { 
       return this.modified == null ? null : this.modified.getValue();
     }
 
     /**
      * @param value Identifies the most recent date on which the plan has been revised.
      */
-    public CarePlan setModified(DateAndTime value) { 
+    public CarePlan setModified(Date value) { 
       if (value == null)
         this.modified = null;
       else {

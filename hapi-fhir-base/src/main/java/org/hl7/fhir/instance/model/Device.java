@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -394,14 +394,14 @@ public class Device extends DomainResource {
     /**
      * @return Date of expiry of this device (if applicable).
      */
-    public DateAndTime getExpiry() { 
+    public Date getExpiry() { 
       return this.expiry == null ? null : this.expiry.getValue();
     }
 
     /**
      * @param value Date of expiry of this device (if applicable).
      */
-    public Device setExpiry(DateAndTime value) { 
+    public Device setExpiry(Date value) { 
       if (value == null)
         this.expiry = null;
       else {

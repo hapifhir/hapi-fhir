@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -290,14 +290,14 @@ public class Order extends DomainResource {
     /**
      * @return When the order was made.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value When the order was made.
      */
-    public Order setDate(DateAndTime value) { 
+    public Order setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {

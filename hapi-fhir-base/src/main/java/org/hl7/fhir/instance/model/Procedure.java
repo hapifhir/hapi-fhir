@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Procedure", profile="http://hl7.org/fhir/Profile/Procedure")
 public class Procedure extends DomainResource {
 
-    public enum ProcedureRelationshipType {
+    public enum ProcedureRelationshipType implements FhirEnum {
         /**
          * This procedure had to be performed because of the related one.
          */
@@ -58,15 +58,19 @@ public class Procedure extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProcedureRelationshipType fromCode(String codeString) throws Exception {
+
+      public static final ProcedureRelationshipTypeEnumFactory ENUM_FACTORY = new ProcedureRelationshipTypeEnumFactory();
+
+        public static ProcedureRelationshipType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("caused-by".equals(codeString))
           return CAUSEDBY;
         if ("because-of".equals(codeString))
           return BECAUSEOF;
-        throw new Exception("Unknown ProcedureRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRelationshipType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CAUSEDBY: return "caused-by";
@@ -97,8 +101,8 @@ public class Procedure extends DomainResource {
         }
     }
 
-  public static class ProcedureRelationshipTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ProcedureRelationshipTypeEnumFactory implements EnumFactory<ProcedureRelationshipType> {
+    public ProcedureRelationshipType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -106,9 +110,9 @@ public class Procedure extends DomainResource {
           return ProcedureRelationshipType.CAUSEDBY;
         if ("because-of".equals(codeString))
           return ProcedureRelationshipType.BECAUSEOF;
-        throw new Exception("Unknown ProcedureRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProcedureRelationshipType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ProcedureRelationshipType code) throws IllegalArgumentException {
       if (code == ProcedureRelationshipType.CAUSEDBY)
         return "caused-by";
       if (code == ProcedureRelationshipType.BECAUSEOF)
@@ -303,7 +307,7 @@ public class Procedure extends DomainResource {
             this.type = null;
           else {
             if (this.type == null)
-              this.type = new Enumeration<ProcedureRelationshipType>();
+              this.type = new Enumeration<ProcedureRelationshipType>(ProcedureRelationshipType.ENUM_FACTORY);
             this.type.setValue(value);
           }
           return this;

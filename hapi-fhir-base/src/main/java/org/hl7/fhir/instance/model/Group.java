@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Group", profile="http://hl7.org/fhir/Profile/Group")
 public class Group extends DomainResource {
 
-    public enum GroupType {
+    public enum GroupType implements FhirEnum {
         /**
          * Group contains "person" Patient resources.
          */
@@ -74,7 +74,10 @@ public class Group extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static GroupType fromCode(String codeString) throws Exception {
+
+      public static final GroupTypeEnumFactory ENUM_FACTORY = new GroupTypeEnumFactory();
+
+        public static GroupType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("person".equals(codeString))
@@ -89,8 +92,9 @@ public class Group extends DomainResource {
           return MEDICATION;
         if ("substance".equals(codeString))
           return SUBSTANCE;
-        throw new Exception("Unknown GroupType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown GroupType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PERSON: return "person";
@@ -137,8 +141,8 @@ public class Group extends DomainResource {
         }
     }
 
-  public static class GroupTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class GroupTypeEnumFactory implements EnumFactory<GroupType> {
+    public GroupType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -154,9 +158,9 @@ public class Group extends DomainResource {
           return GroupType.MEDICATION;
         if ("substance".equals(codeString))
           return GroupType.SUBSTANCE;
-        throw new Exception("Unknown GroupType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown GroupType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(GroupType code) throws IllegalArgumentException {
       if (code == GroupType.PERSON)
         return "person";
       if (code == GroupType.ANIMAL)
@@ -493,7 +497,7 @@ public class Group extends DomainResource {
      */
     public Group setType(GroupType value) { 
         if (this.type == null)
-          this.type = new Enumeration<GroupType>();
+          this.type = new Enumeration<GroupType>(GroupType.ENUM_FACTORY);
         this.type.setValue(value);
       return this;
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="OrderResponse", profile="http://hl7.org/fhir/Profile/OrderResponse")
 public class OrderResponse extends DomainResource {
 
-    public enum OrderOutcomeCode {
+    public enum OrderOutcomeCode implements FhirEnum {
         /**
          * The order is known, but no processing has occurred at this time.
          */
@@ -86,7 +86,10 @@ public class OrderResponse extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static OrderOutcomeCode fromCode(String codeString) throws Exception {
+
+      public static final OrderOutcomeCodeEnumFactory ENUM_FACTORY = new OrderOutcomeCodeEnumFactory();
+
+        public static OrderOutcomeCode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("pending".equals(codeString))
@@ -107,8 +110,9 @@ public class OrderResponse extends DomainResource {
           return ABORTED;
         if ("complete".equals(codeString))
           return COMPLETE;
-        throw new Exception("Unknown OrderOutcomeCode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown OrderOutcomeCode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PENDING: return "pending";
@@ -167,8 +171,8 @@ public class OrderResponse extends DomainResource {
         }
     }
 
-  public static class OrderOutcomeCodeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class OrderOutcomeCodeEnumFactory implements EnumFactory<OrderOutcomeCode> {
+    public OrderOutcomeCode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -190,9 +194,9 @@ public class OrderResponse extends DomainResource {
           return OrderOutcomeCode.ABORTED;
         if ("complete".equals(codeString))
           return OrderOutcomeCode.COMPLETE;
-        throw new Exception("Unknown OrderOutcomeCode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown OrderOutcomeCode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(OrderOutcomeCode code) throws IllegalArgumentException {
       if (code == OrderOutcomeCode.PENDING)
         return "pending";
       if (code == OrderOutcomeCode.REVIEW)
@@ -403,14 +407,14 @@ public class OrderResponse extends DomainResource {
     /**
      * @return The date and time at which this order response was made (created/posted).
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date and time at which this order response was made (created/posted).
      */
-    public OrderResponse setDate(DateAndTime value) { 
+    public OrderResponse setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {
@@ -537,7 +541,7 @@ public class OrderResponse extends DomainResource {
      */
     public OrderResponse setCode(OrderOutcomeCode value) { 
         if (this.code == null)
-          this.code = new Enumeration<OrderOutcomeCode>();
+          this.code = new Enumeration<OrderOutcomeCode>(OrderOutcomeCode.ENUM_FACTORY);
         this.code.setValue(value);
       return this;
     }

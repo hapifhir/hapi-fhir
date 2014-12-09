@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="ElementDefinition")
 public class ElementDefinition extends Type {
 
-    public enum PropertyRepresentation {
+    public enum PropertyRepresentation implements FhirEnum {
         /**
          * In XML, this property is represented as an attribute not an element.
          */
@@ -52,13 +52,17 @@ public class ElementDefinition extends Type {
          * added to help the parsers
          */
         NULL;
-        public static PropertyRepresentation fromCode(String codeString) throws Exception {
+
+      public static final PropertyRepresentationEnumFactory ENUM_FACTORY = new PropertyRepresentationEnumFactory();
+
+        public static PropertyRepresentation fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("xmlAttr".equals(codeString))
           return XMLATTR;
-        throw new Exception("Unknown PropertyRepresentation code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case XMLATTR: return "xmlAttr";
@@ -85,23 +89,23 @@ public class ElementDefinition extends Type {
         }
     }
 
-  public static class PropertyRepresentationEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class PropertyRepresentationEnumFactory implements EnumFactory<PropertyRepresentation> {
+    public PropertyRepresentation fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("xmlAttr".equals(codeString))
           return PropertyRepresentation.XMLATTR;
-        throw new Exception("Unknown PropertyRepresentation code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown PropertyRepresentation code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(PropertyRepresentation code) throws IllegalArgumentException {
       if (code == PropertyRepresentation.XMLATTR)
         return "xmlAttr";
       return "?";
       }
     }
 
-    public enum ResourceSlicingRules {
+    public enum ResourceSlicingRules implements FhirEnum {
         /**
          * No additional content is allowed other than that described by the slices in this profile.
          */
@@ -118,7 +122,10 @@ public class ElementDefinition extends Type {
          * added to help the parsers
          */
         NULL;
-        public static ResourceSlicingRules fromCode(String codeString) throws Exception {
+
+      public static final ResourceSlicingRulesEnumFactory ENUM_FACTORY = new ResourceSlicingRulesEnumFactory();
+
+        public static ResourceSlicingRules fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("closed".equals(codeString))
@@ -127,8 +134,9 @@ public class ElementDefinition extends Type {
           return OPEN;
         if ("openAtEnd".equals(codeString))
           return OPENATEND;
-        throw new Exception("Unknown ResourceSlicingRules code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceSlicingRules code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CLOSED: return "closed";
@@ -163,8 +171,8 @@ public class ElementDefinition extends Type {
         }
     }
 
-  public static class ResourceSlicingRulesEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ResourceSlicingRulesEnumFactory implements EnumFactory<ResourceSlicingRules> {
+    public ResourceSlicingRules fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -174,9 +182,9 @@ public class ElementDefinition extends Type {
           return ResourceSlicingRules.OPEN;
         if ("openAtEnd".equals(codeString))
           return ResourceSlicingRules.OPENATEND;
-        throw new Exception("Unknown ResourceSlicingRules code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceSlicingRules code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ResourceSlicingRules code) throws IllegalArgumentException {
       if (code == ResourceSlicingRules.CLOSED)
         return "closed";
       if (code == ResourceSlicingRules.OPEN)
@@ -187,7 +195,7 @@ public class ElementDefinition extends Type {
       }
     }
 
-    public enum ResourceAggregationMode {
+    public enum ResourceAggregationMode implements FhirEnum {
         /**
          * The reference is a local reference to a contained resource.
          */
@@ -204,7 +212,10 @@ public class ElementDefinition extends Type {
          * added to help the parsers
          */
         NULL;
-        public static ResourceAggregationMode fromCode(String codeString) throws Exception {
+
+      public static final ResourceAggregationModeEnumFactory ENUM_FACTORY = new ResourceAggregationModeEnumFactory();
+
+        public static ResourceAggregationMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("contained".equals(codeString))
@@ -213,8 +224,9 @@ public class ElementDefinition extends Type {
           return REFERENCED;
         if ("bundled".equals(codeString))
           return BUNDLED;
-        throw new Exception("Unknown ResourceAggregationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceAggregationMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CONTAINED: return "contained";
@@ -249,8 +261,8 @@ public class ElementDefinition extends Type {
         }
     }
 
-  public static class ResourceAggregationModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ResourceAggregationModeEnumFactory implements EnumFactory<ResourceAggregationMode> {
+    public ResourceAggregationMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -260,9 +272,9 @@ public class ElementDefinition extends Type {
           return ResourceAggregationMode.REFERENCED;
         if ("bundled".equals(codeString))
           return ResourceAggregationMode.BUNDLED;
-        throw new Exception("Unknown ResourceAggregationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceAggregationMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ResourceAggregationMode code) throws IllegalArgumentException {
       if (code == ResourceAggregationMode.CONTAINED)
         return "contained";
       if (code == ResourceAggregationMode.REFERENCED)
@@ -273,7 +285,7 @@ public class ElementDefinition extends Type {
       }
     }
 
-    public enum ConstraintSeverity {
+    public enum ConstraintSeverity implements FhirEnum {
         /**
          * If the constraint is violated, the resource is not conformant.
          */
@@ -286,15 +298,19 @@ public class ElementDefinition extends Type {
          * added to help the parsers
          */
         NULL;
-        public static ConstraintSeverity fromCode(String codeString) throws Exception {
+
+      public static final ConstraintSeverityEnumFactory ENUM_FACTORY = new ConstraintSeverityEnumFactory();
+
+        public static ConstraintSeverity fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("error".equals(codeString))
           return ERROR;
         if ("warning".equals(codeString))
           return WARNING;
-        throw new Exception("Unknown ConstraintSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConstraintSeverity code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ERROR: return "error";
@@ -325,8 +341,8 @@ public class ElementDefinition extends Type {
         }
     }
 
-  public static class ConstraintSeverityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ConstraintSeverityEnumFactory implements EnumFactory<ConstraintSeverity> {
+    public ConstraintSeverity fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -334,9 +350,9 @@ public class ElementDefinition extends Type {
           return ConstraintSeverity.ERROR;
         if ("warning".equals(codeString))
           return ConstraintSeverity.WARNING;
-        throw new Exception("Unknown ConstraintSeverity code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ConstraintSeverity code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ConstraintSeverity code) throws IllegalArgumentException {
       if (code == ConstraintSeverity.ERROR)
         return "error";
       if (code == ConstraintSeverity.WARNING)
@@ -345,7 +361,7 @@ public class ElementDefinition extends Type {
       }
     }
 
-    public enum BindingConformance {
+    public enum BindingConformance implements FhirEnum {
         /**
          * Only codes in the specified set are allowed.  If the binding is extensible, other codes may be used for concepts not covered by the bound set of codes.
          */
@@ -362,7 +378,10 @@ public class ElementDefinition extends Type {
          * added to help the parsers
          */
         NULL;
-        public static BindingConformance fromCode(String codeString) throws Exception {
+
+      public static final BindingConformanceEnumFactory ENUM_FACTORY = new BindingConformanceEnumFactory();
+
+        public static BindingConformance fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("required".equals(codeString))
@@ -371,8 +390,9 @@ public class ElementDefinition extends Type {
           return PREFERRED;
         if ("example".equals(codeString))
           return EXAMPLE;
-        throw new Exception("Unknown BindingConformance code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown BindingConformance code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUIRED: return "required";
@@ -407,8 +427,8 @@ public class ElementDefinition extends Type {
         }
     }
 
-  public static class BindingConformanceEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class BindingConformanceEnumFactory implements EnumFactory<BindingConformance> {
+    public BindingConformance fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -418,9 +438,9 @@ public class ElementDefinition extends Type {
           return BindingConformance.PREFERRED;
         if ("example".equals(codeString))
           return BindingConformance.EXAMPLE;
-        throw new Exception("Unknown BindingConformance code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown BindingConformance code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(BindingConformance code) throws IllegalArgumentException {
       if (code == BindingConformance.REQUIRED)
         return "required";
       if (code == BindingConformance.PREFERRED)
@@ -663,7 +683,7 @@ public class ElementDefinition extends Type {
          */
         public ElementDefinitionSlicingComponent setRules(ResourceSlicingRules value) { 
             if (this.rules == null)
-              this.rules = new Enumeration<ResourceSlicingRules>();
+              this.rules = new Enumeration<ResourceSlicingRules>(ResourceSlicingRules.ENUM_FACTORY);
             this.rules.setValue(value);
           return this;
         }
@@ -1089,7 +1109,7 @@ public class ElementDefinition extends Type {
          */
         public ElementDefinitionConstraintComponent setSeverity(ConstraintSeverity value) { 
             if (this.severity == null)
-              this.severity = new Enumeration<ConstraintSeverity>();
+              this.severity = new Enumeration<ConstraintSeverity>(ConstraintSeverity.ENUM_FACTORY);
             this.severity.setValue(value);
           return this;
         }
@@ -1393,7 +1413,7 @@ public class ElementDefinition extends Type {
             this.conformance = null;
           else {
             if (this.conformance == null)
-              this.conformance = new Enumeration<BindingConformance>();
+              this.conformance = new Enumeration<BindingConformance>(BindingConformance.ENUM_FACTORY);
             this.conformance.setValue(value);
           }
           return this;

@@ -29,62 +29,41 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.instance.model;
 
 /**
- * Primitive type "id" in FHIR: a string from 1 to 36 characters, only containing letters, digits, "-" and "."
+ * Primitive type "id" in FHIR: a string from 1 to 64 characters, only containing letters, digits, "-" and "."
  */
-public class IdType extends PrimitiveType {
+public class IdType extends PrimitiveType<String> {
 
-  private static final long serialVersionUID = 8363122970864385593L;
+	public static final int MAX_LENGTH = 64;
+	  
+	private static final long serialVersionUID = 1L;
 
-  public static final int MAX_LENGTH = 64;
-  
 	/**
-	 * The value of the id
+	 * Constructor
 	 */
-	protected String value;
-
-	public IdType(String value) {
-    this.value = value;  
-  }
-
-  public IdType() {
-  }
-
-  /**
-	 * @return the id
-	 */
-	public String getValue() {
-		return value;
+	public IdType() {
+		super();
 	}
 
 	/**
-	 * @param value the id
+	 * Constructor
 	 */
-	public void setValue(String value) {
-		this.value = value;
-	}
-	
-	@Override
-  protected Type typedCopy() {
-		return copy();
-	}
-	
-	@Override
-  public IdType copy() {
-		IdType dst = new IdType();
-		dst.value = value;
-		return dst;
+	public IdType(String theValue) {
+		setValue(theValue);
 	}
 
-  @Override
-  public String asStringValue() {
-    return value;
-  }
-	public boolean isEmpty() {
-		return super.isEmpty() && value == null;
+	@Override
+	protected String parse(String theValue) {
+		return theValue;
 	}
 
-	public boolean hasValue() {
-		return value != null;
+	@Override
+	protected String encode(String theValue) {
+		return theValue;
 	}
-	
+
+	@Override
+	public IdType copy() {
+		return new IdType(getValue());
+	}
+
 }

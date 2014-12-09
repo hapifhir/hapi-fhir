@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="CommunicationRequest", profile="http://hl7.org/fhir/Profile/CommunicationRequest")
 public class CommunicationRequest extends DomainResource {
 
-    public enum CommunicationRequestStatus {
+    public enum CommunicationRequestStatus implements FhirEnum {
         /**
          * The request has been placed.
          */
@@ -86,7 +86,10 @@ public class CommunicationRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CommunicationRequestStatus fromCode(String codeString) throws Exception {
+
+      public static final CommunicationRequestStatusEnumFactory ENUM_FACTORY = new CommunicationRequestStatusEnumFactory();
+
+        public static CommunicationRequestStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -107,8 +110,9 @@ public class CommunicationRequest extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new Exception("Unknown CommunicationRequestStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CommunicationRequestStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUESTED: return "requested";
@@ -167,8 +171,8 @@ public class CommunicationRequest extends DomainResource {
         }
     }
 
-  public static class CommunicationRequestStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CommunicationRequestStatusEnumFactory implements EnumFactory<CommunicationRequestStatus> {
+    public CommunicationRequestStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -190,9 +194,9 @@ public class CommunicationRequest extends DomainResource {
           return CommunicationRequestStatus.REJECTED;
         if ("failed".equals(codeString))
           return CommunicationRequestStatus.FAILED;
-        throw new Exception("Unknown CommunicationRequestStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CommunicationRequestStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CommunicationRequestStatus code) throws IllegalArgumentException {
       if (code == CommunicationRequestStatus.REQUESTED)
         return "requested";
       if (code == CommunicationRequestStatus.RECEIVED)
@@ -215,7 +219,7 @@ public class CommunicationRequest extends DomainResource {
       }
     }
 
-    public enum CommunicationRequestMode {
+    public enum CommunicationRequestMode implements FhirEnum {
         /**
          * planned.
          */
@@ -232,7 +236,10 @@ public class CommunicationRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static CommunicationRequestMode fromCode(String codeString) throws Exception {
+
+      public static final CommunicationRequestModeEnumFactory ENUM_FACTORY = new CommunicationRequestModeEnumFactory();
+
+        public static CommunicationRequestMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("planned".equals(codeString))
@@ -241,8 +248,9 @@ public class CommunicationRequest extends DomainResource {
           return PROPOSED;
         if ("ordered".equals(codeString))
           return ORDERED;
-        throw new Exception("Unknown CommunicationRequestMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CommunicationRequestMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PLANNED: return "planned";
@@ -277,8 +285,8 @@ public class CommunicationRequest extends DomainResource {
         }
     }
 
-  public static class CommunicationRequestModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class CommunicationRequestModeEnumFactory implements EnumFactory<CommunicationRequestMode> {
+    public CommunicationRequestMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -288,9 +296,9 @@ public class CommunicationRequest extends DomainResource {
           return CommunicationRequestMode.PROPOSED;
         if ("ordered".equals(codeString))
           return CommunicationRequestMode.ORDERED;
-        throw new Exception("Unknown CommunicationRequestMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown CommunicationRequestMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(CommunicationRequestMode code) throws IllegalArgumentException {
       if (code == CommunicationRequestMode.PLANNED)
         return "planned";
       if (code == CommunicationRequestMode.PROPOSED)
@@ -800,7 +808,7 @@ public class CommunicationRequest extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<CommunicationRequestStatus>();
+          this.status = new Enumeration<CommunicationRequestStatus>(CommunicationRequestStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -849,7 +857,7 @@ public class CommunicationRequest extends DomainResource {
         this.mode = null;
       else {
         if (this.mode == null)
-          this.mode = new Enumeration<CommunicationRequestMode>();
+          this.mode = new Enumeration<CommunicationRequestMode>(CommunicationRequestMode.ENUM_FACTORY);
         this.mode.setValue(value);
       }
       return this;
@@ -930,14 +938,14 @@ public class CommunicationRequest extends DomainResource {
     /**
      * @return The time when this communication is to occur.
      */
-    public DateAndTime getScheduledTime() { 
+    public Date getScheduledTime() { 
       return this.scheduledTime == null ? null : this.scheduledTime.getValue();
     }
 
     /**
      * @param value The time when this communication is to occur.
      */
-    public CommunicationRequest setScheduledTime(DateAndTime value) { 
+    public CommunicationRequest setScheduledTime(Date value) { 
       if (value == null)
         this.scheduledTime = null;
       else {
@@ -1009,14 +1017,14 @@ public class CommunicationRequest extends DomainResource {
     /**
      * @return The time when the request was made.
      */
-    public DateAndTime getOrderedOn() { 
+    public Date getOrderedOn() { 
       return this.orderedOn == null ? null : this.orderedOn.getValue();
     }
 
     /**
      * @param value The time when the request was made.
      */
-    public CommunicationRequest setOrderedOn(DateAndTime value) { 
+    public CommunicationRequest setOrderedOn(Date value) { 
       if (value == null)
         this.orderedOn = null;
       else {
@@ -1195,10 +1203,10 @@ public class CommunicationRequest extends DomainResource {
   public static final String SP_TIME = "time";
   @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="ordered", path="CommunicationRequest.orderedOn", description="When ordered or proposed", type="date" )
-  public static final String SP_ORDERED = "ordered";
   @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
   public static final String SP_PRIORITY = "priority";
+  @SearchParamDefinition(name="ordered", path="CommunicationRequest.orderedOn", description="When ordered or proposed", type="date" )
+  public static final String SP_ORDERED = "ordered";
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
 

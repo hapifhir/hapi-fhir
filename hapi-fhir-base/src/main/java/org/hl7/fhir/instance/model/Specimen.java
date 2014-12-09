@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Specimen", profile="http://hl7.org/fhir/Profile/Specimen")
 public class Specimen extends DomainResource {
 
-    public enum HierarchicalRelationshipType {
+    public enum HierarchicalRelationshipType implements FhirEnum {
         /**
          * The target resource is the parent of the focal specimen resource.
          */
@@ -58,15 +58,19 @@ public class Specimen extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static HierarchicalRelationshipType fromCode(String codeString) throws Exception {
+
+      public static final HierarchicalRelationshipTypeEnumFactory ENUM_FACTORY = new HierarchicalRelationshipTypeEnumFactory();
+
+        public static HierarchicalRelationshipType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("parent".equals(codeString))
           return PARENT;
         if ("child".equals(codeString))
           return CHILD;
-        throw new Exception("Unknown HierarchicalRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown HierarchicalRelationshipType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PARENT: return "parent";
@@ -97,8 +101,8 @@ public class Specimen extends DomainResource {
         }
     }
 
-  public static class HierarchicalRelationshipTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class HierarchicalRelationshipTypeEnumFactory implements EnumFactory<HierarchicalRelationshipType> {
+    public HierarchicalRelationshipType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -106,9 +110,9 @@ public class Specimen extends DomainResource {
           return HierarchicalRelationshipType.PARENT;
         if ("child".equals(codeString))
           return HierarchicalRelationshipType.CHILD;
-        throw new Exception("Unknown HierarchicalRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown HierarchicalRelationshipType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(HierarchicalRelationshipType code) throws IllegalArgumentException {
       if (code == HierarchicalRelationshipType.PARENT)
         return "parent";
       if (code == HierarchicalRelationshipType.CHILD)
@@ -189,7 +193,7 @@ public class Specimen extends DomainResource {
          */
         public SpecimenSourceComponent setRelationship(HierarchicalRelationshipType value) { 
             if (this.relationship == null)
-              this.relationship = new Enumeration<HierarchicalRelationshipType>();
+              this.relationship = new Enumeration<HierarchicalRelationshipType>(HierarchicalRelationshipType.ENUM_FACTORY);
             this.relationship.setValue(value);
           return this;
         }
@@ -1280,14 +1284,14 @@ public class Specimen extends DomainResource {
     /**
      * @return Time when specimen was received for processing or testing.
      */
-    public DateAndTime getReceivedTime() { 
+    public Date getReceivedTime() { 
       return this.receivedTime == null ? null : this.receivedTime.getValue();
     }
 
     /**
      * @param value Time when specimen was received for processing or testing.
      */
-    public Specimen setReceivedTime(DateAndTime value) { 
+    public Specimen setReceivedTime(Date value) { 
       if (value == null)
         this.receivedTime = null;
       else {

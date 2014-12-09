@@ -33,8 +33,6 @@ package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
-import ca.uhn.fhir.parser.DataFormatException;
-
 /**
  * Primitive type "boolean" in FHIR "true" or "false"
  */
@@ -66,12 +64,13 @@ public class BooleanType extends PrimitiveType<Boolean> {
 
 	@Override
 	protected Boolean parse(String theValue) {
-		if ("true".equals(theValue)) {
+		String value = theValue.trim();
+		if ("true".equals(value)) {
 			return Boolean.TRUE;
-		} else if ("false".equals(theValue)) {
+		} else if ("false".equals(value)) {
 			return Boolean.FALSE;
 		} else {
-			throw new DataFormatException("Invalid boolean string: '" + theValue + "'");
+			throw new IllegalArgumentException("Invalid boolean string: '" + theValue + "'");
 		}
 	}
 

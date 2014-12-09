@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Patient", profile="http://hl7.org/fhir/Profile/Patient")
 public class Patient extends DomainResource {
 
-    public enum AdministrativeGender {
+    public enum AdministrativeGender implements FhirEnum {
         /**
          * Male
          */
@@ -66,7 +66,10 @@ public class Patient extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static AdministrativeGender fromCode(String codeString) throws Exception {
+
+      public static final AdministrativeGenderEnumFactory ENUM_FACTORY = new AdministrativeGenderEnumFactory();
+
+        public static AdministrativeGender fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("male".equals(codeString))
@@ -77,8 +80,9 @@ public class Patient extends DomainResource {
           return OTHER;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown AdministrativeGender code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AdministrativeGender code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case MALE: return "male";
@@ -117,8 +121,8 @@ public class Patient extends DomainResource {
         }
     }
 
-  public static class AdministrativeGenderEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AdministrativeGenderEnumFactory implements EnumFactory<AdministrativeGender> {
+    public AdministrativeGender fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class Patient extends DomainResource {
           return AdministrativeGender.OTHER;
         if ("unknown".equals(codeString))
           return AdministrativeGender.UNKNOWN;
-        throw new Exception("Unknown AdministrativeGender code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AdministrativeGender code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AdministrativeGender code) throws IllegalArgumentException {
       if (code == AdministrativeGender.MALE)
         return "male";
       if (code == AdministrativeGender.FEMALE)
@@ -145,7 +149,7 @@ public class Patient extends DomainResource {
       }
     }
 
-    public enum LinkType {
+    public enum LinkType implements FhirEnum {
         /**
          * The patient resource containing this link must no longer be used. The link points forward to another patient resource that must be used in lieu of the patient resource that contains the link.
          */
@@ -162,7 +166,10 @@ public class Patient extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LinkType fromCode(String codeString) throws Exception {
+
+      public static final LinkTypeEnumFactory ENUM_FACTORY = new LinkTypeEnumFactory();
+
+        public static LinkType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("replace".equals(codeString))
@@ -171,8 +178,9 @@ public class Patient extends DomainResource {
           return REFER;
         if ("seealso".equals(codeString))
           return SEEALSO;
-        throw new Exception("Unknown LinkType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LinkType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REPLACE: return "replace";
@@ -207,8 +215,8 @@ public class Patient extends DomainResource {
         }
     }
 
-  public static class LinkTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class LinkTypeEnumFactory implements EnumFactory<LinkType> {
+    public LinkType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -218,9 +226,9 @@ public class Patient extends DomainResource {
           return LinkType.REFER;
         if ("seealso".equals(codeString))
           return LinkType.SEEALSO;
-        throw new Exception("Unknown LinkType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LinkType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(LinkType code) throws IllegalArgumentException {
       if (code == LinkType.REPLACE)
         return "replace";
       if (code == LinkType.REFER)
@@ -444,7 +452,7 @@ public class Patient extends DomainResource {
             this.gender = null;
           else {
             if (this.gender == null)
-              this.gender = new Enumeration<AdministrativeGender>();
+              this.gender = new Enumeration<AdministrativeGender>(AdministrativeGender.ENUM_FACTORY);
             this.gender.setValue(value);
           }
           return this;
@@ -805,7 +813,7 @@ public class Patient extends DomainResource {
          */
         public PatientLinkComponent setType(LinkType value) { 
             if (this.type == null)
-              this.type = new Enumeration<LinkType>();
+              this.type = new Enumeration<LinkType>(LinkType.ENUM_FACTORY);
             this.type.setValue(value);
           return this;
         }
@@ -1099,7 +1107,7 @@ public class Patient extends DomainResource {
         this.gender = null;
       else {
         if (this.gender == null)
-          this.gender = new Enumeration<AdministrativeGender>();
+          this.gender = new Enumeration<AdministrativeGender>(AdministrativeGender.ENUM_FACTORY);
         this.gender.setValue(value);
       }
       return this;
@@ -1136,14 +1144,14 @@ public class Patient extends DomainResource {
     /**
      * @return The date and time of birth for the individual.
      */
-    public DateAndTime getBirthDate() { 
+    public Date getBirthDate() { 
       return this.birthDate == null ? null : this.birthDate.getValue();
     }
 
     /**
      * @param value The date and time of birth for the individual.
      */
-    public Patient setBirthDate(DateAndTime value) { 
+    public Patient setBirthDate(Date value) { 
       if (value == null)
         this.birthDate = null;
       else {
@@ -1681,10 +1689,10 @@ public class Patient extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="birthdate", path="Patient.birthDate", description="The patient's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
-  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
-  public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="active", path="Patient.active", description="Whether the patient record is active", type="token" )
   public static final String SP_ACTIVE = "active";
+  @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
+  public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="language", path="Patient.communication", description="Language code (irrespective of use value)", type="token" )
   public static final String SP_LANGUAGE = "language";
   @SearchParamDefinition(name="identifier", path="Patient.identifier", description="A patient identifier", type="token" )

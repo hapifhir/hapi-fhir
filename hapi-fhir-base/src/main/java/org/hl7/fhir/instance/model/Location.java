@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Location", profile="http://hl7.org/fhir/Profile/Location")
 public class Location extends DomainResource {
 
-    public enum LocationStatus {
+    public enum LocationStatus implements FhirEnum {
         /**
          * The location is operational.
          */
@@ -63,7 +63,10 @@ public class Location extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LocationStatus fromCode(String codeString) throws Exception {
+
+      public static final LocationStatusEnumFactory ENUM_FACTORY = new LocationStatusEnumFactory();
+
+        public static LocationStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -72,8 +75,9 @@ public class Location extends DomainResource {
           return SUSPENDED;
         if ("inactive".equals(codeString))
           return INACTIVE;
-        throw new Exception("Unknown LocationStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LocationStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ACTIVE: return "active";
@@ -108,8 +112,8 @@ public class Location extends DomainResource {
         }
     }
 
-  public static class LocationStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class LocationStatusEnumFactory implements EnumFactory<LocationStatus> {
+    public LocationStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -119,9 +123,9 @@ public class Location extends DomainResource {
           return LocationStatus.SUSPENDED;
         if ("inactive".equals(codeString))
           return LocationStatus.INACTIVE;
-        throw new Exception("Unknown LocationStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LocationStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(LocationStatus code) throws IllegalArgumentException {
       if (code == LocationStatus.ACTIVE)
         return "active";
       if (code == LocationStatus.SUSPENDED)
@@ -132,7 +136,7 @@ public class Location extends DomainResource {
       }
     }
 
-    public enum LocationMode {
+    public enum LocationMode implements FhirEnum {
         /**
          * The Location resource represents a specific instance of a Location.
          */
@@ -145,15 +149,19 @@ public class Location extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static LocationMode fromCode(String codeString) throws Exception {
+
+      public static final LocationModeEnumFactory ENUM_FACTORY = new LocationModeEnumFactory();
+
+        public static LocationMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("instance".equals(codeString))
           return INSTANCE;
         if ("kind".equals(codeString))
           return KIND;
-        throw new Exception("Unknown LocationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LocationMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INSTANCE: return "instance";
@@ -184,8 +192,8 @@ public class Location extends DomainResource {
         }
     }
 
-  public static class LocationModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class LocationModeEnumFactory implements EnumFactory<LocationMode> {
+    public LocationMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -193,9 +201,9 @@ public class Location extends DomainResource {
           return LocationMode.INSTANCE;
         if ("kind".equals(codeString))
           return LocationMode.KIND;
-        throw new Exception("Unknown LocationMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown LocationMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(LocationMode code) throws IllegalArgumentException {
       if (code == LocationMode.INSTANCE)
         return "instance";
       if (code == LocationMode.KIND)
@@ -842,7 +850,7 @@ public class Location extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<LocationStatus>();
+          this.status = new Enumeration<LocationStatus>(LocationStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -935,7 +943,7 @@ public class Location extends DomainResource {
         this.mode = null;
       else {
         if (this.mode == null)
-          this.mode = new Enumeration<LocationMode>();
+          this.mode = new Enumeration<LocationMode>(LocationMode.ENUM_FACTORY);
         this.mode.setValue(value);
       }
       return this;

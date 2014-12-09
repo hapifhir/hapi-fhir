@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Encounter", profile="http://hl7.org/fhir/Profile/Encounter")
 public class Encounter extends DomainResource {
 
-    public enum EncounterState {
+    public enum EncounterState implements FhirEnum {
         /**
          * The Encounter has not yet started.
          */
@@ -70,7 +70,10 @@ public class Encounter extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static EncounterState fromCode(String codeString) throws Exception {
+
+      public static final EncounterStateEnumFactory ENUM_FACTORY = new EncounterStateEnumFactory();
+
+        public static EncounterState fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("planned".equals(codeString))
@@ -83,8 +86,9 @@ public class Encounter extends DomainResource {
           return FINISHED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown EncounterState code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EncounterState code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PLANNED: return "planned";
@@ -127,8 +131,8 @@ public class Encounter extends DomainResource {
         }
     }
 
-  public static class EncounterStateEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class EncounterStateEnumFactory implements EnumFactory<EncounterState> {
+    public EncounterState fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -142,9 +146,9 @@ public class Encounter extends DomainResource {
           return EncounterState.FINISHED;
         if ("cancelled".equals(codeString))
           return EncounterState.CANCELLED;
-        throw new Exception("Unknown EncounterState code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EncounterState code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(EncounterState code) throws IllegalArgumentException {
       if (code == EncounterState.PLANNED)
         return "planned";
       if (code == EncounterState.INPROGRESS)
@@ -159,7 +163,7 @@ public class Encounter extends DomainResource {
       }
     }
 
-    public enum EncounterClass {
+    public enum EncounterClass implements FhirEnum {
         /**
          * An encounter during which the patient is hospitalized and stays overnight.
          */
@@ -196,7 +200,10 @@ public class Encounter extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static EncounterClass fromCode(String codeString) throws Exception {
+
+      public static final EncounterClassEnumFactory ENUM_FACTORY = new EncounterClassEnumFactory();
+
+        public static EncounterClass fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("inpatient".equals(codeString))
@@ -215,8 +222,9 @@ public class Encounter extends DomainResource {
           return DAYTIME;
         if ("virtual".equals(codeString))
           return VIRTUAL;
-        throw new Exception("Unknown EncounterClass code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EncounterClass code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INPATIENT: return "inpatient";
@@ -271,8 +279,8 @@ public class Encounter extends DomainResource {
         }
     }
 
-  public static class EncounterClassEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class EncounterClassEnumFactory implements EnumFactory<EncounterClass> {
+    public EncounterClass fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -292,9 +300,9 @@ public class Encounter extends DomainResource {
           return EncounterClass.DAYTIME;
         if ("virtual".equals(codeString))
           return EncounterClass.VIRTUAL;
-        throw new Exception("Unknown EncounterClass code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown EncounterClass code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(EncounterClass code) throws IllegalArgumentException {
       if (code == EncounterClass.INPATIENT)
         return "inpatient";
       if (code == EncounterClass.OUTPATIENT)
@@ -1443,7 +1451,7 @@ public class Encounter extends DomainResource {
      */
     public Encounter setStatus(EncounterState value) { 
         if (this.status == null)
-          this.status = new Enumeration<EncounterState>();
+          this.status = new Enumeration<EncounterState>(EncounterState.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1488,7 +1496,7 @@ public class Encounter extends DomainResource {
      */
     public Encounter setClass_(EncounterClass value) { 
         if (this.class_ == null)
-          this.class_ = new Enumeration<EncounterClass>();
+          this.class_ = new Enumeration<EncounterClass>(EncounterClass.ENUM_FACTORY);
         this.class_.setValue(value);
       return this;
     }

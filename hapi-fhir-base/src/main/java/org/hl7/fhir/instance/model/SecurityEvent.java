@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="SecurityEvent", profile="http://hl7.org/fhir/Profile/SecurityEvent")
 public class SecurityEvent extends DomainResource {
 
-    public enum SecurityEventAction {
+    public enum SecurityEventAction implements FhirEnum {
         /**
          * Create a new database object, such as Placing an Order.
          */
@@ -70,7 +70,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SecurityEventAction fromCode(String codeString) throws Exception {
+
+      public static final SecurityEventActionEnumFactory ENUM_FACTORY = new SecurityEventActionEnumFactory();
+
+        public static SecurityEventAction fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("C".equals(codeString))
@@ -83,8 +86,9 @@ public class SecurityEvent extends DomainResource {
           return D;
         if ("E".equals(codeString))
           return E;
-        throw new Exception("Unknown SecurityEventAction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SecurityEventAction code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case C: return "C";
@@ -127,8 +131,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class SecurityEventActionEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SecurityEventActionEnumFactory implements EnumFactory<SecurityEventAction> {
+    public SecurityEventAction fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -142,9 +146,9 @@ public class SecurityEvent extends DomainResource {
           return SecurityEventAction.D;
         if ("E".equals(codeString))
           return SecurityEventAction.E;
-        throw new Exception("Unknown SecurityEventAction code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SecurityEventAction code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SecurityEventAction code) throws IllegalArgumentException {
       if (code == SecurityEventAction.C)
         return "C";
       if (code == SecurityEventAction.R)
@@ -159,7 +163,7 @@ public class SecurityEvent extends DomainResource {
       }
     }
 
-    public enum SecurityEventOutcome {
+    public enum SecurityEventOutcome implements FhirEnum {
         /**
          * The operation completed successfully (whether with warnings or not).
          */
@@ -180,7 +184,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SecurityEventOutcome fromCode(String codeString) throws Exception {
+
+      public static final SecurityEventOutcomeEnumFactory ENUM_FACTORY = new SecurityEventOutcomeEnumFactory();
+
+        public static SecurityEventOutcome fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("0".equals(codeString))
@@ -191,8 +198,9 @@ public class SecurityEvent extends DomainResource {
           return _8;
         if ("12".equals(codeString))
           return _12;
-        throw new Exception("Unknown SecurityEventOutcome code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SecurityEventOutcome code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case _0: return "0";
@@ -231,8 +239,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class SecurityEventOutcomeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SecurityEventOutcomeEnumFactory implements EnumFactory<SecurityEventOutcome> {
+    public SecurityEventOutcome fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -244,9 +252,9 @@ public class SecurityEvent extends DomainResource {
           return SecurityEventOutcome._8;
         if ("12".equals(codeString))
           return SecurityEventOutcome._12;
-        throw new Exception("Unknown SecurityEventOutcome code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SecurityEventOutcome code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SecurityEventOutcome code) throws IllegalArgumentException {
       if (code == SecurityEventOutcome._0)
         return "0";
       if (code == SecurityEventOutcome._4)
@@ -259,7 +267,7 @@ public class SecurityEvent extends DomainResource {
       }
     }
 
-    public enum NetworkType {
+    public enum NetworkType implements FhirEnum {
         /**
          * Machine Name, including DNS name.
          */
@@ -284,7 +292,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static NetworkType fromCode(String codeString) throws Exception {
+
+      public static final NetworkTypeEnumFactory ENUM_FACTORY = new NetworkTypeEnumFactory();
+
+        public static NetworkType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("1".equals(codeString))
@@ -297,8 +308,9 @@ public class SecurityEvent extends DomainResource {
           return _4;
         if ("5".equals(codeString))
           return _5;
-        throw new Exception("Unknown NetworkType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NetworkType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case _1: return "1";
@@ -341,8 +353,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class NetworkTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NetworkTypeEnumFactory implements EnumFactory<NetworkType> {
+    public NetworkType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -356,9 +368,9 @@ public class SecurityEvent extends DomainResource {
           return NetworkType._4;
         if ("5".equals(codeString))
           return NetworkType._5;
-        throw new Exception("Unknown NetworkType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NetworkType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NetworkType code) throws IllegalArgumentException {
       if (code == NetworkType._1)
         return "1";
       if (code == NetworkType._2)
@@ -373,7 +385,7 @@ public class SecurityEvent extends DomainResource {
       }
     }
 
-    public enum ObjectType {
+    public enum ObjectType implements FhirEnum {
         /**
          * Person.
          */
@@ -394,7 +406,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObjectType fromCode(String codeString) throws Exception {
+
+      public static final ObjectTypeEnumFactory ENUM_FACTORY = new ObjectTypeEnumFactory();
+
+        public static ObjectType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("1".equals(codeString))
@@ -405,8 +420,9 @@ public class SecurityEvent extends DomainResource {
           return _3;
         if ("4".equals(codeString))
           return _4;
-        throw new Exception("Unknown ObjectType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case _1: return "1";
@@ -445,8 +461,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class ObjectTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObjectTypeEnumFactory implements EnumFactory<ObjectType> {
+    public ObjectType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -458,9 +474,9 @@ public class SecurityEvent extends DomainResource {
           return ObjectType._3;
         if ("4".equals(codeString))
           return ObjectType._4;
-        throw new Exception("Unknown ObjectType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObjectType code) throws IllegalArgumentException {
       if (code == ObjectType._1)
         return "1";
       if (code == ObjectType._2)
@@ -473,7 +489,7 @@ public class SecurityEvent extends DomainResource {
       }
     }
 
-    public enum ObjectRole {
+    public enum ObjectRole implements FhirEnum {
         /**
          * This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal.
          */
@@ -574,7 +590,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObjectRole fromCode(String codeString) throws Exception {
+
+      public static final ObjectRoleEnumFactory ENUM_FACTORY = new ObjectRoleEnumFactory();
+
+        public static ObjectRole fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("1".equals(codeString))
@@ -625,8 +644,9 @@ public class SecurityEvent extends DomainResource {
           return _23;
         if ("24".equals(codeString))
           return _24;
-        throw new Exception("Unknown ObjectRole code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectRole code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case _1: return "1";
@@ -745,8 +765,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class ObjectRoleEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObjectRoleEnumFactory implements EnumFactory<ObjectRole> {
+    public ObjectRole fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -798,9 +818,9 @@ public class SecurityEvent extends DomainResource {
           return ObjectRole._23;
         if ("24".equals(codeString))
           return ObjectRole._24;
-        throw new Exception("Unknown ObjectRole code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectRole code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObjectRole code) throws IllegalArgumentException {
       if (code == ObjectRole._1)
         return "1";
       if (code == ObjectRole._2)
@@ -853,7 +873,7 @@ public class SecurityEvent extends DomainResource {
       }
     }
 
-    public enum ObjectLifecycle {
+    public enum ObjectLifecycle implements FhirEnum {
         /**
          * Origination / Creation.
          */
@@ -918,7 +938,10 @@ public class SecurityEvent extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObjectLifecycle fromCode(String codeString) throws Exception {
+
+      public static final ObjectLifecycleEnumFactory ENUM_FACTORY = new ObjectLifecycleEnumFactory();
+
+        public static ObjectLifecycle fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("1".equals(codeString))
@@ -951,8 +974,9 @@ public class SecurityEvent extends DomainResource {
           return _14;
         if ("15".equals(codeString))
           return _15;
-        throw new Exception("Unknown ObjectLifecycle code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectLifecycle code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case _1: return "1";
@@ -1035,8 +1059,8 @@ public class SecurityEvent extends DomainResource {
         }
     }
 
-  public static class ObjectLifecycleEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObjectLifecycleEnumFactory implements EnumFactory<ObjectLifecycle> {
+    public ObjectLifecycle fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -1070,9 +1094,9 @@ public class SecurityEvent extends DomainResource {
           return ObjectLifecycle._14;
         if ("15".equals(codeString))
           return ObjectLifecycle._15;
-        throw new Exception("Unknown ObjectLifecycle code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObjectLifecycle code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObjectLifecycle code) throws IllegalArgumentException {
       if (code == ObjectLifecycle._1)
         return "1";
       if (code == ObjectLifecycle._2)
@@ -1260,7 +1284,7 @@ public class SecurityEvent extends DomainResource {
             this.action = null;
           else {
             if (this.action == null)
-              this.action = new Enumeration<SecurityEventAction>();
+              this.action = new Enumeration<SecurityEventAction>(SecurityEventAction.ENUM_FACTORY);
             this.action.setValue(value);
           }
           return this;
@@ -1297,14 +1321,14 @@ public class SecurityEvent extends DomainResource {
         /**
          * @return The time when the event occurred on the source.
          */
-        public DateAndTime getDateTime() { 
+        public Date getDateTime() { 
           return this.dateTime == null ? null : this.dateTime.getValue();
         }
 
         /**
          * @param value The time when the event occurred on the source.
          */
-        public SecurityEventEventComponent setDateTime(DateAndTime value) { 
+        public SecurityEventEventComponent setDateTime(Date value) { 
             if (this.dateTime == null)
               this.dateTime = new InstantType();
             this.dateTime.setValue(value);
@@ -1354,7 +1378,7 @@ public class SecurityEvent extends DomainResource {
             this.outcome = null;
           else {
             if (this.outcome == null)
-              this.outcome = new Enumeration<SecurityEventOutcome>();
+              this.outcome = new Enumeration<SecurityEventOutcome>(SecurityEventOutcome.ENUM_FACTORY);
             this.outcome.setValue(value);
           }
           return this;
@@ -1979,7 +2003,7 @@ public class SecurityEvent extends DomainResource {
             this.type = null;
           else {
             if (this.type == null)
-              this.type = new Enumeration<NetworkType>();
+              this.type = new Enumeration<NetworkType>(NetworkType.ENUM_FACTORY);
             this.type.setValue(value);
           }
           return this;
@@ -2380,7 +2404,7 @@ public class SecurityEvent extends DomainResource {
             this.type = null;
           else {
             if (this.type == null)
-              this.type = new Enumeration<ObjectType>();
+              this.type = new Enumeration<ObjectType>(ObjectType.ENUM_FACTORY);
             this.type.setValue(value);
           }
           return this;
@@ -2429,7 +2453,7 @@ public class SecurityEvent extends DomainResource {
             this.role = null;
           else {
             if (this.role == null)
-              this.role = new Enumeration<ObjectRole>();
+              this.role = new Enumeration<ObjectRole>(ObjectRole.ENUM_FACTORY);
             this.role.setValue(value);
           }
           return this;
@@ -2478,7 +2502,7 @@ public class SecurityEvent extends DomainResource {
             this.lifecycle = null;
           else {
             if (this.lifecycle == null)
-              this.lifecycle = new Enumeration<ObjectLifecycle>();
+              this.lifecycle = new Enumeration<ObjectLifecycle>(ObjectLifecycle.ENUM_FACTORY);
             this.lifecycle.setValue(value);
           }
           return this;

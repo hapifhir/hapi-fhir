@@ -48,6 +48,8 @@ import java.util.Date;
 @DatatypeDef(name = "date")
 public class DateType extends BaseDateTimeType {
 
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * The default precision for this type
 	 */

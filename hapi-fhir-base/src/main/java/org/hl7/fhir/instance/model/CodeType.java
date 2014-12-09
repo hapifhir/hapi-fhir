@@ -28,8 +28,6 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.instance.model;
 
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.primitive.CodeDt;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -39,6 +37,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  */
 @DatatypeDef(name = "code")
 public class CodeType extends PrimitiveType<String> implements Comparable<CodeType> {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Constructor

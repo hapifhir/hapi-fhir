@@ -43,6 +43,8 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name = "decimal")
 public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable<DecimalType> {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
 	 */
@@ -61,7 +63,7 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 	 * Constructor
 	 */
 	public DecimalType(double theValue) {
-		// Use the valueOf here because the constructor gives crazy precision
+		// Use the valueOf here because the constructor gives wacky precision
 		// changes due to the floating point conversion
 		setValue(BigDecimal.valueOf(theValue));
 	}

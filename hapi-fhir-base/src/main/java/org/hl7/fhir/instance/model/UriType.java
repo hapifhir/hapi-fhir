@@ -34,17 +34,13 @@ import java.net.URISyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 
-import ca.uhn.fhir.parser.DataFormatException;
-
 /**
  * Primitive type "uri" in FHIR: any valid URI. Sometimes constrained to be only an absolute URI, and sometimes constrained to be a literal reference
  */
 @DatatypeDef(name = "uri")
-public class UriType extends PrimitiveType<URI> {
+public class UriType extends PrimitiveType<String> {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UriType.class);
 
 	/**
 	 * Constructor
@@ -64,7 +60,7 @@ public class UriType extends PrimitiveType<URI> {
 	 * Constructor
 	 */
 	public UriType(URI theValue) {
-		setValue(theValue);
+		setValue(theValue.toString());
 	}
 
 	@Override
@@ -73,8 +69,8 @@ public class UriType extends PrimitiveType<URI> {
 	}
 
 	@Override
-	protected String encode(URI theValue) {
-		return getValue().toASCIIString();
+	protected String encode(String theValue) {
+		return theValue;
 	}
 
 	@Override
@@ -94,8 +90,8 @@ public class UriType extends PrimitiveType<URI> {
 			return false;
 		}
 
-		URI normalize = normalize(getValue());
-		URI normalize2 = normalize(other.getValue());
+		String normalize = normalize(getValue());
+		String normalize2 = normalize(other.getValue());
 		return normalize.equals(normalize2);
 	}
 
@@ -113,51 +109,48 @@ public class UriType extends PrimitiveType<URI> {
 		final int prime = 31;
 		int result = 1;
 
-		URI normalize = normalize(getValue());
+		String normalize = normalize(getValue());
 		result = prime * result + ((normalize == null) ? 0 : normalize.hashCode());
 
 		return result;
 	}
 
-	private URI normalize(URI theValue) {
+	private String normalize(String theValue) {
 		if (theValue == null) {
 			return null;
 		}
-		URI retVal = (theValue.normalize());
-		String urlString = retVal.toString();
-		if (urlString.endsWith("/") && urlString.length() > 1) {
-			try {
+		try {
+			URI retVal = new URI(getValue()).normalize();
+			String urlString = retVal.toString();
+			if (urlString.endsWith("/") && urlString.length() > 1) {
 				retVal = new URI(urlString.substring(0, urlString.length() - 1));
-			} catch (URISyntaxException e) {
-				ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
 			}
+			return retVal.toASCIIString();
+		} catch (URISyntaxException e) {
+			// ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
+			return theValue;
 		}
-		return retVal;
 	}
 
 	@Override
-	protected URI parse(String theValue) {
-		try {
-			return new URI(theValue);
-		} catch (URISyntaxException e) {
-			throw new DataFormatException("Unable to parse URI value", e);
-		}
+	protected String parse(String theValue) {
+		return theValue;
 	}
 
 	/**
-	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
-	 * in the value of the newly created UriDt, per the FHIR specification).
+	 * Creates a new OidType instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
+	 * in the value of the newly created OidType, per the FHIR specification).
 	 * 
 	 * @param theOid
 	 *            The OID to use (<code>null</code> is acceptable and will result in a UriDt instance with a
 	 *            <code>null</code> value)
 	 * @return A new UriDt instance
 	 */
-	public static UriType fromOid(String theOid) {
+	public static OidType fromOid(String theOid) {
 		if (theOid == null) {
-			return new UriType();
+			return new OidType();
 		}
-		return new UriType("urn:oid:" + theOid);
+		return new OidType("urn:oid:" + theOid);
 	}
 
 }

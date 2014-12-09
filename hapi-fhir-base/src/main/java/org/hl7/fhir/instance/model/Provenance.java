@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Provenance", profile="http://hl7.org/fhir/Profile/Provenance")
 public class Provenance extends DomainResource {
 
-    public enum ProvenanceEntityRole {
+    public enum ProvenanceEntityRole implements FhirEnum {
         /**
          * A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.
          */
@@ -66,7 +66,10 @@ public class Provenance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ProvenanceEntityRole fromCode(String codeString) throws Exception {
+
+      public static final ProvenanceEntityRoleEnumFactory ENUM_FACTORY = new ProvenanceEntityRoleEnumFactory();
+
+        public static ProvenanceEntityRole fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("derivation".equals(codeString))
@@ -77,8 +80,9 @@ public class Provenance extends DomainResource {
           return QUOTATION;
         if ("source".equals(codeString))
           return SOURCE;
-        throw new Exception("Unknown ProvenanceEntityRole code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DERIVATION: return "derivation";
@@ -117,8 +121,8 @@ public class Provenance extends DomainResource {
         }
     }
 
-  public static class ProvenanceEntityRoleEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ProvenanceEntityRoleEnumFactory implements EnumFactory<ProvenanceEntityRole> {
+    public ProvenanceEntityRole fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class Provenance extends DomainResource {
           return ProvenanceEntityRole.QUOTATION;
         if ("source".equals(codeString))
           return ProvenanceEntityRole.SOURCE;
-        throw new Exception("Unknown ProvenanceEntityRole code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ProvenanceEntityRole code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ProvenanceEntityRole code) throws IllegalArgumentException {
       if (code == ProvenanceEntityRole.DERIVATION)
         return "derivation";
       if (code == ProvenanceEntityRole.REVISION)
@@ -445,7 +449,7 @@ public class Provenance extends DomainResource {
          */
         public ProvenanceEntityComponent setRole(ProvenanceEntityRole value) { 
             if (this.role == null)
-              this.role = new Enumeration<ProvenanceEntityRole>();
+              this.role = new Enumeration<ProvenanceEntityRole>(ProvenanceEntityRole.ENUM_FACTORY);
             this.role.setValue(value);
           return this;
         }
@@ -798,14 +802,14 @@ public class Provenance extends DomainResource {
     /**
      * @return The instant of time at which the activity was recorded.
      */
-    public DateAndTime getRecorded() { 
+    public Date getRecorded() { 
       return this.recorded == null ? null : this.recorded.getValue();
     }
 
     /**
      * @param value The instant of time at which the activity was recorded.
      */
-    public Provenance setRecorded(DateAndTime value) { 
+    public Provenance setRecorded(Date value) { 
         if (this.recorded == null)
           this.recorded = new InstantType();
         this.recorded.setValue(value);

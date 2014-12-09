@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Profile", profile="http://hl7.org/fhir/Profile/Profile")
 public class Profile extends DomainResource {
 
-    public enum ResourceProfileStatus {
+    public enum ResourceProfileStatus implements FhirEnum {
         /**
          * This profile is still under development.
          */
@@ -62,7 +62,10 @@ public class Profile extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ResourceProfileStatus fromCode(String codeString) throws Exception {
+
+      public static final ResourceProfileStatusEnumFactory ENUM_FACTORY = new ResourceProfileStatusEnumFactory();
+
+        public static ResourceProfileStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -71,8 +74,9 @@ public class Profile extends DomainResource {
           return ACTIVE;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown ResourceProfileStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceProfileStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DRAFT: return "draft";
@@ -107,8 +111,8 @@ public class Profile extends DomainResource {
         }
     }
 
-  public static class ResourceProfileStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ResourceProfileStatusEnumFactory implements EnumFactory<ResourceProfileStatus> {
+    public ResourceProfileStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class Profile extends DomainResource {
           return ResourceProfileStatus.ACTIVE;
         if ("retired".equals(codeString))
           return ResourceProfileStatus.RETIRED;
-        throw new Exception("Unknown ResourceProfileStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceProfileStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ResourceProfileStatus code) throws IllegalArgumentException {
       if (code == ResourceProfileStatus.DRAFT)
         return "draft";
       if (code == ResourceProfileStatus.ACTIVE)
@@ -963,7 +967,7 @@ public class Profile extends DomainResource {
      */
     public Profile setStatus(ResourceProfileStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ResourceProfileStatus>();
+          this.status = new Enumeration<ResourceProfileStatus>(ResourceProfileStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1048,14 +1052,14 @@ public class Profile extends DomainResource {
     /**
      * @return The date that this version of the profile was published.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date that this version of the profile was published.
      */
-    public Profile setDate(DateAndTime value) { 
+    public Profile setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {

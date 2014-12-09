@@ -178,12 +178,12 @@ public class DateAndTime {
 		} else {
 			TimeZone tz;
 			if (!timezone) {
-  		  tz = TimeZone.getTimeZone("GMT + 00 : 00");
-	  	} else {
+				tz = TimeZone.getTimeZone("GMT+00:00");
+			} else {
 				tz = TimeZone.getTimeZone("GMT"+(positiveOffset ? "+" : "-")+Utilities.padLeft(java.lang.Integer.toString(tzHour), '0', 2)+":"+Utilities.padLeft(java.lang.Integer.toString(tzMin), '0', 2));
-	  	}
+			}
 			cal = Calendar.getInstance(tz);
-		} 
+		}
 		
 		//default to 0 if unset
 		cal.set(Calendar.MONTH, 0);
@@ -206,7 +206,7 @@ public class DateAndTime {
 						if (fractions > 0) {
 							cal.set(Calendar.MILLISECOND, (int)((double) fraction / Math.pow(10, fractions) * 1000.0));
 						}
-						}
+					}
 				}
 			}
 		}
@@ -332,7 +332,7 @@ public class DateAndTime {
 		positiveOffset = isPositiveOffset;
 		this.timezone = true;
 	}
-
+	
 	/**
 	 * @return true if the tz offset is positive (i.e. +06:00), false if the tz offset is negative (-06:00)
 	 */

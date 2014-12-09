@@ -35,73 +35,70 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> {
 
-  private static final long serialVersionUID = 5502756236610771914L;
-  
+	private static final long serialVersionUID = 1L;
+	private EnumFactory<T> myEnumFactory;
+
 	/**
-	 * the actual value of the enumeration
+	 * Constructor
 	 */
-  private T value;
-  
-  public Enumeration() {
-  }
-  
-  /**
-   * @param value the value of the enumeration
-   */
-  public Enumeration(T value) {
-  	this.value = value;
-  }
-  
-  /**
-   * @return the value of the enumeration
-   */
-  public T getValue() {
-    return value;
-  }
-  
-  /**
-   * @param value the value of the enumeration
-   */
-  public void setValue(T value) {
-    this.value = value;
-  }
-
-  @Override
-  protected T parse(String theValue) {
-    return null;
-  }
-
-  @Override
-  protected String encode(T theValue) {
-    return null;
-  }
-
-  @Override
-  public Enumeration<T> copy() {
-		Enumeration<T> dst = new Enumeration<T>();
-		dst.value = value;
-		return dst;
+	public Enumeration(T theValue) {
+		setValue(theValue);
 	}
 
-
-  @Override
-  public String asStringValue() {
-    EnumFactory factory = ResourceEnumerations.getEnumFactory(value.getClass());
-    if (factory != null)
-      try {
-        return factory.toCode(value);
-      } catch (Exception e) {
-      }
-    return value.toString();
-  }
-  
-	public boolean isEmpty() {
-		return super.isEmpty() && (value == null || value.toString().equals("NULL"));
+	/**
+	 * Constructor
+	 */
+	public Enumeration(String theValue) {
+		setValueAsString(theValue);
 	}
 
-	public boolean hasValue() {
-		return value != null & !value.toString().equals("NULL");
+	/**
+	 * Constructor
+	 */
+	public Enumeration(EnumFactory<T> theEnumFactory, T theValue) {
+		myEnumFactory = theEnumFactory;
+		setValue(theValue);
 	}
-	
+
+	/**
+	 * Constructor
+	 */
+	public Enumeration(EnumFactory<T> theEnumFactory, String theValue) {
+		myEnumFactory = theEnumFactory;
+		setValueAsString(theValue);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public Enumeration(EnumFactory<T> theEnumFactory) {
+		myEnumFactory = theEnumFactory;
+	}
+
+	/**
+	 * Constructor
+	 */
+	public Enumeration() {
+		// nothing
+	}
+
+	@Override
+	protected T parse(String theValue) {
+		if (myEnumFactory != null) {
+			return myEnumFactory.fromCode(theValue);
+		}
+		return null;
+	}
+
+	@Override
+	protected String encode(T theValue) {
+		return ((FhirEnum)theValue).toCode();
+	}
+
+	@Override
+	public Enumeration<T> copy() {
+		return new Enumeration<T>(myEnumFactory, getValue());
+	}
+
 
 }

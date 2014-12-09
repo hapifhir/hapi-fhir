@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Subscription", profile="http://hl7.org/fhir/Profile/Subscription")
 public class Subscription extends DomainResource {
 
-    public enum SubscriptionStatus {
+    public enum SubscriptionStatus implements FhirEnum {
         /**
          * The client has requested the subscription, and the server has not yet set it up.
          */
@@ -66,7 +66,10 @@ public class Subscription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SubscriptionStatus fromCode(String codeString) throws Exception {
+
+      public static final SubscriptionStatusEnumFactory ENUM_FACTORY = new SubscriptionStatusEnumFactory();
+
+        public static SubscriptionStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -77,8 +80,9 @@ public class Subscription extends DomainResource {
           return ERROR;
         if ("off".equals(codeString))
           return OFF;
-        throw new Exception("Unknown SubscriptionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUESTED: return "requested";
@@ -117,8 +121,8 @@ public class Subscription extends DomainResource {
         }
     }
 
-  public static class SubscriptionStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SubscriptionStatusEnumFactory implements EnumFactory<SubscriptionStatus> {
+    public SubscriptionStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class Subscription extends DomainResource {
           return SubscriptionStatus.ERROR;
         if ("off".equals(codeString))
           return SubscriptionStatus.OFF;
-        throw new Exception("Unknown SubscriptionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SubscriptionStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SubscriptionStatus code) throws IllegalArgumentException {
       if (code == SubscriptionStatus.REQUESTED)
         return "requested";
       if (code == SubscriptionStatus.ACTIVE)
@@ -145,7 +149,7 @@ public class Subscription extends DomainResource {
       }
     }
 
-    public enum SubscriptionChannelType {
+    public enum SubscriptionChannelType implements FhirEnum {
         /**
          * The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made.
          */
@@ -170,7 +174,10 @@ public class Subscription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SubscriptionChannelType fromCode(String codeString) throws Exception {
+
+      public static final SubscriptionChannelTypeEnumFactory ENUM_FACTORY = new SubscriptionChannelTypeEnumFactory();
+
+        public static SubscriptionChannelType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("rest-hook".equals(codeString))
@@ -183,8 +190,9 @@ public class Subscription extends DomainResource {
           return SMS;
         if ("message".equals(codeString))
           return MESSAGE;
-        throw new Exception("Unknown SubscriptionChannelType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case RESTHOOK: return "rest-hook";
@@ -227,8 +235,8 @@ public class Subscription extends DomainResource {
         }
     }
 
-  public static class SubscriptionChannelTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SubscriptionChannelTypeEnumFactory implements EnumFactory<SubscriptionChannelType> {
+    public SubscriptionChannelType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -242,9 +250,9 @@ public class Subscription extends DomainResource {
           return SubscriptionChannelType.SMS;
         if ("message".equals(codeString))
           return SubscriptionChannelType.MESSAGE;
-        throw new Exception("Unknown SubscriptionChannelType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SubscriptionChannelType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SubscriptionChannelType code) throws IllegalArgumentException {
       if (code == SubscriptionChannelType.RESTHOOK)
         return "rest-hook";
       if (code == SubscriptionChannelType.WEBSOCKET)
@@ -341,7 +349,7 @@ public class Subscription extends DomainResource {
          */
         public SubscriptionChannelComponent setType(SubscriptionChannelType value) { 
             if (this.type == null)
-              this.type = new Enumeration<SubscriptionChannelType>();
+              this.type = new Enumeration<SubscriptionChannelType>(SubscriptionChannelType.ENUM_FACTORY);
             this.type.setValue(value);
           return this;
         }
@@ -941,7 +949,7 @@ public class Subscription extends DomainResource {
      */
     public Subscription setStatus(SubscriptionStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<SubscriptionStatus>();
+          this.status = new Enumeration<SubscriptionStatus>(SubscriptionStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1050,14 +1058,14 @@ public class Subscription extends DomainResource {
     /**
      * @return Todo.
      */
-    public DateAndTime getEnd() { 
+    public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value Todo.
      */
-    public Subscription setEnd(DateAndTime value) { 
+    public Subscription setEnd(Date value) { 
       if (value == null)
         this.end = null;
       else {

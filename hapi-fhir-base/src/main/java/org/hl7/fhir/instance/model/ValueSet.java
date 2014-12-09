@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/Profile/ValueSet")
 public class ValueSet extends DomainResource {
 
-    public enum ValuesetStatus {
+    public enum ValuesetStatus implements FhirEnum {
         /**
          * This valueset is still under development.
          */
@@ -62,7 +62,10 @@ public class ValueSet extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ValuesetStatus fromCode(String codeString) throws Exception {
+
+      public static final ValuesetStatusEnumFactory ENUM_FACTORY = new ValuesetStatusEnumFactory();
+
+        public static ValuesetStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -71,8 +74,9 @@ public class ValueSet extends DomainResource {
           return ACTIVE;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown ValuesetStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DRAFT: return "draft";
@@ -107,8 +111,8 @@ public class ValueSet extends DomainResource {
         }
     }
 
-  public static class ValuesetStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ValuesetStatusEnumFactory implements EnumFactory<ValuesetStatus> {
+    public ValuesetStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class ValueSet extends DomainResource {
           return ValuesetStatus.ACTIVE;
         if ("retired".equals(codeString))
           return ValuesetStatus.RETIRED;
-        throw new Exception("Unknown ValuesetStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ValuesetStatus code) throws IllegalArgumentException {
       if (code == ValuesetStatus.DRAFT)
         return "draft";
       if (code == ValuesetStatus.ACTIVE)
@@ -131,7 +135,7 @@ public class ValueSet extends DomainResource {
       }
     }
 
-    public enum FilterOperator {
+    public enum FilterOperator implements FhirEnum {
         /**
          * The specified property of the code equals the provided value.
          */
@@ -160,7 +164,10 @@ public class ValueSet extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static FilterOperator fromCode(String codeString) throws Exception {
+
+      public static final FilterOperatorEnumFactory ENUM_FACTORY = new FilterOperatorEnumFactory();
+
+        public static FilterOperator fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("=".equals(codeString))
@@ -175,8 +182,9 @@ public class ValueSet extends DomainResource {
           return IN;
         if ("not in".equals(codeString))
           return NOTIN;
-        throw new Exception("Unknown FilterOperator code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case EQUAL: return "=";
@@ -223,8 +231,8 @@ public class ValueSet extends DomainResource {
         }
     }
 
-  public static class FilterOperatorEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class FilterOperatorEnumFactory implements EnumFactory<FilterOperator> {
+    public FilterOperator fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -240,9 +248,9 @@ public class ValueSet extends DomainResource {
           return FilterOperator.IN;
         if ("not in".equals(codeString))
           return FilterOperator.NOTIN;
-        throw new Exception("Unknown FilterOperator code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown FilterOperator code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(FilterOperator code) throws IllegalArgumentException {
       if (code == FilterOperator.EQUAL)
         return "=";
       if (code == FilterOperator.ISA)
@@ -1736,7 +1744,7 @@ public class ValueSet extends DomainResource {
          */
         public ConceptSetFilterComponent setOp(FilterOperator value) { 
             if (this.op == null)
-              this.op = new Enumeration<FilterOperator>();
+              this.op = new Enumeration<FilterOperator>(FilterOperator.ENUM_FACTORY);
             this.op.setValue(value);
           return this;
         }
@@ -1898,14 +1906,14 @@ public class ValueSet extends DomainResource {
         /**
          * @return The time at which the expansion was produced by the expanding system.
          */
-        public DateAndTime getTimestamp() { 
+        public Date getTimestamp() { 
           return this.timestamp == null ? null : this.timestamp.getValue();
         }
 
         /**
          * @param value The time at which the expansion was produced by the expanding system.
          */
-        public ValueSetExpansionComponent setTimestamp(DateAndTime value) { 
+        public ValueSetExpansionComponent setTimestamp(Date value) { 
             if (this.timestamp == null)
               this.timestamp = new DateTimeType();
             this.timestamp.setValue(value);
@@ -2920,7 +2928,7 @@ public class ValueSet extends DomainResource {
      */
     public ValueSet setStatus(ValuesetStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ValuesetStatus>();
+          this.status = new Enumeration<ValuesetStatus>(ValuesetStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -3054,14 +3062,14 @@ public class ValueSet extends DomainResource {
     /**
      * @return The date that the value set status was last changed.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date that the value set status was last changed.
      */
-    public ValueSet setDate(DateAndTime value) { 
+    public ValueSet setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {
@@ -3103,14 +3111,14 @@ public class ValueSet extends DomainResource {
     /**
      * @return If a Stability Date is expanded by evaluating the Content Logical Definition using the current version of all referenced code system(s) and value sets as of the Stability Date.
      */
-    public DateAndTime getStableDate() { 
+    public Date getStableDate() { 
       return this.stableDate == null ? null : this.stableDate.getValue();
     }
 
     /**
      * @param value If a Stability Date is expanded by evaluating the Content Logical Definition using the current version of all referenced code system(s) and value sets as of the Stability Date.
      */
-    public ValueSet setStableDate(DateAndTime value) { 
+    public ValueSet setStableDate(Date value) { 
       if (value == null)
         this.stableDate = null;
       else {

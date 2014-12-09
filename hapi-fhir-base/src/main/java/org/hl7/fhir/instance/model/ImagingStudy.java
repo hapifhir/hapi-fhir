@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/Profile/ImagingStudy")
 public class ImagingStudy extends DomainResource {
 
-    public enum ImagingModality {
+    public enum ImagingModality implements FhirEnum {
         /**
          * 
          */
@@ -194,7 +194,10 @@ public class ImagingStudy extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ImagingModality fromCode(String codeString) throws Exception {
+
+      public static final ImagingModalityEnumFactory ENUM_FACTORY = new ImagingModalityEnumFactory();
+
+        public static ImagingModality fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("AR".equals(codeString))
@@ -269,8 +272,9 @@ public class ImagingStudy extends DomainResource {
           return VA;
         if ("XA".equals(codeString))
           return XA;
-        throw new Exception("Unknown ImagingModality code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ImagingModality code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case AR: return "AR";
@@ -437,8 +441,8 @@ public class ImagingStudy extends DomainResource {
         }
     }
 
-  public static class ImagingModalityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ImagingModalityEnumFactory implements EnumFactory<ImagingModality> {
+    public ImagingModality fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -514,9 +518,9 @@ public class ImagingStudy extends DomainResource {
           return ImagingModality.VA;
         if ("XA".equals(codeString))
           return ImagingModality.XA;
-        throw new Exception("Unknown ImagingModality code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ImagingModality code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ImagingModality code) throws IllegalArgumentException {
       if (code == ImagingModality.AR)
         return "AR";
       if (code == ImagingModality.BMD)
@@ -593,7 +597,7 @@ public class ImagingStudy extends DomainResource {
       }
     }
 
-    public enum InstanceAvailability {
+    public enum InstanceAvailability implements FhirEnum {
         /**
          * Resources are immediately available,.
          */
@@ -614,7 +618,10 @@ public class ImagingStudy extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static InstanceAvailability fromCode(String codeString) throws Exception {
+
+      public static final InstanceAvailabilityEnumFactory ENUM_FACTORY = new InstanceAvailabilityEnumFactory();
+
+        public static InstanceAvailability fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("ONLINE".equals(codeString))
@@ -625,8 +632,9 @@ public class ImagingStudy extends DomainResource {
           return NEARLINE;
         if ("UNAVAILABLE".equals(codeString))
           return UNAVAILABLE;
-        throw new Exception("Unknown InstanceAvailability code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown InstanceAvailability code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ONLINE: return "ONLINE";
@@ -665,8 +673,8 @@ public class ImagingStudy extends DomainResource {
         }
     }
 
-  public static class InstanceAvailabilityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class InstanceAvailabilityEnumFactory implements EnumFactory<InstanceAvailability> {
+    public InstanceAvailability fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -678,9 +686,9 @@ public class ImagingStudy extends DomainResource {
           return InstanceAvailability.NEARLINE;
         if ("UNAVAILABLE".equals(codeString))
           return InstanceAvailability.UNAVAILABLE;
-        throw new Exception("Unknown InstanceAvailability code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown InstanceAvailability code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(InstanceAvailability code) throws IllegalArgumentException {
       if (code == InstanceAvailability.ONLINE)
         return "ONLINE";
       if (code == InstanceAvailability.OFFLINE)
@@ -693,7 +701,7 @@ public class ImagingStudy extends DomainResource {
       }
     }
 
-    public enum Modality {
+    public enum Modality implements FhirEnum {
         /**
          * 
          */
@@ -910,7 +918,10 @@ public class ImagingStudy extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Modality fromCode(String codeString) throws Exception {
+
+      public static final ModalityEnumFactory ENUM_FACTORY = new ModalityEnumFactory();
+
+        public static Modality fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("AR".equals(codeString))
@@ -1019,8 +1030,9 @@ public class ImagingStudy extends DomainResource {
           return XA;
         if ("XC".equals(codeString))
           return XC;
-        throw new Exception("Unknown Modality code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Modality code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case AR: return "AR";
@@ -1255,8 +1267,8 @@ public class ImagingStudy extends DomainResource {
         }
     }
 
-  public static class ModalityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ModalityEnumFactory implements EnumFactory<Modality> {
+    public Modality fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -1366,9 +1378,9 @@ public class ImagingStudy extends DomainResource {
           return Modality.XA;
         if ("XC".equals(codeString))
           return Modality.XC;
-        throw new Exception("Unknown Modality code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Modality code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Modality code) throws IllegalArgumentException {
       if (code == Modality.AR)
         return "AR";
       if (code == Modality.AU)
@@ -1653,7 +1665,7 @@ public class ImagingStudy extends DomainResource {
          */
         public ImagingStudySeriesComponent setModality(Modality value) { 
             if (this.modality == null)
-              this.modality = new Enumeration<Modality>();
+              this.modality = new Enumeration<Modality>(Modality.ENUM_FACTORY);
             this.modality.setValue(value);
           return this;
         }
@@ -1840,7 +1852,7 @@ public class ImagingStudy extends DomainResource {
             this.availability = null;
           else {
             if (this.availability == null)
-              this.availability = new Enumeration<InstanceAvailability>();
+              this.availability = new Enumeration<InstanceAvailability>(InstanceAvailability.ENUM_FACTORY);
             this.availability.setValue(value);
           }
           return this;
@@ -1950,14 +1962,14 @@ public class ImagingStudy extends DomainResource {
         /**
          * @return The date when the series was started.
          */
-        public DateAndTime getDateTime() { 
+        public Date getDateTime() { 
           return this.dateTime == null ? null : this.dateTime.getValue();
         }
 
         /**
          * @param value The date when the series was started.
          */
-        public ImagingStudySeriesComponent setDateTime(DateAndTime value) { 
+        public ImagingStudySeriesComponent setDateTime(Date value) { 
           if (value == null)
             this.dateTime = null;
           else {
@@ -2650,14 +2662,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * @return Date and Time the study started.
      */
-    public DateAndTime getStarted() { 
+    public Date getStarted() { 
       return this.started == null ? null : this.started.getValue();
     }
 
     /**
      * @param value Date and Time the study started.
      */
-    public ImagingStudy setStarted(DateAndTime value) { 
+    public ImagingStudy setStarted(Date value) { 
       if (value == null)
         this.started = null;
       else {
@@ -3003,7 +3015,7 @@ public class ImagingStudy extends DomainResource {
         this.availability = null;
       else {
         if (this.availability == null)
-          this.availability = new Enumeration<InstanceAvailability>();
+          this.availability = new Enumeration<InstanceAvailability>(InstanceAvailability.ENUM_FACTORY);
         this.availability.setValue(value);
       }
       return this;

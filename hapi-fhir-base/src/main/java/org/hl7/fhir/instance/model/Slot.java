@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Slot", profile="http://hl7.org/fhir/Profile/Slot")
 public class Slot extends DomainResource {
 
-    public enum Slotstatus {
+    public enum Slotstatus implements FhirEnum {
         /**
          * Indicates that the time interval is busy because one  or more events have been scheduled for that interval.
          */
@@ -66,7 +66,10 @@ public class Slot extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Slotstatus fromCode(String codeString) throws Exception {
+
+      public static final SlotstatusEnumFactory ENUM_FACTORY = new SlotstatusEnumFactory();
+
+        public static Slotstatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("BUSY".equals(codeString))
@@ -77,8 +80,9 @@ public class Slot extends DomainResource {
           return BUSYUNAVAILABLE;
         if ("BUSY-TENTATIVE".equals(codeString))
           return BUSYTENTATIVE;
-        throw new Exception("Unknown Slotstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Slotstatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case BUSY: return "BUSY";
@@ -117,8 +121,8 @@ public class Slot extends DomainResource {
         }
     }
 
-  public static class SlotstatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SlotstatusEnumFactory implements EnumFactory<Slotstatus> {
+    public Slotstatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -130,9 +134,9 @@ public class Slot extends DomainResource {
           return Slotstatus.BUSYUNAVAILABLE;
         if ("BUSY-TENTATIVE".equals(codeString))
           return Slotstatus.BUSYTENTATIVE;
-        throw new Exception("Unknown Slotstatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown Slotstatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(Slotstatus code) throws IllegalArgumentException {
       if (code == Slotstatus.BUSY)
         return "BUSY";
       if (code == Slotstatus.FREE)
@@ -365,7 +369,7 @@ public class Slot extends DomainResource {
      */
     public Slot setFreeBusyType(Slotstatus value) { 
         if (this.freeBusyType == null)
-          this.freeBusyType = new Enumeration<Slotstatus>();
+          this.freeBusyType = new Enumeration<Slotstatus>(Slotstatus.ENUM_FACTORY);
         this.freeBusyType.setValue(value);
       return this;
     }
@@ -401,14 +405,14 @@ public class Slot extends DomainResource {
     /**
      * @return Date/Time that the slot is to begin.
      */
-    public DateAndTime getStart() { 
+    public Date getStart() { 
       return this.start == null ? null : this.start.getValue();
     }
 
     /**
      * @param value Date/Time that the slot is to begin.
      */
-    public Slot setStart(DateAndTime value) { 
+    public Slot setStart(Date value) { 
         if (this.start == null)
           this.start = new InstantType();
         this.start.setValue(value);
@@ -446,14 +450,14 @@ public class Slot extends DomainResource {
     /**
      * @return Date/Time that the slot is to conclude.
      */
-    public DateAndTime getEnd() { 
+    public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
      * @param value Date/Time that the slot is to conclude.
      */
-    public Slot setEnd(DateAndTime value) { 
+    public Slot setEnd(Date value) { 
         if (this.end == null)
           this.end = new InstantType();
         this.end.setValue(value);
@@ -589,14 +593,14 @@ public class Slot extends DomainResource {
     /**
      * @return When this slot was created, or last revised.
      */
-    public DateAndTime getLastModified() { 
+    public Date getLastModified() { 
       return this.lastModified == null ? null : this.lastModified.getValue();
     }
 
     /**
      * @param value When this slot was created, or last revised.
      */
-    public Slot setLastModified(DateAndTime value) { 
+    public Slot setLastModified(Date value) { 
       if (value == null)
         this.lastModified = null;
       else {

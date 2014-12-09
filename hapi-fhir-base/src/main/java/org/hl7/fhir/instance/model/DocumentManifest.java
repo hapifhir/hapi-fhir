@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/Profile/DocumentManifest")
 public class DocumentManifest extends DomainResource {
 
-    public enum DocumentReferenceStatus {
+    public enum DocumentReferenceStatus implements FhirEnum {
         /**
          * This is the current reference for this document.
          */
@@ -62,7 +62,10 @@ public class DocumentManifest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DocumentReferenceStatus fromCode(String codeString) throws Exception {
+
+      public static final DocumentReferenceStatusEnumFactory ENUM_FACTORY = new DocumentReferenceStatusEnumFactory();
+
+        public static DocumentReferenceStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("current".equals(codeString))
@@ -71,8 +74,9 @@ public class DocumentManifest extends DomainResource {
           return SUPERCEDED;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CURRENT: return "current";
@@ -107,8 +111,8 @@ public class DocumentManifest extends DomainResource {
         }
     }
 
-  public static class DocumentReferenceStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DocumentReferenceStatusEnumFactory implements EnumFactory<DocumentReferenceStatus> {
+    public DocumentReferenceStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class DocumentManifest extends DomainResource {
           return DocumentReferenceStatus.SUPERCEDED;
         if ("entered in error".equals(codeString))
           return DocumentReferenceStatus.ENTEREDINERROR;
-        throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DocumentReferenceStatus code) throws IllegalArgumentException {
       if (code == DocumentReferenceStatus.CURRENT)
         return "current";
       if (code == DocumentReferenceStatus.SUPERCEDED)
@@ -485,14 +489,14 @@ public class DocumentManifest extends DomainResource {
     /**
      * @return When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc).
      */
-    public DateAndTime getCreated() { 
+    public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc).
      */
-    public DocumentManifest setCreated(DateAndTime value) { 
+    public DocumentManifest setCreated(Date value) { 
       if (value == null)
         this.created = null;
       else {
@@ -592,7 +596,7 @@ public class DocumentManifest extends DomainResource {
      */
     public DocumentManifest setStatus(DocumentReferenceStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<DocumentReferenceStatus>();
+          this.status = new Enumeration<DocumentReferenceStatus>(DocumentReferenceStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

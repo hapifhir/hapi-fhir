@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="Quantity")
 public class Quantity extends Type {
 
-    public enum QuantityComparator {
+    public enum QuantityComparator implements FhirEnum {
         /**
          * The actual value is less than the given value.
          */
@@ -65,7 +65,10 @@ public class Quantity extends Type {
          * added to help the parsers
          */
         NULL;
-        public static QuantityComparator fromCode(String codeString) throws Exception {
+
+      public static final QuantityComparatorEnumFactory ENUM_FACTORY = new QuantityComparatorEnumFactory();
+
+        public static QuantityComparator fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("<".equals(codeString))
@@ -76,8 +79,9 @@ public class Quantity extends Type {
           return GREATER_OR_EQUAL;
         if (">".equals(codeString))
           return GREATER_THAN;
-        throw new Exception("Unknown QuantityComparator code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown QuantityComparator code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case LESS_THAN: return "<";
@@ -116,8 +120,8 @@ public class Quantity extends Type {
         }
     }
 
-  public static class QuantityComparatorEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class QuantityComparatorEnumFactory implements EnumFactory<QuantityComparator> {
+    public QuantityComparator fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -129,9 +133,9 @@ public class Quantity extends Type {
           return QuantityComparator.GREATER_OR_EQUAL;
         if (">".equals(codeString))
           return QuantityComparator.GREATER_THAN;
-        throw new Exception("Unknown QuantityComparator code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown QuantityComparator code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(QuantityComparator code) throws IllegalArgumentException {
       if (code == QuantityComparator.LESS_THAN)
         return "<";
       if (code == QuantityComparator.LESS_OR_EQUAL)
@@ -277,7 +281,7 @@ public class Quantity extends Type {
         this.comparator = null;
       else {
         if (this.comparator == null)
-          this.comparator = new Enumeration<QuantityComparator>();
+          this.comparator = new Enumeration<QuantityComparator>(QuantityComparator.ENUM_FACTORY);
         this.comparator.setValue(value);
       }
       return this;

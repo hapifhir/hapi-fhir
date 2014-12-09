@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="DiagnosticOrder", profile="http://hl7.org/fhir/Profile/DiagnosticOrder")
 public class DiagnosticOrder extends DomainResource {
 
-    public enum DiagnosticOrderStatus {
+    public enum DiagnosticOrderStatus implements FhirEnum {
         /**
          * The request has been placed.
          */
@@ -86,7 +86,10 @@ public class DiagnosticOrder extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticOrderStatus fromCode(String codeString) throws Exception {
+
+      public static final DiagnosticOrderStatusEnumFactory ENUM_FACTORY = new DiagnosticOrderStatusEnumFactory();
+
+        public static DiagnosticOrderStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -107,8 +110,9 @@ public class DiagnosticOrder extends DomainResource {
           return REJECTED;
         if ("failed".equals(codeString))
           return FAILED;
-        throw new Exception("Unknown DiagnosticOrderStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUESTED: return "requested";
@@ -167,8 +171,8 @@ public class DiagnosticOrder extends DomainResource {
         }
     }
 
-  public static class DiagnosticOrderStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DiagnosticOrderStatusEnumFactory implements EnumFactory<DiagnosticOrderStatus> {
+    public DiagnosticOrderStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -190,9 +194,9 @@ public class DiagnosticOrder extends DomainResource {
           return DiagnosticOrderStatus.REJECTED;
         if ("failed".equals(codeString))
           return DiagnosticOrderStatus.FAILED;
-        throw new Exception("Unknown DiagnosticOrderStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticOrderStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DiagnosticOrderStatus code) throws IllegalArgumentException {
       if (code == DiagnosticOrderStatus.REQUESTED)
         return "requested";
       if (code == DiagnosticOrderStatus.RECEIVED)
@@ -215,7 +219,7 @@ public class DiagnosticOrder extends DomainResource {
       }
     }
 
-    public enum DiagnosticOrderPriority {
+    public enum DiagnosticOrderPriority implements FhirEnum {
         /**
          * The order has a normal priority.
          */
@@ -236,7 +240,10 @@ public class DiagnosticOrder extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DiagnosticOrderPriority fromCode(String codeString) throws Exception {
+
+      public static final DiagnosticOrderPriorityEnumFactory ENUM_FACTORY = new DiagnosticOrderPriorityEnumFactory();
+
+        public static DiagnosticOrderPriority fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("routine".equals(codeString))
@@ -247,8 +254,9 @@ public class DiagnosticOrder extends DomainResource {
           return STAT;
         if ("asap".equals(codeString))
           return ASAP;
-        throw new Exception("Unknown DiagnosticOrderPriority code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticOrderPriority code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ROUTINE: return "routine";
@@ -287,8 +295,8 @@ public class DiagnosticOrder extends DomainResource {
         }
     }
 
-  public static class DiagnosticOrderPriorityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DiagnosticOrderPriorityEnumFactory implements EnumFactory<DiagnosticOrderPriority> {
+    public DiagnosticOrderPriority fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -300,9 +308,9 @@ public class DiagnosticOrder extends DomainResource {
           return DiagnosticOrderPriority.STAT;
         if ("asap".equals(codeString))
           return DiagnosticOrderPriority.ASAP;
-        throw new Exception("Unknown DiagnosticOrderPriority code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DiagnosticOrderPriority code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DiagnosticOrderPriority code) throws IllegalArgumentException {
       if (code == DiagnosticOrderPriority.ROUTINE)
         return "routine";
       if (code == DiagnosticOrderPriority.URGENT)
@@ -402,7 +410,7 @@ public class DiagnosticOrder extends DomainResource {
          */
         public DiagnosticOrderEventComponent setStatus(DiagnosticOrderStatus value) { 
             if (this.status == null)
-              this.status = new Enumeration<DiagnosticOrderStatus>();
+              this.status = new Enumeration<DiagnosticOrderStatus>(DiagnosticOrderStatus.ENUM_FACTORY);
             this.status.setValue(value);
           return this;
         }
@@ -462,14 +470,14 @@ public class DiagnosticOrder extends DomainResource {
         /**
          * @return The date/time at which the event occurred.
          */
-        public DateAndTime getDateTime() { 
+        public Date getDateTime() { 
           return this.dateTime == null ? null : this.dateTime.getValue();
         }
 
         /**
          * @param value The date/time at which the event occurred.
          */
-        public DiagnosticOrderEventComponent setDateTime(DateAndTime value) { 
+        public DiagnosticOrderEventComponent setDateTime(Date value) { 
             if (this.dateTime == null)
               this.dateTime = new DateTimeType();
             this.dateTime.setValue(value);
@@ -735,7 +743,7 @@ public class DiagnosticOrder extends DomainResource {
             this.status = null;
           else {
             if (this.status == null)
-              this.status = new Enumeration<DiagnosticOrderStatus>();
+              this.status = new Enumeration<DiagnosticOrderStatus>(DiagnosticOrderStatus.ENUM_FACTORY);
             this.status.setValue(value);
           }
           return this;
@@ -1259,7 +1267,7 @@ public class DiagnosticOrder extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<DiagnosticOrderStatus>();
+          this.status = new Enumeration<DiagnosticOrderStatus>(DiagnosticOrderStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;
@@ -1308,7 +1316,7 @@ public class DiagnosticOrder extends DomainResource {
         this.priority = null;
       else {
         if (this.priority == null)
-          this.priority = new Enumeration<DiagnosticOrderPriority>();
+          this.priority = new Enumeration<DiagnosticOrderPriority>(DiagnosticOrderPriority.ENUM_FACTORY);
         this.priority.setValue(value);
       }
       return this;

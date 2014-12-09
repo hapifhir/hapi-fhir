@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="OralHealthClaim", profile="http://hl7.org/fhir/Profile/OralHealthClaim")
 public class OralHealthClaim extends DomainResource {
 
-    public enum UseLink {
+    public enum UseLink implements FhirEnum {
         /**
          * The treatment is complete and this represents a Claim for the services.
          */
@@ -67,7 +67,10 @@ public class OralHealthClaim extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static UseLink fromCode(String codeString) throws Exception {
+
+      public static final UseLinkEnumFactory ENUM_FACTORY = new UseLinkEnumFactory();
+
+        public static UseLink fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("complete".equals(codeString))
@@ -78,8 +81,9 @@ public class OralHealthClaim extends DomainResource {
           return EXPLORATORY;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown UseLink code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown UseLink code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case COMPLETE: return "complete";
@@ -118,8 +122,8 @@ public class OralHealthClaim extends DomainResource {
         }
     }
 
-  public static class UseLinkEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class UseLinkEnumFactory implements EnumFactory<UseLink> {
+    public UseLink fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -131,9 +135,9 @@ public class OralHealthClaim extends DomainResource {
           return UseLink.EXPLORATORY;
         if ("other".equals(codeString))
           return UseLink.OTHER;
-        throw new Exception("Unknown UseLink code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown UseLink code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(UseLink code) throws IllegalArgumentException {
       if (code == UseLink.COMPLETE)
         return "complete";
       if (code == UseLink.PROPOSED)
@@ -1061,14 +1065,14 @@ public class OralHealthClaim extends DomainResource {
         /**
          * @return The date of the extraction either known from records or patient reported estimate.
          */
-        public DateAndTime getExtractiondate() { 
+        public Date getExtractiondate() { 
           return this.extractiondate == null ? null : this.extractiondate.getValue();
         }
 
         /**
          * @param value The date of the extraction either known from records or patient reported estimate.
          */
-        public MissingTeethComponent setExtractiondate(DateAndTime value) { 
+        public MissingTeethComponent setExtractiondate(Date value) { 
           if (value == null)
             this.extractiondate = null;
           else {
@@ -1190,14 +1194,14 @@ public class OralHealthClaim extends DomainResource {
         /**
          * @return The intended start date for service.
          */
-        public DateAndTime getStart() { 
+        public Date getStart() { 
           return this.start == null ? null : this.start.getValue();
         }
 
         /**
          * @param value The intended start date for service.
          */
-        public OrthodonticPlanComponent setStart(DateAndTime value) { 
+        public OrthodonticPlanComponent setStart(Date value) { 
           if (value == null)
             this.start = null;
           else {
@@ -1464,97 +1468,104 @@ public class OralHealthClaim extends DomainResource {
         protected Practitioner providerTarget;
 
         /**
+         * Diagnosis applicable for this service or product line.
+         */
+        @Child(name="diagnosisLinkId", type={IntegerType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Diagnosis Link", formalDefinition="Diagnosis applicable for this service or product line." )
+        protected List<IntegerType> diagnosisLinkId;
+
+        /**
          * If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.
          */
-        @Child(name="service", type={Coding.class}, order=4, min=1, max=1)
+        @Child(name="service", type={Coding.class}, order=5, min=1, max=1)
         @Description(shortDefinition="Item Code", formalDefinition="If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied." )
         protected Coding service;
 
         /**
          * The date when the enclosed suite of services were performed or completed.
          */
-        @Child(name="serviceDate", type={DateType.class}, order=5, min=0, max=1)
+        @Child(name="serviceDate", type={DateType.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Date of Service", formalDefinition="The date when the enclosed suite of services were performed or completed." )
         protected DateType serviceDate;
 
         /**
          * The number of repetitions of a service or product.
          */
-        @Child(name="quantity", type={Quantity.class}, order=6, min=0, max=1)
+        @Child(name="quantity", type={Quantity.class}, order=7, min=0, max=1)
         @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
         protected Quantity quantity;
 
         /**
          * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
          */
-        @Child(name="unitPrice", type={Money.class}, order=7, min=0, max=1)
+        @Child(name="unitPrice", type={Money.class}, order=8, min=0, max=1)
         @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name="factor", type={DecimalType.class}, order=8, min=0, max=1)
+        @Child(name="factor", type={DecimalType.class}, order=9, min=0, max=1)
         @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
          */
-        @Child(name="points", type={DecimalType.class}, order=9, min=0, max=1)
+        @Child(name="points", type={DecimalType.class}, order=10, min=0, max=1)
         @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name="net", type={Money.class}, order=10, min=0, max=1)
+        @Child(name="net", type={Money.class}, order=11, min=0, max=1)
         @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an addtional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
         /**
          * List of Unique Device Identifiers associated with this line item.
          */
-        @Child(name="udi", type={Coding.class}, order=11, min=0, max=1)
+        @Child(name="udi", type={Coding.class}, order=12, min=0, max=1)
         @Description(shortDefinition="Unique Device Identifier", formalDefinition="List of Unique Device Identifiers associated with this line item." )
         protected Coding udi;
 
         /**
          * Physical service site on the patient (limb, tooth, etc).
          */
-        @Child(name="bodySite", type={Coding.class}, order=12, min=0, max=1)
+        @Child(name="bodySite", type={Coding.class}, order=13, min=0, max=1)
         @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc)." )
         protected Coding bodySite;
 
         /**
          * A region or surface of the site, eg. limb region or tooth surface(s).
          */
-        @Child(name="subsite", type={Coding.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name="subsite", type={Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Service Sub-location", formalDefinition="A region or surface of the site, eg. limb region or tooth surface(s)." )
         protected List<Coding> subsite;
 
         /**
          * Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.
          */
-        @Child(name="modifier", type={Coding.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name="modifier", type={Coding.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen." )
         protected List<Coding> modifier;
 
         /**
          * Second tier of goods and services.
          */
-        @Child(name="detail", type={}, order=15, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name="detail", type={}, order=16, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Additional items", formalDefinition="Second tier of goods and services." )
         protected List<DetailComponent> detail;
 
         /**
          * The materials and placement date of prior fixed prosthesis.
          */
-        @Child(name="prosthesis", type={}, order=16, min=0, max=1)
+        @Child(name="prosthesis", type={}, order=17, min=0, max=1)
         @Description(shortDefinition="Prosthetic details", formalDefinition="The materials and placement date of prior fixed prosthesis." )
         protected ProsthesisComponent prosthesis;
 
-        private static final long serialVersionUID = -1561435930L;
+        private static final long serialVersionUID = 1518140870L;
 
       public ItemsComponent() {
         super();
@@ -1681,6 +1692,60 @@ public class OralHealthClaim extends DomainResource {
         }
 
         /**
+         * @return {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         */
+        public List<IntegerType> getDiagnosisLinkId() { 
+          if (this.diagnosisLinkId == null)
+            this.diagnosisLinkId = new ArrayList<IntegerType>();
+          return this.diagnosisLinkId;
+        }
+
+        public boolean hasDiagnosisLinkId() { 
+          if (this.diagnosisLinkId == null)
+            return false;
+          for (IntegerType item : this.diagnosisLinkId)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         */
+    // syntactic sugar
+        public IntegerType addDiagnosisLinkIdElement() {//2 
+          IntegerType t = new IntegerType();
+          if (this.diagnosisLinkId == null)
+            this.diagnosisLinkId = new ArrayList<IntegerType>();
+          this.diagnosisLinkId.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         */
+        public ItemsComponent addDiagnosisLinkId(int value) { //1
+          IntegerType t = new IntegerType();
+          t.setValue(value);
+          if (this.diagnosisLinkId == null)
+            this.diagnosisLinkId = new ArrayList<IntegerType>();
+          this.diagnosisLinkId.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #diagnosisLinkId} (Diagnosis applicable for this service or product line.)
+         */
+        public boolean hasDiagnosisLinkId(int value) { 
+          if (this.diagnosisLinkId == null)
+            return false;
+          for (IntegerType v : this.diagnosisLinkId)
+            if (v.equals(value)) // integer
+              return true;
+          return false;
+        }
+
+        /**
          * @return {@link #service} (If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.)
          */
         public Coding getService() { 
@@ -1735,14 +1800,14 @@ public class OralHealthClaim extends DomainResource {
         /**
          * @return The date when the enclosed suite of services were performed or completed.
          */
-        public DateAndTime getServiceDate() { 
+        public Date getServiceDate() { 
           return this.serviceDate == null ? null : this.serviceDate.getValue();
         }
 
         /**
          * @param value The date when the enclosed suite of services were performed or completed.
          */
-        public ItemsComponent setServiceDate(DateAndTime value) { 
+        public ItemsComponent setServiceDate(Date value) { 
           if (value == null)
             this.serviceDate = null;
           else {
@@ -2090,6 +2155,7 @@ public class OralHealthClaim extends DomainResource {
           childrenList.add(new Property("sequence", "integer", "A service line number.", 0, java.lang.Integer.MAX_VALUE, sequence));
           childrenList.add(new Property("type", "Coding", "The type of product or service.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("provider", "Reference(Practitioner)", "The practitioner who is responsible for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
+          childrenList.add(new Property("diagnosisLinkId", "integer", "Diagnosis applicable for this service or product line.", 0, java.lang.Integer.MAX_VALUE, diagnosisLinkId));
           childrenList.add(new Property("service", "Coding", "If a grouping item then 'GROUP' otherwise it is a node therefore a code to indicate the Professional Service or Product supplied.", 0, java.lang.Integer.MAX_VALUE, service));
           childrenList.add(new Property("serviceDate", "date", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, serviceDate));
           childrenList.add(new Property("quantity", "Quantity", "The number of repetitions of a service or product.", 0, java.lang.Integer.MAX_VALUE, quantity));
@@ -2111,6 +2177,11 @@ public class OralHealthClaim extends DomainResource {
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.type = type == null ? null : type.copy();
         dst.provider = provider == null ? null : provider.copy();
+        if (diagnosisLinkId != null) {
+          dst.diagnosisLinkId = new ArrayList<IntegerType>();
+          for (IntegerType i : diagnosisLinkId)
+            dst.diagnosisLinkId.add(i.copy());
+        };
         dst.service = service == null ? null : service.copy();
         dst.serviceDate = serviceDate == null ? null : serviceDate.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
@@ -2141,7 +2212,8 @@ public class OralHealthClaim extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (sequence == null || sequence.isEmpty()) && (type == null || type.isEmpty())
-           && (provider == null || provider.isEmpty()) && (service == null || service.isEmpty()) && (serviceDate == null || serviceDate.isEmpty())
+           && (provider == null || provider.isEmpty()) && (diagnosisLinkId == null || diagnosisLinkId.isEmpty())
+           && (service == null || service.isEmpty()) && (serviceDate == null || serviceDate.isEmpty())
            && (quantity == null || quantity.isEmpty()) && (unitPrice == null || unitPrice.isEmpty())
            && (factor == null || factor.isEmpty()) && (points == null || points.isEmpty()) && (net == null || net.isEmpty())
            && (udi == null || udi.isEmpty()) && (bodySite == null || bodySite.isEmpty()) && (subsite == null || subsite.isEmpty())
@@ -3107,14 +3179,14 @@ public class OralHealthClaim extends DomainResource {
         /**
          * @return Date of the initial placement.
          */
-        public DateAndTime getPriorDate() { 
+        public Date getPriorDate() { 
           return this.priorDate == null ? null : this.priorDate.getValue();
         }
 
         /**
          * @param value Date of the initial placement.
          */
-        public ProsthesisComponent setPriorDate(DateAndTime value) { 
+        public ProsthesisComponent setPriorDate(Date value) { 
           if (value == null)
             this.priorDate = null;
           else {
@@ -3196,9 +3268,9 @@ public class OralHealthClaim extends DomainResource {
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name="date", type={DateType.class}, order=2, min=0, max=1)
+    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
-    protected DateType date;
+    protected DateTimeType created;
 
     /**
      * Insurer Identifier, typical BIN number (6 digit).
@@ -3396,7 +3468,7 @@ public class OralHealthClaim extends DomainResource {
     @Description(shortDefinition="Additional materials, documents, etc.", formalDefinition="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission." )
     protected List<Coding> additionalMaterials;
 
-    private static final long serialVersionUID = 1132893716L;
+    private static final long serialVersionUID = -748490719L;
 
     public OralHealthClaim() {
       super();
@@ -3486,50 +3558,50 @@ public class OralHealthClaim extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
-    public DateType getDateElement() { 
-      if (this.date == null)
+    public DateTimeType getCreatedElement() { 
+      if (this.created == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OralHealthClaim.date");
+          throw new Error("Attempt to auto-create OralHealthClaim.created");
         else if (Configuration.doAutoCreate())
-          this.date = new DateType();
-      return this.date;
+          this.created = new DateTimeType();
+      return this.created;
     }
 
-    public boolean hasDateElement() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasCreatedElement() { 
+      return this.created != null && !this.created.isEmpty();
     }
 
-    public boolean hasDate() { 
-      return this.date != null && !this.date.isEmpty();
+    public boolean hasCreated() { 
+      return this.created != null && !this.created.isEmpty();
     }
 
     /**
-     * @param value {@link #date} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
-    public OralHealthClaim setDateElement(DateType value) { 
-      this.date = value;
+    public OralHealthClaim setCreatedElement(DateTimeType value) { 
+      this.created = value;
       return this;
     }
 
     /**
      * @return The date when the enclosed suite of services were performed or completed.
      */
-    public DateAndTime getDate() { 
-      return this.date == null ? null : this.date.getValue();
+    public Date getCreated() { 
+      return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value The date when the enclosed suite of services were performed or completed.
      */
-    public OralHealthClaim setDate(DateAndTime value) { 
+    public OralHealthClaim setCreated(Date value) { 
       if (value == null)
-        this.date = null;
+        this.created = null;
       else {
-        if (this.date == null)
-          this.date = new DateType();
-        this.date.setValue(value);
+        if (this.created == null)
+          this.created = new DateTimeType();
+        this.created.setValue(value);
       }
       return this;
     }
@@ -3709,7 +3781,7 @@ public class OralHealthClaim extends DomainResource {
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<UseLink>();
+          this.use = new Enumeration<UseLink>(UseLink.ENUM_FACTORY);
         this.use.setValue(value);
       }
       return this;
@@ -4163,14 +4235,14 @@ public class OralHealthClaim extends DomainResource {
     /**
      * @return Date of an accident which these services are addessing.
      */
-    public DateAndTime getAccident() { 
+    public Date getAccident() { 
       return this.accident == null ? null : this.accident.getValue();
     }
 
     /**
      * @param value Date of an accident which these services are addessing.
      */
-    public OralHealthClaim setAccident(DateAndTime value) { 
+    public OralHealthClaim setAccident(Date value) { 
       if (value == null)
         this.accident = null;
       else {
@@ -4354,7 +4426,7 @@ public class OralHealthClaim extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("ruleset", "Coding", "The version of the specification on which this instance relies.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         childrenList.add(new Property("originalRuleset", "Coding", "The version of the specification from which the original instance was created.", 0, java.lang.Integer.MAX_VALUE, originalRuleset));
-        childrenList.add(new Property("date", "date", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("target", "Reference(Organization)", "Insurer Identifier, typical BIN number (6 digit).", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("provider", "Reference(Practitioner)", "The provider which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, provider));
         childrenList.add(new Property("organization", "Reference(Organization)", "The organization which is responsible for the bill, claim pre-determination, pre-authorization.", 0, java.lang.Integer.MAX_VALUE, organization));
@@ -4390,7 +4462,7 @@ public class OralHealthClaim extends DomainResource {
         };
         dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.originalRuleset = originalRuleset == null ? null : originalRuleset.copy();
-        dst.date = date == null ? null : date.copy();
+        dst.created = created == null ? null : created.copy();
         dst.target = target == null ? null : target.copy();
         dst.provider = provider == null ? null : provider.copy();
         dst.organization = organization == null ? null : organization.copy();
@@ -4455,7 +4527,7 @@ public class OralHealthClaim extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (ruleset == null || ruleset.isEmpty())
-           && (originalRuleset == null || originalRuleset.isEmpty()) && (date == null || date.isEmpty())
+           && (originalRuleset == null || originalRuleset.isEmpty()) && (created == null || created.isEmpty())
            && (target == null || target.isEmpty()) && (provider == null || provider.isEmpty()) && (organization == null || organization.isEmpty())
            && (use == null || use.isEmpty()) && (priority == null || priority.isEmpty()) && (fundsReserve == null || fundsReserve.isEmpty())
            && (enterer == null || enterer.isEmpty()) && (facility == null || facility.isEmpty()) && (payee == null || payee.isEmpty())

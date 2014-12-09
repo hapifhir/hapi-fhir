@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Medication", profile="http://hl7.org/fhir/Profile/Medication")
 public class Medication extends DomainResource {
 
-    public enum MedicationKind {
+    public enum MedicationKind implements FhirEnum {
         /**
          * The medication is a product.
          */
@@ -58,15 +58,19 @@ public class Medication extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationKind fromCode(String codeString) throws Exception {
+
+      public static final MedicationKindEnumFactory ENUM_FACTORY = new MedicationKindEnumFactory();
+
+        public static MedicationKind fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("product".equals(codeString))
           return PRODUCT;
         if ("package".equals(codeString))
           return PACKAGE;
-        throw new Exception("Unknown MedicationKind code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationKind code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PRODUCT: return "product";
@@ -97,8 +101,8 @@ public class Medication extends DomainResource {
         }
     }
 
-  public static class MedicationKindEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MedicationKindEnumFactory implements EnumFactory<MedicationKind> {
+    public MedicationKind fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -106,9 +110,9 @@ public class Medication extends DomainResource {
           return MedicationKind.PRODUCT;
         if ("package".equals(codeString))
           return MedicationKind.PACKAGE;
-        throw new Exception("Unknown MedicationKind code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationKind code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MedicationKind code) throws IllegalArgumentException {
       if (code == MedicationKind.PRODUCT)
         return "product";
       if (code == MedicationKind.PACKAGE)
@@ -825,7 +829,7 @@ public class Medication extends DomainResource {
         this.kind = null;
       else {
         if (this.kind == null)
-          this.kind = new Enumeration<MedicationKind>();
+          this.kind = new Enumeration<MedicationKind>(MedicationKind.ENUM_FACTORY);
         this.kind.setValue(value);
       }
       return this;

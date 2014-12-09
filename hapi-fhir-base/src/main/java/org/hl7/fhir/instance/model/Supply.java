@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Supply", profile="http://hl7.org/fhir/Profile/Supply")
 public class Supply extends DomainResource {
 
-    public enum ValuesetSupplyStatus {
+    public enum ValuesetSupplyStatus implements FhirEnum {
         /**
          * Supply has been requested, but not dispensed.
          */
@@ -70,7 +70,10 @@ public class Supply extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ValuesetSupplyStatus fromCode(String codeString) throws Exception {
+
+      public static final ValuesetSupplyStatusEnumFactory ENUM_FACTORY = new ValuesetSupplyStatusEnumFactory();
+
+        public static ValuesetSupplyStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -83,8 +86,9 @@ public class Supply extends DomainResource {
           return FAILED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown ValuesetSupplyStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetSupplyStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REQUESTED: return "requested";
@@ -127,8 +131,8 @@ public class Supply extends DomainResource {
         }
     }
 
-  public static class ValuesetSupplyStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ValuesetSupplyStatusEnumFactory implements EnumFactory<ValuesetSupplyStatus> {
+    public ValuesetSupplyStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -142,9 +146,9 @@ public class Supply extends DomainResource {
           return ValuesetSupplyStatus.FAILED;
         if ("cancelled".equals(codeString))
           return ValuesetSupplyStatus.CANCELLED;
-        throw new Exception("Unknown ValuesetSupplyStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetSupplyStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ValuesetSupplyStatus code) throws IllegalArgumentException {
       if (code == ValuesetSupplyStatus.REQUESTED)
         return "requested";
       if (code == ValuesetSupplyStatus.DISPENSED)
@@ -159,7 +163,7 @@ public class Supply extends DomainResource {
       }
     }
 
-    public enum ValuesetSupplyDispenseStatus {
+    public enum ValuesetSupplyDispenseStatus implements FhirEnum {
         /**
          * Supply has been requested, but not dispensed.
          */
@@ -176,7 +180,10 @@ public class Supply extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ValuesetSupplyDispenseStatus fromCode(String codeString) throws Exception {
+
+      public static final ValuesetSupplyDispenseStatusEnumFactory ENUM_FACTORY = new ValuesetSupplyDispenseStatusEnumFactory();
+
+        public static ValuesetSupplyDispenseStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in progress".equals(codeString))
@@ -185,8 +192,9 @@ public class Supply extends DomainResource {
           return DISPENSED;
         if ("abandoned".equals(codeString))
           return ABANDONED;
-        throw new Exception("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in progress";
@@ -221,8 +229,8 @@ public class Supply extends DomainResource {
         }
     }
 
-  public static class ValuesetSupplyDispenseStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ValuesetSupplyDispenseStatusEnumFactory implements EnumFactory<ValuesetSupplyDispenseStatus> {
+    public ValuesetSupplyDispenseStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -232,9 +240,9 @@ public class Supply extends DomainResource {
           return ValuesetSupplyDispenseStatus.DISPENSED;
         if ("abandoned".equals(codeString))
           return ValuesetSupplyDispenseStatus.ABANDONED;
-        throw new Exception("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ValuesetSupplyDispenseStatus code) throws IllegalArgumentException {
       if (code == ValuesetSupplyDispenseStatus.INPROGRESS)
         return "in progress";
       if (code == ValuesetSupplyDispenseStatus.DISPENSED)
@@ -410,7 +418,7 @@ public class Supply extends DomainResource {
             this.status = null;
           else {
             if (this.status == null)
-              this.status = new Enumeration<ValuesetSupplyDispenseStatus>();
+              this.status = new Enumeration<ValuesetSupplyDispenseStatus>(ValuesetSupplyDispenseStatus.ENUM_FACTORY);
             this.status.setValue(value);
           }
           return this;
@@ -883,7 +891,7 @@ public class Supply extends DomainResource {
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<ValuesetSupplyStatus>();
+          this.status = new Enumeration<ValuesetSupplyStatus>(ValuesetSupplyStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;

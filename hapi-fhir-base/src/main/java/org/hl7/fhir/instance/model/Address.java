@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="Address")
 public class Address extends Type {
 
-    public enum AddressUse {
+    public enum AddressUse implements FhirEnum {
         /**
          * A communication address at a home.
          */
@@ -64,7 +64,10 @@ public class Address extends Type {
          * added to help the parsers
          */
         NULL;
-        public static AddressUse fromCode(String codeString) throws Exception {
+
+      public static final AddressUseEnumFactory ENUM_FACTORY = new AddressUseEnumFactory();
+
+        public static AddressUse fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("home".equals(codeString))
@@ -75,8 +78,9 @@ public class Address extends Type {
           return TEMP;
         if ("old".equals(codeString))
           return OLD;
-        throw new Exception("Unknown AddressUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AddressUse code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case HOME: return "home";
@@ -115,8 +119,8 @@ public class Address extends Type {
         }
     }
 
-  public static class AddressUseEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class AddressUseEnumFactory implements EnumFactory<AddressUse> {
+    public AddressUse fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -128,9 +132,9 @@ public class Address extends Type {
           return AddressUse.TEMP;
         if ("old".equals(codeString))
           return AddressUse.OLD;
-        throw new Exception("Unknown AddressUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown AddressUse code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(AddressUse code) throws IllegalArgumentException {
       if (code == AddressUse.HOME)
         return "home";
       if (code == AddressUse.WORK)
@@ -249,7 +253,7 @@ P.O. Box number, delivery hints, and similar address information.
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<AddressUse>();
+          this.use = new Enumeration<AddressUse>(AddressUse.ENUM_FACTORY);
         this.use.setValue(value);
       }
       return this;

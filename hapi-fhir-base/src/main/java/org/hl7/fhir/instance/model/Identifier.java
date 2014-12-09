@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 @DatatypeDef(name="Identifier")
 public class Identifier extends Type {
 
-    public enum IdentifierUse {
+    public enum IdentifierUse implements FhirEnum {
         /**
          * the identifier recommended for display and use in real-world interactions.
          */
@@ -64,7 +64,10 @@ public class Identifier extends Type {
          * added to help the parsers
          */
         NULL;
-        public static IdentifierUse fromCode(String codeString) throws Exception {
+
+      public static final IdentifierUseEnumFactory ENUM_FACTORY = new IdentifierUseEnumFactory();
+
+        public static IdentifierUse fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("usual".equals(codeString))
@@ -75,8 +78,9 @@ public class Identifier extends Type {
           return TEMP;
         if ("secondary".equals(codeString))
           return SECONDARY;
-        throw new Exception("Unknown IdentifierUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown IdentifierUse code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case USUAL: return "usual";
@@ -115,8 +119,8 @@ public class Identifier extends Type {
         }
     }
 
-  public static class IdentifierUseEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class IdentifierUseEnumFactory implements EnumFactory<IdentifierUse> {
+    public IdentifierUse fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -128,9 +132,9 @@ public class Identifier extends Type {
           return IdentifierUse.TEMP;
         if ("secondary".equals(codeString))
           return IdentifierUse.SECONDARY;
-        throw new Exception("Unknown IdentifierUse code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown IdentifierUse code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(IdentifierUse code) throws IllegalArgumentException {
       if (code == IdentifierUse.USUAL)
         return "usual";
       if (code == IdentifierUse.OFFICIAL)
@@ -239,7 +243,7 @@ public class Identifier extends Type {
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<IdentifierUse>();
+          this.use = new Enumeration<IdentifierUse>(IdentifierUse.ENUM_FACTORY);
         this.use.setValue(value);
       }
       return this;

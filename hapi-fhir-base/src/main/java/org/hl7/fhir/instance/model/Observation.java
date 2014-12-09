@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="Observation", profile="http://hl7.org/fhir/Profile/Observation")
 public class Observation extends DomainResource {
 
-    public enum DataAbsentReason {
+    public enum DataAbsentReason implements FhirEnum {
         /**
          * The value is not known
          */
@@ -82,7 +82,10 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DataAbsentReason fromCode(String codeString) throws Exception {
+
+      public static final DataAbsentReasonEnumFactory ENUM_FACTORY = new DataAbsentReasonEnumFactory();
+
+        public static DataAbsentReason fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unknown".equals(codeString))
@@ -101,8 +104,9 @@ public class Observation extends DomainResource {
           return ASTEXT;
         if ("error".equals(codeString))
           return ERROR;
-        throw new Exception("Unknown DataAbsentReason code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case UNKNOWN: return "unknown";
@@ -157,8 +161,8 @@ public class Observation extends DomainResource {
         }
     }
 
-  public static class DataAbsentReasonEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DataAbsentReasonEnumFactory implements EnumFactory<DataAbsentReason> {
+    public DataAbsentReason fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -178,9 +182,9 @@ public class Observation extends DomainResource {
           return DataAbsentReason.ASTEXT;
         if ("error".equals(codeString))
           return DataAbsentReason.ERROR;
-        throw new Exception("Unknown DataAbsentReason code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DataAbsentReason code) throws IllegalArgumentException {
       if (code == DataAbsentReason.UNKNOWN)
         return "unknown";
       if (code == DataAbsentReason.ASKED)
@@ -201,7 +205,7 @@ public class Observation extends DomainResource {
       }
     }
 
-    public enum ObservationStatus {
+    public enum ObservationStatus implements FhirEnum {
         /**
          * The existence of the observation is registered, but there is no result yet available.
          */
@@ -230,7 +234,10 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObservationStatus fromCode(String codeString) throws Exception {
+
+      public static final ObservationStatusEnumFactory ENUM_FACTORY = new ObservationStatusEnumFactory();
+
+        public static ObservationStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("registered".equals(codeString))
@@ -245,8 +252,9 @@ public class Observation extends DomainResource {
           return CANCELLED;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown ObservationStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REGISTERED: return "registered";
@@ -293,8 +301,8 @@ public class Observation extends DomainResource {
         }
     }
 
-  public static class ObservationStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObservationStatusEnumFactory implements EnumFactory<ObservationStatus> {
+    public ObservationStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -310,9 +318,9 @@ public class Observation extends DomainResource {
           return ObservationStatus.CANCELLED;
         if ("entered in error".equals(codeString))
           return ObservationStatus.ENTEREDINERROR;
-        throw new Exception("Unknown ObservationStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObservationStatus code) throws IllegalArgumentException {
       if (code == ObservationStatus.REGISTERED)
         return "registered";
       if (code == ObservationStatus.PRELIMINARY)
@@ -329,7 +337,7 @@ public class Observation extends DomainResource {
       }
     }
 
-    public enum ObservationReliability {
+    public enum ObservationReliability implements FhirEnum {
         /**
          * The result has no reliability concerns.
          */
@@ -362,7 +370,10 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObservationReliability fromCode(String codeString) throws Exception {
+
+      public static final ObservationReliabilityEnumFactory ENUM_FACTORY = new ObservationReliabilityEnumFactory();
+
+        public static ObservationReliability fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("ok".equals(codeString))
@@ -379,8 +390,9 @@ public class Observation extends DomainResource {
           return ERROR;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown ObservationReliability code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationReliability code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case OK: return "ok";
@@ -431,8 +443,8 @@ public class Observation extends DomainResource {
         }
     }
 
-  public static class ObservationReliabilityEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObservationReliabilityEnumFactory implements EnumFactory<ObservationReliability> {
+    public ObservationReliability fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -450,9 +462,9 @@ public class Observation extends DomainResource {
           return ObservationReliability.ERROR;
         if ("unknown".equals(codeString))
           return ObservationReliability.UNKNOWN;
-        throw new Exception("Unknown ObservationReliability code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationReliability code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObservationReliability code) throws IllegalArgumentException {
       if (code == ObservationReliability.OK)
         return "ok";
       if (code == ObservationReliability.ONGOING)
@@ -471,7 +483,7 @@ public class Observation extends DomainResource {
       }
     }
 
-    public enum ObservationRelationshiptypes {
+    public enum ObservationRelationshiptypes implements FhirEnum {
         /**
          * The target observation is a component of this observation (e.g. Systolic and Diastolic Blood Pressure).
          */
@@ -504,7 +516,10 @@ public class Observation extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ObservationRelationshiptypes fromCode(String codeString) throws Exception {
+
+      public static final ObservationRelationshiptypesEnumFactory ENUM_FACTORY = new ObservationRelationshiptypesEnumFactory();
+
+        public static ObservationRelationshiptypes fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("has-component".equals(codeString))
@@ -521,8 +536,9 @@ public class Observation extends DomainResource {
           return QUALIFIEDBY;
         if ("interfered-by".equals(codeString))
           return INTERFEREDBY;
-        throw new Exception("Unknown ObservationRelationshiptypes code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationRelationshiptypes code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case HASCOMPONENT: return "has-component";
@@ -573,8 +589,8 @@ public class Observation extends DomainResource {
         }
     }
 
-  public static class ObservationRelationshiptypesEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ObservationRelationshiptypesEnumFactory implements EnumFactory<ObservationRelationshiptypes> {
+    public ObservationRelationshiptypes fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -592,9 +608,9 @@ public class Observation extends DomainResource {
           return ObservationRelationshiptypes.QUALIFIEDBY;
         if ("interfered-by".equals(codeString))
           return ObservationRelationshiptypes.INTERFEREDBY;
-        throw new Exception("Unknown ObservationRelationshiptypes code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ObservationRelationshiptypes code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ObservationRelationshiptypes code) throws IllegalArgumentException {
       if (code == ObservationRelationshiptypes.HASCOMPONENT)
         return "has-component";
       if (code == ObservationRelationshiptypes.HASMEMBER)
@@ -904,7 +920,7 @@ public class Observation extends DomainResource {
             this.type = null;
           else {
             if (this.type == null)
-              this.type = new Enumeration<ObservationRelationshiptypes>();
+              this.type = new Enumeration<ObservationRelationshiptypes>(ObservationRelationshiptypes.ENUM_FACTORY);
             this.type.setValue(value);
           }
           return this;
@@ -1300,7 +1316,7 @@ public class Observation extends DomainResource {
         this.dataAbsentReason = null;
       else {
         if (this.dataAbsentReason == null)
-          this.dataAbsentReason = new Enumeration<DataAbsentReason>();
+          this.dataAbsentReason = new Enumeration<DataAbsentReason>(DataAbsentReason.ENUM_FACTORY);
         this.dataAbsentReason.setValue(value);
       }
       return this;
@@ -1447,14 +1463,14 @@ public class Observation extends DomainResource {
     /**
      * @return The date and time this observation was made available.
      */
-    public DateAndTime getIssued() { 
+    public Date getIssued() { 
       return this.issued == null ? null : this.issued.getValue();
     }
 
     /**
      * @param value The date and time this observation was made available.
      */
-    public Observation setIssued(DateAndTime value) { 
+    public Observation setIssued(Date value) { 
       if (value == null)
         this.issued = null;
       else {
@@ -1505,7 +1521,7 @@ public class Observation extends DomainResource {
      */
     public Observation setStatus(ObservationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ObservationStatus>();
+          this.status = new Enumeration<ObservationStatus>(ObservationStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1553,7 +1569,7 @@ public class Observation extends DomainResource {
         this.reliability = null;
       else {
         if (this.reliability == null)
-          this.reliability = new Enumeration<ObservationReliability>();
+          this.reliability = new Enumeration<ObservationReliability>(ObservationReliability.ENUM_FACTORY);
         this.reliability.setValue(value);
       }
       return this;

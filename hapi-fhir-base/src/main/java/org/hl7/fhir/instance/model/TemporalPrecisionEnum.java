@@ -26,13 +26,18 @@ public enum TemporalPrecisionEnum {
 			return DateUtils.addDays(theInput, theAmount);
 		}
 	},
+	MINUTE(Calendar.MINUTE) {
+		@Override
+		public Date add(Date theInput, int theAmount) {
+			return DateUtils.addMinutes(theInput, theAmount);
+		}
+	},
 	SECOND(Calendar.SECOND) {
 		@Override
 		public Date add(Date theInput, int theAmount) {
 			return DateUtils.addSeconds(theInput, theAmount);
 		}
 	},
-
 	MILLI(Calendar.MILLISECOND) {
 		@Override
 		public Date add(Date theInput, int theAmount) {

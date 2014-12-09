@@ -29,13 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 /**
@@ -44,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
 public class SearchParameter extends DomainResource {
 
-    public enum SearchParamType {
+    public enum SearchParamType implements FhirEnum {
         /**
          * Search parameter SHALL be a number (a whole number, or a decimal).
          */
@@ -77,7 +78,10 @@ public class SearchParameter extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static SearchParamType fromCode(String codeString) throws Exception {
+
+      public static final SearchParamTypeEnumFactory ENUM_FACTORY = new SearchParamTypeEnumFactory();
+
+        public static SearchParamType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("number".equals(codeString))
@@ -94,8 +98,9 @@ public class SearchParameter extends DomainResource {
           return COMPOSITE;
         if ("quantity".equals(codeString))
           return QUANTITY;
-        throw new Exception("Unknown SearchParamType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SearchParamType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case NUMBER: return "number";
@@ -146,8 +151,8 @@ public class SearchParameter extends DomainResource {
         }
     }
 
-  public static class SearchParamTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class SearchParamTypeEnumFactory implements EnumFactory<SearchParamType> {
+    public SearchParamType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -165,9 +170,9 @@ public class SearchParameter extends DomainResource {
           return SearchParamType.COMPOSITE;
         if ("quantity".equals(codeString))
           return SearchParamType.QUANTITY;
-        throw new Exception("Unknown SearchParamType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown SearchParamType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(SearchParamType code) throws IllegalArgumentException {
       if (code == SearchParamType.NUMBER)
         return "number";
       if (code == SearchParamType.DATE)
@@ -574,7 +579,7 @@ public class SearchParameter extends DomainResource {
      */
     public SearchParameter setType(SearchParamType value) { 
         if (this.type == null)
-          this.type = new Enumeration<SearchParamType>();
+          this.type = new Enumeration<SearchParamType>(SearchParamType.ENUM_FACTORY);
         this.type.setValue(value);
       return this;
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="List_", profile="http://hl7.org/fhir/Profile/List_")
 public class List_ extends DomainResource {
 
-    public enum ListMode {
+    public enum ListMode implements FhirEnum {
         /**
          * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.
          */
@@ -62,7 +62,10 @@ public class List_ extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ListMode fromCode(String codeString) throws Exception {
+
+      public static final ListModeEnumFactory ENUM_FACTORY = new ListModeEnumFactory();
+
+        public static ListMode fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("working".equals(codeString))
@@ -71,8 +74,9 @@ public class List_ extends DomainResource {
           return SNAPSHOT;
         if ("changes".equals(codeString))
           return CHANGES;
-        throw new Exception("Unknown ListMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ListMode code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case WORKING: return "working";
@@ -107,8 +111,8 @@ public class List_ extends DomainResource {
         }
     }
 
-  public static class ListModeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ListModeEnumFactory implements EnumFactory<ListMode> {
+    public ListMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class List_ extends DomainResource {
           return ListMode.SNAPSHOT;
         if ("changes".equals(codeString))
           return ListMode.CHANGES;
-        throw new Exception("Unknown ListMode code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ListMode code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ListMode code) throws IllegalArgumentException {
       if (code == ListMode.WORKING)
         return "working";
       if (code == ListMode.SNAPSHOT)
@@ -287,14 +291,14 @@ public class List_ extends DomainResource {
         /**
          * @return When this item was added to the list.
          */
-        public DateAndTime getDate() { 
+        public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
          * @param value When this item was added to the list.
          */
-        public ListEntryComponent setDate(DateAndTime value) { 
+        public ListEntryComponent setDate(Date value) { 
           if (value == null)
             this.date = null;
           else {
@@ -620,14 +624,14 @@ public class List_ extends DomainResource {
     /**
      * @return The date that the list was prepared.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date that the list was prepared.
      */
-    public List_ setDate(DateAndTime value) { 
+    public List_ setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {
@@ -727,7 +731,7 @@ public class List_ extends DomainResource {
      */
     public List_ setMode(ListMode value) { 
         if (this.mode == null)
-          this.mode = new Enumeration<ListMode>();
+          this.mode = new Enumeration<ListMode>(ListMode.ENUM_FACTORY);
         this.mode.setValue(value);
       return this;
     }

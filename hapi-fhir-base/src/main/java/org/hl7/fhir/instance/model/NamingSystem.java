@@ -29,12 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
@@ -44,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/Profile/NamingSystem")
 public class NamingSystem extends DomainResource {
 
-    public enum NamingsystemType {
+    public enum NamingsystemType implements FhirEnum {
         /**
          * The namingsystem is used to define concepts and symbols to represent those concepts.  E.g. UCUM, LOINC, NDC code, local lab codes, etc.
          */
@@ -61,7 +62,10 @@ public class NamingSystem extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static NamingsystemType fromCode(String codeString) throws Exception {
+
+      public static final NamingsystemTypeEnumFactory ENUM_FACTORY = new NamingsystemTypeEnumFactory();
+
+        public static NamingsystemType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("codesystem".equals(codeString))
@@ -70,8 +74,9 @@ public class NamingSystem extends DomainResource {
           return IDENTIFIER;
         if ("root".equals(codeString))
           return ROOT;
-        throw new Exception("Unknown NamingsystemType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CODESYSTEM: return "codesystem";
@@ -106,8 +111,8 @@ public class NamingSystem extends DomainResource {
         }
     }
 
-  public static class NamingsystemTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NamingsystemTypeEnumFactory implements EnumFactory<NamingsystemType> {
+    public NamingsystemType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -117,9 +122,9 @@ public class NamingSystem extends DomainResource {
           return NamingsystemType.IDENTIFIER;
         if ("root".equals(codeString))
           return NamingsystemType.ROOT;
-        throw new Exception("Unknown NamingsystemType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NamingsystemType code) throws IllegalArgumentException {
       if (code == NamingsystemType.CODESYSTEM)
         return "codesystem";
       if (code == NamingsystemType.IDENTIFIER)
@@ -130,7 +135,7 @@ public class NamingSystem extends DomainResource {
       }
     }
 
-    public enum NamingsystemStatus {
+    public enum NamingsystemStatus implements FhirEnum {
         /**
          * System has been submitted but not yet approved.
          */
@@ -147,7 +152,10 @@ public class NamingSystem extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static NamingsystemStatus fromCode(String codeString) throws Exception {
+
+      public static final NamingsystemStatusEnumFactory ENUM_FACTORY = new NamingsystemStatusEnumFactory();
+
+        public static NamingsystemStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("proposed".equals(codeString))
@@ -156,8 +164,9 @@ public class NamingSystem extends DomainResource {
           return ACTIVE;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown NamingsystemStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case PROPOSED: return "proposed";
@@ -192,8 +201,8 @@ public class NamingSystem extends DomainResource {
         }
     }
 
-  public static class NamingsystemStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NamingsystemStatusEnumFactory implements EnumFactory<NamingsystemStatus> {
+    public NamingsystemStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -203,9 +212,9 @@ public class NamingSystem extends DomainResource {
           return NamingsystemStatus.ACTIVE;
         if ("retired".equals(codeString))
           return NamingsystemStatus.RETIRED;
-        throw new Exception("Unknown NamingsystemStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NamingsystemStatus code) throws IllegalArgumentException {
       if (code == NamingsystemStatus.PROPOSED)
         return "proposed";
       if (code == NamingsystemStatus.ACTIVE)
@@ -216,7 +225,7 @@ public class NamingSystem extends DomainResource {
       }
     }
 
-    public enum NamingsystemIdentifierType {
+    public enum NamingsystemIdentifierType implements FhirEnum {
         /**
          * An ISO object identifier.  E.g. 1.2.3.4.5.
          */
@@ -237,7 +246,10 @@ public class NamingSystem extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static NamingsystemIdentifierType fromCode(String codeString) throws Exception {
+
+      public static final NamingsystemIdentifierTypeEnumFactory ENUM_FACTORY = new NamingsystemIdentifierTypeEnumFactory();
+
+        public static NamingsystemIdentifierType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("oid".equals(codeString))
@@ -248,8 +260,9 @@ public class NamingSystem extends DomainResource {
           return URI;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown NamingsystemIdentifierType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemIdentifierType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case OID: return "oid";
@@ -288,8 +301,8 @@ public class NamingSystem extends DomainResource {
         }
     }
 
-  public static class NamingsystemIdentifierTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class NamingsystemIdentifierTypeEnumFactory implements EnumFactory<NamingsystemIdentifierType> {
+    public NamingsystemIdentifierType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -301,9 +314,9 @@ public class NamingSystem extends DomainResource {
           return NamingsystemIdentifierType.URI;
         if ("other".equals(codeString))
           return NamingsystemIdentifierType.OTHER;
-        throw new Exception("Unknown NamingsystemIdentifierType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown NamingsystemIdentifierType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(NamingsystemIdentifierType code) throws IllegalArgumentException {
       if (code == NamingsystemIdentifierType.OID)
         return "oid";
       if (code == NamingsystemIdentifierType.UUID)
@@ -398,7 +411,7 @@ public class NamingSystem extends DomainResource {
          */
         public NamingSystemUniqueIdComponent setType(NamingsystemIdentifierType value) { 
             if (this.type == null)
-              this.type = new Enumeration<NamingsystemIdentifierType>();
+              this.type = new Enumeration<NamingsystemIdentifierType>(NamingsystemIdentifierType.ENUM_FACTORY);
             this.type.setValue(value);
           return this;
         }
@@ -782,7 +795,7 @@ public class NamingSystem extends DomainResource {
      */
     public NamingSystem setType(NamingsystemType value) { 
         if (this.type == null)
-          this.type = new Enumeration<NamingsystemType>();
+          this.type = new Enumeration<NamingsystemType>(NamingsystemType.ENUM_FACTORY);
         this.type.setValue(value);
       return this;
     }
@@ -872,7 +885,7 @@ public class NamingSystem extends DomainResource {
      */
     public NamingSystem setStatus(NamingsystemStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<NamingsystemStatus>();
+          this.status = new Enumeration<NamingsystemStatus>(NamingsystemStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

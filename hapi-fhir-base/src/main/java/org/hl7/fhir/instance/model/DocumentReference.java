@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="DocumentReference", profile="http://hl7.org/fhir/Profile/DocumentReference")
 public class DocumentReference extends DomainResource {
 
-    public enum DocumentReferenceStatus {
+    public enum DocumentReferenceStatus implements FhirEnum {
         /**
          * This is the current reference for this document.
          */
@@ -62,7 +62,10 @@ public class DocumentReference extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DocumentReferenceStatus fromCode(String codeString) throws Exception {
+
+      public static final DocumentReferenceStatusEnumFactory ENUM_FACTORY = new DocumentReferenceStatusEnumFactory();
+
+        public static DocumentReferenceStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("current".equals(codeString))
@@ -71,8 +74,9 @@ public class DocumentReference extends DomainResource {
           return SUPERCEDED;
         if ("entered in error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case CURRENT: return "current";
@@ -107,8 +111,8 @@ public class DocumentReference extends DomainResource {
         }
     }
 
-  public static class DocumentReferenceStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DocumentReferenceStatusEnumFactory implements EnumFactory<DocumentReferenceStatus> {
+    public DocumentReferenceStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class DocumentReference extends DomainResource {
           return DocumentReferenceStatus.SUPERCEDED;
         if ("entered in error".equals(codeString))
           return DocumentReferenceStatus.ENTEREDINERROR;
-        throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DocumentReferenceStatus code) throws IllegalArgumentException {
       if (code == DocumentReferenceStatus.CURRENT)
         return "current";
       if (code == DocumentReferenceStatus.SUPERCEDED)
@@ -131,7 +135,7 @@ public class DocumentReference extends DomainResource {
       }
     }
 
-    public enum DocumentRelationshipType {
+    public enum DocumentRelationshipType implements FhirEnum {
         /**
          * This document logically replaces or supercedes the target document.
          */
@@ -152,7 +156,10 @@ public class DocumentReference extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DocumentRelationshipType fromCode(String codeString) throws Exception {
+
+      public static final DocumentRelationshipTypeEnumFactory ENUM_FACTORY = new DocumentRelationshipTypeEnumFactory();
+
+        public static DocumentRelationshipType fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("replaces".equals(codeString))
@@ -163,8 +170,9 @@ public class DocumentReference extends DomainResource {
           return SIGNS;
         if ("appends".equals(codeString))
           return APPENDS;
-        throw new Exception("Unknown DocumentRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentRelationshipType code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case REPLACES: return "replaces";
@@ -203,8 +211,8 @@ public class DocumentReference extends DomainResource {
         }
     }
 
-  public static class DocumentRelationshipTypeEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class DocumentRelationshipTypeEnumFactory implements EnumFactory<DocumentRelationshipType> {
+    public DocumentRelationshipType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -216,9 +224,9 @@ public class DocumentReference extends DomainResource {
           return DocumentRelationshipType.SIGNS;
         if ("appends".equals(codeString))
           return DocumentRelationshipType.APPENDS;
-        throw new Exception("Unknown DocumentRelationshipType code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown DocumentRelationshipType code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(DocumentRelationshipType code) throws IllegalArgumentException {
       if (code == DocumentRelationshipType.REPLACES)
         return "replaces";
       if (code == DocumentRelationshipType.TRANSFORMS)
@@ -304,7 +312,7 @@ public class DocumentReference extends DomainResource {
          */
         public DocumentReferenceRelatesToComponent setCode(DocumentRelationshipType value) { 
             if (this.code == null)
-              this.code = new Enumeration<DocumentRelationshipType>();
+              this.code = new Enumeration<DocumentRelationshipType>(DocumentRelationshipType.ENUM_FACTORY);
             this.code.setValue(value);
           return this;
         }
@@ -1361,14 +1369,14 @@ public class DocumentReference extends DomainResource {
     /**
      * @return When the document was created.
      */
-    public DateAndTime getCreated() { 
+    public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
      * @param value When the document was created.
      */
-    public DocumentReference setCreated(DateAndTime value) { 
+    public DocumentReference setCreated(Date value) { 
       if (value == null)
         this.created = null;
       else {
@@ -1410,14 +1418,14 @@ public class DocumentReference extends DomainResource {
     /**
      * @return When the document reference was created.
      */
-    public DateAndTime getIndexed() { 
+    public Date getIndexed() { 
       return this.indexed == null ? null : this.indexed.getValue();
     }
 
     /**
      * @param value When the document reference was created.
      */
-    public DocumentReference setIndexed(DateAndTime value) { 
+    public DocumentReference setIndexed(Date value) { 
         if (this.indexed == null)
           this.indexed = new InstantType();
         this.indexed.setValue(value);
@@ -1464,7 +1472,7 @@ public class DocumentReference extends DomainResource {
      */
     public DocumentReference setStatus(DocumentReferenceStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<DocumentReferenceStatus>();
+          this.status = new Enumeration<DocumentReferenceStatus>(DocumentReferenceStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }

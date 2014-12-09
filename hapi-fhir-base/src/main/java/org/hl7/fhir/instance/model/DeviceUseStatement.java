@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -373,14 +373,14 @@ public class DeviceUseStatement extends DomainResource {
     /**
      * @return The time at which the statement was made/recorded.
      */
-    public DateAndTime getRecordedOn() { 
+    public Date getRecordedOn() { 
       return this.recordedOn == null ? null : this.recordedOn.getValue();
     }
 
     /**
      * @param value The time at which the statement was made/recorded.
      */
-    public DeviceUseStatement setRecordedOn(DateAndTime value) { 
+    public DeviceUseStatement setRecordedOn(Date value) { 
       if (value == null)
         this.recordedOn = null;
       else {

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -157,14 +157,14 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * @return The date the immunization recommendation was created.
          */
-        public DateAndTime getDate() { 
+        public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
          * @param value The date the immunization recommendation was created.
          */
-        public ImmunizationRecommendationRecommendationComponent setDate(DateAndTime value) { 
+        public ImmunizationRecommendationRecommendationComponent setDate(Date value) { 
             if (this.date == null)
               this.date = new DateTimeType();
             this.date.setValue(value);
@@ -543,14 +543,14 @@ public class ImmunizationRecommendation extends DomainResource {
         /**
          * @return Date recommendation.
          */
-        public DateAndTime getValue() { 
+        public Date getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
          * @param value Date recommendation.
          */
-        public ImmunizationRecommendationRecommendationDateCriterionComponent setValue(DateAndTime value) { 
+        public ImmunizationRecommendationRecommendationDateCriterionComponent setValue(Date value) { 
             if (this.value == null)
               this.value = new DateTimeType();
             this.value.setValue(value);

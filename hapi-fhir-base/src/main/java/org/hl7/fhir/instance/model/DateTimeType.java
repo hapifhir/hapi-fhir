@@ -29,12 +29,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.instance.model;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-
-import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * Represents a FHIR dateTime datatype. Valid precisions values for this type are:
@@ -112,6 +112,17 @@ public class DateTimeType extends BaseDateTimeType {
 		super(theDate, thePrecision, theTimezone);
 	}
 
+	/**
+	 * Constructor
+	 */
+	public DateTimeType(Calendar theCalendar) {
+		if (theCalendar != null) {
+			setValue(theCalendar.getTime());
+			setPrecision(DEFAULT_PRECISION);
+			setTimeZone(theCalendar.getTimeZone());
+		}
+	}
+
 	@Override
 	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
@@ -127,10 +138,10 @@ public class DateTimeType extends BaseDateTimeType {
 	}
 
 	/**
-	 * Returns a new instance of DateTimeDt with the current system time and SECOND precision and the system local time
+	 * Returns a new instance of DateTimeType with the current system time and SECOND precision and the system local time
 	 * zone
 	 */
-	public static DateTimeType withCurrentTime() {
+	public static DateTimeType now() {
 		return new DateTimeType(new Date(), TemporalPrecisionEnum.SECOND, TimeZone.getDefault());
 	}
 
@@ -147,6 +158,33 @@ public class DateTimeType extends BaseDateTimeType {
 	@Override
 	public DateTimeType copy() {
 		return new DateTimeType(getValueAsString());
+	}
+
+	/**
+	 * Creates a new instance by parsing an HL7 v3 format date time string
+	 */
+	public static InstantType parseV3(String theV3String) {
+		InstantType retVal = new InstantType();
+		retVal.setValueAsV3String(theV3String);
+		return retVal;
+	}
+
+	public static DateTimeType today() {
+		DateTimeType retVal = now();
+		retVal.setPrecision(TemporalPrecisionEnum.DAY);
+		return retVal;
+	}
+
+	public boolean getTzSign() {
+		return getTimeZone().getRawOffset() >= 0;
+	}
+
+	public int getTzHour() {
+		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) / 60;
+	}
+
+	public int getTzMin() {
+		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) % 60;
 	}
 
 }

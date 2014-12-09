@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="QuestionnaireAnswers", profile="http://hl7.org/fhir/Profile/QuestionnaireAnswers")
 public class QuestionnaireAnswers extends DomainResource {
 
-    public enum QuestionnaireAnswersStatus {
+    public enum QuestionnaireAnswersStatus implements FhirEnum {
         /**
          * This QuestionnaireAnswers has been partially filled out with answers, but changes or additions are still expected to be made to it.
          */
@@ -62,7 +62,10 @@ public class QuestionnaireAnswers extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static QuestionnaireAnswersStatus fromCode(String codeString) throws Exception {
+
+      public static final QuestionnaireAnswersStatusEnumFactory ENUM_FACTORY = new QuestionnaireAnswersStatusEnumFactory();
+
+        public static QuestionnaireAnswersStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in progress".equals(codeString))
@@ -71,8 +74,9 @@ public class QuestionnaireAnswers extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
-        throw new Exception("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case INPROGRESS: return "in progress";
@@ -107,8 +111,8 @@ public class QuestionnaireAnswers extends DomainResource {
         }
     }
 
-  public static class QuestionnaireAnswersStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class QuestionnaireAnswersStatusEnumFactory implements EnumFactory<QuestionnaireAnswersStatus> {
+    public QuestionnaireAnswersStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class QuestionnaireAnswers extends DomainResource {
           return QuestionnaireAnswersStatus.COMPLETED;
         if ("amended".equals(codeString))
           return QuestionnaireAnswersStatus.AMENDED;
-        throw new Exception("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(QuestionnaireAnswersStatus code) throws IllegalArgumentException {
       if (code == QuestionnaireAnswersStatus.INPROGRESS)
         return "in progress";
       if (code == QuestionnaireAnswersStatus.COMPLETED)
@@ -1065,7 +1069,7 @@ public class QuestionnaireAnswers extends DomainResource {
      */
     public QuestionnaireAnswers setStatus(QuestionnaireAnswersStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<QuestionnaireAnswersStatus>();
+          this.status = new Enumeration<QuestionnaireAnswersStatus>(QuestionnaireAnswersStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1179,14 +1183,14 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @return The date and/or time that this version of the questionnaire answers was authored.
      */
-    public DateAndTime getAuthored() { 
+    public Date getAuthored() { 
       return this.authored == null ? null : this.authored.getValue();
     }
 
     /**
      * @param value The date and/or time that this version of the questionnaire answers was authored.
      */
-    public QuestionnaireAnswers setAuthored(DateAndTime value) { 
+    public QuestionnaireAnswers setAuthored(Date value) { 
         if (this.authored == null)
           this.authored = new DateTimeType();
         this.authored.setValue(value);

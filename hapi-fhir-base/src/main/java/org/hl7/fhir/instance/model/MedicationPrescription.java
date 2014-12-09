@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="MedicationPrescription", profile="http://hl7.org/fhir/Profile/MedicationPrescription")
 public class MedicationPrescription extends DomainResource {
 
-    public enum MedicationPrescriptionStatus {
+    public enum MedicationPrescriptionStatus implements FhirEnum {
         /**
          * The prescription is 'actionable', but not all actions that are implied by it have occurred yet.
          */
@@ -74,7 +74,10 @@ public class MedicationPrescription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationPrescriptionStatus fromCode(String codeString) throws Exception {
+
+      public static final MedicationPrescriptionStatusEnumFactory ENUM_FACTORY = new MedicationPrescriptionStatusEnumFactory();
+
+        public static MedicationPrescriptionStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -89,8 +92,9 @@ public class MedicationPrescription extends DomainResource {
           return STOPPED;
         if ("superceded".equals(codeString))
           return SUPERCEDED;
-        throw new Exception("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case ACTIVE: return "active";
@@ -137,8 +141,8 @@ public class MedicationPrescription extends DomainResource {
         }
     }
 
-  public static class MedicationPrescriptionStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class MedicationPrescriptionStatusEnumFactory implements EnumFactory<MedicationPrescriptionStatus> {
+    public MedicationPrescriptionStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -154,9 +158,9 @@ public class MedicationPrescription extends DomainResource {
           return MedicationPrescriptionStatus.STOPPED;
         if ("superceded".equals(codeString))
           return MedicationPrescriptionStatus.SUPERCEDED;
-        throw new Exception("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(MedicationPrescriptionStatus code) throws IllegalArgumentException {
       if (code == MedicationPrescriptionStatus.ACTIVE)
         return "active";
       if (code == MedicationPrescriptionStatus.ONHOLD)
@@ -1112,14 +1116,14 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return The date (and perhaps time) when the prescription was written.
      */
-    public DateAndTime getDateWritten() { 
+    public Date getDateWritten() { 
       return this.dateWritten == null ? null : this.dateWritten.getValue();
     }
 
     /**
      * @param value The date (and perhaps time) when the prescription was written.
      */
-    public MedicationPrescription setDateWritten(DateAndTime value) { 
+    public MedicationPrescription setDateWritten(Date value) { 
       if (value == null)
         this.dateWritten = null;
       else {
@@ -1173,7 +1177,7 @@ In some situations, this attribute may be used instead of quantity to identify t
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<MedicationPrescriptionStatus>();
+          this.status = new Enumeration<MedicationPrescriptionStatus>(MedicationPrescriptionStatus.ENUM_FACTORY);
         this.status.setValue(value);
       }
       return this;

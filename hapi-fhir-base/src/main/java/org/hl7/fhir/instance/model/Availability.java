@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -306,14 +306,14 @@ public class Availability extends DomainResource {
     /**
      * @return When this availability was created, or last revised.
      */
-    public DateAndTime getLastModified() { 
+    public Date getLastModified() { 
       return this.lastModified == null ? null : this.lastModified.getValue();
     }
 
     /**
      * @param value When this availability was created, or last revised.
      */
-    public Availability setLastModified(DateAndTime value) { 
+    public Availability setLastModified(Date value) { 
       if (value == null)
         this.lastModified = null;
       else {

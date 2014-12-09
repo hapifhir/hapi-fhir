@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Dec 2, 2014 21:09+1100 for FHIR v0.3.0
+// Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 @ResourceDef(name="ExtensionDefinition", profile="http://hl7.org/fhir/Profile/ExtensionDefinition")
 public class ExtensionDefinition extends DomainResource {
 
-    public enum ResourceProfileStatus {
+    public enum ResourceProfileStatus implements FhirEnum {
         /**
          * This profile is still under development.
          */
@@ -62,7 +62,10 @@ public class ExtensionDefinition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ResourceProfileStatus fromCode(String codeString) throws Exception {
+
+      public static final ResourceProfileStatusEnumFactory ENUM_FACTORY = new ResourceProfileStatusEnumFactory();
+
+        public static ResourceProfileStatus fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -71,8 +74,9 @@ public class ExtensionDefinition extends DomainResource {
           return ACTIVE;
         if ("retired".equals(codeString))
           return RETIRED;
-        throw new Exception("Unknown ResourceProfileStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceProfileStatus code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case DRAFT: return "draft";
@@ -107,8 +111,8 @@ public class ExtensionDefinition extends DomainResource {
         }
     }
 
-  public static class ResourceProfileStatusEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ResourceProfileStatusEnumFactory implements EnumFactory<ResourceProfileStatus> {
+    public ResourceProfileStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -118,9 +122,9 @@ public class ExtensionDefinition extends DomainResource {
           return ResourceProfileStatus.ACTIVE;
         if ("retired".equals(codeString))
           return ResourceProfileStatus.RETIRED;
-        throw new Exception("Unknown ResourceProfileStatus code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ResourceProfileStatus code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ResourceProfileStatus code) throws IllegalArgumentException {
       if (code == ResourceProfileStatus.DRAFT)
         return "draft";
       if (code == ResourceProfileStatus.ACTIVE)
@@ -131,7 +135,7 @@ public class ExtensionDefinition extends DomainResource {
       }
     }
 
-    public enum ExtensionContext {
+    public enum ExtensionContext implements FhirEnum {
         /**
          * The context is all elements matching a particular resource element path.
          */
@@ -152,7 +156,10 @@ public class ExtensionDefinition extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ExtensionContext fromCode(String codeString) throws Exception {
+
+      public static final ExtensionContextEnumFactory ENUM_FACTORY = new ExtensionContextEnumFactory();
+
+        public static ExtensionContext fromCode(String codeString) throws IllegalArgumentException {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("resource".equals(codeString))
@@ -163,8 +170,9 @@ public class ExtensionDefinition extends DomainResource {
           return MAPPING;
         if ("extension".equals(codeString))
           return EXTENSION;
-        throw new Exception("Unknown ExtensionContext code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ExtensionContext code '"+codeString+"'");
         }
+        @Override
         public String toCode() {
           switch (this) {
             case RESOURCE: return "resource";
@@ -203,8 +211,8 @@ public class ExtensionDefinition extends DomainResource {
         }
     }
 
-  public static class ExtensionContextEnumFactory implements EnumFactory {
-    public Enum<?> fromCode(String codeString) throws Exception {
+  public static class ExtensionContextEnumFactory implements EnumFactory<ExtensionContext> {
+    public ExtensionContext fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
@@ -216,9 +224,9 @@ public class ExtensionDefinition extends DomainResource {
           return ExtensionContext.MAPPING;
         if ("extension".equals(codeString))
           return ExtensionContext.EXTENSION;
-        throw new Exception("Unknown ExtensionContext code '"+codeString+"'");
+        throw new IllegalArgumentException("Unknown ExtensionContext code '"+codeString+"'");
         }
-    public String toCode(Enum<?> code) throws Exception {
+    public String toCode(ExtensionContext code) throws IllegalArgumentException {
       if (code == ExtensionContext.RESOURCE)
         return "resource";
       if (code == ExtensionContext.DATATYPE)
@@ -982,7 +990,7 @@ public class ExtensionDefinition extends DomainResource {
      */
     public ExtensionDefinition setStatus(ResourceProfileStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<ResourceProfileStatus>();
+          this.status = new Enumeration<ResourceProfileStatus>(ResourceProfileStatus.ENUM_FACTORY);
         this.status.setValue(value);
       return this;
     }
@@ -1067,14 +1075,14 @@ public class ExtensionDefinition extends DomainResource {
     /**
      * @return The date that this version of the extension was published.
      */
-    public DateAndTime getDate() { 
+    public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
      * @param value The date that this version of the extension was published.
      */
-    public ExtensionDefinition setDate(DateAndTime value) { 
+    public ExtensionDefinition setDate(Date value) { 
       if (value == null)
         this.date = null;
       else {
@@ -1204,7 +1212,7 @@ public class ExtensionDefinition extends DomainResource {
      */
     public ExtensionDefinition setContextType(ExtensionContext value) { 
         if (this.contextType == null)
-          this.contextType = new Enumeration<ExtensionContext>();
+          this.contextType = new Enumeration<ExtensionContext>(ExtensionContext.ENUM_FACTORY);
         this.contextType.setValue(value);
       return this;
     }
