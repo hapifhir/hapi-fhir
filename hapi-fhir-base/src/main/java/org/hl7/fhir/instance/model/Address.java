@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.
  */
 @DatatypeDef(name="Address")
-public class Address extends Type {
+public class Address extends Type  implements ICompositeType{
 
     public enum AddressUse implements FhirEnum {
         /**

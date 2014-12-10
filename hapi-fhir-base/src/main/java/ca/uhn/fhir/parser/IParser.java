@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.Resource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -43,9 +44,9 @@ public interface IParser {
 
 	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
 
-	String encodeResourceToString(IResource theResource) throws DataFormatException;
+	String encodeResourceToString(IBaseResource theResource) throws DataFormatException;
 
-	void encodeResourceToWriter(IResource theResource, Writer theWriter) throws IOException, DataFormatException;
+	void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
 
 	/**
 	 * Encodes a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR Specification</a>.
@@ -83,7 +84,7 @@ public interface IParser {
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	<T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -96,7 +97,7 @@ public interface IParser {
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	<T extends IResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
 
 	/**
 	 * Parses a resource

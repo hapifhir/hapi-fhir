@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import org.hl7.fhir.instance.model.IBase;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,7 +24,7 @@ package ca.uhn.fhir.model.api;
 
 
 
-public interface IElement {
+public interface IElement extends IBase {
 
 	boolean isEmpty();
 

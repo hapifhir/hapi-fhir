@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Base implements Serializable {
+public abstract class Base implements Serializable, IBase {
 
   /**
    * User appended data items - allow users to add extra information to the class

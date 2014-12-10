@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A technical identifier - identifies some entity uniquely and unambiguously.
  */
 @DatatypeDef(name="Identifier")
-public class Identifier extends Type {
+public class Identifier extends Type  implements ICompositeType{
 
     public enum IdentifierUse implements FhirEnum {
         /**

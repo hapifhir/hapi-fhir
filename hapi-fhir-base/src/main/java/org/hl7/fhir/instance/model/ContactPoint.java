@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
  */
 @DatatypeDef(name="ContactPoint")
-public class ContactPoint extends Type {
+public class ContactPoint extends Type  implements ICompositeType{
 
     public enum ContactPointSystem implements FhirEnum {
         /**

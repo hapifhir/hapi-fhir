@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A relationship of two Quantity values - expressed as a numerator and a denominator.
  */
 @DatatypeDef(name="Ratio")
-public class Ratio extends Type {
+public class Ratio extends Type  implements ICompositeType{
 
     /**
      * The value of the numerator.

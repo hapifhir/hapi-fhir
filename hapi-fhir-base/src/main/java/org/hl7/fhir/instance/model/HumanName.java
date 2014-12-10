@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A human's name with the ability to identify parts and usage.
  */
 @DatatypeDef(name="HumanName")
-public class HumanName extends Type {
+public class HumanName extends Type implements ICompositeType {
 
     public enum NameUse implements FhirEnum {
         /**

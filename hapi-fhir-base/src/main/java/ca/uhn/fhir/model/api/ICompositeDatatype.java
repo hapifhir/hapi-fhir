@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import org.hl7.fhir.instance.model.ICompositeType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +24,6 @@ package ca.uhn.fhir.model.api;
 
 
 
-public interface ICompositeDatatype extends IDatatype, ICompositeElement {
+public interface ICompositeDatatype extends IDatatype, ICompositeElement, ICompositeType {
 	
 }

@@ -46,6 +46,8 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Resource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -236,7 +238,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
 		if (theResource == null) {
 			throw new NullPointerException("Resource can not be null");
 		}
@@ -247,7 +249,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeResourceToWriter(IResource theResource, Writer theWriter) throws DataFormatException {
+	public void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = createXmlWriter(theWriter);
@@ -424,7 +426,7 @@ public class XmlParser extends BaseParser implements IParser {
 	private void encodeChildElementToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, XMLStreamWriter theEventWriter, IElement nextValue, String childName,
 			BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		if (nextValue.isEmpty()) {
-			if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && getContainedResources().isEmpty()==false && theIncludedResource == false) {
+			if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && getContainedResources().isEmpty() == false && theIncludedResource == false) {
 				// We still want to go in..
 			} else {
 				return;
@@ -467,7 +469,7 @@ public class XmlParser extends BaseParser implements IParser {
 			ContainedDt value = (ContainedDt) nextValue;
 			theEventWriter.writeStartElement("contained");
 			for (IResource next : value.getContainedResources()) {
-				if (getContainedResources().getResourceId(next)!=null) {
+				if (getContainedResources().getResourceId(next) != null) {
 					continue;
 				}
 				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
@@ -496,7 +498,6 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 
 	}
-
 
 	private void encodeCompositeElementChildrenToStreamWriter(RuntimeResourceDefinition theResDef, IResource theResource, IElement theElement, XMLStreamWriter theEventWriter,
 			List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
@@ -576,7 +577,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
 		String reference = determineReferenceText(theRef);
-		
+
 		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement(RESREF_REFERENCE);
 			theEventWriter.writeAttribute("value", reference);
@@ -589,17 +590,25 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-
-	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		String resourceId = null;
-		if (theIncludedResource && StringUtils.isNotBlank(theResource.getId().getValue())) {
-			resourceId = theResource.getId().getValue();
+		if (theResource instanceof IResource) {
+			// HAPI structs
+			IResource iResource = (IResource) theResource;
+			if (theIncludedResource && StringUtils.isNotBlank(iResource.getId().getValue())) {
+				resourceId = iResource.getId().getValue();
+			}
+		} else {
+			// HL7 structs
+			Resource resource = (Resource) theResource;
+			if (theIncludedResource && StringUtils.isNotBlank(resource.getId())) {
+				resourceId = resource.getId();
+			}
 		}
-		
 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
 	}
 
-	private void encodeResourceToXmlStreamWriter(IResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, String theResourceId) throws XMLStreamException {
+	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, String theResourceId) throws XMLStreamException {
 		if (!theIncludedResource) {
 			super.containResourcesForEncoding(theResource);
 		}

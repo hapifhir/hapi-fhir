@@ -31,19 +31,20 @@ package org.hl7.fhir.instance.model;
 
 // Generated on Fri, Dec 5, 2014 09:17+1100 for FHIR v0.3.0
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * Base Resource for everything.
  */
 @ResourceDef(name="Resource", profile="http://hl7.org/fhir/Profile/Resource")
-public abstract class Resource extends Base {
+public abstract class Resource extends Base implements IBaseResource {
 
     @Block()
     public static class ResourceMetaComponent extends BackboneElement {

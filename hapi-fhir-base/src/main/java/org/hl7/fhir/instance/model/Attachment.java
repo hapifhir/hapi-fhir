@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * For referring to data content defined in other formats.
  */
 @DatatypeDef(name="Attachment")
-public class Attachment extends Type {
+public class Attachment extends Type  implements ICompositeType{
 
     /**
      * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.

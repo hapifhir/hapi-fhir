@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A reference to a code defined by a terminology system.
  */
 @DatatypeDef(name="Coding")
-public class Coding extends Type {
+public class Coding extends Type  implements ICompositeType{
 
     /**
      * The identification of the code system that defines the meaning of the symbol in the code.

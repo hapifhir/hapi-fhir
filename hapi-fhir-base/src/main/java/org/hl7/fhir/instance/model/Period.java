@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A time period defined by a start and end date and optionally time.
  */
 @DatatypeDef(name="Period")
-public class Period extends Type {
+public class Period extends Type implements ICompositeType {
 
     /**
      * The start of the period. The boundary is inclusive.

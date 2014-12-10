@@ -20,9 +20,11 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.IPrimitiveType;
+
 import ca.uhn.fhir.parser.DataFormatException;
 
-public interface IPrimitiveDatatype<T> extends IDatatype {
+public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType {
 
 	void setValueAsString(String theValue) throws DataFormatException;
 

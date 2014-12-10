@@ -29,6 +29,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
@@ -66,7 +68,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 public class FhirContext {
 
 	private static final List<Class<? extends IResource>> EMPTY_LIST = Collections.emptyList();
-	private volatile Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
+	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
@@ -131,7 +133,7 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
-	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IResource> theResourceType) {
+	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IBaseResource> theResourceType) {
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
 			retVal = scanResourceType(theResourceType);
@@ -296,11 +298,11 @@ public class FhirContext {
 	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
 		ArrayList<Class<? extends IResource>> resourceTypes = new ArrayList<Class<? extends IResource>>();
 		resourceTypes.add(theResourceType);
-		Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
 		return (RuntimeResourceDefinition) defs.get(theResourceType);
 	}
 
-	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IResource>> theResourceTypes) {
+	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		ModelScanner scanner = new ModelScanner(this, myClassToElementDefinition, theResourceTypes);
 		if (myRuntimeChildUndeclaredExtensionDefinition == null) {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
@@ -310,7 +312,7 @@ public class FhirContext {
 		nameToElementDefinition.putAll(myNameToElementDefinition);
 		nameToElementDefinition.putAll(scanner.getNameToResourceDefinitions());
 
-		Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
 

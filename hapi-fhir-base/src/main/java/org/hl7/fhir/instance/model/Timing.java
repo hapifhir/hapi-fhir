@@ -32,8 +32,8 @@ package org.hl7.fhir.instance.model;
 // Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
-
 import java.math.*;
+
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.
  */
 @DatatypeDef(name="Timing")
-public class Timing extends Type {
+public class Timing extends Type  implements ICompositeType{
 
     public enum EventTiming implements FhirEnum {
         /**

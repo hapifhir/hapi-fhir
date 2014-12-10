@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.
  */
 @DatatypeDef(name="CodeableConcept")
-public class CodeableConcept extends Type {
+public class CodeableConcept extends Type  implements ICompositeType{
 
     /**
      * A reference to a code defined by a terminology system.

@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * Captures constraints on each element within the resource, profile, or extension.
  */
 @DatatypeDef(name="ElementDefinition")
-public class ElementDefinition extends Type {
+public class ElementDefinition extends Type  implements ICompositeType{
 
     public enum PropertyRepresentation implements FhirEnum {
         /**

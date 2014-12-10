@@ -26,6 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -78,7 +81,7 @@ public class FhirTerser {
 	 *            The type to search for. Must not be null.
 	 * @return Returns a list of all matching elements
 	 */
-	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(IResource theResource, final Class<T> theType) {
+	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<T>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 		visit(theResource, null, def, new IModelVisitor() {

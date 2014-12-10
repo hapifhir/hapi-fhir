@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A set of ordered Quantities defined by a low and high limit.
  */
 @DatatypeDef(name="Range")
-public class Range extends Type {
+public class Range extends Type  implements ICompositeType{
 
     /**
      * The low limit. The boundary is inclusive.

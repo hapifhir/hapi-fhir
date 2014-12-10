@@ -43,6 +43,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.ICompositeType;
+
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
@@ -74,7 +78,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
-	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
 	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
 
@@ -86,30 +90,30 @@ class ModelScanner {
 
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 
-	private Set<Class<? extends IElement>> myScanAlso = new HashSet<Class<? extends IElement>>();
+	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
 
 	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 
 	private FhirContext myContext;
 
-	ModelScanner(FhirContext theContext, Class<? extends IResource> theResourceTypes) throws ConfigurationException {
+	ModelScanner(FhirContext theContext, Class<? extends IBaseResource> theResourceTypes) throws ConfigurationException {
 		myContext=theContext;
-		Set<Class<? extends IElement>> singleton = new HashSet<Class<? extends IElement>>();
+		Set<Class<? extends IBase>> singleton = new HashSet<Class<? extends IBase>>();
 		singleton.add(theResourceTypes);
 		init(null, singleton);
 	}
 
-	ModelScanner(FhirContext theContext, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+	ModelScanner(FhirContext theContext, Collection<Class<? extends IBaseResource>> theResourceTypes) throws ConfigurationException {
 		myContext=theContext;
-		init(null, new HashSet<Class<? extends IElement>>(theResourceTypes));
+		init(null, new HashSet<Class<? extends IBase>>(theResourceTypes));
 	}
 
-	ModelScanner(FhirContext theContext, Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IResource>> theResourceTypes) throws ConfigurationException {
+	ModelScanner(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IBase>> theResourceTypes) throws ConfigurationException {
 		myContext=theContext;
-		init(theExistingDefinitions, new HashSet<Class<? extends IElement>>(theResourceTypes));
+		init(theExistingDefinitions, new HashSet<Class<? extends IBase>>(theResourceTypes));
 	}
 
-	public Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
+	public Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
 		return myClassToElementDefinitions;
 	}
 
@@ -167,7 +171,7 @@ class ModelScanner {
 		}
 	}
 
-	private void init(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IElement>> toScan) {
+	private void init(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Set<Class<? extends IBase>> toScan) {
 		if (theExistingDefinitions != null) {
 			myClassToElementDefinitions.putAll(theExistingDefinitions);
 		}
@@ -222,10 +226,10 @@ class ModelScanner {
 		// toScan.add(QuantityDt.class);
 
 		do {
-			for (Class<? extends IElement> nextClass : toScan) {
+			for (Class<? extends IBase> nextClass : toScan) {
 				scan(nextClass);
 			}
-			for (Iterator<Class<? extends IElement>> iter = myScanAlso.iterator(); iter.hasNext();) {
+			for (Iterator<Class<? extends IBase>> iter = myScanAlso.iterator(); iter.hasNext();) {
 				if (myClassToElementDefinitions.containsKey(iter.next())) {
 					iter.remove();
 				}
@@ -235,7 +239,7 @@ class ModelScanner {
 			myScanAlso.clear();
 		} while (!toScan.isEmpty());
 
-		for (Entry<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
+		for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : myClassToElementDefinitions.entrySet()) {
 			if (theExistingDefinitions != null && theExistingDefinitions.containsKey(nextEntry.getKey())) {
 				continue;
 			}
@@ -251,7 +255,7 @@ class ModelScanner {
 		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", size, time);
 	}
 
-	private void scan(Class<? extends IElement> theClass) throws ConfigurationException {
+	private void scan(Class<? extends IBase> theClass) throws ConfigurationException {
 		BaseRuntimeElementDefinition<?> existingDef = myClassToElementDefinitions.get(theClass);
 		if (existingDef != null) {
 			return;
@@ -269,13 +273,13 @@ class ModelScanner {
 
 		DatatypeDef datatypeDefinition = theClass.getAnnotation(DatatypeDef.class);
 		if (datatypeDefinition != null) {
-			if (ICompositeDatatype.class.isAssignableFrom(theClass)) {
+			if (ICompositeType.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings("unchecked")
-				Class<? extends ICompositeDatatype> resClass = (Class<? extends ICompositeDatatype>) theClass;
+				Class<? extends ICompositeType> resClass = (Class<? extends ICompositeType>) theClass;
 				scanCompositeDatatype(resClass, datatypeDefinition);
-			} else if (IPrimitiveDatatype.class.isAssignableFrom(theClass)) {
+			} else if (IPrimitiveType.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings({ "unchecked" })
-				Class<? extends IPrimitiveDatatype<?>> resClass = (Class<? extends IPrimitiveDatatype<?>>) theClass;
+				Class<? extends IPrimitiveType) resClass = (Class<? extends IPrimitiveType>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
 			} else {
 				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());

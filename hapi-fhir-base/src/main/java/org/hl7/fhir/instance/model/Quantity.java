@@ -32,8 +32,8 @@ package org.hl7.fhir.instance.model;
 // Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
-
 import java.math.*;
+
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.
  */
 @DatatypeDef(name="Quantity")
-public class Quantity extends Type {
+public class Quantity extends Type  implements ICompositeType{
 
     public enum QuantityComparator implements FhirEnum {
         /**

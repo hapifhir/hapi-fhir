@@ -32,8 +32,8 @@ package org.hl7.fhir.instance.model;
 // Generated on Sun, Dec 7, 2014 21:45-0500 for FHIR v0.3.0
 
 import java.util.*;
-
 import java.math.*;
+
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
  */
 @DatatypeDef(name="SampledData")
-public class SampledData extends Type {
+public class SampledData extends Type  implements ICompositeType{
 
     /**
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.

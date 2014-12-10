@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -65,7 +66,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	
-	private void containResourcesForEncoding(ContainedResources theContained, IResource theResource, IResource theTarget) {
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
 		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
 
 		Set<String> allIds = new HashSet<String>();
@@ -92,7 +93,7 @@ public abstract class BaseParser implements IParser {
 
 	}
 
-	public void containResourcesForEncoding(IResource theResource) {
+	public void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
 		myContainedResources = contained;
@@ -114,7 +115,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
 		Writer stringWriter = new StringWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
@@ -159,7 +160,7 @@ public abstract class BaseParser implements IParser {
 
 	@SuppressWarnings("cast")
 	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
 		StringReader reader = new StringReader(theMessageString);
 		return (T) parseResource(theResourceType, reader);
 	}

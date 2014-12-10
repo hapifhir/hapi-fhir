@@ -39,7 +39,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * should not need to implement it directly.
  * <p>
  */
-public interface IResource extends ICompositeElement {
+public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
 
 	/**
 	 * Returns the contained resource list for this resource.
