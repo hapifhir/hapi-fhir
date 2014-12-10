@@ -30,6 +30,11 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.instance.model.List_;
+import org.hl7.fhir.instance.model.Organization;
+import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.instance.model.Profile;
+import org.hl7.fhir.instance.model.Resource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -37,8 +42,6 @@ import org.xml.sax.SAXException;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ResourceWithExtensionsA;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -80,17 +83,17 @@ public class XmlParserTest {
 		// Create an organization
 		Organization org = new Organization();
 		org.setId("Organization/65546");
-		org.getName().setValue("Contained Test Organization");
+		org.getNameElement().setValue("Contained Test Organization");
 
 		// Create a patient
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
-		patient.addIdentifier("urn:mrns", "253345");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getManagingOrganization().setResource(org);
 		
 		// Create a list containing both resources. In a server method, you might just
 		// return this list, but here we will create a bundle to encode.
-		List<IResource> resources = new ArrayList<IResource>();
+		List<Resource> resources = new ArrayList<Resource>();
 		resources.add(org);
 		resources.add(patient);		
 		
@@ -705,7 +708,7 @@ public class XmlParserTest {
 				+ "</Patient>";
 		//@formatter:on
 
-		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
+		Patient patient = ourCtx.newXmlParser().parse(Patient.class, msg);
 
 		assertEquals(NarrativeStatusEnum.GENERATED, patient.getText().getStatus().getValueAsEnum());
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
@@ -846,7 +849,7 @@ public class XmlParserTest {
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"), Charset.forName("UTF-8"));
 		Bundle bundle = p.parseBundle(string);
 
-		ListResource res = (ListResource) bundle.toListOfResources().get(2);
+		List_ res = (List_) bundle.toListOfResources().get(2);
 		assertEquals("cid:patient@bundle", res.getSubject().getReference().getValue());
 
 	}

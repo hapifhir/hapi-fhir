@@ -57,6 +57,8 @@ public class Reference extends Type {
     @Description(shortDefinition="Text alternative for the resource", formalDefinition="Plain text narrative that identifies the resource in addition to the resource reference." )
     protected StringType display;
 
+	private Resource resource;
+
     private static final long serialVersionUID = 22777321L;
 
     public Reference() {
@@ -183,6 +185,14 @@ public class Reference extends Type {
         return super.isEmpty() && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty())
           ;
       }
+
+	public void setResource(Resource theResource) {
+		this.resource = theResource;
+	}
+
+	public Resource getResource() {
+		return resource;
+	}
 
 
 }
