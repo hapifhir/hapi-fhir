@@ -169,7 +169,11 @@
 				Encoding a Binary resource without a content type set should not result in a NullPointerException. Thanks
 				to Alexander Kley for reporting!
 			</action>
-		</release>			
+			<action type="add">
+				Server gives a more helpful error message if multiple IResourceProvider implementations
+				are provided for the same resource type. Thanks to wanghaisheng for the idea!
+			</action>
+		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
 				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,

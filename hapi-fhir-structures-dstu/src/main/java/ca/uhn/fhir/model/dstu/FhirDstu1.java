@@ -33,6 +33,7 @@ import java.util.Map;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -57,7 +58,7 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 public class FhirDstu1 implements IFhirVersion {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirDstu1.class);
-	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+//	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 	private String myId;
 
 	@Override
@@ -158,7 +159,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 		String expectedPath = StringUtils.join(path, '.');
 
-		ourLog.info("Filling profile for: {} - Path: {}", expectedPath);
+		ourLog.debug("Filling profile for: {} - Path: {}", expectedPath);
 		String name = def.getName();
 		if (!expectedPath.equals(name)) {
 			path.pollLast();
@@ -267,11 +268,12 @@ public class FhirDstu1 implements IFhirVersion {
 		return retVal;
 	}
 
-	private void scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
+	private Map<RuntimeChildDeclaredExtensionDefinition, String> scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
 		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
+		Map<RuntimeChildDeclaredExtensionDefinition, String> extensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 		for (RuntimeChildDeclaredExtensionDefinition nextChild : cdef.getExtensions()) {
-			if (myExtensionDefToCode.containsKey(nextChild)) {
+			if (extensionDefToCode.containsKey(nextChild)) {
 				continue;
 			}
 
@@ -288,10 +290,10 @@ public class FhirDstu1 implements IFhirVersion {
 			}
 
 			defn.setCode(code);
-			if (myExtensionDefToCode.values().contains(code)) {
+			if (extensionDefToCode.values().contains(code)) {
 				throw new IllegalStateException("Duplicate extension code: " + code);
 			}
-			myExtensionDefToCode.put(nextChild, code);
+			extensionDefToCode.put(nextChild, code);
 
 			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
 				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
@@ -306,11 +308,13 @@ public class FhirDstu1 implements IFhirVersion {
 				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
 					StructureElementDefinitionType type = defn.getDefinition().addType();
 					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + myExtensionDefToCode.get(nextChildExt));
+					type.setProfile("#" + extensionDefToCode.get(nextChildExt));
 				}
 
 			}
 		}
+		
+		return extensionDefToCode;
 	}
 
 	@Override
