@@ -244,7 +244,7 @@ public class FhirDstu1 implements IFhirVersion {
 		retVal.setId(new IdDt(myId));
 
 		// Scan for extensions
-		scanForExtensions(retVal, def);
+		scanForExtensions(retVal, def, new HashMap<RuntimeChildDeclaredExtensionDefinition, String>());
 		Collections.sort(retVal.getExtensionDefn(), new Comparator<ExtensionDefn>() {
 			@Override
 			public int compare(ExtensionDefn theO1, ExtensionDefn theO2) {
@@ -268,12 +268,11 @@ public class FhirDstu1 implements IFhirVersion {
 		return retVal;
 	}
 
-	private Map<RuntimeChildDeclaredExtensionDefinition, String> scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
+	private Map<RuntimeChildDeclaredExtensionDefinition, String> scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def, Map<RuntimeChildDeclaredExtensionDefinition, String> theExtensionDefToCode) {
 		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
-		Map<RuntimeChildDeclaredExtensionDefinition, String> extensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 		for (RuntimeChildDeclaredExtensionDefinition nextChild : cdef.getExtensions()) {
-			if (extensionDefToCode.containsKey(nextChild)) {
+			if (theExtensionDefToCode.containsKey(nextChild)) {
 				continue;
 			}
 
@@ -290,10 +289,10 @@ public class FhirDstu1 implements IFhirVersion {
 			}
 
 			defn.setCode(code);
-			if (extensionDefToCode.values().contains(code)) {
+			if (theExtensionDefToCode.values().contains(code)) {
 				throw new IllegalStateException("Duplicate extension code: " + code);
 			}
-			extensionDefToCode.put(nextChild, code);
+			theExtensionDefToCode.put(nextChild, code);
 
 			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
 				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
@@ -303,18 +302,18 @@ public class FhirDstu1 implements IFhirVersion {
 				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
 			} else {
 				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
-				scanForExtensions(theProfile, pdef);
+				scanForExtensions(theProfile, pdef, theExtensionDefToCode);
 
 				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
 					StructureElementDefinitionType type = defn.getDefinition().addType();
 					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + extensionDefToCode.get(nextChildExt));
+					type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
 				}
 
 			}
 		}
 		
-		return extensionDefToCode;
+		return theExtensionDefToCode;
 	}
 
 	@Override
