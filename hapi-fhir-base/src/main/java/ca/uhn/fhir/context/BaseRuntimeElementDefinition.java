@@ -137,7 +137,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 		for (RuntimeChildDeclaredExtensionDefinition next : myExtensions) {
 			String extUrl = next.getExtensionUrl();
 			if (myUrlToExtension.containsKey(extUrl)) {
-				throw new ConfigurationException("Duplicate extension URL: " + extUrl);
+				throw new ConfigurationException("Duplicate extension URL[" + extUrl + "] in Element[" + getName() + "]");
 			} else {
 				myUrlToExtension.put(extUrl, next);
 			}

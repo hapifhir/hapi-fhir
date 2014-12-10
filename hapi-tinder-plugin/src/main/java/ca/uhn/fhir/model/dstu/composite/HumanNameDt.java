@@ -566,6 +566,11 @@ public class HumanNameDt
 		return this;
 	}
 
+	@Override
+	public StringDt getTextElement() {
+		return getText();
+	}
+
   
 
 
