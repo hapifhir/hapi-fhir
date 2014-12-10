@@ -25,17 +25,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResourceBlock;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private RuntimeResourceBlockDefinition myElementDef;
-	private Class<? extends IResourceBlock> myResourceBlockType;
+	private Class<? extends IBase> myResourceBlockType;
 
-	public RuntimeChildResourceBlockDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IResourceBlock> theResourceBlockType) throws ConfigurationException {
+	public RuntimeChildResourceBlockDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName, Class<? extends IBase> theResourceBlockType) throws ConfigurationException {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceBlockType = theResourceBlockType;
 	}
@@ -50,7 +50,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		if (myResourceBlockType.equals(theDatatype)) {
 			return getElementName();
 		}
@@ -58,7 +58,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		if (myResourceBlockType.equals(theDatatype)) {
 			return myElementDef;
 		}
@@ -71,7 +71,7 @@ public class RuntimeChildResourceBlockDefinition extends BaseRuntimeDeclaredChil
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElementDef = (RuntimeResourceBlockDefinition) theClassToElementDefinitions.get(myResourceBlockType);
 	}
 

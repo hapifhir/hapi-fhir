@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -49,6 +51,7 @@ import javax.json.stream.JsonParsingException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -835,7 +838,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, Reader theReader) {
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) {
 		JsonReader reader = Json.createReader(theReader);
 		JsonObject object = reader.readObject();
 

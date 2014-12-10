@@ -27,11 +27,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
+public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
@@ -41,7 +43,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private FhirContext myContext;
 	private String myId;
 
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceName, theClass);
 		myContext= theContext;
 		myResourceProfile = theResourceAnnotation.profile();
@@ -91,7 +93,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);

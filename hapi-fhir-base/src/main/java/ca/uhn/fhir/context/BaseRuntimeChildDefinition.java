@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
 
 public abstract class BaseRuntimeChildDefinition {
 
@@ -37,18 +37,18 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
 
-	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType);
+	public abstract BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType);
 
-	public abstract String getChildNameByDatatype(Class<? extends IElement> theDatatype);
+	public abstract String getChildNameByDatatype(Class<? extends IBase> theDatatype);
 
 	public abstract IMutator getMutator();
 
 	public abstract Set<String> getValidChildNames();
 
-	abstract void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+	abstract void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
 
 	public interface IAccessor {
-		List<? extends IElement> getValues(Object theTarget);
+		List<? extends IBase> getValues(Object theTarget);
 	}
 
 	public abstract String getElementName();
@@ -58,7 +58,7 @@ public abstract class BaseRuntimeChildDefinition {
 	public abstract int getMin();
 	
 	public interface IMutator {
-		void addValue(Object theTarget, IElement theValue);
+		void addValue(Object theTarget, IBase theValue);
 	}
 
 	public String getExtensionUrl() {

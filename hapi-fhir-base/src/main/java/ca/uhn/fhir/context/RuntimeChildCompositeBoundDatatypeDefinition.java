@@ -22,7 +22,8 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 
-import ca.uhn.fhir.model.api.IDatatype;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -31,7 +32,7 @@ public class RuntimeChildCompositeBoundDatatypeDefinition extends RuntimeChildCo
 
 	private IValueSetEnumBinder<Enum<?>> myBinder;
 
-	public RuntimeChildCompositeBoundDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype, IValueSetEnumBinder<Enum<?>> theBinder) {
+	public RuntimeChildCompositeBoundDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype, IValueSetEnumBinder<Enum<?>> theBinder) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
 		myBinder = theBinder;
 		if (theBinder==null) {

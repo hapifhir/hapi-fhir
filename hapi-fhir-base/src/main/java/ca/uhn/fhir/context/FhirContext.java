@@ -67,7 +67,7 @@ import ca.uhn.fhir.validation.FhirValidator;
  */
 public class FhirContext {
 
-	private static final List<Class<? extends IResource>> EMPTY_LIST = Collections.emptyList();
+	private static final List<Class<? extends IBaseResource>> EMPTY_LIST = Collections.emptyList();
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
@@ -85,7 +85,7 @@ public class FhirContext {
 		this(EMPTY_LIST);
 	}
 
-	public FhirContext(Class<? extends IResource> theResourceType) {
+	public FhirContext(Class<? extends IBaseResource> theResourceType) {
 		this(toCollection(theResourceType));
 	}
 
@@ -93,7 +93,7 @@ public class FhirContext {
 		this(toCollection(theResourceTypes));
 	}
 
-	public FhirContext(Collection<Class<? extends IResource>> theResourceTypes) {
+	public FhirContext(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		scanResourceTypes(theResourceTypes);
 		
 		if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
@@ -295,8 +295,8 @@ public class FhirContext {
 		return new XmlParser(this);
 	}
 
-	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
-		ArrayList<Class<? extends IResource>> resourceTypes = new ArrayList<Class<? extends IResource>>();
+	private RuntimeResourceDefinition scanResourceType(Class<? extends IBaseResource> theResourceType) {
+		ArrayList<Class<? extends IBaseResource>> resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 		resourceTypes.add(theResourceType);
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
 		return (RuntimeResourceDefinition) defs.get(theResourceType);
@@ -340,15 +340,15 @@ public class FhirContext {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
-	private static Collection<Class<? extends IResource>> toCollection(Class<? extends IResource> theResourceType) {
-		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
+	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
+		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		retVal.add(theResourceType);
 		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<Class<? extends IResource>> toCollection(Class<?>[] theResourceTypes) {
-		ArrayList<Class<? extends IResource>> retVal = new ArrayList<Class<? extends IResource>>(1);
+	private static List<Class<? extends IBaseResource>> toCollection(Class<?>[] theResourceTypes) {
+		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		for (Class<?> clazz : theResourceTypes) {
 			if (!IResource.class.isAssignableFrom(clazz)) {
 				throw new IllegalArgumentException(clazz.getCanonicalName() + " is not an instance of " + IResource.class.getSimpleName());

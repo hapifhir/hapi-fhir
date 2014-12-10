@@ -29,10 +29,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -40,8 +40,8 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
 	private Map<String, BaseRuntimeElementDefinition<?>> myAttributeNameToDefinition;
-	private Map<Class<? extends IElement>, String> myDatatypeToAttributeName;
-	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myDatatypeToDefinition;
+	private Map<Class<? extends IBase>, String> myDatatypeToAttributeName;
+	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToDefinition;
 
 	public RuntimeChildUndeclaredExtensionDefinition() {
 		// nothing
@@ -58,19 +58,19 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		return myDatatypeToAttributeName.get(theDatatype);
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
 		return myDatatypeToDefinition.get(theType);
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-		myDatatypeToAttributeName = new HashMap<Class<? extends IElement>, String>();
+		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
@@ -89,7 +89,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
-		myDatatypeToDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
 		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
 			@SuppressWarnings("unchecked")
@@ -112,7 +112,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IAccessor getAccessor() {
 		return new IAccessor() {
 			@Override
-			public List<? extends IElement> getValues(Object theTarget) {
+			public List<? extends IBase> getValues(Object theTarget) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (target.getValue() != null) {
 					return Collections.singletonList(target.getValue());
@@ -126,7 +126,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IMutator getMutator() {
 		return new IMutator() {
 			@Override
-			public void addValue(Object theTarget, IElement theValue) {
+			public void addValue(Object theTarget, IBase theValue) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (theValue instanceof IDatatype) {
 					target.setValue((IDatatype) theTarget);

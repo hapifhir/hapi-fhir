@@ -24,16 +24,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Resource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 
 public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefinition<BaseResourceReferenceDt> {
 
-	private final List<Class<? extends IResource>> myResourceTypes;
-	private HashMap<Class<? extends IResource>, RuntimeResourceDefinition> myResourceTypeToDefinition;
+	private final List<Class<? extends IBaseResource>> myResourceTypes;
+	private HashMap<Class<? extends IBaseResource>, RuntimeResourceDefinition> myResourceTypeToDefinition;
 
-	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IResource>> theResourceTypes) {
+	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theName, BaseResourceReferenceDt.class);
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
 			throw new ConfigurationException("Element '" + theName + "' has no resource types noted");
@@ -41,15 +44,15 @@ public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefini
 		myResourceTypes = theResourceTypes;
 	}
 
-	public List<Class<? extends IResource>> getResourceTypes() {
+	public List<Class<? extends IBaseResource>> getResourceTypes() {
 		return myResourceTypes;
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myResourceTypeToDefinition = new HashMap<Class<? extends IResource>, RuntimeResourceDefinition>();
-		for (Class<? extends IResource> next : myResourceTypes) {
-			if (next.equals(IResource.class)) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		myResourceTypeToDefinition = new HashMap<Class<? extends IBaseResource>, RuntimeResourceDefinition>();
+		for (Class<? extends IBaseResource> next : myResourceTypes) {
+			if (next.equals(IResource.class) || next.equals(Resource.class)) {
 				continue;
 			}
 			RuntimeResourceDefinition definition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);

@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -53,6 +56,7 @@ import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -135,7 +139,7 @@ class ParserState<T> {
 			if (def == null) {
 				throw new DataFormatException("Entry references unknown resource type: " + resourceType);
 			}
-			resource = def.newInstance();
+			resource = (IResource) def.newInstance();
 			resource.setId(id);
 			entry.setResource(resource);
 		}
@@ -164,7 +168,7 @@ class ParserState<T> {
 		myState.xmlEvent(theNextEvent);
 	}
 
-	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IResource> theResourceType, boolean theJsonMode) throws DataFormatException {
+	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode) throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode);
 		retVal.push(retVal.new PreAtomState(theResourceType));
 		return retVal;
@@ -174,7 +178,7 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *            May be null
 	 */
-	public static <T extends IResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode) throws DataFormatException {
+	public static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode) throws DataFormatException {
 		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode);
 		retVal.push(retVal.new PreResourceState(theResourceType));
 		return retVal;
@@ -291,7 +295,7 @@ class ParserState<T> {
 
 	public class AtomDeletedEntryState extends AtomEntryState {
 
-		public AtomDeletedEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
+		public AtomDeletedEntryState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(theInstance, theResourceType);
 		}
 
@@ -388,9 +392,9 @@ class ParserState<T> {
 
 		private boolean myDeleted;
 		private BundleEntry myEntry;
-		private Class<? extends IResource> myResourceType;
+		private Class<? extends IBaseResource> myResourceType;
 
-		public AtomEntryState(Bundle theInstance, Class<? extends IResource> theResourceType) {
+		public AtomEntryState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myEntry = new BundleEntry();
 			myResourceType = theResourceType;
@@ -601,9 +605,9 @@ class ParserState<T> {
 	private class AtomState extends BaseState {
 
 		private Bundle myInstance;
-		private Class<? extends IResource> myResourceType;
+		private Class<? extends IBaseResource> myResourceType;
 
-		public AtomState(Bundle theInstance, Class<? extends IResource> theResourceType) {
+		public AtomState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myInstance = theInstance;
 			myResourceType = theResourceType;
@@ -750,8 +754,8 @@ class ParserState<T> {
 			if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
-				} else if (myInstance instanceof IResource) {
-					((IResource) myInstance).setId(new IdDt(theValue));
+				} else if (myInstance instanceof IBaseResource) {
+					((IBaseResource) myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
@@ -822,7 +826,7 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
-			IResource res = getCurrentElement();
+			IBaseResource res = getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
@@ -936,8 +940,8 @@ class ParserState<T> {
 			if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
-				} else if (myInstance instanceof IResource) {
-					((IResource) myInstance).setId(new IdDt(theValue));
+				} else if (myInstance instanceof IBaseResource) {
+					((IBaseResource) myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
@@ -1125,9 +1129,9 @@ class ParserState<T> {
 	private class PreAtomState extends BaseState {
 
 		private Bundle myInstance;
-		private Class<? extends IResource> myResourceType;
+		private Class<? extends IBaseResource> myResourceType;
 
-		public PreAtomState(Class<? extends IResource> theResourceType) {
+		public PreAtomState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
 		}
@@ -1162,19 +1166,19 @@ class ParserState<T> {
 			 * Stitch together resource references
 			 */
 
-			Map<String, IResource> idToResource = new HashMap<String, IResource>();
-			List<IResource> resources = myInstance.toListOfResources();
-			for (IResource next : resources) {
+			Map<String, IBaseResource> idToResource = new HashMap<String, IBaseResource>();
+			List<IBaseResource> resources = myInstance.toListOfResources();
+			for (IBaseResource next : resources) {
 				if (next.getId() != null && next.getId().isEmpty() == false) {
 					idToResource.put(next.getId().toUnqualifiedVersionless().getValue(), next);
 				}
 			}
 
-			for (IResource next : resources) {
+			for (IBaseResource next : resources) {
 				List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
 				for (ResourceReferenceDt nextRef : refs) {
 					if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
-						IResource target = idToResource.get(nextRef.getReference().getValue());
+						IBaseResource target = idToResource.get(nextRef.getReference().getValue());
 						if (target != null) {
 							nextRef.setResource(target);
 						}
@@ -1188,13 +1192,13 @@ class ParserState<T> {
 
 	private class PreResourceState extends BaseState {
 
-		private Map<String, IResource> myContainedResources = new HashMap<String, IResource>();
+		private Map<String, IBaseResource> myContainedResources = new HashMap<String, IBaseResource>();
 		private BundleEntry myEntry;
-		private IResource myInstance;
+		private IBaseResource myInstance;
 		private List<ResourceReferenceDt> myResourceReferences = new ArrayList<ResourceReferenceDt>();
-		private Class<? extends IResource> myResourceType;
+		private Class<? extends IBaseResource> myResourceType;
 
-		public PreResourceState(BundleEntry theEntry, Class<? extends IResource> theResourceType) {
+		public PreResourceState(BundleEntry theEntry, Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myEntry = theEntry;
 			myResourceType = theResourceType;
@@ -1204,7 +1208,7 @@ class ParserState<T> {
 		 * @param theResourceType
 		 *            May be null
 		 */
-		public PreResourceState(Class<? extends IResource> theResourceType) {
+		public PreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
 		}
@@ -1249,12 +1253,12 @@ class ParserState<T> {
 			}
 		}
 
-		public Map<String, IResource> getContainedResources() {
+		public Map<String, IBaseResource> getContainedResources() {
 			return myContainedResources;
 		}
 
 		@Override
-		protected IResource getCurrentElement() {
+		protected IBaseResource getCurrentElement() {
 			return myInstance;
 		}
 
@@ -1297,7 +1301,7 @@ class ParserState<T> {
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
-								IResource target = myContainedResources.get(ref.substring(1));
+								IBaseResource target = myContainedResources.get(ref.substring(1));
 								if (target != null) {
 									nextRef.setResource(target);
 								} else {
@@ -1369,8 +1373,8 @@ class ParserState<T> {
 			} else if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
-				} else if (myInstance instanceof IResource) {
-					((IResource) myInstance).setId(new IdDt(theValue));
+				} else if (myInstance instanceof IBaseResource) {
+					((IBaseResource) myInstance).setId(new IdDt(theValue));
 				}
 			}
 		}

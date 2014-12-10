@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import ca.uhn.fhir.model.api.ICompositeElement;
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BaseRuntimeElementCompositeDefinition<T extends ICompositeElement> extends BaseRuntimeElementDefinition<T> {
+public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> extends BaseRuntimeElementDefinition<T> {
 
 	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<BaseRuntimeChildDefinition>();
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
@@ -76,7 +76,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 
 		for (BaseRuntimeChildDefinition next : myChildren) {

@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -37,10 +39,10 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
-	private List<Class<? extends IResource>> myResourceTypes;
+	private List<Class<? extends IBaseResource>> myResourceTypes;
 	private Set<String> myValidChildNames;
 
-	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IResource>> theResourceTypes) {
+	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceTypes = theResourceTypes;
 
@@ -50,7 +52,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
@@ -58,7 +60,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
@@ -76,7 +78,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
 		myRuntimeDef.sealAndInitialize(theClassToElementDefinitions);
 
@@ -84,9 +86,9 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 		myValidChildNames.add(getElementName());
 		myValidChildNames.add(getElementName() + "Resource");
 
-		for (Class<? extends IResource> next : myResourceTypes) {
+		for (Class<? extends IBaseResource> next : myResourceTypes) {
 			if (next == IResource.class) {
-				for (Entry<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> nextEntry : theClassToElementDefinitions.entrySet()) {
+				for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : theClassToElementDefinitions.entrySet()) {
 					if (IResource.class.isAssignableFrom(nextEntry.getKey())) {
 						RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) nextEntry.getValue();
 						myValidChildNames.add(getElementName() + nextDef.getName());
@@ -105,7 +107,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);
 	}
 
-	public List<Class<? extends IResource>> getResourceTypes() {
+	public List<Class<? extends IBaseResource>> getResourceTypes() {
 		return myResourceTypes;
 	}
 
