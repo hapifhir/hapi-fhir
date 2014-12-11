@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -118,8 +118,14 @@ class ModelScanner {
 	}
 
 	ModelScanner(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IBaseResource>> theResourceTypes) throws ConfigurationException {
-		myContext=theContext;
-		init(theExistingDefinitions, new HashSet<Class<? extends IBase>>(theResourceTypes));
+		myContext = theContext;
+		Set<Class<? extends IBase>> toScan;
+		if (theResourceTypes != null) {
+			toScan = new HashSet<Class<? extends IBase>>(theResourceTypes);
+		} else {
+			toScan = new HashSet<Class<? extends IBase>>();
+		}
+		init(theExistingDefinitions, toScan);
 	}
 
 	public Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> getClassToElementDefinitions() {
@@ -188,13 +194,7 @@ class ModelScanner {
 		int startSize = myClassToElementDefinitions.size();
 		long start = System.currentTimeMillis();
 
-		InputStream str = ModelScanner.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
-		if (str == null) {
-			str = ModelScanner.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
-		}
-		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
-		}
+		InputStream str = myContext.getVersion().getFhirVersionPropertiesFile(); 
 		Properties prop = new Properties();
 		try {
 			prop.load(str);
@@ -399,13 +399,13 @@ class ModelScanner {
 		for (Field next : theClass.getDeclaredFields()) {
 
 			if (Modifier.isFinal(next.getModifiers())) {
-				ourLog.trace("Ignoring constant {} on target type {}",  next.getName(), theClass);
+				ourLog.trace("Ignoring constant {} on target type {}", next.getName(), theClass);
 				continue;
 			}
 			
 			Child childAnnotation = pullAnnotation(next, Child.class);
 			if (childAnnotation == null) {
-				ourLog.trace("Ignoring non @Child field {} on target type {}",next.getName() , theClass);
+				ourLog.trace("Ignoring non @Child field {} on target type {}", next.getName(), theClass);
 				continue;
 			}
 
@@ -435,8 +435,8 @@ class ModelScanner {
 						}
 					}
 					if (order == Child.REPLACE_PARENT) {
-						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT + ") but no parent element with extension URL " + extensionAttr.url()
-								+ " could be found on type " + next.getDeclaringClass().getSimpleName());
+						throw new ConfigurationException("Field " + next.getName() + "' on target type " + theClass.getSimpleName() + " has order() of REPLACE_PARENT (" + Child.REPLACE_PARENT + ") but no parent element with extension URL " + extensionAttr.url() + " could be found on type "
+								+ next.getDeclaringClass().getSimpleName());
 					}
 
 				} else {
@@ -467,7 +467,7 @@ class ModelScanner {
 			int min = childAnnotation.min();
 			int max = childAnnotation.max();
 			/*
-			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict wityh any
+			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any
 			 * given IDs and can be figured out later
 			 */
 			while (order == Child.ORDER_UNKNOWN && orderMap.containsKey(order)) {

@@ -56,6 +56,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
@@ -67,6 +68,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -97,6 +99,10 @@ public class XmlParser extends BaseParser implements IParser {
 	private FhirContext myContext;
 	private boolean myPrettyPrint;
 
+	/**
+	 * Do not use this constructor, the recommended way to obtain a new instance of the 
+	 * XML parser is to invoke {@link FhirContext#newXmlParser()}.
+	 */
 	public XmlParser(FhirContext theContext) {
 		super(theContext);
 		myContext = theContext;
@@ -114,115 +120,210 @@ public class XmlParser extends BaseParser implements IParser {
 	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws DataFormatException {
 		try {
 			XMLStreamWriter eventWriter = createXmlWriter(theWriter);
-
-			eventWriter.writeStartElement("feed");
-			eventWriter.writeDefaultNamespace(ATOM_NS);
-
-			writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
-			writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
-
-			writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
-			writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
-			writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
-			writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
-			writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
-			writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
-
-			if (theBundle.getTotalResults().getValue() != null) {
-				eventWriter.writeStartElement("os", "totalResults", OPENSEARCH_NS);
-				eventWriter.writeNamespace("os", OPENSEARCH_NS);
-				eventWriter.writeCharacters(theBundle.getTotalResults().getValue().toString());
-				eventWriter.writeEndElement();
+			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				encodeBundleToWriterUsingBundleResource(theBundle, eventWriter);
+			} else {
+				encodeBundleToWriterUsingAtom(theBundle, eventWriter);
 			}
-
-			writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
-			writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
-
-			if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
-				eventWriter.writeStartElement("author");
-				writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
-				writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
-				eventWriter.writeEndElement();
-			}
-
-			writeCategories(eventWriter, theBundle.getCategories());
-
-			for (BundleEntry nextEntry : theBundle.getEntries()) {
-				boolean deleted = false;
-				if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
-					deleted = true;
-					eventWriter.writeStartElement("at", "deleted-entry", TOMBSTONES_NS);
-					eventWriter.writeNamespace("at", TOMBSTONES_NS);
-					eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
-					eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
-					if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty() == false) {
-						eventWriter.writeStartElement(TOMBSTONES_NS, "by");
-						if (nextEntry.getDeletedByName().isEmpty() == false) {
-							eventWriter.writeStartElement(TOMBSTONES_NS, "name");
-							eventWriter.writeCharacters(nextEntry.getDeletedByName().getValue());
-							eventWriter.writeEndElement();
-						}
-						if (nextEntry.getDeletedByEmail().isEmpty() == false) {
-							eventWriter.writeStartElement(TOMBSTONES_NS, "email");
-							eventWriter.writeCharacters(nextEntry.getDeletedByEmail().getValue());
-							eventWriter.writeEndElement();
-						}
-						eventWriter.writeEndElement();
-					}
-					if (nextEntry.getDeletedComment().isEmpty() == false) {
-						eventWriter.writeStartElement(TOMBSTONES_NS, "comment");
-						eventWriter.writeCharacters(nextEntry.getDeletedComment().getValue());
-						eventWriter.writeEndElement();
-					}
-				} else {
-					eventWriter.writeStartElement("entry");
-				}
-
-				writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
-				if (!deleted) {
-					writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
-				}
-				writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
-				writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
-
-				writeCategories(eventWriter, nextEntry.getCategories());
-
-				if (!nextEntry.getLinkSelf().isEmpty()) {
-					writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
-				}
-
-				if (!nextEntry.getLinkAlternate().isEmpty()) {
-					writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate());
-				}
-
-				if (!nextEntry.getLinkSearch().isEmpty()) {
-					writeAtomLink(eventWriter, "search", nextEntry.getLinkSearch());
-				}
-
-				IResource resource = nextEntry.getResource();
-				if (resource != null && !resource.isEmpty() && !deleted) {
-					eventWriter.writeStartElement("content");
-					eventWriter.writeAttribute("type", "text/xml");
-					encodeResourceToXmlStreamWriter(resource, eventWriter, false);
-					eventWriter.writeEndElement(); // content
-				} else {
-					ourLog.debug("Bundle entry contains null resource");
-				}
-
-				if (!nextEntry.getSummary().isEmpty()) {
-					eventWriter.writeStartElement("summary");
-					eventWriter.writeAttribute("type", "xhtml");
-					encodeXhtml(nextEntry.getSummary(), eventWriter);
-					eventWriter.writeEndElement();
-				}
-
-				eventWriter.writeEndElement(); // entry
-			}
-
-			eventWriter.writeEndElement();
-			eventWriter.close();
 		} catch (XMLStreamException e) {
 			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	private void encodeBundleToWriterUsingAtom(Bundle theBundle, XMLStreamWriter eventWriter) throws XMLStreamException {
+		eventWriter.writeStartElement("feed");
+		eventWriter.writeDefaultNamespace(ATOM_NS);
+
+		writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
+		writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
+
+		writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
+		writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
+		writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
+		writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
+		writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
+		writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
+
+		if (theBundle.getTotalResults().getValue() != null) {
+			eventWriter.writeStartElement("os", "totalResults", OPENSEARCH_NS);
+			eventWriter.writeNamespace("os", OPENSEARCH_NS);
+			eventWriter.writeCharacters(theBundle.getTotalResults().getValue().toString());
+			eventWriter.writeEndElement();
+		}
+
+		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
+		writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
+
+		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
+			eventWriter.writeStartElement("author");
+			writeTagWithTextNode(eventWriter, "name", theBundle.getAuthorName());
+			writeOptionalTagWithTextNode(eventWriter, "uri", theBundle.getAuthorUri());
+			eventWriter.writeEndElement();
+		}
+
+		writeCategories(eventWriter, theBundle.getCategories());
+
+		for (BundleEntry nextEntry : theBundle.getEntries()) {
+			boolean deleted = false;
+			if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
+				deleted = true;
+				eventWriter.writeStartElement("at", "deleted-entry", TOMBSTONES_NS);
+				eventWriter.writeNamespace("at", TOMBSTONES_NS);
+				eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
+				eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
+				if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty() == false) {
+					eventWriter.writeStartElement(TOMBSTONES_NS, "by");
+					if (nextEntry.getDeletedByName().isEmpty() == false) {
+						eventWriter.writeStartElement(TOMBSTONES_NS, "name");
+						eventWriter.writeCharacters(nextEntry.getDeletedByName().getValue());
+						eventWriter.writeEndElement();
+					}
+					if (nextEntry.getDeletedByEmail().isEmpty() == false) {
+						eventWriter.writeStartElement(TOMBSTONES_NS, "email");
+						eventWriter.writeCharacters(nextEntry.getDeletedByEmail().getValue());
+						eventWriter.writeEndElement();
+					}
+					eventWriter.writeEndElement();
+				}
+				if (nextEntry.getDeletedComment().isEmpty() == false) {
+					eventWriter.writeStartElement(TOMBSTONES_NS, "comment");
+					eventWriter.writeCharacters(nextEntry.getDeletedComment().getValue());
+					eventWriter.writeEndElement();
+				}
+			} else {
+				eventWriter.writeStartElement("entry");
+			}
+
+			writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
+			if (!deleted) {
+				writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+			}
+			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
+			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
+
+			writeCategories(eventWriter, nextEntry.getCategories());
+
+			if (!nextEntry.getLinkSelf().isEmpty()) {
+				writeAtomLink(eventWriter, "self", nextEntry.getLinkSelf());
+			}
+
+			if (!nextEntry.getLinkAlternate().isEmpty()) {
+				writeAtomLink(eventWriter, "alternate", nextEntry.getLinkAlternate());
+			}
+
+			if (!nextEntry.getLinkSearch().isEmpty()) {
+				writeAtomLink(eventWriter, "search", nextEntry.getLinkSearch());
+			}
+
+			IResource resource = nextEntry.getResource();
+			if (resource != null && !resource.isEmpty() && !deleted) {
+				eventWriter.writeStartElement("content");
+				eventWriter.writeAttribute("type", "text/xml");
+				encodeResourceToXmlStreamWriter(resource, eventWriter, false);
+				eventWriter.writeEndElement(); // content
+			} else {
+				ourLog.debug("Bundle entry contains null resource");
+			}
+
+			if (!nextEntry.getSummary().isEmpty()) {
+				eventWriter.writeStartElement("summary");
+				eventWriter.writeAttribute("type", "xhtml");
+				encodeXhtml(nextEntry.getSummary(), eventWriter);
+				eventWriter.writeEndElement();
+			}
+
+			eventWriter.writeEndElement(); // entry
+		}
+
+		eventWriter.writeEndElement();
+		eventWriter.close();
+	}
+
+	private void encodeBundleToWriterUsingBundleResource(Bundle theBundle, XMLStreamWriter theEventWriter) throws XMLStreamException {
+		theEventWriter.writeStartElement("Bundle");
+		theEventWriter.writeDefaultNamespace(FHIR_NS);
+
+		writeOptionalTagWithValue(theEventWriter, "id", theBundle.getId().getIdPart());
+
+		theEventWriter.writeStartElement("meta");
+		writeOptionalTagWithValue(theEventWriter, "versionId", theBundle.getId().getVersionIdPart());
+		InstantDt updated = (InstantDt) theBundle.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		if (updated != null) {
+			writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+		}
+		theEventWriter.writeEndElement();
+
+		String bundleBaseUrl = theBundle.getLinkBase().getValue();
+		
+		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
+		writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
+		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
+		
+		writeBundleResourceLink(theEventWriter, "first", theBundle.getLinkFirst());
+		writeBundleResourceLink(theEventWriter, "previous", theBundle.getLinkPrevious());
+		writeBundleResourceLink(theEventWriter, "next", theBundle.getLinkNext());
+		writeBundleResourceLink(theEventWriter, "last", theBundle.getLinkLast());
+		writeBundleResourceLink(theEventWriter, "self", theBundle.getLinkSelf());
+
+		for (BundleEntry nextEntry : theBundle.getEntries()) {
+			theEventWriter.writeStartElement("entry");
+			
+			IResource nextResource = nextEntry.getResource();
+			if (nextResource.getId() != null && nextResource.getId().hasBaseUrl()) {
+				if (!nextResource.getId().getBaseUrl().equals(bundleBaseUrl)) {
+					writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
+				}
+			}
+			
+			writeOptionalTagWithValue(theEventWriter, "status", nextEntry.getStatus().getValue());			
+			writeOptionalTagWithValue(theEventWriter, "search", nextEntry.getLinkSearch().getValue());
+			writeOptionalTagWithValue(theEventWriter, "score", nextEntry.getScore().getValueAsString());
+			
+			boolean deleted = false;
+			if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
+				deleted = true;
+				theEventWriter.writeStartElement("deleted");
+				writeOptionalTagWithValue(theEventWriter, "type", nextEntry.getId().getResourceType());
+				writeOptionalTagWithValue(theEventWriter, "id", nextEntry.getId().getIdPart());
+				writeOptionalTagWithValue(theEventWriter, "versionId", nextEntry.getId().getVersionIdPart());
+				writeOptionalTagWithValue(theEventWriter, "instant", nextEntry.getDeletedAt().getValueAsString());
+				theEventWriter.writeEndElement();
+			} 
+
+			IResource resource = nextEntry.getResource();
+			if (resource != null && !resource.isEmpty() && !deleted) {
+				theEventWriter.writeStartElement("resource");
+				encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+				theEventWriter.writeEndElement(); // content
+			} else {
+				ourLog.debug("Bundle entry contains null resource");
+			}
+
+			theEventWriter.writeEndElement(); // entry
+		}
+
+		theEventWriter.writeEndElement();
+		theEventWriter.close();
+	}
+
+	private void writeBundleResourceLink(XMLStreamWriter theEventWriter, String theRel, StringDt theUrl) throws XMLStreamException {
+		if (theUrl.isEmpty()==false) {
+			theEventWriter.writeStartElement("link");
+			theEventWriter.writeStartElement("relation");
+			theEventWriter.writeAttribute("value", theRel);
+			theEventWriter.writeEndElement();
+			theEventWriter.writeStartElement("url");
+			theEventWriter.writeAttribute("value", theUrl.getValue());
+			theEventWriter.writeEndElement();
+			theEventWriter.writeEndElement();
+		}
+	}
+
+	private void writeOptionalTagWithValue(XMLStreamWriter theEventWriter, String theName, String theValue) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theValue)) {
+			theEventWriter.writeStartElement(theName);
+			theEventWriter.writeAttribute("value", theValue);
+			theEventWriter.writeEndElement();
 		}
 	}
 
@@ -619,6 +720,7 @@ public class XmlParser extends BaseParser implements IParser {
 				resourceId = resource.getId();
 			}
 		}
+
 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
 	}
 
@@ -634,10 +736,25 @@ public class XmlParser extends BaseParser implements IParser {
 
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
-
-		if (theResourceId != null) {
-			theEventWriter.writeAttribute("id", theResourceId);
+		
+		if (!myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			if (theResourceId != null) {
+				theEventWriter.writeAttribute("id", theResourceId);
+			}
+		} else {
+			
+			IResource resource = (IResource) theResource;
+			writeOptionalTagWithValue(theEventWriter, "id", resource.getId().getIdPart());
+			
+			theEventWriter.writeStartElement("meta");
+			writeOptionalTagWithValue(theEventWriter, "versionId", resource.getId().getVersionIdPart());
+			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			if (updated != null) {
+				writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+			}
+			theEventWriter.writeEndElement();
 		}
+		
 
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;

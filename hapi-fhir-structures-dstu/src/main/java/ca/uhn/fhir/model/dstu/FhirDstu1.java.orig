@@ -31,6 +31,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+<<<<<<< HEAD
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+
+=======
+>>>>>>> c294e1c064fcbf112edcbf4e10c341691c12a1a8
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBaseResource;

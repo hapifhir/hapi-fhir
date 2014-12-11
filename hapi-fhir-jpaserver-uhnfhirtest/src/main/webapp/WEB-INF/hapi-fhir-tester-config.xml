@@ -19,6 +19,7 @@
 				<value>blaze    , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
 				<value>oridashi , Oridashi                                     , http://demo.oridashi.com.au:8190</value>
 				<!-- <value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value> -->
+				<value>nortal   , Nortal                                       , http://fhir.nortal.com/fhir-server</value>
 			</list>
 		</property>
 	</bean>

@@ -34,17 +34,21 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
 public class Bundle extends BaseBundle /* implements IElement */{
 
+	private ResourceMetadataMap myResourceMetadata;
+	private BoundCodeDt<BundleTypeEnum> myType;
 	private StringDt myBundleId;
-
 	private TagList myCategories;
 	private List<BundleEntry> myEntries;
 	private volatile transient Map<IdDt, IResource> myIdToEntries;
@@ -54,13 +58,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	private StringDt myLinkNext;
 	private StringDt myLinkPrevious;
 	private StringDt myLinkSelf;
-	private InstantDt myPublished;
 	private StringDt myTitle;
 	private IntegerDt myTotalResults;
-	private InstantDt myUpdated;
 
 	/**
-	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addCategory(String, String, String)} should be used instead
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so
+	 *             {@link #addCategory(String, String, String)} should be used instead
 	 */
 	public Tag addCategory() {
 		Tag retVal = new Tag();
@@ -72,7 +75,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		getCategories().add(new Tag(theScheme, theTerm, theLabel));
 	}
 
-	
 	public void addCategory(Tag theTag) {
 		getCategories().add(theTag);
 	}
@@ -119,10 +121,10 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 		if (theResource.getId() != null) {
 			if (theResource.getId().isAbsolute()) {
-				
+
 				entry.getLinkSelf().setValue(theResource.getId().getValue());
 				entry.getId().setValue(theResource.getId().toVersionless().getValue());
-				
+
 			} else if (StringUtils.isNotBlank(theResource.getId().getValue())) {
 
 				StringBuilder b = new StringBuilder();
@@ -208,6 +210,27 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return entry;
 	}
 
+	public StringDt getBundleId() {
+		if (myBundleId == null) {
+			myBundleId = new StringDt();
+		}
+		return myBundleId;
+	}
+
+	public TagList getCategories() {
+		if (myCategories == null) {
+			myCategories = new TagList();
+		}
+		return myCategories;
+	}
+
+	public List<BundleEntry> getEntries() {
+		if (myEntries == null) {
+			myEntries = new ArrayList<BundleEntry>();
+		}
+		return myEntries;
+	}
+
 	// public static void main(String[] args) {
 	//
 	// FhirContext ctx = new FhirContext();
@@ -233,27 +256,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	// c.update().resource(txt).withId("1665").execute();
 	// }
 	//
-
-	public StringDt getBundleId() {
-		if (myBundleId == null) {
-			myBundleId = new StringDt();
-		}
-		return myBundleId;
-	}
-
-	public TagList getCategories() {
-		if (myCategories == null) {
-			myCategories = new TagList();
-		}
-		return myCategories;
-	}
-
-	public List<BundleEntry> getEntries() {
-		if (myEntries == null) {
-			myEntries = new ArrayList<BundleEntry>();
-		}
-		return myEntries;
-	}
 
 	public StringDt getLinkBase() {
 		if (myLinkBase == null) {
@@ -298,18 +300,22 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	}
 
 	public InstantDt getPublished() {
-		if (myPublished == null) {
-			myPublished = new InstantDt();
+		InstantDt retVal = (InstantDt) getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		if (retVal == null) {
+			retVal= new InstantDt();
+			getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, retVal);
 		}
-		return myPublished;
+		return retVal;
 	}
 
 	/**
 	 * Retrieves a resource from a bundle given its logical ID.
 	 * <p>
-	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
-	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been populated. It will cache its results for fast performance, but that means that
-	 * modifications to the bundle after this method is called may not be accurately reflected.
+	 * <b>Important usage notes</b>: This method ignores base URLs (so passing in an ID of
+	 * <code>http://foo/Patient/123</code> will return a resource if it has the logical ID of
+	 * <code>http://bar/Patient/123</code>. Also, this method is intended to be used for bundles which have already been
+	 * populated. It will cache its results for fast performance, but that means that modifications to the bundle after
+	 * this method is called may not be accurately reflected.
 	 * </p>
 	 * 
 	 * @param theId
@@ -328,6 +334,13 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			myIdToEntries = map;
 		}
 		return map.get(theId.toUnqualified());
+	}
+
+	public ResourceMetadataMap getResourceMetadata() {
+		if (myResourceMetadata == null) {
+			myResourceMetadata = new ResourceMetadataMap();
+		}
+		return myResourceMetadata;
 	}
 
 	/**
@@ -359,11 +372,20 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return myTotalResults;
 	}
 
-	public InstantDt getUpdated() {
-		if (myUpdated == null) {
-			myUpdated = new InstantDt();
+	public BoundCodeDt<BundleTypeEnum> getType() {
+		if (myType == null) {
+			myType = new BoundCodeDt<BundleTypeEnum>(BundleTypeEnum.VALUESET_BINDER);
 		}
-		return myUpdated;
+		return myType;
+	}
+
+	public InstantDt getUpdated() {
+		InstantDt retVal = (InstantDt) getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		if (retVal == null) {
+			retVal= new InstantDt();
+			getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, retVal);
+		}
+		return retVal;
 	}
 
 	/**
@@ -379,7 +401,11 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	}
 
 	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished;
+		getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, thePublished);
+	}
+
+	public void setType(BoundCodeDt<BundleTypeEnum> theType) {
+		myType = theType;
 	}
 
 	/**

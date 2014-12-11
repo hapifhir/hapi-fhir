@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dev.composite;
 
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
 /*
  * #%L
  * HAPI FHIR Structures - DEV (FHIR Latest)
@@ -20,6 +22,7 @@ package ca.uhn.fhir.model.dev.composite;
  * #L%
  */
 
+@DatatypeDef(name="CountDt") 
 public class CountDt extends QuantityDt {
 
 }
