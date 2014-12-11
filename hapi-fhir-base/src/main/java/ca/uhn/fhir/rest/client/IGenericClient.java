@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.client;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -152,7 +154,7 @@ public interface IGenericClient {
 	 *            The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
 	 * @return The resource
 	 */
-	<T extends IResource> T read(Class<T> theType, IdDt theId);
+	<T extends IBaseResource> T read(Class<T> theType, IdDt theId);
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -163,7 +165,7 @@ public interface IGenericClient {
 	 *            The ID to load
 	 * @return The resource
 	 */
-	<T extends IResource> T read(Class<T> theType, String theId);
+	<T extends IBaseResource> T read(Class<T> theType, String theId);
 
 	/**
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
@@ -200,7 +202,7 @@ public interface IGenericClient {
 	 * @param theParams
 	 * @return
 	 */
-	<T extends IResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
+	<T extends IBaseResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
 
 	/**
 	 * Perform the "search" operation using an absolute URL.
@@ -211,7 +213,7 @@ public interface IGenericClient {
 	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned bundle from the server
 	 */
-	<T extends IResource> Bundle search(Class<T> theType, UriDt theUrl);
+	<T extends IBaseResource> Bundle search(Class<T> theType, UriDt theUrl);
 
 	Bundle search(UriDt theUrl);
 

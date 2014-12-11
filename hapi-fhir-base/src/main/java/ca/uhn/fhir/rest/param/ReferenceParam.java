@@ -21,6 +21,9 @@ package ca.uhn.fhir.rest.param;
  */
 
 import static org.apache.commons.lang3.StringUtils.*;
+
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -89,7 +92,7 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		myChain = theChain;
 	}
 
-	public Class<? extends IResource> getResourceType(FhirContext theCtx) {
+	public Class<? extends IBaseResource> getResourceType(FhirContext theCtx) {
 		if (isBlank(getResourceType())) {
 			return null;
 		}

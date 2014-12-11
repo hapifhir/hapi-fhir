@@ -25,8 +25,5 @@ import org.hl7.fhir.instance.model.IBase;
 
 
 public interface IElement extends IBase {
-
-	boolean isEmpty();
-
 	
 }

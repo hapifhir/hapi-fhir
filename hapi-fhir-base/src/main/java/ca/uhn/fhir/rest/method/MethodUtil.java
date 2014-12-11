@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -22,6 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.Resource.ResourceMetaComponent;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -115,20 +117,24 @@ public class MethodUtil {
 		}
 
 		addTagsToPostOrPut(theResource, retVal);
-//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
-		
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
 		return retVal;
 	}
 
-	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IResource resource) {
+	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
 			Date headerDateValue;
 			try {
 				headerDateValue = DateUtils.parseDate(headerValue);
-				InstantDt lmValue = new InstantDt(headerDateValue);
-				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+				if (resource instanceof IResource) {
+					InstantDt lmValue = new InstantDt(headerDateValue);
+					((IResource) resource).getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+				} else if (resource instanceof Resource){
+					((Resource) resource).getMeta().setLastUpdated(headerDateValue);
+				}
 			} catch (Exception e) {
 				ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
 			}
@@ -137,7 +143,9 @@ public class MethodUtil {
 		List<String> clHeaders = theHeaders.get(Constants.HEADER_CONTENT_LOCATION_LC);
 		if (clHeaders != null && clHeaders.size() > 0 && StringUtils.isNotBlank(clHeaders.get(0))) {
 			String headerValue = clHeaders.get(0);
-			resource.getId().setValue(headerValue);
+			if (isNotBlank(headerValue)) {
+				new IdDt(headerValue).applyTo(resource);
+			}
 		}
 
 		List<String> categoryHeaders = theHeaders.get(Constants.HEADER_CATEGORY_LC);
@@ -146,7 +154,14 @@ public class MethodUtil {
 			for (String header : categoryHeaders) {
 				parseTagValue(tagList, header);
 			}
-			ResourceMetadataKeyEnum.TAG_LIST.put(resource, tagList);
+			if (resource instanceof IResource) {
+				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) resource, tagList);
+			} else if (resource instanceof Resource) {
+				ResourceMetaComponent meta = ((Resource) resource).getMeta();
+				for (Tag next : tagList) {
+					meta.addTag().setSystem(next.getScheme()).setCode(next.getTerm()).setDisplay(next.getLabel());
+				}
+			}
 		}
 	}
 
@@ -261,8 +276,8 @@ public class MethodUtil {
 		}
 		addTagsToPostOrPut(theResource, retVal);
 
-//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
-		
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
 		return retVal;
 	}
 

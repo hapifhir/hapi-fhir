@@ -20,8 +20,7 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 
@@ -29,8 +28,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Resource;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -346,9 +348,10 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
 	 * </p>
+	 * @return 
 	 */
 	@Override
-	public void setValue(String theValue) throws DataFormatException {
+	public IdDt setValue(String theValue) throws DataFormatException {
 		// TODO: add validation
 		myValue = theValue;
 		myHaveComponentParts = false;
@@ -388,6 +391,7 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			}
 
 		}
+		return this;
 	}
 
 	/**
@@ -505,4 +509,16 @@ public class IdDt implements IPrimitiveDatatype<String> {
 		return isBlank(getValue());
 	}
 
+	public void applyTo(IBaseResource theResouce) {
+		if (theResouce == null) {
+			throw new NullPointerException("theResource can not be null");
+		} else if (theResouce instanceof IResource) {
+			((IResource) theResouce).setId(new IdDt(getValue()));
+		} else if (theResouce instanceof Resource) {
+			((Resource) theResouce).setId(getIdPart());
+		} else {
+			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
+		}
+	}
+	
 }

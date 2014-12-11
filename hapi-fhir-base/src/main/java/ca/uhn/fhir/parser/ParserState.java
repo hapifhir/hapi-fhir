@@ -20,9 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +32,10 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.Element;
+import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -52,11 +53,9 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IBaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -755,7 +754,7 @@ class ParserState<T> {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else if (myInstance instanceof IBaseResource) {
-					((IBaseResource) myInstance).setId(new IdDt(theValue));
+					(myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
@@ -826,7 +825,7 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
-			IBaseResource res = getCurrentElement();
+			IResource res = (IResource) getCurrentElement();
 			assert res != null;
 			if (res.getId() == null || res.getId().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
@@ -836,7 +835,8 @@ class ParserState<T> {
 					res.setId(new IdDt('#' + res.getId().getIdPart()));
 				}
 			}
-			getPreResourceState().getCurrentElement().getContained().getContainedResources().add(res);
+			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
+			preResCurrentElement.getContained().getContainedResources().add(res);
 			
 		}
 
@@ -844,12 +844,12 @@ class ParserState<T> {
 
 	private class DeclaredExtensionState extends BaseState {
 
-		private IElement myChildInstance;
+		private IBase myChildInstance;
 		private RuntimeChildDeclaredExtensionDefinition myDefinition;
-		private IElement myParentInstance;
+		private IBase myParentInstance;
 		private PreResourceState myPreResourceState;
 
-		public DeclaredExtensionState(PreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IElement theParentInstance) {
+		public DeclaredExtensionState(PreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IBase theParentInstance) {
 			super(thePreResourceState);
 			myPreResourceState = thePreResourceState;
 			myDefinition = theDefinition;
@@ -879,7 +879,7 @@ class ParserState<T> {
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
+				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
@@ -918,7 +918,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return myParentInstance;
 		}
 
@@ -927,9 +927,9 @@ class ParserState<T> {
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
-		private ICompositeElement myInstance;
+		private IBase myInstance;
 
-		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, ICompositeElement theInstance) {
+		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
@@ -940,8 +940,10 @@ class ParserState<T> {
 			if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
+				} else if (myInstance instanceof Element) {
+					((Element) myInstance).setId(theValue);
 				} else if (myInstance instanceof IBaseResource) {
-					((IBaseResource) myInstance).setId(new IdDt(theValue));
+					new IdDt(theValue).applyTo((IBaseResource) myInstance);
 				}
 			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
 				((ExtensionDt) myInstance).setUrl(theValue);
@@ -986,7 +988,7 @@ class ParserState<T> {
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveDatatype<?> newChildInstance;
+				IPrimitiveType<?> newChildInstance;
 				newChildInstance = primitiveTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
@@ -1020,7 +1022,7 @@ class ParserState<T> {
 			}
 			case CONTAINED_RESOURCES: {
 				RuntimeElemContainedResources targetElem = (RuntimeElemContainedResources) target;
-				List<? extends IElement> values = child.getAccessor().getValues(myInstance);
+				List<? extends IBase> values = child.getAccessor().getValues(myInstance);
 				ContainedDt newDt;
 				if (values == null || values.isEmpty() || values.get(0) == null) {
 					newDt = targetElem.newInstance();
@@ -1055,7 +1057,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return myInstance;
 		}
 
@@ -1096,8 +1098,8 @@ class ParserState<T> {
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveDatatype<?> newChildInstance = primitiveTarget.newInstance();
-				myExtension.setValue(newChildInstance);
+				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
+				myExtension.setValue((IElement) newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
@@ -1166,9 +1168,9 @@ class ParserState<T> {
 			 * Stitch together resource references
 			 */
 
-			Map<String, IBaseResource> idToResource = new HashMap<String, IBaseResource>();
-			List<IBaseResource> resources = myInstance.toListOfResources();
-			for (IBaseResource next : resources) {
+			Map<String, IResource> idToResource = new HashMap<String, IResource>();
+			List<IResource> resources = myInstance.toListOfResources();
+			for (IResource next : resources) {
 				if (next.getId() != null && next.getId().isEmpty() == false) {
 					idToResource.put(next.getId().toUnqualifiedVersionless().getValue(), next);
 				}
@@ -1178,7 +1180,7 @@ class ParserState<T> {
 				List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
 				for (ResourceReferenceDt nextRef : refs) {
 					if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
-						IBaseResource target = idToResource.get(nextRef.getReference().getValue());
+						IResource target = idToResource.get(nextRef.getReference().getValue());
 						if (target != null) {
 							nextRef.setResource(target);
 						}
@@ -1194,7 +1196,7 @@ class ParserState<T> {
 
 		private Map<String, IBaseResource> myContainedResources = new HashMap<String, IBaseResource>();
 		private BundleEntry myEntry;
-		private IBaseResource myInstance;
+		private IResource myInstance;
 		private List<ResourceReferenceDt> myResourceReferences = new ArrayList<ResourceReferenceDt>();
 		private Class<? extends IBaseResource> myResourceType;
 
@@ -1241,7 +1243,7 @@ class ParserState<T> {
 			}
 
 			RuntimeResourceDefinition def = (RuntimeResourceDefinition) definition;
-			myInstance = def.newInstance();
+			myInstance = (IResource) def.newInstance();
 			if (myEntry != null) {
 				myEntry.setResource(myInstance);
 			}
@@ -1295,13 +1297,13 @@ class ParserState<T> {
 				}
 
 				@Override
-				public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 					if (theElement instanceof ResourceReferenceDt) {
 						ResourceReferenceDt nextRef = (ResourceReferenceDt) theElement;
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
-								IBaseResource target = myContainedResources.get(ref.substring(1));
+								IResource target = (IResource) myContainedResources.get(ref.substring(1));
 								if (target != null) {
 									nextRef.setResource(target);
 								} else {
@@ -1359,9 +1361,9 @@ class ParserState<T> {
 	}
 
 	private class PrimitiveState extends BaseState {
-		private IPrimitiveDatatype<?> myInstance;
+		private IPrimitiveType<?> myInstance;
 
-		public PrimitiveState(PreResourceState thePreResourceState, IPrimitiveDatatype<?> theInstance) {
+		public PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 		}
@@ -1373,8 +1375,10 @@ class ParserState<T> {
 			} else if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId(theValue);
+				} else if (myInstance instanceof Element) {
+					((Element) myInstance).setId(theValue);
 				} else if (myInstance instanceof IBaseResource) {
-					((IBaseResource) myInstance).setId(new IdDt(theValue));
+					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.IBaseResource) myInstance);
 				}
 			}
 		}
@@ -1404,7 +1408,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return myInstance;
 		}
 

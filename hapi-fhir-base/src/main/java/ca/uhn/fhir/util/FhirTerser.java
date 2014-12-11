@@ -53,7 +53,7 @@ public class FhirTerser {
 		myContext = theContext;
 	}
 
-	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition,
+	private <T extends IBase> void addUndeclaredExtensions(IBase theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition,
 			IModelVisitor theCallback) {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
@@ -87,7 +87,7 @@ public class FhirTerser {
 		visit(theResource, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+			public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
@@ -140,13 +140,13 @@ public class FhirTerser {
 	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
 		String name = theSubList.get(0);
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
-		List<? extends IElement> values = nextDef.getAccessor().getValues(theCurrentObj);
+		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
 		List<Object> retVal = new ArrayList<Object>();
 
 		if (theSubList.size() == 1) {
 			retVal.addAll(values);
 		} else {
-			for (IElement nextElement : values) {
+			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 				List<?> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()));
 				retVal.addAll(foundValues);
@@ -170,7 +170,7 @@ public class FhirTerser {
 
 	}
 
-	private <T extends IElement> void visit(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+	private <T extends IElement> void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
@@ -198,9 +198,9 @@ public class FhirTerser {
 		case RESOURCE: {
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
-				List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
+				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
 				if (values != null) {
-					for (IElement nextValue : values) {
+					for (IBase nextValue : values) {
 						if (nextValue == null) {
 							continue;
 						}

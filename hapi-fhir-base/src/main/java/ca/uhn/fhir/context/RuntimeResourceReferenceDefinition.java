@@ -52,7 +52,7 @@ public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefini
 	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myResourceTypeToDefinition = new HashMap<Class<? extends IBaseResource>, RuntimeResourceDefinition>();
 		for (Class<? extends IBaseResource> next : myResourceTypes) {
-			if (next.equals(IResource.class) || next.equals(Resource.class)) {
+			if (next.equals(IResource.class) || next.equals(Resource.class) || next.equals(IBaseResource.class)) {
 				continue;
 			}
 			RuntimeResourceDefinition definition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);

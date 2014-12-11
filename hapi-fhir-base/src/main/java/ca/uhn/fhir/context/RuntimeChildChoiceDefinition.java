@@ -30,8 +30,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -88,11 +88,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			String elementName;
 			String alternateElementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
-			if (IResource.class.isAssignableFrom(next)) {
+			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				alternateElementName = getElementName() + "Resource";
-				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
-				types.add((Class<? extends IResource>) next);
+				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
 				nextDef.sealAndInitialize(theClassToElementDefinitions);
 			} else {
@@ -105,7 +105,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				myNameToChildDefinition.put(alternateElementName, nextDef);
 			}
 			
-			if (IResource.class.isAssignableFrom(next)) {
+			if (IBaseResource.class.isAssignableFrom(next)) {
 				myDatatypeToElementDefinition.put(ResourceReferenceDt.class, nextDef);
 				alternateElementName = getElementName() + "Resource";
 				myDatatypeToElementName.put(ResourceReferenceDt.class, alternateElementName);

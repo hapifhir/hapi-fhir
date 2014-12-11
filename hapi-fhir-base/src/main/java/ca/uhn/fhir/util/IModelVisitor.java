@@ -20,10 +20,11 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 
 /**
@@ -37,7 +38,7 @@ public interface IModelVisitor {
 	 * @param theChildDefinition May be null if this is a root element
 	 * @param theDefinition
 	 */
-	void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
+	void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
 
 	/**
 	 * 

@@ -34,7 +34,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 import com.phloc.commons.error.IResourceError;
@@ -88,7 +87,7 @@ public class SchematronBaseValidator implements IValidator {
 
 	private ISchematronResource getSchematron(ValidationContext<IResource> theCtx) {
 		Class<? extends IResource> resource = theCtx.getResource().getClass();
-		Class<? extends IResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
+		Class<? extends IResource> baseResourceClass = (Class<? extends IResource>) theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
 		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
 	}

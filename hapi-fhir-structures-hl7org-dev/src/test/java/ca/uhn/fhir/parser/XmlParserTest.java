@@ -31,6 +31,7 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.List_;
+import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.Profile;
@@ -710,7 +711,7 @@ public class XmlParserTest {
 
 		Patient patient = ourCtx.newXmlParser().parse(Patient.class, msg);
 
-		assertEquals(NarrativeStatusEnum.GENERATED, patient.getText().getStatus().getValueAsEnum());
+		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue().getValueAsString());
 

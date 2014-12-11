@@ -25,7 +25,6 @@ import java.io.Reader;
 import java.io.Writer;
 
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Resource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
@@ -67,7 +66,7 @@ public interface IParser {
 	 */
 	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
 
-	<T extends IResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
+	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
 
 	Bundle parseBundle(Reader theReader);
 
@@ -152,14 +151,5 @@ public interface IParser {
 	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
-
-	/**
-	 * Parses a resource from the HL7.org structure library
-	 * 
-	 * @param theClass The resource type
-	 * @param theResourceBody The body of the resource to parse
-	 * @return A parsed resource
-	 */
-	<T extends Resource> T parse(Class<T> theClass, String theResourceBody);
 
 }

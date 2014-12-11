@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Binary;
@@ -107,7 +106,7 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
-	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IElement> theElementType) {
+	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IBase> theElementType) {
 		return myClassToElementDefinition.get(theElementType);
 	}
 
@@ -144,7 +143,7 @@ public class FhirContext {
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed for extending the core library.
 	 */
-	public RuntimeResourceDefinition getResourceDefinition(IResource theResource) {
+	public RuntimeResourceDefinition getResourceDefinition(IBaseResource theResource) {
 		return getResourceDefinition(theResource.getClass());
 	}
 

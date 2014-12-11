@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -36,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -233,7 +233,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> T read(final Class<T> theType, IdDt theId) {
+	public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
 		if (theId == null || theId.hasIdPart() == false) {
 			throw new IllegalArgumentException("theId does not contain a valid ID, is: " + theId);
 		}
@@ -254,7 +254,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> T read(Class<T> theType, String theId) {
+	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
 		return read(theType, new IdDt(theId));
 	}
 
@@ -274,7 +274,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (def == null) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
 		}
-		return read(def.getImplementingClass(), id);
+		return (IResource) read(def.getImplementingClass(), id);
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle search(final Class<T> theType, Map<String, List<IQueryParameterType>> theParams) {
+	public <T extends IBaseResource> Bundle search(final Class<T> theType, Map<String, List<IQueryParameterType>> theParams) {
 		LinkedHashMap<String, List<String>> params = new LinkedHashMap<String, List<String>>();
 		for (Entry<String, List<IQueryParameterType>> nextEntry : theParams.entrySet()) {
 			ArrayList<String> valueList = new ArrayList<String>();
@@ -307,7 +307,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> Bundle search(final Class<T> theType, UriDt theUrl) {
+	public <T extends IBaseResource> Bundle search(final Class<T> theType, UriDt theUrl) {
 		BaseHttpClientInvocation invocation = new HttpGetClientInvocation(theUrl.getValueAsString());
 		return invokeClient(myContext, new BundleResponseHandler(theType), invocation);
 	}
@@ -317,7 +317,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return search(inferResourceClass(theUrl), theUrl);
 	}
 
-	private Class<? extends IResource> inferResourceClass(UriDt theUrl) {
+	private Class<? extends IBaseResource> inferResourceClass(UriDt theUrl) {
 		String urlString = theUrl.getValueAsString();
 		int i = urlString.indexOf('?');
 
@@ -360,7 +360,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		myLogRequestAndResponse = theLogRequestAndResponse;
 	}
 
-	private String toResourceName(Class<? extends IResource> theType) {
+	private String toResourceName(Class<? extends IBaseResource> theType) {
 		return myContext.getResourceDefinition(theType).getName();
 	}
 
@@ -544,9 +544,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class BundleResponseHandler implements IClientResponseHandler<Bundle> {
 
-		private Class<? extends IResource> myType;
+		private Class<? extends IBaseResource> myType;
 
-		public BundleResponseHandler(Class<? extends IResource> theType) {
+		public BundleResponseHandler(Class<? extends IBaseResource> theType) {
 			myType = theType;
 		}
 
@@ -832,7 +832,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private final class ResourceResponseHandler<T extends IResource> implements IClientResponseHandler<T> {
+	private final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 
 		private IdDt myId;
 		private Class<T> myType;
@@ -852,7 +852,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			T retVal = parser.parseResource(myType, theResponseReader);
 
 			if (myId != null) {
-				retVal.setId(myId);
+				myId.applyTo(retVal);
 			}
 
 			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
@@ -869,7 +869,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Integer myParamLimit;
 		private String myResourceId;
 		private String myResourceName;
-		private Class<? extends IResource> myResourceType;
+		private Class<? extends IBaseResource> myResourceType;
 		private SearchStyleEnum mySearchStyle;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 

@@ -82,7 +82,7 @@ public abstract class BaseIdentifiableElement extends BaseElement implements IId
 		}
 
 		@Override
-		public void setValue(String theValue) throws DataFormatException {
+		public IdDt setValue(String theValue) throws DataFormatException {
 			throw new UnsupportedOperationException("Use IElement#setElementSpecificId(String) to set the element ID for an element");
 		}
 

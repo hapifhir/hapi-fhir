@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.ICompositeDatatype;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -131,12 +132,13 @@ public class FhirDstu1 implements IFhirVersion {
 	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IResource> next : rr.getResourceTypes()) {
+			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
 				StructureElementDefinitionType type = elem.getDefinition().addType();
 				type.getCode().setValue("ResourceReference");
 
 				if (next != IResource.class) {
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
+					@SuppressWarnings("unchecked")
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
 					type.getProfile().setValueAsString(resDef.getResourceProfile());
 				}
 			}

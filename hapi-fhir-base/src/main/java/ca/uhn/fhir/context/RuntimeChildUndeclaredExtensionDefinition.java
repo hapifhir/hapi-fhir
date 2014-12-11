@@ -30,10 +30,10 @@ import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
@@ -99,8 +99,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		// Resource Reference
 		myDatatypeToAttributeName.put(ResourceReferenceDt.class, "valueResource");
-		List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
-		types.add(IResource.class);
+		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+		types.add(IBaseResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
 		def.sealAndInitialize(theClassToElementDefinitions);
 		myAttributeNameToDefinition.put("valueResource", def);

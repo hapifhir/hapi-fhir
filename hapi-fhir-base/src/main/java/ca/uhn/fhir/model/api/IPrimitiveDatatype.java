@@ -24,7 +24,7 @@ import org.hl7.fhir.instance.model.IPrimitiveType;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
-public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType {
+public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType<T> {
 
 	void setValueAsString(String theValue) throws DataFormatException;
 
@@ -32,5 +32,5 @@ public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType {
 
 	T getValue();
 	
-	void setValue(T theValue) throws DataFormatException;
+	IPrimitiveType<T> setValue(T theValue) throws DataFormatException;
 }

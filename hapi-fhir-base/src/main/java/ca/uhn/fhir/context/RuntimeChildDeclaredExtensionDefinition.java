@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -140,7 +141,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 			if ("valueResourceReference".equals(myDatatypeChildName)) {
 				// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension
 				myDatatypeChildName = "valueResource";
-				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
+				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
 				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
 			}else {
