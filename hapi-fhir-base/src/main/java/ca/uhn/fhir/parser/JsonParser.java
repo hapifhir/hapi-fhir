@@ -989,7 +989,12 @@ public class JsonParser extends BaseParser implements IParser {
 	private void parseExtensionInDstu2Style(ParserState<?> theState, String theUrl, JsonArray theValues) {
 		theState.enteringNewElementExtension(null, theUrl, false);
 		
-		
+		for (int extIdx = 0; extIdx < theValues.size(); extIdx++) {
+			JsonObject nextExt = theValues.getJsonObject(extIdx);
+			for (String nextKey : nextExt.keySet()) {
+				if (nextKey.startsWith("value") && nextKey.length() > 5 && )
+			}
+		}
 		
 		theState.endingElement();
 	}
