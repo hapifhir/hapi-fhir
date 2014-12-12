@@ -469,11 +469,7 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
-
-			if (fhirServerBase.endsWith("/")) {
-				fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
-			}
+			fhirServerBase = determineServerBase(theRequest);
 
 			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
@@ -710,6 +706,16 @@ public class RestfulServer extends HttpServlet {
 
 	}
 
+	private String determineServerBase(HttpServletRequest theRequest) {
+		String fhirServerBase;
+		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
+
+		if (fhirServerBase.endsWith("/")) {
+            fhirServerBase = fhirServerBase.substring(0, fhirServerBase.length() - 1);
+        }
+		return fhirServerBase;
+	}
+
 	/**
 	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations, but subclasses may put initialization code in {@link #initialize()}, which is
 	 * called immediately before beginning initialization of the restful server's internal init.
@@ -944,7 +950,7 @@ public class RestfulServer extends HttpServlet {
 		myInterceptors.remove(theInterceptor);
 	}
 
-	private static void addProfileToBundleEntry(FhirContext theContext, IResource theResource) {
+	private static void addProfileToBundleEntry(FhirContext theContext, IResource theResource, String theServerBase) {
 
 		TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tl == null) {
@@ -953,7 +959,7 @@ public class RestfulServer extends HttpServlet {
 		}
 
 		RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-		String profile = nextDef.getResourceProfile();
+		String profile = nextDef.getResourceProfile(theServerBase);
 		if (isNotBlank(profile)) {
 			tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
 		}
@@ -1017,7 +1023,7 @@ public class RestfulServer extends HttpServlet {
 			for (IResource nextRes : resourceList) {
 				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
 				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					addProfileToBundleEntry(theServer.getFhirContext(), nextRes);
+					addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
 				}
 			}
 		}
@@ -1336,7 +1342,7 @@ public class RestfulServer extends HttpServlet {
 		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
 			RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(theResource);
 			if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-				addProfileToBundleEntry(theServer.getFhirContext(), theResource);
+				addProfileToBundleEntry(theServer.getFhirContext(), theResource, theServerBase);
 			}
 		}
 
