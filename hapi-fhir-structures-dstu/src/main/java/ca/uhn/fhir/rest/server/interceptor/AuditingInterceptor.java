@@ -114,6 +114,10 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			log.debug("No auditing configured.");
 			return true;
 		}
+		if(theResponseObject == null || theResponseObject.isEmpty()){
+			log.debug("No bundle to audit");
+			return true;
+		}
 		try{
 			log.info("Auditing bundle: " + theResponseObject + " from request " + theRequestDetails);
 			SecurityEvent auditEvent = new SecurityEvent();	
@@ -161,6 +165,10 @@ public class AuditingInterceptor extends InterceptorAdapter {
 		if(myClientParamsOptional && myDataStore == null){
 			//auditing is not required or configured, so do nothing here
 			log.debug("No auditing configured.");
+			return true;
+		}
+		if(theResponseObject == null){
+			log.debug("No object to audit");
 			return true;
 		}
 		try{
