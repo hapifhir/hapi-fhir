@@ -1,11 +1,6 @@
 package ca.uhn.fhir.context;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.junit.Test;
-
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
@@ -13,6 +8,12 @@ import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
 import ca.uhn.fhir.model.dstu.resource.Profile.StructureElement;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RuntimeResourceDefinitionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinitionTest.class);
@@ -58,7 +59,7 @@ public class RuntimeResourceDefinitionTest {
 
 		Profile profile = (Profile) def.toProfile();
 
-		ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile));
+		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
 		
 		List<StructureElement> element = profile.getStructure().get(0).getElement();
 		assertEquals(1, element.get(0).getDefinition().getType().size());
@@ -100,6 +101,50 @@ public class RuntimeResourceDefinitionTest {
 		Profile profile = (Profile) def.toProfile();
 
 		assertEquals("customobservation", profile.getId().toString());
+	}
+
+	@Test
+	public void whenResourceProfileNotSet_ProfileShouldBeConstructedFromServerBaseAndId() {
+		FhirContext ctx = new FhirContext(PatientSansProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientSansProfile.class);
+		assertEquals("http://foo.org/fhir/Profile/PatientSansProfile", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@ResourceDef(name = "Patient", id = "PatientSansProfile")
+	class PatientSansProfile extends Patient {
+	}
+
+	@Test
+	public void whenResourceProfileHasNoUrl_ProfileShouldBeConstructedFromServerBaseAndProfile() {
+		FhirContext ctx = new FhirContext(PatientWithShortProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithShortProfile.class);
+		assertEquals("http://foo.org/fhir/Profile/PatientWithShortProfile", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@ResourceDef(name = "Patient", id = "PatientWithShortProfileId", profile="PatientWithShortProfile")
+	class PatientWithShortProfile extends Patient {
+	}
+
+	@Test
+	public void whenResourceProfileHasUrl_ProfileShouldUseThat() {
+		FhirContext ctx = new FhirContext(PatientWithFullProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithFullProfile.class);
+		assertEquals("http://bar.org/Profile/PatientWithFullProfile", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@ResourceDef(name = "Patient", id = "PatientWithFullProfileId", profile="http://bar.org/Profile/PatientWithFullProfile")
+	class PatientWithFullProfile extends Patient {
+	}
+
+	@Test
+	public void whenProfileAndIdAreBlank_ProfileShouldBeBlank() {
+		FhirContext ctx = new FhirContext(PatientWithNoIdOrProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithNoIdOrProfile.class);
+		assertEquals("", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@ResourceDef(name = "Patient")
+	class PatientWithNoIdOrProfile extends Patient {
 	}
 
 }
