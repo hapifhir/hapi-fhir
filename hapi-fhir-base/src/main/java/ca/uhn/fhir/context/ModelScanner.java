@@ -288,7 +288,7 @@ class ModelScanner {
 				scanCompositeDatatype(resClass, datatypeDefinition);
 			} else if (IPrimitiveType.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings({ "unchecked" })
-				Class<? extends IPrimitiveType> resClass = (Class<? extends IPrimitiveType>) theClass;
+				Class<? extends IPrimitiveType<?>> resClass = (Class<? extends IPrimitiveType<?>>) theClass;
 				scanPrimitiveDatatype(resClass, datatypeDefinition);
 			} else {
 				throw new ConfigurationException("Resource type contains a @" + DatatypeDef.class.getSimpleName() + " annotation but does not implement " + IDatatype.class.getCanonicalName() + ": " + theClass.getCanonicalName());

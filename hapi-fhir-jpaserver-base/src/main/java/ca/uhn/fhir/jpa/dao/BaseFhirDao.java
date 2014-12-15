@@ -33,6 +33,7 @@ import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -117,7 +118,7 @@ public abstract class BaseFhirDao implements IDao {
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 
-	private Map<Class<? extends IResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+	private Map<Class<? extends IBaseResource>,IFhirResourceDao<?>> myResourceTypeToDao;
 
 	public FhirContext getContext() {
 		return myContext;
@@ -343,7 +344,7 @@ public abstract class BaseFhirDao implements IDao {
 					if (isBlank(typeString)) {
 						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
-					Class<? extends IResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
+					Class<? extends IBaseResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
 					if (StringUtils.isBlank(id)) {
 						continue;
@@ -798,9 +799,9 @@ public abstract class BaseFhirDao implements IDao {
 		return myConfig;
 	}
 
-	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IResource> theType) {
+	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IBaseResource> theType) {
 		if (myResourceTypeToDao == null) {
-			myResourceTypeToDao = new HashMap<Class<? extends IResource>, IFhirResourceDao<?>>();
+			myResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
 				myResourceTypeToDao.put(next.getResourceType(), next);
 			}
@@ -928,7 +929,7 @@ public abstract class BaseFhirDao implements IDao {
 
 						ArrayList<IResource> retVal = new ArrayList<IResource>();
 						for (BaseHasResource next : resEntities) {
-							retVal.add(toResource(next));
+							retVal.add((IResource) toResource(next));
 						}
 						return retVal;
 					}
@@ -971,7 +972,7 @@ public abstract class BaseFhirDao implements IDao {
 
 		ArrayList<IResource> retVal = new ArrayList<IResource>();
 		for (ResourceTable next : q.getResultList()) {
-			IResource resource = toResource(next);
+			IResource resource = (IResource) toResource(next);
 			retVal.add(resource);
 		}
 
@@ -1056,12 +1057,12 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
-	protected IResource toResource(BaseHasResource theEntity) {
+	protected IBaseResource toResource(BaseHasResource theEntity) {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity);
 	}
 
-	protected <T extends IResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
+	protected <T extends IBaseResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
 		case JSON:
@@ -1079,18 +1080,19 @@ public abstract class BaseFhirDao implements IDao {
 		IParser parser = theEntity.getEncoding().newParser(getContext());
 		T retVal = parser.parseResource(theResourceType, resourceText);
 
-		retVal.setId(theEntity.getIdDt());
+		IResource res = (IResource)retVal;
+		res.setId(theEntity.getIdDt());
 
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
-		retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
+		res.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
+		res.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
+		res.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
 
 		if (theEntity.getTitle() != null) {
-			ResourceMetadataKeyEnum.TITLE.put(retVal, theEntity.getTitle());
+			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
 		}
 
 		if (theEntity.getDeleted() != null) {
-			ResourceMetadataKeyEnum.DELETED_AT.put(retVal, new InstantDt(theEntity.getDeleted()));
+			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 		}
 
 		Collection<? extends BaseTag> tags = theEntity.getTags();
@@ -1099,8 +1101,9 @@ public abstract class BaseFhirDao implements IDao {
 			for (BaseTag next : tags) {
 				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
 			}
-			retVal.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+			res.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
 		}
+		
 		return retVal;
 	}
 

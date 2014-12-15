@@ -336,6 +336,17 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<resources>
+			<resource>
+				<directory>${baseDir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${baseDir}/target/generated-sources/tinder</directory>
+			</resource>
+			<resource>
+				<directory>${baseDir}/target/generated-resources/tinder</directory>
+			</resource>
+		</resources>
 	</build>
 
 	<reporting>

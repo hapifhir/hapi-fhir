@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.junit.Assert.*;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
@@ -13,8 +14,11 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 public class JsonParserTest {
@@ -23,7 +27,13 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseBundleWithBinary() {
-		// TODO: implement this test, make sure we handle ID and meta correctly in Binary
+		Binary patient = new Binary();
+		patient.setId(new IdDt("http://base/Binary/11/_history/22"));
+		patient.setContentType("foo");
+		patient.setContent(new byte[] { 1, 2, 3, 4 });
+
+		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 	}
 
 	@Test
@@ -52,8 +62,10 @@ public class JsonParserTest {
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
 
-		JSON expected = JSONSerializer.toJSON(content.trim());
-		JSON actual = JSONSerializer.toJSON(reencoded.trim());
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
 
 		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
 		String act = actual.toString().replace("\\r\\n", "\\n");
@@ -67,6 +79,7 @@ public class JsonParserTest {
 	
 	@Test
 	public void testParseAndEncodeNewExtensionFormat() {
+		
 		//@formatter:off
 		String resource = "{\n" + 
 			"  \"resourceType\" : \"Patient\",\n" + 
@@ -78,7 +91,11 @@ public class JsonParserTest {
 			"      }\n" + 
 			"    }]\n" + 
 			"  }],\n" +
-			"  \"gender\" : \"M\",\n" +
+			"  \"modifier\" : { \n" + 
+			"    \"http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier\" : [{\n" + 
+			"      \"valueBoolean\" : true\n" + 
+			"      }]\n" + 
+			"  }," +
 			"  \"name\" : [{\n" + 
 			"      \"family\": [\n" + 
 			"        \"du\",\n" + 
@@ -97,13 +114,20 @@ public class JsonParserTest {
 			"      \"given\": [\n" + 
 			"        \"Bénédicte\"\n" + 
 			"      ]\n" + 
-			"    }]" +
+			"    }],\n" +
+			"  \"gender\" : \"M\"\n" +
 			"}";
 		//@formatter:on
 		
-		ourLog.info(resource);
+//		ourLog.info(resource);
 		
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, resource);
+		
+		// Modifier extension
+		assertEquals(1, parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").size());
+		assertTrue( parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).isModifier());
+		assertEquals(BooleanDt.class, parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).getValueAsPrimitive().getClass());
+		assertEquals("true", parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).getValueAsPrimitive().getValueAsString());
 		
 		// Gender
 		assertEquals("M",parsed.getGender());
@@ -131,6 +155,23 @@ public class JsonParserTest {
 		assertEquals(CodeDt.class, parsed.getNameFirstRep().getFamily().get(0).getUndeclaredExtensionsByUrl("http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier").get(0).getValueAsPrimitive().getClass());
 		assertEquals("VV", parsed.getNameFirstRep().getFamily().get(0).getUndeclaredExtensionsByUrl("http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier").get(0).getValueAsPrimitive().getValueAsString());
 		
+		/*
+		 * Now re-encode
+		 */
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(encoded);
+
+		JSON expected = JSONSerializer.toJSON(resource.trim());
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
+
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
+		String act = actual.toString().replace("\\r\\n", "\\n");
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+
+		assertEquals(exp, act);
+
 	}
 	
 	

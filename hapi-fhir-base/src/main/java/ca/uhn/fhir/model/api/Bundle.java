@@ -300,10 +300,10 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	}
 
 	public InstantDt getPublished() {
-		InstantDt retVal = (InstantDt) getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+		InstantDt retVal = (InstantDt) getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 		if (retVal == null) {
 			retVal= new InstantDt();
-			getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, retVal);
+			getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, retVal);
 		}
 		return retVal;
 	}
