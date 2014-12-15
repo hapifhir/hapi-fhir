@@ -214,9 +214,8 @@ public class ValueSetGenerator {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		// p.setOutputDirectory("../hapi-fhir-base/src/main/java/ca/uhn/fhir/model/dstu/valueset/");
-		// p.setOutputDirectory("target/generated/valuesets/ca/uhn/fhir/model/dstu/valueset");
-		// p.parse();
+		ValueSetGenerator p = new ValueSetGenerator("dev");
+		 p.parse();
 
 	}
 

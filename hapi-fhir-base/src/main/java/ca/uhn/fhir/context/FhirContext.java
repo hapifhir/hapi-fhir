@@ -112,6 +112,8 @@ public class FhirContext {
 			myVersion = theVersion.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
+		} else if (FhirVersionEnum.DEV.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DEV.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}

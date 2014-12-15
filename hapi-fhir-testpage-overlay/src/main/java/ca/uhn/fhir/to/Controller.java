@@ -131,6 +131,7 @@ public class Controller {
 		return "result";
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/delete" })
 	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
@@ -157,7 +158,7 @@ public class Controller {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete(def.getImplementingClass(), new IdDt(id));
+			client.delete((Class<? extends IResource>) def.getImplementingClass(), new IdDt(id));
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
@@ -191,7 +192,7 @@ public class Controller {
 					return "resource";
 				}
 
-				resType = def.getImplementingClass();
+				resType = (Class<? extends IResource>) def.getImplementingClass();
 				String id = theReq.getParameter("resource-tags-id");
 				if (isNotBlank(id)) {
 					String vid = theReq.getParameter("resource-tags-vid");
@@ -384,7 +385,7 @@ public class Controller {
 		if (isNotBlank(theRequest.getUpdateId())) {
 			String updateId = theRequest.getUpdateId();
 			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
-			IResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+			IResource updateResource = (IResource) client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
 			String updateResourceString = theRequest.newParser(myCtx).setPrettyPrint(true).encodeResourceToString(updateResource);
 			theModel.put("updateResource", updateResourceString);
 			theModel.put("updateResourceId", updateId);
@@ -461,6 +462,7 @@ public class Controller {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
 	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
@@ -478,7 +480,7 @@ public class Controller {
 		IQuery query;
 		if (isNotBlank(theReq.getParameter("resource"))) {
 			try {
-				query = search.forResource(getResourceType(theReq).getImplementingClass());
+				query = search.forResource((Class<? extends IResource>)getResourceType(theReq).getImplementingClass());
 			} catch (ServletException e) {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
@@ -658,7 +660,7 @@ public class Controller {
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
-			type = def.getImplementingClass();
+			type = (Class<? extends IResource>) def.getImplementingClass();
 		}
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
@@ -741,7 +743,7 @@ public class Controller {
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
 			RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
-			type = def.getImplementingClass();
+			type = (Class<? extends IResource>) def.getImplementingClass();
 			id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
 		}
 

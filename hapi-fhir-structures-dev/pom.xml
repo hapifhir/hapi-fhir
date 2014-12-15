@@ -29,12 +29,14 @@
 		</dependency>
 		
 <!-- Testing -->
+		<!-- 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>0.8-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -338,13 +340,13 @@
 		</pluginManagement>
 		<resources>
 			<resource>
-				<directory>${baseDir}/src/main/resources</directory>
+				<directory>${basedir}/src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>${baseDir}/target/generated-sources/tinder</directory>
+				<directory>${basedir}/target/generated-sources/tinder</directory>
 			</resource>
 			<resource>
-				<directory>${baseDir}/target/generated-resources/tinder</directory>
+				<directory>${basedir}/target/generated-resources/tinder</directory>
 			</resource>
 		</resources>
 	</build>
