@@ -101,9 +101,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
 
 	private FhirContext myContext;
-
 	private HttpRequestBase myLastRequest;
-
 	private boolean myLogRequestAndResponse;
 
 	/**

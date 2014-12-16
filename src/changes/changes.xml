@@ -183,6 +183,12 @@
 				resources were present with a non-numeric identifier. Thanks to 
 				Bill de Beaubien for reporting!
 			</action>
+			<action type="fix" issue="60">
+				Client requests which include a resource/bundle body (e.g. create,
+				update, transaction) were not including a charset in the content type
+				header, leading to servers incorrectly assuming ISO-8859/1. Thanks to 
+				shvoidlee for reporting!
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
