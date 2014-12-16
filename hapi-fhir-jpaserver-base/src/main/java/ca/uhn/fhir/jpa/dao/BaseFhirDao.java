@@ -957,7 +957,15 @@ public abstract class BaseFhirDao implements IDao {
 	protected List<IResource> loadResourcesById(Set<IdDt> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
 		for (IdDt next : theIncludePids) {
-			pids.add(next.getIdPartAsLong());
+			if (next.isIdPartValidLong()) {
+				pids.add(next.getIdPartAsLong());
+			} else {
+				try {
+					pids.add(translateForcedIdToPid(next));
+				} catch (ResourceNotFoundException e) {
+					ourLog.warn("Failed to translate forced ID [{}] to PID", next.getValue()); 
+				}
+			}
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();

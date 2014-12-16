@@ -1,6 +1,8 @@
 package ca.uhn.fhir.tinder.model;
 
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -176,7 +178,12 @@ public abstract class Child extends BaseElement {
 		}
 
 		ParameterizedType type = (ParameterizedType) clazz.getGenericSuperclass();
-		Class<?> rawType = (Class<?>) type.getActualTypeArguments()[0];
+		Type type2 = type.getActualTypeArguments()[0];
+		if (type2 instanceof GenericArrayType) {
+			String arrayType = ((GenericArrayType) type2).getGenericComponentType().toString();
+			return arrayType + "[]";
+		}
+		Class<?> rawType = (Class<?>) type2;
 		return rawType.getSimpleName();
 	}
 

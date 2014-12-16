@@ -242,6 +242,7 @@
 						<baseResourceName>documentmanifest</baseResourceName>
 						<baseResourceName>documentreference</baseResourceName>
 						<baseResourceName>encounter</baseResourceName>
+						<baseResourceName>episodeofcare</baseResourceName>
 						<baseResourceName>familyhistory</baseResourceName>
 						<baseResourceName>geneexpression</baseResourceName>
 						<baseResourceName>geneticanalysis</baseResourceName>
@@ -287,6 +288,7 @@
 						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>remittance</baseResourceName>
 						<baseResourceName>riskassessment</baseResourceName>
+						<baseResourceName>schedule</baseResourceName>
 						<baseResourceName>securityclaim</baseResourceName>
 						<baseResourceName>securityevent</baseResourceName>
 						<baseResourceName>securitygroup</baseResourceName>

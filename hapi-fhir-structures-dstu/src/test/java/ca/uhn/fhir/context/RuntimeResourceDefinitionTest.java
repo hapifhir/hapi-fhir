@@ -58,7 +58,7 @@ public class RuntimeResourceDefinitionTest {
 
 		Profile profile = (Profile) def.toProfile();
 
-		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
+		ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile));
 		
 		List<StructureElement> element = profile.getStructure().get(0).getElement();
 		assertEquals(1, element.get(0).getDefinition().getType().size());

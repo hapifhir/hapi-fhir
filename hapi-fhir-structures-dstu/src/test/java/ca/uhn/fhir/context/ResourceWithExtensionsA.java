@@ -21,13 +21,6 @@ public class ResourceWithExtensionsA extends BaseResource {
 	 * so check the unit tests immediately after any changes 
 	 */
 	
-	@Child(name = "bar1", type = Bar1.class, order = 2, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/#b1", definedLocally=true, isModifier=false)
-	private List<Bar1> myBar1;
-
-	@Child(name = "bar2", type = Bar1.class, order = 3, min = 1, max = Child.MAX_UNLIMITED)
-	@Extension(url = "http://bar/#b2", definedLocally=true, isModifier=false)
-	private Bar1 myBar2;
 
 	@Child(name = "foo1", type = StringDt.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	@Extension(url = "http://foo/#f1", definedLocally=true, isModifier=false)
@@ -37,6 +30,14 @@ public class ResourceWithExtensionsA extends BaseResource {
 	@Extension(url = "http://foo/#f2", definedLocally=true, isModifier=true)
 	private StringDt myFoo2;
 
+	@Child(name = "bar1", type = Bar1.class, order = 2, min = 1, max = Child.MAX_UNLIMITED)
+	@Extension(url = "http://bar/#b1", definedLocally=true, isModifier=false)
+	private List<Bar1> myBar1;
+	
+	@Child(name = "bar2", type = Bar1.class, order = 3, min = 1, max = Child.MAX_UNLIMITED)
+	@Extension(url = "http://bar/#b2", definedLocally=true, isModifier=false)
+	private Bar1 myBar2;
+	
 	@Child(name="baz", type = CodeableConceptDt.class, order = 4)
     @Extension(url= "http://baz/#baz", definedLocally=true, isModifier=false)
     @Description(shortDefinition = "Contains a codeable concept")

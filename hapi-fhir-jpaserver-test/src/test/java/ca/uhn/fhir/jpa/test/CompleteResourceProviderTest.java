@@ -60,14 +60,42 @@ public class CompleteResourceProviderTest {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
-	private static FhirContext ourCtx;
+	private static FhirContext ourFhirCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
+	private static IFhirResourceDao<Organization> ourOrganizationDao;
 
 	// private static JpaConformanceProvider ourConfProvider;
+
+	/**
+	 * Test for issue #60
+	 */
+	@Test
+	public void testStoreUtf8Characters() throws Exception {
+		String name = "測試醫院";
+		Organization org = new Organization();
+		org.setName(name);
+		org.addIdentifier("urn:system", "testStoreUtf8Characters_01");
+		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+
+		// Read back directly from the DAO
+		{
+			Organization returned = ourOrganizationDao.read(orgId);
+			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			ourLog.info(val);
+			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+		}
+		// Read back through the HTTP API
+		{
+			Organization returned = ourClient.read(Organization.class, orgId);
+			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			ourLog.info(val);
+			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+		}
+	}
 
 	/**
 	 * See issue #52
@@ -75,16 +103,16 @@ public class CompleteResourceProviderTest {
 	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = ourClient;
-		
+
 		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
-		
+
 		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/imagingstudy.json"));
 		client.create().resource(resBody).execute();
-		
+
 		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
-		
+
 		assertEquals(1, newSize - initialSize);
-		
+
 	}
 
 	/**
@@ -93,16 +121,16 @@ public class CompleteResourceProviderTest {
 	@Test
 	public void testDocumentManifestResources() throws Exception {
 		IGenericClient client = ourClient;
-		
+
 		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
-		
+
 		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentmanifest.json"));
 		client.create().resource(resBody).execute();
-		
+
 		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
-		
+
 		assertEquals(1, newSize - initialSize);
-		
+
 	}
 
 	/**
@@ -111,39 +139,38 @@ public class CompleteResourceProviderTest {
 	@Test
 	public void testDocumentReferenceResources() throws Exception {
 		IGenericClient client = ourClient;
-		
+
 		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
-		
+
 		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentreference.json"));
 		client.create().resource(resBody).execute();
-		
+
 		int newSize = client.search().forResource(DocumentReference.class).execute().size();
-		
+
 		assertEquals(1, newSize - initialSize);
-		
+
 	}
-	
+
 	/**
 	 * See issue #52
 	 */
 	@Test
 	public void testDiagnosticOrderResources() throws Exception {
 		IGenericClient client = ourClient;
-		
+
 		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
-		
+
 		DiagnosticOrder res = new DiagnosticOrder();
 		res.addIdentifier("urn:foo", "123");
-		
+
 		client.create().resource(res).execute();
-		
+
 		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
-		
+
 		assertEquals(1, newSize - initialSize);
-		
+
 	}
 
-	
 	private void delete(String theResourceType, String theParamName, String theParamValue) {
 		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
 		for (IResource next : resources.toListOfResources()) {
@@ -445,27 +472,27 @@ public class CompleteResourceProviderTest {
 			EncounterResourceProvider encounterRp = new EncounterResourceProvider();
 			encounterRp.setDao(encounterDao);
 
-			IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
+			ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
 			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
-			organizationRp.setDao(organizationDao);
+			organizationRp.setDao(ourOrganizationDao);
 
 			IFhirResourceDao<ImagingStudy> imagingStudyDao = (IFhirResourceDao<ImagingStudy>) ourAppCtx.getBean("myImagingStudyDao", IFhirResourceDao.class);
 			ImagingStudyResourceProvider imagingStudyRp = new ImagingStudyResourceProvider();
 			imagingStudyRp.setDao(imagingStudyDao);
 
-			IFhirResourceDao<DiagnosticOrder> diagnosticOrderDao =ourAppCtx.getBean("myDiagnosticOrderDao", IFhirResourceDao.class);
+			IFhirResourceDao<DiagnosticOrder> diagnosticOrderDao = ourAppCtx.getBean("myDiagnosticOrderDao", IFhirResourceDao.class);
 			DiagnosticOrderResourceProvider diagnosticOrderRp = new DiagnosticOrderResourceProvider();
 			diagnosticOrderRp.setDao(diagnosticOrderDao);
-			
-			IFhirResourceDao<DocumentManifest> documentManifestDao =ourAppCtx.getBean("myDocumentManifestDao", IFhirResourceDao.class);
+
+			IFhirResourceDao<DocumentManifest> documentManifestDao = ourAppCtx.getBean("myDocumentManifestDao", IFhirResourceDao.class);
 			DocumentManifestResourceProvider documentManifestRp = new DocumentManifestResourceProvider();
 			documentManifestRp.setDao(documentManifestDao);
-			
-			IFhirResourceDao<DocumentReference> documentReferenceDao =ourAppCtx.getBean("myDocumentReferenceDao", IFhirResourceDao.class);
+
+			IFhirResourceDao<DocumentReference> documentReferenceDao = ourAppCtx.getBean("myDocumentReferenceDao", IFhirResourceDao.class);
 			DocumentReferenceResourceProvider documentReferenceRp = new DocumentReferenceResourceProvider();
 			documentReferenceRp.setDao(documentReferenceDao);
 
-			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, observationRp, organizationRp, imagingStudyRp);
+			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, organizationRp, imagingStudyRp);
 			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
@@ -490,10 +517,10 @@ public class CompleteResourceProviderTest {
 			ourServer.start();
 		}
 
-		ourCtx = restServer.getFhirContext();
+		ourFhirCtx = restServer.getFhirContext();
 		// ourCtx.getRestfulClientFactory().setProxy("localhost", 8888);
 
-		ourClient = ourCtx.newRestfulGenericClient(serverBase);
+		ourClient = ourFhirCtx.newRestfulGenericClient(serverBase);
 		// ourClient = ourCtx.newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
 		// ourClient = ourCtx.newRestfulGenericClient("https://fhir.orionhealth.com/blaze/fhir");
 		// ourClient = ourCtx.newRestfulGenericClient("http://spark.furore.com/fhir");

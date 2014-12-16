@@ -215,14 +215,14 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeResourceToString(myResource);
 				contentType = encoding.getResourceContentType();
 			}
-			entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
+			entity = new StringEntity(contents, ContentType.create(contentType, Constants.CHARSET_UTF_8));
 		}
 
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
 
 		if (contentType != null) {
-			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType);
+			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		}
 
 		return retVal;

@@ -44,6 +44,7 @@ public class Constants {
 	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
 	public static final Set<String> FORMAT_VAL_XML;
 	public static final String FORMAT_XML = "xml";
+	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_AUTHORIZATION = "Authorization";

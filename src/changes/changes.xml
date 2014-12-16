@@ -185,6 +185,22 @@
 				Server gives a more helpful error message if multiple IResourceProvider implementations
 				are provided for the same resource type. Thanks to wanghaisheng for the idea!
 			</action>
+			<action type="add" issue="61">
+				Bring DSTU1 resource definitions up to version 0.0.82-2929<![CDATA[<br/>]]>
+				Bring DEV resource definitions up to 0.4.0-3775<![CDATA[<br/>]]>
+				Thanks to crinacimpian for reporting!
+			</action>
+			<action type="add" issue="62">
+				JPA server did not correctly process _include requests if included 
+				resources were present with a non-numeric identifier. Thanks to 
+				Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" issue="60">
+				Client requests which include a resource/bundle body (e.g. create,
+				update, transaction) were not including a charset in the content type
+				header, leading to servers incorrectly assuming ISO-8859/1. Thanks to 
+				shvoidlee for reporting!
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
