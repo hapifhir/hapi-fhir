@@ -73,7 +73,10 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 			Set<Include> theIncludes,
 			
 			@Sort 
-			SortSpec theSort			
+			SortSpec theSort,
+			
+			@Count
+			Integer theCount
 	) {
 		startRequest(theServletRequest);
 		try {
@@ -86,7 +89,8 @@ public class ${className}ResourceProvider extends JpaResourceProvider<${classNam
 
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
-		
+			paramMap.setCount(theCount);
+
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;
 		} finally {

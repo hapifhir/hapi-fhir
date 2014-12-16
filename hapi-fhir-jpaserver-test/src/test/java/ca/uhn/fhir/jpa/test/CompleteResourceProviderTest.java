@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -15,6 +17,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -43,6 +46,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -67,6 +71,8 @@ public class CompleteResourceProviderTest {
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
+	private static OrganizationResourceProvider ourOrganizationRp;
+	private static DaoConfig ourDaoConfig;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -95,6 +101,29 @@ public class CompleteResourceProviderTest {
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
+	}
+
+	@Test
+	public void testCountParam() throws Exception {
+		// NB this does not get used- The paging provider has its own limits built in
+		ourDaoConfig.setHardSearchLimit(100);
+		
+		List<IResource> resources = new ArrayList<>();
+		for (int i = 0; i < 300; i++) {
+			Organization org = new Organization();
+			org.setName("testCountParam_01");
+			resources.add(org);
+		}
+		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
+
+		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(10).execute();
+		assertEquals(300, found.getTotalResults().getValue().intValue());
+		assertEquals(10, found.getEntries().size());
+
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(999).execute();
+		assertEquals(300, found.getTotalResults().getValue().intValue());
+		assertEquals(50, found.getEntries().size());
+
 	}
 
 	/**
@@ -452,6 +481,8 @@ public class CompleteResourceProviderTest {
 		if (true) {
 			ourAppCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
 
+			ourDaoConfig = (DaoConfig)ourAppCtx.getBean(DaoConfig.class);
+			
 			ourPatientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(ourPatientDao);
@@ -473,8 +504,8 @@ public class CompleteResourceProviderTest {
 			encounterRp.setDao(encounterDao);
 
 			ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
-			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
-			organizationRp.setDao(ourOrganizationDao);
+			ourOrganizationRp = new OrganizationResourceProvider();
+			ourOrganizationRp.setDao(ourOrganizationDao);
 
 			IFhirResourceDao<ImagingStudy> imagingStudyDao = (IFhirResourceDao<ImagingStudy>) ourAppCtx.getBean("myImagingStudyDao", IFhirResourceDao.class);
 			ImagingStudyResourceProvider imagingStudyRp = new ImagingStudyResourceProvider();
@@ -492,7 +523,7 @@ public class CompleteResourceProviderTest {
 			DocumentReferenceResourceProvider documentReferenceRp = new DocumentReferenceResourceProvider();
 			documentReferenceRp.setDao(documentReferenceDao);
 
-			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, organizationRp, imagingStudyRp);
+			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, ourOrganizationRp, imagingStudyRp);
 			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
@@ -502,6 +533,8 @@ public class CompleteResourceProviderTest {
 			// ourConfProvider = new JpaConformanceProvider(restServer, systemDao,
 			// Collections.singletonList((IFhirResourceDao)patientDao));
 
+			restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
+			
 			ourServer = new Server(port);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
