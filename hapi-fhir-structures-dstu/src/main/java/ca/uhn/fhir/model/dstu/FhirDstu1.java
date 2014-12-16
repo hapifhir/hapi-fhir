@@ -130,7 +130,7 @@ public class FhirDstu1 implements IFhirVersion {
 		}
 	}
 
-	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
+	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
 			for (Class<? extends IResource> next : rr.getResourceTypes()) {
@@ -139,7 +139,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 				if (next != IResource.class) {
 					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
-					type.getProfile().setValueAsString(resDef.getResourceProfile());
+					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
 				}
 			}
 
@@ -155,7 +155,7 @@ public class FhirDstu1 implements IFhirVersion {
 		type.setCode(fromCodeString);
 	}
 
-	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
+	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild, String theServerBase) {
 
 		fillBasics(theElement, def, path, theChild);
 
@@ -203,7 +203,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 				if (child instanceof RuntimeChildResourceBlockDefinition) {
 					RuntimeResourceBlockDefinition nextDef = (RuntimeResourceBlockDefinition) child.getSingleChildOrThrow();
-					fillProfile(theStruct, elem, nextDef, path, child);
+					fillProfile(theStruct, elem, nextDef, path, child, theServerBase);
 				} else if (child instanceof RuntimeChildContainedResources) {
 					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
@@ -214,10 +214,10 @@ public class FhirDstu1 implements IFhirVersion {
 					String nextName = childNamesIter.next();
 					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(nextName);
 					fillBasics(elem, nextDef, path, child);
-					fillName(elem, nextDef);
+					fillName(elem, nextDef, theServerBase);
 					while (childNamesIter.hasNext()) {
 						nextDef = child.getChildByName(childNamesIter.next());
-						fillName(elem, nextDef);
+						fillName(elem, nextDef, theServerBase);
 					}
 					path.pollLast();
 				} else {
@@ -233,7 +233,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, HttpServletRequest theRequest) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -262,8 +262,7 @@ public class FhirDstu1 implements IFhirVersion {
 		StructureElement element = struct.addElement();
 		element.getDefinition().setMin(1);
 		element.getDefinition().setMax("1");
-
-		fillProfile(struct, element, def, path, null);
+		fillProfile(struct, element, def, path, null, theServerBase);
 
 		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
 

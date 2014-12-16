@@ -150,12 +150,12 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return retVal;
 	}
 
-	public synchronized IResource toProfile(HttpServletRequest theRequest) {
+	public synchronized IResource toProfile(String theServerBase) {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this, theRequest);
+		IResource retVal = myContext.getVersion().generateProfile(this, theServerBase);
 		myProfileDef = retVal;
 
 		return retVal;

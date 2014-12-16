@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirVersion {
 
-	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, HttpServletRequest theRequest);
+	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
 	Object createServerConformanceProvider(RestfulServer theServer);
 

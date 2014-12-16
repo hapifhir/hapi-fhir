@@ -469,7 +469,7 @@ public class RestfulServer extends HttpServlet {
 				requestPath = requestPath.substring(1);
 			}
 
-			fhirServerBase = determineServerBase(theRequest);
+			fhirServerBase = getServerBaseForRequest(theRequest);
 
 			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
@@ -703,10 +703,9 @@ public class RestfulServer extends HttpServlet {
 			theResponse.getWriter().close();
 
 		}
-
 	}
 
-	private String determineServerBase(HttpServletRequest theRequest) {
+	public String getServerBaseForRequest(HttpServletRequest theRequest) {
 		String fhirServerBase;
 		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
 

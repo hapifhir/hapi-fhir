@@ -44,7 +44,7 @@ public class FhirDev implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, HttpServletRequest theRequest) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -60,7 +60,7 @@ public class FhirDev implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
 	}
 
 }
