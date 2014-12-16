@@ -209,6 +209,9 @@ public abstract class BaseStructureParser {
 		if ("Binary".equals(theNextType)) {
 			return Binary.class.getCanonicalName();
 		}
+//		if ("BoundCodeableConceptDt".equals(theNextType)) {
+//			return "ca.uhn.fhir.model." + myVersion + ".composite.BoundCodeableConceptDt";
+//		}
 		// QuantityCompararatorEnum
 		// QuantityComparatorEnum
 
@@ -423,6 +426,7 @@ public abstract class BaseStructureParser {
 		ctx.put("searchParams", (theResource.getSearchParameters()));
 		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
+		ctx.put("includes", (theResource.getIncludes()));
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");

@@ -52,6 +52,8 @@ public abstract class BaseElement {
 		// if (theElem.getDeclaringClassNameComplete()==null) {
 		theElem.setDeclaringClassNameComplete(getDeclaringClassNameCompleteForChildren());
 		// }
+		
+//		clearTypes();
 	}
 
 	public String getBinding() {

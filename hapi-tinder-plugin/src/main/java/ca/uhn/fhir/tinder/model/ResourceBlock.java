@@ -4,6 +4,10 @@ import java.util.List;
 
 public class ResourceBlock extends Child {
 
+	public ResourceBlock() {
+		super();
+	}
+	
 	private String myForcedClassName;
 
 	@Override

@@ -69,16 +69,15 @@ public class ${className}
 	public static final ${param.typeCapitalized}ClientParam ${param.fluentConstantName} = new ${param.typeCapitalized}ClientParam(${param.constantName});
 #end
 
-#if( ${param.typeCapitalized} == 'Reference' )
-#foreach ( $include in $param.paths )
+#end
+
+#foreach ( $include in $includes )
 	/**
 	 * Constant for fluent queries to be used to add include statements. Specifies
 	 * the path value of "<b>${include.path}</b>".
 	 */
 	public static final Include INCLUDE_${include.includeName} = new Include("${include.path}");
 
-#end	
-#end
 #end
 
 #childExtensionFields( $childExtensionTypes )

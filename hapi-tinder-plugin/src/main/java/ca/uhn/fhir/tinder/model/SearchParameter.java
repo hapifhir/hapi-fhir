@@ -21,6 +21,20 @@ public class SearchParameter {
 
 	}
 
+	public List<String> getCompositeOf() {
+		if (myCompositeOf == null) {
+			myCompositeOf = new ArrayList<String>();
+		}
+		return myCompositeOf;
+	}
+
+	public List<String> getCompositeTypes() {
+		if (myCompositeTypes == null) {
+			myCompositeTypes = new ArrayList<String>();
+		}
+		return myCompositeTypes;
+	}
+
 	public String getConstantName() {
 		return "SP_" + myName.toUpperCase().replace("_[X]", "_X").replace("-[X]", "_X").replace('-', '_').replace("!", "");
 	}
@@ -72,6 +86,14 @@ public class SearchParameter {
 		return WordUtils.capitalize(myType);
 	}
 
+	public void setCompositeOf(List<String> theCompositeOf) {
+		myCompositeOf = theCompositeOf;
+	}
+
+	public void setCompositeTypes(List<String> theCompositeTypes) {
+		myCompositeTypes = theCompositeTypes;
+	}
+
 	public void setDescription(String theDescription) {
 		myDescription = theDescription;
 	}
@@ -96,11 +118,36 @@ public class SearchParameter {
 		myType = theType;
 	}
 
-	public static class Include {
+	public static class Include implements Comparable<Include>{
 		private String myPath;
 
 		public Include(String thePath) {
 			myPath = thePath;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((myPath == null) ? 0 : myPath.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Include other = (Include) obj;
+			if (myPath == null) {
+				if (other.myPath != null)
+					return false;
+			} else if (!myPath.equals(other.myPath))
+				return false;
+			return true;
 		}
 
 		public String getIncludeName() {
@@ -116,28 +163,11 @@ public class SearchParameter {
 			return myPath;
 		}
 
-	}
-
-	public void setCompositeOf(List<String> theCompositeOf) {
-		myCompositeOf = theCompositeOf;
-	}
-
-	public List<String> getCompositeOf() {
-		if (myCompositeOf == null) {
-			myCompositeOf = new ArrayList<String>();
+		@Override
+		public int compareTo(Include theO) {
+			return myPath.compareTo(theO.myPath);
 		}
-		return myCompositeOf;
-	}
 
-	public void setCompositeTypes(List<String> theCompositeTypes) {
-		myCompositeTypes = theCompositeTypes;
-	}
-
-	public List<String> getCompositeTypes() {
-		if (myCompositeTypes == null) {
-			myCompositeTypes = new ArrayList<String>();
-		}
-		return myCompositeTypes;
 	}
 
 }
