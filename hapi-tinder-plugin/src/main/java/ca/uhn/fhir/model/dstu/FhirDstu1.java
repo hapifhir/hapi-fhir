@@ -21,7 +21,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, HttpServletRequest theRequest) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		throw new UnsupportedOperationException();
 	}
 
