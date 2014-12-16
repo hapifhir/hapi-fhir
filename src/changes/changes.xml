@@ -178,6 +178,11 @@
 				Bring DEV resource definitions up to 0.4.0-3775<![CDATA[<br/>]]>
 				Thanks to crinacimpian for reporting!
 			</action>
+			<action type="add" issue="62">
+				JPA server did not correctly process _include requests if included 
+				resources were present with a non-numeric identifier. Thanks to 
+				Bill de Beaubien for reporting!
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">

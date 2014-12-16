@@ -1139,6 +1139,47 @@ public class FhirResourceDaoTest {
 
 	}
 
+	/**
+	 * Test for #62
+	 */
+	@Test
+	public void testSearchWithIncludesThatHaveTextId() {
+		{
+			Organization org = new Organization();
+			org.setId("testSearchWithIncludesThatHaveTextId_id1");
+			org.getName().setValue("testSearchWithIncludesThatHaveTextId_O1");
+			IdDt orgId = ourOrganizationDao.create(org).getId();
+			assertThat(orgId.getValue(), endsWith("Organization/testSearchWithIncludesThatHaveTextId_id1/_history/1"));
+			
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "001");
+			patient.addName().addFamily("Tester_testSearchWithIncludesThatHaveTextId_P1").addGiven("Joe");
+			patient.getManagingOrganization().setReference(orgId);
+			ourPatientDao.create(patient);
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier("urn:system", "002");
+			patient.addName().addFamily("Tester_testSearchWithIncludesThatHaveTextId_P2").addGiven("John");
+			ourPatientDao.create(patient);
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludesThatHaveTextId_P1"));
+		params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+		IBundleProvider search = ourPatientDao.search(params);
+		List<IResource> patients = toList(search);
+		assertEquals(2, patients.size());
+		assertEquals(Patient.class, patients.get(0).getClass());
+		assertEquals(Organization.class, patients.get(1).getClass());
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludesThatHaveTextId_P1"));
+		patients = toList(ourPatientDao.search(params));
+		assertEquals(1, patients.size());
+
+	}
+
 	@Test
 	public void testSearchWithNoResults() {
 		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
