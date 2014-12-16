@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.server;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +73,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -997,8 +1001,17 @@ public class RestfulServerMethodTest {
 	public void testServerProfileProviderFindsProfiles() {
 		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
 		IdDt id = new IdDt("Profile", "observation");
-		Profile profile = profileProvider.getProfileById(null, id);
+		Profile profile = profileProvider.getProfileById(createHttpServletRequest(), id);
 		assertNotNull(profile);
+	}
+
+	private HttpServletRequest createHttpServletRequest() {
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
+		when(req.getServletPath()).thenReturn("/fhir");
+		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getContextPath()).thenReturn("/FhirStorm");
+		return req;
 	}
 
 	@AfterClass

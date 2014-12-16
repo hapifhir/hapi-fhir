@@ -65,17 +65,17 @@ public class ServerProfileProvider implements IResourceProvider {
 
 	@Search()
 	public List<Profile> getAllProfiles(HttpServletRequest theRequest) {
+		final String serverBase = getServerBase(theRequest);
 		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitions());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
 			@Override
 			public int compare(RuntimeResourceDefinition theO1, RuntimeResourceDefinition theO2) {
 				int cmp = theO1.getName().compareTo(theO2.getName());
 				if (cmp==0) {
-					cmp=theO1.getResourceProfile().compareTo(theO2.getResourceProfile());
+					cmp=theO1.getResourceProfile(serverBase).compareTo(theO2.getResourceProfile(serverBase));
 				}
 				return cmp;
 			}});
-		String serverBase = getServerBase(theRequest);
 		ArrayList<Profile> retVal = new ArrayList<Profile>();
 		for (RuntimeResourceDefinition next : defs) {
 			retVal.add((Profile) next.toProfile(serverBase));

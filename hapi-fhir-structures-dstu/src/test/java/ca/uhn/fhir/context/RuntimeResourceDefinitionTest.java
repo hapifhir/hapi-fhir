@@ -23,7 +23,7 @@ public class RuntimeResourceDefinitionTest {
 		FhirContext ctx = new FhirContext(Patient.class, Profile.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(Patient.class);
 
-		Profile profile = (Profile) def.toProfile();
+		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
 		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
 		
@@ -42,7 +42,7 @@ public class RuntimeResourceDefinitionTest {
 		FhirContext ctx = new FhirContext(ValueSet.class, Profile.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ValueSet.class);
 
-		Profile profile = (Profile) def.toProfile();
+		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
 		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile);
 		ourLog.info(encoded);
@@ -57,7 +57,7 @@ public class RuntimeResourceDefinitionTest {
 		FhirContext ctx = new FhirContext(ResourceWithExtensionsA.class, Profile.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsA.class);
 
-		Profile profile = (Profile) def.toProfile();
+		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
 		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
 		
@@ -98,7 +98,7 @@ public class RuntimeResourceDefinitionTest {
 		FhirContext ctx = new FhirContext(CustomObservation.class);
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(CustomObservation.class);
 
-		Profile profile = (Profile) def.toProfile();
+		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
 		assertEquals("customobservation", profile.getId().toString());
 	}
