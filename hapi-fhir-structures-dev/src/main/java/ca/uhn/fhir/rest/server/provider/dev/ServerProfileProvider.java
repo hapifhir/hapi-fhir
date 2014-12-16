@@ -35,6 +35,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class ServerProfileProvider implements IResourceProvider {
 
 	private FhirContext myContext;
@@ -49,16 +51,16 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 	
 	@Read()
-	public Profile getProfileById(@IdParam IdDt theId) {
+	public Profile getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
 		if (retVal==null) {
 			return null;
 		}
-		return (Profile) retVal.toProfile();
+		return (Profile) retVal.toProfile(theRequest);
 	}
 
 	@Search()
-	public List<Profile> getAllProfiles() {
+	public List<Profile> getAllProfiles(HttpServletRequest theRequest) {
 		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitions());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
 			@Override
@@ -71,7 +73,7 @@ public class ServerProfileProvider implements IResourceProvider {
 			}});
 		ArrayList<Profile> retVal = new ArrayList<Profile>();
 		for (RuntimeResourceDefinition next : defs) {
-			retVal.add((Profile) next.toProfile());
+			retVal.add((Profile) next.toProfile(theRequest));
 		}
 		return retVal;
 	}

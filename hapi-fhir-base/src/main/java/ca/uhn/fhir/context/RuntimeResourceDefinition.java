@@ -32,6 +32,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import com.phloc.commons.url.URLValidator;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
@@ -136,17 +138,26 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		} while (target.equals(Object.class)==false);
 	}
 
+	@Deprecated
 	public synchronized IResource toProfile() {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this);
+		IResource retVal = myContext.getVersion().generateProfile(this, null);
 		myProfileDef = retVal;
 
 		return retVal;
 	}
 
+	public synchronized IResource toProfile(HttpServletRequest theRequest) {
+		if (myProfileDef != null) {
+			return myProfileDef;
+		}
 
+		IResource retVal = myContext.getVersion().generateProfile(this, theRequest);
+		myProfileDef = retVal;
 
+		return retVal;
+	}
 }

@@ -997,7 +997,7 @@ public class RestfulServerMethodTest {
 	public void testServerProfileProviderFindsProfiles() {
 		ServerProfileProvider profileProvider = (ServerProfileProvider)ourRestfulServer.getServerProfilesProvider();
 		IdDt id = new IdDt("Profile", "observation");
-		Profile profile = profileProvider.getProfileById(id);
+		Profile profile = profileProvider.getProfileById(null, id);
 		assertNotNull(profile);
 	}
 
@@ -1013,12 +1013,14 @@ public class RestfulServerMethodTest {
 		ourCtx = new FhirContext(Patient.class);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		ServerProfileProvider profProvider = new ServerProfileProvider(ourCtx);
 		ourReportProvider = new DummyDiagnosticReportResourceProvider();
 		DummyAdverseReactionResourceProvider adv = new DummyAdverseReactionResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ourRestfulServer =new DummyRestfulServer(patientProvider, profProvider, ourReportProvider, adv);
+		DummyRestfulServer dummyServer = new DummyRestfulServer(patientProvider, ourReportProvider, adv);
+		ourRestfulServer = dummyServer;
+		ServerProfileProvider profProvider = new ServerProfileProvider(ourRestfulServer);
+		dummyServer.addResourceProvider(profProvider);
 		ServletHolder servletHolder = new ServletHolder(ourRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -1370,7 +1372,11 @@ public class RestfulServerMethodTest {
 		private Collection<IResourceProvider> myResourceProviders;
 
 		public DummyRestfulServer(IResourceProvider... theResourceProviders) {
-			myResourceProviders = Arrays.asList(theResourceProviders);
+			myResourceProviders = new ArrayList<IResourceProvider>(Arrays.asList(theResourceProviders));
+		}
+
+		public void addResourceProvider(IResourceProvider theResourceProvider) {
+			myResourceProviders.add(theResourceProvider);
 		}
 
 		@Override

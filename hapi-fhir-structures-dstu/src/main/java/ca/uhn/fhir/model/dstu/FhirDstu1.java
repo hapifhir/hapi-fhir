@@ -55,6 +55,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class FhirDstu1 implements IFhirVersion {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirDstu1.class);
@@ -231,7 +233,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, HttpServletRequest theRequest) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -318,7 +320,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
 	}
 
 }
