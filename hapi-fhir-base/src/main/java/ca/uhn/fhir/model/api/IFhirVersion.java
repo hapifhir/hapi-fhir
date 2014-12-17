@@ -24,12 +24,14 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface IFhirVersion {
 
-	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition);
+	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
 	Object createServerConformanceProvider(RestfulServer theServer);
 
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
-	
+	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
+
 }

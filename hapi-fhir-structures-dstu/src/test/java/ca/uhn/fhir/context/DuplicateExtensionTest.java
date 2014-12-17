@@ -25,13 +25,13 @@ public class DuplicateExtensionTest extends TestCase {
 	public void testScannerShouldAddProvidedResources() {
 		FhirContext ctx = new FhirContext();
 		RuntimeResourceDefinition patientDef = ctx.getResourceDefinition(CustomPatient.class);
-		Profile profile = (Profile) patientDef.toProfile();
+		Profile profile = (Profile) patientDef.toProfile("http://foo.org/fhir");
 
 		String res = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(profile);
 		ourLog.info(res);
 		
 		RuntimeResourceDefinition observationDef = ctx.getResourceDefinition(CustomObservation.class);
-		profile = (Profile) observationDef.toProfile();
+		profile = (Profile) observationDef.toProfile("http://foo.org/fhir");
 	}
 
 	@ResourceDef(name = "Observation", id = "CustomObservation")

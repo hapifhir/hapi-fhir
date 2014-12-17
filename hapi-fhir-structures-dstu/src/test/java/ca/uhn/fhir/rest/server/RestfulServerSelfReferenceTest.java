@@ -106,10 +106,10 @@ public class RestfulServerSelfReferenceTest {
 		Server hServer = new Server(port);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		ServerProfileProvider profProvider = new ServerProfileProvider(ourCtx);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer server = new RestfulServer();
+		ServerProfileProvider profProvider = new ServerProfileProvider(server);
 		server.setFhirContext(ourCtx);
 		server.setResourceProviders(patientProvider, profProvider);
 		ServletHolder servletHolder = new ServletHolder(server);
