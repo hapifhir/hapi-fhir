@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.8" date="TBD">
+		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their

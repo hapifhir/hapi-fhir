@@ -20,18 +20,11 @@
 				<include>NOTICE*</include>
 			</includes>
 		</fileSet>
-		<fileSet>
-			<directory>${project.build.directory}</directory>
-			<outputDirectory>/lib</outputDirectory>
-			<includes>
-				<include>*.jar</include>
-			</includes>
-		</fileSet>
 	</fileSets>
 
 	<dependencySets>
 		<dependencySet>
-			<outputDirectory>/lib/dependency</outputDirectory>
+			<outputDirectory>/lib</outputDirectory>
 			<useProjectArtifact>true</useProjectArtifact>
 			<unpack>false</unpack>
 			<scope>runtime</scope>
