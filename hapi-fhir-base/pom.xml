@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.8</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -196,38 +196,12 @@
 			</reporting>
 		</profile>
 		<profile>
-			<id>DIST</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${maven_assembly_plugin_version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<attach>false</attach>
-									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
-										<!-- <descriptor>src/assembly/hapi-jdk14.xml</descriptor> -->
-									</descriptors>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>ANDROID</id>
 			<dependencies>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-structures-dstu</artifactId>
-					<version>0.8-SNAPSHOT</version>
+					<version>0.8</version>
 				</dependency>
 			</dependencies>
 			<build>

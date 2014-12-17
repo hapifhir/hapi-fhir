@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.8" date="TBD">
+		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
@@ -200,6 +200,12 @@
 				update, transaction) were not including a charset in the content type
 				header, leading to servers incorrectly assuming ISO-8859/1. Thanks to 
 				shvoidlee for reporting!
+			</action>
+			<action type="fix" issue="59" dev="wdebeau1">
+				Clean up the way that Profile resources are automatically exported
+				by the server for custom resource profile classes. See the 
+				<![CDATA[<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/ResourceDef.html">@ResourceDef</a>]]>
+				JavaDoc for information on how this works.
 			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">

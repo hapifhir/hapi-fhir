@@ -19,6 +19,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.util.ExtensionConstants;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class JpaConformanceProvider extends ServerConformanceProvider {
 
 	private String myImplementationDescription;
@@ -34,14 +36,14 @@ public class JpaConformanceProvider extends ServerConformanceProvider {
 	}
 
 	@Override
-	public Conformance getServerConformance() {
+	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		Conformance retVal = myCachedValue;
 
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 
 		FhirContext ctx = myRestfulServer.getFhirContext();
 		
-		retVal = super.getServerConformance();
+		retVal = super.getServerConformance(theRequest);
 		for (Rest nextRest : retVal.getRest()) {
 			for (RestResource nextResource : nextRest.getResource()) {
 

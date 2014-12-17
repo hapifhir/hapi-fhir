@@ -59,6 +59,8 @@ import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
@@ -95,7 +97,7 @@ public class ServerConformanceProvider {
 	 * See the class documentation for an important note if you are extending this class
 	 */
 	@Metadata
-	public Conformance getServerConformance() {
+	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		if (myConformance != null && myCache) {
 			return myConformance;
 		}
@@ -134,7 +136,7 @@ public class ServerConformanceProvider {
 			String resourceName = next.getResourceName();
 			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
-			resource.getProfile().setReference(new IdDt(def.getResourceProfile()));
+			resource.getProfile().setReference(new IdDt(def.getResourceProfile(myRestfulServer.getServerBaseForRequest(theRequest))));
 
 			TreeSet<String> includes = new TreeSet<String>();
 

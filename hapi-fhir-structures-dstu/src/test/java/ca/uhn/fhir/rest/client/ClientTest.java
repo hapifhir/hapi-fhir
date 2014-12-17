@@ -147,6 +147,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
@@ -1048,6 +1049,7 @@ public class ClientTest {
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
+		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	/**

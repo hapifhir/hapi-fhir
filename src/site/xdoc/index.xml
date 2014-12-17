@@ -40,6 +40,50 @@
 		<section name="Announcements">
 
 			<p>
+				<b>Dec 17, 2014 - HAPI FHIR 0.8 Released</b> - HAPI 0.8 has been released!
+				As always, thanks to everyone who contributed on this; this release includes
+				a lot of bug fixes and new features from around the world.
+			</p>
+			<p>
+				See the <a href="http://jamesagnew.github.io/hapi-fhir/changes-report.html">changelog</a>
+				for a complete list of what's new!
+			</p>
+			<p>
+				In particular, this release marks the beginning of our push to separate the model
+				classes (e.g. Patient, Encounter, etc.) from the core API, so that you can use any 
+				version of the structures you want in your application, or even combine versions if 
+				you need to. As is the case with HAPI's HL7 v2 library, you now need to include at least
+				one new separate "structures" JAR with your application as of HAPI-FHIR 0.8. See the
+				<a href="http://jamesagnew.github.io/hapi-fhir/doc_upgrading.html">Upgrading</a>
+				and
+				<a href="http://jamesagnew.github.io/hapi-fhir/download.html">Download</a>
+				pages for more information.
+			</p>
+			<p>
+				With the newly separated "structures" dependencies, we have also introduced
+				a separate "dev" version of the structures, which contains the current development
+				structure definitions, which are now close to being in their final DSTU2 state 
+				(DSTU2 should be released in mid 2015 by HL7 although the date is not yet finalized).
+				DSTU2 contains a number of new and updated resource definitions, but it also makes
+				several infrastructure changes including a new Bundle format and a new encoding style
+				for extensions in JSON. These changes are not yet supported in HAPI-FHIR 0.8, but
+				will be included in HAPI-FHIR 0.9. We expect to deploy a working snapshot build of
+				HAPI-FHIR 0.9 within the next day or so, including all of these changes.
+			</p>
+			<p>
+				One further note: We are currently working with Grahame Grieve on an initiative
+				to harmonize HAPI's model objects with the FHIR Java Reference Implementation. This
+				means that developers should in the future be able to use either the HAPI built-in
+				resource definitions or the ones shipped by HL7. The advantage to this is that
+				it will allow users of HAPI's API to take advantage of other tooling produced
+				by HL7 (such as profile validators). Please get in touch (either by email or
+				on the Google Group) if you would like to help test this. 
+			</p>
+			<p>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
+
+			<p>
 				<b>Oct 23, 2014 - HAPI FHIR 0.7 Released</b> - HAPI 0.7 has been released!
 				This release contains a number of contributions and bugfixes from all over
 				the FHIR community. Thanks to everyone who contributed!
@@ -68,6 +112,7 @@
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
 
+			<!-- 
 			<p>
 				<b>Sep 8, 2014 - HAPI FHIR 0.6 Released</b> - A new build has been uploaded,
 				containing a number of new features and bug fixes. See the changelog
@@ -104,7 +149,7 @@
 				<br/>
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
-
+ 			-->
 		</section>
 
 		<section name="What is HAPI FHIR?">

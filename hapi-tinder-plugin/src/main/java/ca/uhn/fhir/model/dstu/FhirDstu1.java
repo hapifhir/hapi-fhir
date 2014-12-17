@@ -10,6 +10,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class FhirDstu1 implements IFhirVersion {
 
 	@Override
@@ -23,7 +25,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		throw new UnsupportedOperationException();
 	}
 

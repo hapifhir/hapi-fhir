@@ -32,6 +32,9 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import com.phloc.commons.url.URLValidator;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
@@ -76,8 +79,28 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return ChildTypeEnum.RESOURCE;
 	}
 
+	@Deprecated
 	public String getResourceProfile() {
 		return myResourceProfile;
+	}
+
+	public String getResourceProfile(String theServerBase) {
+		String profile;
+		if (!myResourceProfile.isEmpty()) {
+			profile = myResourceProfile;
+		} else if (!myId.isEmpty()) {
+			profile = myId;
+		} else {
+			return "";
+		}
+
+		if (!URLValidator.isValid(profile)) {
+			String profileWithUrl = theServerBase + "/Profile/" + profile;
+			if (URLValidator.isValid(profileWithUrl)) {
+				return profileWithUrl;
+			}
+		}
+		return profile;
 	}
 
 	public RuntimeSearchParam getSearchParam(String theName) {
@@ -117,17 +140,26 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		} while (target.equals(Object.class)==false);
 	}
 
+	@Deprecated
 	public synchronized IResource toProfile() {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this);
+		IResource retVal = myContext.getVersion().generateProfile(this, null);
 		myProfileDef = retVal;
 
 		return retVal;
 	}
 
+	public synchronized IResource toProfile(String theServerBase) {
+		if (myProfileDef != null) {
+			return myProfileDef;
+		}
 
+		IResource retVal = myContext.getVersion().generateProfile(this, theServerBase);
+		myProfileDef = retVal;
 
+		return retVal;
+	}
 }

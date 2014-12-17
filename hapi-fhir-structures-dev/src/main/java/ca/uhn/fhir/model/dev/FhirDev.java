@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class FhirDev implements IFhirVersion {
 
 	private String myId;
@@ -46,7 +48,7 @@ public class FhirDev implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -62,7 +64,7 @@ public class FhirDev implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
 	}
 
 	@Override

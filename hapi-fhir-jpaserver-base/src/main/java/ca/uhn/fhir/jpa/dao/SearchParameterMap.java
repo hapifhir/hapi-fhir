@@ -19,6 +19,8 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	private static final long serialVersionUID = 1L;
 
+	private Integer myCount;
+
 	private Set<Include> myIncludes;
 
 	private SortSpec mySort;
@@ -66,6 +68,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 		getIncludes().add(theInclude);
 	}
 
+	public Integer getCount() {
+		return myCount;
+	}
+
 	public Set<Include> getIncludes() {
 		if (myIncludes == null) {
 			myIncludes = new HashSet<Include>();
@@ -75,6 +81,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	public SortSpec getSort() {
 		return mySort;
+	}
+
+	public void setCount(Integer theCount) {
+		myCount = theCount;
 	}
 
 	public void setIncludes(Set<Include> theIncludes) {

@@ -80,7 +80,7 @@ public class ExtensionTest {
 		{
 			FhirContext ctx2 = new FhirContext();
 			RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
-			System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile()));
+			System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile("http://foo.org/fhir")));
 		}
 	}
 
