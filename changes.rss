@@ -3,9 +3,9 @@
   <title>HAPI-FHIR: HAPI FHIR Changelog</title>
   <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html" />
   <subtitle>These are the latest changes of this project.</subtitle>
-  <updated>2014-11-20T19:52:24Z</updated>
+  <updated>2014-12-17T19:41:45Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2014-11-20T19:52:24Z</dc:date>
+  <dc:date>2014-12-17T19:41:45Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
     <title>0.8</title>
@@ -13,10 +13,10 @@
     <author>
       <name />
     </author>
-    <updated>2014-11-20T19:52:24Z</updated>
-    <published>2014-11-20T19:52:24Z</published>
-    <summary type="html">&lt;p&gt;Version 0.8 is available with 22 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2014-11-20T19:52:24Z</dc:date>
+    <updated>2014-12-17T19:41:45Z</updated>
+    <published>2014-12-17T19:41:45Z</published>
+    <summary type="html">&lt;p&gt;Version 0.8 is available with 31 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2014-12-17T19:41:45Z</dc:date>
   </entry>
 </feed>
 

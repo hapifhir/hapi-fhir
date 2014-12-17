@@ -167,13 +167,13 @@
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 	@Override
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 	<strong class="jxr_keyword">public</strong> String toString() {
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> 		ToStringBuilder builder = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		builder.append(<span class="jxr_string">"system"</span>, defaultString(getSystem()));
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		builder.append(<span class="jxr_string">"system"</span>, defaultString(getValue()));
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 		builder.append(<span class="jxr_string">"value"</span>, getValue());
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 		<strong class="jxr_keyword">if</strong> (myText) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			builder.append(<span class="jxr_string">":text"</span>, myText);
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			builder.append(<span class="jxr_string">"text"</span>, myText);
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 		}
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 		<strong class="jxr_keyword">if</strong> (getMissing() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			builder.append(<span class="jxr_string">":missing"</span>, getMissing());
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			builder.append(<span class="jxr_string">"missing"</span>, getMissing());
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 		}
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 		<strong class="jxr_keyword">return</strong> builder.toString();
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 	}
