@@ -9,9 +9,6 @@
         <dependent-module archiveName="hapi-fhir-jpaserver-base-0.8.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-jpaserver-base/hapi-fhir-jpaserver-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hapi-fhir-base-0.8.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-base/hapi-fhir-base">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="hapi-fhir-structures-dstu-0.8.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
             <dependency-type>uses</dependency-type>
         </dependent-module>
