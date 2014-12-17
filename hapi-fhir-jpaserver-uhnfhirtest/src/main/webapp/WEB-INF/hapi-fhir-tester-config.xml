@@ -12,13 +12,7 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
-				<value>home     , UHN/HAPI Server                              , http://fhirtest.uhn.ca/base</value>
-				<value>hi       , Health Intersections (Ref Server)            , http://fhir.healthintersections.com.au/open</value>
-				<value>hidev    , Health Intersections (Developnent FHIR)      , http://fhir-dev.healthintersections.com.au/open</value>
-				<value>furore   , Spark - Furore (Ref Server)                  , http://spark.furore.com/fhir</value>
-				<value>blaze    , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
-				<value>oridashi , Oridashi                                     , http://demo.oridashi.com.au:8190</value>
-				<!-- <value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value> -->
+				<value>home     , UHN/HAPI Server                              , http://localhost:9090/base</value>
 			</list>
 		</property>
 	</bean>
