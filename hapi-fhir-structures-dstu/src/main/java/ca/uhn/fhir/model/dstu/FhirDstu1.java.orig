@@ -31,12 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-<<<<<<< HEAD
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-
-=======
->>>>>>> c294e1c064fcbf112edcbf4e10c341691c12a1a8
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -78,6 +72,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class FhirDstu1 implements IFhirVersion {
 
@@ -152,7 +148,7 @@ public class FhirDstu1 implements IFhirVersion {
 		}
 	}
 
-	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
+	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
 			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
@@ -160,9 +156,14 @@ public class FhirDstu1 implements IFhirVersion {
 				type.getCode().setValue("ResourceReference");
 
 				if (next != IResource.class) {
+<<<<<<< HEAD
 					@SuppressWarnings("unchecked")
 					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
 					type.getProfile().setValueAsString(resDef.getResourceProfile());
+=======
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
+					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
+>>>>>>> origin/master
 				}
 			}
 
@@ -178,7 +179,7 @@ public class FhirDstu1 implements IFhirVersion {
 		type.setCode(fromCodeString);
 	}
 
-	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
+	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild, String theServerBase) {
 
 		fillBasics(theElement, def, path, theChild);
 
@@ -226,7 +227,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 				if (child instanceof RuntimeChildResourceBlockDefinition) {
 					RuntimeResourceBlockDefinition nextDef = (RuntimeResourceBlockDefinition) child.getSingleChildOrThrow();
-					fillProfile(theStruct, elem, nextDef, path, child);
+					fillProfile(theStruct, elem, nextDef, path, child, theServerBase);
 				} else if (child instanceof RuntimeChildContainedResources) {
 					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
@@ -237,10 +238,10 @@ public class FhirDstu1 implements IFhirVersion {
 					String nextName = childNamesIter.next();
 					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(nextName);
 					fillBasics(elem, nextDef, path, child);
-					fillName(elem, nextDef);
+					fillName(elem, nextDef, theServerBase);
 					while (childNamesIter.hasNext()) {
 						nextDef = child.getChildByName(childNamesIter.next());
-						fillName(elem, nextDef);
+						fillName(elem, nextDef, theServerBase);
 					}
 					path.pollLast();
 				} else {
@@ -256,7 +257,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -285,8 +286,7 @@ public class FhirDstu1 implements IFhirVersion {
 		StructureElement element = struct.addElement();
 		element.getDefinition().setMin(1);
 		element.getDefinition().setMax("1");
-
-		fillProfile(struct, element, def, path, null);
+		fillProfile(struct, element, def, path, null, theServerBase);
 
 		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
 
@@ -343,7 +343,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
 	}
 	
 	@Override

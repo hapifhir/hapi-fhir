@@ -12,7 +12,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>0.8</version>
+	<version>0.9-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
@@ -600,6 +600,7 @@
 			</modules>
 			<build>
 				<plugins>
+					<!-- 
 					<plugin>
 						<artifactId>maven-assembly-plugin</artifactId>
 						<version>${maven_assembly_plugin_version}</version>
@@ -613,12 +614,12 @@
 									<attach>false</attach>
 									<descriptors>
 										<descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor>
-										<!-- <descriptor>src/assembly/hapi-jdk14.xml</descriptor> -->
 									</descriptors>
 								</configuration>
 							</execution>
 						</executions>
 					</plugin>
+					 -->
 				</plugins>
 			</build>
 		</profile>

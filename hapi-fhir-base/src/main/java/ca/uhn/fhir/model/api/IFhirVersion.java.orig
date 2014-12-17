@@ -27,16 +27,27 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface IFhirVersion {
 
+<<<<<<< HEAD
 	FhirVersionEnum getVersion();
 	
+	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition);
+
+	Object createServerConformanceProvider(RestfulServer theServer);
+
 	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
 	
 	InputStream getFhirVersionPropertiesFile();
 	
+=======
 	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
-	Object createServerConformanceProvider(RestfulServer theRestfulServer);
+	Object createServerConformanceProvider(RestfulServer theServer);
 
+	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
+
+>>>>>>> origin/master
 }
