@@ -109,7 +109,7 @@ public class CompleteResourceProviderTest {
 		ourDaoConfig.setHardSearchLimit(100);
 		
 		List<IResource> resources = new ArrayList<>();
-		for (int i = 0; i < 300; i++) {
+		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
 			org.setName("testCountParam_01");
 			resources.add(org);
@@ -117,11 +117,11 @@ public class CompleteResourceProviderTest {
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
 		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(10).execute();
-		assertEquals(300, found.getTotalResults().getValue().intValue());
+		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(10, found.getEntries().size());
 
 		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("testCountParam_01")).limitTo(999).execute();
-		assertEquals(300, found.getTotalResults().getValue().intValue());
+		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(50, found.getEntries().size());
 
 	}
@@ -241,7 +241,8 @@ public class CompleteResourceProviderTest {
 		}
 
 		Bundle history = ourClient.history(null, (String) null, null, null);
-		assertEquals(p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
+		
+		assertEquals("Expected[" + p1Id.getIdPart() + "] but was " + history.getEntries().get(0).getId(), p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
 

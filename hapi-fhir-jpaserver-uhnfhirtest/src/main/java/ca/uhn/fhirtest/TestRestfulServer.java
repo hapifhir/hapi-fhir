@@ -72,8 +72,7 @@ public class TestRestfulServer extends RestfulServer {
 		
 		String baseUrl = System.getProperty("fhir.baseurl");
 		if (StringUtils.isBlank(baseUrl)) {
-			//throw new ServletException("Missing system property: fhir.baseurl");
-			baseUrl = "http://localhost:8080/base";
+			throw new ServletException("Missing system property: fhir.baseurl");
 		}
 		
 		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));

@@ -189,6 +189,12 @@
 				header, leading to servers incorrectly assuming ISO-8859/1. Thanks to 
 				shvoidlee for reporting!
 			</action>
+			<action type="fix" issue="59" dev="wdebeau1">
+				Clean up the way that Profile resources are automatically exported
+				by the server for custom resource profile classes. See the 
+				<![CDATA[<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/ResourceDef.html">@ResourceDef</a>]]>
+				JavaDoc for information on how this works.
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
