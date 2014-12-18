@@ -24,6 +24,7 @@ import org.apache.velocity.app.VelocityEngine;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.dev.resource.ValueSet.ComposeIncludeConcept;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
@@ -46,7 +47,7 @@ public class ValueSetGenerator {
 	private String myVersion;
 
 	public ValueSetGenerator(String theVersion) {
-		myVersion =theVersion;
+		myVersion = theVersion;
 	}
 
 	public String getClassForValueSetIdAndMarkAsNeeded(String theId) {
@@ -64,14 +65,20 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		IParser newXmlParser = new FhirContext(ValueSet.class).newXmlParser();
+		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDev();
+		IParser newXmlParser = ctx.newXmlParser();
 
 		ourLog.info("Parsing built-in ValueSets");
 		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + myVersion + "/all-valuesets-bundle.xml"));
 		Bundle bundle = newXmlParser.parseBundle(vs);
 		for (BundleEntry next : bundle.getEntries()) {
-			ValueSet nextVs = (ValueSet) next.getResource();
-			parseValueSet(nextVs);
+			if ("dstu".equals(myVersion)) {
+				ValueSet nextVs = (ValueSet) next.getResource();
+				parseValueSet(nextVs);
+			} else {
+				ca.uhn.fhir.model.dev.resource.ValueSet nextVs = (ca.uhn.fhir.model.dev.resource.ValueSet) next.getResource();
+				parseValueSet(nextVs);
+			}
 		}
 
 		if (myResourceValueSetFiles != null) {
@@ -141,7 +148,54 @@ public class ValueSetGenerator {
 			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
 		}
 		myValueSets.put(vs.getName().replace(" ", ""), vs);
-		
+
+		return vs;
+	}
+
+	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dev.resource.ValueSet nextVs) {
+		myConceptCount += nextVs.getDefine().getConcept().size();
+		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
+		// output.addConcept(next.getCode().getValue(),
+		// next.getDisplay().getValue(), next.getDefinition());
+
+		ValueSetTm vs = new ValueSetTm();
+
+		vs.setName(nextVs.getName());
+		vs.setDescription(nextVs.getDescription());
+		vs.setId(nextVs.getIdentifierElement().getValueAsString());
+		vs.setClassName(toClassName(nextVs.getName()));
+
+		{
+			ca.uhn.fhir.model.dev.resource.ValueSet.Define define = nextVs.getDefine();
+			String system = define.getSystemElement().getValueAsString();
+			for (ca.uhn.fhir.model.dev.resource.ValueSet.DefineConcept nextConcept : define.getConcept()) {
+				String nextCodeValue = nextConcept.getCode();
+				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay());
+				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition());
+				vs.addConcept(system, nextCodeValue, nextCodeDisplay, nextCodeDefinition);
+			}
+		}
+
+		for (ca.uhn.fhir.model.dev.resource.ValueSet.ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
+			String system = nextInclude.getSystemElement().getValueAsString();
+			for (ComposeIncludeConcept nextConcept : nextInclude.getConcept()) {
+				String nextCodeValue = nextConcept.getCode();
+				vs.addConcept(system, nextCodeValue, null, null);
+			}
+		}
+
+		if (myValueSets.containsKey(vs.getName())) {
+			ourLog.warn("Duplicate Name: " + vs.getName());
+		} else {
+			myValueSets.put(vs.getName(), vs);
+		}
+
+		// This is hackish, but deals with "Administrative Gender Codes" vs "AdministrativeGender"
+		if (vs.getName().endsWith(" Codes")) {
+			myValueSets.put(vs.getName().substring(0, vs.getName().length() - 6).replace(" ", ""), vs);
+		}
+		myValueSets.put(vs.getName().replace(" ", ""), vs);
+
 		return vs;
 	}
 
@@ -215,7 +269,7 @@ public class ValueSetGenerator {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 		ValueSetGenerator p = new ValueSetGenerator("dev");
-		 p.parse();
+		p.parse();
 
 	}
 

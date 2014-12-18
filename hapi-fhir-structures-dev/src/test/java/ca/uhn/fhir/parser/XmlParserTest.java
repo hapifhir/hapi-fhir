@@ -14,6 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 public class XmlParserTest {
@@ -63,4 +64,37 @@ public class XmlParserTest {
 
 	}
 
+	@Test
+	public void testBundleWithBinary() {
+		//@formatter:off
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+			"   <meta/>\n" + 
+			"   <base value=\"http://localhost:52788\"/>\n" + 
+			"   <total value=\"1\"/>\n" + 
+			"   <link>\n" + 
+			"      <relation value=\"self\"/>\n" + 
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
+			"   </link>\n" + 
+			"   <entry>\n" + 
+			"      <resource>\n" + 
+			"         <Binary xmlns=\"http://hl7.org/fhir\">\n" + 
+			"            <id value=\"1\"/>\n" + 
+			"            <meta/>\n" + 
+			"            <contentType value=\"text/plain\"/>\n" + 
+			"            <content value=\"AQIDBA==\"/>\n" + 
+			"         </Binary>\n" + 
+			"      </resource>\n" + 
+			"   </entry>\n" + 
+			"</Bundle>";
+		//@formatter:on
+		
+		Bundle b = ourCtx.newXmlParser().parseBundle(bundle);
+		assertEquals(1, b.getEntries().size());
+		
+		Binary bin = (Binary) b.getEntries().get(0).getResource();
+		assertArrayEquals(new byte[] {1,2,3,4}, bin.getContent());
+		
+	}
+	
+	
 }

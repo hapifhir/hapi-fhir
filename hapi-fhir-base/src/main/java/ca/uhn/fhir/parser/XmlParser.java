@@ -100,8 +100,8 @@ public class XmlParser extends BaseParser implements IParser {
 	private boolean myPrettyPrint;
 
 	/**
-	 * Do not use this constructor, the recommended way to obtain a new instance of the 
-	 * XML parser is to invoke {@link FhirContext#newXmlParser()}.
+	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke
+	 * {@link FhirContext#newXmlParser()}.
 	 */
 	public XmlParser(FhirContext theContext) {
 		super(theContext);
@@ -254,11 +254,11 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeEndElement();
 
 		String bundleBaseUrl = theBundle.getLinkBase().getValue();
-		
+
 		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
 		writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
 		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
-		
+
 		writeBundleResourceLink(theEventWriter, "first", theBundle.getLinkFirst());
 		writeBundleResourceLink(theEventWriter, "previous", theBundle.getLinkPrevious());
 		writeBundleResourceLink(theEventWriter, "next", theBundle.getLinkNext());
@@ -267,18 +267,18 @@ public class XmlParser extends BaseParser implements IParser {
 
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.writeStartElement("entry");
-			
+
 			IResource nextResource = nextEntry.getResource();
 			if (nextResource.getId() != null && nextResource.getId().hasBaseUrl()) {
 				if (!nextResource.getId().getBaseUrl().equals(bundleBaseUrl)) {
 					writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
 				}
 			}
-			
-			writeOptionalTagWithValue(theEventWriter, "status", nextEntry.getStatus().getValue());			
+
+			writeOptionalTagWithValue(theEventWriter, "status", nextEntry.getStatus().getValue());
 			writeOptionalTagWithValue(theEventWriter, "search", nextEntry.getLinkSearch().getValue());
 			writeOptionalTagWithValue(theEventWriter, "score", nextEntry.getScore().getValueAsString());
-			
+
 			boolean deleted = false;
 			if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
 				deleted = true;
@@ -288,7 +288,7 @@ public class XmlParser extends BaseParser implements IParser {
 				writeOptionalTagWithValue(theEventWriter, "versionId", nextEntry.getId().getVersionIdPart());
 				writeOptionalTagWithValue(theEventWriter, "instant", nextEntry.getDeletedAt().getValueAsString());
 				theEventWriter.writeEndElement();
-			} 
+			}
 
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
@@ -307,7 +307,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void writeBundleResourceLink(XMLStreamWriter theEventWriter, String theRel, StringDt theUrl) throws XMLStreamException {
-		if (theUrl.isEmpty()==false) {
+		if (theUrl.isEmpty() == false) {
 			theEventWriter.writeStartElement("link");
 			theEventWriter.writeStartElement("relation");
 			theEventWriter.writeAttribute("value", theRel);
@@ -607,7 +607,7 @@ public class XmlParser extends BaseParser implements IParser {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition && !theIncludedResource) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (theResource instanceof IResource) {
-					NarrativeDt narr = ((IResource)theResource).getText();
+					NarrativeDt narr = ((IResource) theResource).getText();
 					if (gen != null && narr.isEmpty()) {
 						narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
 					}
@@ -619,7 +619,7 @@ public class XmlParser extends BaseParser implements IParser {
 						continue;
 					}
 				} else {
-					Narrative narr1 = ((DomainResource)theResource).getText(); 
+					Narrative narr1 = ((DomainResource) theResource).getText();
 					NarrativeDt narr2 = null;
 					if (gen != null && narr1.isEmpty()) {
 						narr2 = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
@@ -736,16 +736,16 @@ public class XmlParser extends BaseParser implements IParser {
 
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
-		
+
 		if (!myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			if (theResourceId != null) {
 				theEventWriter.writeAttribute("id", theResourceId);
 			}
 		} else {
-			
+
 			IResource resource = (IResource) theResource;
 			writeOptionalTagWithValue(theEventWriter, "id", resource.getId().getIdPart());
-			
+
 			theEventWriter.writeStartElement("meta");
 			writeOptionalTagWithValue(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
@@ -754,14 +754,18 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 			theEventWriter.writeEndElement();
 		}
-		
 
 		if (theResource instanceof Binary) {
 			Binary bin = (Binary) theResource;
-			if (bin.getContentType() != null) {
-				theEventWriter.writeAttribute("contentType", bin.getContentType());
+			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				writeOptionalTagWithValue(theEventWriter, "contentType", bin.getContentType());
+				writeOptionalTagWithValue(theEventWriter, "content", bin.getContentAsBase64());
+			} else {
+				if (bin.getContentType() != null) {
+					theEventWriter.writeAttribute("contentType", bin.getContentType());
+				}
+				theEventWriter.writeCharacters(bin.getContentAsBase64());
 			}
-			theEventWriter.writeCharacters(bin.getContentAsBase64());
 		} else {
 			encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
 		}

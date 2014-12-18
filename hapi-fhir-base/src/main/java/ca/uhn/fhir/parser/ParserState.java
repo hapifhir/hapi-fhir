@@ -811,7 +811,7 @@ class ParserState<T> {
 
 	}
 
-	private class BinaryResourceState extends BaseState {
+	private class BinaryResourceStateForDstu1 extends BaseState {
 
 		private static final int SUBSTATE_CONTENT = 2;
 		private static final int SUBSTATE_CT = 1;
@@ -819,7 +819,7 @@ class ParserState<T> {
 		private Binary myInstance;
 		private int mySubState = 0;
 
-		public BinaryResourceState(PreResourceState thePreResourceState, Binary theInstance) {
+		public BinaryResourceStateForDstu1(PreResourceState thePreResourceState, Binary theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 		}
@@ -1682,8 +1682,8 @@ class ParserState<T> {
 			}
 
 			String resourceName = def.getName();
-			if ("Binary".equals(resourceName)) {
-				push(new BinaryResourceState(getRootPreResourceState(), (Binary) myInstance));
+			if ("Binary".equals(resourceName) && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				push(new BinaryResourceStateForDstu1(getRootPreResourceState(), (Binary) myInstance));
 			} else {
 				push(new ResourceState(getRootPreResourceState(), def, myInstance));
 			}

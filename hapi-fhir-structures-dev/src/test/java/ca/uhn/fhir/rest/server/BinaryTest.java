@@ -54,29 +54,17 @@ public class BinaryTest {
 
 	@Before
 	public void before() {
-		ourLast=null;
+		ourLast = null;
 	}
 
-	@Test
-	public void testRead() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("foo", status.getFirstHeader("content-type").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
-
-	}
-
-	
 	@Test
 	public void testCreate() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		http.setEntity(new ByteArrayEntity(new byte[] {1,2,3,4}, ContentType.create("foo/bar", "UTF-8")));
-		
+		http.setEntity(new ByteArrayEntity(new byte[] { 1, 2, 3, 4 }, ContentType.create("foo/bar", "UTF-8")));
+
 		HttpResponse status = ourClient.execute(http);
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		
+
 		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
 
@@ -87,23 +75,54 @@ public class BinaryTest {
 		res.setContent(new byte[] { 1, 2, 3, 4 });
 		res.setContentType("text/plain");
 		String stringContent = ourCtx.newJsonParser().encodeResourceToString(res);
-		
+
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
 		http.setEntity(new StringEntity(stringContent, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		
+
 		HttpResponse status = ourClient.execute(http);
 		assertEquals(201, status.getStatusLine().getStatusCode());
-		
+
 		assertEquals("text/plain", ourLast.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
 
 	}
 
 	@Test
-	public void testSearch() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?");
+	public void testRead() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
+		HttpResponse status = ourClient.execute(httpGet);
+		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo", status.getFirstHeader("content-type").getValue());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, responseContent);
+
+	}
+
+	@Test
+	public void testSearchJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true&_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+
+		ourLog.info(responseContent);
+
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
+		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+
+		assertEquals("text/plain", bin.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+	}
+
+	@Test
+	public void testSearchXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary?_pretty=true");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_ATOM_XML + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
 
@@ -115,6 +134,7 @@ public class BinaryTest {
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
 	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -141,7 +161,7 @@ public class BinaryTest {
 		ourClient = builder.build();
 
 	}
-	
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -167,8 +187,6 @@ public class BinaryTest {
 			return retVal;
 		}
 
-
-
 		@Search
 		public List<Binary> search() {
 			Binary retVal = new Binary();
@@ -178,6 +196,6 @@ public class BinaryTest {
 			return Collections.singletonList(retVal);
 		}
 
-}
+	}
 
 }

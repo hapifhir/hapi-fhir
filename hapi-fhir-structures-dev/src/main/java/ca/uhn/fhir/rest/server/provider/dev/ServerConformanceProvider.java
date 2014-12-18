@@ -66,8 +66,10 @@ import ca.uhn.fhir.util.ExtensionConstants;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
- * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
+ * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
+ * you are adding anything to the returned conformance instance on each call you should call
+ * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider {
@@ -82,8 +84,9 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -105,7 +108,8 @@ public class ServerConformanceProvider {
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(DateTimeDt.withCurrentTime());
 		retVal.setFhirVersion("0.4.0"); // TODO: pull from model
-		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser needs to be modified to actually allow it
+		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser
+										// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
@@ -141,27 +145,31 @@ public class ServerConformanceProvider {
 			// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 			// Conformance.RestResourceSearchParam>();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
-				String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
-				if (resOpCode != null) {
-					TypeRestfulInteractionEnum resOp = TypeRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(resOpCode);
-					if (resOp == null) {
-						throw new InternalErrorException("Unknown type-restful-interaction: " + resOpCode);
-					}
-					if (resourceOps.contains(resOp) == false) {
-						resourceOps.add(resOp);
-						resource.addInteraction().setCode(resOp);
+				if (nextMethodBinding.getResourceOperationType() != null) {
+					String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
+					if (resOpCode != null) {
+						TypeRestfulInteractionEnum resOp = TypeRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(resOpCode);
+						if (resOp == null) {
+							throw new InternalErrorException("Unknown type-restful-interaction: " + resOpCode);
+						}
+						if (resourceOps.contains(resOp) == false) {
+							resourceOps.add(resOp);
+							resource.addInteraction().setCode(resOp);
+						}
 					}
 				}
 
-				String sysOpCode = nextMethodBinding.getSystemOperationType().getCode();
-				if (sysOpCode != null) {
-					SystemRestfulInteractionEnum sysOp = SystemRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(sysOpCode);
-					if (sysOp == null) {
-						throw new InternalErrorException("Unknown system-restful-interaction: " + sysOpCode);
-					}
-					if (systemOps.contains(sysOp) == false) {
-						systemOps.add(sysOp);
-						rest.addInteraction().setCode(sysOp);
+				if (nextMethodBinding.getSystemOperationType() != null) {
+					String sysOpCode = nextMethodBinding.getSystemOperationType().getCode();
+					if (sysOpCode != null) {
+						SystemRestfulInteractionEnum sysOp = SystemRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(sysOpCode);
+						if (sysOp == null) {
+							throw new InternalErrorException("Unknown system-restful-interaction: " + sysOpCode);
+						}
+						if (systemOps.contains(sysOp) == false) {
+							systemOps.add(sysOp);
+							rest.addInteraction().setCode(sysOp);
+						}
 					}
 				}
 
@@ -323,7 +331,8 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
+	 * invocation.
 	 * <p>
 	 * See the class documentation for an important note if you are extending this class
 	 * </p>
@@ -333,8 +342,9 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;
