@@ -20,7 +20,8 @@ package ca.uhn.fhir.model.dstu;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -72,8 +73,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class FhirDstu1 implements IFhirVersion {
 
@@ -358,6 +357,11 @@ public class FhirDstu1 implements IFhirVersion {
 		return str;
 	}
 	
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dstu/schema";
+	}
 
 
 

@@ -11,6 +11,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Patient;
@@ -174,6 +175,21 @@ public class JsonParserTest {
 
 	}
 	
-	
+	@Test
+	public void testParseAndEncodeBundleWithDeletedEntry() {
+		
+		Patient res = new Patient();
+		res.setId(new IdDt("Patient", "111", "222"));
+		ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt("2011-01-01T12:12:22Z"));
+		
+		Bundle bundle = new Bundle();
+		bundle.addResource(res, ourCtx, "http://foo/base");
+		
+		String encoded = ourCtx.newJsonParser().encodeBundleToString(bundle);
+		ourLog.info(encoded);
+		
+		assertEquals("{\"resourceType\":\"Bundle\",\"id\":null,\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]", encoded);
+		
+	}
 
 }

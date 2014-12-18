@@ -28,8 +28,10 @@ import java.util.Map;
 
 import javax.xml.transform.stream.StreamSource;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -44,7 +46,12 @@ import com.phloc.schematron.xslt.SchematronResourceSCH;
 
 public class SchematronBaseValidator implements IValidator {
 
-	private Map<Class<? extends IResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IResource>, ISchematronResource>();
+	private Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IBaseResource>, ISchematronResource>();
+	private FhirContext myCtx;
+
+	SchematronBaseValidator(FhirContext theContext) {
+		myCtx = theContext;
+	}
 
 	@Override
 	public void validateResource(ValidationContext<IResource> theCtx) {
@@ -87,19 +94,19 @@ public class SchematronBaseValidator implements IValidator {
 
 	private ISchematronResource getSchematron(ValidationContext<IResource> theCtx) {
 		Class<? extends IResource> resource = theCtx.getResource().getClass();
-		Class<? extends IResource> baseResourceClass = (Class<? extends IResource>) theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
+		Class<? extends IBaseResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
 		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion, Class<? extends IResource> theClass) {
+	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {
 				return retVal;
 			}
 
-			String pathToBase = "ca/uhn/fhir/model/" + theVersion + "/schema/" + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
+			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
 					+ ".sch";
 			InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 			if (baseIs == null) {

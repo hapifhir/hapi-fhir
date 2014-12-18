@@ -39,4 +39,6 @@ public interface IFhirVersion {
 
 	Object createServerConformanceProvider(RestfulServer theRestfulServer);
 
+	String getPathToSchemaDefinitions();
+
 }

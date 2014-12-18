@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.dev.resource.Conformance.RestResourceInteraction;
 import ca.uhn.fhir.model.dev.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dev.resource.OperationDefinition;
 import ca.uhn.fhir.model.dev.resource.OperationDefinition.Parameter;
+import ca.uhn.fhir.model.dev.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dev.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dev.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dev.valueset.TypeRestfulInteractionEnum;
@@ -66,10 +67,8 @@ import ca.uhn.fhir.util.ExtensionConstants;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
- * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
- * you are adding anything to the returned conformance instance on each call you should call
- * <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
+ * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider {
@@ -84,9 +83,8 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -266,28 +264,28 @@ public class ServerConformanceProvider {
 		}
 		sortSearchParameters(searchParameters);
 		if (!searchParameters.isEmpty()) {
-			boolean allOptional = searchParameters.get(0).isRequired() == false;
-
-			OperationDefinition query = null;
-			if (!allOptional) {
-				RestOperation operation = rest.addOperation();
-				query = new OperationDefinition();
-				operation.setDefinition(new ResourceReferenceDt(query));
-				query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
-				query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
-				for (String nextInclude : searchMethodBinding.getIncludes()) {
-					query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
-				}
-			}
+			// boolean allOptional = searchParameters.get(0).isRequired() == false;
+			//
+			// OperationDefinition query = null;
+			// if (!allOptional) {
+			// RestOperation operation = rest.addOperation();
+			// query = new OperationDefinition();
+			// operation.setDefinition(new ResourceReferenceDt(query));
+			// query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
+			// query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
+			// for (String nextInclude : searchMethodBinding.getIncludes()) {
+			// query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
+			// }
+			// }
 
 			for (SearchParameter nextParameter : searchParameters) {
 
 				String nextParamName = nextParameter.getName();
 
-				// String chain = null;
+				String chain = null;
 				String nextParamUnchainedName = nextParamName;
 				if (nextParamName.contains(".")) {
-					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
+					chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
 					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
 				}
 
@@ -303,27 +301,22 @@ public class ServerConformanceProvider {
 					}
 				}
 
-				Parameter param;
-				if (query == null) {
-					// param = resource.addSearchParam();
-				} else {
-					param = query.addParameter();
-					param.addUndeclaredExtension(false, ExtensionConstants.PARAM_IS_REQUIRED, new BooleanDt(nextParameter.isRequired()));
+				RestResourceSearchParam param = resource.addSearchParam();
+				param.setName(nextParamUnchainedName);
+				if (StringUtils.isNotBlank(chain)) {
+					param.addChain(chain);
 				}
-
-				// param.setName(nextParamName);
-				// if (StringUtils.isNotBlank(chain)) {
-				// param.addChain(chain);
-				// }
-				// param.setDocumentation(nextParamDescription);
-				// param.setType(nextParameter.getParamType());
+				param.setDocumentation(nextParamDescription);
+				if (nextParameter.getParamType() != null) {
+					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
+				}
 				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
 					RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
-						// ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
-						// if (code != null) {
-						// param.addTarget(code);
-						// }
+						ResourceTypeEnum code = ResourceTypeEnum.VALUESET_BINDER.fromCodeString(targetDef.getName());
+						if (code != null) {
+							param.addTarget(code);
+						}
 					}
 				}
 			}
@@ -331,8 +324,7 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the cache property (default is true). If set to true, the same response will be returned for each
-	 * invocation.
+	 * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
 	 * <p>
 	 * See the class documentation for an important note if you are extending this class
 	 * </p>
@@ -342,9 +334,8 @@ public class ServerConformanceProvider {
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;

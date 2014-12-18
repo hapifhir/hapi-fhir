@@ -19,7 +19,6 @@ import ca.uhn.fhir.model.dev.resource.Conformance;
 import ca.uhn.fhir.model.dev.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dev.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dev.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dev.resource.OperationDefinition;
 import ca.uhn.fhir.model.dev.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -112,6 +111,7 @@ public class ServerConformanceProviderTest {
 				found=true;
 			}
 		}
+
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance();
 		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -141,9 +141,13 @@ public class ServerConformanceProviderTest {
 		RestResource res = rest.getResourceFirstRep();
 		assertEquals("DiagnosticReport", res.getType());
 		
-		OperationDefinition p0 = (OperationDefinition) rest.getOperationFirstRep().getDefinition().getResource();
-		assertEquals("subject.identifier", p0.getParameterFirstRep().getName());
+		assertEquals(DiagnosticReport.SP_SUBJECT , res.getSearchParam().get(0).getName());
+		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 		
+		assertEquals(DiagnosticReport.SP_NAME, res.getSearchParam().get(2).getName());
+		
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(1).getName());
+				
 		assertEquals(1,res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
 	}
@@ -152,7 +156,6 @@ public class ServerConformanceProviderTest {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	@SuppressWarnings("unused")
 	public static class SearchProvider {
 
 		@Search(type = Patient.class)

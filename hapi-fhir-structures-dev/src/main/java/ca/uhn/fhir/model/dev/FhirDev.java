@@ -36,8 +36,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class FhirDev implements IFhirVersion {
 
 	private String myId;
@@ -82,6 +80,11 @@ public class FhirDev implements IFhirVersion {
 			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dev/model.properties");
 		}
 		return str;
+	}
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dev/schema";
 	}
 
 }
