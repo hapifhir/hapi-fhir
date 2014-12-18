@@ -21,17 +21,19 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</dependency>
+		<!-- 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.8</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dev</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.8</version>
 		</dependency>
- 		
+		-->
+
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
