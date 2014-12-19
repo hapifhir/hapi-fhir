@@ -358,6 +358,11 @@ public class FhirDstu1 implements IFhirVersion {
 		return str;
 	}
 	
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dstu/schema";
+	}
+
 
 
 

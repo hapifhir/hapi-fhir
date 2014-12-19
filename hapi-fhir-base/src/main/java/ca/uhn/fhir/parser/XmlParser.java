@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -677,9 +678,31 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter,
 			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+		/*
+		 * DSTU2 requires extensions to come in a specific spot within the encoded content - 
+		 * This is a bit of a messy way to make that happen, but hopefully this won't 
+		 * matter as much once we use the HL7 structures
+		 */
+		
+		List<BaseRuntimeChildDefinition> preExtensionChildren = new ArrayList<BaseRuntimeChildDefinition>();
+		List<BaseRuntimeChildDefinition> postExtensionChildren = new ArrayList<BaseRuntimeChildDefinition>();
+		List<BaseRuntimeChildDefinition> children = resDef.getChildren();
+		for (BaseRuntimeChildDefinition next : children) {
+			if (next.getElementName().equals("text")) {
+				preExtensionChildren.add(next);
+			} else if (next.getElementName().equals("contained")) {
+				preExtensionChildren.add(next);
+			} else {
+				postExtensionChildren.add(next);
+			}
+		}
+		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, preExtensionChildren, theIncludedResource);
+		
 		encodeExtensionsIfPresent(theResDef, theResource, theEventWriter, theElement, theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getExtensions(), theIncludedResource);
-		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, resDef.getChildren(), theIncludedResource);
+		
+		encodeCompositeElementChildrenToStreamWriter(theResDef, theResource, theElement, theEventWriter, postExtensionChildren, theIncludedResource);
+		
 	}
 
 	private void encodeCompositeElementToStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter,
