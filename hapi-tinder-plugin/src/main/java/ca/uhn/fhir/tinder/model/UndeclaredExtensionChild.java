@@ -25,11 +25,6 @@ public class UndeclaredExtensionChild extends Child {
 	}
 
 	@Override
-	public String getTypeSuffix() {
-		return "";
-	}
-
-	@Override
 	public boolean isSingleChildInstantiable() {
 		return true;
 	}

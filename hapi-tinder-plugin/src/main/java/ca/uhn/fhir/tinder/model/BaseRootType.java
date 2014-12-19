@@ -38,11 +38,6 @@ public abstract class BaseRootType extends BaseElement {
 		return retVal;
 	}
 
-	@Override
-	public String getTypeSuffix() {
-		return "";
-	}
-
 	public void setId(String theId) {
 		myId = theId;
 	}

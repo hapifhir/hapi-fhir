@@ -355,7 +355,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell><Data ss:Type="String">GeneticAnalysis.geneticAnalysisDiscreteResult.dnaAnalysisDiscreteSequenceVariation</Data></Cell>
     <Cell><Data ss:Type="String">0..*</Data></Cell>
-    <Cell ss:Index="6"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="6"><Data ss:Type="String"></Data></Cell>
     <Cell ss:Index="8"><Data ss:Type="String">DNA analysis discrete sequence variation</Data></Cell>
     <Cell><Data ss:Type="String">DNA analysis discrete sequence variation</Data></Cell>
     <Cell ss:Index="17"><Data ss:Type="String">55208-3</Data></Cell>

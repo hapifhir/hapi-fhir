@@ -145,8 +145,6 @@ public abstract class BaseElement {
 		return myType;
 	}
 
-	public abstract String getTypeSuffix();
-
 	public String getV2Mapping() {
 		return myV2Mapping;
 	}
@@ -230,18 +228,28 @@ public abstract class BaseElement {
 		}
 		String typeString = theType;
 		typeString = typeString.replace("Reference (", "Reference(");
+		typeString = typeString.replace("Resource (", "Reference(");
+		typeString = typeString.replace("Resource(", "Reference(").trim();
 		
-		if (typeString.toLowerCase().startsWith("resource(")) {
-			typeString = typeString.substring("Resource(".length(), typeString.length() - 1);
-			myResourceRef = true;
-		} else if (typeString.toLowerCase().startsWith("reference(")) {
-			typeString = typeString.substring("Reference(".length(), typeString.length() - 1);
-			myResourceRef = true;
-		} else if (typeString.startsWith("@")) {
+//		if (typeString.toLowerCase().startsWith("resource(")) {
+//			typeString = typeString.substring("Resource(".length(), typeString.length());
+//			myResourceRef = true;
+//		} else if (typeString.toLowerCase().startsWith("reference(")) {
+//			typeString = typeString.substring("Reference(".length(), typeString.length());
+//			myResourceRef = true;
+//		} else 
+		
+		boolean datatype = true;
+		if (typeString.startsWith("@")) {
 			typeString = typeString.substring(1);
 			typeString = ResourceBlock.convertFhirPathNameToClassName(typeString);
+			datatype = false;
+//		} else if (typeString.equals("Reference(Any)")) {
+//			typeString = "Reference(IResource)";
+//			datatype = false;
 		} else if (typeString.equals("*")) {
 			typeString = "IDatatype";
+			datatype = false;
 		}
 
 		if (StringUtils.isNotBlank(typeString)) {
@@ -251,6 +259,14 @@ public abstract class BaseElement {
 				int endIdx = typeString.indexOf(")");
 				typeString = typeString.substring(0,idx) + typeString.substring(idx, endIdx).replace("|", ",") + typeString.substring(endIdx);
  			}
+			
+			if (idx == 0 && typeString.endsWith(")")) {
+				myResourceRef = true;
+			}
+			
+			if (typeString.startsWith("=")) {
+				datatype = false;
+			}
 			
 			String[] types = typeString.replace("=", "").split("\\|");
 			for (String nextType : types) {
@@ -266,7 +282,9 @@ public abstract class BaseElement {
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
 				} else {
 					nextType = nextType.substring(0, 1).toUpperCase() + nextType.substring(1);
-					nextType = nextType + getTypeSuffix();
+					if (datatype) {
+						nextType = nextType + "Dt";
+					}
 				}
 
 				for (String next : nextType.split(",")) {
@@ -303,4 +321,9 @@ public abstract class BaseElement {
 		return myExtensionUrl;
 	}
 
+	public static void main(String[] args) {
+		SimpleChild child = new SimpleChild();
+		child.setTypeFromString("CodeableConcept | Resource(Any)");
+	}
+	
 }
