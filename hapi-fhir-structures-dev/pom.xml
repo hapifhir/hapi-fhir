@@ -313,9 +313,9 @@
 						<baseResourceName>securityevent</baseResourceName>
 						<baseResourceName>securitygroup</baseResourceName>
 						<baseResourceName>securityprincipal</baseResourceName>
-						<baseResourceName>sequence</baseResourceName>
+						<!--<baseResourceName>sequence</baseResourceName>
 						<baseResourceName>sequencinganalysis</baseResourceName>
-						<baseResourceName>sequencinglab</baseResourceName>
+						<baseResourceName>sequencinglab</baseResourceName>-->
 						<baseResourceName>slot</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
 						<baseResourceName>statusrequest</baseResourceName>
@@ -328,8 +328,8 @@
 						<!--<baseResourceName>test</baseResourceName>-->
 						<baseResourceName>user</baseResourceName>
 						<baseResourceName>valueset</baseResourceName>
-						<baseResourceName>vcfmeta</baseResourceName>
-						<baseResourceName>vcfvariant</baseResourceName>
+						<!--<baseResourceName>vcfmeta</baseResourceName>
+						<baseResourceName>vcfvariant</baseResourceName>-->
 						<baseResourceName>visionclaim</baseResourceName>
 						<baseResourceName>visionprescription</baseResourceName>
 						<!--<baseResourceName>visit</baseResourceName>-->
