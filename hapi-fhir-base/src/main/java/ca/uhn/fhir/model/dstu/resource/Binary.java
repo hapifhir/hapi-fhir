@@ -23,8 +23,7 @@ package ca.uhn.fhir.model.dstu.resource;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -103,6 +102,11 @@ public class Binary extends BaseResource implements IResource {
 	@Override
 	public String getResourceName() {
 		return Binary.class.getName();
+	}
+
+	@Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU1;
 	}
 
 }

@@ -1168,4 +1168,8 @@ public class DeviceObservationReport
         return "DeviceObservationReport";
     }
 
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
 }

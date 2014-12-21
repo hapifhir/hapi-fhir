@@ -1580,4 +1580,8 @@ public class Supply
         return "Supply";
     }
 
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
 }

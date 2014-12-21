@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
@@ -409,6 +410,7 @@ public abstract class BaseStructureParser {
 		ctx.put("imports", imports);
 		ctx.put("profile", theResource.getProfile());
 		ctx.put("version", myVersion);
+		ctx.put("versionEnumName", determineVersionEnum().name());
 		ctx.put("id", StringUtils.defaultString(theResource.getId()));
 		if (theResource.getDeclaringClassNameComplete() != null) {
 			ctx.put("className", theResource.getDeclaringClassNameComplete());
@@ -503,6 +505,7 @@ public abstract class BaseStructureParser {
 				ctx.put("nameToResourceClass", myNameToResourceClass);
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
 				ctx.put("version", myVersion);
+				ctx.put("versionEnumName", determineVersionEnum().name());
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty("resource.loader", "cp");
@@ -518,6 +521,18 @@ public abstract class BaseStructureParser {
 				throw new MojoFailureException(e.getMessage(), e);
 			}
 		}
+	}
+
+	private FhirVersionEnum determineVersionEnum() throws MojoFailureException {
+		FhirVersionEnum versionEnum=null;
+		if ("dstu".equals(myVersion)) {
+			versionEnum=FhirVersionEnum.DSTU1;
+		} else if ("dev".equals(myVersion)) {
+			versionEnum=FhirVersionEnum.DEV;
+		} else {
+			throw new MojoFailureException("Unknown version: "+myVersion);
+		}
+		return versionEnum;
 	}
 
 	static String cellValue(Node theRowXml, int theCellIndex) {

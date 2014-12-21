@@ -1127,4 +1127,8 @@ public class AllergyIntolerance
         return "AllergyIntolerance";
     }
 
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
 }

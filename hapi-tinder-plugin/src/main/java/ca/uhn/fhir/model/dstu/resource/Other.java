@@ -699,4 +699,8 @@ public class Other
         return "Other";
     }
 
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
 }

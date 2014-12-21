@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -220,6 +221,11 @@ public class ServerInvalidDefinitionTest {
 				@Override
 				public ContainedDt getContained() {
 					return null;
+				}
+
+				@Override
+				public FhirVersionEnum getStructureFhirVersionEnum() {
+					return FhirVersionEnum.DSTU1;
 				}
 			}.getClass();
 		}

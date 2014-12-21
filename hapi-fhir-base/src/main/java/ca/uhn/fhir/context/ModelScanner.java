@@ -709,7 +709,14 @@ class ModelScanner {
 		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition);
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
-			myNameToResourceDefinitions.put(resourceName, resourceDef);
+			try {
+				IResource res = (IResource) theClass.newInstance();
+				if (res.getStructureFhirVersionEnum() == myContext.getVersion().getVersion()) {
+					myNameToResourceDefinitions.put(resourceName, resourceDef);
+				}
+			} catch (Exception e) {
+				ourLog.error("Failed to instantiate type[" +theClass.getName() +"]", e);
+			}
 		}
 		scanCompositeElementForChildren(theClass, resourceDef);
 

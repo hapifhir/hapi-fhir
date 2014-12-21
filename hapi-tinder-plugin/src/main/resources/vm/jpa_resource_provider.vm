@@ -9,12 +9,13 @@ import ca.uhn.fhir.jpa.provider.JpaResourceProvider;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.dstu.composite.*;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.${version}.composite.*;
+import ca.uhn.fhir.model.${version}.resource.*;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
-
+import ca.uhn.fhir.model.dstu.resource.Binary;
+ 
 
 public class ${className}ResourceProvider extends JpaResourceProvider<${className}> {
 

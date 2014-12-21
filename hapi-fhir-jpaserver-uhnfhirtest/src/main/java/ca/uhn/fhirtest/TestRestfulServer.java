@@ -1,6 +1,6 @@
 package ca.uhn.fhirtest;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -27,6 +27,7 @@ public class TestRestfulServer extends RestfulServer {
 
 	private ApplicationContext myAppCtx;
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize() throws ServletException {
 		super.initialize();
@@ -46,13 +47,31 @@ public class TestRestfulServer extends RestfulServer {
 //				"WEB-INF/hapi-fhir-server-config.xml"
 //				);
 
+		String fhirVersionParam = getInitParameter("FhirVersion");
+		if (StringUtils.isBlank(fhirVersionParam)) {
+			fhirVersionParam="DSTU1";
+		}
+		
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 		
-		FhirContext ctx = myAppCtx.getBean(FhirContext.class);
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-		setFhirContext(ctx);
+		List<IResourceProvider> beans;
+		switch (fhirVersionParam.trim().toUpperCase()) {
+		case "DSTU":
+		case "DSTU1":
+			setFhirContext(FhirContext.forDstu1());
+			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
+			break;
+		case "DEV":
+			setFhirContext(FhirContext.forDev());
+			beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
+			break;
+		default:
+			throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
+		}
 		
-		Collection<IResourceProvider> beans = myAppCtx.getBeansOfType(IResourceProvider.class).values();
+		FhirContext ctx = getFhirContext();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		
 		for (IResourceProvider nextResourceProvider : beans) {
 			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
 		}

@@ -206,6 +206,10 @@ public class ResourceWithExtensionsA extends BaseResource {
 	}
 
 	
-	
+	@Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU1;
+	}
+
 
 }

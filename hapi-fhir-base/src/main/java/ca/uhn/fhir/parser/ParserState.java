@@ -1834,12 +1834,14 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new Error("Element " + theLocalPart + " in primitive!"); // TODO:
-																			// can
-																			// this
-																			// happen?
+			if (false) {// TODO: make this configurable
+				throw new Error("Element " + theLocalPart + " in primitive!"); // TODO:
+			}
+			ourLog.warn("Ignoring element {} in primitive tag", theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+			return;
 		}
-
+		
 		@Override
 		protected IBase getCurrentElement() {
 			return myInstance;

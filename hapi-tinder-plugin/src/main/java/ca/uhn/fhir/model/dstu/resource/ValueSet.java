@@ -3683,4 +3683,8 @@ public class ValueSet
         return "ValueSet";
     }
 
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
 }

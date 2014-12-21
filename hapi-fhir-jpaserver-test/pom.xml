@@ -125,46 +125,6 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.9-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>buildclient</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
-						<configuration>
-							<packageBase>ca.uhn.test.jpasrv</packageBase>
-							<baseResourceNames>
-								<baseResourceName>device</baseResourceName>
-								<baseResourceName>documentmanifest</baseResourceName>
-								<baseResourceName>documentreference</baseResourceName>
-								<baseResourceName>encounter</baseResourceName>
-								<baseResourceName>diagnosticorder</baseResourceName>
-								<baseResourceName>diagnosticreport</baseResourceName>
-								<baseResourceName>imagingstudy</baseResourceName>
-								<baseResourceName>location</baseResourceName>
-								<baseResourceName>observation</baseResourceName>
-								<baseResourceName>organization</baseResourceName>
-								<baseResourceName>patient</baseResourceName>
-								<baseResourceName>practitioner</baseResourceName>
-								<baseResourceName>questionnaire</baseResourceName>
-								<baseResourceName>valueset</baseResourceName>
-							</baseResourceNames>
-							<buildDatatypes>true</buildDatatypes>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ca.uhn.hapi.fhir</groupId>
-						<artifactId>hapi-fhir-structures-dstu</artifactId>
-						<version>0.9-SNAPSHOT</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>

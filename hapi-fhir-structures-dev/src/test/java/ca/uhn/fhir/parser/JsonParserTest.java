@@ -38,6 +38,16 @@ public class JsonParserTest {
 	}
 
 	@Test
+	public void testParsePatientInBundle() {
+		
+		String text = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
+		FhirContext ctx = FhirContext.forDev();
+		Bundle b = ctx.newJsonParser().parseBundle(text);
+		
+		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+	}
+	
+	@Test
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/bundle-example.json"));
 

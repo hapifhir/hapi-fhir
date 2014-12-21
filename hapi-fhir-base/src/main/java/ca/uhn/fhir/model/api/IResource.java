@@ -20,8 +20,6 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -134,4 +132,10 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 */
 	String getResourceName();
 
+	/**
+	 * Returns the FHIR version represented by this structure
+	 */
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum();
+
+	
 }

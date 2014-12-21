@@ -61,7 +61,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
 		setReference(theResource.getId());
 	}
 
-	protected abstract IdDt getReference();
+	public abstract IdDt getReference();
 
 	/**
 	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This method will return the resource instance only if it has previously been loaded using

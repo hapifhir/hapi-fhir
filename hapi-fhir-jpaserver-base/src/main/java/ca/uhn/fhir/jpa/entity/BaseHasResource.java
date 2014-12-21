@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
@@ -29,7 +30,11 @@ public abstract class BaseHasResource {
 	@Column(name = "RES_ENCODING", nullable = false, length = 5)
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
-	
+
+	@Column(name = "RES_VERSION", nullable = true, length = 5)
+	@Enumerated(EnumType.STRING)
+	private FhirVersionEnum myFhirVersion;
+
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false)
 	@JoinColumn(name = "FORCED_ID_PID")
 	private ForcedId myForcedId;
@@ -60,6 +65,10 @@ public abstract class BaseHasResource {
 
 	public ResourceEncodingEnum getEncoding() {
 		return myEncoding;
+	}
+
+	public FhirVersionEnum getFhirVersion() {
+		return myFhirVersion;
 	}
 
 	public ForcedId getForcedId() {
@@ -100,6 +109,10 @@ public abstract class BaseHasResource {
 
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
+	}
+
+	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
+		myFhirVersion = theFhirVersion;
 	}
 
 	public void setForcedId(ForcedId theForcedId) {

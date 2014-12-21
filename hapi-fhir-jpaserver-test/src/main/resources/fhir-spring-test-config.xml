@@ -13,49 +13,9 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean class="ca.uhn.fhir.context.FhirContext"></bean>
 
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
 	</bean>
-
-	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
-	</bean>
-
-	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticReport"/>
-	</bean>
-	<bean id="myImagingStudyDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.ImagingStudy"/>
-	</bean>
-	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Location"/>
-	</bean>
-	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Patient"/>
-	</bean>
-	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Observation"/>
-	</bean>
-	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Organization"/>
-	</bean>
-	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Questionnaire"/>
-	</bean>
-	<bean id="myEncounterDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.Encounter"/>
-	</bean>
-
-	<bean id="myDiagnosticOrderDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DiagnosticOrder"/>
-	</bean>
-	<bean id="myDocumentManifestDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DocumentManifest"/>
-	</bean>
-	<bean id="myDocumentReferenceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu.resource.DocumentReference"/>
-	</bean>
-
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />

@@ -245,7 +245,7 @@
 						<baseResourceName>explanationofbenefit</baseResourceName>
 						<baseResourceName>extensiondefinition</baseResourceName>
 						<baseResourceName>familyhistory</baseResourceName>
-						<baseResourceName>geneexpression</baseResourceName>
+						<!--<baseResourceName>geneexpression</baseResourceName>-->
 						<baseResourceName>geneticanalysis</baseResourceName>
 						<baseResourceName>goal</baseResourceName>
 						<!--<baseResourceName>goalrequest</baseResourceName>-->

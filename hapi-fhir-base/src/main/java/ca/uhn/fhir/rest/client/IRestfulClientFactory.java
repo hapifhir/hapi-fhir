@@ -66,13 +66,21 @@ public interface IRestfulClientFactory {
 	 */
 	IGenericClient newGenericClient(String theServerBase);
 
-
+	/**
+	 * Sets the socket timeout (in milliseconds)
+	 */
 	void setSocketTimeout(int theSocketTimeout);
 
 
+	/**
+	 * Sets the connection timeout (in milliseconds)
+	 */
 	void setConnectTimeout(int theConnectTimeout);
 
 
+	/**
+	 * Sets the connection request timeout (in milliseconds)
+	 */
 	void setConnectionRequestTimeout(int theConnectionRequestTimeout);
 
 	/**

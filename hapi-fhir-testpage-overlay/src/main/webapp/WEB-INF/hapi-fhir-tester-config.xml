@@ -11,13 +11,13 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
-				<!-- <value>test, TEST, http://uhnvesb01d.uhn.on.ca:25180/uhn-fhir-service-1.2/</value>  -->
-				<value>home     , Localhost Server                , http://localhost:8887/fhir/context </value>
-				<value>hi       , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
-				<value>furore   , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
-				<value>blaze    , Blaze (Orion Health)            , https://fhir.orionhealth.com/blaze/fhir</value>
-				<value>oridashi , Oridashi                        , http://demo.oridashi.com.au:8190</value>
-				<value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value>
+				<value>home     , DSTU1 , Localhost Server DSTU1          , http://localhost:8887/fhir/contextDstu1</value>
+				<value>home_dev , DEV   , Localhost Server DEV            , http://localhost:8887/fhir/contextDev</value>
+				<value>hi       , DSTU1 , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
+				<value>furore   , DSTU1 , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
+				<value>blaze    , DSTU1 , Blaze (Orion Health)            , https://fhir.orionhealth.com/blaze/fhir</value>
+				<value>oridashi , DSTU1 , Oridashi                        , http://demo.oridashi.com.au:8190</value>
+				<value>fhirbase , DSTU1 , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value>
 			</list>
 		</property>
 	</bean>

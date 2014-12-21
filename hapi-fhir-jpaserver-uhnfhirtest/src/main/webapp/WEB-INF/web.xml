@@ -11,7 +11,8 @@
 		<param-value>
 			/WEB-INF/hapi-fhir-server-database-config.xml
 			/WEB-INF/hapi-fhir-server-config.xml
-			/WEB-INF/hapi-fhir-server-resourceproviders.xml
+			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
+			classpath:hapi-fhir-server-resourceproviders-dev.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
 			/WEB-INF/hapi-fhir-tester-config.xml
 		</param-value>
@@ -33,18 +34,46 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>fhirServlet</servlet-name>
+		<servlet-name>fhirServletDstu1</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server</param-value>
+			<param-value>UHN Test Server (DSTU1 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>DSTU1</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>fhirServletDev</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server (DEV Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>DEV</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>fhirServlet</servlet-name>
+		<servlet-name>fhirServletDstu1</servlet-name>
 		<url-pattern>/base/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>fhirServletDstu1</servlet-name>
+		<url-pattern>/baseDstu1/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>fhirServletDev</servlet-name>
+		<url-pattern>/baseDev/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
