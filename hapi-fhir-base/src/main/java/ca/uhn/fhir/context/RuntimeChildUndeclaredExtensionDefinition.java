@@ -48,13 +48,27 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
+	public IAccessor getAccessor() {
+		return new IAccessor() {
+			@Override
+			public List<? extends IBase> getValues(Object theTarget) {
+				ExtensionDt target = (ExtensionDt) theTarget;
+				if (target.getValue() != null) {
+					return Collections.singletonList(target.getValue());
+				}
+				return target.getUndeclaredExtensions();
+			}
+		};
+	}
+
+	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
 		return myAttributeNameToDefinition.get(theName);
 	}
 
 	@Override
-	public Set<String> getValidChildNames() {
-		return myAttributeNameToDefinition.keySet();
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
+		return myDatatypeToDefinition.get(theType);
 	}
 
 	@Override
@@ -63,8 +77,38 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		return myDatatypeToDefinition.get(theType);
+	public String getElementName() {
+		return "extension";
+	}
+
+	@Override
+	public int getMax() {
+		return 1;
+	}
+
+	@Override
+	public int getMin() {
+		return 0;
+	}
+
+	@Override
+	public IMutator getMutator() {
+		return new IMutator() {
+			@Override
+			public void addValue(Object theTarget, IBase theValue) {
+				ExtensionDt target = (ExtensionDt) theTarget;
+				if (theValue instanceof IDatatype) {
+					target.setValue((IDatatype) theTarget);
+				} else {
+					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
+				}
+			}
+		};
+	}
+
+	@Override
+	public Set<String> getValidChildNames() {
+		return myAttributeNameToDefinition.keySet();
 	}
 
 	@Override
@@ -79,7 +123,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 //				}
 				
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
-					String attrName = "value" + WordUtils.capitalize(next.getName());
+					String attrName = createExtensionChildName(next);
 					datatypeAttributeNameToDefinition.put(attrName, next);
 					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
 					myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);
@@ -108,48 +152,9 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		myDatatypeToDefinition.put(ResourceReferenceDt.class, def);
 	}
 
-	@Override
-	public IAccessor getAccessor() {
-		return new IAccessor() {
-			@Override
-			public List<? extends IBase> getValues(Object theTarget) {
-				ExtensionDt target = (ExtensionDt) theTarget;
-				if (target.getValue() != null) {
-					return Collections.singletonList(target.getValue());
-				}
-				return target.getUndeclaredExtensions();
-			}
-		};
-	}
-
-	@Override
-	public IMutator getMutator() {
-		return new IMutator() {
-			@Override
-			public void addValue(Object theTarget, IBase theValue) {
-				ExtensionDt target = (ExtensionDt) theTarget;
-				if (theValue instanceof IDatatype) {
-					target.setValue((IDatatype) theTarget);
-				} else {
-					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
-				}
-			}
-		};
-	}
-
-	@Override
-	public int getMax() {
-		return 1;
-	}
-
-	@Override
-	public int getMin() {
-		return 0;
-	}
-
-	@Override
-	public String getElementName() {
-		return "extension";
+	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {
+		String attrName = "value" + WordUtils.capitalize(next.getName());
+		return attrName;
 	}
 
 }

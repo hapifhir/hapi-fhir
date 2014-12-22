@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -34,16 +35,27 @@
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
 			<version>0.9-SNAPSHOT</version>
 			<type>war</type>
-			<scope>provided</scope>		
+			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+		    <version>${phloc_schematron_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+		    <version>${phloc_commons_version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
 			<version>0.9-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -51,26 +63,26 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.hsqldb</groupId>
-		    <artifactId>hsqldb</artifactId>
-		    <version>2.3.2</version>
-		    <scope>provided</scope>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.3.2</version>
+			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>org.apache.derby</groupId>
-		    <artifactId>derby</artifactId>
-		    <version>${derby_version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.apache.derby</groupId>
-		    <artifactId>derbynet</artifactId>
-		    <version>${derby_version}</version>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>${derby_version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.derby</groupId>
-		    <artifactId>derbyclient</artifactId>
-		    <version>${derby_version}</version>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbynet</artifactId>
+			<version>${derby_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbyclient</artifactId>
+			<version>${derby_version}</version>
 		</dependency>
 
 		<dependency>
@@ -84,16 +96,16 @@
 			<version>${logback_version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>jcl-over-slf4j</artifactId>
-		    <version>${slf4j_version}</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j_version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -144,14 +156,14 @@
 			<artifactId>commons-dbcp</artifactId>
 			<version>1.4</version>
 		</dependency>
-		
+
 		<!-- Only required for CORS support -->
 		<dependency>
 			<groupId>org.ebaysf.web</groupId>
 			<artifactId>cors-filter</artifactId>
 			<version>${ebay_cors_filter_version}</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -165,7 +177,8 @@
 						<target>1.7</target>
 					</configuration>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

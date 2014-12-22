@@ -2,7 +2,6 @@
     <wb-module deploy-name="hapi-fhir-jpaserver-uhnfhirtest">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-resources/tinder"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/tinder"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
@@ -13,9 +12,6 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="hapi-fhir-structures-dstu-0.9-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="hapi-fhir-structures-dev-0.9-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dev/hapi-fhir-structures-dev">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-testpage-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">

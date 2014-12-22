@@ -41,8 +41,8 @@ public class ServerProvidedResourceScannerTest extends TestCase {
         server.init();
 
         // Then
-        assertNull(server.getFhirContext().getElementDefinition(CustomObservation.class));
-        assertNull(server.getFhirContext().getElementDefinition(CustomPatient.class));
+        assertEquals(CustomObservation.class, server.getFhirContext().getElementDefinition(CustomObservation.class).getImplementingClass());
+        assertEquals(CustomPatient.class, server.getFhirContext().getElementDefinition(CustomPatient.class).getImplementingClass());
     }
 
     @Test
@@ -58,11 +58,11 @@ public class ServerProvidedResourceScannerTest extends TestCase {
     }
 
     @ResourceDef(name = "Patient", id="CustomPatient")
-    class CustomPatient extends Patient {
+    public static class CustomPatient extends Patient {
     }
 
     @ResourceDef(name = "Observation", id="CustomObservation")
-    class CustomObservation extends Observation {
+    public static class CustomObservation extends Observation {
     }
 
     @ProvidesResources(resources={CustomPatient.class,CustomObservation.class})

@@ -10,26 +10,27 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class ProvidedResourceScannerTest extends TestCase {
-    @Test
-    public void testScannerShouldAddProvidedResources() {
-        FhirContext ctx = new FhirContext();
-        assertNull(ctx.getElementDefinition(CustomPatient.class));
+	@Test
+	public void testScannerShouldAddProvidedResources() {
+		FhirContext ctx = new FhirContext();
+		assertEquals(CustomPatient.class, ctx.getElementDefinition(CustomPatient.class).getImplementingClass());
+		assertEquals(Patient.class, ctx.getResourceDefinition("Patient").getImplementingClass());
 
-        ProvidedResourceScanner scanner = new ProvidedResourceScanner(ctx);
-        scanner.scanForProvidedResources(new TestResourceProviderB());
+		ProvidedResourceScanner scanner = new ProvidedResourceScanner(ctx);
+		scanner.scanForProvidedResources(new TestResourceProviderB());
 
-        assertNotNull(ctx.getElementDefinition(CustomPatient.class));
-    }
+		assertNotNull(ctx.getElementDefinition(CustomPatient.class));
+	}
 
-    @ProvidesResources(resources=CustomObservation.class)
-    class TestResourceProviderA {
-    }
+	@ResourceDef(name = "Patient", id = "CustomPatient")
+	public static class CustomPatient extends Patient {
+	}
 
-    @ProvidesResources(resources={CustomPatient.class,ResourceWithExtensionsA.class})
-    class TestResourceProviderB {
-    }
+	@ProvidesResources(resources = CustomObservation.class)
+	public static class TestResourceProviderA {
+	}
 
-    @ResourceDef(name = "Patient", id="CustomPatient")
-    class CustomPatient extends Patient {
-    }
+	@ProvidesResources(resources = { CustomPatient.class, ResourceWithExtensionsA.class })
+	public static class TestResourceProviderB {
+	}
 }

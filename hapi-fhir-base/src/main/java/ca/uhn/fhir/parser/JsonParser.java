@@ -1371,7 +1371,9 @@ public class JsonParser extends BaseParser implements IParser {
 
 			boolean noValue = value == null || value.isEmpty();
 			if (noValue && ext.getAllUndeclaredExtensions().isEmpty()) {
+				
 				ourLog.debug("Extension with URL[{}] has no value", extensionUrl);
+				
 			} else if (noValue) {
 
 				BaseRuntimeElementDefinition<?> elemDef = null;
@@ -1379,13 +1381,22 @@ public class JsonParser extends BaseParser implements IParser {
 				extractAndWriteExtensionsAsDirectChild(ext, theEventWriter, elemDef, resDef, theResource, extensionUrl);
 
 			} else {
+				
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(value.getClass());
+				BaseRuntimeElementDefinition<?> childDef;
 				if (childName == null) {
-					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + value.getClass().getCanonicalName());
+					childDef = myContext.getElementDefinition(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					} else {
+						childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
+					}
+				} else {
+					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 				}
-				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, true);
+				
 			}
 
 			theEventWriter.writeEnd();
