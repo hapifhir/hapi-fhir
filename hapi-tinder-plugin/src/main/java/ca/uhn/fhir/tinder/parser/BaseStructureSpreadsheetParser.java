@@ -85,7 +85,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			BaseRootType resource = createRootType();
 			addResource(resource);
 
-			parseBasicElements(resourceRow, resource);
+			parseBasicElements(resourceRow, resource, null);
 
 			parseParameters(file, resource);
 
@@ -133,7 +133,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					elem = new SimpleChild();
 				}
 
-				parseBasicElements(nextRow, elem);
+				parseBasicElements(nextRow, elem, type);
 
 				elements.put(elem.getName(), elem);
 				BaseElement parent = elements.get(elem.getElementParentName());
@@ -337,7 +337,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		}
 	}
 
-	protected void parseBasicElements(Element theRowXml, BaseElement theTarget) {
+	private void parseBasicElements(Element theRowXml, BaseElement theTarget, String theTypeOrNull) {
 		String name = cellValue(theRowXml, myColName);
 		theTarget.setName(name);
 
@@ -350,9 +350,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			theTarget.setCardMax(split[1]);
 		}
 
-		String type = cellValue(theRowXml, myColType);
+		String type = theTypeOrNull != null ? theTypeOrNull : cellValue(theRowXml, myColType);
 		theTarget.setTypeFromString(type);
-
 		theTarget.setBinding(cellValue(theRowXml, myColBinding));
 		theTarget.setShortName(cellValue(theRowXml, myColShortName));
 		theTarget.setDefinition(cellValue(theRowXml, myColDefinition));

@@ -373,9 +373,10 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	@Override
-	public void setValue(Date theValue) {
+	public BaseDateTimeDt setValue(Date theValue) {
 		clearTimeZone();
 		super.setValue(theValue);
+		return this;
 	}
 
 	/**

@@ -24,9 +24,13 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
 public class BundleEntry extends BaseBundle {
@@ -38,20 +42,61 @@ public class BundleEntry extends BaseBundle {
 	//@formatter:on
 	private TagList myCategories;
 	private InstantDt myDeletedAt;
+	private CodeDt myDeletedResourceType;
+	private StringDt myDeletedResourceId;
+	private StringDt myDeletedResourceVersion;
+
+	public CodeDt getDeletedResourceType() {
+		if (myDeletedResourceType == null) {
+			myDeletedResourceType = new CodeDt();
+		}
+		return myDeletedResourceType;
+	}
+
+	public void setDeletedResourceType(CodeDt theDeletedResourceType) {
+		myDeletedResourceType = theDeletedResourceType;
+	}
+
+	public StringDt getDeletedResourceId() {
+		if (myDeletedResourceId == null) {
+			myDeletedResourceId = new StringDt();
+		}
+		return myDeletedResourceId;
+	}
+
+	public void setDeletedResourceId(StringDt theDeletedResourceId) {
+		myDeletedResourceId = theDeletedResourceId;
+	}
+
+	public StringDt getDeletedResourceVersion() {
+		if (myDeletedResourceVersion == null) {
+			myDeletedResourceVersion = new StringDt();
+		}
+		return myDeletedResourceVersion;
+	}
+
+	public void setDeletedResourceVersion(StringDt theDeletedResourceVersion) {
+		myDeletedResourceVersion = theDeletedResourceVersion;
+	}
+
 	private StringDt myDeletedByEmail;
 	private StringDt myDeletedByName;
 	private StringDt myDeletedComment;
 	private StringDt myLinkAlternate;
 	private StringDt myLinkSearch;
 	private StringDt myLinkSelf;
+	private StringDt myLinkBase;
 	private InstantDt myPublished;
 	private IResource myResource;
 	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
+	private BoundCodeDt<BundleEntryStatusEnum> myStatus;
+	private DecimalDt myScore;
 
 	/**
-	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addCategory(String, String, String)} should be used instead
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so
+	 *             {@link #addCategory(String, String, String)} should be used instead
 	 */
 	public Tag addCategory() {
 		Tag retVal = new Tag();
@@ -112,6 +157,13 @@ public class BundleEntry extends BaseBundle {
 		return myLinkAlternate;
 	}
 
+	public StringDt getLinkBase() {
+		if (myLinkBase == null) {
+			myLinkBase = new StringDt();
+		}
+		return myLinkBase;
+	}
+
 	public StringDt getLinkSearch() {
 		if (myLinkSearch == null) {
 			myLinkSearch = new StringDt();
@@ -135,6 +187,13 @@ public class BundleEntry extends BaseBundle {
 
 	public IResource getResource() {
 		return myResource;
+	}
+
+	public BoundCodeDt<BundleEntryStatusEnum> getStatus() {
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<BundleEntryStatusEnum>(BundleEntryStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
 	}
 
 	public XhtmlDt getSummary() {
@@ -162,7 +221,7 @@ public class BundleEntry extends BaseBundle {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
+				ElementUtil.isEmpty(myDeletedResourceId, myDeletedResourceType, myDeletedResourceVersion, myScore,myStatus, myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
 		//@formatter:on
 	}
 
@@ -192,6 +251,10 @@ public class BundleEntry extends BaseBundle {
 		myLinkAlternate = theLinkAlternate;
 	}
 
+	public void setLinkBase(StringDt theLinkBase) {
+		myLinkBase = theLinkBase;
+	}
+
 	public void setLinkSearch(StringDt theLinkSearch) {
 		myLinkSearch = theLinkSearch;
 	}
@@ -212,6 +275,10 @@ public class BundleEntry extends BaseBundle {
 		myResource = theResource;
 	}
 
+	public void setStatus(BoundCodeDt<BundleEntryStatusEnum> theStatus) {
+		myStatus = theStatus;
+	}
+
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;
@@ -227,6 +294,17 @@ public class BundleEntry extends BaseBundle {
 		}
 		b.append("id", getId());
 		return b.toString();
+	}
+
+	public DecimalDt getScore() {
+		if (myScore == null) {
+			myScore = new DecimalDt();
+		}
+		return myScore;
+	}
+
+	public void setScore(DecimalDt theScore) {
+		myScore = theScore;
 	}
 
 }

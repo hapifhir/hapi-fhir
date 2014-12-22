@@ -22,6 +22,8 @@ package ca.uhn.fhir.model.view;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -81,8 +83,8 @@ public class ViewGenerator {
 					continue;
 				}
 
-				List<? extends IElement> sourceValues = sourceChildEquivalent.getAccessor().getValues(theSource);
-				for (IElement nextElement : sourceValues) {
+				List<? extends IBase> sourceValues = sourceChildEquivalent.getAccessor().getValues(theSource);
+				for (IBase nextElement : sourceValues) {
 					nextChild.getMutator().addValue(theTarget, nextElement);
 				}
 			}
@@ -102,8 +104,8 @@ public class ViewGenerator {
 					
 				} else {
 					
-					List<? extends IElement> values = sourceDeclaredExt.getAccessor().getValues(theSource);
-					for (IElement nextElement : values) {
+					List<? extends IBase> values = sourceDeclaredExt.getAccessor().getValues(theSource);
+					for (IBase nextElement : values) {
 						nextExt.getMutator().addValue(theTarget, nextElement);
 					}
 					

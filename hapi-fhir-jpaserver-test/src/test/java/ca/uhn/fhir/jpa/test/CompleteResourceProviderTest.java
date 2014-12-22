@@ -32,10 +32,8 @@ import ca.uhn.fhir.model.dstu.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
 import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
 import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
@@ -47,18 +45,10 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.test.jpasrv.DiagnosticOrderResourceProvider;
-import ca.uhn.test.jpasrv.DocumentManifestResourceProvider;
-import ca.uhn.test.jpasrv.DocumentReferenceResourceProvider;
-import ca.uhn.test.jpasrv.EncounterResourceProvider;
-import ca.uhn.test.jpasrv.ImagingStudyResourceProvider;
-import ca.uhn.test.jpasrv.LocationResourceProvider;
-import ca.uhn.test.jpasrv.ObservationResourceProvider;
-import ca.uhn.test.jpasrv.OrganizationResourceProvider;
-import ca.uhn.test.jpasrv.PatientResourceProvider;
 
 public class CompleteResourceProviderTest {
 
@@ -66,12 +56,11 @@ public class CompleteResourceProviderTest {
 	private static IGenericClient ourClient;
 	private static FhirContext ourFhirCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
-	private static IFhirResourceDao<Observation> ourObservationDao;
-	private static IFhirResourceDao<Patient> ourPatientDao;
-	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
+	// private static IFhirResourceDao<Observation> ourObservationDao;
+	// private static IFhirResourceDao<Patient> ourPatientDao;
+	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
-	private static OrganizationResourceProvider ourOrganizationRp;
 	private static DaoConfig ourDaoConfig;
 
 	// private static JpaConformanceProvider ourConfProvider;
@@ -107,7 +96,7 @@ public class CompleteResourceProviderTest {
 	public void testCountParam() throws Exception {
 		// NB this does not get used- The paging provider has its own limits built in
 		ourDaoConfig.setHardSearchLimit(100);
-		
+
 		List<IResource> resources = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
@@ -241,7 +230,7 @@ public class CompleteResourceProviderTest {
 		}
 
 		Bundle history = ourClient.history(null, (String) null, null, null);
-		
+
 		assertEquals("Expected[" + p1Id.getIdPart() + "] but was " + history.getEntries().get(0).getId(), p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
@@ -360,8 +349,7 @@ public class CompleteResourceProviderTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
@@ -459,8 +447,7 @@ public class CompleteResourceProviderTest {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExist/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson()
-				.prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
@@ -479,85 +466,38 @@ public class CompleteResourceProviderTest {
 		RestfulServer restServer = new RestfulServer();
 		String serverBase = "http://localhost:" + port + "/fhir/context";
 
-		if (true) {
-			ourAppCtx = new ClassPathXmlApplicationContext("fhir-spring-test-config.xml");
+		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-spring-test-config.xml");
 
-			ourDaoConfig = (DaoConfig)ourAppCtx.getBean(DaoConfig.class);
-			
-			ourPatientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDao", IFhirResourceDao.class);
-			PatientResourceProvider patientRp = new PatientResourceProvider();
-			patientRp.setDao(ourPatientDao);
+		ourDaoConfig = (DaoConfig) ourAppCtx.getBean(DaoConfig.class);
 
-			ourQuestionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDao", IFhirResourceDao.class);
-			QuestionnaireResourceProvider questionnaireRp = new QuestionnaireResourceProvider();
-			questionnaireRp.setDao(ourQuestionnaireDao);
+		ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
 
-			ourObservationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDao", IFhirResourceDao.class);
-			ObservationResourceProvider observationRp = new ObservationResourceProvider();
-			observationRp.setDao(ourObservationDao);
+		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
+		restServer.setResourceProviders(rpsDstu1);
 
-			IFhirResourceDao<Location> locationDao = (IFhirResourceDao<Location>) ourAppCtx.getBean("myLocationDao", IFhirResourceDao.class);
-			LocationResourceProvider locationRp = new LocationResourceProvider();
-			locationRp.setDao(locationDao);
+		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-			IFhirResourceDao<Encounter> encounterDao = (IFhirResourceDao<Encounter>) ourAppCtx.getBean("myEncounterDao", IFhirResourceDao.class);
-			EncounterResourceProvider encounterRp = new EncounterResourceProvider();
-			encounterRp.setDao(encounterDao);
+		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
+		JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
+		restServer.setPlainProviders(systemProv);
 
-			ourOrganizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
-			ourOrganizationRp = new OrganizationResourceProvider();
-			ourOrganizationRp.setDao(ourOrganizationDao);
+		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-			IFhirResourceDao<ImagingStudy> imagingStudyDao = (IFhirResourceDao<ImagingStudy>) ourAppCtx.getBean("myImagingStudyDao", IFhirResourceDao.class);
-			ImagingStudyResourceProvider imagingStudyRp = new ImagingStudyResourceProvider();
-			imagingStudyRp.setDao(imagingStudyDao);
+		ourServer = new Server(port);
 
-			IFhirResourceDao<DiagnosticOrder> diagnosticOrderDao = ourAppCtx.getBean("myDiagnosticOrderDao", IFhirResourceDao.class);
-			DiagnosticOrderResourceProvider diagnosticOrderRp = new DiagnosticOrderResourceProvider();
-			diagnosticOrderRp.setDao(diagnosticOrderDao);
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
 
-			IFhirResourceDao<DocumentManifest> documentManifestDao = ourAppCtx.getBean("myDocumentManifestDao", IFhirResourceDao.class);
-			DocumentManifestResourceProvider documentManifestRp = new DocumentManifestResourceProvider();
-			documentManifestRp.setDao(documentManifestDao);
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(restServer);
+		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
-			IFhirResourceDao<DocumentReference> documentReferenceDao = ourAppCtx.getBean("myDocumentReferenceDao", IFhirResourceDao.class);
-			DocumentReferenceResourceProvider documentReferenceRp = new DocumentReferenceResourceProvider();
-			documentReferenceRp.setDao(documentReferenceDao);
-
-			restServer.setResourceProviders(diagnosticOrderRp, documentManifestRp, documentReferenceRp, encounterRp, locationRp, patientRp, questionnaireRp, ourOrganizationRp, imagingStudyRp);
-			restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-
-			IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDao", IFhirSystemDao.class);
-			JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
-			restServer.setPlainProviders(systemProv);
-
-			// ourConfProvider = new JpaConformanceProvider(restServer, systemDao,
-			// Collections.singletonList((IFhirResourceDao)patientDao));
-
-			restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
-			
-			ourServer = new Server(port);
-
-			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
-
-			// testerServlet.setServerBase("http://fhir.healthintersections.com.au/open");
-
-			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(restServer);
-			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-			ourServer.setHandler(proxyHandler);
-			ourServer.start();
-		}
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
 
 		ourFhirCtx = restServer.getFhirContext();
-		// ourCtx.getRestfulClientFactory().setProxy("localhost", 8888);
 
 		ourClient = ourFhirCtx.newRestfulGenericClient(serverBase);
-		// ourClient = ourCtx.newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
-		// ourClient = ourCtx.newRestfulGenericClient("https://fhir.orionhealth.com/blaze/fhir");
-		// ourClient = ourCtx.newRestfulGenericClient("http://spark.furore.com/fhir");
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}

@@ -16,71 +16,197 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
 
-import java.util.Date;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
-import ca.uhn.fhir.model.dstu.composite.BoundCodeableConceptDt_;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AlertStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.resource.Appointment;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.resource.Availability;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CausalityExpectationEnum;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.CompositionAttestationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.CompositionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConceptMapEquivalenceEnum;
+import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.valueset.ConditionRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
+import ca.uhn.fhir.model.dstu.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExposureTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.FamilyHistory;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.GVFMeta;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.resource.Immunization;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationDateCriterionCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRouteCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ListModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.resource.MedicationAdministration;
+import ca.uhn.fhir.model.dstu.valueset.MedicationAdministrationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationDispense;
+import ca.uhn.fhir.model.dstu.valueset.MedicationDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
 import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.resource.Microarray;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Order;
+import ca.uhn.fhir.model.dstu.valueset.OrderOutcomeStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Procedure;
+import ca.uhn.fhir.model.dstu.valueset.ProcedureRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.valueset.ProvenanceEntityRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.valueset.QueryOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireGroupNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.valueset.ReactionSeverityEnum;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResponseTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventParticipantNetworkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventSourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.SequencingAnalysis;
+import ca.uhn.fhir.model.dstu.resource.SequencingLab;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Slot;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyItemTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.AgeDt;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -104,7 +230,8 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  *
  */
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance", id="conformance")
-public class Conformance extends BaseConformance implements IResource {
+public class Conformance 
+    extends  ca.uhn.fhir.model.base.resource.BaseConformance     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -610,6 +737,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myIdentifier;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
+     * </p> 
+	 */
+	public StringDt getIdentifierElement() {  
+		if (myIdentifier == null) {
+			myIdentifier = new StringDt();
+		}
+		return myIdentifier;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this statement)
 	 *
@@ -653,6 +799,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myVersion;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>version</b> (Logical id for this version of the statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * </p> 
+	 */
+	public StringDt getVersionElement() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>version</b> (Logical id for this version of the statement)
@@ -698,6 +863,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Informal name for this conformance statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language name identifying the conformance statement
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Informal name for this conformance statement)
 	 *
@@ -735,12 +919,31 @@ public class Conformance extends BaseConformance implements IResource {
      * Name of Organization publishing this conformance statement
      * </p> 
 	 */
+	public StringDt getPublisher() {  
+		if (myPublisher == null) {
+			myPublisher = new StringDt();
+		}
+		return myPublisher;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>publisher</b> (Publishing Organization).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of Organization publishing this conformance statement
+     * </p> 
+	 */
 	public StringDt getPublisherElement() {  
 		if (myPublisher == null) {
 			myPublisher = new StringDt();
 		}
 		return myPublisher;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>publisher</b> (Publishing Organization)
@@ -785,6 +988,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myTelecom;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>telecom</b> (Contacts for Organization).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contacts for Organization relevant to this conformance statement.  The contacts may be a website, email, phone numbers, etc.
+     * </p> 
+	 */
+	public java.util.List<ContactDt> getTelecomElement() {  
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		return myTelecom;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>telecom</b> (Contacts for Organization)
@@ -875,12 +1097,31 @@ public class Conformance extends BaseConformance implements IResource {
      * A free text natural language description of the conformance statement and its use. Typically, this is used when the profile describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP
      * </p> 
 	 */
+	public StringDt getDescription() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>description</b> (Human description of the conformance statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language description of the conformance statement and its use. Typically, this is used when the profile describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP
+     * </p> 
+	 */
 	public StringDt getDescriptionElement() {  
 		if (myDescription == null) {
 			myDescription = new StringDt();
 		}
 		return myDescription;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>description</b> (Human description of the conformance statement)
@@ -926,6 +1167,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myStatus;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>status</b> (draft | active | retired).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of this conformance statement
+     * </p> 
+	 */
+	public BoundCodeDt<ConformanceStatementStatusEnum> getStatusElement() {  
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<ConformanceStatementStatusEnum>(ConformanceStatementStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>status</b> (draft | active | retired)
 	 *
@@ -969,6 +1229,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myExperimental;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>experimental</b> (If for testing purposes, not real usage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
+     * </p> 
+	 */
+	public BooleanDt getExperimentalElement() {  
+		if (myExperimental == null) {
+			myExperimental = new BooleanDt();
+		}
+		return myExperimental;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>experimental</b> (If for testing purposes, not real usage)
@@ -1014,6 +1293,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDate;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>date</b> (Publication Date).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date when the conformance statement was published
+     * </p> 
+	 */
+	public DateTimeDt getDateElement() {  
+		if (myDate == null) {
+			myDate = new DateTimeDt();
+		}
+		return myDate;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>date</b> (Publication Date)
 	 *
@@ -1035,8 +1333,8 @@ public class Conformance extends BaseConformance implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public Conformance setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Conformance setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1048,8 +1346,8 @@ public class Conformance extends BaseConformance implements IResource {
      * The date when the conformance statement was published
      * </p> 
 	 */
-	public Conformance setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Conformance setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1070,6 +1368,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return mySoftware;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>software</b> (Software that is covered by this conformance statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Software that is covered by this conformance statement.  It is used when the profile describes the capabilities of a particular software version, independent of an installation.
+     * </p> 
+	 */
+	public Software getSoftwareElement() {  
+		if (mySoftware == null) {
+			mySoftware = new Software();
+		}
+		return mySoftware;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>software</b> (Software that is covered by this conformance statement)
@@ -1102,6 +1419,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myImplementation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>implementation</b> (If this describes a specific instance).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program
+     * </p> 
+	 */
+	public Implementation getImplementationElement() {  
+		if (myImplementation == null) {
+			myImplementation = new Implementation();
+		}
+		return myImplementation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>implementation</b> (If this describes a specific instance)
 	 *
@@ -1132,6 +1468,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myFhirVersion;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>fhirVersion</b> (FHIR Version).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The version of the FHIR specification on which this conformance statement is based
+     * </p> 
+	 */
+	public IdDt getFhirVersionElement() {  
+		if (myFhirVersion == null) {
+			myFhirVersion = new IdDt();
+		}
+		return myFhirVersion;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>fhirVersion</b> (FHIR Version)
@@ -1177,6 +1532,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myAcceptUnknown;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>acceptUnknown</b> (True if application accepts unknown elements).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A flag that indicates whether the application accepts unknown elements as part of a resource.
+     * </p> 
+	 */
+	public BooleanDt getAcceptUnknownElement() {  
+		if (myAcceptUnknown == null) {
+			myAcceptUnknown = new BooleanDt();
+		}
+		return myAcceptUnknown;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>acceptUnknown</b> (True if application accepts unknown elements)
 	 *
@@ -1220,6 +1594,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myFormat;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>format</b> (formats supported (xml | json | mime type)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of the formats supported by this implementation
+     * </p> 
+	 */
+	public java.util.List<CodeDt> getFormatElement() {  
+		if (myFormat == null) {
+			myFormat = new java.util.ArrayList<CodeDt>();
+		}
+		return myFormat;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>format</b> (formats supported (xml | json | mime type))
@@ -1299,6 +1692,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myProfile;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>profile</b> (Profiles supported by the system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of recourses, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
+     * </p> 
+	 */
+	public java.util.List<ResourceReferenceDt> getProfileElement() {  
+		if (myProfile == null) {
+			myProfile = new java.util.ArrayList<ResourceReferenceDt>();
+		}
+		return myProfile;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>profile</b> (Profiles supported by the system)
 	 *
@@ -1342,6 +1754,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myRest;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>rest</b> (If the endpoint is a RESTful one).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A definition of the restful capabilities of the solution, if any
+     * </p> 
+	 */
+	public java.util.List<Rest> getRestElement() {  
+		if (myRest == null) {
+			myRest = new java.util.ArrayList<Rest>();
+		}
+		return myRest;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>rest</b> (If the endpoint is a RESTful one)
@@ -1403,6 +1834,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myMessaging;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>messaging</b> (If messaging is supported).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A description of the messaging capabilities of the solution
+     * </p> 
+	 */
+	public java.util.List<Messaging> getMessagingElement() {  
+		if (myMessaging == null) {
+			myMessaging = new java.util.ArrayList<Messaging>();
+		}
+		return myMessaging;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>messaging</b> (If messaging is supported)
 	 *
@@ -1463,6 +1913,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocument;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>document</b> (Document definition).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A document definition
+     * </p> 
+	 */
+	public java.util.List<Document> getDocumentElement() {  
+		if (myDocument == null) {
+			myDocument = new java.util.ArrayList<Document>();
+		}
+		return myDocument;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>document</b> (Document definition)
 	 *
@@ -1515,7 +1984,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Software extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Software 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1566,6 +2036,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (A name the software is known by).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name software is known by
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (A name the software is known by)
 	 *
@@ -1609,6 +2098,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myVersion;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>version</b> (Version covered by this statement).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The version identifier for the software covered by this statement
+     * </p> 
+	 */
+	public StringDt getVersionElement() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>version</b> (Version covered by this statement)
@@ -1654,6 +2162,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myReleaseDate;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>releaseDate</b> (Date this version released).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date this version of the software released
+     * </p> 
+	 */
+	public DateTimeDt getReleaseDateElement() {  
+		if (myReleaseDate == null) {
+			myReleaseDate = new DateTimeDt();
+		}
+		return myReleaseDate;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>releaseDate</b> (Date this version released)
 	 *
@@ -1675,8 +2202,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public Software setReleaseDateWithSecondsPrecision( Date theDate) {
-		myReleaseDate = new DateTimeDt(theDate); 
+	public Software setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myReleaseDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -1688,8 +2215,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Date this version of the software released
      * </p> 
 	 */
-	public Software setReleaseDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myReleaseDate = new DateTimeDt(theDate, thePrecision); 
+	public Software setReleaseDateWithSecondsPrecision( Date theDate) {
+		myReleaseDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1707,7 +2234,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Implementation extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Implementation 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="description", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1750,6 +2278,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDescription;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>description</b> (Describes this specific instance).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information about the specific installation that this conformance statement relates to
+     * </p> 
+	 */
+	public StringDt getDescriptionElement() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>description</b> (Describes this specific instance)
@@ -1795,6 +2342,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myUrl;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>url</b> (Base URL for the installation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.
+     * </p> 
+	 */
+	public UriDt getUrlElement() {  
+		if (myUrl == null) {
+			myUrl = new UriDt();
+		}
+		return myUrl;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>url</b> (Base URL for the installation)
 	 *
@@ -1835,7 +2401,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Rest extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Rest 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1914,6 +2481,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myMode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>mode</b> (client | server).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies whether this portion of the statement is describing ability to initiate or receive restful operations
+     * </p> 
+	 */
+	public BoundCodeDt<RestfulConformanceModeEnum> getModeElement() {  
+		if (myMode == null) {
+			myMode = new BoundCodeDt<RestfulConformanceModeEnum>(RestfulConformanceModeEnum.VALUESET_BINDER);
+		}
+		return myMode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>mode</b> (client | server)
 	 *
@@ -1957,6 +2543,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDocumentation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (General description of implementation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information about the system's restful capabilities that apply across all applications, such as security
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>documentation</b> (General description of implementation)
@@ -2002,6 +2607,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return mySecurity;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>security</b> (Information about security of implementation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information about security of implementation
+     * </p> 
+	 */
+	public RestSecurity getSecurityElement() {  
+		if (mySecurity == null) {
+			mySecurity = new RestSecurity();
+		}
+		return mySecurity;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>security</b> (Information about security of implementation)
 	 *
@@ -2032,6 +2656,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myResource;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>resource</b> (Resource served on the REST interface).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification of the restful capabilities of the solution for a specific resource type
+     * </p> 
+	 */
+	public java.util.List<RestResource> getResourceElement() {  
+		if (myResource == null) {
+			myResource = new java.util.ArrayList<RestResource>();
+		}
+		return myResource;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>resource</b> (Resource served on the REST interface)
@@ -2093,6 +2736,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myOperation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>operation</b> (What operations are supported?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification of restful operations supported by the system
+     * </p> 
+	 */
+	public java.util.List<RestOperation> getOperationElement() {  
+		if (myOperation == null) {
+			myOperation = new java.util.ArrayList<RestOperation>();
+		}
+		return myOperation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>operation</b> (What operations are supported?)
 	 *
@@ -2153,6 +2815,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myQuery;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>query</b> (Definition of a named query).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of a named query and its parameters and their meaning
+     * </p> 
+	 */
+	public java.util.List<RestQuery> getQueryElement() {  
+		if (myQuery == null) {
+			myQuery = new java.util.ArrayList<RestQuery>();
+		}
+		return myQuery;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>query</b> (Definition of a named query)
 	 *
@@ -2212,6 +2893,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDocumentMailbox;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>documentMailbox</b> (How documents are accepted in /Mailbox).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * </p> 
+	 */
+	public java.util.List<UriDt> getDocumentMailboxElement() {  
+		if (myDocumentMailbox == null) {
+			myDocumentMailbox = new java.util.ArrayList<UriDt>();
+		}
+		return myDocumentMailbox;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>documentMailbox</b> (How documents are accepted in /Mailbox)
@@ -2286,7 +2986,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestSecurity extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestSecurity 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="cors", type=BooleanDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -2300,7 +3001,7 @@ public class Conformance extends BaseConformance implements IResource {
 		shortDefinition="OAuth | OAuth2 | NTLM | Basic | Kerberos",
 		formalDefinition="Types of security services are supported/required by the system"
 	)
-	private java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> myService;
+	private java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> myService;
 	
 	@Child(name="description", type=StringDt.class, order=2, min=0, max=1)	
 	@Description(
@@ -2344,6 +3045,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myCors;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>cors</b> (Adds CORS Headers (http://enable-cors.org/)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Server adds CORS headers when responding to requests - this enables javascript applications to yuse the server
+     * </p> 
+	 */
+	public BooleanDt getCorsElement() {  
+		if (myCors == null) {
+			myCors = new BooleanDt();
+		}
+		return myCors;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>cors</b> (Adds CORS Headers (http://enable-cors.org/))
 	 *
@@ -2381,12 +3101,31 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> getService() {  
+	public java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> getService() {  
 		if (myService == null) {
-			myService = new java.util.ArrayList<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>>();
+			myService = new java.util.ArrayList<BoundCodeableConceptDt<RestfulSecurityServiceEnum>>();
 		}
 		return myService;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>service</b> (OAuth | OAuth2 | NTLM | Basic | Kerberos).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Types of security services are supported/required by the system
+     * </p> 
+	 */
+	public java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> getServiceElement() {  
+		if (myService == null) {
+			myService = new java.util.ArrayList<BoundCodeableConceptDt<RestfulSecurityServiceEnum>>();
+		}
+		return myService;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>service</b> (OAuth | OAuth2 | NTLM | Basic | Kerberos)
@@ -2396,7 +3135,7 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public RestSecurity setService(java.util.List<BoundCodeableConceptDt_<RestfulSecurityServiceEnum>> theValue) {
+	public RestSecurity setService(java.util.List<BoundCodeableConceptDt<RestfulSecurityServiceEnum>> theValue) {
 		myService = theValue;
 		return this;
 	}
@@ -2412,8 +3151,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> addService(RestfulSecurityServiceEnum theValue) {
-		BoundCodeableConceptDt_<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt_<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER, theValue);
+	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> addService(RestfulSecurityServiceEnum theValue) {
+		BoundCodeableConceptDt<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER, theValue);
 		getService().add(retVal);
 		return retVal;
 	}
@@ -2427,7 +3166,7 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> getServiceFirstRep() {
+	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> getServiceFirstRep() {
 		if (getService().size() == 0) {
 			addService();
 		}
@@ -2442,8 +3181,8 @@ public class Conformance extends BaseConformance implements IResource {
      * Types of security services are supported/required by the system
      * </p> 
 	 */
-	public BoundCodeableConceptDt_<RestfulSecurityServiceEnum> addService() {
-		BoundCodeableConceptDt_<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt_<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER);
+	public BoundCodeableConceptDt<RestfulSecurityServiceEnum> addService() {
+		BoundCodeableConceptDt<RestfulSecurityServiceEnum> retVal = new BoundCodeableConceptDt<RestfulSecurityServiceEnum>(RestfulSecurityServiceEnum.VALUESET_BINDER);
 		getService().add(retVal);
 		return retVal;
 	}
@@ -2479,6 +3218,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDescription;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>description</b> (General description of how security works).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * General description of how security works
+     * </p> 
+	 */
+	public StringDt getDescriptionElement() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>description</b> (General description of how security works)
@@ -2523,6 +3281,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myCertificate;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>certificate</b> (Certificates associated with security profiles).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Certificates associated with security profiles
+     * </p> 
+	 */
+	public java.util.List<RestSecurityCertificate> getCertificateElement() {  
+		if (myCertificate == null) {
+			myCertificate = new java.util.ArrayList<RestSecurityCertificate>();
+		}
+		return myCertificate;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>certificate</b> (Certificates associated with security profiles)
@@ -2579,7 +3356,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestSecurityCertificate extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestSecurityCertificate 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -2622,6 +3400,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myType;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>type</b> (Mime type for certificate).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Mime type for certificate
+     * </p> 
+	 */
+	public CodeDt getTypeElement() {  
+		if (myType == null) {
+			myType = new CodeDt();
+		}
+		return myType;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (Mime type for certificate)
@@ -2667,6 +3464,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myBlob;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>blob</b> (Actual certificate).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Actual certificate
+     * </p> 
+	 */
+	public Base64BinaryDt getBlobElement() {  
+		if (myBlob == null) {
+			myBlob = new Base64BinaryDt();
+		}
+		return myBlob;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>blob</b> (Actual certificate)
 	 *
@@ -2708,7 +3524,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestResource extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestResource 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2788,6 +3605,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myType;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>type</b> (A resource type that is supported).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A type of resource exposed via the restful interface
+     * </p> 
+	 */
+	public BoundCodeDt<ResourceTypeEnum> getTypeElement() {  
+		if (myType == null) {
+			myType = new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER);
+		}
+		return myType;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>type</b> (A resource type that is supported)
 	 *
@@ -2832,6 +3668,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myProfile;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>profile</b> (What structural features are supported).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification of the profile that describes the solution's support for the resource, including any constraints on cardinality, bindings, lengths or other limitations
+     * </p> 
+	 */
+	public ResourceReferenceDt getProfileElement() {  
+		if (myProfile == null) {
+			myProfile = new ResourceReferenceDt();
+		}
+		return myProfile;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>profile</b> (What structural features are supported)
 	 *
@@ -2862,6 +3717,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myOperation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>operation</b> (What operations are supported?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a restful operation supported by the solution
+     * </p> 
+	 */
+	public java.util.List<RestResourceOperation> getOperationElement() {  
+		if (myOperation == null) {
+			myOperation = new java.util.ArrayList<RestResourceOperation>();
+		}
+		return myOperation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>operation</b> (What operations are supported?)
@@ -2923,6 +3797,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myReadHistory;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>readHistory</b> (Whether vRead can return past versions).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A flag for whether the server is able to return past versions as part of the vRead operation
+     * </p> 
+	 */
+	public BooleanDt getReadHistoryElement() {  
+		if (myReadHistory == null) {
+			myReadHistory = new BooleanDt();
+		}
+		return myReadHistory;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>readHistory</b> (Whether vRead can return past versions)
 	 *
@@ -2967,6 +3860,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myUpdateCreate;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>updateCreate</b> (If allows/uses update to a new location).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server
+     * </p> 
+	 */
+	public BooleanDt getUpdateCreateElement() {  
+		if (myUpdateCreate == null) {
+			myUpdateCreate = new BooleanDt();
+		}
+		return myUpdateCreate;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>updateCreate</b> (If allows/uses update to a new location)
 	 *
@@ -3010,6 +3922,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return mySearchInclude;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>searchInclude</b> (_include values supported by the server).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of _include values supported by the server
+     * </p> 
+	 */
+	public java.util.List<StringDt> getSearchIncludeElement() {  
+		if (mySearchInclude == null) {
+			mySearchInclude = new java.util.ArrayList<StringDt>();
+		}
+		return mySearchInclude;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>searchInclude</b> (_include values supported by the server)
@@ -3089,6 +4020,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return mySearchParam;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>searchParam</b> (Additional search params defined).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Additional search parameters for implementations to support and/or make use of
+     * </p> 
+	 */
+	public java.util.List<RestResourceSearchParam> getSearchParamElement() {  
+		if (mySearchParam == null) {
+			mySearchParam = new java.util.ArrayList<RestResourceSearchParam>();
+		}
+		return mySearchParam;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>searchParam</b> (Additional search params defined)
 	 *
@@ -3144,7 +4094,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestResourceOperation extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestResourceOperation 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3187,6 +4138,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myCode;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>code</b> (read | vread | update | delete | history-instance | validate | history-type | create | search-type).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Coded identifier of the operation, supported by the system resource
+     * </p> 
+	 */
+	public BoundCodeDt<RestfulOperationTypeEnum> getCodeElement() {  
+		if (myCode == null) {
+			myCode = new BoundCodeDt<RestfulOperationTypeEnum>(RestfulOperationTypeEnum.VALUESET_BINDER);
+		}
+		return myCode;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (read | vread | update | delete | history-instance | validate | history-type | create | search-type)
@@ -3232,6 +4202,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Anything special about operation behavior).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Anything special about operation behavior)
 	 *
@@ -3272,7 +4261,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestResourceSearchParam extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestResourceSearchParam 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3344,6 +4334,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Name of search parameter).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of the search parameter used in the interface
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Name of search parameter)
 	 *
@@ -3387,6 +4396,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDefinition;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>definition</b> (Source of definition for parameter).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter
+     * </p> 
+	 */
+	public UriDt getDefinitionElement() {  
+		if (myDefinition == null) {
+			myDefinition = new UriDt();
+		}
+		return myDefinition;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>definition</b> (Source of definition for parameter)
@@ -3432,6 +4460,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myType;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The type of value a search parameter refers to, and how the content is interpreted
+     * </p> 
+	 */
+	public BoundCodeDt<SearchParamTypeEnum> getTypeElement() {  
+		if (myType == null) {
+			myType = new BoundCodeDt<SearchParamTypeEnum>(SearchParamTypeEnum.VALUESET_BINDER);
+		}
+		return myType;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity)
 	 *
@@ -3476,6 +4523,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Server-specific usage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Server-specific usage)
 	 *
@@ -3519,6 +4585,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myTarget;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>target</b> (Types of resource (if a resource reference)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Types of resource (if a resource is referenced)
+     * </p> 
+	 */
+	public java.util.List<BoundCodeDt<ResourceTypeEnum>> getTargetElement() {  
+		if (myTarget == null) {
+			myTarget = new java.util.ArrayList<BoundCodeDt<ResourceTypeEnum>>();
+		}
+		return myTarget;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>target</b> (Types of resource (if a resource reference))
@@ -3612,6 +4697,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myChain;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>chain</b> (Chained names supported).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public java.util.List<StringDt> getChainElement() {  
+		if (myChain == null) {
+			myChain = new java.util.ArrayList<StringDt>();
+		}
+		return myChain;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>chain</b> (Chained names supported)
 	 *
@@ -3687,7 +4791,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestOperation extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestOperation 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3730,6 +4835,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myCode;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>code</b> (transaction | search-system | history-system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A coded identifier of the operation, supported by the system
+     * </p> 
+	 */
+	public BoundCodeDt<RestfulOperationSystemEnum> getCodeElement() {  
+		if (myCode == null) {
+			myCode = new BoundCodeDt<RestfulOperationSystemEnum>(RestfulOperationSystemEnum.VALUESET_BINDER);
+		}
+		return myCode;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (transaction | search-system | history-system)
@@ -3775,6 +4899,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Anything special about operation behavior).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Anything special about operation behavior)
 	 *
@@ -3815,7 +4958,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class RestQuery extends BaseIdentifiableElement implements IResourceBlock {
+	public static class RestQuery 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3873,6 +5017,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of a query, which is used in the _query parameter when the query is called
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Special named queries (_query=))
 	 *
@@ -3916,6 +5079,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDefinition;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>definition</b> (Where query is defined).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the custom query, defined either in FHIR core or another profile
+     * </p> 
+	 */
+	public UriDt getDefinitionElement() {  
+		if (myDefinition == null) {
+			myDefinition = new UriDt();
+		}
+		return myDefinition;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>definition</b> (Where query is defined)
@@ -3961,6 +5143,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Additional usage guidance).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Additional information about how the query functions in this particular implementation
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Additional usage guidance)
 	 *
@@ -4004,6 +5205,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myParameter;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies which of the parameters for the named query are supported
+     * </p> 
+	 */
+	public java.util.List<RestResourceSearchParam> getParameterElement() {  
+		if (myParameter == null) {
+			myParameter = new java.util.ArrayList<RestResourceSearchParam>();
+		}
+		return myParameter;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>parameter</b> (Parameter for the named query)
@@ -4062,7 +5282,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Messaging extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Messaging 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="endpoint", type=UriDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -4120,6 +5341,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myEndpoint;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>endpoint</b> (Actual endpoint being described).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An address to which messages and/or replies are to be sent.
+     * </p> 
+	 */
+	public UriDt getEndpointElement() {  
+		if (myEndpoint == null) {
+			myEndpoint = new UriDt();
+		}
+		return myEndpoint;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>endpoint</b> (Actual endpoint being described)
 	 *
@@ -4163,6 +5403,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myReliableCache;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>reliableCache</b> (Reliable Message Cache Length).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Length if the receiver's reliable messaging cache (if a receiver) or how long the cache length on the receiver should be (if a sender)
+     * </p> 
+	 */
+	public IntegerDt getReliableCacheElement() {  
+		if (myReliableCache == null) {
+			myReliableCache = new IntegerDt();
+		}
+		return myReliableCache;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>reliableCache</b> (Reliable Message Cache Length)
@@ -4208,6 +5467,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Messaging interface behavior details).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Messaging interface behavior details)
 	 *
@@ -4251,6 +5529,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myEvent;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>event</b> (Declare support for this event).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A description of the solution's support for an event at this end point.
+     * </p> 
+	 */
+	public java.util.List<MessagingEvent> getEventElement() {  
+		if (myEvent == null) {
+			myEvent = new java.util.ArrayList<MessagingEvent>();
+		}
+		return myEvent;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>event</b> (Declare support for this event)
@@ -4307,7 +5604,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class MessagingEvent extends BaseIdentifiableElement implements IResourceBlock {
+	public static class MessagingEvent 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="code", type=CodingDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4395,6 +5693,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myCode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Event type).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A coded identifier of a supported messaging event
+     * </p> 
+	 */
+	public CodingDt getCodeElement() {  
+		if (myCode == null) {
+			myCode = new CodingDt();
+		}
+		return myCode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>code</b> (Event type)
 	 *
@@ -4425,6 +5742,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myCategory;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>category</b> (Consequence | Currency | Notification).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The impact of the content of the message
+     * </p> 
+	 */
+	public BoundCodeDt<MessageSignificanceCategoryEnum> getCategoryElement() {  
+		if (myCategory == null) {
+			myCategory = new BoundCodeDt<MessageSignificanceCategoryEnum>(MessageSignificanceCategoryEnum.VALUESET_BINDER);
+		}
+		return myCategory;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>category</b> (Consequence | Currency | Notification)
@@ -4470,6 +5806,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myMode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>mode</b> (sender | receiver).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The mode of this event declaration - whether application is sender or receiver
+     * </p> 
+	 */
+	public BoundCodeDt<ConformanceEventModeEnum> getModeElement() {  
+		if (myMode == null) {
+			myMode = new BoundCodeDt<ConformanceEventModeEnum>(ConformanceEventModeEnum.VALUESET_BINDER);
+		}
+		return myMode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>mode</b> (sender | receiver)
 	 *
@@ -4513,6 +5868,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myProtocol;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>protocol</b> (http | ftp | mllp +).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A list of the messaging transport protocol(s) identifiers, supported by this endpoint
+     * </p> 
+	 */
+	public java.util.List<CodingDt> getProtocolElement() {  
+		if (myProtocol == null) {
+			myProtocol = new java.util.ArrayList<CodingDt>();
+		}
+		return myProtocol;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>protocol</b> (http | ftp | mllp +)
@@ -4574,6 +5948,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myFocus;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>focus</b> (Resource that's focus of message).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A resource associated with the event.  This is the resource that defines the event.
+     * </p> 
+	 */
+	public BoundCodeDt<ResourceTypeEnum> getFocusElement() {  
+		if (myFocus == null) {
+			myFocus = new BoundCodeDt<ResourceTypeEnum>(ResourceTypeEnum.VALUESET_BINDER);
+		}
+		return myFocus;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>focus</b> (Resource that's focus of message)
 	 *
@@ -4618,6 +6011,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myRequest;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>request</b> (Profile that describes the request).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information about the request for this event
+     * </p> 
+	 */
+	public ResourceReferenceDt getRequestElement() {  
+		if (myRequest == null) {
+			myRequest = new ResourceReferenceDt();
+		}
+		return myRequest;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>request</b> (Profile that describes the request)
 	 *
@@ -4649,6 +6061,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myResponse;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>response</b> (Profile that describes the response).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Information about the response for this event
+     * </p> 
+	 */
+	public ResourceReferenceDt getResponseElement() {  
+		if (myResponse == null) {
+			myResponse = new ResourceReferenceDt();
+		}
+		return myResponse;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>response</b> (Profile that describes the response)
 	 *
@@ -4679,6 +6110,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDocumentation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Endpoint-specific event documentation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Guidance on how this event is handled, such as internal system trigger points, business rules, etc.
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Endpoint-specific event documentation)
@@ -4721,7 +6171,8 @@ public class Conformance extends BaseConformance implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Document extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Document 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="mode", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4773,6 +6224,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myMode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>mode</b> (producer | consumer).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Mode of this document declaration - whether application is producer or consumer
+     * </p> 
+	 */
+	public BoundCodeDt<DocumentModeEnum> getModeElement() {  
+		if (myMode == null) {
+			myMode = new BoundCodeDt<DocumentModeEnum>(DocumentModeEnum.VALUESET_BINDER);
+		}
+		return myMode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>mode</b> (producer | consumer)
 	 *
@@ -4816,6 +6286,25 @@ public class Conformance extends BaseConformance implements IResource {
 		}
 		return myDocumentation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Description of document support).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc.
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Description of document support)
@@ -4861,6 +6350,25 @@ public class Conformance extends BaseConformance implements IResource {
 		return myProfile;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>profile</b> (Constraint on a resource used in the document).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A constraint on a resource used in the document
+     * </p> 
+	 */
+	public ResourceReferenceDt getProfileElement() {  
+		if (myProfile == null) {
+			myProfile = new ResourceReferenceDt();
+		}
+		return myProfile;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>profile</b> (Constraint on a resource used in the document)
 	 *
@@ -4880,12 +6388,14 @@ public class Conformance extends BaseConformance implements IResource {
 
 
 
-	@Override
-	public String getResourceName() {
-		return Conformance.class.getName();
-	}
 
+    @Override
+    public String getResourceName() {
+        return "Conformance";
+    }
 
-
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
 
 }

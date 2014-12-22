@@ -34,7 +34,6 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceProvider.class);
 
-	@Autowired(required = true)
 	private FhirContext myContext;
 
 	private IFhirResourceDao<T> myDao;

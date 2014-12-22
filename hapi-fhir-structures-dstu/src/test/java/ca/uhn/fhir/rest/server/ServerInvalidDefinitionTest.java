@@ -10,10 +10,12 @@ import javax.servlet.ServletException;
 import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -180,7 +182,7 @@ public class ServerInvalidDefinitionTest {
 				}
 				
 				@Override
-				public void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap) {
+				public void setResourceMetadata(ResourceMetadataMap theMap) {
 				}
 				
 				@Override
@@ -202,7 +204,7 @@ public class ServerInvalidDefinitionTest {
 				}
 				
 				@Override
-				public Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata() {
+				public ResourceMetadataMap getResourceMetadata() {
 					return null;
 				}
 				
@@ -219,6 +221,11 @@ public class ServerInvalidDefinitionTest {
 				@Override
 				public ContainedDt getContained() {
 					return null;
+				}
+
+				@Override
+				public FhirVersionEnum getStructureFhirVersionEnum() {
+					return FhirVersionEnum.DSTU1;
 				}
 			}.getClass();
 		}

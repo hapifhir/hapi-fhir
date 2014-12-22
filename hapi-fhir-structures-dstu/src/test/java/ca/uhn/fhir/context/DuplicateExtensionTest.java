@@ -35,7 +35,7 @@ public class DuplicateExtensionTest extends TestCase {
 	}
 
 	@ResourceDef(name = "Observation", id = "CustomObservation")
-	class CustomObservation extends Observation {
+	public static class CustomObservation extends Observation {
 		@Child(name = "idExt", order = 0)
 		@Extension(url = "http://foo.org#id", definedLocally = true, isModifier = false)
 		@Description(shortDefinition = "Contains the id of the resource")
@@ -54,11 +54,11 @@ public class DuplicateExtensionTest extends TestCase {
 	}
 
 	@ProvidesResources(resources = CustomObservation.class)
-	class CustomObservationProvider {
+	public static class CustomObservationProvider {
 	}
 
 	@ResourceDef(name = "Patient", id = "CustomPatient")
-	class CustomPatient extends Patient {
+	public static class CustomPatient extends Patient {
 		@Child(name = "idExt", order = 0)
 		@Extension(url = "http://foo.org#id", definedLocally = true, isModifier = false)
 		@Description(shortDefinition = "Contains the id of the resource")
@@ -77,6 +77,6 @@ public class DuplicateExtensionTest extends TestCase {
 	}
 
 	@ProvidesResources(resources = CustomPatient.class)
-	class CustomPatientProvider {
+	public static class CustomPatientProvider {
 	}
 }

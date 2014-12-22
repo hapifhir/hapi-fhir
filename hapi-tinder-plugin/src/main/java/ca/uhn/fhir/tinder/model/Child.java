@@ -132,13 +132,6 @@ public abstract class Child extends BaseElement {
 		return retVal;
 	}
 
-	public String getTypeSuffix() {
-		if (isResourceRef()) {
-			return "";
-		}
-		return "Dt";
-	}
-
 	public String getVariableName() {
 		String elementName = getMethodName();
 		return "my" + elementName;

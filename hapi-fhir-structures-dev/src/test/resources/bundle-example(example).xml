@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><Bundle xmlns="http://hl7.org/fhir">
+  <id value="example"/>
+  <meta>
+    <versionId value="1"/>
+    <lastUpdated value="2014-08-18T01:43:30Z"/>
+  </meta> 
+  <type value="transaction"/>  
+  <base value="http://example.com/base"/>
+  <total value="3"/>
+  <link>
+    <relation value="next"/>
+    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
+  </link>
+  <link>
+    <relation value="self"/>
+    <url value="https://example.com/base/MedicationPrescription?patient=347"/>
+  </link>
+  <entry>
+    <status value="update"/>
+    <resource>
+      <MedicationPrescription>
+        <id value="3123"/>
+        <meta>
+          <versionId value="1"/>
+          <lastUpdated value="2014-08-16T05:31:17Z"/>      
+        </meta> 
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">
+            <p>Penicillin VK 5ml suspension to be administered by oral route</p>
+            <p>ONE 5ml spoonful to be taken THREE times a day</p>
+            <p>100ml bottle</p>
+            <p>to patient ref: a23</p>
+            <p>by doctor X</p>
+          </div>
+        </text>
+        <status value="active"/>
+        <patient>
+          <reference value="Patient/example"/>
+        </patient>
+        <prescriber>
+          <reference value="Practitioner/example"/>
+        </prescriber>
+
+        <medication>
+          <reference value="Medication/example"/>
+        </medication>
+
+        <dosageInstruction>
+          <scheduledTiming>
+            <repeat>
+              <frequency value="3"/>
+              <duration value="1"/>
+              <units value="d"/>
+            </repeat>
+          </scheduledTiming>
+          <route>
+            <coding>
+              <system value="http://snomed.info/sct"/>
+              <code value="394899003"/>
+              <display value="oral administration of treatment"/>
+            </coding>
+          </route>
+          <doseQuantity>
+            <value value="5"/>
+            <units value="ml"/>
+            <system value="http://unitsofmeasure.org"/>
+            <code value="ml"/>
+          </doseQuantity>
+        </dosageInstruction>
+
+        <dispense>
+          <quantity>
+            <value value="100"/>
+            <units value="ml"/>
+            <system value="http://unitsofmeasure.org"/>
+            <code value="ml"/>
+          </quantity>
+        </dispense>
+
+      </MedicationPrescription>
+    </resource>
+  </entry>
+</Bundle>

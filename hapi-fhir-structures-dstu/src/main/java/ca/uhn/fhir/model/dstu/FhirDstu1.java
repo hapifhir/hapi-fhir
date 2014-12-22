@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.dstu;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.join;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,13 +32,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -54,8 +73,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class FhirDstu1 implements IFhirVersion {
 
@@ -133,12 +150,13 @@ public class FhirDstu1 implements IFhirVersion {
 	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IResource> next : rr.getResourceTypes()) {
+			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
 				StructureElementDefinitionType type = elem.getDefinition().addType();
 				type.getCode().setValue("ResourceReference");
 
 				if (next != IResource.class) {
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
+					@SuppressWarnings("unchecked")
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
 					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
 				}
 			}
@@ -321,5 +339,30 @@ public class FhirDstu1 implements IFhirVersion {
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
 		return new ServerProfileProvider(theRestfulServer);
 	}
+	
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU1;
+	}
+
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		InputStream str = FhirDstu1.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
+		if (str == null) {
+			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+		return str;
+	}
+	
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dstu/schema";
+	}
+
+
 
 }

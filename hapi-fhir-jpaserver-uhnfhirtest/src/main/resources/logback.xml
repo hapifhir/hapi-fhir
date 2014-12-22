@@ -11,7 +11,7 @@
 
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
+			<level>DEBUG</level>
 		</filter>
 		<file>${fhir.logdir}/fhirtest.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -31,7 +31,7 @@
 		<file>${fhir.logdir}/access.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${fhir.logdir}/access.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
-			<maxHistory>30</maxHistory>
+			<maxHistory>600</maxHistory>
 		</rollingPolicy>
 		<encoder>
 			<!-- [%file:%line] -->
@@ -43,7 +43,7 @@
         <appender-ref ref="ACCESS" />
     </logger>  
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="FILE" />
 	</root>
 

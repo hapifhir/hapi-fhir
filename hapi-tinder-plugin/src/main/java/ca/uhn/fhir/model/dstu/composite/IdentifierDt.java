@@ -16,38 +16,36 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -138,7 +136,7 @@ public class IdentifierDt
 	private PeriodDt myPeriod;
 	
 	@Child(name="assigner", order=5, min=0, max=1, type={
-		ca.uhn.fhir.model.dstu.resource.Conformance.class	})
+		ca.uhn.fhir.model.dstu.resource.Organization.class	})
 	@Description(
 		shortDefinition="Organization that issued id (may be just text)",
 		formalDefinition="Organization that issued/manages the identifier"
@@ -172,6 +170,25 @@ public class IdentifierDt
 		}
 		return myUse;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>use</b> (usual | official | temp | secondary (If known)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The purpose of this identifier
+     * </p> 
+	 */
+	public BoundCodeDt<IdentifierUseEnum> getUseElement() {  
+		if (myUse == null) {
+			myUse = new BoundCodeDt<IdentifierUseEnum>(IdentifierUseEnum.VALUESET_BINDER);
+		}
+		return myUse;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | secondary (If known))
@@ -217,6 +234,25 @@ public class IdentifierDt
 		return myLabel;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>label</b> (Description of identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A text string for the identifier that can be displayed to a human so they can recognize the identifier
+     * </p> 
+	 */
+	public StringDt getLabelElement() {  
+		if (myLabel == null) {
+			myLabel = new StringDt();
+		}
+		return myLabel;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>label</b> (Description of identifier)
 	 *
@@ -254,12 +290,31 @@ public class IdentifierDt
      * Establishes the namespace in which set of possible id values is unique.
      * </p> 
 	 */
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>system</b> (The namespace for the identifier).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Establishes the namespace in which set of possible id values is unique.
+     * </p> 
+	 */
 	public UriDt getSystemElement() {  
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
 		return mySystem;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>system</b> (The namespace for the identifier)
@@ -298,12 +353,31 @@ public class IdentifierDt
      * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
      * </p> 
 	 */
+	public StringDt getValue() {  
+		if (myValue == null) {
+			myValue = new StringDt();
+		}
+		return myValue;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>value</b> (The value that is unique).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
+     * </p> 
+	 */
 	public StringDt getValueElement() {  
 		if (myValue == null) {
 			myValue = new StringDt();
 		}
 		return myValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>value</b> (The value that is unique)
@@ -349,6 +423,25 @@ public class IdentifierDt
 		return myPeriod;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>period</b> (Time period when id is/was valid for use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time period during which identifier is/was valid for use
+     * </p> 
+	 */
+	public PeriodDt getPeriodElement() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
+		return myPeriod;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>period</b> (Time period when id is/was valid for use)
 	 *
@@ -379,6 +472,25 @@ public class IdentifierDt
 		}
 		return myAssigner;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>assigner</b> (Organization that issued id (may be just text)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Organization that issued/manages the identifier
+     * </p> 
+	 */
+	public ResourceReferenceDt getAssignerElement() {  
+		if (myAssigner == null) {
+			myAssigner = new ResourceReferenceDt();
+		}
+		return myAssigner;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>assigner</b> (Organization that issued id (may be just text))

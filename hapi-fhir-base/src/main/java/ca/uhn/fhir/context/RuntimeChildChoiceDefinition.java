@@ -29,21 +29,21 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
-	private List<Class<? extends IElement>> myChoiceTypes;
+	private List<Class<? extends IBase>> myChoiceTypes;
 	private Map<String, BaseRuntimeElementDefinition<?>> myNameToChildDefinition;
-	private Map<Class<? extends IElement>, String> myDatatypeToElementName;
-	private Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
+	private Map<Class<? extends IBase>, String> myDatatypeToElementName;
+	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myDatatypeToElementDefinition;
 
-	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IElement>> theChoiceTypes) {
+	public RuntimeChildChoiceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBase>> theChoiceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 
 		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
@@ -56,11 +56,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
-	void setChoiceTypes(List<Class<? extends IElement>> theChoiceTypes) {
+	void setChoiceTypes(List<Class<? extends IBase>> theChoiceTypes) {
 		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
 	}
 
-	public List<Class<? extends IElement>> getChoices() {
+	public List<Class<? extends IBase>> getChoices() {
 		return myChoiceTypes;
 	}
 
@@ -78,21 +78,21 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@SuppressWarnings("unchecked")
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-		myDatatypeToElementName = new HashMap<Class<? extends IElement>, String>();
-		myDatatypeToElementDefinition = new HashMap<Class<? extends IElement>, BaseRuntimeElementDefinition<?>>();
+		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
+		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-		for (Class<? extends IElement> next : myChoiceTypes) {
+		for (Class<? extends IBase> next : myChoiceTypes) {
 
 			String elementName;
 			String alternateElementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
-			if (IResource.class.isAssignableFrom(next)) {
+			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				alternateElementName = getElementName() + "Resource";
-				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
-				types.add((Class<? extends IResource>) next);
+				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
+				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
 				nextDef.sealAndInitialize(theClassToElementDefinitions);
 			} else {
@@ -105,7 +105,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				myNameToChildDefinition.put(alternateElementName, nextDef);
 			}
 			
-			if (IResource.class.isAssignableFrom(next)) {
+			if (IBaseResource.class.isAssignableFrom(next)) {
 				myDatatypeToElementDefinition.put(ResourceReferenceDt.class, nextDef);
 				alternateElementName = getElementName() + "Resource";
 				myDatatypeToElementName.put(ResourceReferenceDt.class, alternateElementName);
@@ -122,16 +122,16 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		return myDatatypeToElementName.get(theDatatype);
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		return myDatatypeToElementDefinition.get(theDatatype);
 	}
 
-	public Set<Class<? extends IElement>> getValidChildTypes() {
+	public Set<Class<? extends IBase>> getValidChildTypes() {
 		return Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
 	}
 

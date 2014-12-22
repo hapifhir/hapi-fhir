@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>0.8</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8</version>
+			<version>0.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -46,7 +46,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8</version>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dev</artifactId>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -319,6 +324,49 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>0.9-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>build_dstu1</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_dev</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>dev</version>
+							<packageBase>ca.uhn.fhir.jpa.rp.dev</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dev.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu</artifactId>
+						<version>0.9-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dev</artifactId>
+						<version>0.9-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
@@ -326,6 +374,17 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-sources/tinder</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-resources/tinder</directory>
+			</resource>
+		</resources>
 	</build>
 
 	<profiles>

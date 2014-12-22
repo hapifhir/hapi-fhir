@@ -20,9 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -39,7 +38,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * should not need to implement it directly.
  * <p>
  */
-public interface IResource extends ICompositeElement {
+public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
 
 	/**
 	 * Returns the contained resource list for this resource.
@@ -88,7 +87,7 @@ public interface IResource extends ICompositeElement {
 	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object
 	 *      types that values of a given key must use.
 	 */
-	Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata();
+	ResourceMetadataMap getResourceMetadata();
 
 	/**
 	 * Returns the narrative block for this resource
@@ -122,7 +121,7 @@ public interface IResource extends ICompositeElement {
 	 * @throws NullPointerException
 	 *             The map must not be null
 	 */
-	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
+	void setResourceMetadata(ResourceMetadataMap theMap);
 
 	/**
 	 * Returns a String representing the name of this Resource. This return
@@ -133,4 +132,10 @@ public interface IResource extends ICompositeElement {
 	 */
 	String getResourceName();
 
+	/**
+	 * Returns the FHIR version represented by this structure
+	 */
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum();
+
+	
 }

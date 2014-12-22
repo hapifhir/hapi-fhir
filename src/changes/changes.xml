@@ -6,6 +6,17 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="0.9" date="TBA">
+			<action type="add">
+				Support for DSTU2 features introduced: New Bundle encoding style, as well as new
+				extension encoding in JSON.   
+			</action>
+			<action type="add">
+				Library now checks if custom resource types can be instantiated on startup
+				(e.g. because they don't have a no-argument constructor) in order to 
+				avoid failing later
+			</action>
+		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
@@ -28,6 +39,18 @@
 						<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/param/TokenOrListParam.html">TokenOrListParam</a>
 						class, which can be used in its place.
 					</ul>
+				]]> 
+			</action>			
+			<action type="add">
+				<![CDATA[
+					<b>API Change</b>: The IResource#getResourceMetadata() method has been changed
+					from returning 
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					to returning a new type called
+					<code>ResourceMetadataMap</code>. This new type implements 
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					itself, so this change should not break existing code, but may
+					require a clean build in order to run correctly.
 				]]> 
 			</action>			
 			<action type="add" issue="38" dev="wdebeau1">

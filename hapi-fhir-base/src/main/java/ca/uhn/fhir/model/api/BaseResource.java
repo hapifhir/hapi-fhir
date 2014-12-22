@@ -20,20 +20,18 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.util.ElementUtil;
 
 public abstract class BaseResource extends BaseElement implements IResource {
@@ -70,7 +68,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	@Child(name = "language", order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private CodeDt myLanguage;
 
-	private Map<ResourceMetadataKeyEnum<?>, Object> myResourceMetadata;
+	private ResourceMetadataMap myResourceMetadata;
 
 	@Child(name = "text", order = 1, min = 0, max = 1)
 	private NarrativeDt myText;
@@ -99,9 +97,9 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
-	public Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata() {
+	public ResourceMetadataMap getResourceMetadata() {
 		if (myResourceMetadata == null) {
-			myResourceMetadata = new HashMap<ResourceMetadataKeyEnum<?>, Object>();
+			myResourceMetadata = new ResourceMetadataMap();
 		}
 		return myResourceMetadata;
 	}
@@ -136,7 +134,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
-	public void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap) {
+	public void setResourceMetadata(ResourceMetadataMap theMap) {
 		Validate.notNull(theMap, "The Map must not be null");
 		myResourceMetadata = theMap;
 	}

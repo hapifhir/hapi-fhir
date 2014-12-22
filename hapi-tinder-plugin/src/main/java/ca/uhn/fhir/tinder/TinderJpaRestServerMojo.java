@@ -5,8 +5,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.http.ParseException;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -20,6 +25,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 @Mojo(name = "generate-jparest-server", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
@@ -39,22 +45,61 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 	@Parameter(required = true)
 	private String packageBase;
 
-	@Parameter(required = true)
+	@Parameter(required = false)
 	private List<String> baseResourceNames;
 
 	@Parameter(required = true, defaultValue = "${project.build.directory}/..")
 	private String baseDir;
-	
+
+	@Parameter(required = true)
+	private String version;
+
 	@Component
 	private MavenProject myProject;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
+		FhirContext fhirContext;
+		if ("dstu".equals(version)) {
+			fhirContext = FhirContext.forDstu1();
+		} else if ("dev".equals(version)) {
+			fhirContext = FhirContext.forDev();
+		} else {
+			throw new MojoFailureException("Unknown version configured: " + version);
+		}
+		
+		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
+			baseResourceNames = new ArrayList<String>();
+			
+			ourLog.info("No resource names supplied, going to use all resources from version: {}",fhirContext.getVersion().getVersion());
+			
+			Properties p = new Properties();
+			try {
+				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
+			} catch (IOException e) {
+				throw new MojoFailureException("Failed to load version property file", e);
+			}
+
+			ourLog.debug("Property file contains: {}",p);
+
+			TreeSet<String> keys = new TreeSet<String>();
+			for(Object next : p.keySet()) {
+				keys.add((String) next);
+			}
+			for (String next : keys) {
+				if (next.startsWith("resource.")) {
+					baseResourceNames.add(next.substring("resource.".length()).toLowerCase());
+				}
+			}
+		}
+		
+		ourLog.info("Including the following resources: {}", baseResourceNames);
+		
 		File directoryBase = new File(targetDirectory, packageBase.replace(".", File.separatorChar + ""));
 		directoryBase.mkdirs();
 
-		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet("dstu", baseDir);
+		ResourceGeneratorUsingSpreadsheet gen = new ResourceGeneratorUsingSpreadsheet(version, baseDir);
 		gen.setBaseResourceNames(baseResourceNames);
 
 		try {
@@ -77,6 +122,14 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		try {
 			VelocityContext ctx = new VelocityContext();
 			ctx.put("resources", gen.getResources());
+			ctx.put("packageBase", packageBase);
+			ctx.put("version", version);
+			
+			String capitalize = WordUtils.capitalize(version);
+			if ("Dstu".equals(capitalize)) {
+				capitalize="Dstu1";
+			}
+			ctx.put("versionCapitalized", capitalize);
 
 			VelocityEngine v = new VelocityEngine();
 			v.setProperty("resource.loader", "cp");
@@ -99,32 +152,6 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		} catch (Exception e) {
 			throw new MojoFailureException("Failed to generate server", e);
 		}
-	}
-
-	private void write() throws IOException {
-		// File directoryBase;
-		// directoryBase.mkdirs();
-		//
-		// File file = new File(directoryBase, myClientClassSimpleName + ".java");
-		// FileWriter w = new FileWriter(file, false);
-		//
-		// ourLog.info("Writing file: {}", file.getAbsolutePath());
-		//
-		// VelocityContext ctx = new VelocityContext();
-		// ctx.put("packageBase", packageBase);
-		// ctx.put("className", myClientClassSimpleName);
-		// ctx.put("resources", myResources);
-		//
-		// VelocityEngine v = new VelocityEngine();
-		// v.setProperty("resource.loader", "cp");
-		// v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		// v.setProperty("runtime.references.strict", Boolean.TRUE);
-		//
-		// InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/client.vm");
-		// InputStreamReader templateReader = new InputStreamReader(templateIs);
-		// v.evaluate(ctx, w, "", templateReader);
-		//
-		// w.close();
 	}
 
 	public static void main(String[] args) throws ParseException, IOException, MojoFailureException, MojoExecutionException {

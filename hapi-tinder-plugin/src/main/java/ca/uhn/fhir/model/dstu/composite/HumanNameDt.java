@@ -16,38 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>HumanNameDt</b> Datatype
@@ -153,6 +153,25 @@ public class HumanNameDt
 		return myUse;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the purpose for this name
+     * </p> 
+	 */
+	public BoundCodeDt<NameUseEnum> getUseElement() {  
+		if (myUse == null) {
+			myUse = new BoundCodeDt<NameUseEnum>(NameUseEnum.VALUESET_BINDER);
+		}
+		return myUse;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>use</b> (usual | official | temp | nickname | anonymous | old | maiden)
 	 *
@@ -197,6 +216,25 @@ public class HumanNameDt
 		return myText;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>text</b> (Text representation of the full name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A full text representation of the name
+     * </p> 
+	 */
+	public StringDt getTextElement() {  
+		if (myText == null) {
+			myText = new StringDt();
+		}
+		return myText;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
 	 *
@@ -240,6 +278,25 @@ public class HumanNameDt
 		}
 		return myFamily;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>family</b> (Family name (often called 'Surname')).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
+     * </p> 
+	 */
+	public java.util.List<StringDt> getFamilyElement() {  
+		if (myFamily == null) {
+			myFamily = new java.util.ArrayList<StringDt>();
+		}
+		return myFamily;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>family</b> (Family name (often called 'Surname'))
@@ -319,6 +376,25 @@ public class HumanNameDt
 		return myGiven;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>given</b> (Given names (not always 'first'). Includes middle names).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Given name
+     * </p> 
+	 */
+	public java.util.List<StringDt> getGivenElement() {  
+		if (myGiven == null) {
+			myGiven = new java.util.ArrayList<StringDt>();
+		}
+		return myGiven;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>given</b> (Given names (not always 'first'). Includes middle names)
 	 *
@@ -396,6 +472,25 @@ public class HumanNameDt
 		}
 		return myPrefix;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>prefix</b> (Parts that come before the name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name
+     * </p> 
+	 */
+	public java.util.List<StringDt> getPrefixElement() {  
+		if (myPrefix == null) {
+			myPrefix = new java.util.ArrayList<StringDt>();
+		}
+		return myPrefix;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>prefix</b> (Parts that come before the name)
@@ -475,6 +570,25 @@ public class HumanNameDt
 		return mySuffix;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>suffix</b> (Parts that come after the name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name
+     * </p> 
+	 */
+	public java.util.List<StringDt> getSuffixElement() {  
+		if (mySuffix == null) {
+			mySuffix = new java.util.ArrayList<StringDt>();
+		}
+		return mySuffix;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>suffix</b> (Parts that come after the name)
 	 *
@@ -553,6 +667,25 @@ public class HumanNameDt
 		return myPeriod;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>period</b> (Time period when name was/is in use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates the period of time when this name was valid for the named person.
+     * </p> 
+	 */
+	public PeriodDt getPeriodElement() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
+		return myPeriod;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>period</b> (Time period when name was/is in use)
 	 *
@@ -564,11 +697,6 @@ public class HumanNameDt
 	public HumanNameDt setPeriod(PeriodDt theValue) {
 		myPeriod = theValue;
 		return this;
-	}
-
-	@Override
-	public StringDt getTextElement() {
-		return getText();
 	}
 
   

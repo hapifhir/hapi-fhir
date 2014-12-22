@@ -91,5 +91,9 @@ public class ${className}
     public String getResourceName() {
         return "${className.replaceAll("Resource", "")}";
     }
+    
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.${versionEnumName};
+    }
 
 }

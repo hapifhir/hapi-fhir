@@ -20,20 +20,21 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IPrimitiveType;
+
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveDatatype<?>> implements IRuntimeDatatypeDefinition {
+public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType> implements IRuntimeDatatypeDefinition {
 
 	private boolean mySpecialization;
 
-	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveDatatype<?>> theImplementingClass) {
+	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType> theImplementingClass) {
 		super(theDef.name(), theImplementingClass);
 		
 		String resourceName = theDef.name();
@@ -50,7 +51,7 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		// nothing
 	}
 

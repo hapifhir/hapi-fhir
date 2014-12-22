@@ -19,38 +19,14 @@ public class RuntimeResourceDefinitionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeResourceDefinitionTest.class);
 
 	@Test
-	public void testToProfileStandard() throws Exception {
-		FhirContext ctx = new FhirContext(Patient.class, Profile.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(Patient.class);
+	public void testProfileIdIsActualResourceName() {
+		FhirContext ctx = new FhirContext(CustomObservation.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(CustomObservation.class);
 
 		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
-		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
-		
-		Structure struct = profile.getStructure().get(0);
-		assertEquals("Patient", struct.getElement().get(0).getPath().getValue());
-		assertEquals("Patient.extension", struct.getElement().get(1).getPath().getValue());
-		assertEquals("Patient.modifierExtension", struct.getElement().get(2).getPath().getValue());
-		assertEquals("Patient.text", struct.getElement().get(3).getPath().getValue());
-		assertEquals("Patient.contained", struct.getElement().get(4).getPath().getValue());
-		assertEquals("Patient.language", struct.getElement().get(5).getPath().getValue());
-		
+		assertEquals("customobservation", profile.getId().toString());
 	}
-	
-	@Test
-	public void testToProfileValueSet() throws Exception {
-		FhirContext ctx = new FhirContext(ValueSet.class, Profile.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(ValueSet.class);
-
-		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
-
-		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile);
-		ourLog.info(encoded);
-		
-		assertTrue(encoded.contains("<path value=\"ValueSet.compose\"/>"));
-		
-	}
-
 	
 	@Test
 	public void testToProfileExtensions() throws Exception {
@@ -93,14 +69,59 @@ public class RuntimeResourceDefinitionTest {
 
 	}
 
+	
 	@Test
-	public void testProfileIdIsActualResourceName() {
-		FhirContext ctx = new FhirContext(CustomObservation.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(CustomObservation.class);
+	public void testToProfileStandard() throws Exception {
+		FhirContext ctx = new FhirContext(Patient.class, Profile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(Patient.class);
 
 		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
 
-		assertEquals("customobservation", profile.getId().toString());
+		ourLog.info(ctx.newXmlParser().encodeResourceToString(profile));
+		
+		Structure struct = profile.getStructure().get(0);
+		assertEquals("Patient", struct.getElement().get(0).getPath().getValue());
+		assertEquals("Patient.extension", struct.getElement().get(1).getPath().getValue());
+		assertEquals("Patient.modifierExtension", struct.getElement().get(2).getPath().getValue());
+		assertEquals("Patient.text", struct.getElement().get(3).getPath().getValue());
+		assertEquals("Patient.contained", struct.getElement().get(4).getPath().getValue());
+		assertEquals("Patient.language", struct.getElement().get(5).getPath().getValue());
+		
+	}
+
+	@Test
+	public void testToProfileValueSet() throws Exception {
+		FhirContext ctx = new FhirContext(ValueSet.class, Profile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(ValueSet.class);
+
+		Profile profile = (Profile) def.toProfile("http://foo.org/fhir");
+
+		String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(profile);
+		ourLog.info(encoded);
+		
+		assertTrue(encoded.contains("<path value=\"ValueSet.compose\"/>"));
+		
+	}
+
+	@Test
+	public void whenProfileAndIdAreBlank_ProfileShouldBeBlank() {
+		FhirContext ctx = new FhirContext(PatientWithNoIdOrProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithNoIdOrProfile.class);
+		assertEquals("", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@Test
+	public void whenResourceProfileHasNoUrl_ProfileShouldBeConstructedFromServerBaseAndProfile() {
+		FhirContext ctx = new FhirContext(PatientWithShortProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithShortProfile.class);
+		assertEquals("http://foo.org/fhir/Profile/PatientWithShortProfile", def.getResourceProfile("http://foo.org/fhir"));
+	}
+
+	@Test
+	public void whenResourceProfileHasUrl_ProfileShouldUseThat() {
+		FhirContext ctx = new FhirContext(PatientWithFullProfile.class);
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithFullProfile.class);
+		assertEquals("http://bar.org/Profile/PatientWithFullProfile", def.getResourceProfile("http://foo.org/fhir"));
 	}
 
 	@Test
@@ -111,40 +132,19 @@ public class RuntimeResourceDefinitionTest {
 	}
 
 	@ResourceDef(name = "Patient", id = "PatientSansProfile")
-	class PatientSansProfile extends Patient {
-	}
-
-	@Test
-	public void whenResourceProfileHasNoUrl_ProfileShouldBeConstructedFromServerBaseAndProfile() {
-		FhirContext ctx = new FhirContext(PatientWithShortProfile.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithShortProfile.class);
-		assertEquals("http://foo.org/fhir/Profile/PatientWithShortProfile", def.getResourceProfile("http://foo.org/fhir"));
-	}
-
-	@ResourceDef(name = "Patient", id = "PatientWithShortProfileId", profile="PatientWithShortProfile")
-	class PatientWithShortProfile extends Patient {
-	}
-
-	@Test
-	public void whenResourceProfileHasUrl_ProfileShouldUseThat() {
-		FhirContext ctx = new FhirContext(PatientWithFullProfile.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithFullProfile.class);
-		assertEquals("http://bar.org/Profile/PatientWithFullProfile", def.getResourceProfile("http://foo.org/fhir"));
+	public static class PatientSansProfile extends Patient {
 	}
 
 	@ResourceDef(name = "Patient", id = "PatientWithFullProfileId", profile="http://bar.org/Profile/PatientWithFullProfile")
-	class PatientWithFullProfile extends Patient {
-	}
-
-	@Test
-	public void whenProfileAndIdAreBlank_ProfileShouldBeBlank() {
-		FhirContext ctx = new FhirContext(PatientWithNoIdOrProfile.class);
-		RuntimeResourceDefinition def = ctx.getResourceDefinition(PatientWithNoIdOrProfile.class);
-		assertEquals("", def.getResourceProfile("http://foo.org/fhir"));
+	public static class PatientWithFullProfile extends Patient {
 	}
 
 	@ResourceDef(name = "Patient")
-	class PatientWithNoIdOrProfile extends Patient {
+	public static class PatientWithNoIdOrProfile extends Patient {
+	}
+
+	@ResourceDef(name = "Patient", id = "PatientWithShortProfileId", profile="PatientWithShortProfile")
+	public static class PatientWithShortProfile extends Patient {
 	}
 
 }

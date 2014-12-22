@@ -16,69 +16,197 @@
 
 package ca.uhn.fhir.model.dstu.resource;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
 
-import java.util.Date;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
 import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AlertStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.resource.Appointment;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.resource.Availability;
 import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CausalityExpectationEnum;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.CompositionAttestationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.CompositionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConceptMapEquivalenceEnum;
+import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.valueset.ConditionRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
 import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
+import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
+import ca.uhn.fhir.model.dstu.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExposureTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
 import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.FamilyHistory;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.GVFMeta;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.resource.Immunization;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationDateCriterionCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRouteCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ListModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.resource.MedicationAdministration;
+import ca.uhn.fhir.model.dstu.valueset.MedicationAdministrationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationDispense;
+import ca.uhn.fhir.model.dstu.valueset.MedicationDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.resource.Microarray;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Order;
+import ca.uhn.fhir.model.dstu.valueset.OrderOutcomeStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Procedure;
+import ca.uhn.fhir.model.dstu.valueset.ProcedureRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.valueset.ProvenanceEntityRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.valueset.QueryOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireGroupNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.valueset.ReactionSeverityEnum;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
 import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResponseTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventParticipantNetworkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventSourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.SequencingAnalysis;
+import ca.uhn.fhir.model.dstu.resource.SequencingLab;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Slot;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyItemTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.AgeDt;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 
 /**
@@ -102,7 +230,8 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  *
  */
 @ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile", id="profile")
-public class Profile extends BaseResource implements IResource {
+public class Profile 
+    extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
@@ -482,6 +611,25 @@ public class Profile extends BaseResource implements IResource {
 		return myIdentifier;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>identifier</b> (Logical id to reference this profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this profile when it is referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI)
+     * </p> 
+	 */
+	public StringDt getIdentifierElement() {  
+		if (myIdentifier == null) {
+			myIdentifier = new StringDt();
+		}
+		return myIdentifier;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>identifier</b> (Logical id to reference this profile)
 	 *
@@ -525,6 +673,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myVersion;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>version</b> (Logical id for this version of the profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp
+     * </p> 
+	 */
+	public StringDt getVersionElement() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>version</b> (Logical id for this version of the profile)
@@ -570,6 +737,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Informal name for this profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language name identifying the Profile
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Informal name for this profile)
 	 *
@@ -614,6 +800,25 @@ public class Profile extends BaseResource implements IResource {
 		return myPublisher;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Details of the individual or organization who accepts responsibility for publishing the profile
+     * </p> 
+	 */
+	public StringDt getPublisherElement() {  
+		if (myPublisher == null) {
+			myPublisher = new StringDt();
+		}
+		return myPublisher;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>publisher</b> (Name of the publisher (Organization or individual))
 	 *
@@ -657,6 +862,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myTelecom;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>telecom</b> (Contact information of the publisher).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Contact details to assist a user in finding and communicating with the publisher
+     * </p> 
+	 */
+	public java.util.List<ContactDt> getTelecomElement() {  
+		if (myTelecom == null) {
+			myTelecom = new java.util.ArrayList<ContactDt>();
+		}
+		return myTelecom;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>telecom</b> (Contact information of the publisher)
@@ -754,6 +978,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDescription;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>description</b> (Natural language description of the profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A free text natural language description of the profile and its use
+     * </p> 
+	 */
+	public StringDt getDescriptionElement() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>description</b> (Natural language description of the profile)
 	 *
@@ -797,6 +1040,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myCode;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Assist with indexing and finding).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
+     * </p> 
+	 */
+	public java.util.List<CodingDt> getCodeElement() {  
+		if (myCode == null) {
+			myCode = new java.util.ArrayList<CodingDt>();
+		}
+		return myCode;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (Assist with indexing and finding)
@@ -858,6 +1120,25 @@ public class Profile extends BaseResource implements IResource {
 		return myStatus;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>status</b> (draft | active | retired).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The status of the profile
+     * </p> 
+	 */
+	public BoundCodeDt<ResourceProfileStatusEnum> getStatusElement() {  
+		if (myStatus == null) {
+			myStatus = new BoundCodeDt<ResourceProfileStatusEnum>(ResourceProfileStatusEnum.VALUESET_BINDER);
+		}
+		return myStatus;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>status</b> (draft | active | retired)
 	 *
@@ -901,6 +1182,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myExperimental;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>experimental</b> (If for testing purposes, not real usage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage
+     * </p> 
+	 */
+	public BooleanDt getExperimentalElement() {  
+		if (myExperimental == null) {
+			myExperimental = new BooleanDt();
+		}
+		return myExperimental;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>experimental</b> (If for testing purposes, not real usage)
@@ -946,6 +1246,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDate;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>date</b> (Date for this version of the profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The date that this version of the profile was published
+     * </p> 
+	 */
+	public DateTimeDt getDateElement() {  
+		if (myDate == null) {
+			myDate = new DateTimeDt();
+		}
+		return myDate;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>date</b> (Date for this version of the profile)
 	 *
@@ -967,8 +1286,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDateWithSecondsPrecision( Date theDate) {
-		myDate = new DateTimeDt(theDate); 
+	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myDate = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -980,8 +1299,8 @@ public class Profile extends BaseResource implements IResource {
      * The date that this version of the profile was published
      * </p> 
 	 */
-	public Profile setDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myDate = new DateTimeDt(theDate, thePrecision); 
+	public Profile setDateWithSecondsPrecision( Date theDate) {
+		myDate = new DateTimeDt(theDate); 
 		return this; 
 	}
 
@@ -1002,6 +1321,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myRequirements;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>requirements</b> (Scope and Usage this profile is for).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The Scope and Usage that this profile was created to meet
+     * </p> 
+	 */
+	public StringDt getRequirementsElement() {  
+		if (myRequirements == null) {
+			myRequirements = new StringDt();
+		}
+		return myRequirements;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>requirements</b> (Scope and Usage this profile is for)
@@ -1047,6 +1385,25 @@ public class Profile extends BaseResource implements IResource {
 		return myFhirVersion;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>fhirVersion</b> (FHIR Version this profile targets).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The version of the FHIR specification on which this profile is based
+     * </p> 
+	 */
+	public IdDt getFhirVersionElement() {  
+		if (myFhirVersion == null) {
+			myFhirVersion = new IdDt();
+		}
+		return myFhirVersion;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>fhirVersion</b> (FHIR Version this profile targets)
 	 *
@@ -1090,6 +1447,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myMapping;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>mapping</b> (External specification that the content is mapped to).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An external specification that the content is mapped to
+     * </p> 
+	 */
+	public java.util.List<Mapping> getMappingElement() {  
+		if (myMapping == null) {
+			myMapping = new java.util.ArrayList<Mapping>();
+		}
+		return myMapping;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>mapping</b> (External specification that the content is mapped to)
@@ -1151,6 +1527,25 @@ public class Profile extends BaseResource implements IResource {
 		return myStructure;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>structure</b> (A constraint on a resource or a data type).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A constraint statement about what contents a resource or data type may have
+     * </p> 
+	 */
+	public java.util.List<Structure> getStructureElement() {  
+		if (myStructure == null) {
+			myStructure = new java.util.ArrayList<Structure>();
+		}
+		return myStructure;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>structure</b> (A constraint on a resource or a data type)
 	 *
@@ -1210,6 +1605,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myExtensionDefn;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>extensionDefn</b> (Definition of an extension).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An extension defined as part of the profile
+     * </p> 
+	 */
+	public java.util.List<ExtensionDefn> getExtensionDefnElement() {  
+		if (myExtensionDefn == null) {
+			myExtensionDefn = new java.util.ArrayList<ExtensionDefn>();
+		}
+		return myExtensionDefn;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>extensionDefn</b> (Definition of an extension)
@@ -1271,6 +1685,25 @@ public class Profile extends BaseResource implements IResource {
 		return myQuery;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>query</b> (Definition of a named query).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of a named query and its parameters and their meaning
+     * </p> 
+	 */
+	public java.util.List<Query> getQueryElement() {  
+		if (myQuery == null) {
+			myQuery = new java.util.ArrayList<Query>();
+		}
+		return myQuery;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>query</b> (Definition of a named query)
 	 *
@@ -1323,7 +1756,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Mapping extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Mapping 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1381,6 +1815,25 @@ public class Profile extends BaseResource implements IResource {
 		return myIdentity;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>identity</b> (Internal id when this mapping is used).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An Internal id that is used to identify this mapping set when specific mappings are made
+     * </p> 
+	 */
+	public IdDt getIdentityElement() {  
+		if (myIdentity == null) {
+			myIdentity = new IdDt();
+		}
+		return myIdentity;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>identity</b> (Internal id when this mapping is used)
 	 *
@@ -1424,6 +1877,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myUri;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>uri</b> (Identifies what this mapping refers to).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A URI that identifies the specification that this mapping is expressed to
+     * </p> 
+	 */
+	public UriDt getUriElement() {  
+		if (myUri == null) {
+			myUri = new UriDt();
+		}
+		return myUri;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>uri</b> (Identifies what this mapping refers to)
@@ -1469,6 +1941,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Names what this mapping refers to).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A name for the specification that is being mapped to
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Names what this mapping refers to)
 	 *
@@ -1513,6 +2004,25 @@ public class Profile extends BaseResource implements IResource {
 		return myComments;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>comments</b> (Versions, Issues, Scope limitations etc).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage
+     * </p> 
+	 */
+	public StringDt getCommentsElement() {  
+		if (myComments == null) {
+			myComments = new StringDt();
+		}
+		return myComments;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>comments</b> (Versions, Issues, Scope limitations etc)
 	 *
@@ -1553,7 +2063,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Structure extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Structure 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="type", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1625,6 +2136,25 @@ public class Profile extends BaseResource implements IResource {
 		return myType;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>type</b> (The Resource or Data Type being described).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The Resource or Data type being described
+     * </p> 
+	 */
+	public BoundCodeDt<FHIRDefinedTypeEnum> getTypeElement() {  
+		if (myType == null) {
+			myType = new BoundCodeDt<FHIRDefinedTypeEnum>(FHIRDefinedTypeEnum.VALUESET_BINDER);
+		}
+		return myType;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>type</b> (The Resource or Data Type being described)
 	 *
@@ -1668,6 +2198,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myName;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Name for this particular structure (reference target)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of this resource constraint statement (to refer to it from other resource constraints - from Profile.structure.element.definition.type.profile)
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>name</b> (Name for this particular structure (reference target))
@@ -1713,6 +2262,25 @@ public class Profile extends BaseResource implements IResource {
 		return myPublish;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>publish</b> (This definition is published (i.e. for validation)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This definition of a profile on a structure is published as a formal statement. Some structural definitions might be defined purely for internal use within the profile, and not intended to be used outside that context
+     * </p> 
+	 */
+	public BooleanDt getPublishElement() {  
+		if (myPublish == null) {
+			myPublish = new BooleanDt();
+		}
+		return myPublish;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>publish</b> (This definition is published (i.e. for validation))
 	 *
@@ -1757,6 +2325,25 @@ public class Profile extends BaseResource implements IResource {
 		return myPurpose;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>purpose</b> (Human summary: why describe this resource?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Human summary: why describe this resource?
+     * </p> 
+	 */
+	public StringDt getPurposeElement() {  
+		if (myPurpose == null) {
+			myPurpose = new StringDt();
+		}
+		return myPurpose;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>purpose</b> (Human summary: why describe this resource?)
 	 *
@@ -1800,6 +2387,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myElement;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>element</b> (Definition of elements in the resource (if no profile)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Captures constraints on each element within the resource
+     * </p> 
+	 */
+	public java.util.List<StructureElement> getElementElement() {  
+		if (myElement == null) {
+			myElement = new java.util.ArrayList<StructureElement>();
+		}
+		return myElement;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>element</b> (Definition of elements in the resource (if no profile))
@@ -1861,6 +2467,25 @@ public class Profile extends BaseResource implements IResource {
 		return mySearchParam;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>searchParam</b> (Search params defined).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Additional search parameters for implementations to support and/or make use of
+     * </p> 
+	 */
+	public java.util.List<StructureSearchParam> getSearchParamElement() {  
+		if (mySearchParam == null) {
+			mySearchParam = new java.util.ArrayList<StructureSearchParam>();
+		}
+		return mySearchParam;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>searchParam</b> (Search params defined)
 	 *
@@ -1916,7 +2541,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElement extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElement 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="path", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -1981,6 +2607,25 @@ public class Profile extends BaseResource implements IResource {
 		return myPath;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>path</b> (The path of the element (see the formal definitions)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
+     * </p> 
+	 */
+	public StringDt getPathElement() {  
+		if (myPath == null) {
+			myPath = new StringDt();
+		}
+		return myPath;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>path</b> (The path of the element (see the formal definitions))
 	 *
@@ -2024,6 +2669,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myRepresentation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>representation</b> (How this element is represented in instances).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Codes that define how this element is represented in instances, when the deviation varies from the normal case
+     * </p> 
+	 */
+	public java.util.List<BoundCodeDt<PropertyRepresentationEnum>> getRepresentationElement() {  
+		if (myRepresentation == null) {
+			myRepresentation = new java.util.ArrayList<BoundCodeDt<PropertyRepresentationEnum>>();
+		}
+		return myRepresentation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>representation</b> (How this element is represented in instances)
@@ -2117,6 +2781,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Name for this particular element definition (reference target)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of this element definition (to refer to it from other element definitions using Profile.structure.element.definition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Name for this particular element definition (reference target))
 	 *
@@ -2161,6 +2844,25 @@ public class Profile extends BaseResource implements IResource {
 		return mySlicing;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>slicing</b> (This element is sliced - slices follow).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set)
+     * </p> 
+	 */
+	public StructureElementSlicing getSlicingElement() {  
+		if (mySlicing == null) {
+			mySlicing = new StructureElementSlicing();
+		}
+		return mySlicing;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>slicing</b> (This element is sliced - slices follow)
 	 *
@@ -2192,6 +2894,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDefinition;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>definition</b> (More specific definition of the element).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of the content of the element to provide a more specific definition than that contained for the element in the base resource
+     * </p> 
+	 */
+	public StructureElementDefinition getDefinitionElement() {  
+		if (myDefinition == null) {
+			myDefinition = new StructureElementDefinition();
+		}
+		return myDefinition;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>definition</b> (More specific definition of the element)
 	 *
@@ -2218,7 +2939,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementSlicing extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementSlicing 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="discriminator", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2269,6 +2991,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDiscriminator;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Designates which child element is used to discriminate between the slices when processing an instance. The value of the child element in the instance SHALL completely distinguish which slice the element in the resource matches based on the allowed values for that element in each of the slices
+     * </p> 
+	 */
+	public IdDt getDiscriminatorElement() {  
+		if (myDiscriminator == null) {
+			myDiscriminator = new IdDt();
+		}
+		return myDiscriminator;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>discriminator</b> (Element that used to distinguish the slices)
 	 *
@@ -2312,6 +3053,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myOrdered;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>ordered</b> (If elements must be in same order as slices).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the matching elements have to occur in the same order as defined in the profile
+     * </p> 
+	 */
+	public BooleanDt getOrderedElement() {  
+		if (myOrdered == null) {
+			myOrdered = new BooleanDt();
+		}
+		return myOrdered;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>ordered</b> (If elements must be in same order as slices)
@@ -2357,6 +3117,25 @@ public class Profile extends BaseResource implements IResource {
 		return myRules;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>rules</b> (closed | open | openAtEnd).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end
+     * </p> 
+	 */
+	public BoundCodeDt<SlicingRulesEnum> getRulesElement() {  
+		if (myRules == null) {
+			myRules = new BoundCodeDt<SlicingRulesEnum>(SlicingRulesEnum.VALUESET_BINDER);
+		}
+		return myRules;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>rules</b> (closed | open | openAtEnd)
 	 *
@@ -2397,7 +3176,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinition extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementDefinition 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="short", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -2553,6 +3333,25 @@ public class Profile extends BaseResource implements IResource {
 		return myShort;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>short</b> (Concise definition for xml presentation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)
+     * </p> 
+	 */
+	public StringDt getShortElement() {  
+		if (myShort == null) {
+			myShort = new StringDt();
+		}
+		return myShort;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>short</b> (Concise definition for xml presentation)
 	 *
@@ -2596,6 +3395,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myFormal;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>formal</b> (Full formal definition in human language).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource
+     * </p> 
+	 */
+	public StringDt getFormalElement() {  
+		if (myFormal == null) {
+			myFormal = new StringDt();
+		}
+		return myFormal;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>formal</b> (Full formal definition in human language)
@@ -2641,6 +3459,25 @@ public class Profile extends BaseResource implements IResource {
 		return myComments;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>comments</b> (Comments about the use of this element).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Comments about the use of the element, including notes about how to use the data properly, exceptions to proper use, etc.
+     * </p> 
+	 */
+	public StringDt getCommentsElement() {  
+		if (myComments == null) {
+			myComments = new StringDt();
+		}
+		return myComments;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>comments</b> (Comments about the use of this element)
 	 *
@@ -2685,6 +3522,25 @@ public class Profile extends BaseResource implements IResource {
 		return myRequirements;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>requirements</b> (Why is this needed?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Explains why this element is needed and why it's been constrained as it has
+     * </p> 
+	 */
+	public StringDt getRequirementsElement() {  
+		if (myRequirements == null) {
+			myRequirements = new StringDt();
+		}
+		return myRequirements;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>requirements</b> (Why is this needed?)
 	 *
@@ -2728,6 +3584,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return mySynonym;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>synonym</b> (Other names).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies additional names by which this element might also be known
+     * </p> 
+	 */
+	public java.util.List<StringDt> getSynonymElement() {  
+		if (mySynonym == null) {
+			mySynonym = new java.util.ArrayList<StringDt>();
+		}
+		return mySynonym;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>synonym</b> (Other names)
@@ -2807,6 +3682,25 @@ public class Profile extends BaseResource implements IResource {
 		return myMin;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>min</b> (Minimum Cardinality).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The minimum number of times this element SHALL appear in the instance
+     * </p> 
+	 */
+	public IntegerDt getMinElement() {  
+		if (myMin == null) {
+			myMin = new IntegerDt();
+		}
+		return myMin;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>min</b> (Minimum Cardinality)
 	 *
@@ -2851,6 +3745,25 @@ public class Profile extends BaseResource implements IResource {
 		return myMax;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>max</b> (Maximum Cardinality (a number or *)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The maximum number of times this element is permitted to appear in the instance
+     * </p> 
+	 */
+	public StringDt getMaxElement() {  
+		if (myMax == null) {
+			myMax = new StringDt();
+		}
+		return myMax;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>max</b> (Maximum Cardinality (a number or *))
 	 *
@@ -2894,6 +3807,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myType;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>type</b> (Data type and Profile for this element).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The data type or resource that the value of this element is permitted to be
+     * </p> 
+	 */
+	public java.util.List<StructureElementDefinitionType> getTypeElement() {  
+		if (myType == null) {
+			myType = new java.util.ArrayList<StructureElementDefinitionType>();
+		}
+		return myType;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (Data type and Profile for this element)
@@ -2955,6 +3887,25 @@ public class Profile extends BaseResource implements IResource {
 		return myNameReference;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>nameReference</b> (To another element constraint (by element.name)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element
+     * </p> 
+	 */
+	public StringDt getNameReferenceElement() {  
+		if (myNameReference == null) {
+			myNameReference = new StringDt();
+		}
+		return myNameReference;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>nameReference</b> (To another element constraint (by element.name))
 	 *
@@ -2996,6 +3947,22 @@ public class Profile extends BaseResource implements IResource {
 		return myValue;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>value[x]</b> (Fixed value: [as defined for a primitive type]).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Specifies a primitive value that SHALL hold for this element in the instance
+     * </p> 
+	 */
+	public IDatatype getValueElement() {  
+		return myValue;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>value[x]</b> (Fixed value: [as defined for a primitive type])
 	 *
@@ -3023,6 +3990,22 @@ public class Profile extends BaseResource implements IResource {
 	public IDatatype getExample() {  
 		return myExample;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>example[x]</b> (Example value: [as defined for type]).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An example value for this element
+     * </p> 
+	 */
+	public IDatatype getExampleElement() {  
+		return myExample;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>example[x]</b> (Example value: [as defined for type])
@@ -3054,6 +4037,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myMaxLength;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>maxLength</b> (Length for strings).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates the shortest length that SHALL be supported by conformant instances without truncation
+     * </p> 
+	 */
+	public IntegerDt getMaxLengthElement() {  
+		if (myMaxLength == null) {
+			myMaxLength = new IntegerDt();
+		}
+		return myMaxLength;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>maxLength</b> (Length for strings)
@@ -3098,6 +4100,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myCondition;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>condition</b> (Reference to invariant about presence).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A reference to an invariant that may make additional statements about the cardinality or value in the instance
+     * </p> 
+	 */
+	public java.util.List<IdDt> getConditionElement() {  
+		if (myCondition == null) {
+			myCondition = new java.util.ArrayList<IdDt>();
+		}
+		return myCondition;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>condition</b> (Reference to invariant about presence)
@@ -3177,6 +4198,25 @@ public class Profile extends BaseResource implements IResource {
 		return myConstraint;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>constraint</b> (Condition that must evaluate to true).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance
+     * </p> 
+	 */
+	public java.util.List<StructureElementDefinitionConstraint> getConstraintElement() {  
+		if (myConstraint == null) {
+			myConstraint = new java.util.ArrayList<StructureElementDefinitionConstraint>();
+		}
+		return myConstraint;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>constraint</b> (Condition that must evaluate to true)
 	 *
@@ -3237,6 +4277,25 @@ public class Profile extends BaseResource implements IResource {
 		return myMustSupport;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>mustSupport</b> (If the element must supported).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported
+     * </p> 
+	 */
+	public BooleanDt getMustSupportElement() {  
+		if (myMustSupport == null) {
+			myMustSupport = new BooleanDt();
+		}
+		return myMustSupport;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>mustSupport</b> (If the element must supported)
 	 *
@@ -3280,6 +4339,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myIsModifier;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>isModifier</b> (If this modifies the meaning of other elements).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.
+     * </p> 
+	 */
+	public BooleanDt getIsModifierElement() {  
+		if (myIsModifier == null) {
+			myIsModifier = new BooleanDt();
+		}
+		return myIsModifier;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>isModifier</b> (If this modifies the meaning of other elements)
@@ -3325,6 +4403,25 @@ public class Profile extends BaseResource implements IResource {
 		return myBinding;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>binding</b> (ValueSet details if this is coded).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Binds to a value set if this element is coded (code, Coding, CodeableConcept)
+     * </p> 
+	 */
+	public StructureElementDefinitionBinding getBindingElement() {  
+		if (myBinding == null) {
+			myBinding = new StructureElementDefinitionBinding();
+		}
+		return myBinding;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>binding</b> (ValueSet details if this is coded)
 	 *
@@ -3355,6 +4452,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myMapping;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>mapping</b> (Map element to another set of definitions).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a concept from an external specification that roughly corresponds to this element
+     * </p> 
+	 */
+	public java.util.List<StructureElementDefinitionMapping> getMappingElement() {  
+		if (myMapping == null) {
+			myMapping = new java.util.ArrayList<StructureElementDefinitionMapping>();
+		}
+		return myMapping;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>mapping</b> (Map element to another set of definitions)
@@ -3411,7 +4527,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionType extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementDefinitionType 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3462,6 +4579,25 @@ public class Profile extends BaseResource implements IResource {
 		return myCode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Name of Data type or Resource).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * 
+     * </p> 
+	 */
+	public BoundCodeDt<DataTypeEnum> getCodeElement() {  
+		if (myCode == null) {
+			myCode = new BoundCodeDt<DataTypeEnum>(DataTypeEnum.VALUESET_BINDER);
+		}
+		return myCode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>code</b> (Name of Data type or Resource)
 	 *
@@ -3506,6 +4642,25 @@ public class Profile extends BaseResource implements IResource {
 		return myProfile;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>profile</b> (Profile.structure to apply).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a profile that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile
+     * </p> 
+	 */
+	public UriDt getProfileElement() {  
+		if (myProfile == null) {
+			myProfile = new UriDt();
+		}
+		return myProfile;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>profile</b> (Profile.structure to apply)
 	 *
@@ -3549,6 +4704,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myAggregation;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>aggregation</b> (contained | referenced | bundled - how aggregated).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle
+     * </p> 
+	 */
+	public java.util.List<BoundCodeDt<AggregationModeEnum>> getAggregationElement() {  
+		if (myAggregation == null) {
+			myAggregation = new java.util.ArrayList<BoundCodeDt<AggregationModeEnum>>();
+		}
+		return myAggregation;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>aggregation</b> (contained | referenced | bundled - how aggregated)
@@ -3638,7 +4812,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionConstraint extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementDefinitionConstraint 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="key", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3703,6 +4878,25 @@ public class Profile extends BaseResource implements IResource {
 		return myKey;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>key</b> (Target of 'condition' reference above).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality
+     * </p> 
+	 */
+	public IdDt getKeyElement() {  
+		if (myKey == null) {
+			myKey = new IdDt();
+		}
+		return myKey;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>key</b> (Target of 'condition' reference above)
 	 *
@@ -3746,6 +4940,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myName;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Short human label).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Used to label the constraint in OCL or in short displays incapable of displaying the full human description
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>name</b> (Short human label)
@@ -3791,6 +5004,25 @@ public class Profile extends BaseResource implements IResource {
 		return mySeverity;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>severity</b> (error | warning).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the impact constraint violation has on the conformance of the instance
+     * </p> 
+	 */
+	public BoundCodeDt<ConstraintSeverityEnum> getSeverityElement() {  
+		if (mySeverity == null) {
+			mySeverity = new BoundCodeDt<ConstraintSeverityEnum>(ConstraintSeverityEnum.VALUESET_BINDER);
+		}
+		return mySeverity;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>severity</b> (error | warning)
 	 *
@@ -3834,6 +5066,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myHuman;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>human</b> (Human description of constraint).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Text that can be used to describe the constraint in messages identifying that the constraint has been violated
+     * </p> 
+	 */
+	public StringDt getHumanElement() {  
+		if (myHuman == null) {
+			myHuman = new StringDt();
+		}
+		return myHuman;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>human</b> (Human description of constraint)
@@ -3879,6 +5130,25 @@ public class Profile extends BaseResource implements IResource {
 		return myXpath;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>xpath</b> (XPath expression of constraint).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * XPath expression of constraint
+     * </p> 
+	 */
+	public StringDt getXpathElement() {  
+		if (myXpath == null) {
+			myXpath = new StringDt();
+		}
+		return myXpath;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>xpath</b> (XPath expression of constraint)
 	 *
@@ -3919,7 +5189,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionBinding extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementDefinitionBinding 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -3985,6 +5256,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Descriptive Name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A descriptive name for this - can be useful for generating implementation artifacts
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Descriptive Name)
 	 *
@@ -4028,6 +5318,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myIsExtensible;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>isExtensible</b> (Can additional codes be used?).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * If true, then conformant systems may use additional codes or (where the data type permits) text alone to convey concepts not covered by the set of codes identified in the binding.  If false, then conformant systems are constrained to the provided codes alone
+     * </p> 
+	 */
+	public BooleanDt getIsExtensibleElement() {  
+		if (myIsExtensible == null) {
+			myIsExtensible = new BooleanDt();
+		}
+		return myIsExtensible;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>isExtensible</b> (Can additional codes be used?)
@@ -4073,6 +5382,25 @@ public class Profile extends BaseResource implements IResource {
 		return myConformance;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>conformance</b> (required | preferred | example).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates the degree of conformance expectations associated with this binding
+     * </p> 
+	 */
+	public BoundCodeDt<BindingConformanceEnum> getConformanceElement() {  
+		if (myConformance == null) {
+			myConformance = new BoundCodeDt<BindingConformanceEnum>(BindingConformanceEnum.VALUESET_BINDER);
+		}
+		return myConformance;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>conformance</b> (required | preferred | example)
 	 *
@@ -4117,6 +5445,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDescription;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>description</b> (Human explanation of the value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Describes the intended use of this particular set of codes
+     * </p> 
+	 */
+	public StringDt getDescriptionElement() {  
+		if (myDescription == null) {
+			myDescription = new StringDt();
+		}
+		return myDescription;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>description</b> (Human explanation of the value set)
 	 *
@@ -4158,6 +5505,22 @@ public class Profile extends BaseResource implements IResource {
 		return myReference;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>reference[x]</b> (Source of value set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Points to the value set or external definition that identifies the set of codes to be used
+     * </p> 
+	 */
+	public IDatatype getReferenceElement() {  
+		return myReference;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>reference[x]</b> (Source of value set)
 	 *
@@ -4185,7 +5548,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureElementDefinitionMapping extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureElementDefinitionMapping 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="identity", type=IdDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4228,6 +5592,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myIdentity;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>identity</b> (Reference to mapping declaration).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An internal reference to the definition of a mapping
+     * </p> 
+	 */
+	public IdDt getIdentityElement() {  
+		if (myIdentity == null) {
+			myIdentity = new IdDt();
+		}
+		return myIdentity;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>identity</b> (Reference to mapping declaration)
@@ -4273,6 +5656,25 @@ public class Profile extends BaseResource implements IResource {
 		return myMap;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>map</b> (Details of the mapping).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Expresses what part of the target specification corresponds to this element
+     * </p> 
+	 */
+	public StringDt getMapElement() {  
+		if (myMap == null) {
+			myMap = new StringDt();
+		}
+		return myMap;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>map</b> (Details of the mapping)
 	 *
@@ -4315,7 +5717,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class StructureSearchParam extends BaseIdentifiableElement implements IResourceBlock {
+	public static class StructureSearchParam 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4380,6 +5783,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Name of search parameter).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of the standard or custom search parameter
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Name of search parameter)
 	 *
@@ -4423,6 +5845,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myType;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The type of value a search parameter refers to, and how the content is interpreted
+     * </p> 
+	 */
+	public BoundCodeDt<SearchParamTypeEnum> getTypeElement() {  
+		if (myType == null) {
+			myType = new BoundCodeDt<SearchParamTypeEnum>(SearchParamTypeEnum.VALUESET_BINDER);
+		}
+		return myType;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>type</b> (number | date | string | token | reference | composite | quantity)
@@ -4468,6 +5909,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Contents and meaning of search parameter).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A specification for search parameters. For standard parameters, provides additional information on how the parameter is used in this solution.  For custom parameters, provides a description of what the parameter does
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Contents and meaning of search parameter)
 	 *
@@ -4512,6 +5972,25 @@ public class Profile extends BaseResource implements IResource {
 		return myXpath;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>xpath</b> (XPath that extracts the parameter set).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An XPath expression that returns a set of elements for the search parameter
+     * </p> 
+	 */
+	public StringDt getXpathElement() {  
+		if (myXpath == null) {
+			myXpath = new StringDt();
+		}
+		return myXpath;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>xpath</b> (XPath that extracts the parameter set)
 	 *
@@ -4555,6 +6034,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myTarget;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>target</b> (Types of resource (if a resource reference)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Types of resource (if a resource is referenced)
+     * </p> 
+	 */
+	public java.util.List<BoundCodeDt<ResourceTypeEnum>> getTargetElement() {  
+		if (myTarget == null) {
+			myTarget = new java.util.ArrayList<BoundCodeDt<ResourceTypeEnum>>();
+		}
+		return myTarget;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>target</b> (Types of resource (if a resource reference))
@@ -4645,7 +6143,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class ExtensionDefn extends BaseIdentifiableElement implements IResourceBlock {
+	public static class ExtensionDefn 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4710,6 +6209,25 @@ public class Profile extends BaseResource implements IResource {
 		return myCode;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Identifies the extension in this profile).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A unique code (within the profile) used to identify the extension
+     * </p> 
+	 */
+	public CodeDt getCodeElement() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
+		return myCode;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>code</b> (Identifies the extension in this profile)
 	 *
@@ -4753,6 +6271,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myDisplay;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>display</b> (Use this name when displaying the value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Defined so that applications can use this name when displaying the value of the extension to the user
+     * </p> 
+	 */
+	public StringDt getDisplayElement() {  
+		if (myDisplay == null) {
+			myDisplay = new StringDt();
+		}
+		return myDisplay;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>display</b> (Use this name when displaying the value)
@@ -4798,6 +6335,25 @@ public class Profile extends BaseResource implements IResource {
 		return myContextType;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>contextType</b> (resource | datatype | mapping | extension).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the type of context to which the extension applies
+     * </p> 
+	 */
+	public BoundCodeDt<ExtensionContextEnum> getContextTypeElement() {  
+		if (myContextType == null) {
+			myContextType = new BoundCodeDt<ExtensionContextEnum>(ExtensionContextEnum.VALUESET_BINDER);
+		}
+		return myContextType;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>contextType</b> (resource | datatype | mapping | extension)
 	 *
@@ -4841,6 +6397,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myContext;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>context</b> (Where the extension can be used in instances).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the types of resource or data type elements to which the extension can be applied
+     * </p> 
+	 */
+	public java.util.List<StringDt> getContextElement() {  
+		if (myContext == null) {
+			myContext = new java.util.ArrayList<StringDt>();
+		}
+		return myContext;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>context</b> (Where the extension can be used in instances)
@@ -4920,6 +6495,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDefinition;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>definition</b> (Definition of the extension and its content).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Definition of the extension and its content
+     * </p> 
+	 */
+	public StructureElementDefinition getDefinitionElement() {  
+		if (myDefinition == null) {
+			myDefinition = new StructureElementDefinition();
+		}
+		return myDefinition;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>definition</b> (Definition of the extension and its content)
 	 *
@@ -4947,7 +6541,8 @@ public class Profile extends BaseResource implements IResource {
      * </p> 
 	 */
 	@Block()	
-	public static class Query extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Query 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="name", type=StringDt.class, order=0, min=1, max=1)	
 	@Description(
@@ -4998,6 +6593,25 @@ public class Profile extends BaseResource implements IResource {
 		return myName;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Special named queries (_query=)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of a query, which is used in the URI from Conformance statements declaring use of the query.  Typically this will also be the name for the _query parameter when the query is called, though in some cases it may be aliased by a server to avoid collisions
+     * </p> 
+	 */
+	public StringDt getNameElement() {  
+		if (myName == null) {
+			myName = new StringDt();
+		}
+		return myName;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>name</b> (Special named queries (_query=))
 	 *
@@ -5042,6 +6656,25 @@ public class Profile extends BaseResource implements IResource {
 		return myDocumentation;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>documentation</b> (Describes the named query).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of the query - the functionality it offers, and considerations about how it functions and to use it
+     * </p> 
+	 */
+	public StringDt getDocumentationElement() {  
+		if (myDocumentation == null) {
+			myDocumentation = new StringDt();
+		}
+		return myDocumentation;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>documentation</b> (Describes the named query)
 	 *
@@ -5085,6 +6718,25 @@ public class Profile extends BaseResource implements IResource {
 		}
 		return myParameter;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>parameter</b> (Parameter for the named query).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A parameter of a named query
+     * </p> 
+	 */
+	public java.util.List<StructureSearchParam> getParameterElement() {  
+		if (myParameter == null) {
+			myParameter = new java.util.ArrayList<StructureSearchParam>();
+		}
+		return myParameter;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>parameter</b> (Parameter for the named query)
@@ -5137,7 +6789,11 @@ public class Profile extends BaseResource implements IResource {
 
     @Override
     public String getResourceName() {
-        return Profile.class.getName();
+        return "Profile";
+    }
+
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
     }
 
 }

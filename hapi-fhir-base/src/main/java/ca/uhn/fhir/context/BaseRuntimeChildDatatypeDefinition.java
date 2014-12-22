@@ -25,27 +25,28 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private Class<? extends ICodeEnum> myCodeType;
-	private Class<? extends IDatatype> myDatatype;
+	private Class<? extends IBase> myDatatype;
 
 	private BaseRuntimeElementDefinition<?> myElementDefinition;
 
-	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype) {
+	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		assert theDatatype != IDatatype.class; // should use RuntimeChildAny
 		myDatatype = theDatatype;
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		if (myDatatype.equals(theDatatype)) {
 			return getElementName();
 		}
@@ -53,8 +54,8 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
-		Class<? extends IElement> datatype = theDatatype;
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
+		Class<? extends IBase> datatype = theDatatype;
 		if (myDatatype.equals(datatype)) {
 			return myElementDefinition;
 		}
@@ -73,7 +74,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		return myCodeType;
 	}
 
-	public Class<? extends IDatatype> getDatatype() {
+	public Class<? extends IBase> getDatatype() {
 		return myDatatype;
 	}
 
@@ -83,7 +84,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElementDefinition = theClassToElementDefinitions.get(getDatatype());
 		assert myElementDefinition != null : "Unknown type: " + getDatatype();
 	}

@@ -22,13 +22,14 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 
-import ca.uhn.fhir.model.api.IDatatype;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildPrimitiveDatatypeDefinition extends BaseRuntimeChildDatatypeDefinition {
 
-	public RuntimeChildPrimitiveDatatypeDefinition(Field theField, String theElementName, Description theDescriptionAnnotation, Child theChildAnnotation,  Class<? extends IDatatype> theDatatype) {
+	public RuntimeChildPrimitiveDatatypeDefinition(Field theField, String theElementName, Description theDescriptionAnnotation, Child theChildAnnotation,  Class<? extends IBase> theDatatype) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
 	}
 

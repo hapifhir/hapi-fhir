@@ -63,11 +63,6 @@ public class ResourceBlock extends Child {
 		return true;
 	}
 
-	@Override
-	public String getTypeSuffix() {
-		return "";
-	}
-
 	public void setForcedClassName(String theClassName) {
 		myForcedClassName =theClassName;
 	}

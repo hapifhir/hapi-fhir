@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBase;
 
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
-public abstract class BaseRuntimeElementDefinition<T extends IElement> {
+public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	private String myName;
 	private Class<? extends T> myImplementingClass;
@@ -129,7 +129,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IElement> {
 	 * Invoked prior to use to perform any initialization and make object
 	 * mutable
 	 */
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		for (BaseRuntimeChildDefinition next : myExtensions) {
 			next.sealAndInitialize(theClassToElementDefinitions);
 		}

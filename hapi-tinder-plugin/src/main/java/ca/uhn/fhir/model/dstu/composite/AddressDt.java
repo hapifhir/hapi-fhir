@@ -16,38 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>AddressDt</b> Datatype
@@ -160,6 +160,25 @@ public class AddressDt
 		return myUse;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The purpose of this address
+     * </p> 
+	 */
+	public BoundCodeDt<AddressUseEnum> getUseElement() {  
+		if (myUse == null) {
+			myUse = new BoundCodeDt<AddressUseEnum>(AddressUseEnum.VALUESET_BINDER);
+		}
+		return myUse;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>use</b> (home | work | temp | old - purpose of this address)
 	 *
@@ -204,6 +223,25 @@ public class AddressDt
 		return myText;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>text</b> (Text representation of the address).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A full text representation of the address
+     * </p> 
+	 */
+	public StringDt getTextElement() {  
+		if (myText == null) {
+			myText = new StringDt();
+		}
+		return myText;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the address)
 	 *
@@ -247,6 +285,25 @@ public class AddressDt
 		}
 		return myLine;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * This component contains the house number, apartment number, street name, street direction, P.O. Box number, delivery hints, and similar address information
+     * </p> 
+	 */
+	public java.util.List<StringDt> getLineElement() {  
+		if (myLine == null) {
+			myLine = new java.util.ArrayList<StringDt>();
+		}
+		return myLine;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>line</b> (Street name, number, direction & P.O. Box etc)
@@ -326,6 +383,25 @@ public class AddressDt
 		return myCity;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>city</b> (Name of city, town etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The name of the city, town, village or other community or delivery center.
+     * </p> 
+	 */
+	public StringDt getCityElement() {  
+		if (myCity == null) {
+			myCity = new StringDt();
+		}
+		return myCity;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>city</b> (Name of city, town etc.)
 	 *
@@ -369,6 +445,25 @@ public class AddressDt
 		}
 		return myState;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>state</b> (Sub-unit of country (abreviations ok)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
+     * </p> 
+	 */
+	public StringDt getStateElement() {  
+		if (myState == null) {
+			myState = new StringDt();
+		}
+		return myState;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>state</b> (Sub-unit of country (abreviations ok))
@@ -414,6 +509,25 @@ public class AddressDt
 		return myZip;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>zip</b> (Postal code for area).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A postal code designating a region defined by the postal service.
+     * </p> 
+	 */
+	public StringDt getZipElement() {  
+		if (myZip == null) {
+			myZip = new StringDt();
+		}
+		return myZip;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>zip</b> (Postal code for area)
 	 *
@@ -458,6 +572,25 @@ public class AddressDt
 		return myCountry;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>country</b> (Country (can be ISO 3166 3 letter code)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Country - a nation as commonly understood or generally accepted
+     * </p> 
+	 */
+	public StringDt getCountryElement() {  
+		if (myCountry == null) {
+			myCountry = new StringDt();
+		}
+		return myCountry;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>country</b> (Country (can be ISO 3166 3 letter code))
 	 *
@@ -501,6 +634,25 @@ public class AddressDt
 		}
 		return myPeriod;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>period</b> (Time period when address was/is in use).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Time period when address was/is in use
+     * </p> 
+	 */
+	public PeriodDt getPeriodElement() {  
+		if (myPeriod == null) {
+			myPeriod = new PeriodDt();
+		}
+		return myPeriod;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>period</b> (Time period when address was/is in use)

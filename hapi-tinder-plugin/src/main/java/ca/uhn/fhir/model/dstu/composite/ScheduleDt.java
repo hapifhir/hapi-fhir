@@ -16,45 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.Date;
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.Block;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>ScheduleDt</b> Datatype
@@ -125,6 +118,25 @@ public class ScheduleDt
 		return myEvent;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>event</b> (When the event occurs).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies specific time periods when the event should occur
+     * </p> 
+	 */
+	public java.util.List<PeriodDt> getEventElement() {  
+		if (myEvent == null) {
+			myEvent = new java.util.ArrayList<PeriodDt>();
+		}
+		return myEvent;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>event</b> (When the event occurs)
 	 *
@@ -185,6 +197,25 @@ public class ScheduleDt
 		return myRepeat;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>repeat</b> (Only if there is none or one event).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies a repeating pattern to the intended time periods.
+     * </p> 
+	 */
+	public Repeat getRepeatElement() {  
+		if (myRepeat == null) {
+			myRepeat = new Repeat();
+		}
+		return myRepeat;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>repeat</b> (Only if there is none or one event)
 	 *
@@ -208,7 +239,8 @@ public class ScheduleDt
      * </p> 
 	 */
 	@Block()	
-	public static class Repeat extends BaseIdentifiableElement implements IResourceBlock {
+	public static class Repeat 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
 	
 	@Child(name="frequency", type=IntegerDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -280,6 +312,25 @@ public class ScheduleDt
 		return myFrequency;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>frequency</b> (Event occurs frequency times per duration).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates how often the event should occur.
+     * </p> 
+	 */
+	public IntegerDt getFrequencyElement() {  
+		if (myFrequency == null) {
+			myFrequency = new IntegerDt();
+		}
+		return myFrequency;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>frequency</b> (Event occurs frequency times per duration)
 	 *
@@ -324,6 +375,25 @@ public class ScheduleDt
 		return myWhen;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>when</b> (HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the occurrence of daily life that determines timing
+     * </p> 
+	 */
+	public BoundCodeDt<EventTimingEnum> getWhenElement() {  
+		if (myWhen == null) {
+			myWhen = new BoundCodeDt<EventTimingEnum>(EventTimingEnum.VALUESET_BINDER);
+		}
+		return myWhen;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>when</b> (HS | WAKE | AC | ACM | ACD | ACV | PC | PCM | PCD | PCV - common life events)
 	 *
@@ -367,6 +437,25 @@ public class ScheduleDt
 		}
 		return myDuration;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>duration</b> (Repeating or event-related duration).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How long each repetition should last
+     * </p> 
+	 */
+	public DecimalDt getDurationElement() {  
+		if (myDuration == null) {
+			myDuration = new DecimalDt();
+		}
+		return myDuration;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>duration</b> (Repeating or event-related duration)
@@ -438,6 +527,25 @@ public class ScheduleDt
 		return myUnits;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>units</b> (s | min | h | d | wk | mo | a - unit of time (UCUM)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The units of time for the duration
+     * </p> 
+	 */
+	public BoundCodeDt<UnitsOfTimeEnum> getUnitsElement() {  
+		if (myUnits == null) {
+			myUnits = new BoundCodeDt<UnitsOfTimeEnum>(UnitsOfTimeEnum.VALUESET_BINDER);
+		}
+		return myUnits;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>units</b> (s | min | h | d | wk | mo | a - unit of time (UCUM))
 	 *
@@ -481,6 +589,25 @@ public class ScheduleDt
 		}
 		return myCount;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>count</b> (Number of times to repeat).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A total count of the desired number of repetitions
+     * </p> 
+	 */
+	public IntegerDt getCountElement() {  
+		if (myCount == null) {
+			myCount = new IntegerDt();
+		}
+		return myCount;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>count</b> (Number of times to repeat)
@@ -526,6 +653,25 @@ public class ScheduleDt
 		return myEnd;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>end</b> (When to stop repeats).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * When to stop repeating the schedule
+     * </p> 
+	 */
+	public DateTimeDt getEndElement() {  
+		if (myEnd == null) {
+			myEnd = new DateTimeDt();
+		}
+		return myEnd;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>end</b> (When to stop repeats)
 	 *
@@ -547,8 +693,8 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public Repeat setEndWithSecondsPrecision( Date theDate) {
-		myEnd = new DateTimeDt(theDate); 
+	public Repeat setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myEnd = new DateTimeDt(theDate, thePrecision); 
 		return this; 
 	}
 
@@ -560,8 +706,8 @@ public class ScheduleDt
      * When to stop repeating the schedule
      * </p> 
 	 */
-	public Repeat setEnd( Date theDate,  TemporalPrecisionEnum thePrecision) {
-		myEnd = new DateTimeDt(theDate, thePrecision); 
+	public Repeat setEndWithSecondsPrecision( Date theDate) {
+		myEnd = new DateTimeDt(theDate); 
 		return this; 
 	}
 

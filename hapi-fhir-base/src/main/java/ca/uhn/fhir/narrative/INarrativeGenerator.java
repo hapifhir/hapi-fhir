@@ -20,18 +20,19 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public interface INarrativeGenerator {
 
-	NarrativeDt generateNarrative(String theProfile, IResource theResource) throws DataFormatException;
+	NarrativeDt generateNarrative(String theProfile, IBaseResource theResource) throws DataFormatException;
 
-	NarrativeDt generateNarrative(IResource theResource);
+	NarrativeDt generateNarrative(IBaseResource theResource);
 
-	String generateTitle(IResource theResource);
+	String generateTitle(IBaseResource theResource);
 
-	String generateTitle(String theProfile, IResource theResource);
+	String generateTitle(String theProfile, IBaseResource theResource);
 
 }

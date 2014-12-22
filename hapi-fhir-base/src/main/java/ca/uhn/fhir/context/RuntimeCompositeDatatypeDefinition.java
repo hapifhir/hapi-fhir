@@ -20,16 +20,18 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import org.hl7.fhir.instance.model.ICompositeType;
+
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeDatatype> implements IRuntimeDatatypeDefinition {
+public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompositeDefinition<ICompositeType> implements IRuntimeDatatypeDefinition {
 
 	private boolean mySpecialization;
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeDatatype> theImplementingClass) {
+	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass) {
 		super(theDef.name(), theImplementingClass);
 		
 		String resourceName = theDef.name();

@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU (FHIR 0.80)
  * %%
  * Copyright (C) 2014 University Health Network
  * %%

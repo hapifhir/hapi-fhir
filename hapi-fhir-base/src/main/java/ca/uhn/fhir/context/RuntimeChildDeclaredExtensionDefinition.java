@@ -30,7 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -39,7 +41,7 @@ import ca.uhn.fhir.model.api.annotation.Extension;
 public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myChildDef;
-	private Class<? extends IElement> myChildType;
+	private Class<? extends IBase> myChildType;
 	private String myDatatypeChildName;
 	private boolean myDefinedLocally;
 	private String myExtensionUrl;
@@ -49,7 +51,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	/**
 	 * @param theDefinedLocally See {@link Extension#definedLocally()}
 	 */
-	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IElement> theChildType) throws ConfigurationException {
+	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IBase> theChildType) throws ConfigurationException {
 		super(theField, theChild, theDescriptionAnnotation, theElementName);
 		assert isNotBlank(theExtensionUrl);
 		myExtensionUrl = theExtensionUrl;
@@ -72,7 +74,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
 		if (myChildType.equals(theType)) {
 			return myChildDef;
 		}
@@ -84,7 +86,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		if (myChildType.equals(theDatatype) && myDatatypeChildName != null) {
 			return myDatatypeChildName;
 		} else {
@@ -92,7 +94,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 		}
 	}
 
-	public Class<? extends IElement> getChildType() {
+	public Class<? extends IBase> getChildType() {
 		return myChildType;
 	}
 
@@ -119,7 +121,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 		return myModifier;
 	}
 
-	public IElement newInstance() {
+	public IBase newInstance() {
 		try {
 			return myChildType.newInstance();
 		} catch (InstantiationException e) {
@@ -130,7 +132,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myUrlToChildExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 
 		BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(myChildType);
@@ -139,7 +141,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 			if ("valueResourceReference".equals(myDatatypeChildName)) {
 				// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension
 				myDatatypeChildName = "valueResource";
-				List<Class<? extends IResource>> types = new ArrayList<Class<? extends IResource>>();
+				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
 				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
 			}else {

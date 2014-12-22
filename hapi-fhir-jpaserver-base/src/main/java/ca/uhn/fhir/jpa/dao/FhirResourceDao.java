@@ -32,6 +32,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -1125,16 +1126,16 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					if (!(def instanceof RuntimeChildResourceDefinition)) {
 						throw new ConfigurationException("Property " + chain + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
-					List<Class<? extends IResource>> resourceTypes;
+					List<Class<? extends IBaseResource>> resourceTypes;
 					if (isBlank(ref.getResourceType())) {
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 						resourceTypes = resDef.getResourceTypes();
 					} else {
-						resourceTypes = new ArrayList<Class<? extends IResource>>();
+						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
 					}
-					for (Class<? extends IResource> nextType : resourceTypes) {
+					for (Class<? extends IBaseResource> nextType : resourceTypes) {
 						RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(nextType);
 						RuntimeSearchParam param = typeDef.getSearchParam(ref.getChain());
 						if (param == null) {

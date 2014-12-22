@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import sun.misc.BASE64Decoder;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.resource.BaseSecurityEvent;
@@ -114,7 +114,7 @@ public class AuditingInterceptorTest {
 		assertEquals("Patient: PatientOne Test", object.getName().getValue());
 		assertEquals(SecurityEventObjectLifecycleEnum.ACCESS_OR_USE, object.getLifecycle().getValueAsEnum());
 		assertEquals(SecurityEventObjectTypeEnum.PERSON, object.getType().getValueAsEnum());
-		assertEquals(requestURL, new String(new BASE64Decoder().decodeBuffer(object.getQuery().getValueAsString())));
+		assertEquals(requestURL, new String(Base64.decodeBase64(object.getQuery().getValueAsString())));
 		
 	}
 
@@ -162,7 +162,7 @@ public class AuditingInterceptorTest {
 			}else{
 				fail("Unexpected patient identifier being audited: " + object.getIdentifier().getValue().getValue());
 			}
-			assertEquals(requestURL, new String(new BASE64Decoder().decodeBuffer(object.getQuery().getValueAsString())));
+			assertEquals(requestURL, new String(Base64.decodeBase64(object.getQuery().getValueAsString())));
 			assertEquals(SecurityEventObjectTypeEnum.PERSON, object.getType().getValueAsEnum());
 		}
 		

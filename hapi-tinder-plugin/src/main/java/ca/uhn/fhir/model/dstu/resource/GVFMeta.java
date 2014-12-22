@@ -1,0 +1,2206 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package ca.uhn.fhir.model.dstu.resource;
+
+
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.rest.gclient.*;
+
+import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
+import ca.uhn.fhir.model.dstu.valueset.AggregationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.AlertStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu.valueset.AnimalSpeciesEnum;
+import ca.uhn.fhir.model.dstu.resource.Appointment;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu.resource.Availability;
+import ca.uhn.fhir.model.dstu.valueset.BindingConformanceEnum;
+import ca.uhn.fhir.model.dstu.resource.CarePlan;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanActivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanGoalStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CarePlanStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.CausalityExpectationEnum;
+import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.CompositionAttestationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.CompositionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConceptMapEquivalenceEnum;
+import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.valueset.ConditionRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceEventModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConformanceStatementStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ConstraintSeverityEnum;
+import ca.uhn.fhir.model.dstu.composite.ContactDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.CriticalityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
+import ca.uhn.fhir.model.dstu.resource.DeviceObservationReport;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderPriorityEnum;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticOrderStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.valueset.DiagnosticReportStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
+import ca.uhn.fhir.model.dstu.valueset.DocumentModeEnum;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
+import ca.uhn.fhir.model.dstu.valueset.DocumentReferenceStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.DocumentRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExposureTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ExtensionContextEnum;
+import ca.uhn.fhir.model.dstu.valueset.FHIRDefinedTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.FamilyHistory;
+import ca.uhn.fhir.model.dstu.valueset.FilterOperatorEnum;
+import ca.uhn.fhir.model.dstu.resource.GVFMeta;
+import ca.uhn.fhir.model.dstu.resource.Group;
+import ca.uhn.fhir.model.dstu.valueset.GroupTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.HierarchicalRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImagingModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.resource.Immunization;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationReasonCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.ImmunizationRecommendation;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationDateCriterionCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRecommendationStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ImmunizationRouteCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.InstanceAvailabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu.valueset.IssueTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LinkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ListModeEnum;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.valueset.LocationModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.LocationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu.resource.Media;
+import ca.uhn.fhir.model.dstu.valueset.MediaTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Medication;
+import ca.uhn.fhir.model.dstu.resource.MedicationAdministration;
+import ca.uhn.fhir.model.dstu.valueset.MedicationAdministrationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationDispense;
+import ca.uhn.fhir.model.dstu.valueset.MedicationDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.MedicationKindEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dstu.valueset.MedicationPrescriptionStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
+import ca.uhn.fhir.model.dstu.valueset.MessageEventEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageSignificanceCategoryEnum;
+import ca.uhn.fhir.model.dstu.valueset.MessageTransportEnum;
+import ca.uhn.fhir.model.dstu.resource.Microarray;
+import ca.uhn.fhir.model.dstu.valueset.ModalityEnum;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.valueset.ObservationInterpretationCodesEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu.valueset.ObservationStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Order;
+import ca.uhn.fhir.model.dstu.valueset.OrderOutcomeStatusEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.valueset.OrganizationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ParticipantTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.PatientRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.PractitionerSpecialtyEnum;
+import ca.uhn.fhir.model.dstu.resource.Procedure;
+import ca.uhn.fhir.model.dstu.valueset.ProcedureRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.Profile;
+import ca.uhn.fhir.model.dstu.valueset.PropertyRepresentationEnum;
+import ca.uhn.fhir.model.dstu.valueset.ProvenanceEntityRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.valueset.QueryOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireGroupNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireNameEnum;
+import ca.uhn.fhir.model.dstu.valueset.QuestionnaireStatusEnum;
+import ca.uhn.fhir.model.dstu.composite.RangeDt;
+import ca.uhn.fhir.model.dstu.composite.RatioDt;
+import ca.uhn.fhir.model.dstu.valueset.ReactionSeverityEnum;
+import ca.uhn.fhir.model.dstu.resource.RelatedPerson;
+import ca.uhn.fhir.model.dstu.valueset.ResourceProfileStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.ResponseTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulConformanceModeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.dstu.composite.SampledDataDt;
+import ca.uhn.fhir.model.dstu.composite.ScheduleDt;
+import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventActionEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectLifecycleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectRoleEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventOutcomeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventParticipantNetworkTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SecurityEventSourceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SensitivityTypeEnum;
+import ca.uhn.fhir.model.dstu.resource.SequencingAnalysis;
+import ca.uhn.fhir.model.dstu.resource.SequencingLab;
+import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
+import ca.uhn.fhir.model.dstu.resource.Slot;
+import ca.uhn.fhir.model.dstu.resource.Specimen;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenCollectionMethodEnum;
+import ca.uhn.fhir.model.dstu.valueset.SpecimenTreatmentProcedureEnum;
+import ca.uhn.fhir.model.dstu.resource.Substance;
+import ca.uhn.fhir.model.dstu.valueset.SubstanceTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyDispenseStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyItemTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyStatusEnum;
+import ca.uhn.fhir.model.dstu.valueset.SupplyTypeEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.valueset.ValueSetStatusEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu.composite.AgeDt;
+import ca.uhn.fhir.model.dstu.composite.DurationDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.BoundCodeableConceptDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.IdrefDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.OidDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+
+
+/**
+ * HAPI/FHIR <b>GVFMeta</b> Resource
+ * (Meta data of a GVF file)
+ *
+ * <p>
+ * <b>Definition:</b>
+ * Pragmas from a GVF
+ * </p> 
+ *
+ * <p>
+ * <b>Requirements:</b>
+ * 
+ * </p> 
+ *
+ * <p>
+ * <b>Profile Definition:</b>
+ * <a href="http://hl7.org/fhir/profiles/GVFMeta">http://hl7.org/fhir/profiles/GVFMeta</a> 
+ * </p>
+ *
+ */
+@ResourceDef(name="GVFMeta", profile="http://hl7.org/fhir/profiles/GVFMeta", id="gvfmeta")
+public class GVFMeta 
+    extends  BaseResource     implements IResource {
+
+	/**
+	 * Search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient being described in the file</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GVFMeta.subject.patient</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file", type="reference"  )
+	public static final String SP_PATIENT = "patient";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
+	 * <p>
+	 * Description: <b>Patient being described in the file</b><br/>
+	 * Type: <b>reference</b><br/>
+	 * Path: <b>GVFMeta.subject.patient</b><br/>
+	 * </p>
+	 */
+	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
+
+	/**
+	 * Constant for fluent queries to be used to add include statements. Specifies
+	 * the path value of "<b>GVFMeta.subject.patient</b>".
+	 */
+	public static final Include INCLUDE_SUBJECT_PATIENT = new Include("GVFMeta.subject.patient");
+
+	/**
+	 * Search parameter constant for <b>file</b>
+	 * <p>
+	 * Description: <b>URL to source file of the resource</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>GVFMeta.sourceFile</b><br/>
+	 * </p>
+	 */
+	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource", type="string"  )
+	public static final String SP_FILE = "file";
+
+	/**
+	 * <b>Fluent Client</b> search parameter constant for <b>file</b>
+	 * <p>
+	 * Description: <b>URL to source file of the resource</b><br/>
+	 * Type: <b>string</b><br/>
+	 * Path: <b>GVFMeta.sourceFile</b><br/>
+	 * </p>
+	 */
+	public static final StringClientParam FILE = new StringClientParam(SP_FILE);
+
+
+	@Child(name="subject", order=0, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Subject being described by the file",
+		formalDefinition="Subject being described by the file"
+	)
+	private java.util.List<Subject> mySubject;
+	
+	@Child(name="sourceFile", type=AttachmentDt.class, order=1, min=1, max=1)	
+	@Description(
+		shortDefinition="Source GVF file",
+		formalDefinition="GVF file from which data of the resource is extracted"
+	)
+	private AttachmentDt mySourceFile;
+	
+	@Child(name="gvfVersion", type=CodeDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Version of the GVF file",
+		formalDefinition="Valid version of the GVF file"
+	)
+	private CodeDt myGvfVersion;
+	
+	@Child(name="referenceFasta", type=UriDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="FASTA file used as reference assembly",
+		formalDefinition="URL to FASTA file used as reference assembly"
+	)
+	private UriDt myReferenceFasta;
+	
+	@Child(name="featureGFF3", type=UriDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="GFF3 file containing feature being described in the file",
+		formalDefinition="GFF3 file containing feature being described in the file"
+	)
+	private UriDt myFeatureGFF3;
+	
+	@Child(name="fileDate", type=DateDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Date when the file is updated",
+		formalDefinition="Date when the file is updated"
+	)
+	private DateDt myFileDate;
+	
+	@Child(name="individual", type=StringDt.class, order=6, min=0, max=Child.MAX_UNLIMITED)	
+	@Description(
+		shortDefinition="Id of individual being described in the file",
+		formalDefinition="Id of individual being described in the file"
+	)
+	private java.util.List<StringDt> myIndividual;
+	
+	@Child(name="population", type=CodeDt.class, order=7, min=0, max=1)	
+	@Description(
+		shortDefinition="Code for population which the individual can be categorized into",
+		formalDefinition="Code for population which the individual can be categorized into"
+	)
+	private CodeDt myPopulation;
+	
+	@Child(name="platform", order=8, min=0, max=1)	
+	@Description(
+		shortDefinition="Sequencing platform",
+		formalDefinition="Technology platform used in the sequencing"
+	)
+	private Platform myPlatform;
+	
+	@Child(name="sequencingScope", type=CodeDt.class, order=9, min=0, max=1)	
+	@Description(
+		shortDefinition="Sequencing scope",
+		formalDefinition="Scope of the sequencing"
+	)
+	private CodeDt mySequencingScope;
+	
+	@Child(name="captureMethod", type=CodeDt.class, order=10, min=0, max=1)	
+	@Description(
+		shortDefinition="Capture method",
+		formalDefinition="Capture method used in the sequencing"
+	)
+	private CodeDt myCaptureMethod;
+	
+	@Child(name="captureRegions", type=UriDt.class, order=11, min=0, max=1)	
+	@Description(
+		shortDefinition="Region captured in the file",
+		formalDefinition="Region captured in the file"
+	)
+	private UriDt myCaptureRegions;
+	
+	@Child(name="sequenceAlignment", type=StringDt.class, order=12, min=0, max=1)	
+	@Description(
+		shortDefinition="Sequence alignment algorithm/pipline used",
+		formalDefinition="Sequence alignment algorithm/pipline used"
+	)
+	private StringDt mySequenceAlignment;
+	
+	@Child(name="variantCalling", type=StringDt.class, order=13, min=0, max=1)	
+	@Description(
+		shortDefinition="Pipline used for variant calling",
+		formalDefinition="Pipline used for variant calling"
+	)
+	private StringDt myVariantCalling;
+	
+	@Child(name="sampleDescription", type=StringDt.class, order=14, min=0, max=1)	
+	@Description(
+		shortDefinition="Description of sample used in the sequencing",
+		formalDefinition="Description of sample used in the sequencing"
+	)
+	private StringDt mySampleDescription;
+	
+	@Child(name="genomicSource", type=CodeDt.class, order=15, min=0, max=1)	
+	@Description(
+		shortDefinition="Source of the sample",
+		formalDefinition="Source of the sample"
+	)
+	private CodeDt myGenomicSource;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  mySubject,  mySourceFile,  myGvfVersion,  myReferenceFasta,  myFeatureGFF3,  myFileDate,  myIndividual,  myPopulation,  myPlatform,  mySequencingScope,  myCaptureMethod,  myCaptureRegions,  mySequenceAlignment,  myVariantCalling,  mySampleDescription,  myGenomicSource);
+	}
+	
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, mySubject, mySourceFile, myGvfVersion, myReferenceFasta, myFeatureGFF3, myFileDate, myIndividual, myPopulation, myPlatform, mySequencingScope, myCaptureMethod, myCaptureRegions, mySequenceAlignment, myVariantCalling, mySampleDescription, myGenomicSource);
+	}
+
+	/**
+	 * Gets the value(s) for <b>subject</b> (Subject being described by the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	public java.util.List<Subject> getSubject() {  
+		if (mySubject == null) {
+			mySubject = new java.util.ArrayList<Subject>();
+		}
+		return mySubject;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>subject</b> (Subject being described by the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	public java.util.List<Subject> getSubjectElement() {  
+		if (mySubject == null) {
+			mySubject = new java.util.ArrayList<Subject>();
+		}
+		return mySubject;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>subject</b> (Subject being described by the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	public GVFMeta setSubject(java.util.List<Subject> theValue) {
+		mySubject = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>subject</b> (Subject being described by the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	public Subject addSubject() {
+		Subject newType = new Subject();
+		getSubject().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>subject</b> (Subject being described by the file),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	public Subject getSubjectFirstRep() {
+		if (getSubject().isEmpty()) {
+			return addSubject();
+		}
+		return getSubject().get(0); 
+	}
+  
+	/**
+	 * Gets the value(s) for <b>sourceFile</b> (Source GVF file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GVF file from which data of the resource is extracted
+     * </p> 
+	 */
+	public AttachmentDt getSourceFile() {  
+		if (mySourceFile == null) {
+			mySourceFile = new AttachmentDt();
+		}
+		return mySourceFile;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>sourceFile</b> (Source GVF file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GVF file from which data of the resource is extracted
+     * </p> 
+	 */
+	public AttachmentDt getSourceFileElement() {  
+		if (mySourceFile == null) {
+			mySourceFile = new AttachmentDt();
+		}
+		return mySourceFile;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>sourceFile</b> (Source GVF file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GVF file from which data of the resource is extracted
+     * </p> 
+	 */
+	public GVFMeta setSourceFile(AttachmentDt theValue) {
+		mySourceFile = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>gvfVersion</b> (Version of the GVF file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Valid version of the GVF file
+     * </p> 
+	 */
+	public CodeDt getGvfVersion() {  
+		if (myGvfVersion == null) {
+			myGvfVersion = new CodeDt();
+		}
+		return myGvfVersion;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>gvfVersion</b> (Version of the GVF file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Valid version of the GVF file
+     * </p> 
+	 */
+	public CodeDt getGvfVersionElement() {  
+		if (myGvfVersion == null) {
+			myGvfVersion = new CodeDt();
+		}
+		return myGvfVersion;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>gvfVersion</b> (Version of the GVF file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Valid version of the GVF file
+     * </p> 
+	 */
+	public GVFMeta setGvfVersion(CodeDt theValue) {
+		myGvfVersion = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>gvfVersion</b> (Version of the GVF file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Valid version of the GVF file
+     * </p> 
+	 */
+	public GVFMeta setGvfVersion( String theCode) {
+		myGvfVersion = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>referenceFasta</b> (FASTA file used as reference assembly).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * URL to FASTA file used as reference assembly
+     * </p> 
+	 */
+	public UriDt getReferenceFasta() {  
+		if (myReferenceFasta == null) {
+			myReferenceFasta = new UriDt();
+		}
+		return myReferenceFasta;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>referenceFasta</b> (FASTA file used as reference assembly).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * URL to FASTA file used as reference assembly
+     * </p> 
+	 */
+	public UriDt getReferenceFastaElement() {  
+		if (myReferenceFasta == null) {
+			myReferenceFasta = new UriDt();
+		}
+		return myReferenceFasta;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>referenceFasta</b> (FASTA file used as reference assembly)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * URL to FASTA file used as reference assembly
+     * </p> 
+	 */
+	public GVFMeta setReferenceFasta(UriDt theValue) {
+		myReferenceFasta = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>referenceFasta</b> (FASTA file used as reference assembly)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * URL to FASTA file used as reference assembly
+     * </p> 
+	 */
+	public GVFMeta setReferenceFasta( String theUri) {
+		myReferenceFasta = new UriDt(theUri); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>featureGFF3</b> (GFF3 file containing feature being described in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GFF3 file containing feature being described in the file
+     * </p> 
+	 */
+	public UriDt getFeatureGFF3() {  
+		if (myFeatureGFF3 == null) {
+			myFeatureGFF3 = new UriDt();
+		}
+		return myFeatureGFF3;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>featureGFF3</b> (GFF3 file containing feature being described in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GFF3 file containing feature being described in the file
+     * </p> 
+	 */
+	public UriDt getFeatureGFF3Element() {  
+		if (myFeatureGFF3 == null) {
+			myFeatureGFF3 = new UriDt();
+		}
+		return myFeatureGFF3;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>featureGFF3</b> (GFF3 file containing feature being described in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GFF3 file containing feature being described in the file
+     * </p> 
+	 */
+	public GVFMeta setFeatureGFF3(UriDt theValue) {
+		myFeatureGFF3 = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>featureGFF3</b> (GFF3 file containing feature being described in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * GFF3 file containing feature being described in the file
+     * </p> 
+	 */
+	public GVFMeta setFeatureGFF3( String theUri) {
+		myFeatureGFF3 = new UriDt(theUri); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>fileDate</b> (Date when the file is updated).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date when the file is updated
+     * </p> 
+	 */
+	public DateDt getFileDate() {  
+		if (myFileDate == null) {
+			myFileDate = new DateDt();
+		}
+		return myFileDate;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>fileDate</b> (Date when the file is updated).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date when the file is updated
+     * </p> 
+	 */
+	public DateDt getFileDateElement() {  
+		if (myFileDate == null) {
+			myFileDate = new DateDt();
+		}
+		return myFileDate;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>fileDate</b> (Date when the file is updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date when the file is updated
+     * </p> 
+	 */
+	public GVFMeta setFileDate(DateDt theValue) {
+		myFileDate = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>fileDate</b> (Date when the file is updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date when the file is updated
+     * </p> 
+	 */
+	public GVFMeta setFileDate( Date theDate,  TemporalPrecisionEnum thePrecision) {
+		myFileDate = new DateDt(theDate, thePrecision); 
+		return this; 
+	}
+
+	/**
+	 * Sets the value for <b>fileDate</b> (Date when the file is updated)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Date when the file is updated
+     * </p> 
+	 */
+	public GVFMeta setFileDateWithDayPrecision( Date theDate) {
+		myFileDate = new DateDt(theDate); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>individual</b> (Id of individual being described in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+	 */
+	public java.util.List<StringDt> getIndividual() {  
+		if (myIndividual == null) {
+			myIndividual = new java.util.ArrayList<StringDt>();
+		}
+		return myIndividual;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>individual</b> (Id of individual being described in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+	 */
+	public java.util.List<StringDt> getIndividualElement() {  
+		if (myIndividual == null) {
+			myIndividual = new java.util.ArrayList<StringDt>();
+		}
+		return myIndividual;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>individual</b> (Id of individual being described in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+	 */
+	public GVFMeta setIndividual(java.util.List<StringDt> theValue) {
+		myIndividual = theValue;
+		return this;
+	}
+
+	/**
+	 * Adds and returns a new value for <b>individual</b> (Id of individual being described in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+	 */
+	public StringDt addIndividual() {
+		StringDt newType = new StringDt();
+		getIndividual().add(newType);
+		return newType; 
+	}
+
+	/**
+	 * Gets the first repetition for <b>individual</b> (Id of individual being described in the file),
+	 * creating it if it does not already exist.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+	 */
+	public StringDt getIndividualFirstRep() {
+		if (getIndividual().isEmpty()) {
+			return addIndividual();
+		}
+		return getIndividual().get(0); 
+	}
+ 	/**
+	 * Adds a new value for <b>individual</b> (Id of individual being described in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual being described in the file
+     * </p> 
+     *
+     * @return Returns a reference to this object, to allow for simple chaining.
+	 */
+	public GVFMeta addIndividual( String theString) {
+		if (myIndividual == null) {
+			myIndividual = new java.util.ArrayList<StringDt>();
+		}
+		myIndividual.add(new StringDt(theString));
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>population</b> (Code for population which the individual can be categorized into).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Code for population which the individual can be categorized into
+     * </p> 
+	 */
+	public CodeDt getPopulation() {  
+		if (myPopulation == null) {
+			myPopulation = new CodeDt();
+		}
+		return myPopulation;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>population</b> (Code for population which the individual can be categorized into).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Code for population which the individual can be categorized into
+     * </p> 
+	 */
+	public CodeDt getPopulationElement() {  
+		if (myPopulation == null) {
+			myPopulation = new CodeDt();
+		}
+		return myPopulation;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>population</b> (Code for population which the individual can be categorized into)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Code for population which the individual can be categorized into
+     * </p> 
+	 */
+	public GVFMeta setPopulation(CodeDt theValue) {
+		myPopulation = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>population</b> (Code for population which the individual can be categorized into)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Code for population which the individual can be categorized into
+     * </p> 
+	 */
+	public GVFMeta setPopulation( String theCode) {
+		myPopulation = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>platform</b> (Sequencing platform).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Technology platform used in the sequencing
+     * </p> 
+	 */
+	public Platform getPlatform() {  
+		if (myPlatform == null) {
+			myPlatform = new Platform();
+		}
+		return myPlatform;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>platform</b> (Sequencing platform).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Technology platform used in the sequencing
+     * </p> 
+	 */
+	public Platform getPlatformElement() {  
+		if (myPlatform == null) {
+			myPlatform = new Platform();
+		}
+		return myPlatform;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>platform</b> (Sequencing platform)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Technology platform used in the sequencing
+     * </p> 
+	 */
+	public GVFMeta setPlatform(Platform theValue) {
+		myPlatform = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>sequencingScope</b> (Sequencing scope).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Scope of the sequencing
+     * </p> 
+	 */
+	public CodeDt getSequencingScope() {  
+		if (mySequencingScope == null) {
+			mySequencingScope = new CodeDt();
+		}
+		return mySequencingScope;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>sequencingScope</b> (Sequencing scope).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Scope of the sequencing
+     * </p> 
+	 */
+	public CodeDt getSequencingScopeElement() {  
+		if (mySequencingScope == null) {
+			mySequencingScope = new CodeDt();
+		}
+		return mySequencingScope;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>sequencingScope</b> (Sequencing scope)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Scope of the sequencing
+     * </p> 
+	 */
+	public GVFMeta setSequencingScope(CodeDt theValue) {
+		mySequencingScope = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>sequencingScope</b> (Sequencing scope)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Scope of the sequencing
+     * </p> 
+	 */
+	public GVFMeta setSequencingScope( String theCode) {
+		mySequencingScope = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>captureMethod</b> (Capture method).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Capture method used in the sequencing
+     * </p> 
+	 */
+	public CodeDt getCaptureMethod() {  
+		if (myCaptureMethod == null) {
+			myCaptureMethod = new CodeDt();
+		}
+		return myCaptureMethod;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>captureMethod</b> (Capture method).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Capture method used in the sequencing
+     * </p> 
+	 */
+	public CodeDt getCaptureMethodElement() {  
+		if (myCaptureMethod == null) {
+			myCaptureMethod = new CodeDt();
+		}
+		return myCaptureMethod;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>captureMethod</b> (Capture method)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Capture method used in the sequencing
+     * </p> 
+	 */
+	public GVFMeta setCaptureMethod(CodeDt theValue) {
+		myCaptureMethod = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>captureMethod</b> (Capture method)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Capture method used in the sequencing
+     * </p> 
+	 */
+	public GVFMeta setCaptureMethod( String theCode) {
+		myCaptureMethod = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>captureRegions</b> (Region captured in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Region captured in the file
+     * </p> 
+	 */
+	public UriDt getCaptureRegions() {  
+		if (myCaptureRegions == null) {
+			myCaptureRegions = new UriDt();
+		}
+		return myCaptureRegions;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>captureRegions</b> (Region captured in the file).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Region captured in the file
+     * </p> 
+	 */
+	public UriDt getCaptureRegionsElement() {  
+		if (myCaptureRegions == null) {
+			myCaptureRegions = new UriDt();
+		}
+		return myCaptureRegions;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>captureRegions</b> (Region captured in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Region captured in the file
+     * </p> 
+	 */
+	public GVFMeta setCaptureRegions(UriDt theValue) {
+		myCaptureRegions = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>captureRegions</b> (Region captured in the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Region captured in the file
+     * </p> 
+	 */
+	public GVFMeta setCaptureRegions( String theUri) {
+		myCaptureRegions = new UriDt(theUri); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>sequenceAlignment</b> (Sequence alignment algorithm/pipline used).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Sequence alignment algorithm/pipline used
+     * </p> 
+	 */
+	public StringDt getSequenceAlignment() {  
+		if (mySequenceAlignment == null) {
+			mySequenceAlignment = new StringDt();
+		}
+		return mySequenceAlignment;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>sequenceAlignment</b> (Sequence alignment algorithm/pipline used).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Sequence alignment algorithm/pipline used
+     * </p> 
+	 */
+	public StringDt getSequenceAlignmentElement() {  
+		if (mySequenceAlignment == null) {
+			mySequenceAlignment = new StringDt();
+		}
+		return mySequenceAlignment;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>sequenceAlignment</b> (Sequence alignment algorithm/pipline used)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Sequence alignment algorithm/pipline used
+     * </p> 
+	 */
+	public GVFMeta setSequenceAlignment(StringDt theValue) {
+		mySequenceAlignment = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>sequenceAlignment</b> (Sequence alignment algorithm/pipline used)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Sequence alignment algorithm/pipline used
+     * </p> 
+	 */
+	public GVFMeta setSequenceAlignment( String theString) {
+		mySequenceAlignment = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>variantCalling</b> (Pipline used for variant calling).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Pipline used for variant calling
+     * </p> 
+	 */
+	public StringDt getVariantCalling() {  
+		if (myVariantCalling == null) {
+			myVariantCalling = new StringDt();
+		}
+		return myVariantCalling;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>variantCalling</b> (Pipline used for variant calling).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Pipline used for variant calling
+     * </p> 
+	 */
+	public StringDt getVariantCallingElement() {  
+		if (myVariantCalling == null) {
+			myVariantCalling = new StringDt();
+		}
+		return myVariantCalling;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>variantCalling</b> (Pipline used for variant calling)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Pipline used for variant calling
+     * </p> 
+	 */
+	public GVFMeta setVariantCalling(StringDt theValue) {
+		myVariantCalling = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>variantCalling</b> (Pipline used for variant calling)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Pipline used for variant calling
+     * </p> 
+	 */
+	public GVFMeta setVariantCalling( String theString) {
+		myVariantCalling = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>sampleDescription</b> (Description of sample used in the sequencing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of sample used in the sequencing
+     * </p> 
+	 */
+	public StringDt getSampleDescription() {  
+		if (mySampleDescription == null) {
+			mySampleDescription = new StringDt();
+		}
+		return mySampleDescription;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>sampleDescription</b> (Description of sample used in the sequencing).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of sample used in the sequencing
+     * </p> 
+	 */
+	public StringDt getSampleDescriptionElement() {  
+		if (mySampleDescription == null) {
+			mySampleDescription = new StringDt();
+		}
+		return mySampleDescription;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>sampleDescription</b> (Description of sample used in the sequencing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of sample used in the sequencing
+     * </p> 
+	 */
+	public GVFMeta setSampleDescription(StringDt theValue) {
+		mySampleDescription = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>sampleDescription</b> (Description of sample used in the sequencing)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Description of sample used in the sequencing
+     * </p> 
+	 */
+	public GVFMeta setSampleDescription( String theString) {
+		mySampleDescription = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>genomicSource</b> (Source of the sample).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Source of the sample
+     * </p> 
+	 */
+	public CodeDt getGenomicSource() {  
+		if (myGenomicSource == null) {
+			myGenomicSource = new CodeDt();
+		}
+		return myGenomicSource;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>genomicSource</b> (Source of the sample).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Source of the sample
+     * </p> 
+	 */
+	public CodeDt getGenomicSourceElement() {  
+		if (myGenomicSource == null) {
+			myGenomicSource = new CodeDt();
+		}
+		return myGenomicSource;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>genomicSource</b> (Source of the sample)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Source of the sample
+     * </p> 
+	 */
+	public GVFMeta setGenomicSource(CodeDt theValue) {
+		myGenomicSource = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>genomicSource</b> (Source of the sample)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Source of the sample
+     * </p> 
+	 */
+	public GVFMeta setGenomicSource( String theCode) {
+		myGenomicSource = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Block class for child element: <b>GVFMeta.subject</b> (Subject being described by the file)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Subject being described by the file
+     * </p> 
+	 */
+	@Block()	
+	public static class Subject 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
+	
+	@Child(name="patient", order=0, min=0, max=1, type={
+		ca.uhn.fhir.model.dstu.resource.Patient.class	})
+	@Description(
+		shortDefinition="Identity of the subejct",
+		formalDefinition="Identity of the subejct"
+	)
+	private ResourceReferenceDt myPatient;
+	
+	@Child(name="fieldId", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Id of individual field of the file that correspond to the subject",
+		formalDefinition="Id of individual field of the file that correspond to the subject"
+	)
+	private StringDt myFieldId;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myPatient,  myFieldId);
+	}
+	
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myPatient, myFieldId);
+	}
+
+	/**
+	 * Gets the value(s) for <b>patient</b> (Identity of the subejct).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identity of the subejct
+     * </p> 
+	 */
+	public ResourceReferenceDt getPatient() {  
+		if (myPatient == null) {
+			myPatient = new ResourceReferenceDt();
+		}
+		return myPatient;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>patient</b> (Identity of the subejct).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identity of the subejct
+     * </p> 
+	 */
+	public ResourceReferenceDt getPatientElement() {  
+		if (myPatient == null) {
+			myPatient = new ResourceReferenceDt();
+		}
+		return myPatient;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>patient</b> (Identity of the subejct)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identity of the subejct
+     * </p> 
+	 */
+	public Subject setPatient(ResourceReferenceDt theValue) {
+		myPatient = theValue;
+		return this;
+	}
+
+  
+	/**
+	 * Gets the value(s) for <b>fieldId</b> (Id of individual field of the file that correspond to the subject).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual field of the file that correspond to the subject
+     * </p> 
+	 */
+	public StringDt getFieldId() {  
+		if (myFieldId == null) {
+			myFieldId = new StringDt();
+		}
+		return myFieldId;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>fieldId</b> (Id of individual field of the file that correspond to the subject).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual field of the file that correspond to the subject
+     * </p> 
+	 */
+	public StringDt getFieldIdElement() {  
+		if (myFieldId == null) {
+			myFieldId = new StringDt();
+		}
+		return myFieldId;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>fieldId</b> (Id of individual field of the file that correspond to the subject)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual field of the file that correspond to the subject
+     * </p> 
+	 */
+	public Subject setFieldId(StringDt theValue) {
+		myFieldId = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>fieldId</b> (Id of individual field of the file that correspond to the subject)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of individual field of the file that correspond to the subject
+     * </p> 
+	 */
+	public Subject setFieldId( String theString) {
+		myFieldId = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+
+	}
+
+
+	/**
+	 * Block class for child element: <b>GVFMeta.platform</b> (Sequencing platform)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Technology platform used in the sequencing
+     * </p> 
+	 */
+	@Block()	
+	public static class Platform 
+	    extends  BaseIdentifiableElement 	    implements IResourceBlock {
+	
+	@Child(name="class", type=CodeDt.class, order=0, min=0, max=1)	
+	@Description(
+		shortDefinition="Platform class",
+		formalDefinition="Class of the sequencing platform"
+	)
+	private CodeDt myClassElement;
+	
+	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
+	@Description(
+		shortDefinition="Platform version",
+		formalDefinition="Version of the platform being used"
+	)
+	private StringDt myVersion;
+	
+	@Child(name="name", type=CodeDt.class, order=2, min=0, max=1)	
+	@Description(
+		shortDefinition="Platform name",
+		formalDefinition="Name of the platform being used"
+	)
+	private CodeDt myName;
+	
+	@Child(name="identity", type=StringDt.class, order=3, min=0, max=1)	
+	@Description(
+		shortDefinition="Platform id",
+		formalDefinition="Id of the platfrom being used"
+	)
+	private StringDt myIdentity;
+	
+	@Child(name="readLength", type=IntegerDt.class, order=4, min=0, max=1)	
+	@Description(
+		shortDefinition="Read length",
+		formalDefinition="Read length of the technology"
+	)
+	private IntegerDt myReadLength;
+	
+	@Child(name="readType", type=CodeDt.class, order=5, min=0, max=1)	
+	@Description(
+		shortDefinition="Read type",
+		formalDefinition="Read type of the technology"
+	)
+	private CodeDt myReadType;
+	
+	@Child(name="readPairSpan", type=IntegerDt.class, order=6, min=0, max=1)	
+	@Description(
+		shortDefinition="Read pair span",
+		formalDefinition="Read pair span of the technology"
+	)
+	private IntegerDt myReadPairSpan;
+	
+	@Child(name="averageCoverage", type=IntegerDt.class, order=7, min=0, max=1)	
+	@Description(
+		shortDefinition="Average coverage",
+		formalDefinition="Average coverage of the technology"
+	)
+	private IntegerDt myAverageCoverage;
+	
+
+	@Override
+	public boolean isEmpty() {
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myClassElement,  myVersion,  myName,  myIdentity,  myReadLength,  myReadType,  myReadPairSpan,  myAverageCoverage);
+	}
+	
+	@Override
+	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myClassElement, myVersion, myName, myIdentity, myReadLength, myReadType, myReadPairSpan, myAverageCoverage);
+	}
+
+	/**
+	 * Gets the value(s) for <b>class</b> (Platform class).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Class of the sequencing platform
+     * </p> 
+	 */
+	public CodeDt getClassElement() {  
+		if (myClassElement == null) {
+			myClassElement = new CodeDt();
+		}
+		return myClassElement;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>class</b> (Platform class).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Class of the sequencing platform
+     * </p> 
+	 */
+	public CodeDt getClassElementElement() {  
+		if (myClassElement == null) {
+			myClassElement = new CodeDt();
+		}
+		return myClassElement;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>class</b> (Platform class)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Class of the sequencing platform
+     * </p> 
+	 */
+	public Platform setClassElement(CodeDt theValue) {
+		myClassElement = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>class</b> (Platform class)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Class of the sequencing platform
+     * </p> 
+	 */
+	public Platform setClassElement( String theCode) {
+		myClassElement = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>version</b> (Platform version).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Version of the platform being used
+     * </p> 
+	 */
+	public StringDt getVersion() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>version</b> (Platform version).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Version of the platform being used
+     * </p> 
+	 */
+	public StringDt getVersionElement() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>version</b> (Platform version)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Version of the platform being used
+     * </p> 
+	 */
+	public Platform setVersion(StringDt theValue) {
+		myVersion = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>version</b> (Platform version)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Version of the platform being used
+     * </p> 
+	 */
+	public Platform setVersion( String theString) {
+		myVersion = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>name</b> (Platform name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the platform being used
+     * </p> 
+	 */
+	public CodeDt getName() {  
+		if (myName == null) {
+			myName = new CodeDt();
+		}
+		return myName;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>name</b> (Platform name).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the platform being used
+     * </p> 
+	 */
+	public CodeDt getNameElement() {  
+		if (myName == null) {
+			myName = new CodeDt();
+		}
+		return myName;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>name</b> (Platform name)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the platform being used
+     * </p> 
+	 */
+	public Platform setName(CodeDt theValue) {
+		myName = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>name</b> (Platform name)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Name of the platform being used
+     * </p> 
+	 */
+	public Platform setName( String theCode) {
+		myName = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>identity</b> (Platform id).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of the platfrom being used
+     * </p> 
+	 */
+	public StringDt getIdentity() {  
+		if (myIdentity == null) {
+			myIdentity = new StringDt();
+		}
+		return myIdentity;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>identity</b> (Platform id).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of the platfrom being used
+     * </p> 
+	 */
+	public StringDt getIdentityElement() {  
+		if (myIdentity == null) {
+			myIdentity = new StringDt();
+		}
+		return myIdentity;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>identity</b> (Platform id)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of the platfrom being used
+     * </p> 
+	 */
+	public Platform setIdentity(StringDt theValue) {
+		myIdentity = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>identity</b> (Platform id)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Id of the platfrom being used
+     * </p> 
+	 */
+	public Platform setIdentity( String theString) {
+		myIdentity = new StringDt(theString); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>readLength</b> (Read length).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read length of the technology
+     * </p> 
+	 */
+	public IntegerDt getReadLength() {  
+		if (myReadLength == null) {
+			myReadLength = new IntegerDt();
+		}
+		return myReadLength;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>readLength</b> (Read length).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read length of the technology
+     * </p> 
+	 */
+	public IntegerDt getReadLengthElement() {  
+		if (myReadLength == null) {
+			myReadLength = new IntegerDt();
+		}
+		return myReadLength;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>readLength</b> (Read length)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read length of the technology
+     * </p> 
+	 */
+	public Platform setReadLength(IntegerDt theValue) {
+		myReadLength = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>readLength</b> (Read length)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read length of the technology
+     * </p> 
+	 */
+	public Platform setReadLength( int theInteger) {
+		myReadLength = new IntegerDt(theInteger); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>readType</b> (Read type).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read type of the technology
+     * </p> 
+	 */
+	public CodeDt getReadType() {  
+		if (myReadType == null) {
+			myReadType = new CodeDt();
+		}
+		return myReadType;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>readType</b> (Read type).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read type of the technology
+     * </p> 
+	 */
+	public CodeDt getReadTypeElement() {  
+		if (myReadType == null) {
+			myReadType = new CodeDt();
+		}
+		return myReadType;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>readType</b> (Read type)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read type of the technology
+     * </p> 
+	 */
+	public Platform setReadType(CodeDt theValue) {
+		myReadType = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>readType</b> (Read type)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read type of the technology
+     * </p> 
+	 */
+	public Platform setReadType( String theCode) {
+		myReadType = new CodeDt(theCode); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>readPairSpan</b> (Read pair span).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read pair span of the technology
+     * </p> 
+	 */
+	public IntegerDt getReadPairSpan() {  
+		if (myReadPairSpan == null) {
+			myReadPairSpan = new IntegerDt();
+		}
+		return myReadPairSpan;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>readPairSpan</b> (Read pair span).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read pair span of the technology
+     * </p> 
+	 */
+	public IntegerDt getReadPairSpanElement() {  
+		if (myReadPairSpan == null) {
+			myReadPairSpan = new IntegerDt();
+		}
+		return myReadPairSpan;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>readPairSpan</b> (Read pair span)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read pair span of the technology
+     * </p> 
+	 */
+	public Platform setReadPairSpan(IntegerDt theValue) {
+		myReadPairSpan = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>readPairSpan</b> (Read pair span)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Read pair span of the technology
+     * </p> 
+	 */
+	public Platform setReadPairSpan( int theInteger) {
+		myReadPairSpan = new IntegerDt(theInteger); 
+		return this; 
+	}
+
+ 
+	/**
+	 * Gets the value(s) for <b>averageCoverage</b> (Average coverage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Average coverage of the technology
+     * </p> 
+	 */
+	public IntegerDt getAverageCoverage() {  
+		if (myAverageCoverage == null) {
+			myAverageCoverage = new IntegerDt();
+		}
+		return myAverageCoverage;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>averageCoverage</b> (Average coverage).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Average coverage of the technology
+     * </p> 
+	 */
+	public IntegerDt getAverageCoverageElement() {  
+		if (myAverageCoverage == null) {
+			myAverageCoverage = new IntegerDt();
+		}
+		return myAverageCoverage;
+	}
+
+
+	/**
+	 * Sets the value(s) for <b>averageCoverage</b> (Average coverage)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Average coverage of the technology
+     * </p> 
+	 */
+	public Platform setAverageCoverage(IntegerDt theValue) {
+		myAverageCoverage = theValue;
+		return this;
+	}
+
+ 	/**
+	 * Sets the value for <b>averageCoverage</b> (Average coverage)
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Average coverage of the technology
+     * </p> 
+	 */
+	public Platform setAverageCoverage( int theInteger) {
+		myAverageCoverage = new IntegerDt(theInteger); 
+		return this; 
+	}
+
+ 
+
+	}
+
+
+
+
+    @Override
+    public String getResourceName() {
+        return "GVFMeta";
+    }
+
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.DSTU1;
+    }
+
+}

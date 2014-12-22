@@ -12,13 +12,15 @@
 	<bean class="ca.uhn.fhir.to.TesterConfig">
 		<property name="servers">
 			<list>
-				<value>home     , UHN/HAPI Server                              , http://fhirtest.uhn.ca/base</value>
-				<value>hi       , Health Intersections (Ref Server)            , http://fhir.healthintersections.com.au/open</value>
-				<value>hidev    , Health Intersections (Developnent FHIR)      , http://fhir-dev.healthintersections.com.au/open</value>
-				<value>furore   , Spark - Furore (Ref Server)                  , http://spark.furore.com/fhir</value>
-				<value>blaze    , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
-				<value>oridashi , Oridashi                                     , http://demo.oridashi.com.au:8190</value>
-				<!-- <value>fhirbase , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value> -->
+				<value>home     , DSTU1 , UHN/HAPI Server (DSTU1 FHIR)                 , http://fhirtest.uhn.ca/baseDstu1</value>
+				<value>home_dev , DEV   , UHN/HAPI Server (DSTU2 FHIR)                   , http://fhirtest.uhn.ca/baseDev</value>
+				<value>hi       , DSTU1 , Health Intersections (DSTU1 FHIR)            , http://fhir.healthintersections.com.au/open</value>
+				<value>hidev    , DEV   , Health Intersections (DSTU2 FHIR)              , http://fhir-dev.healthintersections.com.au/open</value>
+				<value>furore   , DSTU1 , Spark - Furore                               , http://spark.furore.com/fhir</value>
+				<value>blaze    , DSTU1 , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
+				<value>oridashi , DSTU1 , Oridashi                                     , http://demo.oridashi.com.au:8190</value>
+				<!-- <value>fhirbase , DSTU1 , FHIRPlace (Health Samurai)      , http://try-fhirplace.hospital-systems.com/ </value> -->
+				<value>nortal   , DSTU1 , Nortal                                       , http://fhir.nortal.com/fhir-server</value>
 			</list>
 		</property>
 	</bean>

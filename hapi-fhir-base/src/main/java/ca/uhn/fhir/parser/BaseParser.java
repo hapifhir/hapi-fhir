@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,6 +34,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.Resource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -41,7 +46,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -58,41 +62,70 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected String fixContainedResourceId(String theValue) {
-		if (StringUtils.isNotBlank(theValue)&&theValue.charAt(0)=='#') {
+		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
 			return theValue.substring(1);
 		}
 		return theValue;
 	}
 
-	
-	private void containResourcesForEncoding(ContainedResources theContained, IResource theResource, IResource theTarget) {
-		List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
+	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
 
 		Set<String> allIds = new HashSet<String>();
+		if (theTarget instanceof IResource) {
+			List<? extends IResource> containedResources = ((IResource) theTarget).getContained().getContainedResources();
+			for (IResource next : containedResources) {
+				String nextId = next.getId().getValue();
+				if (StringUtils.isNotBlank(nextId)) {
+					allIds.add(nextId);
+				}
+			}
+		} else if (theTarget instanceof DomainResource) {
+			List<Resource> containedResources = ((DomainResource) theTarget).getContained();
+			for (Resource next : containedResources) {
+				String nextId = next.getId();
+				if (StringUtils.isNotBlank(nextId)) {
+					allIds.add(nextId);
+				}
+			}
+		} else {
+			// no resources to contain
+		}
 
-		for (IResource next : theTarget.getContained().getContainedResources()) {
-			String nextId = next.getId().getValue();
-			if (StringUtils.isNotBlank(nextId)) {
-				allIds.add(nextId);
+		{
+			List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
+			for (ResourceReferenceDt next : allElements) {
+				IResource resource = next.getResource();
+				if (resource != null) {
+					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
+						theContained.addContained(resource);
+					} else {
+						continue;
+					}
+
+					containResourcesForEncoding(theContained, resource, theTarget);
+				}
 			}
 		}
 
-		for (ResourceReferenceDt next : allElements) {
-			IResource resource = next.getResource();
-			if (resource != null) {
-				if (resource.getId().isEmpty() || resource.getId().isLocal()) {
-					theContained.addContained(resource);
-				} else {
-					continue;
-				}
+		{
+			List<Reference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, Reference.class);
+			for (Reference next : allElements) {
+				Resource resource = next.getResource();
+				if (resource != null) {
+					if (resource.getIdElement().isEmpty() || resource.getId().startsWith("#")) {
+						theContained.addContained(resource);
+					} else {
+						continue;
+					}
 
-				containResourcesForEncoding(theContained, resource, theTarget);
+					containResourcesForEncoding(theContained, resource, theTarget);
+				}
 			}
 		}
 
 	}
 
-	public void containResourcesForEncoding(IResource theResource) {
+	public void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
 		myContainedResources = contained;
@@ -114,7 +147,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public String encodeResourceToString(IResource theResource) throws DataFormatException {
+	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
 		Writer stringWriter = new StringWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
@@ -140,7 +173,8 @@ public abstract class BaseParser implements IParser {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
+	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded
+	 * values.
 	 */
 	public boolean getSuppressNarratives() {
 		return mySuppressNarratives;
@@ -159,7 +193,7 @@ public abstract class BaseParser implements IParser {
 
 	@SuppressWarnings("cast")
 	@Override
-	public <T extends IResource> T parseResource(Class<T> theResourceType, String theMessageString) {
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
 		StringReader reader = new StringReader(theMessageString);
 		return (T) parseResource(theResourceType, reader);
 	}
@@ -185,12 +219,12 @@ public abstract class BaseParser implements IParser {
 		return this;
 	}
 
-	protected void throwExceptionForUnknownChildType(BaseRuntimeChildDefinition nextChild, Class<? extends IElement> type) {
+	protected void throwExceptionForUnknownChildType(BaseRuntimeChildDefinition nextChild, Class<? extends IBase> theType) {
 		if (nextChild instanceof BaseRuntimeDeclaredChildDefinition) {
 			StringBuilder b = new StringBuilder();
 			b.append(((BaseRuntimeDeclaredChildDefinition) nextChild).getElementName());
 			b.append(" has type ");
-			b.append(type);
+			b.append(theType.getName());
 			b.append(" but this is not a valid type for this element");
 			if (nextChild instanceof RuntimeChildChoiceDefinition) {
 				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
@@ -198,7 +232,7 @@ public abstract class BaseParser implements IParser {
 			}
 			throw new DataFormatException(b.toString());
 		}
-		throw new DataFormatException(nextChild + " has no child of type " + type);
+		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
 	protected String determineReferenceText(ResourceReferenceDt theRef) {
@@ -220,37 +254,38 @@ public abstract class BaseParser implements IParser {
 		return reference;
 	}
 
-	
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
-		private IdentityHashMap<IResource, IdDt> myResourceToId = new IdentityHashMap<IResource, IdDt>();
-		private List<IResource> myResources = new ArrayList<IResource>();
+		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
+		private List<IBaseResource> myResources = new ArrayList<IBaseResource>();
 
-		public void addContained(IResource theResource) {
+		public void addContained(IBaseResource theResource) {
 			if (myResourceToId.containsKey(theResource)) {
 				return;
 			}
-			
+
 			IdDt newId;
-			if (theResource.getId().isLocal()) {
-				newId = theResource.getId();
+			if (theResource instanceof IResource && ((IResource) theResource).getId().isLocal()) {
+				newId = ((IResource) theResource).getId();
+			} else if (theResource instanceof Resource && ((Resource)theResource).getId() != null && ((Resource)theResource).getId().startsWith("#")) {
+				newId = new IdDt(((Resource)theResource).getId());
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());
 				newId = new IdDt(myNextContainedId++);
 			}
-			
+
 			myResourceToId.put(theResource, newId);
 			myResources.add(theResource);
 		}
 
-		public List<IResource> getContainedResources() {
+		public List<IBaseResource> getContainedResources() {
 			return myResources;
 		}
-		
-		public IdDt getResourceId(IResource theResource) {
-			return myResourceToId.get(theResource);
+
+		public IdDt getResourceId(IBaseResource theNext) {
+			return myResourceToId.get(theNext);
 		}
 
 		public boolean isEmpty() {

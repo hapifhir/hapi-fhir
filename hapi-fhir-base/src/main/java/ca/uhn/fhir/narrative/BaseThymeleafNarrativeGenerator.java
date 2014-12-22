@@ -36,6 +36,7 @@ import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.thymeleaf.Arguments;
 import org.thymeleaf.Configuration;
 import org.thymeleaf.TemplateEngine;
@@ -60,7 +61,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -92,12 +92,12 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	@Override
-	public NarrativeDt generateNarrative(IResource theResource) {
+	public NarrativeDt generateNarrative(IBaseResource theResource) {
 		return generateNarrative(null, theResource);
 	}
 
 	@Override
-	public NarrativeDt generateNarrative(String theProfile, IResource theResource) {
+	public NarrativeDt generateNarrative(String theProfile, IBaseResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}
@@ -144,12 +144,12 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	@Override
-	public String generateTitle(IResource theResource) {
+	public String generateTitle(IBaseResource theResource) {
 		return generateTitle(null, theResource);
 	}
 
 	@Override
-	public String generateTitle(String theProfile, IResource theResource) {
+	public String generateTitle(String theProfile, IBaseResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}

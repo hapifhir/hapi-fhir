@@ -20,18 +20,25 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.io.InputStream;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-import javax.servlet.http.HttpServletRequest;
-
 public interface IFhirVersion {
 
+	FhirVersionEnum getVersion();
+	
+	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
+	
+	InputStream getFhirVersionPropertiesFile();
+	
 	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
-	Object createServerConformanceProvider(RestfulServer theServer);
+	Object createServerConformanceProvider(RestfulServer theRestfulServer);
 
-	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer);
+	String getPathToSchemaDefinitions();
 
 }

@@ -27,14 +27,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+
 import com.phloc.commons.url.URLValidator;
 
-import javax.servlet.http.HttpServletRequest;
-
-public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
+public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
@@ -43,12 +44,25 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private List<RuntimeSearchParam> mySearchParams;
 	private FhirContext myContext;
 	private String myId;
+	private final FhirVersionEnum myStructureVersion;
 
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
+	public FhirVersionEnum getStructureVersion() {
+		return myStructureVersion;
+	}
+
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceName, theClass);
 		myContext= theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
+		
+		try {
+			IBaseResource instance = theClass.newInstance();
+			myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();
+		} catch (Exception e) {
+			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
+		}
+		
 	}
 
 	public String getId() {
@@ -114,7 +128,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);

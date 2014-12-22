@@ -16,6 +16,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
@@ -56,7 +57,7 @@ public class TinderStructuresMojo extends AbstractMojo {
 	private String baseDir;
 	
 	@Override
-	public void execute() throws MojoExecutionException, MojoFailureException {
+	public void execute() throws MojoExecutionException, MojoFailureException {		
 		if (StringUtils.isBlank(packageName)) {
 			throw new MojoFailureException("Package not specified");
 		}
@@ -220,8 +221,8 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dev", ".");
-		rp.setBaseResourceNames(Arrays.asList("contract", "valueset", "organization", "location" 
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu", ".");
+		rp.setBaseResourceNames(Arrays.asList("securityevent" // , "contract", "valueset", "organization", "location" 
 //				, "observation", "conformance", "referralrequest", "patient","practitioner","encounter",
 //				"organization","location","relatedperson","appointment","slot","order","availability","device", "valueset"
 				));
