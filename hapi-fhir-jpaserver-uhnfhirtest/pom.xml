@@ -9,6 +9,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-jpaserver-uhnfhirtest</artifactId>
+	<packaging>war</packaging>
 
 	<name>HAPI FHIR - fhirtest.uhn.ca Deployable WAR</name>
 
@@ -215,5 +216,4 @@
 		<finalName>hapi-fhir-jpaserver</finalName>
 	</build>
 
-	<packaging>war</packaging>
 </project>

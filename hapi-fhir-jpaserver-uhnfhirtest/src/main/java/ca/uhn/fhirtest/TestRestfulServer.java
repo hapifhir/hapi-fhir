@@ -55,15 +55,21 @@ public class TestRestfulServer extends RestfulServer {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 		
 		List<IResourceProvider> beans;
+		JpaSystemProvider systemProvider;
+		IFhirSystemDao systemDao;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU":
 		case "DSTU1":
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
+			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProvider.class);
+			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			break;
 		case "DEV":
 			setFhirContext(FhirContext.forDev());
 			beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
+			systemProvider = myAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
+			systemDao = myAppCtx.getBean("mySystemDaoDev", IFhirSystemDao.class);
 			break;
 		default:
 			throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
@@ -76,10 +82,7 @@ public class TestRestfulServer extends RestfulServer {
 			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
 		}
 		setResourceProviders(beans);
-		
-		IFhirSystemDao systemDao = myAppCtx.getBean(IFhirSystemDao.class);
-		JpaSystemProvider sp = new JpaSystemProvider(systemDao);
-		setPlainProviders(sp);
+		setPlainProviders(systemProvider);
 		
 		String implDesc = getInitParameter("ImplementationDescription");
 		
