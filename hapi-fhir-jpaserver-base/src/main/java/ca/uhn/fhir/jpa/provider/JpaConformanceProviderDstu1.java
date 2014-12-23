@@ -21,14 +21,14 @@ import ca.uhn.fhir.util.ExtensionConstants;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class JpaConformanceProvider extends ServerConformanceProvider {
+public class JpaConformanceProviderDstu1 extends ServerConformanceProvider {
 
 	private String myImplementationDescription;
 	private IFhirSystemDao mySystemDao;
 	private volatile Conformance myCachedValue;
 	private RestfulServer myRestfulServer;
 
-	public JpaConformanceProvider(RestfulServer theRestfulServer, IFhirSystemDao theSystemDao) {
+	public JpaConformanceProviderDstu1(RestfulServer theRestfulServer, IFhirSystemDao theSystemDao) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;

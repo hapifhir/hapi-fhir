@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -58,6 +60,7 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -71,7 +74,7 @@ import ca.uhn.fhir.util.ExtensionConstants;
  * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
-public class ServerConformanceProvider {
+public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
@@ -90,13 +93,9 @@ public class ServerConformanceProvider {
 		return myPublisher;
 	}
 
-	/**
-	 * Actually create and return the conformance statement
-	 * 
-	 * See the class documentation for an important note if you are extending this class
-	 */
+	@Override
 	@Metadata
-	public Conformance getServerConformance() {
+	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		if (myConformance != null && myCache) {
 			return myConformance;
 		}
@@ -136,7 +135,7 @@ public class ServerConformanceProvider {
 			String resourceName = next.getResourceName();
 			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
 			resource.getTypeElement().setValue(def.getName());
-			resource.getProfile().setReference(new IdDt(def.getResourceProfile()));
+			resource.getProfile().setReference(new IdDt(def.getResourceProfile(myRestfulServer.getServerBaseForRequest(theRequest))));
 
 			TreeSet<String> includes = new TreeSet<String>();
 

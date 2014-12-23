@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Query;
+import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
@@ -88,6 +89,23 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+	
+	/**
+	 * #65
+	 */
+	@Test
+	public void testJsonPrimitiveWithExtensionEncoding() {
+		String res = "{\"resourceType\":\"Questionnaire\",\"status\":\"draft\",\"authored\":\"2014-10-30T14:15:00\",\"subject\":{\"reference\":\"http://www.hl7.org/fhir/Patient/1\"},\"author\":{\"reference\":\"http://www.hl7.org/fhir/Practitioner/1\"},\"name\":{\"text\":\"WDHB Friends and Family Test\"},\"group\":{\"header\":\"Note: This is an anonymous survey, which means you cannot be identified.\",\"_header\":[{\"extension\":[{\"url\":\"http://hl7.org/fhir/Profile/iso-21090#language\",\"valueCode\":\"en\"},{\"url\":\"http://hl7.org/fhir/Profile/iso-21090#string-translation\",\"valueString\":\"è«\\u008bæ³¨æ\\u0084\\u008fï¼\\u009aè¿\\u0099æ\\u0098¯ä¸\\u0080ä¸ªå\\u008c¿å\\u0090\\u008dè°\\u0083æ\\u009f¥ï¼\\u008cè¢«è°\\u0083æ\\u009f¥äººå°\\u0086ä¸\\u008dä¼\\u009aè¢«è¯\\u0086å\\u0088«å\\u0087ºæ\\u009d¥ã\\u0080\\u0082\"},{\"url\":\"http://hl7.org/fhir/Profile/iso-21090#string-translation\",\"valueString\":\"ì\\u009dµëª\\u0085ì\\u009c¼ë¡\\u009c í\\u0095\\u0098ë\\u008a\\u0094 ì\\u0084¤ë¬¸ì¡°ì\\u0082¬ì\\u009d´ë¯\\u0080ë¡\\u009c ì\\u009e\\u0091ì\\u0084±ì\\u009e\\u0090ê°\\u0080 ë\\u0088\\u0084êµ¬ì\\u009d¸ì§\\u0080 ë°\\u009dí\\u0098\\u0080ì§\\u0080ì§\\u0080 ì\\u0095\\u008aì\\u008aµë\\u008b\\u0088ë\\u008b¤.\"}]}],\"question\":[{\"extension\":[{\"url\":\"http://hl7.org/fhir/questionnaire-extensions#answerFormat\",\"valueCode\":\"single-choice\"}],\"text\":\"Are you a patient?\",\"options\":{\"reference\":\"#question1\"}}]}}";
+		Questionnaire parsed = ourCtx.newJsonParser().parseResource(Questionnaire.class, res);
+		assertEquals("Note: This is an anonymous survey, which means you cannot be identified.", parsed.getGroup().getHeader().getValue());
+		assertEquals(1, parsed.getGroup().getHeader().getUndeclaredExtensionsByUrl("http://hl7.org/fhir/Profile/iso-21090#language").size());
+	
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"_header\":{"));
+		
+	}
+
 	
 	@Test
 	public void testEncodeNonContained() {
@@ -193,7 +211,7 @@ public class JsonParserTest {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"_acceptUnknown\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}]}");
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 		// Now with a value
 		ourLog.info("---------------");
@@ -207,7 +225,7 @@ public class JsonParserTest {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":true,\"_acceptUnknown\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}]}");
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":true,\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
 
