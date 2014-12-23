@@ -16,6 +16,13 @@
 				(e.g. because they don't have a no-argument constructor) in order to 
 				avoid failing later
 			</action>
+			<action type="fix" issue="67">
+				IdDt failed to recognize local identifiers containing fragments that look like 
+				real identifiers as being local identifiers even though they started with '#'.
+				For example, a local resource reference of "#aa/_history/aa" would be incorrectly
+				parsed as a non-local reference.
+				Thanks to Mohammad Jafari for reporting!
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

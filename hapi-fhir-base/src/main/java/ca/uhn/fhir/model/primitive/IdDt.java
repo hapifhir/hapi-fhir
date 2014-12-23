@@ -283,7 +283,8 @@ public class IdDt implements IPrimitiveDatatype<String> {
 				b.append('/');
 				b.append(myUnqualifiedVersionId);
 			}
-			myValue = b.toString();
+			String value = b.toString();
+			myValue = value;
 		}
 		return myValue;
 	}
@@ -384,10 +385,17 @@ public class IdDt implements IPrimitiveDatatype<String> {
 		myValue = theValue;
 		myHaveComponentParts = false;
 		if (StringUtils.isBlank(theValue)) {
+			myBaseUrl = null;
 			myValue = null;
 			myUnqualifiedId = null;
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
+		} else if (theValue.charAt(0)== '#') {
+			myValue = theValue;
+			myUnqualifiedId = theValue;
+			myUnqualifiedVersionId=null;
+			myResourceType = null;
+			myHaveComponentParts = true;
 		} else {
 			int vidIndex = theValue.indexOf("/_history/");
 			int idIndex;
@@ -452,13 +460,7 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	}
 
 	public IdDt toVersionless() {
-		String value = getValue();
-		int i = value.indexOf(Constants.PARAM_HISTORY);
-		if (i > 1) {
-			return new IdDt(value.substring(0, i - 1));
-		} else {
-			return this;
-		}
+		return new IdDt(getBaseUrl(), getResourceType(), getIdPart(), null);
 	}
 
 	public IdDt withResourceType(String theResourceName) {
