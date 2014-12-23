@@ -49,6 +49,7 @@ public class TestRestfulServer extends RestfulServer {
 		List<IResourceProvider> beans;
 		JpaSystemProvider systemProvider;
 		IFhirSystemDao systemDao;
+		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU":
 		case "DSTU1": {
@@ -59,6 +60,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
+			baseUrlProperty = "fhir.baseurl.dstu1";
 			break;
 		}
 		case "DEV": {
@@ -69,6 +71,7 @@ public class TestRestfulServer extends RestfulServer {
 			JpaConformanceProviderDev confProvider = new JpaConformanceProviderDev(this, systemDao);
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
+			baseUrlProperty = "fhir.baseurl.dstu2";
 			break;
 		}
 		default:
@@ -83,12 +86,16 @@ public class TestRestfulServer extends RestfulServer {
 
 		FhirContext ctx = getFhirContext();
 		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-		
+
 		setUseBrowserFriendlyContentTypes(true);
 
-		String baseUrl = System.getProperty("fhir.baseurl");
+		String baseUrl = System.getProperty(baseUrlProperty);
 		if (StringUtils.isBlank(baseUrl)) {
-			throw new ServletException("Missing system property: fhir.baseurl");
+			// Fall back to the old URL
+			baseUrl = System.getProperty("fhir.baseurl");
+			if (StringUtils.isBlank(baseUrl)) {
+				throw new ServletException("Missing system property: " + baseUrlProperty);
+			}
 		}
 
 		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));
@@ -96,7 +103,7 @@ public class TestRestfulServer extends RestfulServer {
 
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLoggerName("fhirtest.access");
-		loggingInterceptor.setMessageFormat("Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
+		loggingInterceptor.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
 		this.registerInterceptor(loggingInterceptor);
 
 	}

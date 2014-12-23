@@ -13,7 +13,7 @@
 		<property name="servers">
 			<list>
 				<value>home     , DSTU1 , UHN/HAPI Server (DSTU1 FHIR)                 , http://fhirtest.uhn.ca/baseDstu1</value>
-				<value>home_dev , DEV   , UHN/HAPI Server (DSTU2 FHIR)                 , http://fhirtest.uhn.ca/baseDev</value>
+				<value>home_dev , DEV   , UHN/HAPI Server (DSTU2 FHIR)                 , http://fhirtest.uhn.ca/baseDstu2</value>
 				<value>hi       , DSTU1 , Health Intersections (DSTU1 FHIR)            , http://fhir.healthintersections.com.au/open</value>
 				<value>hidev    , DEV   , Health Intersections (DSTU2 FHIR)            , http://fhir-dev.healthintersections.com.au/open</value>
 				<value>furore   , DSTU1 , Spark - Furore                               , http://spark.furore.com/fhir</value>
