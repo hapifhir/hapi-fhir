@@ -743,8 +743,25 @@ public abstract class BaseFhirDao implements IDao {
 		}
 
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
-		T retVal = parser.parseResource(theResourceType, resourceText);
-
+		T retVal;
+		try {
+			retVal = parser.parseResource(theResourceType, resourceText);
+		} catch (Exception e) {
+			StringBuilder b = new StringBuilder();
+			b.append("Failed to parse database resource[");
+			b.append(theResourceType);
+			b.append("/");
+			b.append(theEntity.getIdDt().getIdPart());
+			b.append(" (pid ");
+			b.append(theEntity.getId());
+			b.append(", version ");
+			b.append(myContext.getVersion().getVersion());
+			b.append("): ");
+			b.append(e.getMessage());
+			String msg = b.toString();
+			ourLog.error(msg, e);
+			throw new DataFormatException(msg, e);
+		}
 		IResource res = (IResource) retVal;
 		res.setId(theEntity.getIdDt());
 

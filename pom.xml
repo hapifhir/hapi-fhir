@@ -136,15 +136,19 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Plugin Versions -->
+		<apache_httpclient_version>4.3.6</apache_httpclient_version>
+		<apache_httpcore_version>4.4</apache_httpcore_version>
+		<commons_io_version>2.4</commons_io_version>
 		<commons_lang_version>3.3.2</commons_lang_version>
+		<commons_codec_version>1.10</commons_codec_version>
 		<derby_version>10.11.1.1</derby_version>
 		<guava_version>18.0</guava_version>
 		<hamcrest_version>1.3</hamcrest_version>
-		<hibernate_version>4.2.12.Final</hibernate_version>
+		<hibernate_version>4.3.7.Final<!-- 4.2.12.Final --></hibernate_version>
 		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
-		<jetty_version>9.2.2.v20140723</jetty_version>
+		<jetty_version>9.2.6.v20141205</jetty_version>
 		<jscience_version>4.3.1</jscience_version>
-		<junit_version>4.11</junit_version>
+		<junit_version>4.12</junit_version>
 		<logback_version>1.1.2</logback_version>
 		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
 		<maven_javadoc_plugin_version>2.10.1</maven_javadoc_plugin_version>
@@ -153,15 +157,15 @@
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<maven_source_plugin_version>2.3</maven_source_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
-		<mockito_version>1.9.5</mockito_version>
+		<mockito_version>1.10.17</mockito_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
-		<phloc_commons_version>4.3.3</phloc_commons_version>
+		<phloc_commons_version>4.3.5</phloc_commons_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<servlet_api_version>3.1.0</servlet_api_version>
-		<slf4j_version>1.7.7</slf4j_version>
-		<spring_version>4.1.0.RELEASE</spring_version>
+		<slf4j_version>1.7.9</slf4j_version>
+		<spring_version>4.1.3.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
-		<thymeleaf-version>2.1.3.RELEASE</thymeleaf-version>
+		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<woodstox_version>4.4.0</woodstox_version>
 	</properties>

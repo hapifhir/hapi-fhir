@@ -16,6 +16,16 @@
 				(e.g. because they don't have a no-argument constructor) in order to 
 				avoid failing later
 			</action>
+			<action type="add">
+				Bump a few dependency JARs to the latest versions in Maven POM:
+				<![CDATA[
+					<ul>
+						<li>SLF4j (in base module) - Bumped to 1.7.9</li>
+						<li>Apache HTTPClient (in base module) - Bumped to 4.3.6</li>
+						<li>Hibernate (in JPA module) - Bumped to 4.3.7</li>
+					</ul>
+				]]>
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
