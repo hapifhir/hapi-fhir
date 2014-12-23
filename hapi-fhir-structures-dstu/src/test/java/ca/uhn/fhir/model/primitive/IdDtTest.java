@@ -26,6 +26,43 @@ public class IdDtTest {
 		
 	}
 	
+	/**
+	 * See #67
+	 */
+	@Test
+	public void testComplicatedLocal() {
+		IdDt id = new IdDt("#Patient/cid:Patient-72/_history/1");
+		assertTrue(id.isLocal());
+		assertNull(id.getBaseUrl());
+		assertNull(id.getResourceType());
+		assertNull(id.getVersionIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id.getIdPart());
+		
+		IdDt id2 = new IdDt("#Patient/cid:Patient-72/_history/1");
+		assertEquals(id, id2);
+		
+		id2 = id2.toUnqualified();
+		assertTrue(id2.isLocal());
+		assertNull(id2.getBaseUrl());
+		assertNull(id2.getResourceType());
+		assertNull(id2.getVersionIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id2.getIdPart());
+
+		id2 = id2.toVersionless();
+		assertTrue(id2.isLocal());
+		assertNull(id2.getBaseUrl());
+		assertNull(id2.getResourceType());
+		assertNull(id2.getVersionIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id2.getIdPart());
+
+		id2 = id2.toUnqualifiedVersionless();
+		assertTrue(id2.isLocal());
+		assertNull(id2.getBaseUrl());
+		assertNull(id2.getResourceType());
+		assertNull(id2.getVersionIdPart());
+		assertEquals("#Patient/cid:Patient-72/_history/1", id2.getIdPart());
+	}
+	
 	@Test
 	public void testDetermineBase() {
 
@@ -78,6 +115,15 @@ public class IdDtTest {
 		assertEquals("123", ref.getReference().getIdPart());
 		assertEquals("999", ref.getReference().getVersionIdPart());
 
+	}
+
+	
+	@Test
+	public void testViewMethods() {
+		IdDt i = new IdDt("http://foo/fhir/Organization/123/_history/999");
+		assertEquals("Organization/123/_history/999", i.toUnqualified().getValue());
+		assertEquals("http://foo/fhir/Organization/123", i.toVersionless().getValue());
+		assertEquals("Organization/123", i.toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
