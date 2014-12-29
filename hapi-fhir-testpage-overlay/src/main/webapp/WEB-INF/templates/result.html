@@ -167,7 +167,7 @@
 																	$("#outerForm").attr("action", "page").submit();
 																});
 															</script>
-														</th:block>														
+														</th:block>
 													</h4>
 												</div>
 												<div id="collapseOne" class="panel-collapse collapse in" th:unless="${#lists.isEmpty(bundle.entries)}">
@@ -175,10 +175,10 @@
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<colgroup>
 																<col style="width: 100px;"/>
-																<col style="width: 100px;"/>
+																<col/>
 																<col/>
 																<col style="width: 100px;"/>
-															</colgroup>															
+															</colgroup>
 															<thead>
 																<tr>
 																	<th></th>
@@ -196,7 +196,7 @@
 																	</th:block>
 																</td>
 																<td>
-																	<small th:if="${entry.resource} != null" th:text="${entry.resource.id.toUnqualified()}"/>
+																	<a th:if="${entry.resource} != null" th:href="${entry.resource.id}" th:text="${entry.resource.id.toUnqualified()}" style="font-size: 0.8em"/>
 																</td>
 																<td>
 																	<small th:text="${entry.title}"/>
@@ -206,7 +206,7 @@
 																<td th:if="${entry.updated.value} != null and ${entry.updated.today} == false" th:text="${#dates.format(entry.updated.value, 'yyyy-MM-dd')}"></td>
 															</tr>
 															</tbody>
-														</table>										
+														</table>
 													</div>
 												</div>
 												<script type="text/javascript">

@@ -26,6 +26,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class ReflectionUtil {
 
@@ -81,6 +83,21 @@ public class ReflectionUtil {
 			type = (Class<?>) firstArg;
 		}
 		return type;
+	}
+
+	public static LinkedHashSet<Method> getDeclaredMethods(Class<?> theClazz) {
+		LinkedHashSet<Method> retVal = new LinkedHashSet<Method>();
+		for (Method next : theClazz.getDeclaredMethods()) {
+			try {
+				Method method = theClazz.getMethod(next.getName(), next.getParameterTypes());
+				retVal.add(method);
+			} catch (NoSuchMethodException e) {
+				retVal.add(next);
+			} catch (SecurityException e) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
 	}
 
 }

@@ -45,6 +45,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -58,6 +59,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
@@ -85,7 +87,7 @@ public class Controller {
 	private TesterConfig myConfig;
 
 	private Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
-	
+
 	private List<String> myFilterHeaders;
 
 	@Autowired
@@ -343,9 +345,9 @@ public class Controller {
 			haveSearchParams = extractSearchParamsDstu1(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		default:
-			throw new IllegalStateException("Unknown FHIR version: "+theRequest.getFhirVersion(myConfig));
+			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
 		}
-		
+
 		theModel.put("includes", includes);
 		theModel.put("queries", queries);
 		theModel.put("haveSearchParams", haveSearchParams);
@@ -366,7 +368,8 @@ public class Controller {
 		return "resource";
 	}
 
-	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
+	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
 		Conformance conformance = (Conformance) theConformance;
 		for (Rest nextRest : conformance.getRest()) {
 			for (RestResource nextRes : nextRest.getResource()) {
@@ -414,8 +417,9 @@ public class Controller {
 		return haveSearchParams;
 	}
 
-	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams, List<List<String>> queryIncludes) {
-		ca.uhn.fhir.model.dev.resource.Conformance conformance = (ca.uhn.fhir.model.dev.resource.Conformance)theConformance;
+	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		ca.uhn.fhir.model.dev.resource.Conformance conformance = (ca.uhn.fhir.model.dev.resource.Conformance) theConformance;
 		for (ca.uhn.fhir.model.dev.resource.Conformance.Rest nextRest : conformance.getRest()) {
 			for (ca.uhn.fhir.model.dev.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
@@ -456,7 +460,7 @@ public class Controller {
 		IQuery query;
 		if (isNotBlank(theReq.getParameter("resource"))) {
 			try {
-				query = search.forResource((Class<? extends IResource>)getResourceType(theRequest, theReq).getImplementingClass());
+				query = search.forResource((Class<? extends IResource>) getResourceType(theRequest, theReq).getImplementingClass());
 			} catch (ServletException e) {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
@@ -913,7 +917,7 @@ public class Controller {
 	private FhirContext getContext(HomeRequest theRequest) {
 		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
 		FhirContext retVal = myContexts.get(version);
-		if (retVal==null) {
+		if (retVal == null) {
 			retVal = new FhirContext(version);
 			myContexts.put(version, retVal);
 		}
@@ -956,13 +960,13 @@ public class Controller {
 		}
 
 		List<String> values;
-		boolean addToWhere=true;
+		boolean addToWhere = true;
 		if ("token".equals(nextType)) {
 			if (isBlank(parts.get(2))) {
 				return true;
 			}
 			values = Collections.singletonList(StringUtils.join(parts, ""));
-			addToWhere=false;
+			addToWhere = false;
 			theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(2)));
 		} else if ("date".equals(nextType)) {
 			values = new ArrayList<String>();
@@ -991,13 +995,13 @@ public class Controller {
 			theClientCodeJsonWriter.write("value", nextValue);
 			theClientCodeJsonWriter.writeEnd();
 			if (addToWhere) {
-			theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
+				theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
 			}
 
 		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString + ".0", theReq, theQuery , theClientCodeJsonWriter);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery, theClientCodeJsonWriter);
 		}
 
 		return true;
@@ -1010,7 +1014,7 @@ public class Controller {
 		case DSTU1:
 			return loadAndAddConfDstu1(theRequest, theModel);
 		}
-		throw new IllegalStateException("Unknown version: "+theRequest.getFhirVersion(myConfig));
+		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
 
 	private Conformance loadAndAddConfDstu1(final HomeRequest theRequest, final ModelMap theModel) {
@@ -1018,7 +1022,7 @@ public class Controller {
 
 		Conformance conformance;
 		try {
-			conformance = (Conformance)client.conformance();
+			conformance = (Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
@@ -1077,7 +1081,7 @@ public class Controller {
 
 		ca.uhn.fhir.model.dev.resource.Conformance conformance;
 		try {
-			conformance = (ca.uhn.fhir.model.dev.resource.Conformance)client.conformance();
+			conformance = (ca.uhn.fhir.model.dev.resource.Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
@@ -1223,6 +1227,22 @@ public class Controller {
 						bundle = getContext(theRequest).newXmlParser().parseBundle(resultBody);
 					}
 					break;
+				}
+			}
+
+			/*
+			 * DSTU2 no longer has a title in the bundle format, but it's still
+			 * useful here..
+			 */
+			if (bundle != null) {
+				INarrativeGenerator gen = getContext(theRequest).getNarrativeGenerator();
+				if (gen != null) {
+					for (BundleEntry next : bundle.getEntries()) {
+						if (next.getTitle().isEmpty() && next.getResource() != null) {
+							String title = gen.generateTitle(next.getResource());
+							next.getTitle().setValue(title);
+						}
+					}
 				}
 			}
 

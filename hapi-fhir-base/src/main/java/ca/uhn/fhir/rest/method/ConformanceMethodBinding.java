@@ -42,7 +42,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 //		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
 //			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
 //		}
-		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom(theMethod.getReturnType())) {
+		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom((Class<?>) theMethod.getGenericReturnType())) {
 			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 

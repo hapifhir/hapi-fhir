@@ -15,6 +15,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 public class ExceptionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testExceptionsAreGood() throws Exception {
 		ImmutableSet<ClassInfo> classes = ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClasses(BaseServerResponseException.class.getPackage().getName());
@@ -35,8 +36,12 @@ public class ExceptionTest {
 			if (next == UnclassifiedServerFailureException.class) {
 				continue;
 			}
+			if (next == ResourceVersionNotSpecifiedException.class) {
+				// This one is deprocated
+				continue;
+			}
 			
-			assertTrue(BaseServerResponseException.isExceptionTypeRegistered(next));
+			assertTrue("Type " + next + " is not registered", BaseServerResponseException.isExceptionTypeRegistered(next));
 			
 			if (next == AuthenticationException.class) {
 				continue;

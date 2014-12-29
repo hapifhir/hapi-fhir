@@ -210,9 +210,20 @@ public class BundleEntry extends BaseBundle {
 		return myTitle;
 	}
 
+	/**
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved
+	 * to the resource &lt;meta/&gt; element so it is redundant here). In preparation for DSTU2, it is recommended that you
+	 * migrate code away from using this method and over to using resource metadata instead. 
+	 */
 	public InstantDt getUpdated() {
 		if (myUpdated == null) {
 			myUpdated = new InstantDt();
+		}
+		if (myUpdated.isEmpty() && myResource != null) {
+			InstantDt resourceUpdated = ResourceMetadataKeyEnum.UPDATED.get(myResource);
+			if (resourceUpdated!=null && !resourceUpdated.isEmpty()) {
+				return resourceUpdated;
+			}
 		}
 		return myUpdated;
 	}
@@ -279,6 +290,11 @@ public class BundleEntry extends BaseBundle {
 		myStatus = theStatus;
 	}
 
+	/**
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved
+	 * to the resource &lt;meta/&gt; element so it is redundant here). In preparation for DSTU2, it is recommended that you
+	 * migrate code away from using this method and over to using resource metadata instead. 
+	 */
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;

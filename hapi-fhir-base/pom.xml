@@ -203,6 +203,11 @@
 					<artifactId>hapi-fhir-structures-dstu</artifactId>
 					<version>0.9-SNAPSHOT</version>
 				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-android</artifactId>
+					<version>${slf4j_version}</version>
+				</dependency>
 			</dependencies>
 			<build>
 				<plugins>
@@ -225,10 +230,13 @@
 											<include>javax.json:javax.json-api</include>
 											-->
 											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
+											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
 											<include>org.glassfish:javax.json</include>
 											<include>org.codehaus.woodstox:woodstox-core-asl</include>
 											<include>javax.xml.stream:stax-api</include>
 											<include>org.codehaus.woodstox:stax2-api</include>
+											<include>org.slf4j:slf4j*</include>
+											<include>org.apache.commons:*</include>
 										</includes>
 									</artifactSet>
 									<relocations>

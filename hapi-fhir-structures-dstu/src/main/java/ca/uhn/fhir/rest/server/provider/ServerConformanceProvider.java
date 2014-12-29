@@ -97,6 +97,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	 * 
 	 * See the class documentation for an important note if you are extending this class
 	 */
+	@Override
 	@Metadata
 	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		if (myConformance != null && myCache) {

@@ -69,7 +69,7 @@ public class ETagServerTest {
 
 		Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
 		assertNotNull(cl);
-		assertEquals("\"222\"", cl.getValue());
+		assertEquals("W/\"222\"", cl.getValue());
 	}
 
 	

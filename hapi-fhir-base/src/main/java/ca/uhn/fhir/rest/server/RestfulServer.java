@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 import org.apache.commons.lang3.StringUtils;
@@ -196,7 +197,7 @@ public class RestfulServer extends HttpServlet {
 	private int findResourceMethods(Object theProvider, Class<?> clazz) throws ConfigurationException {
 		int count = 0;
 
-		for (Method m : clazz.getDeclaredMethods()) {
+		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
 			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
 			if (foundMethodBinding == null) {
 				continue;
@@ -263,7 +264,7 @@ public class RestfulServer extends HttpServlet {
 			findSystemMethods(theSystemProvider, supertype);
 		}
 
-		for (Method m : clazz.getDeclaredMethods()) {
+		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
 
@@ -797,7 +798,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	private void invokeDestroy(Object theProvider, Class<?> clazz) {
-		for (Method m : clazz.getDeclaredMethods()) {
+		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
 			Destroy destroy = m.getAnnotation(Destroy.class);
 			if (destroy != null) {
 				try {
@@ -1392,7 +1393,7 @@ public class RestfulServer extends HttpServlet {
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (theResource.getId().hasVersionIdPart()) {
-				theHttpResponse.addHeader(Constants.HEADER_ETAG, '"' + theResource.getId().getVersionIdPart() + '"');
+				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getId().getVersionIdPart() + '"');
 			}
 		}
 

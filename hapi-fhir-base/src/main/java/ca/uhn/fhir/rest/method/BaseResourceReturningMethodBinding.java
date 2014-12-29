@@ -34,6 +34,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -90,7 +92,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 			myResourceListCollectionType = collectionType;
 
-		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
+		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;

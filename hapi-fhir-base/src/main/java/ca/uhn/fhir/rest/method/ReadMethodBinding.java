@@ -222,7 +222,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	public static HttpGetClientInvocation createAbsoluteReadInvocation(IdDt theId) {
-		return new HttpGetClientInvocation(theId.getValue());
+		return new HttpGetClientInvocation(theId.toVersionless().getValue());
 	}
 
 	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IdDt theId) {
