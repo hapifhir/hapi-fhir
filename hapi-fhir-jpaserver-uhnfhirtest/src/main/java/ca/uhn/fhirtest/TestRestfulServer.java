@@ -94,9 +94,6 @@ public class TestRestfulServer extends RestfulServer {
 		setResourceProviders(beans);
 		setPlainProviders(systemProvider);
 
-		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-
 		setUseBrowserFriendlyContentTypes(true);
 
 		String baseUrl = System.getProperty(baseUrlProperty);
