@@ -65,11 +65,16 @@ import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IRead;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IReadIfNoneMatch;
+import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.ISort;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.ITransactionTyped;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
@@ -87,6 +92,8 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.util.ICallable;
 
 /**
  * @author James Agnew
@@ -121,7 +128,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		Class<BaseConformance> conformance = (Class<BaseConformance>) myContext.getResourceDefinition("Conformance").getImplementingClass();
-		
+
 		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance, null);
 		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
@@ -232,23 +239,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
-		if (theId == null || theId.hasIdPart() == false) {
-			throw new IllegalArgumentException("theId does not contain a valid ID, is: " + theId);
-		}
-
-		HttpGetClientInvocation invocation;
-		if (theId.hasBaseUrl()) {
-			invocation = ReadMethodBinding.createAbsoluteReadInvocation(theId.toVersionless());
-		} else {
-			invocation = ReadMethodBinding.createReadInvocation(theId, toResourceName(theType));
-		}
-		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
-		}
-
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, theId);
-		T resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
+		return doReadOrVRead(theType, theId, false, null, null);
 	}
 
 	@Override
@@ -420,30 +411,54 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> T vread(final Class<T> theType, IdDt theId) {
+	public <T extends IBaseResource> T vread(final Class<T> theType, IdDt theId) {
+		if (theId.hasVersionIdPart() == false) {
+			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
+		}
+		return doReadOrVRead(theType, theId, true, null, null);
+	}
+
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IdDt theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
 		String resName = toResourceName(theType);
 		IdDt id = theId;
 		if (!id.hasBaseUrl()) {
 			id = new IdDt(resName, id.getIdPart(), id.getVersionIdPart());
 		}
 
-		if (id.hasVersionIdPart() == false) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
-		}
-
 		HttpGetClientInvocation invocation;
 		if (id.hasBaseUrl()) {
-			invocation = ReadMethodBinding.createAbsoluteVReadInvocation(id);
+			if (theVRead) {
+				invocation = ReadMethodBinding.createAbsoluteVReadInvocation(id);
+			} else {
+				invocation = ReadMethodBinding.createAbsoluteReadInvocation(id);
+			}
 		} else {
-			invocation = ReadMethodBinding.createVReadInvocation(id);
+			if (theVRead) {
+				invocation = ReadMethodBinding.createVReadInvocation(id, resName);
+			} else {
+				invocation = ReadMethodBinding.createReadInvocation(id, resName);
+			}
 		}
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
 
+		if (theIfVersionMatches != null) {
+			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
+		}
+		
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id);
-		T resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
-		return resp;
+
+		if (theNotModifiedHandler == null) {
+			return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+		} else {
+			try {
+				return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+			} catch (NotModifiedException e) {
+				return theNotModifiedHandler.call();
+			}
+		}
+
 	}
 
 	/* also deprecated in interface */
@@ -454,7 +469,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> T vread(Class<T> theType, String theId, String theVersionId) {
+	public <T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId) {
 		IdDt resId = new IdDt(toResourceName(theType), theId, theVersionId);
 		return vread(theType, resId);
 	}
@@ -549,8 +564,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -577,7 +591,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (getParamEncoding() != null) {
 				myResourceBody = null;
 			}
-			
+
 			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
@@ -688,6 +702,132 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	@Override
+	public IRead read() {
+		return new ReadInternal();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private class ReadInternal extends BaseClientExecutable implements IRead, IReadTyped, IReadExecutable {
+		private RuntimeResourceDefinition myType;
+		private IdDt myId;
+		private ICallable myNotModifiedHandler;
+		private String myIfVersionMatches;
+
+		@Override
+		public <T extends IBaseResource> IReadTyped<T> resource(Class<T> theResourceType) {
+			Validate.notNull(theResourceType, "theResourceType must not be null");
+			myType = myContext.getResourceDefinition(theResourceType);
+			if (myType == null) {
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceType));
+			}
+			return this;
+		}
+
+		@Override
+		public IReadTyped<IBaseResource> resource(String theResourceAsText) {
+			Validate.notBlank(theResourceAsText, "You must supply a value for theResourceAsText");
+			myType = myContext.getResourceDefinition(theResourceAsText);
+			if (myType == null) {
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceAsText));
+			}
+			return this;
+		}
+
+		@Override
+		public IReadExecutable withId(String theId) {
+			Validate.notBlank(theId, "The ID can not be blank");
+			myId = new IdDt(myType.getName(), theId);
+			return this;
+		}
+
+		@Override
+		public IReadExecutable withIdAndVersion(String theId, String theVersion) {
+			Validate.notBlank(theId, "The ID can not be blank");
+			myId = new IdDt(myType.getName(), theId, theVersion);
+			return this;
+		}
+
+		@Override
+		public IReadExecutable withId(IdDt theId) {
+			Validate.notNull(theId, "The ID can not be null");
+			Validate.notBlank(theId.getIdPart(), "The ID can not be blank");
+			myId = theId.toUnqualified();
+			return this;
+		}
+
+		@Override
+		public IReadExecutable withUrl(String theUrl) {
+			myId = new IdDt(theUrl);
+			processUrl();
+			return this;
+		}
+
+		private void processUrl() {
+			String resourceType = myId.getResourceType();
+			if (isBlank(resourceType)) {
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_INCOMPLETE_URI_FOR_READ, myId));
+			}
+			myType = myContext.getResourceDefinition(resourceType);
+			if (myType == null) {
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, myId));
+			}
+		}
+
+		@Override
+		public Object execute() {
+			if (myId.hasVersionIdPart()) {
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches);
+			} else {
+				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches);
+			}
+		}
+
+		@Override
+		public IReadExecutable withUrl(IdDt theUrl) {
+			Validate.notNull(theUrl, "theUrl can not be null");
+			myId = theUrl;
+			processUrl();
+			return this;
+		}
+
+		@Override
+		public IReadIfNoneMatch ifVersionMatches(String theVersion) {
+			myIfVersionMatches = theVersion;
+			return new IReadIfNoneMatch() {
+
+				@Override
+				public IReadExecutable returnResource(final IBaseResource theInstance) {
+					myNotModifiedHandler = new ICallable() {
+						@Override
+						public Object call() {
+							return theInstance;
+						}
+					};
+					return ReadInternal.this;
+				}
+
+				@Override
+				public IReadExecutable returnNull() {
+					myNotModifiedHandler = new ICallable() {
+						@Override
+						public Object call() {
+							return null;
+						}
+					};
+					return ReadInternal.this;
+				}
+
+				@Override
+				public IReadExecutable throwNotModifiedException() {
+					myNotModifiedHandler = null;
+					return ReadInternal.this;
+				}
+			};
+		}
+
+	}
+
 	private class GetTagsInternal extends BaseClientExecutable<IGetTags, TagList> implements IGetTags {
 
 		private String myId;
@@ -776,8 +916,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
 
 		@Override
-		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -791,7 +930,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				ourLog.warn("Failed to parse OperationOutcome response", e);
 				return null;
 			}
-			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
+			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, retVal);
 
 			return retVal;
 		}
@@ -805,8 +944,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, myResourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			if (theResponseStatusCode == Constants.STATUS_HTTP_201_CREATED) {
 				response.setCreated(true);
@@ -824,8 +962,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public List<IResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			return new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources();
 		}
 	}
@@ -849,11 +986,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IParser parser = respType.newParser(myContext);
 			T retVal = parser.parseResource(myType, theResponseReader);
 
-			if (myId != null) {
-				myId.applyTo(retVal);
-			}
-
-			MethodUtil.parseClientRequestResourceHeaders(theHeaders, retVal);
+			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
 
 			return retVal;
 		}
@@ -1035,8 +1168,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
 
 		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-				BaseServerResponseException {
+		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -1091,7 +1223,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class UpdateInternal extends BaseClientExecutable<IUpdateTyped, MethodOutcome> implements IUpdate, IUpdateTyped {
+	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable {
 
 		private IdDt myId;
 		private IResource myResource;
@@ -1112,7 +1244,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
 			if (getParamEncoding() != null) {
 				myResourceBody = null;
-			}			
+			}
 
 			BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 
@@ -1141,7 +1273,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IUpdateTyped withId(IdDt theId) {
+		public IUpdateExecutable withId(IdDt theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}
@@ -1153,7 +1285,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IUpdateTyped withId(String theId) {
+		public IUpdateExecutable withId(String theId) {
 			if (theId == null) {
 				throw new NullPointerException("theId can not be null");
 			}

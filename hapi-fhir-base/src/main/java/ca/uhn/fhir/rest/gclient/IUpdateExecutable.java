@@ -20,12 +20,9 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 
-public interface IUpdateTyped extends IUpdateExecutable {
+public interface IUpdateExecutable extends IClientExecutable<IUpdateExecutable, MethodOutcome>{
 
-	IUpdateExecutable withId(IdDt theId);
-
-	IUpdateExecutable withId(String theId);
-
+	
 }

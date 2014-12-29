@@ -25,14 +25,17 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * @deprecated Use {@link PreconditionFailedException} instead - This exception is
- * strangely named and will be removed at some point.
+ * Represents an <b>HTTP 412 Precondition Failed</b> response. This exception
+ * should be thrown for an {@link Update} operation if that operation requires a version to 
+ * be specified in an HTTP header, and none was.
  */
-public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
+@SuppressWarnings("deprecation")
+public class PreconditionFailedException extends ResourceVersionNotSpecifiedException {
+	@SuppressWarnings("hiding")
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
 	private static final long serialVersionUID = 1L;
 
-	public ResourceVersionNotSpecifiedException(String error) {
+	public PreconditionFailedException(String error) {
 		super(STATUS_CODE, error);
 	}
 	
@@ -43,23 +46,8 @@ public class ResourceVersionNotSpecifiedException extends BaseServerResponseExce
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceVersionNotSpecifiedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public PreconditionFailedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
-	}
-
-	public ResourceVersionNotSpecifiedException(int theStatusCode, String error) {
-		super(theStatusCode, error);
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param theMessage
-	 *            The message
-	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
-	 */
-	public ResourceVersionNotSpecifiedException(int theStatusCode, String theMessage, BaseOperationOutcome theOperationOutcome) {
-		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 
 }

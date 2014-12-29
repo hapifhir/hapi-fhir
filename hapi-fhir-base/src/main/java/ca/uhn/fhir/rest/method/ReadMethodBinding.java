@@ -44,11 +44,13 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding implements IClientResponseHandlerHandlesBinary<Object> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
@@ -143,7 +145,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		if (myVersionIdIndex == null) {
 			String resourceName = getResourceName();
 			if (id.hasVersionIdPart()) {
-				retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()));
+				retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), id.getVersionIdPart()), resourceName);
 			} else {
 				retVal = createReadInvocation(id, resourceName);
 			}
@@ -151,7 +153,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			IdDt vid = ((IdDt) theArgs[myVersionIdIndex]);
 			String resourceName = getResourceName();
 
-			retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()));
+			retVal = createVReadInvocation(new IdDt(resourceName, id.getIdPart(), vid.getVersionIdPart()), resourceName);
 		}
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
@@ -163,8 +165,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-			BaseServerResponseException {
+	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 		Binary resource = new Binary(theResponseMimeType, contents);
 
@@ -190,8 +191,25 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		}
 
 		Object response = invokeServerMethod(theMethodParams);
+		IBundleProvider retVal = toResourceList(response);
 
-		return toResourceList(response);
+		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
+			String ifNoneMatch = ((Request)theRequest).getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
+				List<IResource> responseResources = retVal.getResources(0, 1);
+				IResource responseResource = responseResources.get(0);
+				
+				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
+				if (responseResource.getId() != null && responseResource.getId().hasVersionIdPart()) {
+					if (responseResource.getId().getVersionIdPart().equals(ifNoneMatch)) {
+						ourLog.debug("Returning HTTP 301 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
+						throw new NotModifiedException("Not Modified");
+					}
+				}
+			}
+		}
+
+		return retVal;
 	}
 
 	@Override
@@ -215,8 +233,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart()).getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IdDt theId) {
-		return new HttpGetClientInvocation(theId.getValue());
+	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, String theResourceName) {
+		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
 	}
 
 }

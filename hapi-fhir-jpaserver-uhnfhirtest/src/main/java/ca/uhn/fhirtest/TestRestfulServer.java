@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -57,6 +58,7 @@ public class TestRestfulServer extends RestfulServer {
 		List<IResourceProvider> beans;
 		JpaSystemProvider systemProvider;
 		IFhirSystemDao systemDao;
+		ETagSupportEnum etagSupport;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU":
 		case "DSTU1":
@@ -64,16 +66,20 @@ public class TestRestfulServer extends RestfulServer {
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProvider.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
+			etagSupport = ETagSupportEnum.DISABLED;
 			break;
 		case "DEV":
 			setFhirContext(FhirContext.forDev());
 			beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
 			systemProvider = myAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDev", IFhirSystemDao.class);
+			etagSupport = ETagSupportEnum.ENABLED;
 			break;
 		default:
 			throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
+		
+		setETagSupport(etagSupport);
 		
 		FhirContext ctx = getFhirContext();
 		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
@@ -105,20 +111,6 @@ public class TestRestfulServer extends RestfulServer {
 		loggingInterceptor.setMessageFormat("Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
 		this.registerInterceptor(loggingInterceptor);
 		
-	}
-
-	@Override
-	public void destroy() {
-		super.destroy();
-		
-//		myAppCtx.close();
-//		
-//		try {
-//			ourLog.info("Shutting down derby");
-//			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";shutdown=true");
-//		} catch (Exception e) {
-//			ourLog.info("Failed to create database: {}",e.getMessage());
-//		}
 	}
 
 }

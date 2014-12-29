@@ -24,20 +24,21 @@ import ca.uhn.fhir.rest.server.Constants;
  */
 
 /**
- * This Represents an <b>HTTP 501 Not Implemented</b> response, which means the resource provider currently lacks the
- * ability to fullfill the request.
+ * This Represents an <b>HTTP 301 Not Modified</b> response, which means the resource has not
+ * changed since the last version the client retrieved. This exception should only be used
+ * as a part of the ETag workflow. 
  * 
  * <p>
  * Note that a complete list of RESTful exceptions is available in the <a href="./package-summary.html">Package
  * Summary</a>.
  * </p>
  */
-public class NotImplementedOperationException extends BaseServerResponseException {
+public class NotModifiedException extends BaseServerResponseException {
 
-	public static final int STATUS_CODE = Constants.STATUS_HTTP_501_NOT_IMPLEMENTED;
+	public static final int STATUS_CODE = Constants.STATUS_HTTP_304_NOT_MODIFIED;
 	private static final long serialVersionUID = 1L;
 
-	public NotImplementedOperationException(String theMessage) {
+	public NotModifiedException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
 
@@ -49,7 +50,7 @@ public class NotImplementedOperationException extends BaseServerResponseExceptio
 	 * @param theOperationOutcome
 	 *            The OperationOutcome resource to return to the client
 	 */
-	public NotImplementedOperationException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public NotModifiedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

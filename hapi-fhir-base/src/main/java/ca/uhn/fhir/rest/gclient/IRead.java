@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.gclient;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,12 +22,14 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
+public interface IRead {
+	/**
+	 * Construct a read for the given resource type (e.g. Patient.class)
+	 */
+	<T extends IBaseResource> IReadTyped<T> resource(Class<T> theResourceType);
 
-public interface IUpdateTyped extends IUpdateExecutable {
-
-	IUpdateExecutable withId(IdDt theId);
-
-	IUpdateExecutable withId(String theId);
-
+	/**
+	 * Construct a read for the given resource type (e.g. "Patient")
+	 */
+	IReadTyped<IBaseResource> resource(String theResourceType);
 }

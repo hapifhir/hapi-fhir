@@ -219,6 +219,14 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
+				
+				<p>
+					<b>See also</b> the page on 
+					<a href="./doc_rest_etag.html#client_read">ETag Support</a> 
+					for information on specifying a matching version in the
+					client request.
+				</p>
+				
 			</subsection>			
 
 			<subsection name="Instance - Delete">
@@ -248,6 +256,14 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
+				
+				<p>
+					<b>See also</b> the page on 
+					<a href="./doc_rest_etag.html#client_update">ETag Support</a> 
+					for information on specifying a matching version in the
+					client request.
+				</p>
+				
 			</subsection>			
 
 			<subsection name="Server - Conformance">

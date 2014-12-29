@@ -451,6 +451,11 @@ public class IdDt implements IPrimitiveDatatype<String> {
 		return getValue();
 	}
 
+	/**
+	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one 
+	 * is present in this IdDt. For example, if this IdDt contains the ID "http://foo/Patient/1",
+	 * this method will return a new IdDt containing ID "Patient/1". 
+	 */
 	public IdDt toUnqualified() {
 		return new IdDt(getResourceType(), getIdPart(), getVersionIdPart());
 	}
@@ -550,5 +555,21 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
 	}
-	
+
+	/**
+	 * Retrieves the ID from the given resource instance
+	 */
+	public static IdDt of(IBaseResource theResouce) {
+		if (theResouce == null) {
+			throw new NullPointerException("theResource can not be null");
+		} else if (theResouce instanceof IResource) {
+			return ((IResource) theResouce).getId();
+		} else if (theResouce instanceof Resource) {
+			// TODO: implement
+			throw new UnsupportedOperationException();
+		} else {
+			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
+		}
+	}
+
 }

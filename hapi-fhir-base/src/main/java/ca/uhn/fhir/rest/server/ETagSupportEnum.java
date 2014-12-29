@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.gclient;
+package ca.uhn.fhir.rest.server;
 
 /*
  * #%L
@@ -20,12 +20,19 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
-
-public interface IUpdateTyped extends IUpdateExecutable {
-
-	IUpdateExecutable withId(IdDt theId);
-
-	IUpdateExecutable withId(String theId);
-
+/**
+ * RESTful server behaviour for automatically adding profile tags
+ * 
+ * @see RestfulServer#setETagSupport(ETagSupportEnum)
+ */
+public enum ETagSupportEnum {
+	/**
+	 * Send ETag headers
+	 */
+	ENABLED,
+	
+	/**
+	 * Do not send ETag headers
+	 */
+	DISABLED
 }

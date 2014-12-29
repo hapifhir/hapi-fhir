@@ -72,6 +72,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -661,11 +662,13 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
 
   String versionId = theId.getVersionIdPart();
   if (versionId != null) {
-    // If the client passed in a version number in the request URL, which means they are
+    // If the client passed in a version number in an If-Match header, they are
     // doing a version-aware update. You may wish to throw an exception if the supplied
-    // version is not the latest version.
+    // version is not the latest version. Note that as of DSTU2 the FHIR specification uses
+    // ETags and If-Match to handle version aware updates, so PreconditionFailedException (HTTP 412)
+    // is used instead of ResourceVersionConflictException (HTTP 409)
     if (detectedVersionConflict) {
-      throw new ResourceVersionConflictException("Invalid version");
+      throw new PreconditionFailedException("Unexpected version");
     }
   }
   

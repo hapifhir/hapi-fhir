@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.Resource.ResourceMetaComponent;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -106,13 +107,17 @@ public class MethodUtil {
 		}
 
 		if (theId.hasVersionIdPart()) {
-			String versionId = theId.getVersionIdPart();
-			if (StringUtils.isNotBlank(versionId)) {
-				urlBuilder.append('/');
-				urlBuilder.append(Constants.PARAM_HISTORY);
-				urlBuilder.append('/');
-				urlBuilder.append(versionId);
-				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			} else {
+				String versionId = theId.getVersionIdPart();
+				if (StringUtils.isNotBlank(versionId)) {
+					urlBuilder.append('/');
+					urlBuilder.append(Constants.PARAM_HISTORY);
+					urlBuilder.append('/');
+					urlBuilder.append(versionId);
+					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+				}
 			}
 		}
 
@@ -122,7 +127,7 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IBaseResource resource) {
+	public static void parseClientRequestResourceHeaders(IdDt theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
@@ -132,7 +137,7 @@ public class MethodUtil {
 				if (resource instanceof IResource) {
 					InstantDt lmValue = new InstantDt(headerDateValue);
 					((IResource) resource).getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
-				} else if (resource instanceof Resource){
+				} else if (resource instanceof Resource) {
 					((Resource) resource).getMeta().setLastUpdated(headerDateValue);
 				}
 			} catch (Exception e) {
@@ -145,6 +150,27 @@ public class MethodUtil {
 			String headerValue = clHeaders.get(0);
 			if (isNotBlank(headerValue)) {
 				new IdDt(headerValue).applyTo(resource);
+			}
+		}
+
+		IdDt existing = IdDt.of(resource);
+
+		List<String> eTagHeaders = theHeaders.get(Constants.HEADER_ETAG_LC);
+		String eTagVersion = null;
+		if (eTagHeaders != null && eTagHeaders.size() > 0) {
+			eTagVersion = parseETagValue(eTagHeaders.get(0));
+		}
+		if (isNotBlank(eTagVersion)) {
+			if (existing == null || existing.isEmpty()) {
+				if (theRequestedId != null) {
+					theRequestedId.withVersion(eTagVersion).applyTo(resource);
+				}
+			} else if (existing.hasVersionIdPart() == false) {
+				existing.withVersion(eTagVersion).applyTo(resource);
+			}
+		} else if (existing == null || existing.isEmpty()) {
+			if (theRequestedId != null) {
+				theRequestedId.applyTo(resource);
 			}
 		}
 
@@ -163,6 +189,27 @@ public class MethodUtil {
 				}
 			}
 		}
+	}
+
+	public static String parseETagValue(String value) {
+		String eTagVersion;
+		value = value.trim();
+		if (value.length() > 1) {
+			if (value.charAt(value.length() - 1) == '"') {
+				if (value.charAt(0) == '"') {
+					eTagVersion = value.substring(1, value.length() - 1);
+				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/' && value.charAt(2) == '"') {
+					eTagVersion = value.substring(3, value.length() - 1);
+				} else {
+					eTagVersion = value;
+				}
+			} else {
+				eTagVersion = value;
+			}
+		} else {
+			eTagVersion = value;
+		}
+		return eTagVersion;
 	}
 
 	public static void parseTagValue(TagList tagList, String nextTagComplete) {

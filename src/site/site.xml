@@ -76,6 +76,7 @@
 				<item name="Web Testing UI" href="./doc_server_tester.html" />
 			</item>
 			<item name="Logging" href="./doc_logging.html" />
+			<item name="ETags" href="./doc_rest_etag.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
 		</menu>
 

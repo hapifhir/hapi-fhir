@@ -180,7 +180,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				resource = parser.parseResource(theResponseReader);
 			}
 
-			MethodUtil.parseClientRequestResourceHeaders(theHeaders, resource);
+			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
 
 			switch (getMethodReturnType()) {
 			case BUNDLE:

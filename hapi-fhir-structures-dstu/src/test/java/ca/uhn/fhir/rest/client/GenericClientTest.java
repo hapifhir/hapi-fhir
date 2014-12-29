@@ -385,6 +385,47 @@ public class GenericClientTest {
 	}
 
 	@Test
+	public void testReadFluent() throws Exception {
+
+		String msg = getResourceResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
+
+		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int count = 0;
+		
+		Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		response = (Patient) client.read().resource("Patient").withId("1234").execute();
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		response = client.read().resource(Patient.class).withIdAndVersion("1234", "22").execute();
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
+
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+		response = client.read().resource(Patient.class).withUrl("http://foo/Patient/22").execute();
+		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
+		assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
+
+	}
+
+	
+	@Test
 	public void testReadWithAbsoluteUrl() throws Exception {
 
 		String msg = getResourceResult();
