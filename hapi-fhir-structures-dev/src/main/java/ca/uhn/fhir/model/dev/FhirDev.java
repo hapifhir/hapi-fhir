@@ -41,7 +41,7 @@ public class FhirDev implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public Object createServerConformanceProvider(RestfulServer theServer) {
+	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
 

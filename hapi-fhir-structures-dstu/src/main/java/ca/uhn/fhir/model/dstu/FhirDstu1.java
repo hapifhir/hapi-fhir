@@ -70,6 +70,7 @@ import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
@@ -81,7 +82,7 @@ public class FhirDstu1 implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public Object createServerConformanceProvider(RestfulServer theServer) {
+	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
 

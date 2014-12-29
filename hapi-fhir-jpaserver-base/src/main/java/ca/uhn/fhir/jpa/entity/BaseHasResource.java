@@ -107,6 +107,8 @@ public abstract class BaseHasResource {
 		myDeleted = theDate;
 	}
 
+	public abstract Long getId();
+	
 	public void setEncoding(ResourceEncodingEnum theEncoding) {
 		myEncoding = theEncoding;
 	}

@@ -73,6 +73,11 @@
 
 	<servlet-mapping>
 		<servlet-name>fhirServletDev</servlet-name>
+		<url-pattern>/baseDstu2/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>fhirServletDev</servlet-name>
 		<url-pattern>/baseDev/*</url-pattern>
 	</servlet-mapping>
 

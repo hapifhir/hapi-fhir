@@ -28,8 +28,10 @@
 			-->
 			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<!-- 
 			<property name="hibernate.connection.username" value="sa" />
 			<property name="hibernate.connection.password" value="" />
+			-->
 			<property name="hibernate.jdbc.batch_size" value="0" />
 			<property name="hibernate.cache.use_minimal_puts" value="false" />
 			<property name="hibernate.show_sql" value="false" />

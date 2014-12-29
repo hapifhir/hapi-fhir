@@ -815,21 +815,36 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IBaseResource theResource, XMLStreamWriter theWriter, List<ExtensionDt> extensions, String tagName,
+	private void encodeUndeclaredExtensions(RuntimeResourceDefinition theResDef, IBaseResource theResource, XMLStreamWriter theWriter, List<ExtensionDt> theExtensions, String tagName,
 			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
-		for (ExtensionDt next : extensions) {
+		for (ExtensionDt next : theExtensions) {
 			theWriter.writeStartElement(tagName);
 			theWriter.writeAttribute("url", next.getUrl().getValue());
 
 			if (next.getValue() != null) {
-				IElement nextValue = next.getValue();
+				IElement value = next.getValue();
+//				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+//				String childName = extDef.getChildNameByDatatype(nextValue.getClass());
+//				if (childName == null) {
+//					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + nextValue.getClass().getCanonicalName());
+//				}
+//				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(nextValue.getClass());
+//				
+//				
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-				String childName = extDef.getChildNameByDatatype(nextValue.getClass());
+				String childName = extDef.getChildNameByDatatype(value.getClass());
+				BaseRuntimeElementDefinition<?> childDef;
 				if (childName == null) {
-					throw new ConfigurationException("Unable to encode extension, unregognized child element type: " + nextValue.getClass().getCanonicalName());
+					childDef = myContext.getElementDefinition(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					} else {
+						childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
+					}
+				} else {
+					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
 				}
-				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(nextValue.getClass());
-				encodeChildElementToStreamWriter(theResDef, theResource, theWriter, nextValue, childName, childDef, null, theIncludedResource);
+				encodeChildElementToStreamWriter(theResDef, theResource, theWriter, value, childName, childDef, null, theIncludedResource);
 			}
 
 			// child extensions

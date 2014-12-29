@@ -263,7 +263,7 @@
 			<plugin>
 				<groupId>de.juplo</groupId>
 				<artifactId>hibernate4-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<version>1.0.5</version>
 				<configuration>
 					<force>true</force>
 					<target>SCRIPT</target>

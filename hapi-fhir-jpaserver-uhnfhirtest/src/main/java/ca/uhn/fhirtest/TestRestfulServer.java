@@ -10,7 +10,8 @@ import org.springframework.web.context.ContextLoaderListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProvider;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDev;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
@@ -23,58 +24,60 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 public class TestRestfulServer extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
 	private ApplicationContext myAppCtx;
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize() throws ServletException {
 		super.initialize();
-		
-//		try {
-//			ourLog.info("Creating database");
-//			DriverManager.getConnection("jdbc:derby:directory:" + System.getProperty("fhir.db.location") + ";create=true");
-//		} catch (Exception e) {
-//			ourLog.error("Failed to create database: {}",e);
-//		}
-		
-			
-//		myAppCtx = new ClassPathXmlApplicationContext("fhir-spring-uhnfhirtest-config.xml", "hapi-jpaserver-springbeans.xml");
 
-//		myAppCtx = new FileSystemXmlApplicationContext(
-//				"WEB-INF/hapi-fhir-server-database-config.xml",
-//				"WEB-INF/hapi-fhir-server-config.xml"
-//				);
+		// Get the spring context from the web container (it's declared in web.xml)
+		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
+		// These two parmeters are also declared in web.xml
+		String implDesc = getInitParameter("ImplementationDescription");
 		String fhirVersionParam = getInitParameter("FhirVersion");
 		if (StringUtils.isBlank(fhirVersionParam)) {
-			fhirVersionParam="DSTU1";
+			fhirVersionParam = "DSTU1";
 		}
-		
-		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		
+
+		// Depending on the version this server is supporing, we will
+		// retrieve all the appropriate resource providers and the
+		// conformance provider
 		List<IResourceProvider> beans;
 		JpaSystemProvider systemProvider;
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
+		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
 		case "DSTU":
-		case "DSTU1":
+		case "DSTU1": {
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProvider.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.DISABLED;
+			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
+			confProvider.setImplementationDescription(implDesc);
+			setServerConformanceProvider(confProvider);
+			baseUrlProperty = "fhir.baseurl.dstu1";
 			break;
-		case "DEV":
+		}
+		case "DEV": {
 			setFhirContext(FhirContext.forDev());
 			beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
 			systemProvider = myAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDev", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
+			JpaConformanceProviderDev confProvider = new JpaConformanceProviderDev(this, systemDao);
+			confProvider.setImplementationDescription(implDesc);
+			setServerConformanceProvider(confProvider);
+			baseUrlProperty = "fhir.baseurl.dstu2";
 			break;
+		}
 		default:
 			throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
@@ -84,33 +87,35 @@ public class TestRestfulServer extends RestfulServer {
 		FhirContext ctx = getFhirContext();
 		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 		
+
 		for (IResourceProvider nextResourceProvider : beans) {
 			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
 		}
 		setResourceProviders(beans);
 		setPlainProviders(systemProvider);
-		
-		String implDesc = getInitParameter("ImplementationDescription");
-		
-		JpaConformanceProvider confProvider = new JpaConformanceProvider(this, systemDao);
-		confProvider.setImplementationDescription(implDesc);
-		setServerConformanceProvider(confProvider);
-		
+
+		FhirContext ctx = getFhirContext();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
 		setUseBrowserFriendlyContentTypes(true);
-		
-		String baseUrl = System.getProperty("fhir.baseurl");
+
+		String baseUrl = System.getProperty(baseUrlProperty);
 		if (StringUtils.isBlank(baseUrl)) {
-			throw new ServletException("Missing system property: fhir.baseurl");
+			// Fall back to the old URL
+			baseUrl = System.getProperty("fhir.baseurl");
+			if (StringUtils.isBlank(baseUrl)) {
+				throw new ServletException("Missing system property: " + baseUrlProperty);
+			}
 		}
-		
+
 		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));
 		setPagingProvider(new FifoMemoryPagingProvider(10));
-		
+
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLoggerName("fhirtest.access");
-		loggingInterceptor.setMessageFormat("Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
+		loggingInterceptor.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
 		this.registerInterceptor(loggingInterceptor);
-		
+
 	}
 
 }

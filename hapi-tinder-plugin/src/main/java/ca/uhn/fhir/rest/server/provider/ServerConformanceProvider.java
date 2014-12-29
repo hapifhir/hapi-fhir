@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -71,7 +72,7 @@ import javax.servlet.http.HttpServletRequest;
  * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
-public class ServerConformanceProvider {
+public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private boolean myCache = true;
 	private volatile Conformance myConformance;

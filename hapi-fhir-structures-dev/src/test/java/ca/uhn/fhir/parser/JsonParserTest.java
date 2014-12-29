@@ -1,6 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
@@ -11,16 +15,17 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Patient;
+import ca.uhn.fhir.model.dev.resource.QuestionnaireAnswers;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 public class JsonParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
@@ -37,6 +42,23 @@ public class JsonParserTest {
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 	}
 
+	/**
+	 * #65
+	 */
+	@Test
+	public void testJsonPrimitiveWithExtensionEncoding() {
+		
+		QuestionnaireAnswers parsed = new QuestionnaireAnswers();
+		parsed.getGroup().setLinkId("value123");
+		parsed.getGroup().getLinkIdElement().addUndeclaredExtension(false, "http://123", new StringDt("HELLO"));
+	
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"http://123\":[{\"valueString\":\"HELLO\"}]}}"));
+		
+	}
+
+	
 	@Test
 	public void testParsePatientInBundle() {
 		

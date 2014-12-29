@@ -4,10 +4,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 
@@ -46,7 +51,7 @@ public class ServerConformanceProviderTest {
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(null);
+		rs.init(createServletConfig());
 		
 		boolean found=false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -60,7 +65,7 @@ public class ServerConformanceProviderTest {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance();
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -80,11 +85,11 @@ public class ServerConformanceProviderTest {
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(null);
+		rs.init(createServletConfig());
 		
-		Conformance conformance = sc.getServerConformance();
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		myCtx.newValidator().validate(conformance);
+		assertTrue(myCtx.newValidator().validateWithResult(conformance).isSuccessful());
 	}
 
 	
@@ -98,7 +103,7 @@ public class ServerConformanceProviderTest {
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(null);
+		rs.init(createServletConfig());
 		
 		boolean found=false;
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
@@ -113,7 +118,7 @@ public class ServerConformanceProviderTest {
 		}
 
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance();
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -131,9 +136,9 @@ public class ServerConformanceProviderTest {
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
 		rs.setServerConformanceProvider(sc);
 
-		rs.init(null);
+		rs.init(createServletConfig());
 		
-		Conformance conformance = sc.getServerConformance();
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -171,7 +176,6 @@ public class ServerConformanceProviderTest {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	@SuppressWarnings("unused")
 	public static class MultiOptionalProvider {
 
 		@Search(type = Patient.class)
@@ -202,5 +206,20 @@ public class ServerConformanceProviderTest {
 		
 	}
 	
+
+	private HttpServletRequest createHttpServletRequest() {
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
+		when(req.getServletPath()).thenReturn("/fhir");
+		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
+		when(req.getContextPath()).thenReturn("/FhirStorm");
+		return req;
+	}
+
+	private ServletConfig createServletConfig() {
+		ServletConfig sc = mock(ServletConfig.class);
+		when (sc.getServletContext()).thenReturn(null);
+		return sc;
+	}
 
 }

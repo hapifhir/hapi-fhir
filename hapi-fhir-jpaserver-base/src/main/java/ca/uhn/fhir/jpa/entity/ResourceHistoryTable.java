@@ -67,6 +67,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return historyTag;
 	}
 
+	public Long getId() {
+		return myId;
+	}
+
 	@Override
 	public IdDt getIdDt() {
 		Object id = getForcedId()==null? getResourceId() : getForcedId().getForcedId();

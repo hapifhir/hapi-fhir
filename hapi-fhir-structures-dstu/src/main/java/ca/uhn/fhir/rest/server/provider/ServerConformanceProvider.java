@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -71,7 +72,7 @@ import javax.servlet.http.HttpServletRequest;
  * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
-public class ServerConformanceProvider {
+public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
@@ -106,7 +107,7 @@ public class ServerConformanceProvider {
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(DateTimeDt.withCurrentTime());
-		retVal.setFhirVersion("0.80"); // TODO: pull from model
+		retVal.setFhirVersion("0.0.82-3059"); // TODO: pull from model
 		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser needs to be modified to actually allow it
 		
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
