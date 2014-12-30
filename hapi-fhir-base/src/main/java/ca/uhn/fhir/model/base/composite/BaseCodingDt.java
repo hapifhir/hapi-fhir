@@ -81,8 +81,8 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	}
 
 	/**
-	 * Returns true if <code>this</code> Coding has the same {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getCode() Code} and {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getSystem() system} (as compared by simple equals comparison). Does not compare other
-	 * Codes (e.g. {@link ca.uhn.fhir.model.dstu.composite.InternalCodingDt#getUse() use}) or any extensions.
+	 * Returns true if <code>this</code> Coding has the same {@link #getCodeElement() Code} and {@link #getSystemElement() system} (as compared by simple equals comparison). Does not compare other
+	 * Codes (e.g. getUseElement()) or any extensions.
 	 */
 	public boolean matchesSystemAndCode(BaseCodingDt theCoding) {
 		if (theCoding == null) {

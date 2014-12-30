@@ -28,6 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.DatatypeUtil;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
@@ -43,7 +44,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getFamilyAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
@@ -61,7 +62,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getGivenAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
@@ -79,7 +80,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getPrefixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
@@ -97,7 +98,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getSuffix() suffix} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getSuffixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());

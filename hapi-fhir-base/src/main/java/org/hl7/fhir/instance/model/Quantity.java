@@ -156,7 +156,7 @@ public class Quantity extends Type  implements ICompositeType{
     protected DecimalType value;
 
     /**
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "&lt;" , then the real value is &lt; stated value.
      */
     @Child(name="comparator", type={CodeType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value." )
@@ -239,7 +239,7 @@ public class Quantity extends Type  implements ICompositeType{
     }
 
     /**
-     * @return {@link #comparator} (How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.). This is the underlying object with id, value and extensions. The accessor "getComparator" gives direct access to the value
+     * @return {@link #comparator} (How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "&lt;" , then the real value is &lt; stated value.). This is the underlying object with id, value and extensions. The accessor "getComparator" gives direct access to the value
      */
     public Enumeration<QuantityComparator> getComparatorElement() { 
       if (this.comparator == null)
@@ -259,7 +259,7 @@ public class Quantity extends Type  implements ICompositeType{
     }
 
     /**
-     * @param value {@link #comparator} (How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.). This is the underlying object with id, value and extensions. The accessor "getComparator" gives direct access to the value
+     * @param value {@link #comparator} (How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "&lt;" , then the real value is &lt; stated value.). This is the underlying object with id, value and extensions. The accessor "getComparator" gives direct access to the value
      */
     public Quantity setComparatorElement(Enumeration<QuantityComparator> value) { 
       this.comparator = value;
@@ -267,14 +267,14 @@ public class Quantity extends Type  implements ICompositeType{
     }
 
     /**
-     * @return How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
+     * @return How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "&lt;" , then the real value is &lt; stated value.
      */
     public QuantityComparator getComparator() { 
       return this.comparator == null ? null : this.comparator.getValue();
     }
 
     /**
-     * @param value How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
+     * @param value How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "&lt;" , then the real value is &lt; stated value.
      */
     public Quantity setComparator(QuantityComparator value) { 
       if (value == null)

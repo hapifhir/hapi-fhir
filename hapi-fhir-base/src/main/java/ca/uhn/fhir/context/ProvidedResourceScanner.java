@@ -44,8 +44,9 @@ public class ProvidedResourceScanner {
     /**
      * If {@code theProvider} is tagged with the {@code ProvidesResources} annotation, this method will add every resource listed
      * by the {@code resources} method.
-     * <p/>
-     * notes:
+     * <p>
+     * Notes:
+     * </p>
      * <ul>
      * <li>if {@code theProvider} isn't annotated with {@code resources} nothing is done; it's expected that most RestfulServers and
      * ResourceProviders won't be annotated.</li>

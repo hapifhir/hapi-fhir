@@ -49,13 +49,13 @@ public enum PractitionerRoleEnum {
 	RESEARCHER("researcher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
-	 * Display: <b>Teacher/educator</b><br/>
+	 * Display: <b>Teacher/educator</b><br>
 	 * Code Value: <b>teacher</b>
 	 */
 	TEACHER_EDUCATOR("teacher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
-	 * Display: <b>ICT professional</b><br/>
+	 * Display: <b>ICT professional</b><br>
 	 * Code Value: <b>ict</b>
 	 */
 	ICT_PROFESSIONAL("ict", "http://hl7.org/fhir/practitioner-role"),

@@ -42,7 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <p>
  * The following substitution variables are supported:
  * </p>
- * <table>
+ * <table summary="Substitution variables supported by this class">
  * <tr>
  * <td>${id}</td>
  * <td>The resource ID associated with this request (or "" if none)</td>

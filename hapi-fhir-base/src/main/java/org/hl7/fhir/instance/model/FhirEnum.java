@@ -38,9 +38,7 @@ public interface FhirEnum {
 
   /**
    * Get the XML/JSON representation for an enumerated value
-   * @param code - the enumeration value
    * @return the XML/JSON representation
-   * @throws Exception if the enumeration is not valid (would usually indicate a code generation bug)
    */
   public String toCode();
 

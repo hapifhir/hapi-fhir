@@ -29,23 +29,23 @@ public enum SearchStyleEnum {
 
 	/**
 	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
-	 * <br/>
+	 * <br>
 	 * <code>GET [base]/[resource type]?[params]</code>
 	 */
 	GET,
 	
 	/**
 	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
-	 * <br/>
+	 * <br>
 	 * <code>GET [base]/[resource type]/_search?[params]</code>
 	 */
 	GET_WITH_SEARCH,
 
 	/**
 	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
-	 * <br/>
+	 * <br>
 	 * <code>POST [base]/[resource type]/_search</code>
-	 * <br/>
+	 * <br>
 	 * and the params in a form encoded POST body.
 	 */
 	POST

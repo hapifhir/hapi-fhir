@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum ParticipantTypeEnum {
 
 	/**
-	 * Display: <b>Translator</b><br/>
+	 * Display: <b>Translator</b><br>
 	 * Code Value: <b>translator</b>
 	 *
 	 * A translator who is facilitating communication with the patient during the encounter
@@ -37,7 +37,7 @@ public enum ParticipantTypeEnum {
 	TRANSLATOR("translator", "http://hl7.org/fhir/participant-type"),
 	
 	/**
-	 * Display: <b>Emergency</b><br/>
+	 * Display: <b>Emergency</b><br>
 	 * Code Value: <b>emergency</b>
 	 *
 	 * A person to be contacted in case of an emergency during the encounter

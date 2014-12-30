@@ -30,7 +30,8 @@ import java.lang.annotation.Target;
  * RESTful method annotation used for a method which provides
  * the FHIR "conformance" method.
  * 
- * @see See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
+ * See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
+ * fore more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value=ElementType.METHOD)

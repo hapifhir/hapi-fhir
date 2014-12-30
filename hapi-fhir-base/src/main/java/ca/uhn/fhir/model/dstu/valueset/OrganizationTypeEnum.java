@@ -29,55 +29,55 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum OrganizationTypeEnum {
 
 	/**
-	 * Display: <b>Healthcare Provider</b><br/>
+	 * Display: <b>Healthcare Provider</b><br>
 	 * Code Value: <b>prov</b>
 	 */
 	HEALTHCARE_PROVIDER("prov", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Hospital Department</b><br/>
+	 * Display: <b>Hospital Department</b><br>
 	 * Code Value: <b>dept</b>
 	 */
 	HOSPITAL_DEPARTMENT("dept", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Intensive Care Unit</b><br/>
+	 * Display: <b>Intensive Care Unit</b><br>
 	 * Code Value: <b>icu</b>
 	 */
 	INTENSIVE_CARE_UNIT("icu", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Organizational team</b><br/>
+	 * Display: <b>Organizational team</b><br>
 	 * Code Value: <b>team</b>
 	 */
 	ORGANIZATIONAL_TEAM("team", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Federal Government</b><br/>
+	 * Display: <b>Federal Government</b><br>
 	 * Code Value: <b>fed</b>
 	 */
 	FEDERAL_GOVERNMENT("fed", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Insurance Company</b><br/>
+	 * Display: <b>Insurance Company</b><br>
 	 * Code Value: <b>ins</b>
 	 */
 	INSURANCE_COMPANY("ins", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Educational Institute</b><br/>
+	 * Display: <b>Educational Institute</b><br>
 	 * Code Value: <b>edu</b>
 	 */
 	EDUCATIONAL_INSTITUTE("edu", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Religious Institution</b><br/>
+	 * Display: <b>Religious Institution</b><br>
 	 * Code Value: <b>reli</b>
 	 */
 	RELIGIOUS_INSTITUTION("reli", "http://hl7.org/fhir/organization-type"),
 	
 	/**
-	 * Display: <b>Pharmacy</b><br/>
+	 * Display: <b>Pharmacy</b><br>
 	 * Code Value: <b>pharm</b>
 	 */
 	PHARMACY("pharm", "http://hl7.org/fhir/organization-type"),

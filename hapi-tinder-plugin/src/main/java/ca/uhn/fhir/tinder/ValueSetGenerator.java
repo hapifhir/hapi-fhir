@@ -20,6 +20,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -253,6 +254,7 @@ public class ValueSetGenerator {
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("valueSet", theValueSetTm);
 		ctx.put("packageBase", thePackageBase);
+		ctx.put("esc", new EscapeTool());
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");

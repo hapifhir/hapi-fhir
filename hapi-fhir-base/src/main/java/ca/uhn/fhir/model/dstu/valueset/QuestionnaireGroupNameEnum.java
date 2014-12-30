@@ -29,31 +29,31 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum QuestionnaireGroupNameEnum {
 
 	/**
-	 * Display: <b>Hair Color</b><br/>
+	 * Display: <b>Hair Color</b><br>
 	 * Code Value: <b>B.001</b>
 	 */
 	HAIR_COLOR("B.001", "http://hl7.org/fhir/questionnaire-group-name"),
 	
 	/**
-	 * Display: <b>Vision</b><br/>
+	 * Display: <b>Vision</b><br>
 	 * Code Value: <b>B.002</b>
 	 */
 	VISION("B.002", "http://hl7.org/fhir/questionnaire-group-name"),
 	
 	/**
-	 * Display: <b>Sleepwalker</b><br/>
+	 * Display: <b>Sleepwalker</b><br>
 	 * Code Value: <b>B.003</b>
 	 */
 	SLEEPWALKER("B.003", "http://hl7.org/fhir/questionnaire-group-name"),
 	
 	/**
-	 * Display: <b>Tooth extraction</b><br/>
+	 * Display: <b>Tooth extraction</b><br>
 	 * Code Value: <b>B.004</b>
 	 */
 	TOOTH_EXTRACTION("B.004", "http://hl7.org/fhir/questionnaire-group-name"),
 	
 	/**
-	 * Display: <b>Stutter</b><br/>
+	 * Display: <b>Stutter</b><br>
 	 * Code Value: <b>B.005</b>
 	 */
 	STUTTER("B.005", "http://hl7.org/fhir/questionnaire-group-name"),

@@ -70,9 +70,8 @@ public class CompleteResourceProviderTest {
 	 */
 	@Test
 	public void testStoreUtf8Characters() throws Exception {
-		String name = "測試醫院";
 		Organization org = new Organization();
-		org.setName(name);
+		org.setName("測試醫院");
 		org.addIdentifier("urn:system", "testStoreUtf8Characters_01");
 		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 

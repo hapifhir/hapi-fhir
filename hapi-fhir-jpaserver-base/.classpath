@@ -6,6 +6,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="target/generated-sources/tinder"/>
 	<classpathentry excluding="**/*.java" including="**/*.java" kind="src" path="src/test/resources"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
@@ -22,11 +23,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="src" output="target/classes" path="target/generated-sources/tinder">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>

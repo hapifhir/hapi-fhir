@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum ImmunizationRecommendationDateCriterionCodesEnum {
 
 	/**
-	 * Display: <b>due</b><br/>
+	 * Display: <b>due</b><br>
 	 * Code Value: <b>due</b>
 	 *
 	 * Date the next dose is considered due
@@ -37,7 +37,7 @@ public enum ImmunizationRecommendationDateCriterionCodesEnum {
 	DUE("due", "http://hl7.org/fhir/immunization-recommendation-date-criterion"),
 	
 	/**
-	 * Display: <b>overdue</b><br/>
+	 * Display: <b>overdue</b><br>
 	 * Code Value: <b>overdue</b>
 	 *
 	 * Date the next dose is considered overdue
@@ -45,7 +45,7 @@ public enum ImmunizationRecommendationDateCriterionCodesEnum {
 	OVERDUE("overdue", "http://hl7.org/fhir/immunization-recommendation-date-criterion"),
 	
 	/**
-	 * Display: <b>latest</b><br/>
+	 * Display: <b>latest</b><br>
 	 * Code Value: <b>latest</b>
 	 *
 	 * The latest date the next dose is to be given

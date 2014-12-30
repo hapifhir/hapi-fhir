@@ -79,7 +79,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
-	 * @deprecated Use {@link #delete()) instead
+	 * @deprecated Use {@link #delete()} instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
 
@@ -91,7 +91,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
-	 * @deprecated Use {@link #delete()) instead
+	 * @deprecated Use {@link #delete()} instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, String theId);
 
@@ -105,7 +105,7 @@ public interface IGenericClient {
 	 * 
 	 * @param theType
 	 *            The type of resource to return the history for, or
-	 *            <code>null<code> to search for history across all resources
+	 *            <code>null</code> to search for history across all resources
 	 * @param theId
 	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
 	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
@@ -117,14 +117,14 @@ public interface IGenericClient {
 	 *            specification.
 	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit);
+	<T extends IResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
 	 *            The type of resource to return the history for, or
-	 *            <code>null<code> to search for history across all resources
+	 *            <code>null</code> to search for history across all resources
 	 * @param theId
 	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
 	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
@@ -136,7 +136,7 @@ public interface IGenericClient {
 	 *            specification.
 	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, String theIdDt, DateTimeDt theSince, Integer theLimit);
+	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next"
@@ -214,7 +214,6 @@ public interface IGenericClient {
 	 * @param theType
 	 *            The type of resource to load
 	 * @param theParams
-	 * @return
 	 */
 	<T extends IBaseResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
 
@@ -277,7 +276,7 @@ public interface IGenericClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(IdDt theIdDt, IResource theResource);
+	MethodOutcome update(IdDt theId, IResource theResource);
 
 	/**
 	 * Implementation of the "instance update" method.
@@ -288,13 +287,11 @@ public interface IGenericClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(String theIdDt, IResource theResource);
+	MethodOutcome update(String theId, IResource theResource);
 
 	/**
 	 * Implementation of the "type validate" method.
 	 * 
-	 * @param theId
-	 *            The ID to validate
 	 * @param theResource
 	 *            The resource to validate
 	 * @return An outcome containing any validation issues

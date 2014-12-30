@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum AnimalSpeciesEnum {
 
 	/**
-	 * Display: <b>Dog</b><br/>
+	 * Display: <b>Dog</b><br>
 	 * Code Value: <b>canislf</b>
 	 *
 	 * Canis lupus familiaris
@@ -37,7 +37,7 @@ public enum AnimalSpeciesEnum {
 	DOG("canislf", "http://hl7.org/fhir/animal-species"),
 	
 	/**
-	 * Display: <b>Sheep</b><br/>
+	 * Display: <b>Sheep</b><br>
 	 * Code Value: <b>ovisa</b>
 	 *
 	 * Ovis aries
@@ -45,7 +45,7 @@ public enum AnimalSpeciesEnum {
 	SHEEP("ovisa", "http://hl7.org/fhir/animal-species"),
 	
 	/**
-	 * Display: <b>Domestic Canary</b><br/>
+	 * Display: <b>Domestic Canary</b><br>
 	 * Code Value: <b>serinuscd</b>
 	 *
 	 * Serinus canaria domestica

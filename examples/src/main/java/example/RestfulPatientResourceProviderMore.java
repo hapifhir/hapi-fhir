@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -250,6 +251,45 @@ public List<Patient> findObservations(
 
 }
 //END SNIPPET: referenceWithStaticChain
+
+
+//START SNIPPET: referenceWithDynamicChain
+@Search()
+public List<Observation> findBySubject(
+      @RequiredParam(name=Observation.SP_SUBJECT, chainWhitelist = {"", Patient.SP_IDENTIFIER, Patient.SP_BIRTHDATE}) ReferenceParam subject
+      ) {
+    List<Observation> observations = new ArrayList<Observation>();
+
+    String chain = subject.getChain();
+    if (Patient.SP_IDENTIFIER.equals(chain)) {
+
+       // Because the chained parameter "subject.identifier" is actually of type
+       // "token", we convert the value to a token before processing it. 
+       TokenParam tokenSubject = subject.toTokenParam();
+       String system = tokenSubject.getSystem();
+       String identifier = tokenSubject.getValue();
+       
+       // TODO: populate all the observations for the identifier
+       
+    } else if (Patient.SP_BIRTHDATE.equals(chain)) {
+
+          // Because the chained parameter "subject.birthdate" is actually of type
+          // "date", we convert the value to a date before processing it. 
+          DateParam dateSubject = subject.toDateParam();
+          DateTimeDt birthDate = dateSubject.getValueAsDateTimeDt();
+          
+          // TODO: populate all the observations for the birthdate
+          
+    } else if ("".equals(chain)) {
+        
+       String resourceId = subject.getValue();
+        // TODO: populate all the observations for the resource id
+        
+    }
+
+    return observations;
+}
+//END SNIPPET: referenceWithDynamicChain
 
 
 //START SNIPPET: read

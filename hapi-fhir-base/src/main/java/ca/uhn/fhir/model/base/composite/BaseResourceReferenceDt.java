@@ -43,8 +43,6 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theResource
 	 */
 	public BaseResourceReferenceDt() {
 		// nothing
@@ -67,8 +65,10 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
 	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This method will return the resource instance only if it has previously been loaded using
 	 * {@link #loadResource(IRestfulClient)} or it was contained within the resource containing this resource.
 	 *
-	 * @see See {@link #loadResource(IRestfulClient)}
-	 * @see See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id>contained resources</a>
+	 * See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id">contained resources</a>
+	 * for more information.
+	 * 
+	 * @see #loadResource(IRestfulClient)
 	 */
 	public IResource getResource() {
 		return myResource;

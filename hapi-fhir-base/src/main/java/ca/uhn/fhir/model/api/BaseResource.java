@@ -52,9 +52,9 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>_id</b>
 	 * <p>
-	 * Description: <b>the _id of a resource</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Resource._id</b><br/>
+	 * Description: <b>the _id of a resource</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Resource._id</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam RES_ID = new StringClientParam(BaseResource.SP_RES_ID);

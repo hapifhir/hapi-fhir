@@ -57,7 +57,7 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link InternalCodingDt#getSystem() system} and {@link InternalCodingDt#getCode() code} from a {@link InternalCodingDt} instance and adds it as a parameter
+	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
 	 * 
 	 * @param theCodingDt
 	 *            The coding
@@ -67,10 +67,10 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	}
 
 	/**
-	 * Constructor which copies the {@link IdentifierDt#getSystem() system} and {@link IdentifierDt#getValue() value} from a {@link IdentifierDt} instance and adds it as a parameter
+	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a parameter
 	 * 
-	 * @param theCodingDt
-	 *            The coding
+	 * @param theIdentifierDt
+	 *            The identifier
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
 		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());

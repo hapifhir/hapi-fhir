@@ -69,9 +69,9 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 	}
 
 	/**
-	 * Returns true if <code>this</code> identifier has the same {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getValue() value} and
-	 * {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getSystem() system} (as compared by simple equals comparison). Does not compare other values (e.g.
-	 * {@link ca.uhn.fhir.model.dstu.composite.IdentifierDt#getUse() use}) or any extensions.
+	 * Returns true if <code>this</code> identifier has the same {@link #getValueElement() value} and
+	 * {@link #getSystemElement() system} (as compared by simple equals comparison). Does not compare other values (e.g.
+	 * getUse()) or any extensions.
 	 */
 	public boolean matchesSystemAndValue(BaseIdentifierDt theIdentifier) {
 		if (theIdentifier == null) {

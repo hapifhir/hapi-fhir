@@ -32,7 +32,8 @@ public interface IBasicClient extends IRestfulClient {
 	/**
 	 * Returns the server conformance statement
 	 * 
-	 * @see See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
+	 * See the <a href="http://hl7.org/implement/standards/fhir/http.html#conformance">FHIR HTTP Conformance</a> definition
+	 * for more information.
 	 */
 	@Metadata
 	BaseConformance getServerConformanceStatement();

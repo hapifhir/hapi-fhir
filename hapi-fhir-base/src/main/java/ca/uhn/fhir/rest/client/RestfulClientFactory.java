@@ -60,7 +60,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	/**
 	 * Constructor
 	 * 
-	 * @param theContext
+	 * @param theFhirContext
 	 *            The context
 	 */
 	public RestfulClientFactory(FhirContext theFhirContext) {

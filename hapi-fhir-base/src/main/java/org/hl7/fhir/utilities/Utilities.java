@@ -78,7 +78,6 @@ public class Utilities {
      * 
      * @param word the word that is to be pluralized.
      * @return the pluralized form of the word, or the word itself if it could not be pluralized
-     * @see #singularize(Object)
      */
     public static String pluralizeMe( String word ) {
     	Inflector inf = new Inflector();

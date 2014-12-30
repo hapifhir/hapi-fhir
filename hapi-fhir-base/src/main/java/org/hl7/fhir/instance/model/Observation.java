@@ -632,14 +632,14 @@ public class Observation extends DomainResource {
     @Block()
     public static class ObservationReferenceRangeComponent extends BackboneElement {
         /**
-         * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.
+         * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3.
          */
         @Child(name="low", type={Quantity.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3." )
         protected Quantity low;
 
         /**
-         * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.
+         * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5.
          */
         @Child(name="high", type={Quantity.class}, order=2, min=0, max=1)
         @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5." )
@@ -673,7 +673,7 @@ public class Observation extends DomainResource {
       }
 
         /**
-         * @return {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.)
+         * @return {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3.)
          */
         public Quantity getLow() { 
           if (this.low == null)
@@ -689,7 +689,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.)
+         * @param value {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3.)
          */
         public ObservationReferenceRangeComponent setLow(Quantity value) { 
           this.low = value;
@@ -697,7 +697,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.)
+         * @return {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5.)
          */
         public Quantity getHigh() { 
           if (this.high == null)
@@ -713,7 +713,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.)
+         * @param value {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5.)
          */
         public ObservationReferenceRangeComponent setHigh(Quantity value) { 
           this.high = value;

@@ -72,7 +72,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class RestfulServer extends HttpServlet {
 
 	/**
-	 * Default setting for {@link #setETagSupport(ETagSupportEnum)ETag Support}: {@link ETagSupportEnum#ENABLED}
+	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
@@ -362,7 +362,7 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
 	 * if you do not wish to export a conformance statement.
 	 * </p>
 	 */
@@ -955,7 +955,7 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement.
 	 * <p>
-	 * By default, the {@link ServerConformanceProvider} is used, but this can be changed, or set to <code>null</code>
+	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
 	 * if you do not wish to export a conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.

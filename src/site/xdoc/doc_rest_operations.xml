@@ -701,8 +701,21 @@
 					resources by subject, but use the subject's last name instead of their resource ID.
 					In this example, you are chaining "family" (the last name) to "subject" (the patient).
 					The net result in the query string would look like:<br/>
-					<code>http://fhir.example.com/DiagnosticReport?subject.family=SMITH</code>
+					<code>http://fhir.example.com/DiagnosticReport?subject.family=SMITH</code><br/>
+					What this query says is "<i>fetch me all of the DiagnosticReport resources
+					where the <b>subject</b> (Patient) of the report has the <b>family</b> (name) of
+					'SMITH'</i>".
 				</p>
+				
+				<p>
+					There are two ways of dealing with chained parameters in your methods: static chains and
+					dynamic chains. Both are equally valid, although dyamic chains might lead to somewhat
+					more compact and readable code.
+				</p>
+				
+				<a name="dynamic_chains"/>
+				<h4>Dynamic Chains</h4>
+				
 				<p>
 					Chained values must be explicitly declared through the use
 					of a whitelist (or blacklist). The following example shows how to declare a
@@ -725,13 +738,16 @@
 				</macro>
 
 				<p>
-					Example URLs to invoke this method:
-					<br />
-					Resource by ID: <code>http://fhir.example.com/DiagnosticReport?subject=1234</code>
-					<br />
-					Resource by chained parameter value: <code>http://fhir.example.com/DiagnosticReport?subject.family=SMITH</code>
+					If you are handling multiple types of chained parameters in a single method,
+					you may want to convert the reference parameter type into something more
+					convenient before using its value. The following example shows how to do that.
 				</p>
 
+				<macro name="snippet">
+					<param name="id" value="referenceWithDynamicChain" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+				
 				<h4>Static Chains</h4>
 
 				<p>

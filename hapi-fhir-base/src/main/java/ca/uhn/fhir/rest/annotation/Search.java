@@ -36,7 +36,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * RESTful method annotation used for a method which provides
  * the FHIR "search" method.
  * 
- * @see See the <a href="http://hl7.org/implement/standards/fhir/http.html#search">FHIR Search</a> definition
+ * See the <a href="http://hl7.org/implement/standards/fhir/http.html#search">FHIR Search</a> definition
+ * for more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value=ElementType.METHOD)

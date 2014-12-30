@@ -29,28 +29,28 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum QuantityCompararatorEnum {
 
 	/**
-	 * Code Value: <b><</b>
+	 * Code Value: <b>&lt;</b>
 	 *
 	 * The actual value is less than the given value.
 	 */
 	LESSTHAN("<", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b><=</b>
+	 * Code Value: <b>&lt;=</b>
 	 *
 	 * The actual value is less than or equal to the given value.
 	 */
 	LESSTHAN_OR_EQUALS("<=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b>>=</b>
+	 * Code Value: <b>&gt;=</b>
 	 *
 	 * The actual value is greater than or equal to the given value.
 	 */
 	GREATERTHAN_OR_EQUALS(">=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b>></b>
+	 * Code Value: <b>&gt;</b>
 	 *
 	 * The actual value is greater than the given value.
 	 */

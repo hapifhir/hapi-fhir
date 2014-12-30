@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SupplyStatusEnum {
 
 	/**
-	 * Display: <b>Requested</b><br/>
+	 * Display: <b>Requested</b><br>
 	 * Code Value: <b>requested</b>
 	 *
 	 * Supply has been requested, but not dispensed.
@@ -37,7 +37,7 @@ public enum SupplyStatusEnum {
 	REQUESTED("requested", "http://hl7.org/fhir/valueset-supply-status"),
 	
 	/**
-	 * Display: <b>Dispensed</b><br/>
+	 * Display: <b>Dispensed</b><br>
 	 * Code Value: <b>dispensed</b>
 	 *
 	 * Supply is part of a pharmacy order and has been dispensed.
@@ -45,7 +45,7 @@ public enum SupplyStatusEnum {
 	DISPENSED("dispensed", "http://hl7.org/fhir/valueset-supply-status"),
 	
 	/**
-	 * Display: <b>Received</b><br/>
+	 * Display: <b>Received</b><br>
 	 * Code Value: <b>received</b>
 	 *
 	 * Supply has been received by the requestor.
@@ -53,7 +53,7 @@ public enum SupplyStatusEnum {
 	RECEIVED("received", "http://hl7.org/fhir/valueset-supply-status"),
 	
 	/**
-	 * Display: <b>Failed</b><br/>
+	 * Display: <b>Failed</b><br>
 	 * Code Value: <b>failed</b>
 	 *
 	 * The supply will not be completed because the supplier was unable or unwilling to supply the item.
@@ -61,7 +61,7 @@ public enum SupplyStatusEnum {
 	FAILED("failed", "http://hl7.org/fhir/valueset-supply-status"),
 	
 	/**
-	 * Display: <b>Cancelled</b><br/>
+	 * Display: <b>Cancelled</b><br>
 	 * Code Value: <b>cancelled</b>
 	 *
 	 * The orderer of the supply cancelled the request.

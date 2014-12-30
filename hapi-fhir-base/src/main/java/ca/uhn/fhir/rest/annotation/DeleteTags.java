@@ -66,7 +66,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public @interface DeleteTags {
 
 	/**
-	 * If set to a type other than the default (which is {@link IResource.class}
+	 * If set to a type other than the default (which is {@link IResource}
 	 * , this method is expected to return a TagList containing only tags which
 	 * are specific to the given resource type.
 	 */

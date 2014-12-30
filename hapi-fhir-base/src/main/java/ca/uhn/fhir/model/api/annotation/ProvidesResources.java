@@ -28,11 +28,10 @@ import java.lang.annotation.RetentionPolicy;
  * These resources will automatically be added to the resource list used for profile generation.
  * <pre>
  * Examples:
- * {@code
- * @literal@ProvidesResources(resource=CustomObservation.class)
+ * {@literal @}ProvidesResources(resource=CustomObservation.class)
  * class CustomObservationResourceProvider implements IResourceProvider{...}
  *
- * @literal@ProvidesResources(resource={CustomPatient.class,CustomObservation.class}){...}
+ * {@literal @}ProvidesResources(resource={CustomPatient.class,CustomObservation.class}){...}
  * class FhirServer extends RestfulServer
  * }
  * </pre>

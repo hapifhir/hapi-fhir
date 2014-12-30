@@ -1,9 +1,18 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -1145,9 +1154,8 @@ public class FhirResourceDaoTest {
 	 */
 	@Test
 	public void testStoreUtf8Characters() throws Exception {
-		String name = "測試醫院";
 		Organization org = new Organization();
-		org.setName(new String(name.getBytes(), "UTF-8"));
+		org.setName("測試醫院");
 		org.addIdentifier("urn:system", "testStoreUtf8Characters_01");
 		IdDt orgId = ourOrganizationDao.create(org).getId();
 

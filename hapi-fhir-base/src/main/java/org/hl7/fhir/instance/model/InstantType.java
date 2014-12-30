@@ -75,7 +75,7 @@ public class InstantType extends BaseDateTimeType {
 	/**
 	 * Create a new instance using the given date, precision level, and time zone
 	 * 
-	 * @throws DataFormatException
+	 * @throws ca.uhn.fhir.parser.DataFormatException
 	 *             If the specified precision is not allowed for this type
 	 */
 	public InstantType(Date theDate, TemporalPrecisionEnum thePrecision, TimeZone theTimezone) {
@@ -123,7 +123,7 @@ public class InstantType extends BaseDateTimeType {
 	 * @param theString
 	 *            The string representation of the string. Must be in a valid
 	 *            format according to the FHIR specification
-	 * @throws DataFormatException
+	 * @throws ca.uhn.fhir.parser.DataFormatException If the value is invalid 
 	 */
 	public InstantType(String theString) {
 		super(theString);

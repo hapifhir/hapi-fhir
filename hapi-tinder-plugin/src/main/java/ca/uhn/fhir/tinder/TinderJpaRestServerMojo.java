@@ -24,6 +24,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
@@ -124,7 +125,8 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			ctx.put("resources", gen.getResources());
 			ctx.put("packageBase", packageBase);
 			ctx.put("version", version);
-			
+			ctx.put("esc", new EscapeTool());
+
 			String capitalize = WordUtils.capitalize(version);
 			if ("Dstu".equals(capitalize)) {
 				capitalize="Dstu1";

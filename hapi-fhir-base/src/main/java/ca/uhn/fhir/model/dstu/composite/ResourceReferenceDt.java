@@ -107,7 +107,7 @@ public class ResourceReferenceDt
 	 * Constructor which accepts a reference directly (this can be an ID, a partial/relative URL or a complete/absolute
 	 * URL)
 	 * 
-	 * @param theId
+	 * @param theResourceId
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(IdDt theResourceId) {

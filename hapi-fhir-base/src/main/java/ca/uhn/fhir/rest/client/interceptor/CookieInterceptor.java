@@ -29,8 +29,8 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * HTTP interceptor to be used for adding Cookie to requests.
  * <p>
- * This interceptor adds a header resembling the following:<br/>
- * &nbsp;&nbsp;&nbsp;<code>Cookie: [key]=[value]</code><br/>
+ * This interceptor adds a header resembling the following:<br>
+ * &nbsp;&nbsp;&nbsp;<code>Cookie: [key]=[value]</code><br>
  * </p>
  */
 

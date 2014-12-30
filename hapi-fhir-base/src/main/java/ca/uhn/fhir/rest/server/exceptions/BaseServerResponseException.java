@@ -76,8 +76,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * 
 	 * @param theStatusCode
 	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
+	 * @param theMessages
+	 *            The messages
 	 */
 	public BaseServerResponseException(int theStatusCode, String... theMessages) {
 		super(theMessages != null && theMessages.length > 0 ? theMessages[0] : null);

@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -429,6 +430,7 @@ public abstract class BaseStructureParser {
 		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 		ctx.put("includes", (theResource.getIncludes()));
+		ctx.put("esc", new EscapeTool());
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");
@@ -506,6 +508,7 @@ public abstract class BaseStructureParser {
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
 				ctx.put("version", myVersion);
 				ctx.put("versionEnumName", determineVersionEnum().name());
+				ctx.put("esc", new EscapeTool());
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty("resource.loader", "cp");

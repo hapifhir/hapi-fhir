@@ -29,31 +29,31 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum PractitionerSpecialtyEnum {
 
 	/**
-	 * Display: <b>Cardiologist</b><br/>
+	 * Display: <b>Cardiologist</b><br>
 	 * Code Value: <b>cardio</b>
 	 */
 	CARDIOLOGIST("cardio", "http://hl7.org/fhir/practitioner-specialty"),
 	
 	/**
-	 * Display: <b>Dentist</b><br/>
+	 * Display: <b>Dentist</b><br>
 	 * Code Value: <b>dent</b>
 	 */
 	DENTIST("dent", "http://hl7.org/fhir/practitioner-specialty"),
 	
 	/**
-	 * Display: <b>Dietary consultant</b><br/>
+	 * Display: <b>Dietary consultant</b><br>
 	 * Code Value: <b>dietary</b>
 	 */
 	DIETARY_CONSULTANT("dietary", "http://hl7.org/fhir/practitioner-specialty"),
 	
 	/**
-	 * Display: <b>Midwife</b><br/>
+	 * Display: <b>Midwife</b><br>
 	 * Code Value: <b>midw</b>
 	 */
 	MIDWIFE("midw", "http://hl7.org/fhir/practitioner-specialty"),
 	
 	/**
-	 * Display: <b>Systems architect</b><br/>
+	 * Display: <b>Systems architect</b><br>
 	 * Code Value: <b>sysarch</b>
 	 */
 	SYSTEMS_ARCHITECT("sysarch", "http://hl7.org/fhir/practitioner-specialty"),

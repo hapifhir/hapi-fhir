@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum MaritalStatusCodesEnum {
 
 	/**
-	 * Display: <b>unmarried</b><br/>
+	 * Display: <b>unmarried</b><br>
 	 * Code Value: <b>U</b>
 	 *
 	 * The person is not presently married. The marital history is not known or stated

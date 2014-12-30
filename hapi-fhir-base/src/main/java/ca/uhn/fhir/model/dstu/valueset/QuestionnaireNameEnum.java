@@ -29,19 +29,19 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum QuestionnaireNameEnum {
 
 	/**
-	 * Display: <b>Cancer Treatment Quality Questionnaire 2012</b><br/>
+	 * Display: <b>Cancer Treatment Quality Questionnaire 2012</b><br>
 	 * Code Value: <b>CTQQ-2012</b>
 	 */
 	CANCER_TREATMENT_QUALITY_QUESTIONNAIRE_2012("CTQQ-2012", "http://hl7.org/fhir/questionnaire-name"),
 	
 	/**
-	 * Display: <b>Pre-admission standard Form A</b><br/>
+	 * Display: <b>Pre-admission standard Form A</b><br>
 	 * Code Value: <b>PA.form.A</b>
 	 */
 	PRE_ADMISSION_STANDARD_FORM_A("PA.form.A", "http://hl7.org/fhir/questionnaire-name"),
 	
 	/**
-	 * Display: <b>Brazelton Neonatal Assessment Scale</b><br/>
+	 * Display: <b>Brazelton Neonatal Assessment Scale</b><br>
 	 * Code Value: <b>BNAS</b>
 	 */
 	BRAZELTON_NEONATAL_ASSESSMENT_SCALE("BNAS", "http://hl7.org/fhir/questionnaire-name"),

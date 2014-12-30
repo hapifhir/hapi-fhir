@@ -112,7 +112,7 @@ public interface IParser {
 	/**
 	 * Parses a resource
 	 * 
-	 * @param theString
+	 * @param theMessageString
 	 *            The string to parse
 	 * @return A parsed resource
 	 * @throws DataFormatException

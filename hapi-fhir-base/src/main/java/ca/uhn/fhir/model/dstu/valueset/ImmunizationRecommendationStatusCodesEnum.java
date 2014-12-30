@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum ImmunizationRecommendationStatusCodesEnum {
 
 	/**
-	 * Display: <b>due</b><br/>
+	 * Display: <b>due</b><br>
 	 * Code Value: <b>due</b>
 	 *
 	 * The patient is due for their next vaccination
@@ -37,7 +37,7 @@ public enum ImmunizationRecommendationStatusCodesEnum {
 	DUE("due", "http://hl7.org/fhir/immunization-recommendation-status"),
 	
 	/**
-	 * Display: <b>overdue</b><br/>
+	 * Display: <b>overdue</b><br>
 	 * Code Value: <b>overdue</b>
 	 *
 	 * The patient is considered overdue for their next vaccination

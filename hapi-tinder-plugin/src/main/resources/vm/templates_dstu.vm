@@ -52,13 +52,13 @@
 
 #foreach ( $child in $childElements )
 	/**
-	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.referenceType} get${child.methodName}() {  
@@ -76,13 +76,13 @@
 
 
 	/**
-	 * Gets the value(s) for <b>${child.elementName}</b> (${child.shortName}).
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.referenceType} get${child.methodName}Element() {  
@@ -100,11 +100,11 @@
 
 
 	/**
-	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 * Sets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}(${child.referenceType} theValue) {
@@ -114,11 +114,11 @@
 
 #if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} == false && ${child.boundCode} == false )
 	/**
-	 * Adds and returns a new value for <b>${child.elementName}</b> (${child.shortName})
+	 * Adds and returns a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.singleType} add${child.methodName}() {
@@ -128,12 +128,12 @@
 	}
 
 	/**
-	 * Gets the first repetition for <b>${child.elementName}</b> (${child.shortName}),
+	 * Gets the first repetition for <b>${child.elementName}</b> ($esc.html(${child.shortName})),
 	 * creating it if it does not already exist.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.singleType} get${child.methodName}FirstRep() {
@@ -145,11 +145,11 @@
 #end
 #if( ${child.repeatable} && ${child.singleChildInstantiable} && ${child.resourceRef} )
 	/**
-	 * Adds and returns a new value for <b>${child.elementName}</b> (${child.shortName})
+	 * Adds and returns a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ResourceReferenceDt add${child.methodName}() {
@@ -160,14 +160,14 @@
 #end
 #if ( ${child.boundCode} && ${child.repeatable} )
 	/**
-	 * Add a value for <b>${child.elementName}</b> (${child.shortName}) using an enumerated type. This
+	 * Add a value for <b>${child.elementName}</b> ($esc.html(${child.shortName})) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link ${hash}addType()} method.
+	 * you may also use the {@link ${hash}add${child.methodName}()} method.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}(${child.bindingClass} theValue) {
@@ -177,12 +177,12 @@
 	}
 
 	/**
-	 * Gets the first repetition for <b>${child.elementName}</b> (${child.shortName}),
+	 * Gets the first repetition for <b>${child.elementName}</b> ($esc.html(${child.shortName})),
 	 * creating it if it does not already exist.
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.boundDatatype}<${child.bindingClass}> get${child.methodName}FirstRep() {
@@ -193,11 +193,11 @@
 	}
 
 	/**
-	 * Add a value for <b>${child.elementName}</b> (${child.shortName})
+	 * Add a value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.boundDatatype}<${child.bindingClass}> add${child.methodName}() {
@@ -207,11 +207,11 @@
 	}
 
 	/**
-	 * Sets the value(s), and clears any existing value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 * Sets the value(s), and clears any existing value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
@@ -222,11 +222,11 @@
 
 #elseif ( ${child.boundCode} )
 	/**
-	 * Sets the value(s) for <b>${child.elementName}</b> (${child.shortName})
+	 * Sets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}(${child.bindingClass} theValue) {
@@ -238,11 +238,11 @@
 #foreach ( $ss in $child.simpleSetters )
 #if(${child.repeatable})
 	/**
-	 * Adds a new value for <b>${child.elementName}</b> (${child.shortName})
+	 * Adds a new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
      *
      * @return Returns a reference to this object, to allow for simple chaining.
@@ -256,11 +256,11 @@
 	}
 #else
 	/**
-	 * Sets the value for <b>${child.elementName}</b> (${child.shortName})
+	 * Sets the value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
 	 *
      * <p>
      * <b>Definition:</b>
-     * ${child.definition}
+     * $esc.html(${child.definition})
      * </p> 
 	 */
 	public ${child.declaringClassNameComplete} set${child.methodName}${ss.suffix}(#{foreach}($param in $ss.parameters) ${param.datatype} ${param.parameter}#{if}( $foreach.hasNext ), #{end}#{end}) {

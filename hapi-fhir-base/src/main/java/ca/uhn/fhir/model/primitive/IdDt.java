@@ -106,7 +106,7 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	 * 
 	 * @param theResourceType
 	 *            The resource type (e.g. "Patient")
-	 * @param theId
+	 * @param theIdPart
 	 *            The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, BigDecimal theIdPart) {
@@ -377,7 +377,6 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	 * <p>
 	 * regex: [a-z0-9\-\.]{1,36}
 	 * </p>
-	 * @return 
 	 */
 	@Override
 	public IdDt setValue(String theValue) throws DataFormatException {

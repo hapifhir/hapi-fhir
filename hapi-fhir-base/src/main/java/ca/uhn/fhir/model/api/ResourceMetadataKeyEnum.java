@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * data elements which are sent/receieved in HTTP Headers along with read/create resource requests, or properties which can be found in bundle entries.
  * <p>
  * To access or set resource metadata values, every resource has a metadata map, and this class provides convenient getters/setters for interacting with that map. For example, to get a resource's
- * {@link UPDATED} value, which is the "last updated" time for that resource, use the following code:
+ * {@link #UPDATED} value, which is the "last updated" time for that resource, use the following code:
  * </p>
  * <p>
  * <code>InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(resource);</code>
@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * To set this value, use the following:
  * </p>
  * <p>
- * <code>InstantDt update = new InstantDt("2011-01-02T11:22:33.0000Z"); // populate with the actual time<br/>
+ * <code>InstantDt update = new InstantDt("2011-01-02T11:22:33.0000Z"); // populate with the actual time<br>
  * ResourceMetadataKeyEnum.UPDATED.put(resource, update);</code>
  * </p>
  * <p>
@@ -191,7 +191,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
 	 * 
-	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getUnqualifiedVersionId()} method
+	 * @deprecated The {@link IResource#getId()} resource ID will now be populated with the version ID via the {@link IdDt#getVersionIdPart()} method
 	 */
 	@Deprecated
 	public static final ResourceMetadataKeyEnum<IdDt> VERSION_ID = new ResourceMetadataKeyEnum<IdDt>("VERSION_ID") {

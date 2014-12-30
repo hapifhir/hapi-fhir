@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum DiagnosticOrderPriorityEnum {
 
 	/**
-	 * Display: <b>Routine</b><br/>
+	 * Display: <b>Routine</b><br>
 	 * Code Value: <b>routine</b>
 	 *
 	 * The order has a normal priority.
@@ -37,7 +37,7 @@ public enum DiagnosticOrderPriorityEnum {
 	ROUTINE("routine", "http://hl7.org/fhir/diagnostic-order-priority"),
 	
 	/**
-	 * Display: <b>Urgent</b><br/>
+	 * Display: <b>Urgent</b><br>
 	 * Code Value: <b>urgent</b>
 	 *
 	 * The order should be urgently.
@@ -45,7 +45,7 @@ public enum DiagnosticOrderPriorityEnum {
 	URGENT("urgent", "http://hl7.org/fhir/diagnostic-order-priority"),
 	
 	/**
-	 * Display: <b>Stat</b><br/>
+	 * Display: <b>Stat</b><br>
 	 * Code Value: <b>stat</b>
 	 *
 	 * The order is time-critical.
@@ -53,7 +53,7 @@ public enum DiagnosticOrderPriorityEnum {
 	STAT("stat", "http://hl7.org/fhir/diagnostic-order-priority"),
 	
 	/**
-	 * Display: <b>ASAP</b><br/>
+	 * Display: <b>ASAP</b><br>
 	 * Code Value: <b>asap</b>
 	 *
 	 * The order should be acted on as soon as possible.

@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SupplyTypeEnum {
 
 	/**
-	 * Display: <b>Central Supply</b><br/>
+	 * Display: <b>Central Supply</b><br>
 	 * Code Value: <b>central</b>
 	 *
 	 * Supply is stored and requested from central supply
@@ -37,7 +37,7 @@ public enum SupplyTypeEnum {
 	CENTRAL_SUPPLY("central", "http://hl7.org/fhir/supply-type"),
 	
 	/**
-	 * Display: <b>Non-Stock</b><br/>
+	 * Display: <b>Non-Stock</b><br>
 	 * Code Value: <b>nonstock</b>
 	 *
 	 * Supply is not onsite and must be requested from an outside vendor using a non-stock requisition

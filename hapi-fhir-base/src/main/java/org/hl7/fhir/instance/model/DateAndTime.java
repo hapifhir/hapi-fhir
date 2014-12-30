@@ -326,7 +326,7 @@ public class DateAndTime {
 	}
 	
 	/**
-	 * @param isPositive - true if the tz offset is positive (i.e. +06:00), false if the tz offset is negative (-06:00)
+	 * @param isPositiveOffset - true if the tz offset is positive (i.e. +06:00), false if the tz offset is negative (-06:00)
 	 */
 	public void setTzSign(boolean isPositiveOffset) {
 		positiveOffset = isPositiveOffset;

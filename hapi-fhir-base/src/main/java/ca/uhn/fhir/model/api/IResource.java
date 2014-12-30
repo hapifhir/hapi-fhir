@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * Note that this class is a part of HAPI's model API, used to define
  * structure classes. Users will often interact with this interface, but
  * should not need to implement it directly.
- * <p>
+ * </p>
  */
 public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
 
@@ -48,7 +48,7 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 * encoding, and copying contained resources from this list to their
 	 * appropriate references when parsing) so it is generally not neccesary to
 	 * interact with this list directly. Instead, in a server you can place
-	 * resource instances in reference fields (such as {@link ca.uhn.fhir.model.dstu.resource.Patient#setManagingOrganization(ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt)})
+	 * resource instances in reference fields (such as <code>Patient#setManagingOrganization(ResourceReferenceDt)</code> )
 	 * and the resource will be automatically contained. In a client, contained resources will
 	 * be automatically populated into their appropriate fields by the HAPI parser.
 	 * </p>

@@ -57,6 +57,7 @@ import ca.uhn.fhir.validation.FhirValidator;
  * 
  * <p>
  * Important usage notes:
+ * </p>
  * <ul>
  * <li>Thread safety: <b>This class is thread safe</b> and may be shared between multiple processing threads.</li>
  * <li>
@@ -67,7 +68,6 @@ import ca.uhn.fhir.validation.FhirValidator;
  * another) but you will incur a performance penalty if a new FhirContext is created for every message you parse/encode.
  * </li>
  * </ul>
- * </p>
  */
 public class FhirContext {
 
@@ -315,7 +315,6 @@ public class FhirContext {
 	 * 
 	 * @param theServerBase
 	 *            The URL of the base for the restful FHIR server to connect to
-	 * @return
 	 */
 	public IGenericClient newRestfulGenericClient(String theServerBase) {
 		return getRestfulClientFactory().newGenericClient(theServerBase);

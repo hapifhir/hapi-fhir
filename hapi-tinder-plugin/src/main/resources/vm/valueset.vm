@@ -10,9 +10,9 @@ public enum ${valueSet.className} {
 #foreach ($code in $valueSet.codes)
 	/**
 #if ( ${code.hasDisplay} )
-	 * Display: <b>${code.display}</b><br/>
+	 * Display: <b>$esc.html(${code.display})</b><br>
 #end
-	 * Code Value: <b>${code.code}</b>
+	 * Code Value: <b>$esc.html(${code.code})</b>
 #if ( ${code.hasDefinition} )
 	 *
 	 * ${code.definition}
