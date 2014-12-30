@@ -94,4 +94,15 @@ public class TokenOrListParam extends BaseOrListParam<TokenParam> {
 		return new TokenParam();
 	}
 
+	public boolean doesCodingListMatch(List<? extends BaseCodingDt> theCodings) {
+		List<BaseCodingDt> paramCodings = getListAsCodings();
+		for (BaseCodingDt coding : theCodings) {
+			for (BaseCodingDt paramCoding : paramCodings) {
+				if (coding.matchesToken(paramCoding)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
