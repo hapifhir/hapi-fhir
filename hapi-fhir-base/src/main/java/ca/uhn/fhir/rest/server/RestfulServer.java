@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.*;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -1116,7 +1118,7 @@ public class RestfulServer extends HttpServlet {
 		bundle.getLinkBase().setValue(theServerBase);
 		bundle.getLinkSelf().setValue(theCompleteUrl);
 
-		List<IResource> addedResources = new ArrayList<IResource>();
+		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 		for (IResource next : theResult) {
 
@@ -1172,7 +1174,7 @@ public class RestfulServer extends HttpServlet {
 					references.addAll(newReferences);
 				}
 
-				addedResources.addAll(addedResourcesThisPass);
+				includedResources.addAll(addedResourcesThisPass);
 
 			} while (references.isEmpty() == false);
 
@@ -1183,8 +1185,11 @@ public class RestfulServer extends HttpServlet {
 		/*
 		 * Actually add the resources to the bundle
 		 */
-		for (IResource next : addedResources) {
-			bundle.addResource(next, theContext, theServerBase);
+		for (IResource next : includedResources) {
+			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				entry.getStatus().setValueAsEnum(BundleEntryStatusEnum.INCLUDE);
+			}
 		}
 
 		bundle.getTotalResults().setValue(theTotalResults);

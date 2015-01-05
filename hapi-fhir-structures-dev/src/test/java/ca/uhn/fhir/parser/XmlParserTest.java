@@ -50,6 +50,7 @@ public class XmlParserTest {
 
 		assertEquals(1, parsed.getEntries().size());
 		assertEquals("update", parsed.getEntries().get(0).getStatus().getValue());
+		assertEquals("http://foo?search", parsed.getEntries().get(0).getLinkSearch().getValue());
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
 		assertEquals("Patient/example", p.getPatient().getReference().getValue());

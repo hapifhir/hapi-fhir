@@ -34,6 +34,20 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>fhirServletBase</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server (Base / DSTU1 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>BASE</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>fhirServletDstu1</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
@@ -48,21 +62,21 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>fhirServletDev</servlet-name>
+		<servlet-name>fhirServletDstu2</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
 			<param-name>ImplementationDescription</param-name>
-			<param-value>UHN Test Server (DEV Resources)</param-value>
+			<param-value>UHN Test Server (DSTU2 Resources)</param-value>
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
-			<param-value>DEV</param-value>
+			<param-value>DSTU2</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>fhirServletDstu1</servlet-name>
+		<servlet-name>fhirServletBase</servlet-name>
 		<url-pattern>/base/*</url-pattern>
 	</servlet-mapping>
 
@@ -72,12 +86,12 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>fhirServletDev</servlet-name>
+		<servlet-name>fhirServletDstu2</servlet-name>
 		<url-pattern>/baseDstu2/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>fhirServletDev</servlet-name>
+		<servlet-name>fhirServletDstu2</servlet-name>
 		<url-pattern>/baseDev/*</url-pattern>
 	</servlet-mapping>
 
