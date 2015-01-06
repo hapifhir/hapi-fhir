@@ -42,61 +42,26 @@ public class BundleEntry extends BaseBundle {
 	//@formatter:on
 	private TagList myCategories;
 	private InstantDt myDeletedAt;
-	private CodeDt myDeletedResourceType;
-	private StringDt myDeletedResourceId;
-	private StringDt myDeletedResourceVersion;
-
-	public CodeDt getDeletedResourceType() {
-		if (myDeletedResourceType == null) {
-			myDeletedResourceType = new CodeDt();
-		}
-		return myDeletedResourceType;
-	}
-
-	public void setDeletedResourceType(CodeDt theDeletedResourceType) {
-		myDeletedResourceType = theDeletedResourceType;
-	}
-
-	public StringDt getDeletedResourceId() {
-		if (myDeletedResourceId == null) {
-			myDeletedResourceId = new StringDt();
-		}
-		return myDeletedResourceId;
-	}
-
-	public void setDeletedResourceId(StringDt theDeletedResourceId) {
-		myDeletedResourceId = theDeletedResourceId;
-	}
-
-	public StringDt getDeletedResourceVersion() {
-		if (myDeletedResourceVersion == null) {
-			myDeletedResourceVersion = new StringDt();
-		}
-		return myDeletedResourceVersion;
-	}
-
-	public void setDeletedResourceVersion(StringDt theDeletedResourceVersion) {
-		myDeletedResourceVersion = theDeletedResourceVersion;
-	}
-
 	private StringDt myDeletedByEmail;
 	private StringDt myDeletedByName;
 	private StringDt myDeletedComment;
+	private StringDt myDeletedResourceId;
+	private CodeDt myDeletedResourceType;
+	private StringDt myDeletedResourceVersion;
 	private StringDt myLinkAlternate;
+	private StringDt myLinkBase;
 	private StringDt myLinkSearch;
 	private StringDt myLinkSelf;
-	private StringDt myLinkBase;
 	private InstantDt myPublished;
 	private IResource myResource;
+	private DecimalDt myScore;
+	private BoundCodeDt<BundleEntryStatusEnum> myStatus;
 	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
-	private BoundCodeDt<BundleEntryStatusEnum> myStatus;
-	private DecimalDt myScore;
 
 	/**
-	 * @deprecated Tags wil become immutable in a future release of HAPI, so
-	 *             {@link #addCategory(String, String, String)} should be used instead
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addCategory(String, String, String)} should be used instead
 	 */
 	public Tag addCategory() {
 		Tag retVal = new Tag();
@@ -150,6 +115,27 @@ public class BundleEntry extends BaseBundle {
 		return myDeletedComment;
 	}
 
+	public StringDt getDeletedResourceId() {
+		if (myDeletedResourceId == null) {
+			myDeletedResourceId = new StringDt();
+		}
+		return myDeletedResourceId;
+	}
+
+	public CodeDt getDeletedResourceType() {
+		if (myDeletedResourceType == null) {
+			myDeletedResourceType = new CodeDt();
+		}
+		return myDeletedResourceType;
+	}
+
+	public StringDt getDeletedResourceVersion() {
+		if (myDeletedResourceVersion == null) {
+			myDeletedResourceVersion = new StringDt();
+		}
+		return myDeletedResourceVersion;
+	}
+
 	public StringDt getLinkAlternate() {
 		if (myLinkAlternate == null) {
 			myLinkAlternate = new StringDt();
@@ -189,6 +175,13 @@ public class BundleEntry extends BaseBundle {
 		return myResource;
 	}
 
+	public DecimalDt getScore() {
+		if (myScore == null) {
+			myScore = new DecimalDt();
+		}
+		return myScore;
+	}
+
 	public BoundCodeDt<BundleEntryStatusEnum> getStatus() {
 		if (myStatus == null) {
 			myStatus = new BoundCodeDt<BundleEntryStatusEnum>(BundleEntryStatusEnum.VALUESET_BINDER);
@@ -211,9 +204,8 @@ public class BundleEntry extends BaseBundle {
 	}
 
 	/**
-	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved
-	 * to the resource &lt;meta/&gt; element so it is redundant here). In preparation for DSTU2, it is recommended that you
-	 * migrate code away from using this method and over to using resource metadata instead. 
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved to the resource &lt;meta/&gt; element so it is redundant here). In
+	 *             preparation for DSTU2, it is recommended that you migrate code away from using this method and over to using resource metadata instead.
 	 */
 	public InstantDt getUpdated() {
 		if (myUpdated == null) {
@@ -221,7 +213,7 @@ public class BundleEntry extends BaseBundle {
 		}
 		if (myUpdated.isEmpty() && myResource != null) {
 			InstantDt resourceUpdated = ResourceMetadataKeyEnum.UPDATED.get(myResource);
-			if (resourceUpdated!=null && !resourceUpdated.isEmpty()) {
+			if (resourceUpdated != null && !resourceUpdated.isEmpty()) {
 				return resourceUpdated;
 			}
 		}
@@ -258,6 +250,18 @@ public class BundleEntry extends BaseBundle {
 		myDeletedComment = theDeletedComment;
 	}
 
+	public void setDeletedResourceId(StringDt theDeletedResourceId) {
+		myDeletedResourceId = theDeletedResourceId;
+	}
+
+	public void setDeletedResourceType(CodeDt theDeletedResourceType) {
+		myDeletedResourceType = theDeletedResourceType;
+	}
+
+	public void setDeletedResourceVersion(StringDt theDeletedResourceVersion) {
+		myDeletedResourceVersion = theDeletedResourceVersion;
+	}
+
 	public void setLinkAlternate(StringDt theLinkAlternate) {
 		myLinkAlternate = theLinkAlternate;
 	}
@@ -286,14 +290,17 @@ public class BundleEntry extends BaseBundle {
 		myResource = theResource;
 	}
 
+	public void setScore(DecimalDt theScore) {
+		myScore = theScore;
+	}
+
 	public void setStatus(BoundCodeDt<BundleEntryStatusEnum> theStatus) {
 		myStatus = theStatus;
 	}
 
 	/**
-	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved
-	 * to the resource &lt;meta/&gt; element so it is redundant here). In preparation for DSTU2, it is recommended that you
-	 * migrate code away from using this method and over to using resource metadata instead. 
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved to the resource &lt;meta/&gt; element so it is redundant here). In
+	 *             preparation for DSTU2, it is recommended that you migrate code away from using this method and over to using resource metadata instead.
 	 */
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
@@ -310,17 +317,6 @@ public class BundleEntry extends BaseBundle {
 		}
 		b.append("id", getId());
 		return b.toString();
-	}
-
-	public DecimalDt getScore() {
-		if (myScore == null) {
-			myScore = new DecimalDt();
-		}
-		return myScore;
-	}
-
-	public void setScore(DecimalDt theScore) {
-		myScore = theScore;
 	}
 
 }
