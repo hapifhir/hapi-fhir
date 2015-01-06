@@ -58,7 +58,10 @@
 		</menu>
 
 		<menu name="Documentation">
-			<item name="Introduction" href="./doc_intro.html" />
+			<item name="Introduction" href="./doc_intro.html" >
+				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
+			</item>
+			
 			<item name="The Data Model" href="./doc_fhirobjects.html">
 				<item name="Profiles &amp; Extensions" href="./doc_extensions.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />

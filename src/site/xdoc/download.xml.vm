@@ -39,7 +39,7 @@
    <version>${project.version}</version>
 </dependency>]]></source>
 			
-			<subsection name="Supporting DEV Resources">
+			<subsection name="Supporting DEV (DSTU2) Resources">
 			
 				<p>
 					HAPI also has a <code>hapi-fhir-structures-dev-[version].jar</code>, which 
@@ -47,11 +47,11 @@
 					your classpath if you want to use resources that were created or updated by
 					HL7 after the DSTU1 release. Be warned though that using these resources
 					<b>can lead to incompatibility</b> between your application and other applications
-					if those applications use libraries that do not support DEV resources.
+					if those applications are designed to be compliant with FHIR DSTU1.
 				</p>
 				
 				<p>
-					If you are using Maven, ad the following dependency to include DEV resources:
+					If you are using Maven, add the following dependency to include DEV resources:
 				</p>
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
