@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu;
  * #%L
  * HAPI FHIR Structures - DSTU (FHIR 0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
