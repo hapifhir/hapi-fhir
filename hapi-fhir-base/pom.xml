@@ -237,6 +237,7 @@
 											<include>org.codehaus.woodstox:stax2-api</include>
 											<include>org.slf4j:slf4j*</include>
 											<include>org.apache.commons:*</include>
+											<include>org.apache.httpcomponents:*</include>
 										</includes>
 									</artifactSet>
 									<relocations>
