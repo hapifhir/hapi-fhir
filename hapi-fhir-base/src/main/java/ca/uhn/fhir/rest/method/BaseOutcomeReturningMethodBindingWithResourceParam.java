@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -42,6 +43,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private int myResourceParameterIndex;
 	private String myResourceName;
 	private boolean myBinary;
+	private Class<? extends IResource> myResourceType;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -51,6 +53,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		int index = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
+				if (myResourceType != null) {
+					throw new ConfigurationException("Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
+				}
+				
 				resourceParameter = (ResourceParameter) next;
 				Class<? extends IResource> resourceType = resourceParameter.getResourceType();
 
@@ -62,7 +68,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					myBinary = true;
 				}
 
-				myResourceName = theContext.getResourceDefinition(resourceType).getName();
+				myResourceType = resourceParameter.getResourceType();
+				myResourceName = theContext.getResourceDefinition(myResourceType).getName();
 
 				myResourceParameterIndex = index;
 			}
@@ -73,6 +80,11 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
+	}
+
+	@Override
+	protected Class<? extends IBaseResource> requestContainsResourceType() {
+		return myResourceType;
 	}
 
 	@Override

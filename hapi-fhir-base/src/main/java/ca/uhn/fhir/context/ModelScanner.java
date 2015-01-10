@@ -615,7 +615,7 @@ class ModelScanner {
 	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
 		T retVal = theTarget.getAnnotation(theAnnotationType);
 		if (retVal == null) {
-			String sourceClassName = theAnnotationType.getClass().getName();
+			String sourceClassName = theAnnotationType.getName();
 			String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
 
 			if (!sourceClassName.equals(candidateAltClassName)) {

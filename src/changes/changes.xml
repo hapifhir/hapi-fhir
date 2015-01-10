@@ -45,6 +45,11 @@
 				header in server was incorrectly using FHIR date format instead
 				of RFC-1123 format. 
 			</action>
+			<action type="fix">
+				Server create and update methods failed with an IllegalArgumentException if
+				the method type was a custom resource definition type (instead of a built-in
+				HAPI type). Thanks to Neal Acharya for the analysis. 
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
