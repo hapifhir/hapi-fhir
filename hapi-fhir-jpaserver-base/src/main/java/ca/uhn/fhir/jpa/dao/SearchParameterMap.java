@@ -20,9 +20,7 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 	private static final long serialVersionUID = 1L;
 
 	private Integer myCount;
-
 	private Set<Include> myIncludes;
-
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {

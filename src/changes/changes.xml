@@ -50,6 +50,12 @@
 				the method type was a custom resource definition type (instead of a built-in
 				HAPI type). Thanks to Neal Acharya for the analysis. 
 			</action>
+			<action type="add" fix="79">
+				JPA server module now supports 
+				<![CDATA[<code>_include</code>]]> 
+				value of 
+				<![CDATA[<code>*</code>]]>. Thanks to Bill de Beaubien for reporting! 
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

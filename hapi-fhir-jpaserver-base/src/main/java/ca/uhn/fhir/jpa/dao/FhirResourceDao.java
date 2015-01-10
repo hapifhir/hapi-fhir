@@ -502,11 +502,16 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 								for (Include next : theParams.getIncludes()) {
 									for (IResource nextResource : resources) {
 										RuntimeResourceDefinition def = getContext().getResourceDefinition(nextResource);
-										if (!next.getValue().startsWith(def.getName() + ".")) {
+										List<Object> values;
+										if ("*".equals(next.getValue())) {
+											values = new ArrayList<Object>();
+											values.addAll(t.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class));
+										} else if (next.getValue().startsWith(def.getName() + ".")) {
+											values = t.getValues(nextResource, next.getValue());
+										} else {
 											continue;
 										}
 
-										List<Object> values = t.getValues(nextResource, next.getValue());
 										for (Object object : values) {
 											if (object == null) {
 												continue;

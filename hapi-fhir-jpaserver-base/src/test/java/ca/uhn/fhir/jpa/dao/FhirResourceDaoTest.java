@@ -31,6 +31,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -911,7 +912,8 @@ public class FhirResourceDaoTest {
 		}
 
 		/*
-		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list for numeric IDs that don't exist
+		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list
+		 * for numeric IDs that don't exist
 		 */
 
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999999")));
@@ -1057,8 +1059,7 @@ public class FhirResourceDaoTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
-				.setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
 		ourPatientDao.create(patient);
 
 		patient = new Patient();
@@ -1115,9 +1116,16 @@ public class FhirResourceDaoTest {
 
 	@Test
 	public void testSearchWithIncludes() {
+		IdDt parentOrgId;
+		{
+			Organization org = new Organization();
+			org.getName().setValue("testSearchWithIncludes_O1Parent");
+			parentOrgId = ourOrganizationDao.create(org).getId();
+		}
 		{
 			Organization org = new Organization();
 			org.getName().setValue("testSearchWithIncludes_O1");
+			org.setPartOf(new ResourceReferenceDt(parentOrgId));
 			IdDt orgId = ourOrganizationDao.create(org).getId();
 
 			Patient patient = new Patient();
@@ -1133,20 +1141,59 @@ public class FhirResourceDaoTest {
 			ourPatientDao.create(patient);
 		}
 
-		SearchParameterMap params = new SearchParameterMap();
-		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-		params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
-		IBundleProvider search = ourPatientDao.search(params);
-		List<IResource> patients = toList(search);
-		assertEquals(2, patients.size());
-		assertEquals(Patient.class, patients.get(0).getClass());
-		assertEquals(Organization.class, patients.get(1).getClass());
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-		patients = toList(ourPatientDao.search(params));
-		assertEquals(1, patients.size());
-
+		{
+			// No includes
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			List<IResource> patients = toList(ourPatientDao.search(params));
+			assertEquals(1, patients.size());
+		}
+		{
+			// Named include
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+			IBundleProvider search = ourPatientDao.search(params);
+			List<IResource> patients = toList(search);
+			assertEquals(2, patients.size());
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
+		}
+		{
+			// Named include with parent
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+			params.addInclude(Organization.INCLUDE_PARTOF);
+			IBundleProvider search = ourPatientDao.search(params);
+			List<IResource> patients = toList(search);
+			assertEquals(3, patients.size());
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
+			assertEquals(Organization.class, patients.get(2).getClass());
+		}
+		{
+			// * include
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.addInclude(new Include("*"));
+			IBundleProvider search = ourPatientDao.search(params);
+			List<IResource> patients = toList(search);
+			assertEquals(3, patients.size());
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
+			assertEquals(Organization.class, patients.get(2).getClass());
+		}
+		{
+			// Irrelevant include
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.addInclude(Encounter.INCLUDE_INDICATION);
+			IBundleProvider search = ourPatientDao.search(params);
+			List<IResource> patients = toList(search);
+			assertEquals(1, patients.size());
+			assertEquals(Patient.class, patients.get(0).getClass());
+		}
 	}
 
 	/**
