@@ -433,4 +433,11 @@ public class FhirContext {
 		return new FhirContext(FhirVersionEnum.DEV);
 	}
 
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
+	 */
+	public static FhirContext forDstu2() {
+		return new FhirContext(FhirVersionEnum.DEV);
+	}
+
 }

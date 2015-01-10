@@ -1012,6 +1012,9 @@ class ParserState<T> {
 			if (!myEntry.getStatus().isEmpty()) {
 				ResourceMetadataKeyEnum.ENTRY_STATUS.put(myEntry.getResource(), myEntry.getStatus().getValueAsEnum());
 			}
+			if (!myEntry.getStatus().isEmpty()) {
+				ResourceMetadataKeyEnum.ENTRY_SCORE.put(myEntry.getResource(), myEntry.getScore());
+			}
 		}
 
 	}
@@ -1114,12 +1117,17 @@ class ParserState<T> {
 			for (BundleEntry nextEntry : myInstance.getEntries()) {
 				IResource nextResource = nextEntry.getResource();
 				
-				String baseUrl = myInstance.getLinkBase().getValue();
+				String bundleBaseUrl = myInstance.getLinkBase().getValue();
+				String entryBaseUrl = nextEntry.getLinkBase().getValue();
 				String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 				String resourceName = myContext.getResourceDefinition(nextResource).getName();
-				String idPart = nextResource.getId().getIdPart();
-				if (isNotBlank(idPart)) {
-					nextResource.setId(new IdDt(baseUrl, resourceName, idPart, version));
+				String bundleIdPart = nextResource.getId().getIdPart();
+				if (isNotBlank(bundleIdPart)) {
+					if (isNotBlank(entryBaseUrl)) {
+						nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+					} else {
+						nextResource.setId(new IdDt(bundleBaseUrl, resourceName, bundleIdPart, version));
+					}
 				}
 			}
 			

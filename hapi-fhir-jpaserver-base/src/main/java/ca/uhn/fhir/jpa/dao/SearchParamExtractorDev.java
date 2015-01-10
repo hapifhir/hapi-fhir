@@ -350,7 +350,7 @@ class SearchParamExtractorDev implements ISearchParamExtractor {
 						}
 					} else if (nextObject instanceof ContactPointDt) {
 						ContactPointDt nextContact = (ContactPointDt) nextObject;
-						if (nextContact.getValue().isEmpty() == false) {
+						if (nextContact.getValueElement().isEmpty() == false) {
 							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextContact.getValueElement().getValueAsString()), nextContact.getValue());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
@@ -415,7 +415,7 @@ class SearchParamExtractorDev implements ISearchParamExtractor {
 					codes.add(nextValue.getValueAsString());
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
-					if (!nextCC.getText().isEmpty()) {
+					if (!nextCC.getTextElement().isEmpty()) {
 						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseFhirDao.normalizeString(nextCC.getTextElement().getValue()), nextCC.getTextElement().getValue());
 						nextEntity.setResource(theEntity);
 						retVal.add(nextEntity);
@@ -433,7 +433,7 @@ class SearchParamExtractorDev implements ISearchParamExtractor {
 							codes.add(nextCode);
 						}
 
-						if (!nextCoding.getDisplay().isEmpty()) {
+						if (!nextCoding.getDisplayElement().isEmpty()) {
 							systems.add(null);
 							codes.add(nextCoding.getDisplayElement().getValue());
 						}

@@ -112,7 +112,7 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		Collection<Include> retValCollection = null;
 		if (myInstantiableCollectionType != null) {
 			try {
@@ -127,14 +127,15 @@ class IncludeParameter extends BaseQueryParameter {
 				continue;
 			}
 			if (nextParamList.size() > 1) {
-				throw new InvalidRequestException("'OR' query parameters (values containing ',') are not supported in _include parameters");
+				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
 			String value = nextParamList.get(0);
 			if (myAllow != null) {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
-						throw new InvalidRequestException("Invalid _include parameter value: '" + value + "'. Valid values are: " + new TreeSet<String>(myAllow));
+						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString());
+						throw new InvalidRequestException(msg);
 					}
 				}
 			}

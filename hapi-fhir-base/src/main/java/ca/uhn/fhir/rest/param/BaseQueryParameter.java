@@ -42,21 +42,60 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public abstract class BaseQueryParameter implements IParameter {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
+
 	public abstract List<QualifiedParamList> encode(FhirContext theContext, Object theObject) throws InternalErrorException;
 
 	public abstract String getName();
 
-	public abstract Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
-
-	public abstract boolean isRequired();
+	public abstract SearchParamTypeEnum getParamType();
 
 	/**
-	 * Parameter should return true if {@link #parse(List)} should be called even if the query string contained no
-	 * values for the given parameter
+	 * Returns null if blacklist is "none"
+	 */
+	public Set<String> getQualifierBlacklist() {
+		return null;
+	}
+
+	/**
+	 * Returns null if whitelist is "all"
+	 */
+	public Set<String> getQualifierWhitelist() {
+		return null;
+	}
+
+	/**
+	 * Parameter should return true if {@link #parse(FhirContext, List)} should be called even if the query string
+	 * contained no values for the given parameter
 	 */
 	public abstract boolean handlesMissing();
 
-	public abstract SearchParamTypeEnum getParamType();
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		// ignore for now
+	}
+
+	public abstract boolean isRequired();
+
+	public abstract Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException;
+
+	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
+		QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(theQualifier);
+		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
+			return;
+		}
+
+		String[] value = theRequest.getParameters().get(theQualifiedParamName);
+		if (value != null) {
+			for (String nextParam : value) {
+				if (nextParam.contains(",") == false) {
+					paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
+				} else {
+					paramList.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(theQualifier, nextParam));
+				}
+			}
+		}
+	}
 
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
@@ -87,7 +126,7 @@ public abstract class BaseQueryParameter implements IParameter {
 			theTargetQueryArguments.put(getName() + StringUtils.defaultString(qualifier), paramValues);
 		}
 	}
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseQueryParameter.class);
+
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 
@@ -103,55 +142,18 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		}
 
 		if (paramList.isEmpty()) {
-			
+
 			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", getName(), qualified, getQualifierWhitelist());
-			
+
 			if (handlesMissing()) {
-				return parse(paramList);
+				return parse(theRequest.getServer().getFhirContext(), paramList);
 			} else {
 				return null;
 			}
 		}
 
-		return parse(paramList);
+		return parse(theRequest.getServer().getFhirContext(), paramList);
 
-	}
-
-	private void parseParams(RequestDetails theRequest, List<QualifiedParamList> paramList, String theQualifiedParamName, String theQualifier) {
-		QualifierDetails qualifiers = SearchMethodBinding.extractQualifiersFromParameterName(theQualifier);
-		if (!qualifiers.passes(getQualifierWhitelist(), getQualifierBlacklist())) {
-			return;
-		}
-
-		String[] value = theRequest.getParameters().get(theQualifiedParamName);
-		if (value != null) {
-			for (String nextParam : value) {
-				if (nextParam.contains(",") == false) {
-					paramList.add(QualifiedParamList.singleton(theQualifier, nextParam));
-				} else {
-					paramList.add(QualifiedParamList.splitQueryStringByCommasIgnoreEscape(theQualifier, nextParam));
-				}
-			}
-		}
-	}
-
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// ignore for now
-	}
-
-	/**
-	 * Returns null if blacklist is "none"
-	 */
-	public Set<String> getQualifierBlacklist() {
-		return null;
-	}
-
-	/**
-	 * Returns null if whitelist is "all"
-	 */
-	public Set<String> getQualifierWhitelist() {
-		return null;
 	}
 
 }

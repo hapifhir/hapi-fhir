@@ -213,7 +213,7 @@ public class SearchParameter extends BaseQueryParameter {
 	 * @see ca.uhn.fhir.rest.param.IParameter#parse(java.util.List)
 	 */
 	@Override
-	public Object parse(List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public Object parse(FhirContext theContext, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		return myParamBinder.parse(getName(), theString);
 	}
 

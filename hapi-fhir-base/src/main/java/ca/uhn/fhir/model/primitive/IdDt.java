@@ -481,31 +481,8 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	 *            The resource name (e.g. "Patient")
 	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
 	 */
-	public String withServerBase(String theServerBase, String theResourceType) {
-		if (getValue().startsWith("http")) {
-			return getValue();
-		}
-		StringBuilder retVal = new StringBuilder();
-		retVal.append(theServerBase);
-		if (retVal.charAt(retVal.length() - 1) != '/') {
-			retVal.append('/');
-		}
-		if (isNotBlank(getResourceType())) {
-			retVal.append(getResourceType());
-		} else {
-			retVal.append(theResourceType);
-		}
-		retVal.append('/');
-		retVal.append(getIdPart());
-
-		if (hasVersionIdPart()) {
-			retVal.append('/');
-			retVal.append(Constants.PARAM_HISTORY);
-			retVal.append('/');
-			retVal.append(getVersionIdPart());
-		}
-
-		return retVal.toString();
+	public IdDt withServerBase(String theServerBase, String theResourceType) {
+		return new IdDt(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
 	}
 
 	/**

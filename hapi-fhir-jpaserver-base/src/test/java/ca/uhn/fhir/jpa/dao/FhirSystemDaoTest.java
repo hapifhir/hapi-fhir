@@ -23,14 +23,15 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dev.composite.IdentifierDt;
+import ca.uhn.fhir.model.dev.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Device;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu.resource.Location;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dev.resource.Device;
+import ca.uhn.fhir.model.dev.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dev.resource.Location;
+import ca.uhn.fhir.model.dev.resource.Observation;
+import ca.uhn.fhir.model.dev.resource.Organization;
+import ca.uhn.fhir.model.dev.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -49,6 +50,7 @@ public class FhirSystemDaoTest {
 	private static IFhirResourceDao<Location> ourLocationDao;
 	private static Date ourTestStarted;
 	private static IFhirSystemDao ourSystemDao;
+	private static FhirContext ourFhirContext;
 
 	@Test
 	public void testHistory() throws Exception {
@@ -56,7 +58,7 @@ public class FhirSystemDaoTest {
 		Thread.sleep(10);
 
 		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "testHistory");
+		patient.addIdentifier().setSystem("urn:system").setValue( "testHistory");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 		IdDt pid = ourPatientDao.create(patient).getId().toVersionless();
 
@@ -104,7 +106,7 @@ public class FhirSystemDaoTest {
 		TagList tl1 = new TagList();
 		tl1.addTag("testGetAllTagsScheme1", "testGetAllTagsTerm1", "testGetAllTagsLabel1");
 		Patient p1 = new Patient();
-		p1.addIdentifier("foo", "testGetAllTags01");
+		p1.addIdentifier().setSystem("foo").setValue("testGetAllTags01");
 		ResourceMetadataKeyEnum.TAG_LIST.put(p1, tl1);
 		ourPatientDao.create(p1);
 
@@ -175,7 +177,7 @@ public class FhirSystemDaoTest {
 
 		Patient p1 = new Patient();
 		p1.getId().setValue("testTransactionWithUpdateXXX01");
-		p1.addIdentifier("system", "testTransactionWithUpdate01");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithUpdate01");
 		res.add(p1);
 
 		Observation p2 = new Observation();
@@ -200,7 +202,7 @@ public class FhirSystemDaoTest {
 		p1.addName().addFamily("Name1");
 		p1.setId(p1.getId().toUnqualified().toVersionless());
 
-		p2.addReferenceRange().setHigh(123L);
+		p2.addReferenceRange().setHigh(new QuantityDt(123L));
 		p2.setId(p2.getId().toUnqualified().toVersionless());
 
 		ourSystemDao.transaction(res);
@@ -221,7 +223,7 @@ public class FhirSystemDaoTest {
 
 		Patient p1 = new Patient();
 		p1.setId("cid:patient1");
-		p1.addIdentifier("system", "testTransactionWithCidIds01");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithCidIds01");
 		res.add(p1);
 
 		Observation o1 = new Observation();
@@ -251,7 +253,7 @@ public class FhirSystemDaoTest {
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = FhirSystemDaoTest.class.getResourceAsStream("/bundle.json");
-		Bundle bundle = new FhirContext().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
+		Bundle bundle = ourFhirContext.newJsonParser().parseBundle(new InputStreamReader(bundleRes));
 		List<IResource> res = bundle.toListOfResources();
 
 		ourSystemDao.transaction(res);
@@ -267,7 +269,7 @@ public class FhirSystemDaoTest {
 	public void testPersistWithSimpleLink() {
 		Patient patient = new Patient();
 		patient.setId(new IdDt("Patient/testPersistWithSimpleLinkP01"));
-		patient.addIdentifier("urn:system", "testPersistWithSimpleLinkP01");
+		patient.addIdentifier().setSystem("urn:system").setValue( "testPersistWithSimpleLinkP01");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 
 		Observation obs = new Observation();
@@ -302,7 +304,7 @@ public class FhirSystemDaoTest {
 
 		patient = (Patient) patResults.getResources(0,1).get(0);
 		obs = (Observation) obsResults.getResources(0, 1).get(0);
-		patient.addIdentifier("urn:system", "testPersistWithSimpleLinkP02");
+		patient.addIdentifier().setSystem("urn:system").setValue( "testPersistWithSimpleLinkP02");
 		obs.getName().addCoding().setSystem("urn:system").setCode("testPersistWithSimpleLinkO02");
 
 		ourSystemDao.transaction(Arrays.asList((IResource) patient, obs));
@@ -328,7 +330,7 @@ public class FhirSystemDaoTest {
 		Map<String, Long> oldCounts = ourSystemDao.getResourceCounts();
 
 		Patient patient = new Patient();
-		patient.addIdentifier("urn:system", "testGetResourceCountsP01");
+		patient.addIdentifier().setSystem("urn:system").setValue( "testGetResourceCountsP01");
 		patient.addName().addFamily("Tester").addGiven("Joe");
 		ourPatientDao.create(patient);
 
@@ -378,6 +380,7 @@ public class FhirSystemDaoTest {
 	public static void beforeClass() {
 		ourTestStarted = new Date();
 		ourCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml");
+		ourFhirContext = ourCtx.getBean(FhirContext.class);
 		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
 		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDao", IFhirResourceDao.class);

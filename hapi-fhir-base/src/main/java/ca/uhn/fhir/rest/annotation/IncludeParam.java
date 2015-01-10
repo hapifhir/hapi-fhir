@@ -47,10 +47,24 @@ public @interface IncludeParam {
 	 * within the given set. If an _include parameter is passed to the server
 	 * which does not match any allowed values the server will return an error.
 	 * <p>
-	 * You may also pass in a value of "*" which indicates to the server
-	 * that any value is allowable and will be passed to this parameter. This is
-	 * helpful if you want to explicitly declare support for some includes, but also
-	 * allow others implicitly (e.g. imports from other resources)
+	 * Values for this parameter takew the form that the FHIR specification
+	 * defines for <code>_include</code> values, namely <code>[Resource Name].[path]</code>.
+	 * For example: <code>"Patient.link.other"</code>
+	 * or <code>"Encounter.partOf"</code> 
+	 * </p>
+	 * <p>
+	 * You may also pass in a value of "*" which indicates means that the
+	 * client may request <code>_include=*</code>. This is a request to 
+	 * include all referenced resources as well as any resources referenced
+	 * by those resources, etc.
+	 * </p>
+	 * <p>
+	 * Leave this parameter empty if you do not want the server to declare or
+	 * restrict which includes are allowable. In this case, the client may add
+	 * any _include value they want, and that value will be accepted by the server
+	 * and passed to the handling method. Note that this means that the server 
+	 * will not declare which _include values it supports in its conformance
+	 * statement.
 	 * </p> 
 	 */
 	String[] allow() default {};

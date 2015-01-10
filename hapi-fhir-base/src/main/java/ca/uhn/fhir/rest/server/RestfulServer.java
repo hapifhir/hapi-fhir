@@ -1394,8 +1394,8 @@ public class RestfulServer extends HttpServlet {
 
 		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			String fullId = theResource.getId().withServerBase(theServerBase, resName);
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId);
+			IdDt fullId = theResource.getId().withServerBase(theServerBase, resName);
+			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {

@@ -56,6 +56,14 @@
 				value of 
 				<![CDATA[<code>*</code>]]>. Thanks to Bill de Beaubien for reporting! 
 			</action>
+			<action type="fix">
+				IdDt method 
+				<![CDATA[withServerBase]]>
+				returned String (unlike all of the other "withFoo" methods on that class),
+				and did not work correctly if the IdDt already had a server base. This
+				has been corrected. Note that the return type for this method has been
+				changed, so code may need to be updated.
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

@@ -65,6 +65,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
@@ -1353,14 +1355,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			TokenParam id = (TokenParam) theParameter;
 			system = id.getSystem();
 			code = id.getValue();
-		} else if (theParameter instanceof IdentifierDt) {
-			IdentifierDt id = (IdentifierDt) theParameter;
-			system = id.getSystem().getValueAsString();
-			code = id.getValue().getValue();
-		} else if (theParameter instanceof CodingDt) {
-			CodingDt id = (CodingDt) theParameter;
-			system = id.getSystem().getValueAsString();
-			code = id.getCode().getValue();
+		} else if (theParameter instanceof BaseIdentifierDt) {
+			BaseIdentifierDt id = (BaseIdentifierDt) theParameter;
+			system = id.getSystemElement().getValueAsString();
+			code = id.getValueElement().getValue();
+		} else if (theParameter instanceof BaseCodingDt) {
+			BaseCodingDt id = (BaseCodingDt) theParameter;
+			system = id.getSystemElement().getValueAsString();
+			code = id.getCodeElement().getValue();
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
 		}

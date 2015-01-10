@@ -3,6 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
@@ -10,6 +11,7 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -18,6 +20,7 @@ import ca.uhn.fhir.model.dev.composite.DurationDt;
 import ca.uhn.fhir.model.dev.resource.Encounter;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Organization;
+import ca.uhn.fhir.model.dev.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
@@ -131,5 +134,60 @@ public class XmlParserTest {
 		
 	}
 	
-	
+
+	@Test
+	public void testParseMetadata() throws Exception {
+		//@formatter:off
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+			"   <base value=\"http://foo/fhirBase1\"/>\n" + 
+			"   <total value=\"1\"/>\n" + 
+			"   <link>\n" + 
+			"      <relation value=\"self\"/>\n" + 
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
+			"   </link>\n" + 
+			"   <entry>\n" + 
+			"      <base value=\"http://foo/fhirBase2\"/>\n" + 
+			"      <status value=\"match\"/>\n" +
+			"      <search value=\"http://foo/Patient?identifier=value\"/>\n" +
+			"      <score value=\"0.123\"/>\n" +
+			"      <resource>\n" + 
+			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"            <id value=\"1\"/>\n" + 
+			"            <meta>\n" +
+			"               <versionId value=\"2\"/>\n" +
+			"               <lastUpdated value=\"2001-02-22T11:22:33-05:00\"/>\n" +
+			"            </meta>\n" + 
+			"            <birthDate value=\"2012-01-02\"/>\n" + 
+			"         </Patient>\n" + 
+			"      </resource>\n" + 
+			"   </entry>\n" + 
+			"</Bundle>";
+		//@formatter:on
+		
+		Bundle b = ourCtx.newXmlParser().parseBundle(bundle);
+		assertEquals(1, b.getEntries().size());
+		
+		Patient pt = (Patient) b.getEntries().get(0).getResource();
+		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getId().getValue());
+		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
+		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
+		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_STATUS.get(pt).getCode());
+		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
+		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
+		
+		Bundle toBundle = new Bundle();
+		toBundle.getLinkBase().setValue("http://foo/fhirBase1");
+		toBundle.getTotalResults().setValue(1);
+		toBundle.getLinkSelf().setValue("http://localhost:52788/Binary?_pretty=true");
+		
+		toBundle.addResource(pt, ourCtx, "http://foo/fhirBase1");
+		String reEncoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(toBundle);
+
+		ourLog.info(reEncoded);
+		
+		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));
+		assertTrue(d.toString(), d.identical());
+
+	}
+
 }

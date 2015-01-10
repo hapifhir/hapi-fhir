@@ -27,8 +27,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -289,6 +292,29 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		}
 	};
 
+	/**
+	 * Denotes the search score which a given resource should match in a transaction. See the
+	 * FHIR transaction definition for information about this. Corresponds to
+	 * the value in <code>Bundle.entry.score</code> in a Bundle resource.
+	 * <p>
+	 * Note that search URL is only used in FHIR DSTU2 and later.
+	 * </p>
+	 * <p>
+	 * Values for this key are of type <b>{@link DecimalDt}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<DecimalDt> ENTRY_SCORE = new ResourceMetadataKeyEnum<DecimalDt>("ENTRY_SCORE") {
+		@Override
+		public DecimalDt get(IResource theResource) {
+			return getDecimalFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SCORE);
+		}
+
+		@Override
+		public void put(IResource theResource, DecimalDt theObject) {
+			theResource.getResourceMetadata().put(ENTRY_SCORE, theObject);
+		}
+	};
+
 	
 	private final String myValue;
 
@@ -374,6 +400,50 @@ public abstract class ResourceMetadataKeyEnum<T> {
 				+ InstantDt.class.getCanonicalName());
 	}
 
+	private static StringDt getStringDtFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<StringDt> theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (StringUtils.isBlank((String) retValObj)) {
+				return null;
+			}
+			return new StringDt((String) retValObj);
+		} else if (retValObj instanceof StringDt) {
+			if (((StringDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (StringDt) retValObj;
+			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
+
+	private static DecimalDt getDecimalFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<DecimalDt> theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof DecimalDt) {
+			if (((DecimalDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (DecimalDt) retValObj;
+			}
+		} else if (retValObj instanceof String) {
+			if (StringUtils.isBlank((String) retValObj)) {
+				return null;
+			}
+			return new DecimalDt((String) retValObj);
+		} else if (retValObj instanceof Double) {
+			return new DecimalDt((Double) retValObj);
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
+	
 	@SuppressWarnings("unchecked")
 	private static <T extends Enum<?>> T getEnumFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<T> theKey, Class<T> theEnumType, IValueSetEnumBinder<T> theBinder) {
 		Object retValObj = theResourceMetadata.get(theKey);

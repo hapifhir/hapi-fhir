@@ -275,7 +275,7 @@ public class XmlParser extends BaseParser implements IParser {
 			IResource nextResource = nextEntry.getResource();
 			if (nextResource.getId() != null && nextResource.getId().hasBaseUrl()) {
 				if (!nextResource.getId().getBaseUrl().equals(bundleBaseUrl)) {
-					writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
+					writeOptionalTagWithValue(theEventWriter, "base", nextResource.getId().getBaseUrl());
 				}
 			}
 

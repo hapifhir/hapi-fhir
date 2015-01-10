@@ -36,6 +36,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -160,27 +161,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 				// String resourceType = theContext.getResourceDefinition(theResource).getName();
 
-				String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
-				if (isNotBlank(linkSearch)) {
-					if (!UrlUtil.isAbsolute(linkSearch)) {
-						linkSearch = (theServerBase + "/" + linkSearch);
-					}
-					entry.getLinkSearch().setValue(linkSearch);
-				}
-
-				String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
-				if (isNotBlank(linkAlternate)) {
-					if (!UrlUtil.isAbsolute(linkAlternate)) {
-						linkSearch = (theServerBase + "/" + linkAlternate);
-					}
-					entry.getLinkAlternate().setValue(linkSearch);
-				}
-				
-				BundleEntryStatusEnum entryStatus = ResourceMetadataKeyEnum.ENTRY_STATUS.get(theResource);
-				if (entryStatus != null) {
-					entry.getStatus().setValueAsEnum(entryStatus);
-				}
-
 
 			}
 		}
@@ -204,7 +184,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 
 		IdDt previous = ResourceMetadataKeyEnum.PREVIOUS_ID.get(theResource);
 		if (previous != null) {
-			entry.getLinkAlternate().setValue(previous.withServerBase(theServerBase, def.getName()));
+			entry.getLinkAlternate().setValue(previous.withServerBase(theServerBase, def.getName()).getValue());
 		}
 
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
@@ -212,6 +192,32 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			for (Tag nextTag : tagList) {
 				entry.addCategory(nextTag);
 			}
+		}
+
+		String linkSearch = ResourceMetadataKeyEnum.LINK_SEARCH.get(theResource);
+		if (isNotBlank(linkSearch)) {
+			if (!UrlUtil.isAbsolute(linkSearch)) {
+				linkSearch = (theServerBase + "/" + linkSearch);
+			}
+			entry.getLinkSearch().setValue(linkSearch);
+		}
+
+		String linkAlternate = ResourceMetadataKeyEnum.LINK_ALTERNATE.get(theResource);
+		if (isNotBlank(linkAlternate)) {
+			if (!UrlUtil.isAbsolute(linkAlternate)) {
+				linkSearch = (theServerBase + "/" + linkAlternate);
+			}
+			entry.getLinkAlternate().setValue(linkSearch);
+		}
+		
+		BundleEntryStatusEnum entryStatus = ResourceMetadataKeyEnum.ENTRY_STATUS.get(theResource);
+		if (entryStatus != null) {
+			entry.getStatus().setValueAsEnum(entryStatus);
+		}
+
+		DecimalDt entryScore = ResourceMetadataKeyEnum.ENTRY_SCORE.get(theResource);
+		if (entryScore != null) {
+			entry.setScore(entryScore);
 		}
 
 		return entry;
