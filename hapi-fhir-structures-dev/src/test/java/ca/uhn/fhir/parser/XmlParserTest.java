@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.StringReader;
@@ -14,8 +15,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
+import ca.uhn.fhir.model.dev.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 
 public class XmlParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
@@ -50,6 +53,7 @@ public class XmlParserTest {
 
 		assertEquals(1, parsed.getEntries().size());
 		assertEquals("update", parsed.getEntries().get(0).getStatus().getValue());
+		assertEquals(BundleEntryStatusEnum.UPDATE, ResourceMetadataKeyEnum.ENTRY_STATUS.get(parsed.getEntries().get(0).getResource()));
 		assertEquals("http://foo?search", parsed.getEntries().get(0).getLinkSearch().getValue());
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
@@ -65,6 +69,20 @@ public class XmlParserTest {
 
 	}
 
+	@Test
+	public void testEncodeAndParseBundleWithoutResourceIds() {
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system").setValue("someval");
+		
+		Bundle bundle = Bundle.withSingleResource(org);
+		String str = ourCtx.newXmlParser().encodeBundleToString(bundle);
+		ourLog.info(str);
+		
+		Bundle parsed = ourCtx.newXmlParser().parseBundle(str);
+		assertThat(parsed.getEntries().get(0).getResource().getId().getValue(), isEmptyOrNullString());
+		assertTrue(parsed.getEntries().get(0).getResource().getId().isEmpty());
+	}
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off

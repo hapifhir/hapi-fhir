@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -533,6 +534,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 								if (!includePids.isEmpty()) {
 									ourLog.info("Loading {} included resources", includePids.size());
 									resources = loadResourcesById(includePids);
+									for (IResource next : resources) {
+										ResourceMetadataKeyEnum.ENTRY_STATUS.put(next, BundleEntryStatusEnum.INCLUDE);
+									}
 									retVal.addAll(resources);
 								}
 							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());

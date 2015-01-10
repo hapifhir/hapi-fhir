@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
@@ -264,6 +265,31 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		}
 	};
 
+	/**
+	 * If present and populated with a {@link BundleEntryStatusEnum}, contains the "bundle entry status",
+	 * which is the value of the status field in the Bundle.entry containing this resource. This value can be
+	 * set to provide a status value of "include" for included resources being returned by a server, or to 
+	 * set the value on a transaction, etc.
+	 * <p>
+	 * Note that status is only used in FHIR DSTU2 and later.
+	 * </p>
+	 * <p>
+	 * Values for this key are of type <b>{@link BundleEntryStatusEnum}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<BundleEntryStatusEnum> ENTRY_STATUS = new ResourceMetadataKeyEnum<BundleEntryStatusEnum>("ENTRY_STATUS") {
+		@Override
+		public BundleEntryStatusEnum get(IResource theResource) {
+			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_STATUS, BundleEntryStatusEnum.class, BundleEntryStatusEnum.VALUESET_BINDER);
+		}
+
+		@Override
+		public void put(IResource theResource, BundleEntryStatusEnum theObject) {
+			theResource.getResourceMetadata().put(ENTRY_STATUS, theObject);
+		}
+	};
+
+	
 	private final String myValue;
 
 	public ResourceMetadataKeyEnum(String theValue) {
@@ -343,6 +369,20 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			} else {
 				return (InstantDt) retValObj;
 			}
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Enum<?>> T getEnumFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<T> theKey, Class<T> theEnumType, IValueSetEnumBinder<T> theBinder) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (theEnumType.equals(retValObj.getClass())) {
+			return (T) retValObj;
+		} else if (retValObj instanceof String) {
+			return theBinder.fromCodeString((String) retValObj);
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 				+ InstantDt.class.getCanonicalName());

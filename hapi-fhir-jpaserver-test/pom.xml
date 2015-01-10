@@ -20,6 +20,11 @@
 			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dev</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 			<version>${thymeleaf-version}</version>

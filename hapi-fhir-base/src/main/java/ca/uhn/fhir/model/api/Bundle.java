@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
@@ -174,6 +175,12 @@ public class Bundle extends BaseBundle /* implements IElement */{
 					}
 					entry.getLinkAlternate().setValue(linkSearch);
 				}
+				
+				BundleEntryStatusEnum entryStatus = ResourceMetadataKeyEnum.ENTRY_STATUS.get(theResource);
+				if (entryStatus != null) {
+					entry.getStatus().setValueAsEnum(entryStatus);
+				}
+
 
 			}
 		}

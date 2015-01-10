@@ -1179,7 +1179,7 @@ public class RestfulServer extends HttpServlet {
 			} while (references.isEmpty() == false);
 
 			bundle.addResource(next, theContext, theServerBase);
-
+			
 		}
 
 		/*
@@ -1188,7 +1188,9 @@ public class RestfulServer extends HttpServlet {
 		for (IResource next : includedResources) {
 			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				entry.getStatus().setValueAsEnum(BundleEntryStatusEnum.INCLUDE);
+				if (entry.getStatus().isEmpty()) {
+					entry.getStatus().setValueAsEnum(BundleEntryStatusEnum.INCLUDE);
+				}
 			}
 		}
 

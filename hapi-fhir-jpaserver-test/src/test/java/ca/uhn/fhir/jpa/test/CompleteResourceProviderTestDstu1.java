@@ -25,18 +25,18 @@ import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dev.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dev.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dev.resource.DocumentManifest;
-import ca.uhn.fhir.model.dev.resource.DocumentReference;
-import ca.uhn.fhir.model.dev.resource.Encounter;
-import ca.uhn.fhir.model.dev.resource.ImagingStudy;
-import ca.uhn.fhir.model.dev.resource.Location;
-import ca.uhn.fhir.model.dev.resource.Organization;
-import ca.uhn.fhir.model.dev.resource.Patient;
-import ca.uhn.fhir.model.dev.valueset.EncounterClassEnum;
-import ca.uhn.fhir.model.dev.valueset.EncounterStateEnum;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
+import ca.uhn.fhir.model.dstu.resource.DocumentReference;
+import ca.uhn.fhir.model.dstu.resource.Encounter;
+import ca.uhn.fhir.model.dstu.resource.ImagingStudy;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
+import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
@@ -52,12 +52,12 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class CompleteResourceProviderTest {
+public class CompleteResourceProviderTestDstu1 {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
 	private static FhirContext ourFhirCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CompleteResourceProviderTestDstu1.class);
 	// private static IFhirResourceDao<Observation> ourObservationDao;
 	// private static IFhirResourceDao<Patient> ourPatientDao;
 	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
@@ -155,7 +155,7 @@ public class CompleteResourceProviderTest {
 
 		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
 
-		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/imagingstudy.json"));
+		String resBody = IOUtils.toString(CompleteResourceProviderTestDstu1.class.getResource("/imagingstudy.json"));
 		client.create().resource(resBody).execute();
 
 		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
@@ -173,7 +173,7 @@ public class CompleteResourceProviderTest {
 
 		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
 
-		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentmanifest.json"));
+		String resBody = IOUtils.toString(CompleteResourceProviderTestDstu1.class.getResource("/documentmanifest.json"));
 		client.create().resource(resBody).execute();
 
 		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
@@ -191,7 +191,7 @@ public class CompleteResourceProviderTest {
 
 		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
 
-		String resBody = IOUtils.toString(CompleteResourceProviderTest.class.getResource("/documentreference.json"));
+		String resBody = IOUtils.toString(CompleteResourceProviderTestDstu1.class.getResource("/documentreference.json"));
 		client.create().resource(resBody).execute();
 
 		int newSize = client.search().forResource(DocumentReference.class).execute().size();
@@ -285,7 +285,7 @@ public class CompleteResourceProviderTest {
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
 		e1.getStatusElement().setValueAsEnum(EncounterStateEnum.IN_PROGRESS);
 		e1.getClassElementElement().setValueAsEnum(EncounterClassEnum.HOME);
-		ca.uhn.fhir.model.dev.resource.Encounter.Location location = e1.addLocation();
+		ca.uhn.fhir.model.dstu.resource.Encounter.Location location = e1.addLocation();
 		location.getLocation().setReference(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
 		IdDt e1id = ourClient.create().resource(e1).execute().getId();
@@ -404,7 +404,7 @@ public class CompleteResourceProviderTest {
 		//@formatter:off
 		Bundle actual = ourClient.search()
 				.forResource(Patient.class)
-				.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
+				.where(Patient.PROVIDER.hasId(o1id.getIdPart()))
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
@@ -413,7 +413,7 @@ public class CompleteResourceProviderTest {
 		//@formatter:off
 		actual = ourClient.search()
 				.forResource(Patient.class)
-				.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
+				.where(Patient.PROVIDER.hasId(o1id.getValue()))
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
@@ -496,7 +496,7 @@ public class CompleteResourceProviderTest {
 		int port = RandomServerPortProvider.findFreePort();
 
 		RestfulServer restServer = new RestfulServer();
-		ourFhirCtx = FhirContext.forDev();
+		ourFhirCtx = FhirContext.forDstu1();
 		restServer.setFhirContext(ourFhirCtx);
 		
 		String serverBase = "http://localhost:" + port + "/fhir/context";
