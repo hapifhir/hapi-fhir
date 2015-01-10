@@ -14,6 +14,8 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.dev.composite.DurationDt;
+import ca.uhn.fhir.model.dev.resource.Encounter;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Binary;
@@ -31,6 +33,20 @@ public class XmlParserTest {
 		XMLUnit.setIgnoreWhitespace(true);
 	}
 
+	@Test
+	public void testDuration() {
+		Encounter enc = new Encounter();
+		DurationDt duration = new DurationDt();
+		duration.setUnits("day").setValue(123L);
+		enc.setLength(duration);
+		
+		String str = ourCtx.newXmlParser().encodeResourceToString(enc);
+		ourLog.info(str);
+		
+		assertThat(str, not(containsString("meta")));
+		assertThat(str, containsString("<length><value value=\"123\"/><units value=\"day\"/></length>"));
+	}
+	
 	@Test
 	public void testParseBundleWithBinary() {
 		// TODO: implement this test, make sure we handle ID and meta correctly in Binary
