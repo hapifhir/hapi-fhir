@@ -585,18 +585,20 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 		case CONTAINED_RESOURCES: {
 			ContainedDt value = (ContainedDt) nextValue;
-			theEventWriter.writeStartElement("contained");
 			for (IResource next : value.getContainedResources()) {
 				if (getContainedResources().getResourceId(next) != null) {
 					continue;
 				}
+				theEventWriter.writeStartElement("contained");
 				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
+				theEventWriter.writeEndElement();
 			}
 			for (IBaseResource next : getContainedResources().getContainedResources()) {
 				IdDt resourceId = getContainedResources().getResourceId(next);
+				theEventWriter.writeStartElement("contained");
 				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(resourceId.getValue()));
+				theEventWriter.writeEndElement();
 			}
-			theEventWriter.writeEndElement();
 			break;
 		}
 		case RESOURCE: {

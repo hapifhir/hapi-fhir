@@ -64,6 +64,18 @@
 				has been corrected. Note that the return type for this method has been
 				changed, so code may need to be updated.
 			</action>
+			<action type="fix" issue="84" due-to="mochaholic">
+				In previous versions of HAPI, the XML parser encoded multiple contained
+				resources in a single 
+				<![CDATA[<code>&lt;contained&gt;&lt;/contained&gt;</code>]]>
+				tag, even though the FHIR specification rerquires a separate
+				<![CDATA[<code>&lt;contained&gt;&lt;/contained&gt;</code>]]>
+				tag for each resource. This has been corrected. Note that the parser will
+				correctly parse either form (this has always been the case) so this
+				change should not cause any breakage in HAPI based trading partners, but
+				may cause issues if other applications have been coded to depend on the
+				incorrect behaviour. Thanks to Mochaholic for reporting! 
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
