@@ -22,6 +22,7 @@ package ca.uhn.fhir.narrative;
 
 import org.hl7.fhir.instance.model.IBaseResource;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -35,4 +36,9 @@ public interface INarrativeGenerator {
 
 	String generateTitle(String theProfile, IBaseResource theResource);
 
+	/**
+	 * This method is called automatically by the framework, you do not need to interact with this method.
+	 */
+	void setFhirContext(FhirContext theFhirContext);
+	
 }

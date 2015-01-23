@@ -1,4 +1,4 @@
 <div>
-	<th:block th:if="${!resource.label.empty}" th:text="${resource.label.value}"/>
-	<th:block th:if="${resource.label.empty}" th:text="${resource.value.valueAsString}"/>
+	<th:block th:if="${!resource.labelElement.empty}" th:text="${resource.labelElement.value}"/>
+	<th:block th:if="${resource.labelElement.empty}" th:text="${resource.valueElement.valueAsString}"/>
 </div>

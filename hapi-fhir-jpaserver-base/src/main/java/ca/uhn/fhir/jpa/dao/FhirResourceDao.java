@@ -67,6 +67,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
@@ -1015,12 +1016,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			BigDecimal valueValue;
 			boolean approx = false;
 
-			if (params instanceof QuantityDt) {
-				QuantityDt param = (QuantityDt) params;
-				systemValue = param.getSystem().getValueAsString();
-				unitsValue = param.getUnits().getValueAsString();
-				cmpValue = param.getComparator().getValueAsEnum();
-				valueValue = param.getValue().getValue();
+			if (params instanceof BaseQuantityDt) {
+				BaseQuantityDt param = (BaseQuantityDt) params;
+				systemValue = param.getSystemElement().getValueAsString();
+				unitsValue = param.getUnitsElement().getValueAsString();
+				cmpValue = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(param.getComparatorElement().getValueAsString());
+				valueValue = param.getValueElement().getValue();
 			} else if (params instanceof QuantityParam) {
 				QuantityParam param = (QuantityParam) params;
 				systemValue = param.getSystem().getValueAsString();

@@ -5,11 +5,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import java.io.StringReader;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
+import org.custommonkey.xmlunit.Diff;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -58,6 +62,70 @@ public class JsonParserTest {
 		
 	}
 
+	@Test
+	public void testParseMetadata() throws Exception {
+		//@formatter:off
+		String bundle = "{\n" + 
+			"  \"resourceType\" : \"Bundle\",\n" + 
+			"  \"base\" : \"http://foo/fhirBase1\",\n" + 
+			"  \"total\" : 1,\n" + 
+			"   \"link\": [{\n" + 
+			"      \"relation\" : \"self\",\n" + 
+			"      \"url\" : \"http://localhost:52788/Binary?_pretty=true\"\n" + 
+			"   }],\n" + 
+			"   \"entry\" : [{\n" + 
+			"      \"base\" : \"http://foo/fhirBase2\",\n" + 
+			"      \"status\" : \"match\",\n" +
+			"      \"search\" : \"http://foo/Patient?identifier=value\",\n" +
+			"      \"score\" : 0.123,\n" +
+			"      \"resource\" : {\n" + 
+			"         \"resourceType\" : \"Patient\",\n" + 
+			"         \"id\" : \"1\",\n" + 
+			"         \"meta\" : {\n" +
+			"            \"versionId\" : \"2\",\n" +
+			"            \"lastUpdated\" : \"2001-02-22T11:22:33-05:00\"\n" +
+			"         },\n" + 
+			"         \"birthDate\" : \"2012-01-02\"\n" + 
+			"      }\n" + 
+			"   }]\n" + 
+			"}";
+		//@formatter:on
+		
+		Bundle b = ourCtx.newJsonParser().parseBundle(bundle);
+		assertEquals(1, b.getEntries().size());
+		
+		Patient pt = (Patient) b.getEntries().get(0).getResource();
+		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getId().getValue());
+		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
+		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
+		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_STATUS.get(pt).getCode());
+		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
+		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
+		
+		Bundle toBundle = new Bundle();
+		toBundle.getLinkBase().setValue("http://foo/fhirBase1");
+		toBundle.getTotalResults().setValue(1);
+		toBundle.getLinkSelf().setValue("http://localhost:52788/Binary?_pretty=true");
+		
+		toBundle.addResource(pt, ourCtx, "http://foo/fhirBase1");
+		String reEncoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(toBundle);
+
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(bundle.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reEncoded.trim(), cfg);
+
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
+		String act = actual.toString().replace("\\r\\n", "\\n");
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+
+		assertEquals(exp, act);
+
+	}
+
+	
 	
 	@Test
 	public void testParsePatientInBundle() {
@@ -217,10 +285,11 @@ public class JsonParserTest {
 		Bundle bundle = new Bundle();
 		bundle.addResource(res, ourCtx, "http://foo/base");
 		
-		String encoded = ourCtx.newJsonParser().encodeBundleToString(bundle);
-		ourLog.info(encoded);
+		String actual = ourCtx.newJsonParser().encodeBundleToString(bundle);
+		ourLog.info(actual);
 		
-		assertEquals("{\"resourceType\":\"Bundle\",\"id\":null,\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]", encoded);
+		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]";
+		assertEquals(expected, actual);
 		
 	}
 

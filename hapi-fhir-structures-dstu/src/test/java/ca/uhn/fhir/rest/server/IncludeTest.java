@@ -86,7 +86,7 @@ public class IncludeTest {
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals(1, p.getName().size());
 		assertEquals("Hello", p.getId().getIdPart());
-		assertEquals("Patient.foo", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("foo", p.getName().get(0).getFamilyFirstRep().getValue());
 	}
 	
 	

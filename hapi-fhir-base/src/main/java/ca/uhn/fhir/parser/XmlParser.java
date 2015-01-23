@@ -170,8 +170,14 @@ public class XmlParser extends BaseParser implements IParser {
 				deleted = true;
 				eventWriter.writeStartElement("at", "deleted-entry", TOMBSTONES_NS);
 				eventWriter.writeNamespace("at", TOMBSTONES_NS);
-				eventWriter.writeAttribute("ref", nextEntry.getId().getValueAsString());
-				eventWriter.writeAttribute("when", nextEntry.getDeletedAt().getValueAsString());
+
+				if (nextEntry.getDeletedResourceId().isEmpty()) {
+					writeOptionalAttribute(eventWriter, "ref", nextEntry.getId().getValueAsString());
+				} else {
+					writeOptionalAttribute(eventWriter, "ref", nextEntry.getDeletedResourceId().getValueAsString());
+				}
+
+				writeOptionalAttribute(eventWriter, "when", nextEntry.getDeletedAt().getValueAsString());
 				if (nextEntry.getDeletedByEmail().isEmpty() == false || nextEntry.getDeletedByName().isEmpty() == false) {
 					eventWriter.writeStartElement(TOMBSTONES_NS, "by");
 					if (nextEntry.getDeletedByName().isEmpty() == false) {
@@ -197,7 +203,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 			writeOptionalTagWithTextNode(eventWriter, "title", nextEntry.getTitle());
 			if (!deleted) {
-				writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				if (nextEntry.getId().isEmpty() == false) {
+					writeTagWithTextNode(eventWriter, "id", nextEntry.getId());
+				} else {
+					writeTagWithTextNode(eventWriter, "id", nextEntry.getResource().getId());
+				}
 			}
 			writeOptionalTagWithTextNode(eventWriter, "updated", nextEntry.getUpdated());
 			writeOptionalTagWithTextNode(eventWriter, "published", nextEntry.getPublished());
@@ -240,6 +250,12 @@ public class XmlParser extends BaseParser implements IParser {
 		eventWriter.close();
 	}
 
+	private void writeOptionalAttribute(XMLStreamWriter theEventWriter, String theName, String theValue) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theValue)) {
+			theEventWriter.writeAttribute(theName, theValue);
+		}
+	}
+
 	private void encodeBundleToWriterUsingBundleResource(Bundle theBundle, XMLStreamWriter theEventWriter) throws XMLStreamException {
 		theEventWriter.writeStartElement("Bundle");
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
@@ -273,11 +289,7 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeStartElement("entry");
 
 			IResource nextResource = nextEntry.getResource();
-			if (nextResource.getId() != null && nextResource.getId().hasBaseUrl()) {
-				if (!nextResource.getId().getBaseUrl().equals(bundleBaseUrl)) {
-					writeOptionalTagWithValue(theEventWriter, "base", nextResource.getId().getBaseUrl());
-				}
-			}
+			writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
 
 			writeOptionalTagWithValue(theEventWriter, "status", nextEntry.getStatus().getValue());
 			writeOptionalTagWithValue(theEventWriter, "search", nextEntry.getLinkSearch().getValue());

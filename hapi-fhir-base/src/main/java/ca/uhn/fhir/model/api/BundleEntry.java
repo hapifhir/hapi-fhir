@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -45,7 +46,7 @@ public class BundleEntry extends BaseBundle {
 	private StringDt myDeletedByEmail;
 	private StringDt myDeletedByName;
 	private StringDt myDeletedComment;
-	private StringDt myDeletedResourceId;
+	private IdDt myDeletedResourceId;
 	private CodeDt myDeletedResourceType;
 	private StringDt myDeletedResourceVersion;
 	private StringDt myLinkAlternate;
@@ -61,7 +62,8 @@ public class BundleEntry extends BaseBundle {
 	private InstantDt myUpdated;
 
 	/**
-	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addCategory(String, String, String)} should be used instead
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so
+	 *             {@link #addCategory(String, String, String)} should be used instead
 	 */
 	public Tag addCategory() {
 		Tag retVal = new Tag();
@@ -115,9 +117,9 @@ public class BundleEntry extends BaseBundle {
 		return myDeletedComment;
 	}
 
-	public StringDt getDeletedResourceId() {
+	public IdDt getDeletedResourceId() {
 		if (myDeletedResourceId == null) {
-			myDeletedResourceId = new StringDt();
+			myDeletedResourceId = new IdDt();
 		}
 		return myDeletedResourceId;
 	}
@@ -136,6 +138,16 @@ public class BundleEntry extends BaseBundle {
 		return myDeletedResourceVersion;
 	}
 
+	/**
+	 * @deprecated Setting IDs on bundle entries is redundant since resources already have an ID field. Instead of
+	 *             providing an ID using this method, set the ID on the resource using {@link IResource#setId(IdDt)} or
+	 *             if this entry represents a deleted resource, use {@link #setDeletedResourceId(IdDt)}.
+	 */
+	@Override
+	public IdDt getId() {
+		return super.getId();
+	}
+
 	public StringDt getLinkAlternate() {
 		if (myLinkAlternate == null) {
 			myLinkAlternate = new StringDt();
@@ -143,6 +155,9 @@ public class BundleEntry extends BaseBundle {
 		return myLinkAlternate;
 	}
 
+	/**
+	 * @deprecated Use resource ID to determine base URL
+	 */
 	public StringDt getLinkBase() {
 		if (myLinkBase == null) {
 			myLinkBase = new StringDt();
@@ -204,8 +219,10 @@ public class BundleEntry extends BaseBundle {
 	}
 
 	/**
-	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved to the resource &lt;meta/&gt; element so it is redundant here). In
-	 *             preparation for DSTU2, it is recommended that you migrate code away from using this method and over to using resource metadata instead.
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata
+	 *             has been moved to the resource &lt;meta/&gt; element so it is redundant here). In preparation for
+	 *             DSTU2, it is recommended that you migrate code away from using this method and over to using resource
+	 *             metadata instead.
 	 */
 	public InstantDt getUpdated() {
 		if (myUpdated == null) {
@@ -224,7 +241,11 @@ public class BundleEntry extends BaseBundle {
 	public boolean isEmpty() {
 		//@formatter:off
 		return super.isEmpty() && 
-				ElementUtil.isEmpty(myDeletedResourceId, myDeletedResourceType, myDeletedResourceVersion, myScore,myStatus, myCategories, myDeletedAt, myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
+				ElementUtil.isEmpty(
+						myDeletedResourceId, myDeletedResourceType, myDeletedResourceVersion, myDeletedAt, 
+						myScore, myStatus, myCategories, 
+						myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, 
+						myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
 		//@formatter:on
 	}
 
@@ -250,7 +271,7 @@ public class BundleEntry extends BaseBundle {
 		myDeletedComment = theDeletedComment;
 	}
 
-	public void setDeletedResourceId(StringDt theDeletedResourceId) {
+	public void setDeletedResourceId(IdDt theDeletedResourceId) {
 		myDeletedResourceId = theDeletedResourceId;
 	}
 
@@ -262,10 +283,21 @@ public class BundleEntry extends BaseBundle {
 		myDeletedResourceVersion = theDeletedResourceVersion;
 	}
 
+	/**
+	 * @deprecated Bundle entries no longer have an ID in DSTU2, as ID is explicitly stated in the resource itself.
+	 */
+	@Override
+	public void setId(IdDt theId) {
+		super.setId(theId);
+	}
+
 	public void setLinkAlternate(StringDt theLinkAlternate) {
 		myLinkAlternate = theLinkAlternate;
 	}
 
+	/**
+	 * @deprecated Use resource ID to determine base URL
+	 */
 	public void setLinkBase(StringDt theLinkBase) {
 		myLinkBase = theLinkBase;
 	}
@@ -299,8 +331,10 @@ public class BundleEntry extends BaseBundle {
 	}
 
 	/**
-	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata has been moved to the resource &lt;meta/&gt; element so it is redundant here). In
-	 *             preparation for DSTU2, it is recommended that you migrate code away from using this method and over to using resource metadata instead.
+	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata
+	 *             has been moved to the resource &lt;meta/&gt; element so it is redundant here). In preparation for
+	 *             DSTU2, it is recommended that you migrate code away from using this method and over to using resource
+	 *             metadata instead.
 	 */
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");

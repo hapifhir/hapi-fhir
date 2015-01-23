@@ -154,7 +154,7 @@ class SearchParamExtractorDev implements ISearchParamExtractor {
 						continue;
 					}
 
-					if (new UriDt(BaseFhirDao.UCUM_NS).equals(nextValue.getSystem())) {
+					if (new UriDt(BaseFhirDao.UCUM_NS).equals(nextValue.getSystemElement())) {
 						if (isNotBlank(nextValue.getCode())) {
 
 							Unit<? extends Quantity> unit = Unit.valueOf(nextValue.getCode());
@@ -293,7 +293,7 @@ class SearchParamExtractorDev implements ISearchParamExtractor {
 
 			String nextPath = nextSpDef.getPath();
 			if (isBlank(nextPath)) {
-				// TODO: implement phoenetic, and any others that have no path
+				// TODO: implement phonetic, and any others that have no path
 				continue;
 			}
 

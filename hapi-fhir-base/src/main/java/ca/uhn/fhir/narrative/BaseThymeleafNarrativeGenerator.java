@@ -61,6 +61,8 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -70,7 +72,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGenerator.class);
 	private static final XhtmlAndHtml5NonValidatingSAXTemplateParser PARSER = new XhtmlAndHtml5NonValidatingSAXTemplateParser(1);
 
-	private Configuration configuration;
+	private Configuration myThymeleafConfig;
 	private boolean myApplyDefaultDatatypeTemplates = true;
 	private HashMap<Class<?>, String> myClassToName;
 	private boolean myCleanWhitespace = true;
@@ -84,16 +86,27 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private TemplateEngine myTitleTemplateEngine;
 
 	public BaseThymeleafNarrativeGenerator() {
-		configuration = new Configuration();
-		configuration.addTemplateResolver(new ClassLoaderTemplateResolver());
-		configuration.addMessageResolver(new StandardMessageResolver());
-		configuration.setTemplateModeHandlers(StandardTemplateModeHandlers.ALL_TEMPLATE_MODE_HANDLERS);
-		configuration.initialize();
+		myThymeleafConfig = new Configuration();
+		myThymeleafConfig.addTemplateResolver(new ClassLoaderTemplateResolver());
+		myThymeleafConfig.addMessageResolver(new StandardMessageResolver());
+		myThymeleafConfig.setTemplateModeHandlers(StandardTemplateModeHandlers.ALL_TEMPLATE_MODE_HANDLERS);
+		myThymeleafConfig.initialize();
 	}
 
 	@Override
 	public NarrativeDt generateNarrative(IBaseResource theResource) {
-		return generateNarrative(null, theResource);
+		return generateNarrative( null, theResource);
+	}
+
+	@Override
+	public void setFhirContext(FhirContext theFhirContext) {
+		if (theFhirContext == null) {
+			throw new NullPointerException("Can not set theFhirContext to null");
+		}
+		if (myFhirContext != null && myFhirContext != theFhirContext) {
+			throw new IllegalStateException("Narrative generators may not be reused/shared across multiple FhirContext instances");
+		}
+		myFhirContext = theFhirContext;
 	}
 
 	@Override
@@ -108,6 +121,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 		if (name == null) {
 			name = myClassToName.get(theResource.getClass());
+		}
+		if (name == null) {
+			name = myFhirContext.getResourceDefinition(theResource).getName().toLowerCase();
 		}
 
 		if (name == null) {
@@ -145,7 +161,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 	@Override
 	public String generateTitle(IBaseResource theResource) {
-		return generateTitle(null, theResource);
+		return generateTitle( null, theResource);
 	}
 
 	@Override
@@ -162,6 +178,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 		if (name == null) {
 			name = myClassToName.get(theResource.getClass());
+		}
+		if (name == null) {
+			name = myFhirContext.getResourceDefinition(theResource).getName().toLowerCase();
 		}
 
 		ourLog.trace("Template name is {}", name);
@@ -235,7 +254,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	protected abstract List<String> getPropertyFile();
 
 	private Document getXhtmlDOMFor(final Reader source) {
-		final Configuration configuration1 = configuration;
+		final Configuration configuration1 = myThymeleafConfig;
 		try {
 			return PARSER.parseTemplate(configuration1, "input", source);
 		} catch (final Exception e) {
@@ -371,32 +390,42 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				try {
 					clazz = Class.forName(className);
 				} catch (ClassNotFoundException e) {
-					ourLog.warn("Unknown datatype class '{}' identified in narrative file {}", name, propFileName);
+					ourLog.debug("Unknown datatype class '{}' identified in narrative file {}", name, propFileName);
+					clazz = null;
+				}
+
+//				if (isBlank(narrativeName) && isBlank(titleName)) {
+//					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' or '" + titlePropName + "' in file " + propFileName);
+//				}
+
+				if (clazz != null) {
+					myClassToName.put(clazz, name);
+				}
+
+			} else if (nextKey.endsWith(".narrative")) {
+				String name = nextKey.substring(0, nextKey.indexOf(".narrative"));
+				if (isBlank(name)) {
 					continue;
 				}
-
 				String narrativePropName = name + ".narrative";
 				String narrativeName = file.getProperty(narrativePropName);
-				String titlePropName = name + ".title";
-				String titleName = file.getProperty(titlePropName);
-				if (isBlank(narrativeName) && isBlank(titleName)) {
-					throw new ConfigurationException("Found property '" + nextKey + "' but no corresponding property '" + narrativePropName + "' or '" + titlePropName + "' in file " + propFileName);
-				}
-
-				myClassToName.put(clazz, name);
-
 				if (StringUtils.isNotBlank(narrativeName)) {
 					String narrative = IOUtils.toString(loadResource(narrativeName));
 					myNameToNarrativeTemplate.put(name, narrative);
 				}
+				continue;
+			} else if (nextKey.endsWith(".title")) {
+				String name = nextKey.substring(0, nextKey.indexOf(".title"));
+				if (isBlank(name)) {
+					continue;
+				}
+				
+				String titlePropName = name + ".title";
+				String titleName = file.getProperty(titlePropName);
 				if (StringUtils.isNotBlank(titleName)) {
 					String title = IOUtils.toString(loadResource(titleName));
 					myNameToTitleTemplate.put(name, title);
 				}
-
-			} else if (nextKey.endsWith(".narrative")) {
-				continue;
-			} else if (nextKey.endsWith(".title")) {
 				continue;
 			} else {
 				throw new ConfigurationException("Invalid property name: " + nextKey);
@@ -516,8 +545,11 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 		return b.toString();
 	}
+	
+	private FhirContext myFhirContext;
 
 	public class NarrativeAttributeProcessor extends AbstractAttrProcessor {
+
 
 		protected NarrativeAttributeProcessor() {
 			super("narrative");
@@ -555,6 +587,21 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 					name = myClassToName.get(nextClass);
 					nextClass = nextClass.getSuperclass();
 				} while (name == null && nextClass.equals(Object.class) == false);
+				
+				if (name == null) {
+					if (value instanceof IBaseResource) {
+						name = myFhirContext.getResourceDefinition((IBaseResource)value).getName();
+					} else if (value instanceof IDatatype) {
+						name = value.getClass().getSimpleName();
+						name = name.substring(0, name.length() - 2);
+					} else {
+						throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
+					}
+					name = name.toLowerCase();
+					if (!myNameToNarrativeTemplate.containsKey(name)) {
+						name = null;
+					}
+				}
 			}
 
 			if (name == null) {
@@ -568,19 +615,23 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 			String result = myProfileTemplateEngine.process(name, context);
 			String trim = result.trim();
-			Document dom = getXhtmlDOMFor(new StringReader(trim));
-
-			Element firstChild = (Element) dom.getFirstChild();
-			for (int i = 0; i < firstChild.getChildren().size(); i++) {
-				Node next = firstChild.getChildren().get(i);
-				if (i == 0 && firstChild.getChildren().size() == 1) {
-					if (next instanceof org.thymeleaf.dom.Text) {
-						org.thymeleaf.dom.Text nextText = (org.thymeleaf.dom.Text) next;
-						nextText.setContent(nextText.getContent().trim());
+			if (!isBlank(trim + "AAA")) {
+				Document dom = getXhtmlDOMFor(new StringReader(trim));
+				
+				Element firstChild = (Element) dom.getFirstChild();
+				for (int i = 0; i < firstChild.getChildren().size(); i++) {
+					Node next = firstChild.getChildren().get(i);
+					if (i == 0 && firstChild.getChildren().size() == 1) {
+						if (next instanceof org.thymeleaf.dom.Text) {
+							org.thymeleaf.dom.Text nextText = (org.thymeleaf.dom.Text) next;
+							nextText.setContent(nextText.getContent().trim());
+						}
 					}
+					theElement.addChild(next);
 				}
-				theElement.addChild(next);
+				
 			}
+			
 
 			return ProcessorResult.ok();
 		}

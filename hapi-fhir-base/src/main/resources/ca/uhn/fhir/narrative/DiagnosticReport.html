@@ -13,25 +13,25 @@
 		display value on the first coding, and if that's missing too show a default "Untitled"
 		value 
 		*/-->
-		<th:block th:if="${not resource.name.text.empty}" th:text="${resource.name.text.value}"/>
-		<th:block th:if="    ${resource.name.text.empty} and ${not resource.name.codingFirstRep.display.empty}" th:text="${resource.name.codingFirstRep.display}"/>
-		<th:block th:if=    "${resource.name.text.empty} and     ${resource.name.codingFirstRep.display.empty}" th:text="Untitled Diagnostic Report"/>
+		<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
+		<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.codingFirstRep.displayElement.empty}" th:text="${resource.name.codingFirstRep.display}"/>
+		<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
 	
 	<table class="hapiPropertyTable">
 		<tbody>
-			<tr th:if="${not resource.status.empty}">
+			<tr th:if="${not resource.statusElement.empty}">
 				<td>Status</td>
-				<td th:text="${resource.status.value}">Final</td>
+				<td th:text="${resource.statusElement.value}">Final</td>
 			</tr>
-			<tr th:if="${not resource.issued.empty}">
+			<tr th:if="${not resource.issuedElement.empty}">
 				<td>Issued</td>
-				<td th:narrative="${resource.issued}">22 March 2012</td>
+				<td th:narrative="${resource.issuedElement}">22 March 2012</td>
 			</tr>
-			<tr th:if="${not resource.conclusion.empty}">
+			<tr th:if="${not resource.conclusionElement.empty}">
 				<td>Conclusion</td>
-				<td th:narrative="${resource.conclusion}">This is the conclusion text</td>
+				<td th:narrative="${resource.conclusionElement}">This is the conclusion text</td>
 			</tr>
 		</tbody>
 	</table>
@@ -50,15 +50,15 @@
 			<th:block th:each="result,rowStat : ${resource.result}">
 				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td>
-						<th:block th:if="${not result.resource.name.text.empty}" th:text="${result.resource.name.text.value}"/>
-						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].display.empty}" th:text="${result.resource.name.coding[0].display}"/>
-						<th:block th:if="${result.resource.name.text.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].display.empty}" th:text="'?'"/>
+						<th:block th:if="${not result.resource.name.textElement.empty}" th:text="${result.resource.name.textElement.value}"/>
+						<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].displayElement.empty}" th:text="${result.resource.name.coding[0].display}"/>
+						<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].displayElement.empty}" th:text="'?'"/>
 						<!--/*--> Hb <!--*/-->
 					</td>
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>
 					<td>
-						<th:block th:if="${not result.resource.interpretation.text.empty}" th:text="${result.resource.interpretation.text}"/>
-						<th:block th:if="${result.resource.interpretation.text.empty} and ${not result.resource.interpretation.codingFirstRep.display.empty}" th:text="${result.resource.interpretation.codingFirstRep.display}"/>
+						<th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+						<th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.codingFirstRep.displayElement.empty}" th:text="${result.resource.interpretation.codingFirstRep.display}"/>
 						<!--/*--> N <!--*/-->
 					</td>
 					<td>
@@ -68,10 +68,10 @@
 							<th:block th:narrative="${result.resource.referenceRange[0].high}">2.9 g/L</th:block>
 						</th:block>
 					</td>
-					<td th:text="${result.resource.status.value}">final</td>
+					<td th:text="${result.resource.statusElement.value}">final</td>
 				</tr>
-				<tr th:if="${not result.resource.comments.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
-					<td th:text="${result.resource.comments.value}" colspan="5">This is a comment</td>
+				<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+					<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
 				</tr>
 				
 				<!--/* The following are just examples that don't appear in the generated narrative -->

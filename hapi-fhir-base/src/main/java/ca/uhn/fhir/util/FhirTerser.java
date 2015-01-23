@@ -34,6 +34,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
@@ -144,7 +145,18 @@ public class FhirTerser {
 		List<Object> retVal = new ArrayList<Object>();
 
 		if (theSubList.size() == 1) {
-			retVal.addAll(values);
+			if (nextDef instanceof RuntimeChildChoiceDefinition) {
+				for (IBase next : values) {
+					if (next != null) {
+						String childName = nextDef.getChildNameByDatatype(next.getClass());
+						if (theSubList.get(0).equals(childName)) {
+							retVal.add(next);
+						}
+					}
+				}
+			} else {
+				retVal.addAll(values);
+			}
 		} else {
 			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());

@@ -248,7 +248,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testCreateWithId01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
 		/*
 		 * ensure that trying to create the same ID again fails appropriately
@@ -262,7 +262,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle history = ourClient.history(null, (String) null, null, null);
 
-		assertEquals("Expected[" + p1Id.getIdPart() + "] but was " + history.getEntries().get(0).getId(), p1Id.getIdPart(), history.getEntries().get(0).getId().getIdPart());
+		assertEquals("Expected[" + p1Id.getIdPart() + "] but was " + history.getEntries().get(0).getResource().getId(), p1Id.getIdPart(), history.getEntries().get(0).getResource().getId().getIdPart());
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
 
@@ -369,7 +369,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 	}
 
 	@Test
@@ -382,7 +382,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -408,7 +408,7 @@ public class CompleteResourceProviderTest {
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
 		//@formatter:off
 		actual = ourClient.search()
@@ -417,7 +417,7 @@ public class CompleteResourceProviderTest {
 				.encodedJson().prettyPrint().execute();
 		//@formatter:on
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -480,7 +480,7 @@ public class CompleteResourceProviderTest {
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExist")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
 	}
 

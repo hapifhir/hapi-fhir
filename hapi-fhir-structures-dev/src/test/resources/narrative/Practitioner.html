@@ -1,0 +1,24 @@
+<div>
+	<!-- 
+	Normal Thymeleaf tags apply. Here, we loop through each of the 
+	identifiers that the practitioner has, and create a DIV tag for
+	each one, with the text "Identifier: [value]"
+	-->
+	<div th:each="identifier : ${resource.identifier}" th:text="'Identifier: ' + ${identifier.value}"></div>
+	
+	<!-- 
+	HAPI also defines a custom tag attribute, th:narrative="value", 
+	which is used to render a datatype into more HTML. In the example
+	below, the value of ${resource.name} (which is the name property
+	of the Practitioner resource, a HumanName datatype instance)
+	is rendered, and its contents placed in a DIV tag. That DIV tag is
+	then given a .nameElement CSS style.
+	 -->
+	<h1>Name</h1>
+	<div th:narrative="${resource.name}" class="nameElement"></div>
+	
+	<h1>Address</h1>
+	<div th:narrative="${resource.addressFirstRep}"></div>
+
+
+</div>

@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.method;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -58,18 +59,22 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 				}
 				
 				resourceParameter = (ResourceParameter) next;
-				Class<? extends IResource> resourceType = resourceParameter.getResourceType();
+				Class<? extends IResource> providerResourceType = resourceParameter.getResourceType();
 
 				if (theProvider instanceof IResourceProvider) {
-					resourceType = ((IResourceProvider) theProvider).getResourceType();
+					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (resourceType.isAssignableFrom(Binary.class)) {
+				if (providerResourceType.isAssignableFrom(Binary.class)) {
 					myBinary = true;
 				}
 
 				myResourceType = resourceParameter.getResourceType();
-				myResourceName = theContext.getResourceDefinition(myResourceType).getName();
+				if (Modifier.isAbstract(myResourceType.getModifiers())) {
+					myResourceType = providerResourceType;
+				}
+				
+				myResourceName = theContext.getResourceDefinition(providerResourceType).getName();
 
 				myResourceParameterIndex = index;
 			}

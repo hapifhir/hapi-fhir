@@ -11,20 +11,20 @@ a browser.
 <!--*/-->
 
 <div>
-	<div class="hapiHeaderText" th:if="${not resource.medication.resource.name.empty}" th:narrative="${resource.medication.resource.name}"></div>
+	<div class="hapiHeaderText" th:if="${not resource.medication.resource.nameElement.empty}" th:narrative="${resource.medication.resource.nameElement}"></div>
 	<table class="hapiPropertyTable">
 		<tbody>
 			<tr th:if="${not resource.id.empty}">
 				<td>Id</td>
 				<td th:text="${resource.id.value}"></td>
 			</tr>
-			<tr th:if="${not resource.dateWritten.empty}">
+			<tr th:if="${not resource.dateWrittenElement.empty}">
 				<td>Date</td>
-				<td ><span th:text="${#dates.format(resource.dateWritten.value,'dd MMMM yyyy')}"></span></td>
+				<td ><span th:text="${#dates.format(resource.dateWrittenElement.value,'dd MMMM yyyy')}"></span></td>
 			</tr>
-			<tr th:if="${not resource.status.empty}">
+			<tr th:if="${not resource.statusElement.empty}">
 				<td>Status</td>
-				<td><span th:text="${resource.status.valueAsEnum}"></span></td>
+				<td><span th:text="${resource.statusElement.valueAsEnum}"></span></td>
 			</tr>
 		</tbody>
 	</table>

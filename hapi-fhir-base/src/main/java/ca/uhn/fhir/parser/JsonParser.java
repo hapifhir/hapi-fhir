@@ -245,7 +245,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 		theEventWriter.write("resourceType", "Bundle");
 
-		writeTagWithTextNode(theEventWriter, "id", theBundle.getId().getIdPart());
+		writeOptionalTagWithTextNode(theEventWriter, "id", theBundle.getId().getIdPart());
 
 		if (!ElementUtil.isEmpty(theBundle.getId().getVersionIdPart(), theBundle.getUpdated())) {
 			theEventWriter.writeStartObject("meta");
@@ -272,7 +272,7 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.writeStartObject();
 
-			writeOptionalTagWithTextNode(theEventWriter, "base", nextEntry.getLinkBase());
+			writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
 			writeOptionalTagWithTextNode(theEventWriter, "status", nextEntry.getStatus());
 			writeOptionalTagWithTextNode(theEventWriter, "search", nextEntry.getLinkSearch());
 			writeOptionalTagWithDecimalNode(theEventWriter, "score", nextEntry.getScore());

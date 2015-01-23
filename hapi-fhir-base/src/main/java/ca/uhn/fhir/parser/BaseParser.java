@@ -46,6 +46,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -66,6 +67,21 @@ public abstract class BaseParser implements IParser {
 			return theValue.substring(1);
 		}
 		return theValue;
+	}
+
+	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
+		IResource resource = theEntry.getResource();
+		if (resource == null) {
+			return null;
+		}
+		
+		String resourceBaseUrl = null;
+		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
+			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
+				resourceBaseUrl = resource.getId().getBaseUrl();
+			}
+		}
+		return resourceBaseUrl;
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {

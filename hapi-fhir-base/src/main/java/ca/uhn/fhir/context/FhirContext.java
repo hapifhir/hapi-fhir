@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -173,6 +174,13 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(Class<? extends IBaseResource> theResourceType) {
+		if (theResourceType == null) {
+			throw new NullPointerException("theResourceType can not be null");
+		}
+		if (Modifier.isAbstract(theResourceType.getModifiers())) {
+			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
+		}
+		
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
 			retVal = scanResourceType((Class<? extends IResource>) theResourceType);
@@ -398,6 +406,9 @@ public class FhirContext {
 	}
 
 	public void setNarrativeGenerator(INarrativeGenerator theNarrativeGenerator) {
+		if (theNarrativeGenerator != null) {
+			theNarrativeGenerator.setFhirContext(this);
+		}
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
