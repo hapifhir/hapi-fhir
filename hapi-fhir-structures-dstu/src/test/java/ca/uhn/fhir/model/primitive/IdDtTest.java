@@ -19,11 +19,19 @@ public class IdDtTest {
 
 	@Test
 	public void testDetectLocal() {
+		IdDt id;
 		
-		IdDt id = new IdDt("#123");
+		id = new IdDt("#123");
 		assertEquals("#123", id.getValue());
 		assertTrue(id.isLocal());
 		
+		id = new IdDt("#Medication/499059CE-CDD4-48BC-9014-528A35D15CED/_history/1");
+		assertEquals("#Medication/499059CE-CDD4-48BC-9014-528A35D15CED/_history/1", id.getValue());
+		assertTrue(id.isLocal());
+
+		id = new IdDt("http://example.com/Patient/33#123");
+		assertEquals("http://example.com/Patient/33#123", id.getValue());
+		assertFalse(id.isLocal());
 	}
 	
 	/**
