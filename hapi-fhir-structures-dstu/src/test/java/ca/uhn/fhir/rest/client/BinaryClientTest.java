@@ -47,6 +47,7 @@ public class BinaryClientTest {
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
+		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}

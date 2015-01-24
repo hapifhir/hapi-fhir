@@ -24,7 +24,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.apache.http.util.EncodingUtils;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -55,7 +54,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class GenericClientTest {
 
-	private static FhirContext myCtx;
+	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientTest.class);
 	private HttpClient myHttpClient;
 
@@ -65,7 +64,8 @@ public class GenericClientTest {
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -133,16 +133,16 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		client.create().resource(myCtx.newXmlParser().encodeResourceToString(p1)).execute();
+		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
-		client.create().resource(myCtx.newJsonParser().encodeResourceToString(p1)).execute();
+		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
@@ -152,13 +152,13 @@ public class GenericClientTest {
 		 * e.g. Now try with reversed encoding (provide a string that's in JSON and ask the client to use XML)
 		 */
 
-		client.create().resource(myCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
+		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
-		client.create().resource(myCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
+		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
@@ -183,7 +183,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		MethodOutcome outcome = client.create().resource(p1).execute();
 		assertEquals("44", outcome.getId().getIdPart());
@@ -237,7 +237,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		MethodOutcome outcome = client.create(p1);
 		assertEquals("44", outcome.getId().getIdPart());
@@ -267,7 +267,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
 		client.create().resource(org).prettyPrint().encodedXml().execute();
@@ -282,7 +282,7 @@ public class GenericClientTest {
 	public void testDelete() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().addLocation().setValue("testDelete01");
-		String ooStr = myCtx.newXmlParser().encodeResourceToString(oo);
+		String ooStr = ourCtx.newXmlParser().encodeResourceToString(oo);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -291,7 +291,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ooStr), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		OperationOutcome outcome = (OperationOutcome) client.delete().resourceById("Patient", "123").execute();
 
@@ -313,7 +313,7 @@ public class GenericClientTest {
 
 		TagList tagList = new TagList();
 		tagList.add(new Tag("CCC", "AAA", "BBB"));
-		String msg = myCtx.newXmlParser().encodeTagListToString(tagList);
+		String msg = ourCtx.newXmlParser().encodeTagListToString(tagList);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -321,7 +321,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		TagList response = client.getTags()
@@ -361,7 +361,7 @@ public class GenericClientTest {
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Patient response = client.read(Patient.class, new IdDt("Patient/1234"));
@@ -399,7 +399,7 @@ public class GenericClientTest {
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
 		
@@ -440,7 +440,7 @@ public class GenericClientTest {
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Patient response = client.read(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234"));
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
@@ -465,7 +465,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -490,7 +490,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		String longValue = StringUtils.leftPad("", 20000, 'B');
 
@@ -523,7 +523,7 @@ public class GenericClientTest {
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
 		//@formatter:off
 		Bundle response = client
 			.search()
@@ -564,7 +564,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -592,7 +592,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -625,7 +625,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -650,7 +650,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -676,7 +676,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
 		//@formatter:off
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Bundle response = client.search()
 				.forResource(Patient.class)
@@ -700,7 +700,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -725,7 +725,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -760,7 +760,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -785,7 +785,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -830,7 +830,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -855,7 +855,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()
@@ -885,7 +885,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Bundle response = client
 				.search(new UriDt(
@@ -909,7 +909,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Bundle response = client
 				.search(Patient.class,
@@ -935,7 +935,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		GenericClient client = (GenericClient) myCtx.newRestfulGenericClient("http://example.com/fhir");
+		GenericClient client = (GenericClient) ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.setPrettyPrint(true);
 		client.setEncoding(EncodingEnum.JSON);
 
@@ -961,7 +961,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Server Issues!"), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.search().forResource(Patient.class).execute();
@@ -985,7 +985,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Server Issues!"), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.search().forResource(Patient.class).execute();
@@ -999,7 +999,7 @@ public class GenericClientTest {
 	@Test
 	public void testTransaction() throws Exception {
 		String bundleStr = IOUtils.toString(getClass().getResourceAsStream("/bundle.json"));
-		Bundle bundle = myCtx.newJsonParser().parseBundle(bundleStr);
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(bundleStr);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1007,7 +1007,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(bundleStr), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.transaction()
@@ -1024,7 +1024,7 @@ public class GenericClientTest {
 	@Test
 	public void testTransactionJson() throws Exception {
 		String bundleStr = IOUtils.toString(getClass().getResourceAsStream("/bundle.json"));
-		Bundle bundle = myCtx.newJsonParser().parseBundle(bundleStr);
+		Bundle bundle = ourCtx.newJsonParser().parseBundle(bundleStr);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1032,7 +1032,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(bundleStr), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.transaction()
@@ -1069,7 +1069,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.update().resource(p1).execute();
@@ -1135,16 +1135,16 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		client.update().resource(myCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
+		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
 		count++;
 
-		client.update().resource(myCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
+		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
@@ -1154,13 +1154,13 @@ public class GenericClientTest {
 		 * e.g. Now try with reversed encoding (provide a string that's in JSON and ask the client to use XML)
 		 */
 
-		client.update().resource(myCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
+		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.JSON.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("[\"John\"]"));
 		count++;
 
-		client.update().resource(myCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
+		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, count), containsString("value=\"John\""));
@@ -1182,7 +1182,7 @@ public class GenericClientTest {
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Patient response = client.vread(Patient.class, new IdDt("http://somebase.com/path/to/base/Patient/1234/_history/2222"));
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
@@ -1199,7 +1199,7 @@ public class GenericClientTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		myCtx = new FhirContext();
+		ourCtx = new FhirContext();
 	}
 
 }

@@ -51,6 +51,7 @@ public class ClientIntegrationTest {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testClientSecurity() throws Exception {
 

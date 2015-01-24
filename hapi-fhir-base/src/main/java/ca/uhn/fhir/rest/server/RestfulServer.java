@@ -502,7 +502,7 @@ public class RestfulServer extends HttpServlet {
 
 			ResourceBinding resourceBinding = null;
 			BaseMethodBinding<?> resourceMethod = null;
-			if ("metadata".equals(resourceName) || theRequestType == RequestType.OPTIONS) {
+			if (Constants.URL_TOKEN_METADATA.equals(resourceName) || theRequestType == RequestType.OPTIONS) {
 				resourceMethod = myServerConformanceMethod;
 			} else if (resourceName == null) {
 				resourceBinding = myNullResourceBinding;

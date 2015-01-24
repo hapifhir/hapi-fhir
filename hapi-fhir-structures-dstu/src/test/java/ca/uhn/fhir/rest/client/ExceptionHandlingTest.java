@@ -32,20 +32,21 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class ExceptionHandlingTest {
 
-	private static FhirContext myCtx;
+	private static FhirContext ourCtx;
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
 	@BeforeClass
 	public static void beforeClass() {
-		myCtx = new FhirContext();
+		ourCtx = new FhirContext();
 	}
 
 	@Before
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -61,7 +62,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.read(Patient.class, new IdDt("Patient/1234"));
@@ -77,7 +78,7 @@ public class ExceptionHandlingTest {
 	public void testFail500WithOperationOutcomeMessage() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
-		String msg = myCtx.newXmlParser().encodeResourceToString(oo);
+		String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_XML;
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -86,7 +87,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.read(Patient.class, new IdDt("Patient/1234"));
@@ -102,7 +103,7 @@ public class ExceptionHandlingTest {
 	public void testFail500WithUnexpectedResource() throws Exception {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("foo").setValue("bar");
-		String msg = myCtx.newXmlParser().encodeResourceToString(patient);
+		String msg = ourCtx.newXmlParser().encodeResourceToString(patient);
 		String contentType = Constants.CT_FHIR_XML;
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -111,7 +112,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		try {
 			client.read(Patient.class, new IdDt("Patient/1234"));
@@ -128,7 +129,7 @@ public class ExceptionHandlingTest {
 	public void testFail500WithOperationOutcomeMessageJson() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
-		String msg = myCtx.newJsonParser().encodeResourceToString(oo);
+		String msg = ourCtx.newJsonParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_JSON;
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -137,7 +138,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
 			client.read(Patient.class, new IdDt("Patient/1234"));
 			fail();
@@ -154,7 +155,7 @@ public class ExceptionHandlingTest {
 	public void testFail500WithOperationOutcomeMessageGeneric() throws Exception {
 		OperationOutcome oo = new OperationOutcome();
 		oo.getIssueFirstRep().getDetails().setValue("Help I'm a bug");
-		String msg = myCtx.newJsonParser().encodeResourceToString(oo);
+		String msg = ourCtx.newJsonParser().encodeResourceToString(oo);
 		String contentType = Constants.CT_FHIR_JSON;
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -163,7 +164,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IMyClient client = myCtx.newRestfulClient(IMyClient.class,"http://example.com/fhir");
+		IMyClient client = ourCtx.newRestfulClient(IMyClient.class,"http://example.com/fhir");
 		try {
 			client.read(new IdDt("Patient/1234"));
 			fail();

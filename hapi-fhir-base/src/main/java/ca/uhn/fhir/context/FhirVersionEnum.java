@@ -27,20 +27,38 @@ public enum FhirVersionEnum {
 
 	/*
 	 * ***********************
-	 * Don't sort this type!!!
+	 * Don't auto-sort this type!!!
+	 * 
+	 * Or more accurately, entries should be sorted from OLDEST FHIR release 
+	 * to NEWEST FHIR release instead of alphabetically
 	 * ***********************
 	 */
 	
-	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1"), 
+	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null), 
 	
-	DEV("ca.uhn.fhir.model.dev.FhirDev");
+	DSTU2("ca.uhn.fhir.model.dstu.FhirDev", null),
 	
+	DEV("ca.uhn.fhir.model.dev.FhirDev", DSTU2);
+
+
 	private final String myVersionClass;
+	private final FhirVersionEnum myEquivalent;
 	private volatile Boolean myPresentOnClasspath;
 	private volatile IFhirVersion myVersionImplementation;
 
-	FhirVersionEnum(String theVersionClass) {
+	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent) {
 		myVersionClass = theVersionClass;
+		myEquivalent = theEquivalent;
+	}
+	
+	public boolean isEquivalentTo(FhirVersionEnum theVersion) {
+		if (this.equals(theVersion)) {
+			return true;
+		}
+		if (myEquivalent != null) {
+			return myEquivalent.equals(theVersion);
+		}
+		return false;
 	}
 	
 	public boolean isNewerThan(FhirVersionEnum theVersion) {

@@ -76,13 +76,20 @@
 				may cause issues if other applications have been coded to depend on the
 				incorrect behaviour. Thanks to Mochaholic for reporting! 
 			</action>
-		</release>
 			<action type="fix" issue="91" due-to="andyhuang91">
 				Custom/user defined resource definitions which contained more than one
 				child with no order defined failed to initialize properly. Thanks to
 				Andy Huang for reporting and figuring out where the
 				problem was! 
 			</action>
+			<action type="add">
+				RESTful Client now queries the server (only once per server base URL) to ensure that
+				the given server corresponds to the correct version of the FHIR specification, as
+				defined by the FhirContext. This behaviour can be disabled by setting the
+				appropriate configuration on the 
+				RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!
+			</action>
+		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the

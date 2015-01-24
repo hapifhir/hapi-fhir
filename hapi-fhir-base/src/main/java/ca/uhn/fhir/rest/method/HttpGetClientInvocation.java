@@ -79,7 +79,7 @@ public class HttpGetClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
+	public HttpGet asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
 		StringBuilder b = new StringBuilder();
 		
 		if (!myUrlPath.contains("://")) {
