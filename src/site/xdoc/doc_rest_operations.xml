@@ -83,7 +83,7 @@
 							<a href="#instance_update">Instance - Update</a>
 						</td>
 						<td>
-							Read the state of a specific version of the resource
+							Updates the resource on the server
 						</td>
 					</tr>
 					<tr>

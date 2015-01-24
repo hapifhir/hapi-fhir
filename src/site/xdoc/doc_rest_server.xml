@@ -131,7 +131,7 @@
 				</p>
 							
 				<p>
-					Once you have defined your resource providers, they are passed to the 
+					Once you have defined your plain providers, they are passed to the 
 					server in a similar way to the resource providers.
 				</p>
 				<macro name="snippet">
