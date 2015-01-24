@@ -146,11 +146,11 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		}
 
 		HttpClient httpClient = getHttpClient();
-		String serverBase = normalizeAndMaybeValidateServerBase(theServerBase, httpClient);
+		maybeValidateServerBase(theServerBase, httpClient);
 
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
-			invocationHandler = new ClientInvocationHandlerFactory(httpClient, myContext, serverBase, theClientType);
+			invocationHandler = new ClientInvocationHandlerFactory(httpClient, myContext, theServerBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
 				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
 				invocationHandler.addBinding(nextMethod, binding);
@@ -166,11 +166,11 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		HttpClient httpClient = getHttpClient();
-		String serverBase = normalizeAndMaybeValidateServerBase(theServerBase, httpClient);
-		return new GenericClient(myContext, httpClient, serverBase);
+		maybeValidateServerBase(theServerBase, httpClient);
+		return new GenericClient(myContext, httpClient, theServerBase);
 	}
 
-	private String normalizeAndMaybeValidateServerBase(String theServerBase, HttpClient theHttpClient) {
+	private void maybeValidateServerBase(String theServerBase, HttpClient theHttpClient) {
 		String serverBase = theServerBase;
 		if (!serverBase.endsWith("/")) {
 			serverBase = serverBase + "/";
@@ -187,7 +187,6 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			break;
 		}
 
-		return serverBase;
 	}
 
 	@Override

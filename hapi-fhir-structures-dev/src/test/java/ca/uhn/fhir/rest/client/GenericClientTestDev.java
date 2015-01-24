@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReaderInputStream;
@@ -25,22 +24,23 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dev.resource.Patient;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class GenericClientTest {
-	private static FhirContext myCtx;
+public class GenericClientTestDev {
+	private static FhirContext ourCtx;
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;
 
 
 	@BeforeClass
 	public static void beforeClass() {
-		myCtx = FhirContext.forDev();
+		ourCtx = FhirContext.forDev();
 	}
 
 	
 	@Before
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
@@ -55,7 +55,7 @@ public class GenericClientTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
 		Bundle response = client.search()

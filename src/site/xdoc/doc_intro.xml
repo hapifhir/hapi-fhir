@@ -50,7 +50,22 @@
 				for instructions.
 			</p>			
 			
-			<subsection name="Introcuding the FHIR Context">
+			<subsection name="A Note on FHIR Versions">
+			
+				<p>
+					Before discussing HAPI itself, a quick word about FHIR versions. FHIR 
+					is not yet a finalized "1.0" standard. It is currently in the DSTU phase,
+					which means that it is changing in subtle and non-subtle ways between releases.
+					Before trying to use FHIR, you will need to determine which version of FHIR
+					you want to support in your application. Typically this would be the
+					latest version, but if you are looking to interact with an application which 
+					already exists, you will probably want to implement the same version implemented
+					by that application.
+				</p>
+			
+			</subsection>
+			
+			<subsection name="Introducing the FHIR Context">
 
 				<p>
 					HAPI defines model classes for every resource type and datatype defined by the FHIR specification.
@@ -61,11 +76,21 @@
 
 				<p>
 					We will come back to how to interact with these objects in a moment, but first 
-					we need to see the FhirContext. The starting point to using HAPI is the
-					<a href="./apidocs/ca/uhn/fhir/context/FhirContext.html">FhirContext</a> object.
-					The following snippet shows how to create a context object, which is similar in
-					purpose to the 
-					<a href="http://docs.oracle.com/javaee/5/api/javax/xml/bind/JAXBContext.html">JAXBContext</a>. 
+					we need to create a 
+					<a href="./apidocs/ca/uhn/fhir/context/FhirContext.html">FhirContext</a>. 
+					FhirContext is the starting point to using HAPI, and acts as a factory for most
+					other parts of the API as well as a runtime cache of information that HAPI needs
+					to operate. Users of the JAXB API may find this class to be similar in purpose to
+					the 
+					<a href="http://docs.oracle.com/javaee/5/api/javax/xml/bind/JAXBContext.html">JAXBContext</a>
+					class from that API.
+				</p>
+	
+				<p>
+					Creating a FhirContext is as simple as instantiating one. A FhirContext instance is
+					specific to a given version of the FHIR specification, so it is recommended that you
+					use one of the factory methods indicating the FHIR version you wish to support in your
+					application, as shown in the following snippet:
 				</p>
 	
 				<macro name="snippet">

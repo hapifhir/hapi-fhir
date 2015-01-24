@@ -109,7 +109,6 @@ public class RestfulServer extends HttpServlet {
 
 	public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
-		myServerConformanceProvider = theCtx.getVersion().createServerConformanceProvider(this);
 	}
 
 	/**
@@ -362,10 +361,10 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
+	 * (metadata) statement if one has been explicitly defined.
 	 * <p>
 	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
+	 * to use the appropriate one for the given FHIR version.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -775,7 +774,12 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			findResourceMethods(getServerProfilesProvider());
-			findSystemMethods(getServerConformanceProvider());
+			
+			Object confProvider = getServerConformanceProvider();
+			if (confProvider == null) {
+				confProvider = myFhirContext.getVersion().createServerConformanceProvider(this);
+			}
+			findSystemMethods(confProvider);
 
 		} catch (Exception ex) {
 			ourLog.error("An error occurred while loading request handlers!", ex);

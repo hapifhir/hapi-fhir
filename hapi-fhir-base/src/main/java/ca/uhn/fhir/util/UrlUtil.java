@@ -84,4 +84,44 @@ public class UrlUtil {
 		return theExtensionUrl;
 	}
 
+	public static boolean isValid(String theUrl) {
+		if (theUrl == null || theUrl.length() < 8) {
+			return false;
+		}
+		
+		String url = theUrl.toLowerCase();
+		if (url.charAt(0) != 'h') {
+			return false;
+		}
+		if (url.charAt(1) != 't') {
+			return false;
+		}
+		if (url.charAt(2) != 't') {
+			return false;
+		}
+		if (url.charAt(3) != 'p') {
+			return false;
+		}
+		int slashOffset;
+		if (url.charAt(4) == ':') {
+			slashOffset = 5;
+		} else if (url.charAt(4) == 's') {
+			if (url.charAt(5) != ':') {
+				return false;
+			}
+			slashOffset = 6;
+		} else {
+			return false;
+		}
+		
+		if (url.charAt(slashOffset) != '/') {
+			return false;
+		}
+		if (url.charAt(slashOffset + 1) != '/') {
+			return false;
+		}
+
+		return true;
+	}
+	
 }

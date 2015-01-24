@@ -304,7 +304,7 @@ public class JsonParserTest {
 		String actual = ourCtx.newJsonParser().encodeBundleToString(bundle);
 		ourLog.info(actual);
 		
-		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]";
+		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]}";
 		assertEquals(expected, actual);
 		
 	}

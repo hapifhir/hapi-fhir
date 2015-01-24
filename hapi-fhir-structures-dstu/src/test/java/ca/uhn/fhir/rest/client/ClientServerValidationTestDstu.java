@@ -21,11 +21,11 @@ import org.mockito.Matchers;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dev.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class ClientServerValidationTestDstu1 {
+public class ClientServerValidationTestDstu {
 
 	private FhirContext myCtx;
 	private HttpClient myHttpClient;
@@ -36,12 +36,12 @@ public class ClientServerValidationTestDstu1 {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 
-		myCtx = FhirContext.forDstu1();
+		myCtx = FhirContext.forDev();
 		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 	}
 
 	@Test
-	public void testServerReturnsAppropriateVersion() throws Exception {
+	public void testServerReturnsAppropriateVersionDstu() throws Exception {
 		Conformance conf = new Conformance();
 		conf.setFhirVersion("0.4.0");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -62,9 +62,9 @@ public class ClientServerValidationTestDstu1 {
 	}
 
 	@Test
-	public void testServerReturnsWrongVersion() throws Exception {
+	public void testServerReturnsWrongVersionDstu() throws Exception {
 		Conformance conf = new Conformance();
-		conf.setFhirVersion("0.8.0");
+		conf.setFhirVersion("0.0.8");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

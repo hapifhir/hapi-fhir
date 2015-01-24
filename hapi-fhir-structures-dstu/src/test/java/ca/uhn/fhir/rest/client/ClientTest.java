@@ -560,7 +560,10 @@ public class ClientTest {
 
 		// TODO: remove the read annotation and make sure we get a sensible
 		// error message to tell the user why the method isn't working
-		ClientWithoutAnnotation client = new FhirContext().newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
+		FhirContext ctx = new FhirContext();
+		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		
+		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
 
 		try {
 			client.read(new IdDt("8"));

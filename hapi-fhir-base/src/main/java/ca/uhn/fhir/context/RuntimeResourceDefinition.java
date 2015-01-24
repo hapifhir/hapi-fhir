@@ -32,8 +32,7 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-
-import com.phloc.commons.url.URLValidator;
+import ca.uhn.fhir.util.UrlUtil;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
@@ -106,9 +105,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			return "";
 		}
 
-		if (!URLValidator.isValid(profile)) {
+		if (!UrlUtil.isValid(profile)) {
 			String profileWithUrl = theServerBase + "/Profile/" + profile;
-			if (URLValidator.isValid(profileWithUrl)) {
+			if (UrlUtil.isValid(profileWithUrl)) {
 				return profileWithUrl;
 			}
 		}

@@ -3,17 +3,14 @@ package ca.uhn.fhir.rest.client;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
@@ -23,8 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
-
-import com.google.common.base.Preconditions;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -41,8 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
  */
 public class ETagClientTest {
 
-	private static FhirContext myCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClientTest.class);
+	private static FhirContext ourCtx;
 	private HttpClient myHttpClient;
 
 	private HttpResponse myHttpResponse;
@@ -51,16 +45,11 @@ public class ETagClientTest {
 	public void before() {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
+		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
-
-	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(count)).getEntity().getContent(), "UTF-8");
-		return body;
-	}
-
 
 	private String getResourceResult() {
 		//@formatter:off
@@ -78,9 +67,8 @@ public class ETagClientTest {
 		return msg;
 	}
 
-
 	private Patient getResource() {
-		return myCtx.newXmlParser().parseResource(Patient.class, getResourceResult());
+		return ourCtx.newXmlParser().parseResource(Patient.class, getResourceResult());
 	}
 
 	@Test
@@ -103,7 +91,7 @@ public class ETagClientTest {
 		//@formatter:on
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Patient response = client.read(Patient.class, new IdDt("Patient/1234"));
 
@@ -128,10 +116,10 @@ public class ETagClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_304_NOT_MODIFIED, "Not modified"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		
+
 		//@formatter:off
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("")));
 		try {
@@ -165,7 +153,6 @@ public class ETagClientTest {
 
 	}
 
-	
 	@Test
 	public void testUpdateWithIfMatch() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -173,10 +160,10 @@ public class ETagClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_200_OK, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		
+
 		//@formatter:off
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("")));
 		client
@@ -203,7 +190,6 @@ public class ETagClientTest {
 
 	}
 
-
 	@Test
 	public void testUpdateWithIfMatchWithPreconditionFailed() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -211,10 +197,10 @@ public class ETagClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_412_PRECONDITION_FAILED, "Precondition Failed"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		
+
 		//@formatter:off
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("")));
 		try {
@@ -261,15 +247,14 @@ public class ETagClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
-				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
 
-		IGenericClient client = myCtx.newRestfulGenericClient("http://example.com/fhir");
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		int count = 0;
-		
+
 		Patient response = client.read().resource(Patient.class).withId(new IdDt("Patient/1234")).execute();
 		assertThat(response.getNameFirstRep().getFamilyAsSingleString(), StringContains.containsString("Cardinal"));
 		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
@@ -291,10 +276,9 @@ public class ETagClientTest {
 
 	}
 
-	
 	@BeforeClass
 	public static void beforeClass() {
-		myCtx = new FhirContext();
+		ourCtx = new FhirContext();
 	}
 
 }

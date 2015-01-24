@@ -22,8 +22,10 @@ public class GenericClientExample {
 
    public static void simpleExample() {
       // START SNIPPET: simple
-      FhirContext ctx = new FhirContext();
-      String serverBase = "http://fhirtest.uhn.ca/base";
+      // We're connecting to a DSTU1 compliant server in this example
+      FhirContext ctx = FhirContext.forDstu1();
+      String serverBase = "http://fhirtest.uhn.ca/baseDstu1";
+      
       IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
       // Perform a search

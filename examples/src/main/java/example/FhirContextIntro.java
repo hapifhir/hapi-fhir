@@ -16,7 +16,7 @@ public class FhirContextIntro {
 	@SuppressWarnings("unused")
 	public static void creatingContext() {
 // START SNIPPET: creatingContext
-FhirContext ctx = new FhirContext();
+FhirContext ctx = FhirContext.forDstu1();
 // END SNIPPET: creatingContext
 		
 	}
@@ -84,7 +84,7 @@ System.out.println(encoded);
 	
 	
 	public static void parseMsg() {
-FhirContext ctx = new FhirContext(Patient.class, Observation.class);
+FhirContext ctx = FhirContext.forDstu1();
 
 //START SNIPPET: parseMsg
 // The following is an example Patient resource
