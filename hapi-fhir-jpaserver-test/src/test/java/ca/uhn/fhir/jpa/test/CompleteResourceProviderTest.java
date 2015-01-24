@@ -93,6 +93,32 @@ public class CompleteResourceProviderTest {
 		}
 	}
 
+	/**
+	 * Test for issue #60
+	 */
+	@Test
+	public void testReadAllInstancesOfType() throws Exception {
+		Patient pat;
+		
+		pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_01");
+		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+
+		pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system").setValue("testReadAllInstancesOfType_02");
+		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+
+		{
+			Bundle returned = ourClient.search().forResource(Patient.class).encodedXml().execute();
+			assertThat(returned.size(), greaterThan(1));
+		}
+		{
+			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().execute();
+			assertThat(returned.size(), greaterThan(1));
+		}
+	}
+
+	
 	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();

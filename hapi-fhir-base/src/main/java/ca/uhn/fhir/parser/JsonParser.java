@@ -286,6 +286,7 @@ public class JsonParser extends BaseParser implements IParser {
 					writeOptionalTagWithTextNode(theEventWriter, "versionId", nextEntry.getResource().getId().getVersionIdPart());
 				}
 				writeTagWithTextNode(theEventWriter, "instant", nextEntry.getDeletedAt());
+				theEventWriter.writeEnd();
 			}
 
 			// linkStarted = false;

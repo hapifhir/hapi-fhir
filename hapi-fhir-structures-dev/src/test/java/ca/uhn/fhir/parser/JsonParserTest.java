@@ -1,21 +1,18 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.io.StringReader;
+import java.io.IOException;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
-import org.custommonkey.xmlunit.Diff;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -44,6 +41,25 @@ public class JsonParserTest {
 
 		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+	}
+
+	/**
+	 * Fixing #89
+	 */
+	@Test
+	public void testEncodeBundleWithDeletedEntry() throws ConfigurationException, DataFormatException, IOException {
+		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserTest.class.getResourceAsStream("/xml-bundle.xml")));
+		String val = ourCtx.newJsonParser().encodeBundleToString(b);
+		
+		ourLog.info(val);
+		
+		//@formatter:off
+		assertThat(val, containsString("\"deleted\":{" + 
+				"\"type\":\"Patient\"," + 
+				"\"resourceId\":\"4384\"," + 
+				"\"instant\":\"2015-01-15T11:04:43.054-05:00\"" + 
+				"}"));
+		//@formatter:on
 	}
 
 	/**
