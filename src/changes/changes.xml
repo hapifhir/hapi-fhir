@@ -77,6 +77,12 @@
 				incorrect behaviour. Thanks to Mochaholic for reporting! 
 			</action>
 		</release>
+			<action type="fix" issue="91" due-to="andyhuang91">
+				Custom/user defined resource definitions which contained more than one
+				child with no order defined failed to initialize properly. Thanks to
+				Andy Huang for reporting and figuring out where the
+				problem was! 
+			</action>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the

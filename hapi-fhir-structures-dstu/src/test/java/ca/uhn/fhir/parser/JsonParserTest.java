@@ -1147,9 +1147,9 @@ public class JsonParserTest {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
+		FhirContext fhirCtx = new FhirContext(MyPatientWithExtensions.class);
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		MyPatientWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyPatientWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getAllUndeclaredExtensions().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());

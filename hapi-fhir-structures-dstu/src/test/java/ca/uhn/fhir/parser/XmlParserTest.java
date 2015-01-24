@@ -1438,12 +1438,35 @@ public class XmlParserTest {
 
 	}
 
+	/**
+	 * See #91
+	 */
+	@Test
+	public void testCustomTypeWithUnoderedExtensions() {
+		MyPatientWithUnorderedExtensions pat = new MyPatientWithUnorderedExtensions();
+		pat.getExtAtt1().setValue(true);
+		pat.getExtAtt2().setValue("val2");
+		pat.getExtAtt3().setValueAsString("20110102");
+		
+		String string = ourCtx.newXmlParser().encodeResourceToString(pat);
+		ourLog.info(string);
+		
+		//@formatter:off
+		assertThat(string, stringContainsInOrder(Arrays.asList(
+			"<extension url=\"urn:ex1\"><valueBoolean value=\"true\"/></extension>",
+			"<extension url=\"urn:ex2\"><valueString value=\"val2\"/></extension>",
+			"<extension url=\"urn:ex3\"><valueDate value=\"20110102\"/></extension>"
+			)));
+		//@formatter:on
+		
+	}
+	
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
+		FhirContext fhirCtx = new FhirContext(MyPatientWithExtensions.class);
 		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		MyPatientWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyPatientWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getAllUndeclaredExtensions().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType().getValue());
@@ -1469,6 +1492,7 @@ public class XmlParserTest {
 		assertTrue(d.toString(), d.identical());
 
 	}
+
 
 	@Test
 	public void testTagList() {
