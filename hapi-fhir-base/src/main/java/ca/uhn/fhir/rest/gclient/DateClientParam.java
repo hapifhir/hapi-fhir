@@ -112,14 +112,14 @@ public class DateClientParam implements IParam {
 		@Override
 		public ICriterion<DateClientParam> second(Date theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
-			dt.setPrecision(TemporalPrecisionEnum.DAY);
+			dt.setPrecision(TemporalPrecisionEnum.SECOND);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
 		@Override
 		public ICriterion<DateClientParam> second(String theValue) {
 			DateTimeDt dt = new DateTimeDt(theValue);
-			dt.setPrecision(TemporalPrecisionEnum.DAY);
+			dt.setPrecision(TemporalPrecisionEnum.SECOND);
 			return new Criterion(myPrefix + dt.getValueAsString());
 		}
 
