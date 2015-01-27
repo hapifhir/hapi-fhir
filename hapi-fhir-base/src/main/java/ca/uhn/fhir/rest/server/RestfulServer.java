@@ -535,6 +535,7 @@ public class RestfulServer extends HttpServlet {
 						operation = Constants.PARAM_HISTORY;
 					}
 				} else if (nextString.startsWith("_")) {
+					//FIXME: this would be untrue for _meta/_delete
 					if (operation != null) {
 						throw new InvalidRequestException("URL Path contains two operations (part beginning with _): " + requestPath);
 					}
