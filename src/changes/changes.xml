@@ -284,6 +284,10 @@
 				<![CDATA[<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/ResourceDef.html">@ResourceDef</a>]]>
 				JavaDoc for information on how this works.
 			</action>
+			<action type="add" issue="73" dev="wdebeau1">
+				Add convenience methods to TokenOrListParam to test whether any of a set of tokens match
+				the given requested list.
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
