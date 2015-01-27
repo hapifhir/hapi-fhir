@@ -288,6 +288,12 @@
 				Add convenience methods to TokenOrListParam to test whether any of a set of tokens match
 				the given requested list.
 			</action>
+			<action type="add" issue="86" dev="harsha89">
+				Add a protected method to RestfulServer which allows developers to 
+				implement their own method for determining which part of the request
+				URL is the FHIR request path (useful if you are embedding the RestulServer inside
+				of another web framework). Thanks to Harsha Kumara for the pull request!
+			</action>
 		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
