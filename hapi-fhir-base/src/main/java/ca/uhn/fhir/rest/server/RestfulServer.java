@@ -166,7 +166,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
 	 */
-	private int escapedLength(String theServletPath) {
+	protected int escapedLength(String theServletPath) {
 		int delta = 0;
 		for (int i = 0; i < theServletPath.length(); i++) {
 			char next = theServletPath.charAt(i);
@@ -480,12 +480,10 @@ public class RestfulServer extends HttpServlet {
 			String operation = null;
 			String compartment = null;
 
-			String requestPath = requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
+			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
 			if (requestPath.length() > 0 && requestPath.charAt(0) == '/') {
 				requestPath = requestPath.substring(1);
 			}
-
-			fhirServerBase = getServerBaseForRequest(theRequest);
 
 			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
@@ -1496,4 +1494,16 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path
+	 * implementation
+	 *
+	 * @param requestFullPath the full request path
+	 * @param servletContextPath the servelet context path
+	 * @param servletPath the servelet path
+	 * @return created resource path
+	 */
+	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
+		return requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
+	}
 }
