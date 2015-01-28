@@ -237,8 +237,9 @@ public class Controller {
 	}
 
 	@RequestMapping(value = { "/", "/home" })
-	public String actionHome(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	public String actionHome(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
+		ourLog.info(theServletRequest.toString());
 		return "home";
 	}
 
@@ -1013,6 +1014,8 @@ public class Controller {
 			return loadAndAddConfDev(theRequest, theModel);
 		case DSTU1:
 			return loadAndAddConfDstu1(theRequest, theModel);
+		case DSTU2:
+			return loadAndAddConfDev(theRequest, theModel);
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
