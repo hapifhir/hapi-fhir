@@ -2,7 +2,9 @@ package ca.uhn.fhirtest;
 
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
@@ -136,7 +138,7 @@ public class TestRestfulServer extends RestfulServer {
 				throw new ServletException("Missing system property: " + baseUrlProperty);
 			}
 		}
-		setServerAddressStrategy(new HardcodedServerAddressStrategy(baseUrl));
+		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));
 		
 		/*
 		 * This is a simple paging strategy that keeps the last 10 
@@ -155,4 +157,32 @@ public class TestRestfulServer extends RestfulServer {
 
 	}
 
+	/**
+	 * The public server is deployed to http://fhirtest.uhn.ca and the JEE webserver
+	 * where this FHIR server is deployed is actually fronted by an Apache HTTPd instance,
+	 * so we use an address strategy to let the server know how it should address itself.
+	 */
+	private static class MyHardcodedServerAddressStrategy extends HardcodedServerAddressStrategy {
+
+		public MyHardcodedServerAddressStrategy(String theBaseUrl) {
+			super(theBaseUrl);
+		}
+
+		@Override
+		public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
+			/*
+			 * This is a bit of a hack, but we want to support both HTTP and HTTPS seamlessly
+			 * so we have the outer httpd proxy relay requests to the Java container on 
+			 * port 28080 for http and 28081 for https.
+			 */
+			String retVal = super.determineServerBase(theServletContext, theRequest);
+			if (theRequest.getRequestURL().indexOf("28081") != -1) {
+				retVal = retVal.replace("http://", "https://");
+			}
+			return retVal;
+		}
+		
+	}
+	
+	
 }

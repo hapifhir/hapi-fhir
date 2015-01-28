@@ -92,6 +92,46 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	}
 
 	/**
+	 * returns true if <code>this</code> Coding matches a search for the coding specified by <code>theSearchParam</code>, according
+	 * to the following:
+	 * <ul>
+	 *		<li>[parameter]=[namespace]|[code] matches a code/value in the given system namespace</li>
+	 *		<li>[parameter]=[code] matches a code/value irrespective of it's system namespace</li>
+	 *		<li>[parameter]=|[code] matches a code/value that has no system namespace</li>
+	 * </ul>
+	 * @param theSearchParam - coding to test <code>this</code> against
+	 * @return true if the coding matches, false otherwise
+	 */
+	public boolean matchesToken(BaseCodingDt theSearchParam) {
+		if (theSearchParam.isSystemPresent()) {
+			if (theSearchParam.isSystemBlank()) {
+				//  [parameter]=|[code] matches a code/value that has no system namespace
+				if (isSystemPresent() && !isSystemBlank())
+					return false;
+			} else {
+				//  [parameter]=[namespace]|[code] matches a code/value in the given system namespace
+				if (!isSystemPresent())
+					return false;
+				if (!getSystemElement().equals(theSearchParam.getSystemElement()))
+					return false;
+			}
+		} else {
+			//  [parameter]=[code] matches a code/value irrespective of it's system namespace
+			// (nothing to do for system for this case)
+		}
+
+		return getCodeElement().equals(theSearchParam.getCodeElement());
+	}
+
+	private boolean isSystemPresent() {
+		return !getSystemElement().isEmpty();
+	}
+
+	private boolean isSystemBlank() {
+		return isSystemPresent() && getSystemElement().getValueAsString().equals("");
+	}
+
+	/**
 	 * Sets the value for <b>code</b> (Symbol in syntax defined by the system)
 	 *
 	 * <p>
@@ -108,5 +148,6 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * </p>
 	 */
 	public abstract BaseCodingDt setSystem(String theUri);
+
 
 }
