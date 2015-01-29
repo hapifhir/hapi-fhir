@@ -89,6 +89,9 @@
 				appropriate configuration on the 
 				RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!
 			</action>
+			<action type="add">
+			    JPA module now supports deleting resource via transaction
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

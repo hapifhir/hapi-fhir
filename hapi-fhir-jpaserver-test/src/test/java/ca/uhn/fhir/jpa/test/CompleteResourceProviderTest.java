@@ -396,6 +396,7 @@ public class CompleteResourceProviderTest {
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
+		assertEquals(BundleEntryStatusEnum.MATCH, actual.getEntries().get(0).getStatus().getValueAsEnum());
 	}
 
 	@Test

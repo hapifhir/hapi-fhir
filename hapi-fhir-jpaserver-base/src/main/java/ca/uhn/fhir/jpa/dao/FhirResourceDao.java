@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -68,9 +69,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
@@ -163,7 +161,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		}
 
-		updateEntity(theResource, entity, false, false);
+		updateEntity(theResource, entity, false, null);
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		notifyWriteCompleted();
@@ -179,7 +177,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
 
-		ResourceTable savedEntity = updateEntity(null, entity, true, true);
+		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
 
 		notifyWriteCompleted();
 
@@ -490,7 +488,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 						// Execute the query and make sure we return distinct results
 						List<IResource> retVal = new ArrayList<IResource>();
-						loadResourcesByPid(pidsSubList, retVal);
+						loadResourcesByPid(pidsSubList, retVal, BundleEntryStatusEnum.MATCH);
 
 						// Load _include resources
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
@@ -748,7 +746,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
 
-		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true, null);
 
 		notifyWriteCompleted();
 		ourLog.info("Processed update on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
@@ -1423,7 +1421,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate, BundleEntryStatusEnum theBundleEntryStatus) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1450,6 +1448,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
 				continue;
 			}
+			
+			ResourceMetadataKeyEnum.ENTRY_STATUS.put(resource, theBundleEntryStatus);
+
 			theResourceListToPopulate.set(index, resource);
 		}
 	}

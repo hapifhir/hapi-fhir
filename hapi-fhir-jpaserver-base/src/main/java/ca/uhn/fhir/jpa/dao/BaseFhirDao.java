@@ -811,7 +811,7 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, boolean theDelete) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull) {
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
@@ -843,7 +843,7 @@ public abstract class BaseFhirDao implements IDao {
 		final List<ResourceIndexedSearchParamQuantity> quantityParams;
 		final List<ResourceIndexedSearchParamDate> dateParams;
 		final List<ResourceLink> links;
-		if (theDelete) {
+		if (theDeletedTimestampOrNull != null) {
 
 			stringParams = Collections.emptyList();
 			tokenParams = Collections.emptyList();
@@ -851,8 +851,8 @@ public abstract class BaseFhirDao implements IDao {
 			quantityParams = Collections.emptyList();
 			dateParams = Collections.emptyList();
 			links = Collections.emptyList();
-			entity.setDeleted(new Date());
-			entity.setUpdated(new Date());
+			entity.setDeleted(theDeletedTimestampOrNull);
+			entity.setUpdated(theDeletedTimestampOrNull);
 
 		} else {
 

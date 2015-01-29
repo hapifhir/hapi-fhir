@@ -1,7 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,13 +20,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import ch.qos.logback.core.pattern.color.BlackCompositeConverter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -25,16 +32,16 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dev.composite.IdentifierDt;
 import ca.uhn.fhir.model.dev.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Device;
 import ca.uhn.fhir.model.dev.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dev.resource.Location;
 import ca.uhn.fhir.model.dev.resource.Observation;
 import ca.uhn.fhir.model.dev.resource.Organization;
 import ca.uhn.fhir.model.dev.resource.Patient;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -214,6 +221,67 @@ public class FhirSystemDaoTest {
 
 	}
 
+	@Test
+	public void testTransactionWithDelete() throws Exception {
+		
+		/*
+		 * Create 3
+		 */
+		
+		List<IResource> res;
+		res = new ArrayList<IResource>();
+
+		Patient p1 = new Patient();
+		p1.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
+		res.add(p1);
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
+		res.add(p2);
+
+		Patient p3 = new Patient();
+		p3.addIdentifier().setSystem("urn:system").setValue("testTransactionWithDelete");
+		res.add(p3);
+
+		ourSystemDao.transaction(res);
+
+		/*
+		 * Verify
+		 */
+		
+		IBundleProvider results = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
+		assertEquals(3, results.size());
+		
+		/*
+		 * Now delete 2
+		 */
+		
+		res = new ArrayList<IResource>();
+		List<IResource> existing = results.getResources(0, 3);
+
+		p1 = new Patient();
+		p1.setId(existing.get(0).getId());
+		ResourceMetadataKeyEnum.DELETED_AT.put(p1, InstantDt.withCurrentTime());
+		res.add(p1);
+		
+		p2 = new Patient();
+		p2.setId(existing.get(1).getId());
+		ResourceMetadataKeyEnum.DELETED_AT.put(p2, InstantDt.withCurrentTime());
+		res.add(p2);
+		
+		ourSystemDao.transaction(res);
+		
+		/*
+		 * Verify
+		 */
+		
+		IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
+		assertEquals(1, results2.size());
+		List<IResource> existing2 = results2.getResources(0, 1);
+		assertEquals(existing2.get(0).getId(), existing.get(2).getId());
+		
+	}
+
 	/**
 	 * Issue #55
 	 */
@@ -233,7 +301,7 @@ public class FhirSystemDaoTest {
 		res.add(o1);
 
 		Observation o2 = new Observation();
-		o2.setId("cid:observation1");
+		o2.setId("cid:observation2");
 		o2.getIdentifier().setSystem("system").setValue("testTransactionWithCidIds03");
 		o2.setSubject(new ResourceReferenceDt("Patient/cid:patient1"));
 		res.add(o2);
@@ -319,6 +387,19 @@ public class FhirSystemDaoTest {
 		assertEquals(obsId, obsId2);
 		assertEquals(obsVersion2, "2");
 
+	}
+
+	@Test(expected=InvalidRequestException.class)
+	public void testTransactionFailsWithDuplicateIds() {
+		Patient patient1 = new Patient();
+		patient1.setId(new IdDt("Patient/testTransactionFailsWithDusplicateIds"));
+		patient1.addIdentifier().setSystem("urn:system").setValue( "testPersistWithSimpleLinkP01");
+
+		Patient patient2 = new Patient();
+		patient2.setId(new IdDt("Patient/testTransactionFailsWithDusplicateIds"));
+		patient2.addIdentifier().setSystem("urn:system").setValue( "testPersistWithSimpleLinkP02");
+
+		ourSystemDao.transaction(Arrays.asList((IResource) patient1, patient2));
 	}
 
 	@Test

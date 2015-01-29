@@ -3,8 +3,10 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,12 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 
@@ -41,10 +46,23 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
 		long start = System.currentTimeMillis();
 
+		Set<IdDt> allIds = new HashSet<IdDt>();
+		
 		for (int i =0; i <theResources.size();i++) {
 			IResource res = theResources.get(i);
 			if(res.getId().hasIdPart() && !res.getId().hasResourceType()) {
 				res.setId(new IdDt(toResourceName(res.getClass()), res.getId().getIdPart()));
+			}
+			
+			/*
+			 * Ensure that the bundle doesn't have any duplicates, since this causes all
+			 * kinds of weirdness
+			 */
+			if (res.getId().hasResourceType() && res.getId().hasIdPart()) {
+				IdDt nextId = res.getId().toUnqualifiedVersionless();
+				if (!allIds.add(nextId)) {
+					throw new InvalidRequestException("Transaction bundle contains multiple resources with ID: " + nextId);
+				}
 			}
 		}
 		
@@ -64,12 +82,6 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 			}
 
 			String resourceName = toResourceName(nextResource);
-
-			// IFhirResourceDao<? extends IResource> dao = getDao(nextResource.getClass());
-			// if (dao == null) {
-			// throw new InvalidRequestException("This server is not able to handle resources of type: " +
-			// nextResource.getResourceId().getResourceType());
-			// }
 
 			ResourceTable entity;
 			if (nextId.isEmpty()) {
@@ -150,7 +162,9 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		for (int i = 0; i < theResources.size(); i++) {
 			IResource resource = theResources.get(i);
 			ResourceTable table = persistedResources.get(i);
-			updateEntity(resource, table, table.getId() != null, false);
+			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(resource);
+			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
+			updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull);
 		}
 
 		long delay = System.currentTimeMillis() - start;
