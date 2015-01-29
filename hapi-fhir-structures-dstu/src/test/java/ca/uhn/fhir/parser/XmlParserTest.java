@@ -3,13 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,6 +21,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -739,7 +734,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testExtensions() throws DataFormatException {
+	public void testExtensionsWithDatatypes() throws DataFormatException {
 
 		MyPatient patient = new MyPatient();
 		patient.setPetName(new StringDt("Fido"));
@@ -761,6 +756,52 @@ public class XmlParserTest {
 
 	}
 
+	/**
+	 * Test for #82 - Not yet enabled because the test won't pass
+	 */
+//	@Test
+	public void testCustomTypeInReplaceParent() throws DataFormatException {
+
+		MyPatient patient = new MyPatient();
+		patient.addName().addFamily("PatientName");
+		
+		MyOrganization org = new MyOrganization();
+		org.setName("OrgName");
+		patient.getManagingOrganization().setResource(org);
+		
+		String str = ourCtx.newXmlParser().encodeResourceToString(patient);
+		ourLog.info(str);
+
+		assertThat(str, Matchers.stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\"><contained><Organization xmlns=\"http://hl7.org/fhir\" id=\"1\"><name value=\"OrgName\"/></Organization></contained><name><family value=\"PatientName\"/></name><managingOrganization><reference value=\"#1\"/></managingOrganization></Patient>"));
+		
+		MyPatient parse = ourCtx.newXmlParser().parseResource(MyPatient.class, str);
+		assertEquals("PatientName", parse.getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("OrgName", ((MyOrganization)parse.getManagingOrganization().getResource()).getName().getValue());
+	}
+
+	/**
+	 * Test for #82 - Not yet enabled because the test won't pass
+	 */
+//	@Test
+	public void testCustomTypeInExtension() throws DataFormatException {
+
+		MyPatient patient = new MyPatient();
+		patient.addName().addFamily("PatientName");
+		
+		MyOrganization org = new MyOrganization();
+		org.setName("OrgName");
+		patient.getSomeOrganization().setResource(org);
+		
+		String str = ourCtx.newXmlParser().encodeResourceToString(patient);
+		ourLog.info(str);
+
+		assertThat(str, Matchers.stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://foo/someOrg\"><valueResource><reference value=\"#1\"/></valueResource></extension><contained><Organization xmlns=\"http://hl7.org/fhir\" id=\"1\"><name value=\"OrgName\"/></Organization></contained><name><family value=\"PatientName\"/></name></Patient>"));
+		
+		MyPatient parse = ourCtx.newXmlParser().parseResource(MyPatient.class, str);
+		assertEquals("PatientName", parse.getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("OrgName", ((MyOrganization)parse.getSomeOrganization().getResource()).getName().getValue());
+	}
+	
 	@Test
 	public void testLoadAndAncodeMessage() throws SAXException, IOException {
 

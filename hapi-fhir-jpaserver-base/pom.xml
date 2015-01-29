@@ -68,7 +68,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
+			<artifactId>java-hamcrest</artifactId>
 			<version>${hamcrest_version}</version>
 			<scope>test</scope>
 		</dependency>
