@@ -90,6 +90,25 @@ public class RestfulServerMethodTest {
 	private static RestfulServer ourRestfulServer;
 
 	@Test
+	public void testCreateBundleDoesntCreateDoubleEntries() {
+		
+		List<IResource> resources = new ArrayList<IResource>();
+		
+		Patient p = new Patient();
+		p.setId("Patient/1");
+		resources.add(p);
+		
+		Organization o = new Organization();
+		o.setId("Organization/2");
+		resources.add(o);
+		
+		p.getManagingOrganization().setResource(o);
+		
+		Bundle bundle = RestfulServer.createBundleFromResourceList(ourCtx, "", resources, "http://foo", "http://foo", 2, null);
+		assertEquals(2, bundle.getEntries().size());
+	}
+	
+	@Test
 	public void test404IsPropagatedCorrectly() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/DiagnosticReport?throw404=true");

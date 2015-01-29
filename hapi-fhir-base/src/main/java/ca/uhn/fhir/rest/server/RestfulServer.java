@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -426,7 +427,7 @@ public class RestfulServer extends HttpServlet {
 		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		Bundle bundle = createBundleFromBundleProvider(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction);
+		Bundle bundle = createBundleFromBundleProvider(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction, null);
 
 		for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = getInterceptors().get(i);
@@ -1031,7 +1032,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public static Bundle createBundleFromBundleProvider(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId) {
+			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType) {
 		theHttpResponse.setStatus(200);
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
@@ -1093,7 +1094,7 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size());
+		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
 
 		bundle.setPublished(theResult.getPublished());
 
@@ -1115,16 +1116,24 @@ public class RestfulServer extends HttpServlet {
 		return bundle;
 	}
 
-	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults) {
+	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		Bundle bundle = new Bundle();
 		bundle.getAuthorName().setValue(theAuthor);
 		bundle.getBundleId().setValue(UUID.randomUUID().toString());
 		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
 		bundle.getLinkBase().setValue(theServerBase);
 		bundle.getLinkSelf().setValue(theCompleteUrl);
+		bundle.getType().setValueAsEnum(theBundleType);
 
 		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
+		
+		for (IResource next : theResult) {
+			if (next.getId().isEmpty() == false) {
+				addedResourceIds.add(next.getId());
+			}
+		}
+			
 		for (IResource next : theResult) {
 
 			Set<String> containedIds = new HashSet<String>();

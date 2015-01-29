@@ -18,6 +18,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -70,6 +71,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
 
 	}
 

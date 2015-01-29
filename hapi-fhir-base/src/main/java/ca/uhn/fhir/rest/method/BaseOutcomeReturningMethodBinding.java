@@ -98,37 +98,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
-	/*
-	 * @Override public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse)
-	 * throws BaseServerResponseException, IOException { Object[] params = new Object[getParameters().size()]; for (int
-	 * i = 0; i < getParameters().size(); i++) { IParameter param = getParameters().get(i); if (param != null) {
-	 * params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null); } }
-	 * 
-	 * addParametersForServerRequest(theRequest, params);
-	 * 
-	 * MethodOutcome response = (MethodOutcome) invokeServerMethod(getProvider(), params);
-	 * 
-	 * if (response == null) { if (myReturnVoid == false) { throw new ConfigurationException("Method " +
-	 * getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null"); }
-	 * else { theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT); } } else if (!myReturnVoid) { if
-	 * (response.isCreated()) { theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED); StringBuilder b = new
-	 * StringBuilder(); b.append(theRequest.getFhirServerBase()); b.append('/'); b.append(getResourceName());
-	 * b.append('/'); b.append(response.getId().getValue()); if (response.getVersionId() != null &&
-	 * response.getVersionId().isEmpty() == false) { b.append("/_history/");
-	 * b.append(response.getVersionId().getValue()); } theResponse.addHeader("Location", b.toString()); } else {
-	 * theResponse.setStatus(Constants.STATUS_HTTP_200_OK); } } else {
-	 * theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT); }
-	 * 
-	 * theServer.addHeadersToResponse(theResponse);
-	 * 
-	 * Writer writer = theResponse.getWriter(); try { if (response != null) { OperationOutcome outcome = new
-	 * OperationOutcome(); if (response.getOperationOutcome() != null && response.getOperationOutcome().getIssue() !=
-	 * null) { outcome.getIssue().addAll(response.getOperationOutcome().getIssue()); } EncodingUtil encoding =
-	 * BaseMethodBinding.determineResponseEncoding(theRequest .getServletRequest(), theRequest.getParameters());
-	 * theResponse.setContentType(encoding.getResourceContentType()); IParser parser = encoding.newParser(getContext());
-	 * parser.encodeResourceToWriter(outcome, writer); } } finally { writer.close(); } // getMethod().in }
-	 */
-
 	/**
 	 * For servers, this method will match only incoming requests that match the given operation, or which have no
 	 * operation in the URL if this method returns null.
@@ -232,7 +201,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			} else {
 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			}
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
+			addContentLocationHeaders(theRequest, servletResponse, response);
 			break;
 
 		case UPDATE:
@@ -241,10 +210,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			} else {
 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			}
-			if (response != null && response.getId() != null) {
-				addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
-				addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
-			}
+			addContentLocationHeaders(theRequest, servletResponse, response);
 			break;
 
 		case VALIDATE:
@@ -279,12 +245,19 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				writer.close();
 			}
 		} else {
-			servletResponse.setContentType(Constants.CT_TEXT);
+			servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
 			Writer writer = servletResponse.getWriter();
 			writer.close();
 		}
 
 		// getMethod().in
+	}
+
+	private void addContentLocationHeaders(Request theRequest, HttpServletResponse servletResponse, MethodOutcome response) {
+		if (response != null && response.getId() != null) {
+			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
+			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
+		}
 	}
 
 	public boolean isReturnVoid() {

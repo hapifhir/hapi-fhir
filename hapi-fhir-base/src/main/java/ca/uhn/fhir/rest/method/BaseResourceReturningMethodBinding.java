@@ -41,6 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -242,7 +243,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		switch (getReturnType()) {
 		case BUNDLE:
 
-			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
+			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
 
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
@@ -275,6 +276,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			break;
 		}
 	}
+
+	/**
+	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
+	 */
+	protected abstract BundleTypeEnum getResponseBundleType();
 
 	/**
 	 * Subclasses may override

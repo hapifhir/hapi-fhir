@@ -37,6 +37,7 @@ public class Constants {
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
+	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + "; charset=UTF-8";
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String FORMAT_JSON = "json";

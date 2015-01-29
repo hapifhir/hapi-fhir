@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
@@ -473,6 +474,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public static enum RequestType {
 		DELETE, GET, OPTIONS, POST, PUT
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.SEARCHSET;
 	}
 
 }

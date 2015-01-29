@@ -31,6 +31,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
@@ -60,6 +61,12 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.SEARCHSET;
+	}
+
 
 	@Override
 	public List<IParameter> getParameters() {

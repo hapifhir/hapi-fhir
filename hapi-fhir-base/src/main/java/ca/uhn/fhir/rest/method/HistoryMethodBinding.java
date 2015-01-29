@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
@@ -125,6 +126,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.HISTORY;
+	}
+	
 	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId, DateTimeDt theSince, Integer theLimit) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {

@@ -103,18 +103,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 	}
 
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/**
 	 * For subclasses to override
 	 */

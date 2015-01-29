@@ -196,7 +196,7 @@ public class ContainedResourceEncodingTest {
         
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
-		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0, null);
         
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
         String xml = parser.encodeBundleToString(bundle);
@@ -235,7 +235,7 @@ public class ContainedResourceEncodingTest {
         
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
-		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+		Bundle bundle = RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0, null);
         
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
         String xml = parser.encodeBundleToString(bundle);

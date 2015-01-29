@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -99,6 +100,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public OtherOperationTypeEnum getOtherOperationType() {
 		return OtherOperationTypeEnum.METADATA;
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
 	}
 
 }

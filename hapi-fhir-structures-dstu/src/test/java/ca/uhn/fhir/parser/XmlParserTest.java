@@ -1,6 +1,8 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -30,7 +32,6 @@ import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -277,6 +278,7 @@ public class XmlParserTest {
 
 	}
 
+	
 	@Test
 	public void testEncodeContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);

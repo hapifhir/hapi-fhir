@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.dev.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -111,6 +112,7 @@ public class CompleteResourceProviderTest {
 		{
 			Bundle returned = ourClient.search().forResource(Patient.class).encodedXml().execute();
 			assertThat(returned.size(), greaterThan(1));
+			assertEquals(BundleTypeEnum.SEARCHSET, returned.getType().getValueAsEnum());
 		}
 		{
 			Bundle returned = ourClient.search().forResource(Patient.class).encodedJson().execute();
@@ -141,8 +143,8 @@ public class CompleteResourceProviderTest {
 		
 		assertEquals(2, found.size());
 		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(null, found.getEntries().get(0).getStatus().getValueAsEnum());
-		assertEquals(null, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
+		assertEquals(BundleEntryStatusEnum.MATCH, found.getEntries().get(0).getStatus().getValueAsEnum());
+		assertEquals(BundleEntryStatusEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntryStatusEnum.INCLUDE, found.getEntries().get(1).getStatus().getValueAsEnum());
 		assertEquals(BundleEntryStatusEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));

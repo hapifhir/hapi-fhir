@@ -40,6 +40,7 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
@@ -235,6 +236,11 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, String theResourceName) {
 		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
 	}
 
 }
