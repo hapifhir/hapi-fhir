@@ -119,6 +119,10 @@
 			<name>Bill de Beaubien</name>
 			<organization>Systems Made Simple</organization>
 		</developer>
+		<developer>
+			<id>twilson650</id>
+			<name>Tom Wilson</name>
+		</developer>
 	</developers>
 
 	<licenses>

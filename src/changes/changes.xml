@@ -92,6 +92,10 @@
 			<action type="add">
 			    JPA module now supports deleting resource via transaction
 			</action>
+			<action type="fix" issue="97" due-to="twilson650">
+				DateClientParam#second() incorrectly used DAY precision instead
+				of SECOND precision. Thanks to Tom Wilson for the pull request!
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
