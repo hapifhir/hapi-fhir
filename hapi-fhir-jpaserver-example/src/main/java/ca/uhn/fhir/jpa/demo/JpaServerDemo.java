@@ -61,9 +61,11 @@ public class JpaServerDemo extends RestfulServer {
 
 
 		/*
-		 * This tells the server to use "incorrect" MIME types if it detects that the request is coming from a browser
-		 * in the hopes that the browser won't just treat the content as a binary payload and try to download it (which
-		 * is what generally happens if you load a FHIR URL in a browser)
+		 * This tells the server to use "incorrect" MIME types if it detects
+		 * that the request is coming from a browser in the hopes that the 
+		 * browser won't just treat the content as a binary payload and try 
+		 * to download it (which is what generally happens if you load a 
+		 * FHIR URL in a browser)
 		 */
 		setUseBrowserFriendlyContentTypes(true);
 

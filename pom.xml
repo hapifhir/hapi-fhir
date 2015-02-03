@@ -164,6 +164,7 @@
 		<logback_version>1.1.2</logback_version>
 		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
 		<maven_javadoc_plugin_version>2.10.1</maven_javadoc_plugin_version>
+		<maven_jxr_plugin_version>2.5</maven_jxr_plugin_version>
 		<maven_license_plugin_version>1.7</maven_license_plugin_version>
 		<maven_surefire_plugin_version>2.18.1</maven_surefire_plugin_version>
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
@@ -356,6 +357,12 @@
 								</copy>
 								<copy todir="target/site/apidocs-dev">
 									<fileset dir="hapi-fhir-structures-dev/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver">
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/xref-jpaserver">
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
 							</target>
 						</configuration>
@@ -672,6 +679,7 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dev</module>
+				<module>hapi-fhir-jpaserver-base</module>
 				<module>examples</module>
 			</modules>
 		</profile>

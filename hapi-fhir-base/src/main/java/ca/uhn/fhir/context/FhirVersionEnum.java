@@ -36,7 +36,7 @@ public enum FhirVersionEnum {
 	
 	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null), 
 	
-	DSTU2("ca.uhn.fhir.model.dstu.FhirDev", null),
+	DSTU2("ca.uhn.fhir.model.dev.FhirDev", null),
 	
 	DEV("ca.uhn.fhir.model.dev.FhirDev", DSTU2);
 

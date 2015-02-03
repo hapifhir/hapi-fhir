@@ -109,7 +109,7 @@ public class FhirContext {
 	private FhirContext(FhirVersionEnum theVersion, Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theVersion != null) {
 			if (!theVersion.isPresentOnClasspath()) {
-				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion"));
+				throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructuresForSpecifiedVersion", theVersion.name()));
 			}
 			myVersion = theVersion.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {

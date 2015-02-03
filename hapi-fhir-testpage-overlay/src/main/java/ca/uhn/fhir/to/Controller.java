@@ -340,6 +340,7 @@ public class Controller {
 
 		switch (theRequest.getFhirVersion(myConfig)) {
 		case DEV:
+		case DSTU2:
 			haveSearchParams = extractSearchParamsDev(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
 			break;
 		case DSTU1:

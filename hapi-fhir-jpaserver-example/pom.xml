@@ -165,7 +165,7 @@
 		
 		<!-- 
 		Tells Maven to name the generated WAR file as
-		restful-server-example.war
+		hapi-fhir-jpaserver-example.war
 		-->
 		<finalName>hapi-fhir-jpaserver-example</finalName>
 		
@@ -180,6 +180,11 @@
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>9.1.1.v20140108</version>
+					<configuration>
+						<webApp>
+							<contextPath>/hapi-fhir-jpaserver-example</contextPath>
+						</webApp>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>

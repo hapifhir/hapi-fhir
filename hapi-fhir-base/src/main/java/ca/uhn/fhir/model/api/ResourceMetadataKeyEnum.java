@@ -22,7 +22,10 @@ package ca.uhn.fhir.model.api;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +78,28 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		@Override
 		public void put(IResource theResource, InstantDt theObject) {
 			theResource.getResourceMetadata().put(DELETED_AT, theObject);
+		}
+	};
+
+	/**
+	 * The value for this key represents a {@link List} of profile IDs that this
+	 * resource claims to conform to. 
+	 * 
+	 * <p>
+	 * Values for this key are of type <b>List&lt;IdDt&gt;</b>. Note that the returned list is
+	 * <i>unmodifiable</i>, so you need to create a new list and call <code>put</code> to
+	 * change its value.
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<List<IdDt>>("PROFILES") {
+		@Override
+		public List<IdDt> get(IResource theResource) {
+			return getIdListFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PROFILES);
+		}
+
+		@Override
+		public void put(IResource theResource, List<IdDt> theObject) {
+			theResource.getResourceMetadata().put(PROFILES, theObject);
 		}
 	};
 
@@ -361,7 +386,31 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	}
 
 	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
+		return toId(theKey, theResourceMetadata.get(theKey));
+	}
+
+	private static List<IdDt> getIdListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj instanceof List) {
+			List<?> retValList = (List<?>)retValObj;
+			for (Object next : retValList) {
+				if (!(next instanceof IdDt)) {
+					List<IdDt> retVal = new ArrayList<IdDt>();
+					for (Object nextVal : retValList) {
+						retVal.add(toId(theKey, nextVal));
+					}
+					return Collections.unmodifiableList(retVal);
+				}
+			}
+			@SuppressWarnings("unchecked")
+			List<IdDt> retVal = (List<IdDt>) retValList;
+			return Collections.unmodifiableList(retVal);
+		} else {
+			return Collections.singletonList(toId(theKey, retValObj));
+		}
+	}
+
+	private static IdDt toId(ResourceMetadataKeyEnum<?> theKey, Object retValObj) {
 		if (retValObj == null) {
 			return null;
 		} else if (retValObj instanceof String) {
