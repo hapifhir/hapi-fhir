@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import static org.junit.Assert.assertThat;
 
+import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
@@ -11,9 +12,9 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 
 public class MultiVersionXmlParserTest {
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MultiVersionXmlParserTest.class);
-	
+
 	@Test
 	public void testEncodeExtensionFromDifferentVersion() {
 		Patient p = new Patient();
@@ -23,11 +24,13 @@ public class MultiVersionXmlParserTest {
 		String str;
 		str = FhirContext.forDstu1().newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str,StringContains.containsString("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"/><comparator value=\"&lt;\"/><units value=\"g/L\"/></valueQuantity></extension>"));
+		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<units value=\"g/L\"",
+				"</valueQuantity></extension>"));
 
 		str = FhirContext.forDev().newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
-		assertThat(str,StringContains.containsString("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"/><comparator value=\"&lt;\"/><units value=\"g/L\"/></valueQuantity></extension>"));
+		assertThat(str, Matchers.stringContainsInOrder("<extension url=\"http://foo#ext\"><valueQuantity><value value=\"2.2\"", "<comparator value=\"&lt;\"", "<units value=\"g/L\"",
+				"</valueQuantity></extension>"));
 	}
 
 }

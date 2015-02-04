@@ -210,10 +210,14 @@ public class XmlUtil {
 			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
 			 * being used (e.g. glassfish) so we don't set them there.
 			 */
-
-			if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
-				// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
-				inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
+			try {
+				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
+					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
+				}
+			} catch (ClassNotFoundException e) {
+				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
 			}
 			ourInputFactory = inputFactory;
 		}
@@ -317,8 +321,13 @@ public class XmlUtil {
 			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
 			 * being used (e.g. glassfish) so we don't set them there.
 			 */
-			if (outputFactory instanceof WstxOutputFactory) {
-				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+			try {
+				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+				if (outputFactory instanceof WstxOutputFactory) {
+					outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+				}
+			} catch (ClassNotFoundException e) {
+				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
 			}
 			ourOutputFactory = outputFactory;
 		}

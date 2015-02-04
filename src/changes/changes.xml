@@ -96,6 +96,11 @@
 				DateClientParam#second() incorrectly used DAY precision instead
 				of SECOND precision. Thanks to Tom Wilson for the pull request!
 			</action>
+			<action type="fix" issue="100" due-to="sweetnavelorange">
+				Fix issue where HAPI failed to initialize correctly if Woodstox library was not on the classpath, even
+				if StAX API was configured to use a different provider. Thanks to
+				James Butler for reporting and figuring out where the issue was!
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

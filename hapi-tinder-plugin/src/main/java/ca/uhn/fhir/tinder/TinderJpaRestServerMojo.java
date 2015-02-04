@@ -118,7 +118,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			throw new MojoFailureException("Failed to generate server", e);
 		}
 
-		myProject.addCompileSourceRoot(directoryBase.getAbsolutePath());
+		myProject.addCompileSourceRoot(targetDirectory.getAbsolutePath());
 
 		try {
 			VelocityContext ctx = new VelocityContext();
