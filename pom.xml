@@ -83,6 +83,11 @@
 			<organization>Orion Health</organization>
 		</developer>
 		<developer>
+			<id>sweetnavelorange</id>
+			<name>James Butler</name>
+			<organization>Orion Health</organization>
+		</developer>
+		<developer>
 			<id>suranga</id>
 			<name>Suranga Nath Kasthurirathne</name>
 			<organization>OpenMRS / Regenstrief Center for Biomedical Informatics</organization>
@@ -122,10 +127,6 @@
 		<developer>
 			<id>twilson650</id>
 			<name>Tom Wilson</name>
-		</developer>
-		<developer>
-			<id>sweetnavelorange</id>
-			<name>James Butler</name>
 		</developer>
 	</developers>
 
