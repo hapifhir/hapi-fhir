@@ -3,7 +3,13 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,6 +49,7 @@ import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Composition;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -1609,4 +1616,54 @@ public class XmlParserTest {
 		 System.setProperty("file.encoding", "ISO-8859-1");
 	}
 
+	/**
+	 * See #103
+	 */
+	@Test
+	public void testEncodeAndReEncodeContainedXml() {
+		Composition comp = new Composition();
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		
+		String string = parser.encodeResourceToString(comp);
+		ourLog.info(string);
+
+		Composition parsed = parser.parseResource(Composition.class, string);
+		parsed.getSection().remove(0);
+
+		string = parser.encodeResourceToString(parsed);
+		ourLog.info(string);
+
+		parsed = parser.parseResource(Composition.class, string);
+		assertEquals(2, parsed.getContained().getContainedResources().size());
+	}
+	
+	/**
+	 * See #103
+	 */
+	@Test
+	public void testEncodeAndReEncodeContainedJson() {
+		Composition comp = new Composition();
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().addIdentifier("foo", "bar"));
+		
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		
+		String string = parser.encodeResourceToString(comp);
+		ourLog.info(string);
+
+		Composition parsed = parser.parseResource(Composition.class, string);
+		parsed.getSection().remove(0);
+
+		string = parser.encodeResourceToString(parsed);
+		ourLog.info(string);
+
+		parsed = parser.parseResource(Composition.class, string);
+		assertEquals(2, parsed.getContained().getContainedResources().size());
+	}
+	
 }

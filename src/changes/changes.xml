@@ -101,6 +101,12 @@
 				if StAX API was configured to use a different provider. Thanks to
 				James Butler for reporting and figuring out where the issue was!
 			</action>
+			<action type="fix" issue="103">
+				Encoders (both XML and JSON) will no longer encode contained resources if they are 
+				not referenced anywhere in the resource via a local reference. This is just a convenience
+				for users who have parsed a resource with contained resources and want to remove some
+				before re-encoding. Thanks to Alexander Kley for reporting! 
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

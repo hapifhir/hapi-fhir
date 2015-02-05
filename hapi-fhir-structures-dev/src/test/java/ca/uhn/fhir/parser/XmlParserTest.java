@@ -1,9 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
@@ -11,12 +15,13 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dev.composite.DurationDt;
+import ca.uhn.fhir.model.dev.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dev.resource.Composition;
 import ca.uhn.fhir.model.dev.resource.Encounter;
 import ca.uhn.fhir.model.dev.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dev.resource.Organization;
@@ -98,7 +103,7 @@ public class XmlParserTest {
 		ourLog.info(str);
 		
 		Bundle parsed = ourCtx.newXmlParser().parseBundle(str);
-		assertThat(parsed.getEntries().get(0).getResource().getId().getValue(), isEmptyOrNullString());
+		assertThat(parsed.getEntries().get(0).getResource().getId().getValue(), emptyOrNullString());
 		assertTrue(parsed.getEntries().get(0).getResource().getId().isEmpty());
 	}
 	
@@ -190,4 +195,54 @@ public class XmlParserTest {
 
 	}
 
+	/**
+	 * See #103
+	 */
+	@Test
+	public void testEncodeAndReEncodeContainedXml() {
+		Composition comp = new Composition();
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		
+		String string = parser.encodeResourceToString(comp);
+		ourLog.info(string);
+
+		Composition parsed = parser.parseResource(Composition.class, string);
+		parsed.getSection().remove(0);
+
+		string = parser.encodeResourceToString(parsed);
+		ourLog.info(string);
+
+		parsed = parser.parseResource(Composition.class, string);
+		assertEquals(2, parsed.getContained().getContainedResources().size());
+	}
+	
+	/**
+	 * See #103
+	 */
+	@Test
+	public void testEncodeAndReEncodeContainedJson() {
+		Composition comp = new Composition();
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
+		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		
+		String string = parser.encodeResourceToString(comp);
+		ourLog.info(string);
+
+		Composition parsed = parser.parseResource(Composition.class, string);
+		parsed.getSection().remove(0);
+
+		string = parser.encodeResourceToString(parsed);
+		ourLog.info(string);
+
+		parsed = parser.parseResource(Composition.class, string);
+		assertEquals(2, parsed.getContained().getContainedResources().size());
+	}
+	
 }

@@ -585,6 +585,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 		case CONTAINED_RESOURCES: {
 			ContainedDt value = (ContainedDt) nextValue;
+			/*
+			 * Disable per #103
 			for (IResource next : value.getContainedResources()) {
 				if (getContainedResources().getResourceId(next) != null) {
 					continue;
@@ -593,6 +595,7 @@ public class XmlParser extends BaseParser implements IParser {
 				encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
 				theEventWriter.writeEndElement();
 			}
+			*/
 			for (IBaseResource next : getContainedResources().getContainedResources()) {
 				IdDt resourceId = getContainedResources().getResourceId(next);
 				theEventWriter.writeStartElement("contained");
@@ -755,13 +758,13 @@ public class XmlParser extends BaseParser implements IParser {
 		if (theResource instanceof IResource) {
 			// HAPI structs
 			IResource iResource = (IResource) theResource;
-			if (theIncludedResource && StringUtils.isNotBlank(iResource.getId().getValue())) {
-				resourceId = iResource.getId().getValue();
+			if (StringUtils.isNotBlank(iResource.getId().getValue())) {
+				resourceId = iResource.getId().getIdPart();
 			}
 		} else {
 			// HL7 structs
 			Resource resource = (Resource) theResource;
-			if (theIncludedResource && StringUtils.isNotBlank(resource.getId())) {
+			if (StringUtils.isNotBlank(resource.getId())) {
 				resourceId = resource.getId();
 			}
 		}
@@ -769,8 +772,8 @@ public class XmlParser extends BaseParser implements IParser {
 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
 	}
 
-	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, String theResourceId) throws XMLStreamException {
-		if (!theIncludedResource) {
+	private void encodeResourceToXmlStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, String theResourceId) throws XMLStreamException {
+		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
 
@@ -786,7 +789,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 			// DSTU2+
 			IResource resource = (IResource) theResource;
-			writeOptionalTagWithValue(theEventWriter, "id", resource.getId().getIdPart());
+			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);
 
 			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 			IdDt resourceId = resource.getId();
@@ -802,9 +805,10 @@ public class XmlParser extends BaseParser implements IParser {
 		} else {
 
 			// DSTU1
-			if (theResourceId != null) {
+			if (theResourceId != null && theContainedResource) {
 				theEventWriter.writeAttribute("id", theResourceId);
 			}
+			
 		}
 
 		if (theResource instanceof Binary) {
@@ -821,10 +825,10 @@ public class XmlParser extends BaseParser implements IParser {
 		} else {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				// DSTU2+
-				encodeResourceToStreamWriterInDstu2Format(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+				encodeResourceToStreamWriterInDstu2Format(resDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
 			} else {
 				// DSTU1
-				encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theIncludedResource);
+				encodeCompositeElementToStreamWriter(resDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
 			}
 
 		}

@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -28,9 +28,11 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -87,12 +89,18 @@ public abstract class BaseParser implements IParser {
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
 
 		Set<String> allIds = new HashSet<String>();
+		Map<String, IBaseResource> existingIdToContainedResource = null;
+		
 		if (theTarget instanceof IResource) {
 			List<? extends IResource> containedResources = ((IResource) theTarget).getContained().getContainedResources();
 			for (IResource next : containedResources) {
 				String nextId = next.getId().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
 					allIds.add(nextId);
+					if (existingIdToContainedResource == null) {
+						existingIdToContainedResource = new HashMap<String, IBaseResource>();
+					}
+					existingIdToContainedResource.put(nextId, next);
 				}
 			}
 		} else if (theTarget instanceof DomainResource) {
@@ -101,6 +109,10 @@ public abstract class BaseParser implements IParser {
 				String nextId = next.getId();
 				if (StringUtils.isNotBlank(nextId)) {
 					allIds.add(nextId);
+					if (existingIdToContainedResource == null) {
+						existingIdToContainedResource = new HashMap<String, IBaseResource>();
+					}
+					existingIdToContainedResource.put(nextId, next);
 				}
 			}
 		} else {
@@ -119,6 +131,14 @@ public abstract class BaseParser implements IParser {
 					}
 
 					containResourcesForEncoding(theContained, resource, theTarget);
+				} else if (next.getReference().isLocal()) {
+					if (existingIdToContainedResource != null) {
+						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReference().getValue());
+						if (potentialTarget != null) {
+							theContained.addContained(potentialTarget);
+							containResourcesForEncoding(theContained, potentialTarget, theTarget);
+						}
+					}
 				}
 			}
 		}
@@ -135,6 +155,14 @@ public abstract class BaseParser implements IParser {
 					}
 
 					containResourcesForEncoding(theContained, resource, theTarget);
+				} else if (next.getReference() != null && next.getReference().startsWith("#")) {
+					if (existingIdToContainedResource != null) {
+						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReference());
+						if (potentialTarget != null) {
+							theContained.addContained(potentialTarget);
+							containResourcesForEncoding(theContained, potentialTarget, theTarget);
+						}
+					}
 				}
 			}
 		}

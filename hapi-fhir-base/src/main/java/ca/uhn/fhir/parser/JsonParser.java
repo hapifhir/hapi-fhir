@@ -394,19 +394,22 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case CONTAINED_RESOURCES: {
-			theWriter.writeStartArray(theChildName);
-			ContainedDt value = (ContainedDt) theNextValue;
-			for (IResource next : value.getContainedResources()) {
-				if (getContainedResources().getResourceId(next) != null) {
-					continue;
+			/*
+			 * Disabled per #103 
+			 * ContainedDt value = (ContainedDt) theNextValue; for (IResource next : value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) {
+			 * continue; } encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(next.getId().getValue())); }
+			 */
+			List<IBaseResource> containedResources = getContainedResources().getContainedResources();
+			if (containedResources.size() > 0) {
+				theWriter.writeStartArray(theChildName);
+
+				for (IBaseResource next : containedResources) {
+					IdDt resourceId = getContainedResources().getResourceId(next);
+					encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(resourceId.getValue()));
 				}
-				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(next.getId().getValue()));
+
+				theWriter.writeEnd();
 			}
-			for (IBaseResource next : getContainedResources().getContainedResources()) {
-				IdDt resourceId = getContainedResources().getResourceId(next);
-				encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(resourceId.getValue()));
-			}
-			theWriter.writeEnd();
 			break;
 		}
 		case PRIMITIVE_XHTML: {
