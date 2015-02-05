@@ -87,6 +87,7 @@
 									<attach>false</attach>
 									<descriptors>
 										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
+										<descriptor>${project.basedir}/src/assembly/hapi-fhir-jpaserver-example.xml</descriptor>
 									</descriptors>
 								</configuration>
 							</execution>

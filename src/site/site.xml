@@ -81,6 +81,7 @@
 			<item name="Logging" href="./doc_logging.html" />
 			<item name="ETags" href="./doc_rest_etag.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
+			<item name="JPA/Database Server" href="./doc_jpa.html" />
 		</menu>
 
 		<menu name="Community">
@@ -89,10 +90,14 @@
 		</menu>
 
 		<menu name="JavaDocs">
-			<item name="Core API" href="./apidocs/index.html" />
+			<item name="Core API" href="./apidocs/index.html">
+				<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
+			</item>
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DEV)" href="./apidocs-dev/index.html" />
-			<item name="Source Code" href=".https://github.com/jamesagnew/hapi-fhir" />
+			<item name="JPA Server API" href="./apidocs-jpaserver/index.html">
+				<item name="Source Code" href="./xref-jpaserver/index.html" />
+			</item>
 		</menu>
 
 		<menu name="Reports">
