@@ -72,7 +72,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/profiles/OperationDefinition", id="operationdefinition")
+@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/profiles/OperationDefinition")
 public class OperationDefinition 
     extends  BaseResource     implements IResource {
 

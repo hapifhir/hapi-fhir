@@ -78,30 +78,35 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	protected List<String> getInputStreamNames() {
 		ArrayList<String> retVal = new ArrayList<String>();
 
-		retVal.add(("/dt/" + myVersion + "/address.xml"));
-		retVal.add(("/dt/" + myVersion + "/attachment.xml"));
-		retVal.add(("/dt/" + myVersion + "/codeableconcept.xml"));
-		retVal.add(("/dt/" + myVersion + "/coding.xml"));
-		retVal.add(("/dt/" + myVersion + "/humanname.xml"));
-		retVal.add(("/dt/" + myVersion + "/identifier.xml"));
-		retVal.add(("/dt/" + myVersion + "/period.xml"));
-		retVal.add(("/dt/" + myVersion + "/ratio.xml"));
-		retVal.add(("/dt/" + myVersion + "/quantity.xml"));
-		retVal.add(("/dt/" + myVersion + "/range.xml"));
-		retVal.add(("/dt/" + myVersion + "/sampleddata.xml"));
-		
-		if ("dstu".equals(myVersion)) {
-			retVal.add(("/dt/" + myVersion + "/contact.xml"));
-//			retVal.add(("/dt/" + myVersion + "/resourcereference.xml"));
-			retVal.add(("/dt/" + myVersion + "/schedule.xml"));
+		String version = myVersion;
+		if (version.equals("dev")) {
+			version = "dstu2";
 		}
 		
-		if (!myVersion.equals("dstu")) {			
-			retVal.add(("/dt/" + myVersion + "/attachment.xml"));
-			retVal.add(("/dt/" + myVersion + "/contactpoint.xml"));
-			retVal.add(("/dt/" + myVersion + "/elementdefinition.xml"));
-			retVal.add(("/dt/" + myVersion + "/reference.xml"));
-			retVal.add(("/dt/" + myVersion + "/timing.xml"));
+		retVal.add(("/dt/" + version + "/address.xml"));
+		retVal.add(("/dt/" + version + "/attachment.xml"));
+		retVal.add(("/dt/" + version + "/codeableconcept.xml"));
+		retVal.add(("/dt/" + version + "/coding.xml"));
+		retVal.add(("/dt/" + version + "/humanname.xml"));
+		retVal.add(("/dt/" + version + "/identifier.xml"));
+		retVal.add(("/dt/" + version + "/period.xml"));
+		retVal.add(("/dt/" + version + "/ratio.xml"));
+		retVal.add(("/dt/" + version + "/quantity.xml"));
+		retVal.add(("/dt/" + version + "/range.xml"));
+		retVal.add(("/dt/" + version + "/sampleddata.xml"));
+		
+		if ("dstu".equals(version)) {
+			retVal.add(("/dt/" + version + "/contact.xml"));
+//			retVal.add(("/dt/" + myVersion + "/resourcereference.xml"));
+			retVal.add(("/dt/" + version + "/schedule.xml"));
+		}
+		
+		if (!version.equals("dstu")) {			
+			retVal.add(("/dt/" + version + "/attachment.xml"));
+			retVal.add(("/dt/" + version + "/contactpoint.xml"));
+			retVal.add(("/dt/" + version + "/elementdefinition.xml"));
+			retVal.add(("/dt/" + version + "/reference.xml"));
+			retVal.add(("/dt/" + version + "/timing.xml"));
 		}
 		
 		return retVal;

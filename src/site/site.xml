@@ -94,7 +94,7 @@
 				<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
 			</item>
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
-			<item name="Model API (DEV)" href="./apidocs-dev/index.html" />
+			<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
 			<item name="JPA Server API" href="./apidocs-jpaserver/index.html">
 				<item name="Source Code" href="./xref-jpaserver/index.html" />
 			</item>

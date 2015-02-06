@@ -82,7 +82,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance", id="conformance")
+@ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance")
 public class Conformance 
     extends  ca.uhn.fhir.model.base.resource.BaseConformance     implements IResource {
 

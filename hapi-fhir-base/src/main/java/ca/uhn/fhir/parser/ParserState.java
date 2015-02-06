@@ -913,7 +913,11 @@ class ParserState<T> {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedResourceType()));
 			} else if ("id".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedResourceId()));
+			} else if ("resourceId".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedResourceId()));
 			} else if ("version".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedResourceVersion()));
+			} else if ("versionId".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedResourceVersion()));
 			} else if ("instant".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getDeletedAt()));

@@ -32,6 +32,8 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 		for (String next : theBaseResourceNames) {
 			String resName = "/res/" + myVersion + "/" + next + "-spreadsheet.xml";
+			resName = resName.replace("/dev/", "/dstu2/");
+			
 			InputStream nextRes = getClass().getResourceAsStream(resName);
 			myInputStreams.add(nextRes);
 			if (nextRes == null) {

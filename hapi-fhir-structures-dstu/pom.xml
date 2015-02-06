@@ -12,7 +12,7 @@
 	<artifactId>hapi-fhir-structures-dstu</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Structures - DSTU (FHIR 0.80)</name>
+	<name>HAPI FHIR Structures - DSTU1 (FHIR v0.80)</name>
 
 	<dependencies>
 		<dependency>

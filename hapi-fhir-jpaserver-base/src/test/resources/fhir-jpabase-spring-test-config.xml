@@ -23,35 +23,35 @@
 	</bean>
 
 	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.DiagnosticReport"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.DiagnosticReport"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myDeviceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Device"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Device"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Patient"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Patient"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Observation"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Observation"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Organization"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Organization"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Location"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Location"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Questionnaire"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Questionnaire"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 	<bean id="myEncounterDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dev.resource.Encounter"/>
+		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Encounter"/>
 		<property name="context" ref="myFhirContext"/>
 	</bean>
 

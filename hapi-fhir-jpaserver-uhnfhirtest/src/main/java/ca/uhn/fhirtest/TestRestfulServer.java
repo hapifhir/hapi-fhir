@@ -12,7 +12,7 @@ import org.springframework.web.context.ContextLoaderListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDev;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -80,12 +80,12 @@ public class TestRestfulServer extends RestfulServer {
 			break;
 		}
 		case "DSTU2": {
-			setFhirContext(FhirContext.forDev());
-			beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
-			systemProvider = myAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
-			systemDao = myAppCtx.getBean("mySystemDaoDev", IFhirSystemDao.class);
+			setFhirContext(FhirContext.forDstu2());
+			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
+			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProvider.class);
+			systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
-			JpaConformanceProviderDev confProvider = new JpaConformanceProviderDev(this, systemDao);
+			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao);
 			confProvider.setImplementationDescription(implDesc);
 			setServerConformanceProvider(confProvider);
 			baseUrlProperty = "fhir.baseurl.dstu2";

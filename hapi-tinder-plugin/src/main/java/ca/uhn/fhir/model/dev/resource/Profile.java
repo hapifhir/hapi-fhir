@@ -71,7 +71,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile", id="profile")
+@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile")
 public class Profile 
     extends  BaseResource     implements IResource {
 
