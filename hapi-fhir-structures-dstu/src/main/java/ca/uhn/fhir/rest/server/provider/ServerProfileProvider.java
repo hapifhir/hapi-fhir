@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.provider;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%

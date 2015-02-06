@@ -15,10 +15,10 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.rp.dev.DiagnosticReportResourceProvider;
-import ca.uhn.fhir.jpa.rp.dev.ObservationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dev.OrganizationResourceProvider;
-import ca.uhn.fhir.jpa.rp.dev.PatientResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.DiagnosticReportResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.ObservationResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -67,7 +67,7 @@ public class OverlayTestApp {
 
 		}
 
-		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dev.xml", "hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-spring-test-config.xml");
+		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
