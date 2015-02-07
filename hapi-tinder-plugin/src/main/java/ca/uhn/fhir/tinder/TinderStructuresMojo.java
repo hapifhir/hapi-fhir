@@ -16,7 +16,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ProfileParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;

@@ -360,8 +360,8 @@
 								<copy todir="target/site/apidocs-dstu">
 									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-dev">
-									<fileset dir="hapi-fhir-structures-dev/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-dstu2">
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
@@ -683,7 +683,7 @@
 			<modules>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
-				<module>hapi-fhir-structures-dev</module>
+				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>examples</module>
 			</modules>
@@ -701,9 +701,9 @@
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>
+				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-dev</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-test</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>

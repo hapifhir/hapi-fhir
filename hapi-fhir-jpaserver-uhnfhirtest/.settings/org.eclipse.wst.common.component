@@ -14,7 +14,7 @@
         <dependent-module archiveName="hapi-fhir-structures-dstu-0.9-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hapi-fhir-structures-dev-0.9-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dev/hapi-fhir-structures-dev">
+        <dependent-module archiveName="hapi-fhir-structures-dstu2-0.9-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu2/hapi-fhir-structures-dstu2">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-testpage-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">

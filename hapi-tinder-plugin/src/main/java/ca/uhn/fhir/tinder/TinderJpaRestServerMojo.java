@@ -64,6 +64,8 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		FhirContext fhirContext;
 		if ("dstu".equals(version)) {
 			fhirContext = FhirContext.forDstu1();
+		} else if ("dstu2".equals(version)) {
+			fhirContext = FhirContext.forDstu2();
 		} else if ("dev".equals(version)) {
 			fhirContext = FhirContext.forDev();
 		} else {

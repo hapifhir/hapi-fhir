@@ -70,7 +70,12 @@ public class ValueSetGenerator {
 		IParser newXmlParser = ctx.newXmlParser();
 
 		ourLog.info("Parsing built-in ValueSets");
-		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + myVersion + "/all-valuesets-bundle.xml"));
+		String version = myVersion;
+		if (version.equals("dev")) {
+			version = "dstu2";
+		}
+		
+		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + version + "/all-valuesets-bundle.xml"));
 		Bundle bundle = newXmlParser.parseBundle(vs);
 		for (BundleEntry next : bundle.getEntries()) {
 			if ("dstu".equals(myVersion)) {

@@ -114,6 +114,8 @@ public class FhirContext {
 			myVersion = theVersion.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU1.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
 		} else if (FhirVersionEnum.DEV.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DEV.getVersionImplementation();
 		} else {
@@ -445,10 +447,10 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2}
 	 */
 	public static FhirContext forDstu2() {
-		return new FhirContext(FhirVersionEnum.DEV);
+		return new FhirContext(FhirVersionEnum.DSTU2);
 	}
 
 }

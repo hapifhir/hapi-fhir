@@ -74,7 +74,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/profiles/DataElement", id="dataelement")
+@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/profiles/DataElement")
 public class DataElement 
     extends  BaseResource     implements IResource {
 

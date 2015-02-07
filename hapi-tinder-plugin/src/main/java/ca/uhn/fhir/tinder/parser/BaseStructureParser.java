@@ -199,6 +199,15 @@ public abstract class BaseStructureParser {
 	}
 
 	private String scanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
+		String retVal = doScanForImportNamesAndReturnFqn(theNextType);
+		if (myVersion.equals("dstu2")) {
+			retVal = retVal.replace(".dev.", ".dstu2.");
+		}
+
+		return retVal;
+	}
+
+	private String doScanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
 		if ("Any".equals(theNextType)) {
 			return (IResource.class.getCanonicalName());
 		}
@@ -211,9 +220,9 @@ public abstract class BaseStructureParser {
 		if ("Binary".equals(theNextType)) {
 			return Binary.class.getCanonicalName();
 		}
-//		if ("BoundCodeableConceptDt".equals(theNextType)) {
-//			return "ca.uhn.fhir.model." + myVersion + ".composite.BoundCodeableConceptDt";
-//		}
+		// if ("BoundCodeableConceptDt".equals(theNextType)) {
+		// return "ca.uhn.fhir.model." + myVersion + ".composite.BoundCodeableConceptDt";
+		// }
 		// QuantityCompararatorEnum
 		// QuantityComparatorEnum
 
@@ -226,12 +235,12 @@ public abstract class BaseStructureParser {
 				return (type);
 			} catch (ClassNotFoundException e) {
 				try {
-					String type = "ca.uhn.fhir.model."+myVersion+ ".composite." + theNextType;
+					String type = "ca.uhn.fhir.model." + myVersion + ".composite." + theNextType;
 					Class.forName(type);
 					return (type);
 				} catch (ClassNotFoundException e5) {
 					try {
-						String type = "ca.uhn.fhir.model."+myVersion+".resource." + theNextType;
+						String type = "ca.uhn.fhir.model." + myVersion + ".resource." + theNextType;
 						Class.forName(type);
 						return (type);
 					} catch (ClassNotFoundException e1) {
@@ -251,16 +260,16 @@ public abstract class BaseStructureParser {
 									return (type);
 								} catch (ClassNotFoundException e4) {
 									try {
-										String type = "ca.uhn.fhir.model."+myVersion+".valueset." + theNextType;
+										String type = "ca.uhn.fhir.model." + myVersion + ".valueset." + theNextType;
 										Class.forName(type);
 										return (type);
 									} catch (ClassNotFoundException e6) {
-										String fileName =  myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + theNextType + ".java";
+										String fileName = myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + theNextType + ".java";
 										File file = new File(fileName);
 										if (file.exists()) {
 											return myPackageBase + ".composite." + theNextType;
 										}
-										fileName =  myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + theNextType + ".java";
+										fileName = myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + theNextType + ".java";
 										file = new File(fileName);
 										if (file.exists()) {
 											return "ca.uhn.fhir.model.primitive." + theNextType;
@@ -527,13 +536,15 @@ public abstract class BaseStructureParser {
 	}
 
 	private FhirVersionEnum determineVersionEnum() throws MojoFailureException {
-		FhirVersionEnum versionEnum=null;
+		FhirVersionEnum versionEnum = null;
 		if ("dstu".equals(myVersion)) {
-			versionEnum=FhirVersionEnum.DSTU1;
+			versionEnum = FhirVersionEnum.DSTU1;
+		} else if ("dstu2".equals(myVersion)) {
+			versionEnum = FhirVersionEnum.DSTU2;
 		} else if ("dev".equals(myVersion)) {
-			versionEnum=FhirVersionEnum.DEV;
+			versionEnum = FhirVersionEnum.DEV;
 		} else {
-			throw new MojoFailureException("Unknown version: "+myVersion);
+			throw new MojoFailureException("Unknown version: " + myVersion);
 		}
 		return versionEnum;
 	}

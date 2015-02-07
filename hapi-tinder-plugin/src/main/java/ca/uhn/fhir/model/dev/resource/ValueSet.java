@@ -69,7 +69,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet", id="valueset")
+@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet")
 public class ValueSet 
     extends  BaseResource     implements IResource {
 
