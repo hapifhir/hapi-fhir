@@ -867,6 +867,12 @@ public class FhirResourceDaoTest {
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChainXX")));
 		assertEquals(2, result.size());
 
+		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "testSearchResourceLinkWithChainXX")));
+		assertEquals(2, result.size());
+		
+		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "|testSearchResourceLinkWithChainXX")));
+		assertEquals(0, result.size());
+
 	}
 
 	@Test
