@@ -78,5 +78,12 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	MethodOutcome update(T theResource, IdDt theId);
 
 	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
+
+	/**
+	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains
+	 * a numeric PID which exists, but is obscured by a "forced ID" so should not exist as
+	 * far as the outside world is concerned. 
+	 */
+	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
 	
 }

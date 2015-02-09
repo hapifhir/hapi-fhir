@@ -41,7 +41,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
@@ -210,9 +211,14 @@ public class Bundle extends BaseBundle /* implements IElement */{
 			entry.getLinkAlternate().setValue(linkSearch);
 		}
 		
-		BundleEntryStatusEnum entryStatus = ResourceMetadataKeyEnum.ENTRY_STATUS.get(theResource);
+		BundleEntrySearchModeEnum entryStatus = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
 		if (entryStatus != null) {
-			entry.getStatus().setValueAsEnum(entryStatus);
+			entry.getSearchMode().setValueAsEnum(entryStatus);
+		}
+
+		BundleEntryTransactionOperationEnum entryTransactionOperation = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(theResource);
+		if (entryTransactionOperation != null) {
+			entry.getTransactionOperation().setValueAsEnum(entryTransactionOperation);
 		}
 
 		DecimalDt entryScore = ResourceMetadataKeyEnum.ENTRY_SCORE.get(theResource);

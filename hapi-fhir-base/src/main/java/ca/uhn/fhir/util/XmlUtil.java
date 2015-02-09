@@ -63,17 +63,11 @@ public class XmlUtil {
 	private static volatile boolean ourHaveLoggedStaxImplementation;
 	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
-
 	private static final Attributes.Name IMPLEMENTATION_TITLE = new Attributes.Name("Implementation-Title");
-
 	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
-
 	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
-
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");
-
 	private static final Attributes.Name BUNDLE_VENDOR = new Attributes.Name("Bundle-Vendor");
-
 	private static final Attributes.Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
 
 	static {
@@ -211,7 +205,7 @@ public class XmlUtil {
 			 * being used (e.g. glassfish) so we don't set them there.
 			 */
 			try {
-				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+				Class.forName("com.ctc.wstx.stax.WstxInputFactory");
 				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
 					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
 					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
@@ -366,6 +360,7 @@ public class XmlUtil {
 						case '"':
 						case '&':
 							hasEscapable = true;
+							break;
 						default:
 							break;
 						}

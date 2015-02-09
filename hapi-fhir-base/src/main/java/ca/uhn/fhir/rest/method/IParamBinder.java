@@ -27,10 +27,10 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-interface IParamBinder {
+interface IParamBinder<T> {
 	
 	List<IQueryParameterOr<?>> encode(FhirContext theContext, Object theString) throws InternalErrorException;
 
-	Object parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
+	T parse(String theName, List<QualifiedParamList> theList) throws InternalErrorException, InvalidRequestException;
 
 }

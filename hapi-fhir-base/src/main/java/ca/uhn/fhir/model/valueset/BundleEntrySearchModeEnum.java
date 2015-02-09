@@ -26,12 +26,10 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
-public enum BundleEntryStatusEnum {
+public enum BundleEntrySearchModeEnum {
 
-	CREATE("create", "http://hl7.org/fhir/bundle-entry-status"),
-	UPDATE("update", "http://hl7.org/fhir/bundle-entry-status"),
-	MATCH("match", "http://hl7.org/fhir/bundle-entry-status"),
-	INCLUDE("include", "http://hl7.org/fhir/bundle-entry-status"),
+	MATCH("match", "http://hl7.org/fhir/search-entry-mode"),
+	INCLUDE("include", "http://hl7.org/fhir/search-entry-mode"),
 	
 	;
 	
@@ -47,18 +45,18 @@ public enum BundleEntryStatusEnum {
 	 */
 	public static final String VALUESET_NAME = "BundleEntryStatus";
 
-	private static Map<String, BundleEntryStatusEnum> CODE_TO_ENUM = new HashMap<String, BundleEntryStatusEnum>();
-	private static Map<String, Map<String, BundleEntryStatusEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, BundleEntryStatusEnum>>();
+	private static Map<String, BundleEntrySearchModeEnum> CODE_TO_ENUM = new HashMap<String, BundleEntrySearchModeEnum>();
+	private static Map<String, Map<String, BundleEntrySearchModeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, BundleEntrySearchModeEnum>>();
 	
 	private final String myCode;
 	private final String mySystem;
 	
 	static {
-		for (BundleEntryStatusEnum next : BundleEntryStatusEnum.values()) {
+		for (BundleEntrySearchModeEnum next : BundleEntrySearchModeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
 			
 			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
-				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, BundleEntryStatusEnum>());
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, BundleEntrySearchModeEnum>());
 			}
 			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
@@ -81,33 +79,33 @@ public enum BundleEntryStatusEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public BundleEntryStatusEnum forCode(String theCode) {
-		BundleEntryStatusEnum retVal = CODE_TO_ENUM.get(theCode);
+	public BundleEntrySearchModeEnum forCode(String theCode) {
+		BundleEntrySearchModeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
 
 	/**
 	 * Converts codes to their respective enumerated values
 	 */
-	public static final IValueSetEnumBinder<BundleEntryStatusEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntryStatusEnum>() {
+	public static final IValueSetEnumBinder<BundleEntrySearchModeEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntrySearchModeEnum>() {
 		@Override
-		public String toCodeString(BundleEntryStatusEnum theEnum) {
+		public String toCodeString(BundleEntrySearchModeEnum theEnum) {
 			return theEnum.getCode();
 		}
 
 		@Override
-		public String toSystemString(BundleEntryStatusEnum theEnum) {
+		public String toSystemString(BundleEntrySearchModeEnum theEnum) {
 			return theEnum.getSystem();
 		}
 		
 		@Override
-		public BundleEntryStatusEnum fromCodeString(String theCodeString) {
+		public BundleEntrySearchModeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
 		
 		@Override
-		public BundleEntryStatusEnum fromCodeString(String theCodeString, String theSystemString) {
-			Map<String, BundleEntryStatusEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+		public BundleEntrySearchModeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, BundleEntrySearchModeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
 			if (map == null) {
 				return null;
 			}
@@ -119,7 +117,7 @@ public enum BundleEntryStatusEnum {
 	/** 
 	 * Constructor
 	 */
-	BundleEntryStatusEnum(String theCode, String theSystem) {
+	BundleEntrySearchModeEnum(String theCode, String theSystem) {
 		myCode = theCode;
 		mySystem = theSystem;
 	}

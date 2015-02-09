@@ -5,7 +5,7 @@
     "versionId": "1",
     "lastUpdated": "2014-08-18T01:43:30Z"
   },
-  "type": "transaction",
+  "type": "searchset",
   "base": "http://example.com/base",
   "total": 3,
   "link": [
@@ -15,67 +15,37 @@
     },
     {
       "relation": "self",
-      "url": "https://example.com/base/MedicationPrescription?patient=347"
+      "url": "https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication"
     }
   ],
   "entry": [
     {
-      "status": "update",
+      "search": {
+        "mode": "match",
+        "score": 1
+      },
       "resource": {
         "resourceType": "MedicationPrescription",
         "id": "3123",
-        "meta": {
-          "versionId": "1",
-          "lastUpdated": "2014-08-16T05:31:17Z"
+        "meta" : {
+        	"versionId" : "1",
+        	"lastUpdated" : "2014-08-16T05:31:17Z"
         },
-        "text": {
-          "status": "generated",
-          "div": "<div>\n            <p>Penicillin VK 5ml suspension to be administered by oral route</p>\n            <p>ONE 5ml spoonful to be taken THREE times a day</p>\n            <p>100ml bottle</p>\n            <p>to patient ref: a23</p>\n            <p>by doctor X</p>\n          </div>"
-        },
-        "status": "active",
         "patient": {
-          "reference": "Patient/example"
-        },
-        "prescriber": {
-          "reference": "Practitioner/example"
+          "reference": "Patient/347"
         },
         "medication": {
           "reference": "Medication/example"
-        },
-        "dosageInstruction": [
-          {
-            "scheduledTiming": {
-              "repeat": {
-                "frequency": 3,
-                "duration": 1,
-                "units": "d"
-              }
-            },
-            "route": {
-              "coding": [
-                {
-                  "system": "http://snomed.info/sct",
-                  "code": "394899003",
-                  "display": "oral administration of treatment"
-                }
-              ]
-            },
-            "doseQuantity": {
-              "value": 5,
-              "units": "ml",
-              "system": "http://unitsofmeasure.org",
-              "code": "ml"
-            }
-          }
-        ],
-        "dispense": {
-          "quantity": {
-            "value": 100,
-            "units": "ml",
-            "system": "http://unitsofmeasure.org",
-            "code": "ml"
-          }
         }
+      }
+    },
+    {
+      "search": {
+        "mode": "include"
+      },
+      "resource": {
+        "resourceType": "Medication",
+        "id": "example"
       }
     }
   ]

@@ -136,14 +136,15 @@ public class ResourceValidatorTest {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
 		Bundle b = ourCtx.newJsonParser().parseBundle(res);
 
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b));
+		
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult result = val.validateWithResult(b);
+
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		
-		
-		assertTrue(result.isSuccessful());
+		assertTrue(result.toString(), result.isSuccessful());
 		assertNotNull(operationOutcome);
 		assertEquals(0, operationOutcome.getIssue().size());
 	}

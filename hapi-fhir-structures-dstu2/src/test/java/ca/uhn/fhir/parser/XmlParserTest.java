@@ -1,12 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.StringReader;
 
@@ -28,7 +23,6 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 
 public class XmlParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
@@ -62,26 +56,24 @@ public class XmlParserTest {
 
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example(example).xml"));
+		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example.xml"));
 
 		Bundle parsed = ourCtx.newXmlParser().parseBundle(content);
 		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("transaction", parsed.getType().getValue());
+		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
 		assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347", parsed.getLinkSelf().getValue());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
 
-		assertEquals(1, parsed.getEntries().size());
-		assertEquals("update", parsed.getEntries().get(0).getStatus().getValue());
-		assertEquals(BundleEntryStatusEnum.UPDATE, ResourceMetadataKeyEnum.ENTRY_STATUS.get(parsed.getEntries().get(0).getResource()));
+		assertEquals(2, parsed.getEntries().size());
 		assertEquals("http://foo?search", parsed.getEntries().get(0).getLinkSearch().getValue());
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
-		assertEquals("Patient/example", p.getPatient().getReference().getValue());
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
 
@@ -152,9 +144,14 @@ public class XmlParserTest {
 			"   </link>\n" + 
 			"   <entry>\n" + 
 			"      <base value=\"http://foo/fhirBase2\"/>\n" + 
-			"      <status value=\"match\"/>\n" +
-			"      <search value=\"http://foo/Patient?identifier=value\"/>\n" +
-			"      <score value=\"0.123\"/>\n" +
+			"      <search>\n" +
+			"         <mode value=\"match\"/>\n" +
+			"         <score value=\"0.123\"/>\n" +
+			"      </search>\n" +
+			"      <transaction>\n" +
+			"         <operation value=\"create\"/>\n" +
+			"         <match value=\"http://foo/Patient?identifier=value\"/>\n" +
+			"      </transaction>\n" +
 			"      <resource>\n" + 
 			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 			"            <id value=\"1\"/>\n" + 
@@ -176,7 +173,8 @@ public class XmlParserTest {
 		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getId().getValue());
 		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
 		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
-		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_STATUS.get(pt).getCode());
+		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(pt).getCode());
+		assertEquals("create", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(pt).getCode());
 		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
 		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
 		

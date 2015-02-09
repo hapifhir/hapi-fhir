@@ -29,6 +29,8 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -58,7 +60,13 @@ import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.CollectionBinder;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.NumberAndListParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -455,6 +463,38 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		QueryParameterAndBinder binder = null;
+		switch (theParamDef.getParamType()) {
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		}
+		
+		return binder.parse(theUnqualifiedParamName, theParameters);
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<IParameter>();

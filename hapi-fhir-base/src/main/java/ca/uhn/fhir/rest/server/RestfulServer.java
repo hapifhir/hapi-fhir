@@ -20,43 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.ProvidedResourceScanner;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.Destroy;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.method.*;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.VersionUtil;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.client.utils.DateUtils;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -67,10 +31,67 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.zip.GZIPOutputStream;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.client.utils.DateUtils;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.ProvidedResourceScanner;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.Destroy;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
+import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
 
@@ -1202,8 +1223,8 @@ public class RestfulServer extends HttpServlet {
 		for (IResource next : includedResources) {
 			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
 			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				if (entry.getStatus().isEmpty()) {
-					entry.getStatus().setValueAsEnum(BundleEntryStatusEnum.INCLUDE);
+				if (entry.getSearchMode().isEmpty()) {
+					entry.getSearchMode().setValueAsEnum(BundleEntrySearchModeEnum.INCLUDE);
 				}
 			}
 		}

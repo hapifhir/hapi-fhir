@@ -20,13 +20,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
@@ -37,9 +37,8 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
-import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -143,11 +142,11 @@ public class ResourceProviderDstu2Test {
 		
 		assertEquals(2, found.size());
 		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(BundleEntryStatusEnum.MATCH, found.getEntries().get(0).getStatus().getValueAsEnum());
-		assertEquals(BundleEntryStatusEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
+		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getSearchMode().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, found.getEntries().get(1).getStatus().getValueAsEnum());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
 	
@@ -398,7 +397,7 @@ public class ResourceProviderDstu2Test {
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testSearchByIdentifier01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
-		assertEquals(BundleEntryStatusEnum.MATCH, actual.getEntries().get(0).getStatus().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.MATCH, actual.getEntries().get(0).getSearchMode().getValueAsEnum());
 	}
 
 	@Test

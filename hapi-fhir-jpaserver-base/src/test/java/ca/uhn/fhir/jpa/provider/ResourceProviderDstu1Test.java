@@ -20,7 +20,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -39,7 +38,6 @@ import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -115,11 +113,11 @@ public class ResourceProviderDstu1Test {
 		
 		assertEquals(2, found.size());
 		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(null, found.getEntries().get(0).getStatus().getValueAsEnum());
-		assertEquals(null, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
+		assertEquals(null, found.getEntries().get(0).getSearchMode().getValueAsEnum());
+		assertEquals(null, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
-		assertEquals(null, found.getEntries().get(1).getStatus().getValueAsEnum());
-		assertEquals(null, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_STATUS));
+		assertEquals(null, found.getEntries().get(1).getSearchMode().getValueAsEnum());
+		assertEquals(null, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
 	

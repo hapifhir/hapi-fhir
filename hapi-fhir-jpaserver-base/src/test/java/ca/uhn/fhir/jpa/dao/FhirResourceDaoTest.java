@@ -641,6 +641,7 @@ public class FhirResourceDaoTest {
 		assertTrue(patients.size() >= 2);
 	}
 
+	
 	@Test
 	public void testHistoryByForcedId() {
 		IdDt idv1;
@@ -661,6 +662,7 @@ public class FhirResourceDaoTest {
 		// Newest first
 		assertEquals("Patient/testHistoryByForcedId/_history/2", patients.get(0).getId().toUnqualified().getValue());
 		assertEquals("Patient/testHistoryByForcedId/_history/1", patients.get(1).getId().toUnqualified().getValue());
+		assertNotEquals(idv1, idv2);
 	}
 
 	@Test

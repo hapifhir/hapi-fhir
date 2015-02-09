@@ -27,7 +27,10 @@ public class JpaServerDemo extends RestfulServer {
 	protected void initialize() throws ServletException {
 		super.initialize();
 
-		// We want to support FHIR DSTU2 format
+		/* 
+		 * We want to support FHIR DSTU2 format. This means that the server
+		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
+		 */
 		setFhirContext(FhirContext.forDstu2());
 		
 		// Get the spring context from the web container (it's declared in web.xml)
@@ -38,14 +41,14 @@ public class JpaServerDemo extends RestfulServer {
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */
-		List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDev", List.class);
+		List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		setResourceProviders(beans);
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
-		JpaSystemProvider systemProvider = myAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
+		JpaSystemProvider systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProvider.class);
 		setPlainProviders(systemProvider);
 		
 		/*
@@ -59,13 +62,17 @@ public class JpaServerDemo extends RestfulServer {
 		FhirContext ctx = getFhirContext();
 		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-
 		/*
-		 * This tells the server to use "incorrect" MIME types if it detects
-		 * that the request is coming from a browser in the hopes that the 
+		 * This tells the server to use "browser friendly" MIME types if it 
+		 * detects that the request is coming from a browser, in the hopes that the 
 		 * browser won't just treat the content as a binary payload and try 
 		 * to download it (which is what generally happens if you load a 
-		 * FHIR URL in a browser)
+		 * FHIR URL in a browser). 
+		 * 
+		 * This means that the server isn't technically complying with the 
+		 * FHIR specification for direct browser requests, but this mode
+		 * is very helpful for testing and troubleshooting since it means 
+		 * you can look at FHIR URLs directly in a browser.  
 		 */
 		setUseBrowserFriendlyContentTypes(true);
 
@@ -78,8 +85,8 @@ public class JpaServerDemo extends RestfulServer {
 		 * Do some fancy logging to create a nice access log that has details about each incoming request.
 		 */
 		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-		loggingInterceptor.setLoggerName("fhirtest.access");
-		loggingInterceptor.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
+		loggingInterceptor.setLoggerName("fhir.access");
+		loggingInterceptor.setMessageFormat("Path[${servletPath}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
 		this.registerInterceptor(loggingInterceptor);
 
 	}

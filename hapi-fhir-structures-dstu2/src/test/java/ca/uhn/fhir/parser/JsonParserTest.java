@@ -93,10 +93,15 @@ public class JsonParserTest {
 			"      \"url\" : \"http://localhost:52788/Binary?_pretty=true\"\n" + 
 			"   }],\n" + 
 			"   \"entry\" : [{\n" + 
-			"      \"base\" : \"http://foo/fhirBase2\",\n" + 
-			"      \"status\" : \"match\",\n" +
-			"      \"search\" : \"http://foo/Patient?identifier=value\",\n" +
-			"      \"score\" : 0.123,\n" +
+			"      \"base\" : \"http://foo/fhirBase2\",\n" +
+			"      \"search\" : {\n" +
+			"         \"mode\" : \"match\",\n" +
+			"         \"score\" : 0.123\n" +
+			"      },\n" +
+			"      \"transaction\" : {\n" +
+			"         \"operation\" : \"create\",\n" +
+			"         \"match\" : \"http://foo/Patient?identifier=value\"\n" +
+			"      },\n" +
 			"      \"resource\" : {\n" + 
 			"         \"resourceType\" : \"Patient\",\n" + 
 			"         \"id\" : \"1\",\n" + 
@@ -117,7 +122,8 @@ public class JsonParserTest {
 		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getId().getValue());
 		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
 		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
-		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_STATUS.get(pt).getCode());
+		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(pt).getCode());
+		assertEquals("create", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(pt).getCode());
 		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
 		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
 		
@@ -165,17 +171,16 @@ public class JsonParserTest {
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("transaction", parsed.getType().getValue());
+		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
 		assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347", parsed.getLinkSelf().getValue());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
 
-		assertEquals(1, parsed.getEntries().size());
-		assertEquals("update", parsed.getEntries().get(0).getStatus().getValue());
+		assertEquals(2, parsed.getEntries().size());
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
-		assertEquals("Patient/example", p.getPatient().getReference().getValue());
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
 

@@ -950,10 +950,10 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("base".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkBase()));
-			} else if ("status".equals(theLocalPart)) {
-				push(new PrimitiveState(getPreResourceState(), myEntry.getStatus()));
+			} else if ("transaction".equals(theLocalPart)) {
+				push(new BundleEntryTransactionState(myEntry));
 			} else if ("search".equals(theLocalPart)) {
-				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
+				push(new BundleEntrySearchState(myEntry));
 			} else if ("score".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getScore()));
 			} else if ("resource".equals(theLocalPart)) {
@@ -1013,16 +1013,74 @@ class ParserState<T> {
 			if (!myEntry.getLinkSearch().isEmpty()) {
 				ResourceMetadataKeyEnum.LINK_SEARCH.put(myEntry.getResource(), myEntry.getLinkSearch().getValue());
 			}
-			if (!myEntry.getStatus().isEmpty()) {
-				ResourceMetadataKeyEnum.ENTRY_STATUS.put(myEntry.getResource(), myEntry.getStatus().getValueAsEnum());
+			if (!myEntry.getSearchMode().isEmpty()) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(myEntry.getResource(), myEntry.getSearchMode().getValueAsEnum());
 			}
-			if (!myEntry.getStatus().isEmpty()) {
+			if (!myEntry.getTransactionOperation().isEmpty()) {
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.put(myEntry.getResource(), myEntry.getTransactionOperation().getValueAsEnum());
+			}
+			if (!myEntry.getScore().isEmpty()) {
 				ResourceMetadataKeyEnum.ENTRY_SCORE.put(myEntry.getResource(), myEntry.getScore());
 			}
 		}
 
 	}
 
+	
+	public class BundleEntrySearchState extends BaseState {
+
+		private BundleEntry myEntry;
+
+		public BundleEntrySearchState(BundleEntry theEntry) {
+			super(null);
+			myEntry = theEntry;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("mode".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getSearchMode()));
+			} else if ("score".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getScore()));
+			} else {
+				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
+			}
+		}
+
+	}
+
+	public class BundleEntryTransactionState extends BaseState {
+
+		private BundleEntry myEntry;
+
+		public BundleEntryTransactionState(BundleEntry theEntry) {
+			super(null);
+			myEntry = theEntry;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("operation".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getTransactionOperation()));
+			} else if ("match".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
+			} else {
+				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
+			}
+		}
+
+	}
+	
 	private class BundleLinkState extends BaseState {
 
 		private BundleEntry myEntry;

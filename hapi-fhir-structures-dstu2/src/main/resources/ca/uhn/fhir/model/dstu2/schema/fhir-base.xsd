@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Thu, Dec 18, 2014 17:00+0000 for FHIR v0.4.0 
+  Generated on Sat, Feb 7, 2015 18:18+0000 for FHIR v0.4.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.4.0">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
@@ -264,6 +264,7 @@
       <xs:element ref="AppointmentResponse"/>
       <xs:element ref="Basic"/>
       <xs:element ref="Binary"/>
+      <xs:element ref="BodySite"/>
       <xs:element ref="Bundle"/>
       <xs:element ref="CarePlan"/>
       <xs:element ref="CarePlan2"/>
@@ -396,6 +397,7 @@
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
            <xs:element name="valueTiming" type="Timing"/>
+           <xs:element name="valueMeta" type="Meta"/>
           </xs:choice>
         </xs:sequence>
         <xs:attribute name="url" type="uri-primitive" use="required"/>
@@ -787,7 +789,7 @@
         <xs:sequence>
           <xs:element name="reference" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>A reference to a location at which the other resource is found. The reference may a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.</xs:documentation>
+              <xs:documentation>A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="display" type="string" minOccurs="0" maxOccurs="1">
@@ -1170,6 +1172,7 @@
            <xs:element name="defaultValueAddress" type="Address"/>
            <xs:element name="defaultValueContactPoint" type="ContactPoint"/>
            <xs:element name="defaultValueTiming" type="Timing"/>
+           <xs:element name="defaultValueMeta" type="Meta"/>
           </xs:choice>
           <xs:element name="meaningWhenMissing" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
@@ -1205,6 +1208,7 @@
            <xs:element name="fixedAddress" type="Address"/>
            <xs:element name="fixedContactPoint" type="ContactPoint"/>
            <xs:element name="fixedTiming" type="Timing"/>
+           <xs:element name="fixedMeta" type="Meta"/>
           </xs:choice>
         <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
@@ -1235,6 +1239,7 @@
            <xs:element name="patternAddress" type="Address"/>
            <xs:element name="patternContactPoint" type="ContactPoint"/>
            <xs:element name="patternTiming" type="Timing"/>
+           <xs:element name="patternMeta" type="Meta"/>
           </xs:choice>
         <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
@@ -1265,6 +1270,7 @@
            <xs:element name="exampleAddress" type="Address"/>
            <xs:element name="exampleContactPoint" type="ContactPoint"/>
            <xs:element name="exampleTiming" type="Timing"/>
+           <xs:element name="exampleMeta" type="Meta"/>
           </xs:choice>
           <xs:element name="maxLength" type="integer" minOccurs="0" maxOccurs="1">
             <xs:annotation>
@@ -1347,7 +1353,7 @@
           </xs:element>
           <xs:element name="description" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>A humane readable text description of how the slicing works. If there is no discriminator, this is required to be present to provide whatever information is possible about how the slices can be differentiated.</xs:documentation>
+              <xs:documentation>A human-readable text description of how the slicing works. If there is no discriminator, this is required to be present to provide whatever information is possible about how the slices can be differentiated.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="ordered" type="boolean" minOccurs="0" maxOccurs="1">
@@ -1421,6 +1427,7 @@
            <xs:element name="referenceAddress" type="Address"/>
            <xs:element name="referenceContactPoint" type="ContactPoint"/>
            <xs:element name="referenceTiming" type="Timing"/>
+           <xs:element name="referenceMeta" type="Meta"/>
           </xs:choice>
         </xs:sequence>
       </xs:extension>
@@ -1989,6 +1996,48 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="Meta">
+    <xs:annotation>
+      <xs:documentation>The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.</xs:documentation>
+      <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:sequence>
+          <xs:element name="versionId" type="id" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="lastUpdated" type="instant" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>When the resource last changed - e.g. when the version changed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="deleted" type="boolean" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Set to 'true' if the resource is deleted. Deleted resources can not be fetched via the RESTful API, but may appear in bundles for various reasons.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" type="uri" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="security" type="Coding" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="tag" type="Coding" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:complexType name="ContactPoint">
     <xs:annotation>
       <xs:documentation>Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.</xs:documentation>
@@ -2154,6 +2203,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
            <xs:element name="valueTiming" type="Timing"/>
+           <xs:element name="valueMeta" type="Meta"/>
           </xs:choice>
           <xs:element name="resource" type="ResourceContainer" minOccurs="0" maxOccurs="1">
             <xs:annotation>
@@ -2211,6 +2261,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
            <xs:element name="valueTiming" type="Timing"/>
+           <xs:element name="valueMeta" type="Meta"/>
           </xs:choice>
         </xs:sequence>
       </xs:extension>
@@ -2231,7 +2282,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="meta" type="Resource.Meta" minOccurs="0" maxOccurs="1">
+          <xs:element name="meta" type="Meta" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.</xs:documentation>
             </xs:annotation>
@@ -2247,43 +2298,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
             </xs:annotation>
           </xs:element>
         </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="Resource.Meta">
-    <xs:annotation>
-      <xs:documentation>Base Resource for everything.</xs:documentation>
-      <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:sequence>
-          <xs:element name="versionId" type="id" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="lastUpdated" type="instant" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>When the resource last changed - e.g. when the version changed.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="profile" type="uri" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="security" type="Coding" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="tag" type="Coding" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="DomainResource">
     <xs:annotation>
@@ -2315,81 +2329,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="QuestionnaireStatus-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="draft">
-        <xs:annotation>
-          <xs:documentation>This Questionnaire is not ready for official use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="published">
-        <xs:annotation>
-          <xs:documentation>This Questionnaire is ready for use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="retired">
-        <xs:annotation>
-          <xs:documentation>This Questionnaire should no longer be used to gather data.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="QuestionnaireStatus">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="QuestionnaireStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="FilterOperator-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="=">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code equals the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="is-a">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code has an is-a relationship with the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="is-not-a">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code does not have an is-a relationship with the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="regex">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code  matches the regex specified in the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="in">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="not in">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="FilterOperator">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="FilterOperator-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
   </xs:complexType>
   <xs:simpleType name="DataAbsentReason-list">
     <xs:restriction base="xs:string">
@@ -2443,61 +2382,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
        <xs:extension base="Element">
          <xs:attribute name="value" type="DataAbsentReason-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="DocumentReferenceStatus-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="current">
-        <xs:annotation>
-          <xs:documentation>This is the current reference for this document.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="superceded">
-        <xs:annotation>
-          <xs:documentation>This reference has been superseded by another reference.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="entered in error">
-        <xs:annotation>
-          <xs:documentation>This reference was created in error.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="DocumentReferenceStatus">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="DocumentReferenceStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="RemittanceOutcome-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="complete">
-        <xs:annotation>
-          <xs:documentation>The processing completed without errors.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="error">
-        <xs:annotation>
-          <xs:documentation>The processing identified with errors.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="RemittanceOutcome">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="RemittanceOutcome-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -2578,6 +2462,526 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
        <xs:extension base="Element">
          <xs:attribute name="value" type="SpecialValues-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ResourceProfileStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation>This profile is still under development.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation>This profile is ready for normal use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="retired">
+        <xs:annotation>
+          <xs:documentation>This profile has been deprecated, withdrawn or superseded and should no longer be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ResourceProfileStatus">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="ResourceProfileStatus-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="DataType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Address">
+        <xs:annotation>
+          <xs:documentation>There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Age">
+        <xs:annotation>
+          <xs:documentation>A duration (length of time) with a UCUM code</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Attachment">
+        <xs:annotation>
+          <xs:documentation>For referring to data content defined in other formats.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="BackboneElement">
+        <xs:annotation>
+          <xs:documentation>Base definition for all elements that are defined inside a resource - but not those in a data type.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CodeableConcept">
+        <xs:annotation>
+          <xs:documentation>A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Coding">
+        <xs:annotation>
+          <xs:documentation>A reference to a code defined by a terminology system.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ContactPoint">
+        <xs:annotation>
+          <xs:documentation>Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Count">
+        <xs:annotation>
+          <xs:documentation>A count of a discrete element (no unit)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Distance">
+        <xs:annotation>
+          <xs:documentation>A measure of distance</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Duration">
+        <xs:annotation>
+          <xs:documentation>A length of time</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Element">
+        <xs:annotation>
+          <xs:documentation>Base definition for all elements in a resource.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ElementDefinition">
+        <xs:annotation>
+          <xs:documentation>Captures constraints on each element within the resource, profile, or extension.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Extension">
+        <xs:annotation>
+          <xs:documentation>Optional Extensions Element - found in all resources.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="HumanName">
+        <xs:annotation>
+          <xs:documentation>A human's name with the ability to identify parts and usage.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Identifier">
+        <xs:annotation>
+          <xs:documentation>A technical identifier - identifies some entity uniquely and unambiguously.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Meta">
+        <xs:annotation>
+          <xs:documentation>The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Money">
+        <xs:annotation>
+          <xs:documentation>An amount of money. With regard to precision, see [[X]]</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Narrative">
+        <xs:annotation>
+          <xs:documentation>A human-readable formatted text, including images.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Period">
+        <xs:annotation>
+          <xs:documentation>A time period defined by a start and end date and optionally time.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Quantity">
+        <xs:annotation>
+          <xs:documentation>A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Range">
+        <xs:annotation>
+          <xs:documentation>A set of ordered Quantities defined by a low and high limit.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Ratio">
+        <xs:annotation>
+          <xs:documentation>A relationship of two Quantity values - expressed as a numerator and a denominator.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Reference">
+        <xs:annotation>
+          <xs:documentation>A reference from one resource to another.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="SampledData">
+        <xs:annotation>
+          <xs:documentation>A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Timing">
+        <xs:annotation>
+          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="base64Binary">
+        <xs:annotation>
+          <xs:documentation>A stream of bytes</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="boolean">
+        <xs:annotation>
+          <xs:documentation>Value of &quot;true&quot; or &quot;false&quot;</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="code">
+        <xs:annotation>
+          <xs:documentation>A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="date">
+        <xs:annotation>
+          <xs:documentation>A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="dateTime">
+        <xs:annotation>
+          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds may be provided but may also be ignored.  Dates SHALL be valid dates.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="decimal">
+        <xs:annotation>
+          <xs:documentation>A rational number with implicit precision</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="id">
+        <xs:annotation>
+          <xs:documentation>Any combination of lowercase letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 36 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Systems SHALL send ids as lower-case but SHOULD interpret them case-insensitively.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="instant">
+        <xs:annotation>
+          <xs:documentation>An instant in time - known at least to the second</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="integer">
+        <xs:annotation>
+          <xs:documentation>A whole number</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="oid">
+        <xs:annotation>
+          <xs:documentation>An oid represented as a URI</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation>A sequence of Unicode characters</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="time">
+        <xs:annotation>
+          <xs:documentation>A time during the day, with no date specified</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="uri">
+        <xs:annotation>
+          <xs:documentation>String of characters used to identify a name or a resource</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="uuid">
+        <xs:annotation>
+          <xs:documentation>A UUID, represented as a URI</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="DataType">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="DataType-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="EncounterState-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="planned">
+        <xs:annotation>
+          <xs:documentation>The Encounter has not yet started.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="arrived">
+        <xs:annotation>
+          <xs:documentation>The Patient is present for the encounter, however is not currently meeting with a practitioner.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="in progress">
+        <xs:annotation>
+          <xs:documentation>The Encounter has begun and the patient is present / the practitioner and the patient are meeting.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="onleave">
+        <xs:annotation>
+          <xs:documentation>The Encounter has begun, but the patient is temporarily on leave.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="finished">
+        <xs:annotation>
+          <xs:documentation>The Encounter has ended.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="cancelled">
+        <xs:annotation>
+          <xs:documentation>The Encounter has ended before it has begun.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="EncounterState">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="EncounterState-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="MessageEvent-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="MedicationAdministration-Complete">
+        <xs:annotation>
+          <xs:documentation>Change the status of a Medication Administration to show that it is complete.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="MedicationAdministration-Nullification">
+        <xs:annotation>
+          <xs:documentation>Someone wishes to record that the record of administration of a medication is in error and should be ignored.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="MedicationAdministration-Recording">
+        <xs:annotation>
+          <xs:documentation>Indicates that a medication has been recorded against the patient's record.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="MedicationAdministration-Update">
+        <xs:annotation>
+          <xs:documentation>Update a Medication Administration record.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="admin-notify">
+        <xs:annotation>
+          <xs:documentation>Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="conceptmap-translate">
+        <xs:annotation>
+          <xs:documentation>Translate a code from one value set to another, based on the existing value set and concept maps resources, and/or other additional knowledge available to the server. The coded value is carried as an extension in the message header.  The outcome is an operationOutcome with hints, warnings, or errors, or the translated code in an extension.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="diagnosticreport-provide">
+        <xs:annotation>
+          <xs:documentation>Provide a diagnostic report, or update a previously provided diagnostic report.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="observation-provide">
+        <xs:annotation>
+          <xs:documentation>Provide a simple observation or update a previously provided simple observation.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="patient-link">
+        <xs:annotation>
+          <xs:documentation>Notification that two patient records actually identify the same patient.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="patient-unlink">
+        <xs:annotation>
+          <xs:documentation>Notification that previous advice that two patient records concern the same patient is now considered incorrect.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="valueset-expand">
+        <xs:annotation>
+          <xs:documentation>The definition of a value set is used to create a simple collection of codes suitable for use for data entry or validation. An expanded value set will be returned, or an error message.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="valueset-validate">
+        <xs:annotation>
+          <xs:documentation>Validate that a coded value is in the set of codes allowed by a value set. The coded value is carried as an extension in the message header. The outcome is an OperationOutcome with hints, warnings, or errors.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="MessageEvent">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="MessageEvent-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ValueSetStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation>This valueset is still under development.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation>This valueset is ready for normal use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="retired">
+        <xs:annotation>
+          <xs:documentation>This valueset has been withdrawn or superceded and should no longer be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ValueSetStatus">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="ValueSetStatus-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="QuestionnaireStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation>This Questionnaire is not ready for official use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="published">
+        <xs:annotation>
+          <xs:documentation>This Questionnaire is ready for use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="retired">
+        <xs:annotation>
+          <xs:documentation>This Questionnaire should no longer be used to gather data.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="QuestionnaireStatus">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="QuestionnaireStatus-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="FilterOperator-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="=">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code equals the provided value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="is-a">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code has an is-a relationship with the provided value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="is-not-a">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code does not have an is-a relationship with the provided value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="regex">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code  matches the regex specified in the provided value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="in">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="not in">
+        <xs:annotation>
+          <xs:documentation>The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="FilterOperator">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="FilterOperator-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="DocumentReferenceStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="current">
+        <xs:annotation>
+          <xs:documentation>This is the current reference for this document.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="superceded">
+        <xs:annotation>
+          <xs:documentation>This reference has been superseded by another reference.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="entered in error">
+        <xs:annotation>
+          <xs:documentation>This reference was created in error.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="DocumentReferenceStatus">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="DocumentReferenceStatus-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="RemittanceOutcome-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="complete">
+        <xs:annotation>
+          <xs:documentation>The processing completed without errors.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="error">
+        <xs:annotation>
+          <xs:documentation>The processing identified with errors.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="RemittanceOutcome">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="RemittanceOutcome-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -2738,6 +3142,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A technical identifier - identifies some entity uniquely and unambiguously.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="Meta">
+        <xs:annotation>
+          <xs:documentation>The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Money">
         <xs:annotation>
           <xs:documentation>An amount of money. With regard to precision, see [[X]]</xs:documentation>
@@ -2881,6 +3290,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="Binary">
         <xs:annotation>
           <xs:documentation>A binary resource can contain any content, whether text, image, pdf, zip archive, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="BodySite">
+        <xs:annotation>
+          <xs:documentation>Record details about the anatomical location of a specimen or body part, including precise localisation information.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Bundle">
@@ -3110,9 +3524,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="MedicationAdministration">
         <xs:annotation>
-          <xs:documentation>Describes the event of a patient being given a dose of a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.
-
-Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.</xs:documentation>
+          <xs:documentation>Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="MedicationDispense">
@@ -3423,286 +3835,6 @@ Related resources tie this event to the authorizing prescription, and the specif
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="DataType-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Address">
-        <xs:annotation>
-          <xs:documentation>There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Age">
-        <xs:annotation>
-          <xs:documentation>A duration (length of time) with a UCUM code</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Attachment">
-        <xs:annotation>
-          <xs:documentation>For referring to data content defined in other formats.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="BackboneElement">
-        <xs:annotation>
-          <xs:documentation>Base definition for all elements that are defined inside a resource - but not those in a data type.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="CodeableConcept">
-        <xs:annotation>
-          <xs:documentation>A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Coding">
-        <xs:annotation>
-          <xs:documentation>A reference to a code defined by a terminology system.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="ContactPoint">
-        <xs:annotation>
-          <xs:documentation>Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Count">
-        <xs:annotation>
-          <xs:documentation>A count of a discrete element (no unit)</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Distance">
-        <xs:annotation>
-          <xs:documentation>A measure of distance</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Duration">
-        <xs:annotation>
-          <xs:documentation>A length of time</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Element">
-        <xs:annotation>
-          <xs:documentation>Base definition for all elements in a resource.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="ElementDefinition">
-        <xs:annotation>
-          <xs:documentation>Captures constraints on each element within the resource, profile, or extension.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Extension">
-        <xs:annotation>
-          <xs:documentation>Optional Extensions Element - found in all resources.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="HumanName">
-        <xs:annotation>
-          <xs:documentation>A human's name with the ability to identify parts and usage.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Identifier">
-        <xs:annotation>
-          <xs:documentation>A technical identifier - identifies some entity uniquely and unambiguously.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Money">
-        <xs:annotation>
-          <xs:documentation>An amount of money. With regard to precision, see [[X]]</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Narrative">
-        <xs:annotation>
-          <xs:documentation>A human-readable formatted text, including images.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Period">
-        <xs:annotation>
-          <xs:documentation>A time period defined by a start and end date and optionally time.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Quantity">
-        <xs:annotation>
-          <xs:documentation>A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Range">
-        <xs:annotation>
-          <xs:documentation>A set of ordered Quantities defined by a low and high limit.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Ratio">
-        <xs:annotation>
-          <xs:documentation>A relationship of two Quantity values - expressed as a numerator and a denominator.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Reference">
-        <xs:annotation>
-          <xs:documentation>A reference from one resource to another.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SampledData">
-        <xs:annotation>
-          <xs:documentation>A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Timing">
-        <xs:annotation>
-          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="base64Binary">
-        <xs:annotation>
-          <xs:documentation>A stream of bytes</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="boolean">
-        <xs:annotation>
-          <xs:documentation>Value of &quot;true&quot; or &quot;false&quot;</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="code">
-        <xs:annotation>
-          <xs:documentation>A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="date">
-        <xs:annotation>
-          <xs:documentation>A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="dateTime">
-        <xs:annotation>
-          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds may be provided but may also be ignored.  Dates SHALL be valid dates.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="decimal">
-        <xs:annotation>
-          <xs:documentation>A rational number with implicit precision</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="id">
-        <xs:annotation>
-          <xs:documentation>Any combination of lowercase letters, numerals, &quot;-&quot; and &quot;.&quot;, with a length limit of 36 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Systems SHALL send ids as lower-case but SHOULD interpret them case-insensitively.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="instant">
-        <xs:annotation>
-          <xs:documentation>An instant in time - known at least to the second</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="integer">
-        <xs:annotation>
-          <xs:documentation>A whole number</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="oid">
-        <xs:annotation>
-          <xs:documentation>An oid represented as a URI</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="string">
-        <xs:annotation>
-          <xs:documentation>A sequence of Unicode characters</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="time">
-        <xs:annotation>
-          <xs:documentation>A time during the day, with no date specified</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="uri">
-        <xs:annotation>
-          <xs:documentation>String of characters used to identify a name or a resource</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="uuid">
-        <xs:annotation>
-          <xs:documentation>A UUID, represented as a URI</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="DataType">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="DataType-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="ResourceProfileStatus-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="draft">
-        <xs:annotation>
-          <xs:documentation>This profile is still under development.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="active">
-        <xs:annotation>
-          <xs:documentation>This profile is ready for normal use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="retired">
-        <xs:annotation>
-          <xs:documentation>This profile has been deprecated, withdrawn or superseded and should no longer be used.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="ResourceProfileStatus">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="ResourceProfileStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="EncounterState-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="planned">
-        <xs:annotation>
-          <xs:documentation>The Encounter has not yet started.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="arrived">
-        <xs:annotation>
-          <xs:documentation>The Patient is present for the encounter, however is not currently meeting with a practitioner.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="in progress">
-        <xs:annotation>
-          <xs:documentation>The Encounter has begun and the patient is present / the practitioner and the patient are meeting.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="onleave">
-        <xs:annotation>
-          <xs:documentation>The Encounter has begun, but the patient is temporarily on leave.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="finished">
-        <xs:annotation>
-          <xs:documentation>The Encounter has ended.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="cancelled">
-        <xs:annotation>
-          <xs:documentation>The Encounter has ended before it has begun.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="EncounterState">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="EncounterState-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
   <xs:simpleType name="CompositionAttestationMode-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="personal">
@@ -3803,6 +3935,11 @@ Related resources tie this event to the authorizing prescription, and the specif
       <xs:enumeration value="Binary">
         <xs:annotation>
           <xs:documentation>A binary resource can contain any content, whether text, image, pdf, zip archive, etc.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="BodySite">
+        <xs:annotation>
+          <xs:documentation>Record details about the anatomical location of a specimen or body part, including precise localisation information.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Bundle">
@@ -4032,9 +4169,7 @@ Related resources tie this event to the authorizing prescription, and the specif
       </xs:enumeration>
       <xs:enumeration value="MedicationAdministration">
         <xs:annotation>
-          <xs:documentation>Describes the event of a patient being given a dose of a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.
-
-Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.</xs:documentation>
+          <xs:documentation>Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="MedicationDispense">
@@ -4325,81 +4460,6 @@ Related resources tie this event to the authorizing prescription, and the specif
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="MessageEvent-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="MedicationAdministration-Complete">
-        <xs:annotation>
-          <xs:documentation>Change the status of a Medication Administration to show that it is complete.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="MedicationAdministration-Nullification">
-        <xs:annotation>
-          <xs:documentation>Someone wishes to record that the record of administration of a medication is in error and should be ignored.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="MedicationAdministration-Recording">
-        <xs:annotation>
-          <xs:documentation>Indicates that a medication has been recorded against the patient's record.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="MedicationAdministration-Update">
-        <xs:annotation>
-          <xs:documentation>Update a Medication Administration record.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="admin-notify">
-        <xs:annotation>
-          <xs:documentation>Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="conceptmap-translate">
-        <xs:annotation>
-          <xs:documentation>Translate a code from one value set to another, based on the existing value set and concept maps resources, and/or other additional knowledge available to the server. The coded value is carried as an extension in the message header.  The outcome is an operationOutcome with hints, warnings, or errors, or the translated code in an extension.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="diagnosticreport-provide">
-        <xs:annotation>
-          <xs:documentation>Provide a diagnostic report, or update a previously provided diagnostic report.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="observation-provide">
-        <xs:annotation>
-          <xs:documentation>Provide a simple observation or update a previously provided simple observation.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="patient-link">
-        <xs:annotation>
-          <xs:documentation>Notification that two patient records actually identify the same patient.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="patient-unlink">
-        <xs:annotation>
-          <xs:documentation>Notification that previous advice that two patient records concern the same patient is now considered incorrect.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="valueset-expand">
-        <xs:annotation>
-          <xs:documentation>The definition of a value set is used to create a simple collection of codes suitable for use for data entry or validation. An expanded value set will be returned, or an error message.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="valueset-validate">
-        <xs:annotation>
-          <xs:documentation>Validate that a coded value is in the set of codes allowed by a value set. The coded value is carried as an extension in the message header. The outcome is an OperationOutcome with hints, warnings, or errors.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="MessageEvent">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="MessageEvent-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
   <xs:simpleType name="MaritalStatus-list">
     <xs:restriction base="xs:string">
     </xs:restriction>
@@ -4412,36 +4472,6 @@ Related resources tie this event to the authorizing prescription, and the specif
     <xs:complexContent>
        <xs:extension base="Element">
          <xs:attribute name="value" type="MaritalStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="ValueSetStatus-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="draft">
-        <xs:annotation>
-          <xs:documentation>This valueset is still under development.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="active">
-        <xs:annotation>
-          <xs:documentation>This valueset is ready for normal use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="retired">
-        <xs:annotation>
-          <xs:documentation>This valueset has been withdrawn or superceded and should no longer be used.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="ValueSetStatus">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="ValueSetStatus-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>

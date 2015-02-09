@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class StringBinder implements IParamBinder {
+final class StringBinder implements IParamBinder<String> {
 	StringBinder() {
 	}
 
@@ -42,7 +42,7 @@ final class StringBinder implements IParamBinder {
 	}
 
 	@Override
-	public Object parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public String parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		if (theParams.size() == 0 || theParams.get(0).size() == 0) {
 			return "";
 		}

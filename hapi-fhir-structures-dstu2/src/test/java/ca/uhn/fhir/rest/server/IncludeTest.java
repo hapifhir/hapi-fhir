@@ -1,8 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -144,7 +143,7 @@ public class IncludeTest {
 		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, bundle.getEntries().get(2).getStatus().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, bundle.getEntries().get(2).getSearchMode().getValueAsEnum());
 
 		Patient p1 = (Patient) bundle.toListOfResources().get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
@@ -170,7 +169,7 @@ public class IncludeTest {
 		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, bundle.getEntries().get(2).getStatus().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, bundle.getEntries().get(2).getSearchMode().getValueAsEnum());
 
 		Patient p1 = (Patient) bundle.toListOfResources().get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
@@ -196,7 +195,7 @@ public class IncludeTest {
 		assertEquals(new IdDt("Patient/p1"), bundle.toListOfResources().get(0).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, bundle.getEntries().get(2).getStatus().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, bundle.getEntries().get(2).getSearchMode().getValueAsEnum());
 
 		Patient p1 = (Patient) bundle.toListOfResources().get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());
@@ -223,8 +222,8 @@ public class IncludeTest {
 		assertEquals(new IdDt("Patient/p2"), bundle.toListOfResources().get(1).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o1"), bundle.toListOfResources().get(2).getId().toUnqualifiedVersionless());
 		assertEquals(new IdDt("Organization/o2"), bundle.toListOfResources().get(3).getId().toUnqualifiedVersionless());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, bundle.getEntries().get(2).getStatus().getValueAsEnum());
-		assertEquals(BundleEntryStatusEnum.INCLUDE, bundle.getEntries().get(3).getStatus().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, bundle.getEntries().get(2).getSearchMode().getValueAsEnum());
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, bundle.getEntries().get(3).getSearchMode().getValueAsEnum());
 
 		Patient p1 = (Patient) bundle.toListOfResources().get(0);
 		assertEquals(0, p1.getContained().getContainedResources().size());

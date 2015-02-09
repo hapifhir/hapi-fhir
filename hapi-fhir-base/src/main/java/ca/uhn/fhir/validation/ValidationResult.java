@@ -57,11 +57,13 @@ public class ValidationResult {
 
     private String toDescription() {
         StringBuilder b = new StringBuilder(100);
-        if (myOperationOutcome != null) {
+        if (myOperationOutcome != null && myOperationOutcome.getIssue().size() > 0) {
             BaseOperationOutcome.BaseIssue issueFirstRep = myOperationOutcome.getIssueFirstRep();
             b.append(issueFirstRep.getDetailsElement().getValue());
             b.append(" - ");
             b.append(issueFirstRep.getLocationFirstRep().getValue());
+        }else {
+        	b.append("No issues");
         }
         return b.toString();
     }

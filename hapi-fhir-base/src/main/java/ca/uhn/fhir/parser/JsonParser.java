@@ -273,9 +273,21 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.writeStartObject();
 
 			writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
-			writeOptionalTagWithTextNode(theEventWriter, "status", nextEntry.getStatus());
-			writeOptionalTagWithTextNode(theEventWriter, "search", nextEntry.getLinkSearch());
-			writeOptionalTagWithDecimalNode(theEventWriter, "score", nextEntry.getScore());
+
+			if (nextEntry.getSearchMode().isEmpty() == false || nextEntry.getScore().isEmpty() == false) {
+				theEventWriter.writeStartObject("search");
+				writeOptionalTagWithTextNode(theEventWriter, "mode", nextEntry.getSearchMode().getValueAsString());
+				writeOptionalTagWithDecimalNode(theEventWriter, "score", nextEntry.getScore());
+				theEventWriter.writeEnd();
+				// IResource nextResource = nextEntry.getResource();
+			}
+
+			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
+				theEventWriter.writeStartObject("transaction");
+				writeOptionalTagWithTextNode(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
+				writeOptionalTagWithTextNode(theEventWriter, "match", nextEntry.getLinkSearch().getValue());
+				theEventWriter.writeEnd();
+			}
 
 			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
 			if (deleted) {

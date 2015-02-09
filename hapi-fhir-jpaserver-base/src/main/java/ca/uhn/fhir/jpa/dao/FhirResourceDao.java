@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -372,6 +371,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
+		boolean checkForForcedId = true;
+		
+		BaseHasResource entity = readEntity(theId, checkForForcedId);
+		
+		return entity;
+	}
+
+	@Override
+	public BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
 		Long pid = translateForcedIdToPid(theId);
@@ -396,10 +404,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
-		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 
 		validateResourceType(entity);
 
+		if (theCheckForForcedId) {
+			validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		}
 		return entity;
 	}
 
@@ -508,7 +518,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 						// Execute the query and make sure we return distinct results
 						List<IResource> retVal = new ArrayList<IResource>();
-						loadResourcesByPid(pidsSubList, retVal, BundleEntryStatusEnum.MATCH);
+						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						// Load _include resources
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
@@ -561,7 +571,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 									ourLog.info("Loading {} included resources", includePids.size());
 									resources = loadResourcesById(includePids);
 									for (IResource next : resources) {
-										ResourceMetadataKeyEnum.ENTRY_STATUS.put(next, BundleEntryStatusEnum.INCLUDE);
+										ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
 									}
 									retVal.addAll(resources);
 								}
@@ -1441,7 +1451,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate, BundleEntryStatusEnum theBundleEntryStatus) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate, BundleEntrySearchModeEnum theBundleEntryStatus) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1469,7 +1479,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				continue;
 			}
 			
-			ResourceMetadataKeyEnum.ENTRY_STATUS.put(resource, theBundleEntryStatus);
+			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, theBundleEntryStatus);
 
 			theResourceListToPopulate.set(index, resource);
 		}

@@ -31,7 +31,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
-import ca.uhn.fhir.model.valueset.BundleEntryStatusEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
 public class BundleEntry extends BaseBundle {
@@ -56,7 +57,8 @@ public class BundleEntry extends BaseBundle {
 	private InstantDt myPublished;
 	private IResource myResource;
 	private DecimalDt myScore;
-	private BoundCodeDt<BundleEntryStatusEnum> myStatus;
+	private BoundCodeDt<BundleEntrySearchModeEnum> mySearchMode;
+	private BoundCodeDt<BundleEntryTransactionOperationEnum> myTransactionOperation;
 	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
@@ -197,12 +199,6 @@ public class BundleEntry extends BaseBundle {
 		return myScore;
 	}
 
-	public BoundCodeDt<BundleEntryStatusEnum> getStatus() {
-		if (myStatus == null) {
-			myStatus = new BoundCodeDt<BundleEntryStatusEnum>(BundleEntryStatusEnum.VALUESET_BINDER);
-		}
-		return myStatus;
-	}
 
 	public XhtmlDt getSummary() {
 		if (mySummary == null) {
@@ -243,7 +239,7 @@ public class BundleEntry extends BaseBundle {
 		return super.isEmpty() && 
 				ElementUtil.isEmpty(
 						myDeletedResourceId, myDeletedResourceType, myDeletedResourceVersion, myDeletedAt, 
-						myScore, myStatus, myCategories, 
+						myScore, mySearchMode, myTransactionOperation, myCategories, 
 						myLinkAlternate, myLinkSelf, myPublished, myResource, mySummary, 
 						myTitle, myUpdated, myDeletedByEmail, myDeletedByName, myDeletedComment);
 		//@formatter:on
@@ -326,9 +322,6 @@ public class BundleEntry extends BaseBundle {
 		myScore = theScore;
 	}
 
-	public void setStatus(BoundCodeDt<BundleEntryStatusEnum> theStatus) {
-		myStatus = theStatus;
-	}
 
 	/**
 	 * @deprecated <b>DSTU2 Note:</b> As of DSTU2, bundle entries no longer have an updated time (this bit of metadata
@@ -353,4 +346,29 @@ public class BundleEntry extends BaseBundle {
 		return b.toString();
 	}
 
+	public BoundCodeDt<BundleEntrySearchModeEnum> getSearchMode() {
+		if (mySearchMode == null) {
+			mySearchMode = new BoundCodeDt<BundleEntrySearchModeEnum>(BundleEntrySearchModeEnum.VALUESET_BINDER);
+		}
+		return mySearchMode;
+	}
+
+	public void setSearchMode(BoundCodeDt<BundleEntrySearchModeEnum> theSearchMode) {
+		mySearchMode = theSearchMode;
+	}
+
+	public BoundCodeDt<BundleEntryTransactionOperationEnum> getTransactionOperation() {
+		if (myTransactionOperation == null) {
+			myTransactionOperation = new BoundCodeDt<BundleEntryTransactionOperationEnum>(BundleEntryTransactionOperationEnum.VALUESET_BINDER);
+		}
+		return myTransactionOperation;
+	}
+
+	public void setTransactionOperation(BoundCodeDt<BundleEntryTransactionOperationEnum> theTransactionOperation) {
+		myTransactionOperation = theTransactionOperation;
+	}
+
+	
+	
+	
 }

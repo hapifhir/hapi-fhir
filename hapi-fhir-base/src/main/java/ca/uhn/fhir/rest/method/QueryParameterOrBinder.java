@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> implements IParamBinder {
+final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> implements IParamBinder<IQueryParameterOr<?>> {
 
 	QueryParameterOrBinder(Class<? extends IQueryParameterOr<?>> theType, List<Class<? extends IQueryParameterType>> theCompositeTypes) {
 		super(theType, theCompositeTypes);
@@ -44,7 +44,7 @@ final class QueryParameterOrBinder extends BaseBinder<IQueryParameterOr<?>> impl
 	}
 
 	@Override
-	public Object parse(String theName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterOr<?> parse(String theName, List<QualifiedParamList> theString) throws InternalErrorException, InvalidRequestException {
 		IQueryParameterOr<?> dt;
 		try {
 			dt = newInstance();
