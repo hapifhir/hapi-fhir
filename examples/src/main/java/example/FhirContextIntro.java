@@ -1,13 +1,11 @@
 package example;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
-import ca.uhn.fhir.model.primitive.CodeDt;
-import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 
@@ -103,16 +101,14 @@ IParser parser = ctx.newXmlParser();
 Patient patient = parser.parseResource(Patient.class, msgString);
 
 // The patient object has accessor methods to retrieve all of the
-// data which has been parsed into the instance. All of the
-// FHIR datatypes are represented by classes which end in "Dt". 
-StringDt patientId = patient.getIdentifier().get(0).getValue();
-StringDt familyName = patient.getName().get(0).getFamily().get(0);
-CodeDt gender = patient.getGender().getCoding().get(0).getCode();
+// data which has been parsed into the instance. 
+String patientId = patient.getIdentifier().get(0).getValue();
+String familyName = patient.getName().get(0).getFamily().get(0).getValue();
+String gender = patient.getGender();
 
-// The various datatype classes have accessors called getValue()
-System.out.println(patientId.getValue()); // PRP1660
-System.out.println(familyName.getValue()); // Cardinal
-System.out.println(gender.getValue()); // M
+System.out.println(patientId); // PRP1660
+System.out.println(familyName); // Cardinal
+System.out.println(gender); // M
 //END SNIPPET: parseMsg
 
 	}

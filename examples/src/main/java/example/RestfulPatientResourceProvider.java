@@ -3,9 +3,9 @@ package example;
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -50,7 +50,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 		patient.getIdentifier().get(0).setValue("00002");
 		patient.addName().addFamily("Test");
 		patient.getName().get(0).addGiven("PatientOne");
-		patient.setGender(AdministrativeGenderCodesEnum.F);
+		patient.setGender(AdministrativeGenderEnum.FEMALE);
 		return patient;
 	}
 
@@ -80,7 +80,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 		patient.addName();
 		patient.getName().get(0).addFamily(theFamilyName.getValue());
 		patient.getName().get(0).addGiven("PatientOne");
-		patient.getGender().setText("M");
+		patient.setGender(AdministrativeGenderEnum.MALE);
 		return Collections.singletonList(patient);
 	}
 

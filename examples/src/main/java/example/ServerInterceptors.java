@@ -3,18 +3,14 @@ package example;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
 public class ServerInterceptors {
 
@@ -25,7 +21,7 @@ public static void main(String[] args) throws DataFormatException, IOException {
 // START SNIPPET: resourceExtension
 // Create an example patient
 Patient patient = new Patient();
-patient.addIdentifier(IdentifierUseEnum.OFFICIAL, "urn:example", "7000135", null);
+patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
 // Create an extension
 ExtensionDt ext = new ExtensionDt();
