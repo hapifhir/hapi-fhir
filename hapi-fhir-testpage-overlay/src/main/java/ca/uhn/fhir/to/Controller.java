@@ -421,17 +421,17 @@ public class Controller {
 
 	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
 			List<List<String>> queryIncludes) {
-		ca.uhn.fhir.model.dev.resource.Conformance conformance = (ca.uhn.fhir.model.dev.resource.Conformance) theConformance;
-		for (ca.uhn.fhir.model.dev.resource.Conformance.Rest nextRest : conformance.getRest()) {
-			for (ca.uhn.fhir.model.dev.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
 					for (StringDt next : nextRes.getSearchInclude()) {
 						if (next.isEmpty() == false) {
 							includes.add(next.getValue());
 						}
 					}
-					for (ca.uhn.fhir.model.dev.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dev.valueset.SearchParamTypeEnum.COMPOSITE) {
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
 							sortParams.add(next.getNameElement().getValue());
 						}
 					}
@@ -1083,21 +1083,21 @@ public class Controller {
 	private IResource loadAndAddConfDev(final HomeRequest theRequest, final ModelMap theModel) {
 		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(myConfig));
 
-		ca.uhn.fhir.model.dev.resource.Conformance conformance;
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {
-			conformance = (ca.uhn.fhir.model.dev.resource.Conformance) client.conformance();
+			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
-			conformance = new ca.uhn.fhir.model.dev.resource.Conformance();
+			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
 		}
 
 		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
 
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
-		for (ca.uhn.fhir.model.dev.resource.Conformance.Rest nextRest : conformance.getRest()) {
-			for (ca.uhn.fhir.model.dev.resource.Conformance.RestResource nextResource : nextRest.getResource()) {
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextResource : nextRest.getResource()) {
 				List<ExtensionDt> exts = nextResource.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
 				if (exts != null && exts.size() > 0) {
 					Number nextCount = ((DecimalDt) (exts.get(0).getValue())).getValueAsNumber();
@@ -1109,10 +1109,10 @@ public class Controller {
 		theModel.put("resourceCounts", resourceCounts);
 
 		if (total > 0) {
-			for (ca.uhn.fhir.model.dev.resource.Conformance.Rest nextRest : conformance.getRest()) {
-				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dev.resource.Conformance.RestResource>() {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource>() {
 					@Override
-					public int compare(ca.uhn.fhir.model.dev.resource.Conformance.RestResource theO1, ca.uhn.fhir.model.dev.resource.Conformance.RestResource theO2) {
+					public int compare(ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO1, ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO2) {
 						DecimalDt count1 = new DecimalDt();
 						List<ExtensionDt> count1exts = theO1.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
 						if (count1exts != null && count1exts.size() > 0) {

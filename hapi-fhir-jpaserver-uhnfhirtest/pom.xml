@@ -49,12 +49,12 @@
 			<version>${phloc_commons_version}</version>
 		</dependency>
 
-		<dependency>
+		<!--dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
 			<version>0.9-SNAPSHOT</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency-->
 
 		<dependency>
 			<groupId>org.springframework</groupId>
