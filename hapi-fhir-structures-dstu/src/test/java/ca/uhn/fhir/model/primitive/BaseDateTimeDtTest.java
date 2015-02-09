@@ -3,6 +3,7 @@ package ca.uhn.fhir.model.primitive;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Condition;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -33,6 +35,22 @@ public class BaseDateTimeDtTest {
 		myDateInstantZoneParser = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss.SSSZ", TimeZone.getTimeZone("GMT-02:00"));
 	}
 
+	/**
+	 * See #101
+	 */
+	@Test
+	public void testPrecision() throws Exception {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(myDateInstantParser.parse("2012-01-02 22:31:02.333"));
+		cal.setTimeZone(TimeZone.getTimeZone("EST"));
+		
+		Patient patient = new Patient();
+		patient.setBirthDate(cal.getTime(), TemporalPrecisionEnum.DAY);
+		String out = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(out, containsString("<birthDate value=\"2012-01-02\"/>"));
+	}
+	
+	
 	@Test
 	public void setTimezoneToZulu() {
 		DateTimeDt dt = new DateTimeDt(new Date(816411488000L));
