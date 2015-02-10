@@ -20,11 +20,14 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.*;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.DAY;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MILLI;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MONTH;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.SECOND;
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.YEAR;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -330,13 +333,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the precision for this datatype using field values from {@link Calendar}. Valid values are:
-	 * <ul>
-	 * <li>{@link Calendar#SECOND}
-	 * <li>{@link Calendar#DAY_OF_MONTH}
-	 * <li>{@link Calendar#MONTH}
-	 * <li>{@link Calendar#YEAR}
-	 * </ul>
+	 * Sets the precision for this datatype
 	 * 
 	 * @throws DataFormatException
 	 */
@@ -372,15 +369,23 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		updateStringValue();
 	}
 
+	/**
+	 * Sets the value for this type using the given Java Date object as the time, and using the
+	 * default precision for this datatype, as well as the local timezone as determined by the
+	 * local operating system. Both of these properties may be modified in subsequent calls 
+	 * if neccesary.
+	 */
 	@Override
 	public BaseDateTimeDt setValue(Date theValue) {
-		clearTimeZone();
-		super.setValue(theValue);
+		setValue(theValue, getDefaultPrecisionForDatatype());
 		return this;
 	}
 
 	/**
-	 * Sets the value of this date/time using the specified level of precision
+	 * Sets the value for this type using the given Java Date object as the time, and using the
+	 * specified precision, as well as the local timezone as determined by the
+	 * local operating system. Both of these properties may be modified in subsequent calls 
+	 * if neccesary.
 	 * 
 	 * @param theValue
 	 *            The date value
@@ -390,8 +395,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 */
 	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {
 		clearTimeZone();
-		super.setValue(theValue);
 		myPrecision = thePrecision;
+		super.setValue(theValue);
 	}
 
 	@Override

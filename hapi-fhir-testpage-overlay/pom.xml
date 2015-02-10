@@ -31,7 +31,17 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-base</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -57,12 +67,12 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
+<!--		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test</artifactId>
 			<version>0.9-SNAPSHOT</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

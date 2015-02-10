@@ -8,10 +8,10 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -47,7 +47,7 @@ public class GenericClientExample {
          // START SNIPPET: create
          Patient patient = new Patient();
          // ..populate the patient object..
-         patient.addIdentifier("urn:system", "12345");
+         patient.addIdentifier().setSystem("urn:system").setValue("12345");
          patient.addName().addFamily("Smith").addGiven("John");
 
          // Invoke the server create method (and send pretty-printed JSON
@@ -72,7 +72,7 @@ public class GenericClientExample {
          // START SNIPPET: update
          Patient patient = new Patient();
          // ..populate the patient object..
-         patient.addIdentifier("urn:system", "12345");
+         patient.addIdentifier().setSystem("urn:system").setValue("12345");
          patient.addName().addFamily("Smith").addGiven("John");
 
          // To update a resource, it should have an ID set (if the resource
@@ -106,7 +106,7 @@ public class GenericClientExample {
          System.out.println("Version ID: " + patient.getId().getVersionIdPart());
          
          // Now let's make a change to the resource
-         patient.setGender(AdministrativeGenderCodesEnum.F);
+         patient.setGender(AdministrativeGenderEnum.FEMALE);
 
          // Invoke the server update method - Because the resource has
          // a version, it will be included in the request sent to 
@@ -147,7 +147,7 @@ public class GenericClientExample {
          Bundle response = client.search()
                .forResource(Patient.class)
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
-               .and(Patient.PROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
+               .and(Patient.CAREPROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
                .execute();
          // END SNIPPET: search
 

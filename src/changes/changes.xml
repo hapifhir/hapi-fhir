@@ -101,6 +101,11 @@
 				if StAX API was configured to use a different provider. Thanks to
 				James Butler for reporting and figuring out where the issue was!
 			</action>
+			<action type="fix" issue="101">
+				Calling BaseDateTimeDt#setValue(Date, TemporalPrecisionEnum) did not always actually respect
+				the given precision when the value was encoded. Thanks to jacksonjesse for
+				reporting!
+			</action>
 			<action type="fix" issue="103">
 				Encoders (both XML and JSON) will no longer encode contained resources if they are 
 				not referenced anywhere in the resource via a local reference. This is just a convenience

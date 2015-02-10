@@ -1,18 +1,17 @@
 package example;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-@SuppressWarnings(value= {"serial","unused"})
+@SuppressWarnings(value= {"serial"})
 public class ExampleProviders {
 
 	

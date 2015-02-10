@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -57,7 +57,7 @@ public class CompleteExampleClient {
       Organization org = (Organization) managingRef.loadResource(client);
 
       // Print organization name
-      System.out.println(org.getName().getValue());
+      System.out.println(org.getName());
 
    }
 
