@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project xmlns="http://maven.apache.org/DECORATION/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/DECORATION/1.1.0 http://maven.apache.org/xsd/decoration-1.1.0.xsd" name="HAPI">
+<project
+	xmlns="http://maven.apache.org/DECORATION/1.3.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd"
+	name="HAPI">
 	
 	<bannerLeft>
 		<name>HAPI</name>
@@ -18,11 +22,16 @@
 		<logo name="Built with Maven 3" href="http://maven.apache.org" img="./images/maven-logo-mini.png" />
 	</poweredBy>
 
-	<version position="left" />
+	<publishDate position="top" format="yyyy-MM-dd" />
+	<version position="top" />
+
+	<!-- <version position="left" />  -->
 
 	<body>
 		<head>
 			<!-- Syntax Highlighter -->
+			<!--
+			-->
 			<script type="text/javascript" src="syntaxhighlighter/shCore.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushJScript.js"></script>
 			<script type="text/javascript" src="syntaxhighlighter/shBrushJava.js"></script>
@@ -35,6 +44,8 @@
 			   HAPI stylesheet comes after because it overwrites the Syntax Highlighter
 			   font size
 			 -->
+			<!--
+			-->
 			<link rel="shortcut icon" href="https://github.com/jamesagnew/hapi-fhir/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 		</head>
@@ -45,19 +56,19 @@
 			<item name="University Health Network" href="http://www.uhn.ca/" />
 		</links>
 
-		<menu name="Welcome">
+		<menu name="HAPI FHIR" inherit="top">
 			<item name="Welcome" href="index.html" />
 			<item name="Download" href="./download.html" />
 			<item name="Upgrade Guide" href="./doc_upgrading.html" />
 			<item name="Changelog" href="./changes-report.html" />
 		</menu>
 
-		<menu name="Test Server">
+		<menu name="Test Servers" inherit="top">
 			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
 			<item name="Vagrant (Private) Test Server" href="doc_vagrant.html"/>
 		</menu>
 
-		<menu name="Documentation">
+		<menu name="Documentation" inherit="top">
 			<item name="Introduction" href="./doc_intro.html" >
 				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
 			</item>
@@ -84,12 +95,7 @@
 			<item name="JPA/Database Server" href="./doc_jpa.html" />
 		</menu>
 
-		<menu name="Community">
-			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
-			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
-		</menu>
-
-		<menu name="JavaDocs">
+		<menu name="JavaDocs" inherit="top">
 			<item name="Core API" href="./apidocs/index.html">
 				<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
 			</item>
@@ -100,7 +106,12 @@
 			</item>
 		</menu>
 
-		<menu name="Reports">
+		<menu name="Get Help" inherit="top">
+			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
+			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
+		</menu>
+
+		<menu name="Reports" inherit="bottom">
 			<item name="Developers" href="team-list.html" />
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
@@ -115,8 +126,26 @@
 		<artifactId>maven-fluido-skin</artifactId>
 		<version>1.3.1</version>
 	</skin>
-
+	
+	<!-- 
+	<skin>
+		<groupId>lt.velykis.maven.skins</groupId>
+		<artifactId>reflow-maven-skin</artifactId>
+		<version>1.1.1</version>
+	</skin>
+	-->
+	
 	<custom>
+		<reflowSkin>
+			<theme>bootswatch-united</theme>
+			<toc>sidebar</toc>
+			<bottomNav maxSpan="9" >
+				<column>HAPI FHIR|Test Servers</column>
+				<column>Get Help|Reports</column>
+			</bottomNav>
+			<highlightJs>true</highlightJs>
+		</reflowSkin>
+		
 		<fluidoSkin>
 			<googleSearch />
 			<!-- <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled> -->
