@@ -30,6 +30,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +52,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -91,6 +93,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
@@ -385,8 +388,8 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement if one has been explicitly defined.
 	 * <p>
-	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
-	 * to use the appropriate one for the given FHIR version.
+	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or
+	 * set to <code>null</code> to use the appropriate one for the given FHIR version.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -539,7 +542,7 @@ public class RestfulServer extends HttpServlet {
 				if (nextString.startsWith("_")) {
 					operation = nextString;
 				} else {
-					id = new IdDt(resourceName, nextString);
+					id = new IdDt(resourceName, UrlUtil.unescape(nextString));
 				}
 			}
 
@@ -551,7 +554,7 @@ public class RestfulServer extends HttpServlet {
 						if (id == null) {
 							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
 						}
-						id = new IdDt(resourceName + "/" + id.getIdPart() + "/_history/" + versionString);
+						id = new IdDt(resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
@@ -797,7 +800,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			findResourceMethods(getServerProfilesProvider());
-			
+
 			Object confProvider = getServerConformanceProvider();
 			if (confProvider == null) {
 				confProvider = myFhirContext.getVersion().createServerConformanceProvider(this);
@@ -984,8 +987,8 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement.
 	 * <p>
-	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
+	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can
+	 * be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
 	 *
@@ -1148,13 +1151,13 @@ public class RestfulServer extends HttpServlet {
 
 		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
-		
+
 		for (IResource next : theResult) {
 			if (next.getId().isEmpty() == false) {
 				addedResourceIds.add(next.getId());
 			}
 		}
-			
+
 		for (IResource next : theResult) {
 
 			Set<String> containedIds = new HashSet<String>();
@@ -1214,7 +1217,7 @@ public class RestfulServer extends HttpServlet {
 			} while (references.isEmpty() == false);
 
 			bundle.addResource(next, theContext, theServerBase);
-			
+
 		}
 
 		/*
@@ -1534,9 +1537,12 @@ public class RestfulServer extends HttpServlet {
 	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path
 	 * implementation
 	 *
-	 * @param requestFullPath the full request path
-	 * @param servletContextPath the servelet context path
-	 * @param servletPath the servelet path
+	 * @param requestFullPath
+	 *            the full request path
+	 * @param servletContextPath
+	 *            the servelet context path
+	 * @param servletPath
+	 *            the servelet path
 	 * @return created resource path
 	 */
 	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {

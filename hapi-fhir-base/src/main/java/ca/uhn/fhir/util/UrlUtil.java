@@ -1,7 +1,9 @@
 package ca.uhn.fhir.util;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 /*
  * #%L
@@ -25,10 +27,10 @@ import java.net.URL;
 
 public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
-	
+
 	/**
-	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning
-	 * and return theEndpoint if the input is invalid.
+	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is
+	 * invalid.
 	 */
 	public static String constructAbsoluteUrl(String theBase, String theEndpoint) {
 		if (theEndpoint == null) {
@@ -40,7 +42,7 @@ public class UrlUtil {
 		if (theBase == null) {
 			return theEndpoint;
 		}
-		
+
 		try {
 			return new URL(new URL(theBase), theEndpoint).toString();
 		} catch (MalformedURLException e) {
@@ -48,7 +50,7 @@ public class UrlUtil {
 			return theEndpoint;
 		}
 	}
-	
+
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();
 		return value.startsWith("http://") || value.startsWith("https://");
@@ -61,26 +63,26 @@ public class UrlUtil {
 		if (theExtensionUrl == null) {
 			return theExtensionUrl;
 		}
-		
+
 		int parentLastSlashIdx = theParentExtensionUrl.lastIndexOf('/');
 		int childLastSlashIdx = theExtensionUrl.lastIndexOf('/');
-		
+
 		if (parentLastSlashIdx == -1 || childLastSlashIdx == -1) {
 			return theExtensionUrl;
 		}
-		
+
 		if (parentLastSlashIdx != childLastSlashIdx) {
 			return theExtensionUrl;
 		}
-		
+
 		if (!theParentExtensionUrl.substring(0, parentLastSlashIdx).equals(theExtensionUrl.substring(0, parentLastSlashIdx))) {
 			return theExtensionUrl;
 		}
-		
+
 		if (theExtensionUrl.length() > parentLastSlashIdx) {
-			return theExtensionUrl.substring(parentLastSlashIdx+1);
+			return theExtensionUrl.substring(parentLastSlashIdx + 1);
 		}
-		
+
 		return theExtensionUrl;
 	}
 
@@ -88,7 +90,7 @@ public class UrlUtil {
 		if (theUrl == null || theUrl.length() < 8) {
 			return false;
 		}
-		
+
 		String url = theUrl.toLowerCase();
 		if (url.charAt(0) != 'h') {
 			return false;
@@ -113,7 +115,7 @@ public class UrlUtil {
 		} else {
 			return false;
 		}
-		
+
 		if (url.charAt(slashOffset) != '/') {
 			return false;
 		}
@@ -123,5 +125,19 @@ public class UrlUtil {
 
 		return true;
 	}
-	
+
+	public static String unescape(String theString) {
+		if (theString == null) {
+			return null;
+		}
+		if (theString.indexOf('%') == -1) {
+			return theString;
+		}
+		try {
+			return URLDecoder.decode(theString, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new Error("UTF-8 not supported, this shouldn't happen", e);
+		}
+	}
+
 }

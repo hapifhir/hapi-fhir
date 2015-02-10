@@ -27,12 +27,21 @@
 				<b>Important Note: </b>
 				This implementation uses a fairly simple table design, with a 
 				single table being used to hold resource bodies (which are stored as 
-				GZipped CLOBs) and a set of tables to hold search indexes, tags, 
+				CLOBs, optionally GZipped to save space) and a set of tables to hold search indexes, tags, 
 				history details, etc. This design is only one of many possible ways
 				of designing a FHIR server so it is worth considering whether it
 				is appropriate for the problem you are trying to solve.
 			</p>
+
+			<subsection name="Getting Started">
+				
+				<p>
+					The easiest way to get started with HAPI's JPA server module is
+					to begin with the example project.
+					
+				</p>
 			
+			</subsection>			
 		</section>
 
 	</body>
