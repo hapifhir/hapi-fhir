@@ -1,18 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-base</artifactId>
 	<packaging>jar</packaging>
-	
+
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
- 
+
 	<name>HAPI FHIR - Core Library</name>
 
 	<dependencies>
@@ -37,23 +38,12 @@
 		</dependency>
 
 		<!-- Only required for OpenID Connect Support -->
-		<!-- 
-		<dependency>
-			<groupId>org.mitre</groupId>
-			<artifactId>openid-connect-client</artifactId>
-			<version>${mitreid-connect-version}</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework.security.oauth</groupId>
-		    <artifactId>spring-security-oauth2</artifactId>
-		    <version>2.0.2.RELEASE</version>
-			<optional>true</optional>
-		</dependency>
-		 -->
-		<!-- 
-		 -->
-		 
+		<!-- <dependency> <groupId>org.mitre</groupId> <artifactId>openid-connect-client</artifactId> 
+			<version>${mitreid-connect-version}</version> <optional>true</optional> </dependency> 
+			<dependency> <groupId>org.springframework.security.oauth</groupId> <artifactId>spring-security-oauth2</artifactId> 
+			<version>2.0.2.RELEASE</version> <optional>true</optional> </dependency> -->
+		<!-- -->
+
 		<!-- Only required for narrative generator support -->
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
@@ -68,39 +58,27 @@
 			<artifactId>cors-filter</artifactId>
 			<version>${ebay_cors_filter_version}</version>
 			<optional>true</optional>
-			<!-- 
-			<exclusions>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
-			-->
+			<!-- <exclusions> <exclusion> <artifactId>servlet-api</artifactId> <groupId>javax.servlet</groupId> 
+				</exclusion> </exclusions> -->
 		</dependency>
 
 		<!-- Only required for Schematron Validator Support -->
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-schematron</artifactId>
-		    <version>${phloc_schematron_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-commons</artifactId>
-		    <version>${phloc_commons_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+			<version>${phloc_commons_version}</version>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- 
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.11.0</version>
-			<optional>true</optional>
-		</dependency>
-   		-->
-   		
+		<!-- <dependency> <groupId>xerces</groupId> <artifactId>xercesImpl</artifactId> 
+			<version>2.11.0</version> <optional>true</optional> </dependency> -->
+
 		<!-- General -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -110,12 +88,12 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.9</version>
+			<version>${commons_codec_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
+			<version>${commons_io_version}</version>
 		</dependency>
 
 		<!-- Logging -->
@@ -125,9 +103,9 @@
 			<version>${slf4j_version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.slf4j</groupId>
-		    <artifactId>jcl-over-slf4j</artifactId>
-		    <version>${slf4j_version}</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${slf4j_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -140,7 +118,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.3</version>
+			<version>${apache_httpclient_version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -151,7 +129,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>4.3.2</version>
+			<version>${apache_httpcore_version}</version>
 		</dependency>
 
 		<dependency>
@@ -202,72 +180,76 @@
 			<id>SITE</id>
 			<reporting>
 				<plugins>
-					<!-- 
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.0</version>
-						<configuration>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jxr-plugin</artifactId>
-						<version>2.4</version>
-						<reportSets>
-							<reportSet>
-								<id>normal</id>
-								<reports>
-									<report>jxr</report>
-								</reports>
-							</reportSet>
-							<reportSet>
-								<id>restful-server-example</id>
-								<reports>
-									<report>jxr</report>
-								</reports>
-								<configuration>
-									<sourcePath>../restful-server-example/src/main/java</sourcePath>
-									<destDir>${project.reporting.outputDirectory}/rse-xref</destDir>
-									<outputDirectory>tmp</outputDirectory>
-									<reportOutputDirectory>rse-xref</reportOutputDirectory>
-								</configuration>
-							</reportSet>
-						</reportSets>
-					</plugin>
-					-->				
-					<!--
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-linkcheck-plugin</artifactId>
-						<version>1.1</version>
-						<configuration>
-							<forceSite>false</forceSite>
-						</configuration>
-					</plugin>
-					-->
+					<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
+						<version>3.0.0</version> <configuration> </configuration> </plugin> <plugin> 
+						<groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jxr-plugin</artifactId> 
+						<version>2.4</version> <reportSets> <reportSet> <id>normal</id> <reports> 
+						<report>jxr</report> </reports> </reportSet> <reportSet> <id>restful-server-example</id> 
+						<reports> <report>jxr</report> </reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> 
+						<destDir>${project.reporting.outputDirectory}/rse-xref</destDir> <outputDirectory>tmp</outputDirectory> 
+						<reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> 
+						</reportSet> </reportSets> </plugin> -->
+					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
+						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
+						</plugin> -->
 				</plugins>
 			</reporting>
 		</profile>
 		<profile>
-			<id>DIST</id>
+			<id>ANDROID</id>
+			<dependencies>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-structures-dstu</artifactId>
+					<version>0.9-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-android</artifactId>
+					<version>${slf4j_version}</version>
+				</dependency>
+			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${maven_assembly_plugin_version}</version>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>1.4</version>
 						<executions>
 							<execution>
 								<phase>package</phase>
 								<goals>
-									<goal>single</goal>
+									<goal>shade</goal>
 								</goals>
 								<configuration>
-									<attach>false</attach>
-									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
-										<!-- <descriptor>src/assembly/hapi-jdk14.xml</descriptor> -->
-									</descriptors>
+									<shadedArtifactAttached>false</shadedArtifactAttached>
+									<createDependencyReducedPom>true</createDependencyReducedPom>
+									<artifactSet>
+										<includes>
+											<!-- 
+											<include>javax.json:javax.json-api</include>
+											-->
+											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
+											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
+											<include>org.glassfish:javax.json</include>
+											<include>org.codehaus.woodstox:woodstox-core-asl</include>
+											<include>javax.xml.stream:stax-api</include>
+											<include>org.codehaus.woodstox:stax2-api</include>
+											<include>org.slf4j:slf4j*</include>
+											<include>org.apache.commons:*</include>
+											<include>org.apache.httpcomponents:*</include>
+										</includes>
+									</artifactSet>
+									<relocations>
+										<relocation>
+											<pattern>javax.xml.stream</pattern>
+											<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
+										</relocation>
+										<relocation>
+											<pattern>javax.json</pattern>
+											<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
+										</relocation>
+									</relocations>
 								</configuration>
 							</execution>
 						</executions>
@@ -275,6 +257,7 @@
 				</plugins>
 			</build>
 		</profile>
+
 	</profiles>
 
 </project>

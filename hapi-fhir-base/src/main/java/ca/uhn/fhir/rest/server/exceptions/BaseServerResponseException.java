@@ -12,7 +12,7 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,13 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(InternalErrorException.STATUS_CODE, InternalErrorException.class);
 		registerExceptionType(InvalidRequestException.STATUS_CODE, InvalidRequestException.class);
 		registerExceptionType(MethodNotAllowedException.STATUS_CODE, MethodNotAllowedException.class);
+		registerExceptionType(NotImplementedOperationException.STATUS_CODE, NotImplementedOperationException.class);
+		registerExceptionType(NotModifiedException.STATUS_CODE, NotModifiedException.class);
 		registerExceptionType(ResourceNotFoundException.STATUS_CODE, ResourceNotFoundException.class);
-		registerExceptionType(ResourceVersionNotSpecifiedException.STATUS_CODE, ResourceVersionNotSpecifiedException.class);
+		registerExceptionType(ResourceGoneException.STATUS_CODE, ResourceGoneException.class);
+		registerExceptionType(PreconditionFailedException.STATUS_CODE, PreconditionFailedException.class);
 		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
-		registerExceptionType(ResourceGoneException.STATUS_CODE, ResourceGoneException.class);
-		registerExceptionType(NotImplementedOperationException.STATUS_CODE, NotImplementedOperationException.class);
 	}
 
 	private List<String> myAdditionalMessages = null;
@@ -75,8 +76,8 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * 
 	 * @param theStatusCode
 	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
+	 * @param theMessages
+	 *            The messages
 	 */
 	public BaseServerResponseException(int theStatusCode, String... theMessages) {
 		super(theMessages != null && theMessages.length > 0 ? theMessages[0] : null);

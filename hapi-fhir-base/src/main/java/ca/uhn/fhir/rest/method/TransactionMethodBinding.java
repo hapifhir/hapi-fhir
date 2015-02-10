@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -172,11 +173,16 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theResources);
+		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theBundle);
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.TRANSACTION_RESPONSE;
 	}
 
 }

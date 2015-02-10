@@ -132,7 +132,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
     } else if (theSearchParamType == 'date') {
     	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
     	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
-    } else if (theSearchParamType == 'reference' && theSearchParamChain.length == 0) {
+    } else if (theSearchParamType == 'reference' && (!theSearchParamChain || theSearchParamChain.length == 0)) {
     	/*
     	 * This is a reference parameter with no chain options, so just display a simple 
     	 * text box for the ID of the referenced resource

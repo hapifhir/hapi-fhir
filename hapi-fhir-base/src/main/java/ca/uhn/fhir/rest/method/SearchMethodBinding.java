@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
@@ -473,6 +474,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public static enum RequestType {
 		DELETE, GET, OPTIONS, POST, PUT
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.SEARCHSET;
 	}
 
 }

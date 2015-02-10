@@ -16,36 +16,36 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -82,6 +82,14 @@ public class CodingDt
 		setSystem(theSystem);
 		setCode(theCode);
 	}
+	
+	/**
+	 * Copy constructor: Creates a new Coding with the system and code copied out of the given coding
+	 */
+	public CodingDt(BaseCodingDt theCoding) {
+		this(theCoding.getSystemElement().getValueAsString(), theCoding.getCodeElement().getValue());
+	}
+	
 
 	@Child(name="system", type=UriDt.class, order=0, min=0, max=1)	
 	@Description(
@@ -147,12 +155,31 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>system</b> (Identity of the terminology system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the code system that defines the meaning of the symbol in the code.
+     * </p> 
+	 */
 	public UriDt getSystemElement() {  
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
 		return mySystem;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>system</b> (Identity of the terminology system)
@@ -198,6 +225,25 @@ public class CodingDt
 		return myVersion;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>version</b> (Version of the system - if relevant).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and When the meaning is not guaranteed to be consistent, the version SHOULD be exchanged
+     * </p> 
+	 */
+	public StringDt getVersionElement() {  
+		if (myVersion == null) {
+			myVersion = new StringDt();
+		}
+		return myVersion;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>version</b> (Version of the system - if relevant)
 	 *
@@ -235,12 +281,31 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
+	public CodeDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
+		return myCode;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Symbol in syntax defined by the system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
+     * </p> 
+	 */
 	public CodeDt getCodeElement() {  
 		if (myCode == null) {
 			myCode = new CodeDt();
 		}
 		return myCode;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (Symbol in syntax defined by the system)
@@ -286,6 +351,25 @@ public class CodingDt
 		return myDisplay;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>display</b> (Representation defined by the system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A representation of the meaning of the code in the system, following the rules of the system.
+     * </p> 
+	 */
+	public StringDt getDisplayElement() {  
+		if (myDisplay == null) {
+			myDisplay = new StringDt();
+		}
+		return myDisplay;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>display</b> (Representation defined by the system)
 	 *
@@ -330,6 +414,25 @@ public class CodingDt
 		return myPrimary;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>primary</b> (If this code was chosen directly by the user).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
+     * </p> 
+	 */
+	public BooleanDt getPrimaryElement() {  
+		if (myPrimary == null) {
+			myPrimary = new BooleanDt();
+		}
+		return myPrimary;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>primary</b> (If this code was chosen directly by the user)
 	 *
@@ -373,6 +476,25 @@ public class CodingDt
 		}
 		return myValueSet;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>valueSet</b> (Set this coding was chosen from).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The set of possible coded values this coding was chosen from or constrained by
+     * </p> 
+	 */
+	public ResourceReferenceDt getValueSetElement() {  
+		if (myValueSet == null) {
+			myValueSet = new ResourceReferenceDt();
+		}
+		return myValueSet;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>valueSet</b> (Set this coding was chosen from)

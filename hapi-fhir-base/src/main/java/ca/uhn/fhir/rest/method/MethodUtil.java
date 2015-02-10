@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -22,10 +21,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.Resource.ResourceMetaComponent;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -55,7 +60,13 @@ import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.CollectionBinder;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.NumberAndListParam;
+import ca.uhn.fhir.rest.param.QuantityAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -66,7 +77,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,31 +115,39 @@ public class MethodUtil {
 		}
 
 		if (theId.hasVersionIdPart()) {
-			String versionId = theId.getVersionIdPart();
-			if (StringUtils.isNotBlank(versionId)) {
-				urlBuilder.append('/');
-				urlBuilder.append(Constants.PARAM_HISTORY);
-				urlBuilder.append('/');
-				urlBuilder.append(versionId);
-				retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			} else {
+				String versionId = theId.getVersionIdPart();
+				if (StringUtils.isNotBlank(versionId)) {
+					urlBuilder.append('/');
+					urlBuilder.append(Constants.PARAM_HISTORY);
+					urlBuilder.append('/');
+					urlBuilder.append(versionId);
+					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+				}
 			}
 		}
 
 		addTagsToPostOrPut(theResource, retVal);
-//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
-		
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
 		return retVal;
 	}
 
-	public static void parseClientRequestResourceHeaders(Map<String, List<String>> theHeaders, IResource resource) {
+	public static void parseClientRequestResourceHeaders(IdDt theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);
 			Date headerDateValue;
 			try {
 				headerDateValue = DateUtils.parseDate(headerValue);
-				InstantDt lmValue = new InstantDt(headerDateValue);
-				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+				if (resource instanceof IResource) {
+					InstantDt lmValue = new InstantDt(headerDateValue);
+					((IResource) resource).getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+				} else if (resource instanceof Resource) {
+					((Resource) resource).getMeta().setLastUpdated(headerDateValue);
+				}
 			} catch (Exception e) {
 				ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
 			}
@@ -137,7 +156,30 @@ public class MethodUtil {
 		List<String> clHeaders = theHeaders.get(Constants.HEADER_CONTENT_LOCATION_LC);
 		if (clHeaders != null && clHeaders.size() > 0 && StringUtils.isNotBlank(clHeaders.get(0))) {
 			String headerValue = clHeaders.get(0);
-			resource.getId().setValue(headerValue);
+			if (isNotBlank(headerValue)) {
+				new IdDt(headerValue).applyTo(resource);
+			}
+		}
+
+		IdDt existing = IdDt.of(resource);
+
+		List<String> eTagHeaders = theHeaders.get(Constants.HEADER_ETAG_LC);
+		String eTagVersion = null;
+		if (eTagHeaders != null && eTagHeaders.size() > 0) {
+			eTagVersion = parseETagValue(eTagHeaders.get(0));
+		}
+		if (isNotBlank(eTagVersion)) {
+			if (existing == null || existing.isEmpty()) {
+				if (theRequestedId != null) {
+					theRequestedId.withVersion(eTagVersion).applyTo(resource);
+				}
+			} else if (existing.hasVersionIdPart() == false) {
+				existing.withVersion(eTagVersion).applyTo(resource);
+			}
+		} else if (existing == null || existing.isEmpty()) {
+			if (theRequestedId != null) {
+				theRequestedId.applyTo(resource);
+			}
 		}
 
 		List<String> categoryHeaders = theHeaders.get(Constants.HEADER_CATEGORY_LC);
@@ -146,8 +188,36 @@ public class MethodUtil {
 			for (String header : categoryHeaders) {
 				parseTagValue(tagList, header);
 			}
-			ResourceMetadataKeyEnum.TAG_LIST.put(resource, tagList);
+			if (resource instanceof IResource) {
+				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) resource, tagList);
+			} else if (resource instanceof Resource) {
+				ResourceMetaComponent meta = ((Resource) resource).getMeta();
+				for (Tag next : tagList) {
+					meta.addTag().setSystem(next.getScheme()).setCode(next.getTerm()).setDisplay(next.getLabel());
+				}
+			}
 		}
+	}
+
+	public static String parseETagValue(String value) {
+		String eTagVersion;
+		value = value.trim();
+		if (value.length() > 1) {
+			if (value.charAt(value.length() - 1) == '"') {
+				if (value.charAt(0) == '"') {
+					eTagVersion = value.substring(1, value.length() - 1);
+				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/' && value.charAt(2) == '"') {
+					eTagVersion = value.substring(3, value.length() - 1);
+				} else {
+					eTagVersion = value;
+				}
+			} else {
+				eTagVersion = value;
+			}
+		} else {
+			eTagVersion = value;
+		}
+		return eTagVersion;
 	}
 
 	public static void parseTagValue(TagList tagList, String nextTagComplete) {
@@ -261,8 +331,8 @@ public class MethodUtil {
 		}
 		addTagsToPostOrPut(theResource, retVal);
 
-//		addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
-		
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
 		return retVal;
 	}
 
@@ -393,6 +463,38 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
+	/**
+	 * This is a utility method intended provided to help the JPA module.
+	 */
+	public static IQueryParameterAnd<?> parseQueryParams(RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+		QueryParameterAndBinder binder = null;
+		switch (theParamDef.getParamType()) {
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+			break;
+		}
+		
+		return binder.parse(theUnqualifiedParamName, theParameters);
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<IParameter>();

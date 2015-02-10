@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dev;
  * #%L
  * HAPI FHIR Structures - DEV (FHIR Latest)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,12 @@ package ca.uhn.fhir.model.dev;
  * #L%
  */
 
+import java.io.InputStream;
+
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
@@ -37,12 +41,12 @@ public class FhirDev implements IFhirVersion {
 	private String myId;
 
 	@Override
-	public Object createServerConformanceProvider(RestfulServer theServer) {
+	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -58,7 +62,29 @@ public class FhirDev implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DEV;
+	}
+
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		InputStream str = FhirDev.class.getResourceAsStream("/ca/uhn/fhir/model/dev/fhirversion.properties");
+		if (str == null) {
+			str = FhirDev.class.getResourceAsStream("ca/uhn/fhir/model/dev/fhirversion.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dev/model.properties");
+		}
+		return str;
+	}
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dev/schema";
 	}
 
 }

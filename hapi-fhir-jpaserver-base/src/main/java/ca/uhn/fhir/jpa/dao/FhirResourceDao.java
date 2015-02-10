@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.dao;
 
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2015 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
@@ -32,6 +52,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -64,9 +85,9 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
@@ -74,6 +95,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -158,7 +180,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		}
 
-		updateEntity(theResource, entity, false, false);
+		updateEntity(theResource, entity, false, null);
 
 		MethodOutcome outcome = toMethodOutcome(entity);
 		notifyWriteCompleted();
@@ -174,7 +196,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
 
-		ResourceTable savedEntity = updateEntity(null, entity, true, true);
+		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
 
 		notifyWriteCompleted();
 
@@ -349,6 +371,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public BaseHasResource readEntity(IdDt theId) {
+		boolean checkForForcedId = true;
+		
+		BaseHasResource entity = readEntity(theId, checkForForcedId);
+		
+		return entity;
+	}
+
+	@Override
+	public BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
 		Long pid = translateForcedIdToPid(theId);
@@ -373,10 +404,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
-		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
 
 		validateResourceType(entity);
 
+		if (theCheckForForcedId) {
+			validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		}
 		return entity;
 	}
 
@@ -485,7 +518,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 						// Execute the query and make sure we return distinct results
 						List<IResource> retVal = new ArrayList<IResource>();
-						loadResourcesByPid(pidsSubList, retVal);
+						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						// Load _include resources
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
@@ -500,11 +533,16 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 								for (Include next : theParams.getIncludes()) {
 									for (IResource nextResource : resources) {
 										RuntimeResourceDefinition def = getContext().getResourceDefinition(nextResource);
-										if (!next.getValue().startsWith(def.getName() + ".")) {
+										List<Object> values;
+										if ("*".equals(next.getValue())) {
+											values = new ArrayList<Object>();
+											values.addAll(t.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class));
+										} else if (next.getValue().startsWith(def.getName() + ".")) {
+											values = t.getValues(nextResource, next.getValue());
+										} else {
 											continue;
 										}
 
-										List<Object> values = t.getValues(nextResource, next.getValue());
 										for (Object object : values) {
 											if (object == null) {
 												continue;
@@ -532,6 +570,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 								if (!includePids.isEmpty()) {
 									ourLog.info("Loading {} included resources", includePids.size());
 									resources = loadResourcesById(includePids);
+									for (IResource next : resources) {
+										ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
+									}
 									retVal.addAll(resources);
 								}
 							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
@@ -735,7 +776,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
 
-		ResourceTable savedEntity = updateEntity(theResource, entity, true, false);
+		ResourceTable savedEntity = updateEntity(theResource, entity, true, null);
 
 		notifyWriteCompleted();
 		ourLog.info("Processed update on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
@@ -1003,12 +1044,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			BigDecimal valueValue;
 			boolean approx = false;
 
-			if (params instanceof QuantityDt) {
-				QuantityDt param = (QuantityDt) params;
-				systemValue = param.getSystem().getValueAsString();
-				unitsValue = param.getUnits().getValueAsString();
-				cmpValue = param.getComparator().getValueAsEnum();
-				valueValue = param.getValue().getValue();
+			if (params instanceof BaseQuantityDt) {
+				BaseQuantityDt param = (BaseQuantityDt) params;
+				systemValue = param.getSystemElement().getValueAsString();
+				unitsValue = param.getUnitsElement().getValueAsString();
+				cmpValue = QuantityCompararatorEnum.VALUESET_BINDER.fromCodeString(param.getComparatorElement().getValueAsString());
+				valueValue = param.getValueElement().getValue();
 			} else if (params instanceof QuantityParam) {
 				QuantityParam param = (QuantityParam) params;
 				systemValue = param.getSystem().getValueAsString();
@@ -1125,16 +1166,16 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					if (!(def instanceof RuntimeChildResourceDefinition)) {
 						throw new ConfigurationException("Property " + chain + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
-					List<Class<? extends IResource>> resourceTypes;
+					List<Class<? extends IBaseResource>> resourceTypes;
 					if (isBlank(ref.getResourceType())) {
 						RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 						resourceTypes = resDef.getResourceTypes();
 					} else {
-						resourceTypes = new ArrayList<Class<? extends IResource>>();
+						resourceTypes = new ArrayList<Class<? extends IBaseResource>>();
 						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
 					}
-					for (Class<? extends IResource> nextType : resourceTypes) {
+					for (Class<? extends IBaseResource> nextType : resourceTypes) {
 						RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(nextType);
 						RuntimeSearchParam param = typeDef.getSearchParam(ref.getChain());
 						if (param == null) {
@@ -1343,14 +1384,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			TokenParam id = (TokenParam) theParameter;
 			system = id.getSystem();
 			code = id.getValue();
-		} else if (theParameter instanceof IdentifierDt) {
-			IdentifierDt id = (IdentifierDt) theParameter;
-			system = id.getSystem().getValueAsString();
-			code = id.getValue().getValue();
-		} else if (theParameter instanceof CodingDt) {
-			CodingDt id = (CodingDt) theParameter;
-			system = id.getSystem().getValueAsString();
-			code = id.getCode().getValue();
+		} else if (theParameter instanceof BaseIdentifierDt) {
+			BaseIdentifierDt id = (BaseIdentifierDt) theParameter;
+			system = id.getSystemElement().getValueAsString();
+			code = id.getValueElement().getValue();
+		} else if (theParameter instanceof BaseCodingDt) {
+			BaseCodingDt id = (BaseCodingDt) theParameter;
+			system = id.getSystemElement().getValueAsString();
+			code = id.getCodeElement().getValue();
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
 		}
@@ -1410,7 +1451,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate, BundleEntrySearchModeEnum theBundleEntryStatus) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1437,6 +1478,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
 				continue;
 			}
+			
+			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, theBundleEntryStatus);
+
 			theResourceListToPopulate.set(index, resource);
 		}
 	}

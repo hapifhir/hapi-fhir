@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -64,6 +65,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final String myContents;
 	private boolean myContentsIsBundle;
 	private Map<String, List<String>> myParams;
+	private final BundleTypeEnum myBundleType;
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlPath) {
 		super();
@@ -74,6 +76,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myResources = null;
 		myBundle = null;
 		myContents = null;
+		myBundleType = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, TagList theTagList, String... theUrlPath) {
@@ -88,11 +91,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myResources = null;
 		myBundle = null;
 		myContents = null;
+		myBundleType = null;
 
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
@@ -100,6 +104,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myResources = theResources;
 		myBundle = null;
 		myContents = null;
+		myBundleType = theBundleType;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
@@ -110,6 +115,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myResources = null;
 		myBundle = theBundle;
 		myContents = null;
+		myBundleType = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
@@ -121,6 +127,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundle = null;
 		myContents = theContents;
 		myContentsIsBundle = theIsBundle;
+		myBundleType = null;
 	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
@@ -133,6 +140,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myContents = null;
 		myContentsIsBundle = false;
 		myParams = theParams;
+		myBundleType = null;
 	}
 
 	@Override
@@ -201,7 +209,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeBundleToString(myBundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myResources != null) {
-				Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size());
+				Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
 				contents = parser.encodeBundleToString(bundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myContents != null) {
@@ -215,14 +223,14 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeResourceToString(myResource);
 				contentType = encoding.getResourceContentType();
 			}
-			entity = new StringEntity(contents, ContentType.create(contentType, "UTF-8"));
+			entity = new StringEntity(contents, ContentType.create(contentType, Constants.CHARSET_UTF_8));
 		}
 
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
 
 		if (contentType != null) {
-			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType);
+			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
 		}
 
 		return retVal;

@@ -6,7 +6,114 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.8" date="TBD">
+		<release version="0.9" date="TBA">
+			<action type="add">
+				Support for DSTU2 features introduced: New Bundle encoding style, as well as new
+				extension encoding in JSON.   
+			</action>
+			<action type="fix" issue="65">
+				Fix an issue encoding extensions on primitive types in JSON. Previously the "_value" object
+				would be an array even if the field it was extending was not repeatable. This is not correct
+				according to the specification, nor can HAPI's parser parse this correctly. The encoder
+				has been corrected, and the parser has been adjusted to be able to handle resources with
+				extensions encoded in this way. Thanks to Mohammad Jafari for reporting!
+			</action>
+			<action type="add">
+				Library now checks if custom resource types can be instantiated on startup
+				(e.g. because they don't have a no-argument constructor) in order to 
+				avoid failing later
+			</action>
+			<action type="add">
+				Bump a few dependency JARs to the latest versions in Maven POM:
+				<![CDATA[
+					<ul>
+						<li>SLF4j (in base module) - Bumped to 1.7.9</li>
+						<li>Apache HTTPClient (in base module) - Bumped to 4.3.6</li>
+						<li>Hibernate (in JPA module) - Bumped to 4.3.7</li>
+					</ul>
+				]]>
+			</action>
+			<action type="fix" issue="67">
+				IdDt failed to recognize local identifiers containing fragments that look like 
+				real identifiers as being local identifiers even though they started with '#'.
+				For example, a local resource reference of "#aa/_history/aa" would be incorrectly
+				parsed as a non-local reference.
+				Thanks to Mohammad Jafari for reporting!
+			</action>
+			<action type="fix">
+				<![CDATA[<code>Last-Modified</code>]]>
+				header in server was incorrectly using FHIR date format instead
+				of RFC-1123 format. 
+			</action>
+			<action type="fix">
+				Server create and update methods failed with an IllegalArgumentException if
+				the method type was a custom resource definition type (instead of a built-in
+				HAPI type). Thanks to Neal Acharya for the analysis. 
+			</action>
+			<action type="add" fix="79">
+				JPA server module now supports 
+				<![CDATA[<code>_include</code>]]> 
+				value of 
+				<![CDATA[<code>*</code>]]>. Thanks to Bill de Beaubien for reporting! 
+			</action>
+			<action type="fix">
+				IdDt method 
+				<![CDATA[withServerBase]]>
+				returned String (unlike all of the other "withFoo" methods on that class),
+				and did not work correctly if the IdDt already had a server base. This
+				has been corrected. Note that the return type for this method has been
+				changed, so code may need to be updated.
+			</action>
+			<action type="fix" issue="84" due-to="mochaholic">
+				In previous versions of HAPI, the XML parser encoded multiple contained
+				resources in a single 
+				<![CDATA[<code>&lt;contained&gt;&lt;/contained&gt;</code>]]>
+				tag, even though the FHIR specification rerquires a separate
+				<![CDATA[<code>&lt;contained&gt;&lt;/contained&gt;</code>]]>
+				tag for each resource. This has been corrected. Note that the parser will
+				correctly parse either form (this has always been the case) so this
+				change should not cause any breakage in HAPI based trading partners, but
+				may cause issues if other applications have been coded to depend on the
+				incorrect behaviour. Thanks to Mochaholic for reporting! 
+			</action>
+			<action type="fix" issue="91" due-to="andyhuang91">
+				Custom/user defined resource definitions which contained more than one
+				child with no order defined failed to initialize properly. Thanks to
+				Andy Huang for reporting and figuring out where the
+				problem was! 
+			</action>
+			<action type="add">
+				RESTful Client now queries the server (only once per server base URL) to ensure that
+				the given server corresponds to the correct version of the FHIR specification, as
+				defined by the FhirContext. This behaviour can be disabled by setting the
+				appropriate configuration on the 
+				RestfulClientConfig. Thanks to Grahame Grieve for the suggestion!
+			</action>
+			<action type="add">
+			    JPA module now supports deleting resource via transaction
+			</action>
+			<action type="fix" issue="97" due-to="twilson650">
+				DateClientParam#second() incorrectly used DAY precision instead
+				of SECOND precision. Thanks to Tom Wilson for the pull request!
+			</action>
+			<action type="fix" issue="100" due-to="sweetnavelorange">
+				Fix issue where HAPI failed to initialize correctly if Woodstox library was not on the classpath, even
+				if StAX API was configured to use a different provider. Thanks to
+				James Butler for reporting and figuring out where the issue was!
+			</action>
+			<action type="fix" issue="101">
+				Calling BaseDateTimeDt#setValue(Date, TemporalPrecisionEnum) did not always actually respect
+				the given precision when the value was encoded. Thanks to jacksonjesse for
+				reporting!
+			</action>
+			<action type="fix" issue="103">
+				Encoders (both XML and JSON) will no longer encode contained resources if they are 
+				not referenced anywhere in the resource via a local reference. This is just a convenience
+				for users who have parsed a resource with contained resources and want to remove some
+				before re-encoding. Thanks to Alexander Kley for reporting! 
+			</action>
+		</release>
+		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
@@ -28,6 +135,18 @@
 						<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/rest/param/TokenOrListParam.html">TokenOrListParam</a>
 						class, which can be used in its place.
 					</ul>
+				]]> 
+			</action>			
+			<action type="add">
+				<![CDATA[
+					<b>API Change</b>: The IResource#getResourceMetadata() method has been changed
+					from returning 
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					to returning a new type called
+					<code>ResourceMetadataMap</code>. This new type implements 
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					itself, so this change should not break existing code, but may
+					require a clean build in order to run correctly.
 				]]> 
 			</action>			
 			<action type="add" issue="38" dev="wdebeau1">
@@ -165,7 +284,47 @@
 				sources that have the wrong level of precision, but will generate a validation
 				error if the resource is validated. Thanks to Alexander Kley for the suggestion!
 			</action>
-		</release>			
+			<action type="fix">
+				Encoding a Binary resource without a content type set should not result in a NullPointerException. Thanks
+				to Alexander Kley for reporting!
+			</action>
+			<action type="add">
+				Server gives a more helpful error message if multiple IResourceProvider implementations
+				are provided for the same resource type. Thanks to wanghaisheng for the idea!
+			</action>
+			<action type="add" issue="61">
+				Bring DSTU1 resource definitions up to version 0.0.82-2929<![CDATA[<br/>]]>
+				Bring DEV resource definitions up to 0.4.0-3775<![CDATA[<br/>]]>
+				Thanks to crinacimpian for reporting!
+			</action>
+			<action type="add" issue="62">
+				JPA server did not correctly process _include requests if included 
+				resources were present with a non-numeric identifier. Thanks to 
+				Bill de Beaubien for reporting!
+			</action>
+			<action type="fix" issue="60">
+				Client requests which include a resource/bundle body (e.g. create,
+				update, transaction) were not including a charset in the content type
+				header, leading to servers incorrectly assuming ISO-8859/1. Thanks to 
+				shvoidlee for reporting!
+			</action>
+			<action type="fix" issue="59" dev="wdebeau1">
+				Clean up the way that Profile resources are automatically exported
+				by the server for custom resource profile classes. See the 
+				<![CDATA[<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/model/api/annotation/ResourceDef.html">@ResourceDef</a>]]>
+				JavaDoc for information on how this works.
+			</action>
+			<action type="add" issue="73" dev="wdebeau1">
+				Add convenience methods to TokenOrListParam to test whether any of a set of tokens match
+				the given requested list.
+			</action>
+			<action type="add" issue="86" dev="harsha89">
+				Add a protected method to RestfulServer which allows developers to 
+				implement their own method for determining which part of the request
+				URL is the FHIR request path (useful if you are embedding the RestulServer inside
+				of another web framework). Thanks to Harsha Kumara for the pull request!
+			</action>
+		</release>
 		<release version="0.7" date="2014-Oct-23">
 			<action type="add" issue="30">
 				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,

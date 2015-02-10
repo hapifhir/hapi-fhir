@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SecurityEventSourceTypeEnum {
 
 	/**
-	 * Display: <b>User Device</b><br/>
+	 * Display: <b>User Device</b><br>
 	 * Code Value: <b>1</b>
 	 *
 	 * End-user display device, diagnostic device
@@ -37,7 +37,7 @@ public enum SecurityEventSourceTypeEnum {
 	USER_DEVICE("1", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Data Interface</b><br/>
+	 * Display: <b>Data Interface</b><br>
 	 * Code Value: <b>2</b>
 	 *
 	 * Data acquisition device or instrument
@@ -45,7 +45,7 @@ public enum SecurityEventSourceTypeEnum {
 	DATA_INTERFACE("2", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Web Server</b><br/>
+	 * Display: <b>Web Server</b><br>
 	 * Code Value: <b>3</b>
 	 *
 	 * Web Server process or thread
@@ -53,7 +53,7 @@ public enum SecurityEventSourceTypeEnum {
 	WEB_SERVER("3", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Application Server</b><br/>
+	 * Display: <b>Application Server</b><br>
 	 * Code Value: <b>4</b>
 	 *
 	 * Application Server process or thread
@@ -61,7 +61,7 @@ public enum SecurityEventSourceTypeEnum {
 	APPLICATION_SERVER("4", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Database Server</b><br/>
+	 * Display: <b>Database Server</b><br>
 	 * Code Value: <b>5</b>
 	 *
 	 * Database Server process or thread
@@ -69,7 +69,7 @@ public enum SecurityEventSourceTypeEnum {
 	DATABASE_SERVER("5", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Security Server</b><br/>
+	 * Display: <b>Security Server</b><br>
 	 * Code Value: <b>6</b>
 	 *
 	 * Security server, e.g., a domain controller
@@ -77,7 +77,7 @@ public enum SecurityEventSourceTypeEnum {
 	SECURITY_SERVER("6", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Network Device</b><br/>
+	 * Display: <b>Network Device</b><br>
 	 * Code Value: <b>7</b>
 	 *
 	 * ISO level 1-3 network component
@@ -85,7 +85,7 @@ public enum SecurityEventSourceTypeEnum {
 	NETWORK_DEVICE("7", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Network Router</b><br/>
+	 * Display: <b>Network Router</b><br>
 	 * Code Value: <b>8</b>
 	 *
 	 * ISO level 4-6 operating software
@@ -93,7 +93,7 @@ public enum SecurityEventSourceTypeEnum {
 	NETWORK_ROUTER("8", "http://hl7.org/fhir/security-source-type"),
 	
 	/**
-	 * Display: <b>Other</b><br/>
+	 * Display: <b>Other</b><br>
 	 * Code Value: <b>9</b>
 	 *
 	 * other kind of device (defined by DICOM, but some other code/system can be used)

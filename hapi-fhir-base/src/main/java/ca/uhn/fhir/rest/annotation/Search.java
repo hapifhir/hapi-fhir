@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * RESTful method annotation used for a method which provides
  * the FHIR "search" method.
  * 
- * @see See the <a href="http://hl7.org/implement/standards/fhir/http.html#search">FHIR Search</a> definition
+ * See the <a href="http://hl7.org/implement/standards/fhir/http.html#search">FHIR Search</a> definition
+ * for more information.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value=ElementType.METHOD)

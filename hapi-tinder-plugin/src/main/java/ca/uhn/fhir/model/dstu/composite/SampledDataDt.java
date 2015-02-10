@@ -16,38 +16,38 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 
 /**
  * HAPI/FHIR <b>SampledDataDt</b> Datatype
@@ -152,6 +152,25 @@ public class SampledDataDt
 		}
 		return myOrigin;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>origin</b> (Zero value and units).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series
+     * </p> 
+	 */
+	public QuantityDt getOriginElement() {  
+		if (myOrigin == null) {
+			myOrigin = new QuantityDt();
+		}
+		return myOrigin;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>origin</b> (Zero value and units)
@@ -262,6 +281,25 @@ public class SampledDataDt
 		return myPeriod;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>period</b> (Number of milliseconds between samples).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The length of time between sampling times, measured in milliseconds
+     * </p> 
+	 */
+	public DecimalDt getPeriodElement() {  
+		if (myPeriod == null) {
+			myPeriod = new DecimalDt();
+		}
+		return myPeriod;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>period</b> (Number of milliseconds between samples)
 	 *
@@ -331,6 +369,25 @@ public class SampledDataDt
 		}
 		return myFactor;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>factor</b> (Multiply data by this before adding to origin).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A correction factor that is applied to the sampled data points before they are added to the origin
+     * </p> 
+	 */
+	public DecimalDt getFactorElement() {  
+		if (myFactor == null) {
+			myFactor = new DecimalDt();
+		}
+		return myFactor;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>factor</b> (Multiply data by this before adding to origin)
@@ -402,6 +459,25 @@ public class SampledDataDt
 		return myLowerLimit;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>lowerLimit</b> (Lower limit of detection).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The lower limit of detection of the measured points. This is needed if any of the data points have the value \"L\" (lower than detection limit)
+     * </p> 
+	 */
+	public DecimalDt getLowerLimitElement() {  
+		if (myLowerLimit == null) {
+			myLowerLimit = new DecimalDt();
+		}
+		return myLowerLimit;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>lowerLimit</b> (Lower limit of detection)
 	 *
@@ -471,6 +547,25 @@ public class SampledDataDt
 		}
 		return myUpperLimit;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>upperLimit</b> (Upper limit of detection).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The upper limit of detection of the measured points. This is needed if any of the data points have the value \"U\" (higher than detection limit)
+     * </p> 
+	 */
+	public DecimalDt getUpperLimitElement() {  
+		if (myUpperLimit == null) {
+			myUpperLimit = new DecimalDt();
+		}
+		return myUpperLimit;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>upperLimit</b> (Upper limit of detection)
@@ -542,6 +637,25 @@ public class SampledDataDt
 		return myDimensions;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>dimensions</b> (Number of sample points at each time point).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once
+     * </p> 
+	 */
+	public IntegerDt getDimensionsElement() {  
+		if (myDimensions == null) {
+			myDimensions = new IntegerDt();
+		}
+		return myDimensions;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>dimensions</b> (Number of sample points at each time point)
 	 *
@@ -585,6 +699,25 @@ public class SampledDataDt
 		}
 		return myData;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\").
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value
+     * </p> 
+	 */
+	public StringDt getDataElement() {  
+		if (myData == null) {
+			myData = new StringDt();
+		}
+		return myData;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>data</b> (Decimal values with spaces, or \"E\" | \"U\" | \"L\")

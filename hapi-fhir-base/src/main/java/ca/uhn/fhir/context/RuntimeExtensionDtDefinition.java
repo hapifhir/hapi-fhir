@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.ICompositeType;
+
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefinition {
 
 	private List<BaseRuntimeChildDefinition> myChildren;
 
-	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeDatatype> theImplementingClass) {
+	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass) {
 		super(theDef, theImplementingClass);
 	}
 
@@ -43,7 +44,7 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 		
 		/*

@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.dstu.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -86,6 +87,7 @@ public class ResourceReferenceDt
 	 * @param theResource
 	 *            The resource instance
 	 */
+	@SimpleSetter()
 	public ResourceReferenceDt(IResource theResource) {
 		super(theResource);
 	}
@@ -105,7 +107,7 @@ public class ResourceReferenceDt
 	 * Constructor which accepts a reference directly (this can be an ID, a partial/relative URL or a complete/absolute
 	 * URL)
 	 * 
-	 * @param theId
+	 * @param theResourceId
 	 *            The reference itself
 	 */
 	public ResourceReferenceDt(IdDt theResourceId) {

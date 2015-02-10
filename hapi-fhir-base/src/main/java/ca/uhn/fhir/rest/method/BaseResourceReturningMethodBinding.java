@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,14 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -90,7 +93,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 			myResourceListCollectionType = collectionType;
 
-		} else if (IResource.class.isAssignableFrom(methodReturnType)) {
+		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
@@ -180,7 +183,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				resource = parser.parseResource(theResponseReader);
 			}
 
-			MethodUtil.parseClientRequestResourceHeaders(theHeaders, resource);
+			MethodUtil.parseClientRequestResourceHeaders(null, theHeaders, resource);
 
 			switch (getMethodReturnType()) {
 			case BUNDLE:
@@ -240,7 +243,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		switch (getReturnType()) {
 		case BUNDLE:
 
-			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null);
+			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
 
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);
@@ -273,6 +276,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			break;
 		}
 	}
+
+	/**
+	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
+	 */
+	protected abstract BundleTypeEnum getResponseBundleType();
 
 	/**
 	 * Subclasses may override

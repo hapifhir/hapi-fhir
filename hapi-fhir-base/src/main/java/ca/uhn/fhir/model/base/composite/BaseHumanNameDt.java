@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.DatatypeUtil;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 
@@ -43,7 +44,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getFamily() family name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getFamilyAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getFamily());
@@ -61,7 +62,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getGiven() given name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getGivenAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getGiven());
@@ -79,7 +80,7 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getPrefix() prefix name} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getPrefixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getPrefix());
@@ -97,33 +98,29 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 	/**
 	 * Returns all repetitions of {@link #getSuffix() suffix} as a space separated string
 	 * 
-	 * @see DatatypeUtil${hash}joinStringsSpaceSeparated(List)
+	 * @see DatatypeUtil#joinStringsSpaceSeparated(List)
 	 */
 	public String getSuffixAsSingleString() {
 		return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(getSuffix());
 	}
-	
+
 	/**
-	 * Gets the value(s) for <b>text</b> (Text representation of the full name).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>text</b> (Text representation of the full name). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A full text representation of the name
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A full text representation of the name
+	 * </p>
 	 */
-	public abstract StringDt getText() ;
+	public abstract StringDt getTextElement();
 
 	/**
 	 * Sets the value(s) for <b>text</b> (Text representation of the full name)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A full text representation of the name
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A full text representation of the name
+	 * </p>
 	 */
-	public abstract BaseHumanNameDt setText(StringDt theValue);	
+	public abstract BaseHumanNameDt setText(StringDt theValue);
 
 	@Override
 	public String toString() {
@@ -132,15 +129,26 @@ public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 		b.append("given", getGivenAsSingleString());
 		return b.toString();
 	}
-	
-	public String getNameAsSingleString(){
+
+	/**
+	 * Returns all of the components of the name (prefix, given, family, suffix) as a 
+	 * single string with a single spaced string separating each part. 
+	 * <p>
+	 * If none of the parts are populated, returns the {@link #getTextElement() text}
+	 * element value instead.
+	 * </p>
+	 */
+	public String getNameAsSingleString() {
 		List<StringDt> nameParts = new ArrayList<StringDt>();
 		nameParts.addAll(getPrefix());
 		nameParts.addAll(getGiven());
 		nameParts.addAll(getFamily());
 		nameParts.addAll(getSuffix());
-		if(nameParts.size() > 0) return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
-		else return getText().getValue();
+		if (nameParts.size() > 0) {
+			return ca.uhn.fhir.util.DatatypeUtil.joinStringsSpaceSeparated(nameParts);
+		} else {
+			return getTextElement().getValue();
+		}
 	}
-	
+
 }

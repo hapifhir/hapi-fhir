@@ -16,39 +16,36 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
@@ -78,6 +75,7 @@ public class QuantityDt
 		// nothing
 	}
 
+ 
 	/**
 	 * Constructor
 	 */
@@ -195,12 +193,31 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
+	public DecimalDt getValue() {  
+		if (myValue == null) {
+			myValue = new DecimalDt();
+		}
+		return myValue;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
+     * </p> 
+	 */
 	public DecimalDt getValueElement() {  
 		if (myValue == null) {
 			myValue = new DecimalDt();
 		}
 		return myValue;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
@@ -265,12 +282,31 @@ public class QuantityDt
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
      * </p> 
 	 */
+	public BoundCodeDt<QuantityCompararatorEnum> getComparator() {  
+		if (myComparator == null) {
+			myComparator = new BoundCodeDt<QuantityCompararatorEnum>(QuantityCompararatorEnum.VALUESET_BINDER);
+		}
+		return myComparator;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
+     * </p> 
+	 */
 	public BoundCodeDt<QuantityCompararatorEnum> getComparatorElement() {  
 		if (myComparator == null) {
 			myComparator = new BoundCodeDt<QuantityCompararatorEnum>(QuantityCompararatorEnum.VALUESET_BINDER);
 		}
 		return myComparator;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
@@ -294,11 +330,29 @@ public class QuantityDt
      * </p> 
 	 */
 	public QuantityDt setComparator(QuantityCompararatorEnum theValue) {
-		getComparatorElement().setValueAsEnum(theValue);
+		getComparator().setValueAsEnum(theValue);
 		return this;
 	}
 
   
+	/**
+	 * Gets the value(s) for <b>units</b> (Unit representation).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A human-readable form of the units
+     * </p> 
+	 */
+	public StringDt getUnits() {  
+		if (myUnits == null) {
+			myUnits = new StringDt();
+		}
+		return myUnits;
+	}
+
+
 	/**
 	 * Gets the value(s) for <b>units</b> (Unit representation).
 	 * creating it if it does
@@ -315,6 +369,7 @@ public class QuantityDt
 		}
 		return myUnits;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>units</b> (Unit representation)
@@ -353,12 +408,31 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
+	public UriDt getSystem() {  
+		if (mySystem == null) {
+			mySystem = new UriDt();
+		}
+		return mySystem;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>system</b> (System that defines coded unit form).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The identification of the system that provides the coded form of the unit
+     * </p> 
+	 */
 	public UriDt getSystemElement() {  
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
 		return mySystem;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>system</b> (System that defines coded unit form)
@@ -397,12 +471,31 @@ public class QuantityDt
      * A computer processable form of the units in some unit representation system
      * </p> 
 	 */
+	public CodeDt getCode() {  
+		if (myCode == null) {
+			myCode = new CodeDt();
+		}
+		return myCode;
+	}
+
+
+	/**
+	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A computer processable form of the units in some unit representation system
+     * </p> 
+	 */
 	public CodeDt getCodeElement() {  
 		if (myCode == null) {
 			myCode = new CodeDt();
 		}
 		return myCode;
 	}
+
 
 	/**
 	 * Sets the value(s) for <b>code</b> (Coded form of the unit)

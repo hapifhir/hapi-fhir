@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
@@ -39,30 +41,52 @@ public class ReadTest {
 	private static int ourPort;
 	private static Server ourServer;
 	private static FhirContext ourCtx;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadTest.class);
 
 	@Test
-	public void testRead() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
-			
-			assertEquals("1", dt.getSystem().getValueAsString());
-			assertEquals(null, dt.getValue().getValueAsString());
-			
-			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-			assertNotNull(cl);
-			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
-			
-		}
+	public void testReadXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
 		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+
+		assertEquals("1", dt.getSystem().getValueAsString());
+		assertEquals(null, dt.getValue().getValueAsString());
+
+		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		assertNotNull(cl);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+		
+		assertThat(responseContent, stringContainsInOrder("1", "\""));
+		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
 	}
-	
-	
+
+	@Test
+	public void testReadJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newJsonParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+
+		assertEquals("1", dt.getSystem().getValueAsString());
+		assertEquals(null, dt.getValue().getValueAsString());
+
+		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
+		assertNotNull(cl);
+		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
+		
+		assertThat(responseContent, stringContainsInOrder("1", "\""));
+		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
+	}
+
 	@Test
 	public void testReadForProviderWithAbstractReturnType() throws Exception {
 		{
@@ -72,19 +96,19 @@ public class ReadTest {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Organization.class,responseContent).getIdentifierFirstRep();
-			
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Organization.class, responseContent).getIdentifierFirstRep();
+
 			assertEquals("1", dt.getSystem().getValueAsString());
 			assertEquals(null, dt.getValue().getValueAsString());
-			
+
 			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Organization/1/_history/1", cl.getValue());
-			
+
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testBinaryRead() throws Exception {
 		{
@@ -93,25 +117,24 @@ public class ReadTest {
 			byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
-			
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
-			
+
 			Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
 			assertEquals("http://localhost:" + ourPort + "/Binary/1/_history/1", cl.getValue());
-			
+
 			Header cd = status.getFirstHeader("content-disposition");
 			assertNotNull(cd);
 			assertEquals("Attachment;", cd.getValue());
-			
-			assertEquals(4,responseContent.length);
+
+			assertEquals(4, responseContent.length);
 			for (int i = 0; i < 4; i++) {
-				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
+				assertEquals(i + 1, responseContent[i]); // should be 1,2,3,4
 			}
-			
+
 		}
-		
+
 	}
 
 	@Test
@@ -123,7 +146,7 @@ public class ReadTest {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
+			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
 			assertEquals("1", dt.getSystem().getValueAsString());
 			assertEquals("2", dt.getValue().getValueAsString());
 
@@ -167,7 +190,7 @@ public class ReadTest {
 	public static class DummyProvider implements IResourceProvider {
 
 		@Read(version = true)
-		public Patient findPatient(@IdParam IdDt theId) {
+		public Patient read(@IdParam IdDt theId) {
 			Patient patient = new Patient();
 			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
 			patient.setId("Patient/1/_history/1");
@@ -181,7 +204,6 @@ public class ReadTest {
 
 	}
 
-	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -202,7 +224,6 @@ public class ReadTest {
 
 	}
 
-	
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -212,7 +233,7 @@ public class ReadTest {
 		public Binary findPatient(@IdParam IdDt theId) {
 			Binary bin = new Binary();
 			bin.setContentType("application/x-foo");
-			bin.setContent(new byte[] {1,2,3,4});
+			bin.setContent(new byte[] { 1, 2, 3, 4 });
 			bin.setId("Binary/1/_history/1");
 			return bin;
 		}
@@ -224,5 +245,4 @@ public class ReadTest {
 
 	}
 
-	
 }

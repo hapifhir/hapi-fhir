@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum ParticipantTypeEnum {
 
 	/**
-	 * Display: <b>Translator</b><br/>
+	 * Display: <b>Translator</b><br>
 	 * Code Value: <b>translator</b>
 	 *
 	 * A translator who is facilitating communication with the patient during the encounter
@@ -37,7 +37,7 @@ public enum ParticipantTypeEnum {
 	TRANSLATOR("translator", "http://hl7.org/fhir/participant-type"),
 	
 	/**
-	 * Display: <b>Emergency</b><br/>
+	 * Display: <b>Emergency</b><br>
 	 * Code Value: <b>emergency</b>
 	 *
 	 * A person to be contacted in case of an emergency during the encounter

@@ -18,6 +18,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,11 +27,15 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -46,8 +52,6 @@ public class CreateTest {
 	private static int ourPort;
 	private static DiagnosticReportProvider ourReportProvider;
 	private static Server ourServer;
-
-	
 
 	@Test
 	public void testCreate() throws Exception {
@@ -67,10 +71,10 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
 
 	}
 
-	
 	@Test
 	public void testCreateById() throws Exception {
 
@@ -92,8 +96,6 @@ public class CreateTest {
 
 	}
 
-
-	
 	@Test
 	public void testCreateJson() throws Exception {
 
@@ -113,6 +115,27 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+
+	}
+
+	@Test
+	public void testCreateCustomType() throws Exception {
+
+		Observation obs = new Observation();
+		obs.getIdentifier().setValue("001");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Observation");
+		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(obs), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Observation/001/_history/002", status.getFirstHeader("location").getValue());
 
 	}
 
@@ -155,7 +178,7 @@ public class CreateTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
-		servlet.setResourceProviders(patientProvider, ourReportProvider,  new DummyAdverseReactionResourceProvider());
+		servlet.setResourceProviders(patientProvider, ourReportProvider, new DummyAdverseReactionResourceProvider(), new CustomObservationProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -180,7 +203,6 @@ public class CreateTest {
 			return DiagnosticReport.class;
 		}
 
-	
 		@Create()
 		public MethodOutcome createDiagnosticReport(@ResourceParam DiagnosticReport thePatient) {
 			OperationOutcome outcome = new OperationOutcome();
@@ -189,7 +211,7 @@ public class CreateTest {
 		}
 
 	}
-	
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
@@ -228,10 +250,6 @@ public class CreateTest {
 
 	}
 
-
-	
-	
-	
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -242,12 +260,48 @@ public class CreateTest {
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 			IdDt id = new IdDt(thePatient.getIdentifier().get(0).getValue().getValue());
-			if (thePatient.getId().isEmpty()==false) {
-				id=thePatient.getId();
+			if (thePatient.getId().isEmpty() == false) {
+				id = thePatient.getId();
 			}
 			return new MethodOutcome(id.withVersion("002"));
 		}
 
+	}
+
+	@ResourceDef(name = "Observation")
+	public static class CustomObservation extends Observation {
+
+		@Extension(url = "http://foo#string", definedLocally = false, isModifier = false)
+		@Child(name = "string")
+		private StringDt myString;
+
+		public StringDt getString() {
+			if (myString == null) {
+				myString = new StringDt();
+			}
+			return myString;
+		}
+
+		public void setString(StringDt theString) {
+			myString = theString;
+		}
+	}
+
+	public static class CustomObservationProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Observation.class;
+		}
+
+		@Create()
+		public MethodOutcome createPatient(@ResourceParam CustomObservation thePatient) {
+			IdDt id = new IdDt(thePatient.getIdentifier().getValue().getValue());
+			if (thePatient.getId().isEmpty() == false) {
+				id = thePatient.getId();
+			}
+			return new MethodOutcome(id.withVersion("002"));
+		}
 
 	}
 

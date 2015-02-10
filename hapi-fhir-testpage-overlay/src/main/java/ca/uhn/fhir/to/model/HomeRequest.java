@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
@@ -56,6 +57,14 @@ public class HomeRequest {
 			retVal = theConfig.getIdToServerBase().keySet().iterator().next();
 		}
 		return retVal;
+	}
+
+	public FhirVersionEnum getFhirVersion(TesterConfig theConfig) {
+		if (isBlank(myServerId) && !theConfig.getIdToFhirVersion().containsKey(myServerId)) {
+			return theConfig.getIdToFhirVersion().entrySet().iterator().next().getValue();
+		} else {
+			return theConfig.getIdToFhirVersion().get(myServerId);
+		}
 	}
 
 	public String getServerName(TesterConfig theConfig) {

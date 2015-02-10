@@ -9,7 +9,7 @@
 		<h1>Operation Outcome</h1>
 		<table border="0">
 			<tr th:each="issue : ${resource.issue}">
-				<td th:text="${issue.severity.value}" style="font-weight: bold;"></td>
+				<td th:text="${issue.severityElement.value}" style="font-weight: bold;"></td>
 				<td th:text="${issue.location}"></td>
 				<td><pre th:text="${issue.details}"/></td>
 			</tr>

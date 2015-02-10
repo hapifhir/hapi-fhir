@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,13 +49,13 @@ public enum PractitionerRoleEnum {
 	RESEARCHER("researcher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
-	 * Display: <b>Teacher/educator</b><br/>
+	 * Display: <b>Teacher/educator</b><br>
 	 * Code Value: <b>teacher</b>
 	 */
 	TEACHER_EDUCATOR("teacher", "http://hl7.org/fhir/practitioner-role"),
 	
 	/**
-	 * Display: <b>ICT professional</b><br/>
+	 * Display: <b>ICT professional</b><br>
 	 * Code Value: <b>ict</b>
 	 */
 	ICT_PROFESSIONAL("ict", "http://hl7.org/fhir/practitioner-role"),

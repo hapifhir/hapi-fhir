@@ -4,9 +4,9 @@
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-fhir</artifactId>
-		<version>0.8-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>0.9-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<repositories>
@@ -20,10 +20,6 @@
 			</releases>
 			<url>https://maven.java.net/service/local/repositories/snapshots/content/</url>
 		</repository>
-		<!-- <repository> <id>UOM</id> <url>https://github.com/unitsofmeasurement/repository</url> 
-			<releases> <enabled>true</enabled> </releases> </repository> <repository> 
-			<id>maven-geotoolkit.org</id> <name>GeoToolkit Repository for Maven</name> 
-			<url>http://maven.geotoolkit.org/</url> </repository> -->
 	</repositories>
 
 	<artifactId>hapi-fhir-jpaserver-base</artifactId>
@@ -35,7 +31,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>commons-logging</artifactId>
@@ -46,7 +42,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -63,8 +64,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
+			<artifactId>java-hamcrest</artifactId>
 			<version>${hamcrest_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf</artifactId>
+			<version>${thymeleaf-version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -234,6 +241,46 @@
 			<artifactId>guava</artifactId>
 			<version>${guava_version}</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.derby</groupId>
+		    <artifactId>derby</artifactId>
+		    <version>${derby_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<version>${jetty_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>${jetty_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>${jetty_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<version>${jetty_version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		
+		
 	</dependencies>
 
 
@@ -248,7 +295,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<configuration>
-						<skip>true</skip>
 						<skipDeploy>true</skipDeploy>
 					</configuration>
 				</plugin>
@@ -258,12 +304,15 @@
 			<plugin>
 				<groupId>de.juplo</groupId>
 				<artifactId>hibernate4-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<version>1.0.5</version>
 				<configuration>
 					<force>true</force>
 					<target>SCRIPT</target>
 					<skip>${skip-hib4}</skip>
 				</configuration>
+				<!--
+				This needs to be uncommented in order for this plugin to work with
+				Hibernate 4.3+ (as of hibernate4-maven-plugin version 1.0.5)
 				<dependencies>
 					<dependency>
 						<groupId>org.hibernate</groupId>
@@ -271,6 +320,7 @@
 						<version>${hibernate_version}</version>
 					</dependency>
 				</dependencies>
+				-->
 				<executions>
 					<execution>
 						<id>o10g</id>
@@ -319,6 +369,49 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-tinder-plugin</artifactId>
+				<version>0.9-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>build_dstu1</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>dstu</version>
+							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_dstu2</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>dstu2</version>
+							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu</artifactId>
+						<version>0.9-SNAPSHOT</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-dstu2</artifactId>
+						<version>0.9-SNAPSHOT</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
@@ -326,7 +419,28 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-sources/tinder</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-resources/tinder</directory>
+			</resource>
+		</resources>
 	</build>
+
+	<reporting>
+		<plugins>		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>${maven_jxr_plugin_version}</version>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<profiles>
 		<profile>

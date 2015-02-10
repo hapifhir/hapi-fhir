@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,13 @@ public class ValidationResult {
 
     private String toDescription() {
         StringBuilder b = new StringBuilder(100);
-        if (myOperationOutcome != null) {
+        if (myOperationOutcome != null && myOperationOutcome.getIssue().size() > 0) {
             BaseOperationOutcome.BaseIssue issueFirstRep = myOperationOutcome.getIssueFirstRep();
             b.append(issueFirstRep.getDetailsElement().getValue());
             b.append(" - ");
             b.append(issueFirstRep.getLocationFirstRep().getValue());
+        }else {
+        	b.append("No issues");
         }
         return b.toString();
     }

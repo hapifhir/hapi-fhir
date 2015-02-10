@@ -2,9 +2,9 @@ package ca.uhn.fhir.model.dstu;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.dstu;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.join;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,12 +32,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
+import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
+import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -50,6 +70,7 @@ import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
@@ -57,11 +78,11 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 public class FhirDstu1 implements IFhirVersion {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirDstu1.class);
-	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+//	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 	private String myId;
 
 	@Override
-	public Object createServerConformanceProvider(RestfulServer theServer) {
+	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
 	}
 
@@ -127,16 +148,17 @@ public class FhirDstu1 implements IFhirVersion {
 		}
 	}
 
-	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef) {
+	private void fillName(StructureElement elem, BaseRuntimeElementDefinition<?> nextDef, String theServerBase) {
 		if (nextDef instanceof RuntimeResourceReferenceDefinition) {
 			RuntimeResourceReferenceDefinition rr = (RuntimeResourceReferenceDefinition) nextDef;
-			for (Class<? extends IResource> next : rr.getResourceTypes()) {
+			for (Class<? extends IBaseResource> next : rr.getResourceTypes()) {
 				StructureElementDefinitionType type = elem.getDefinition().addType();
 				type.getCode().setValue("ResourceReference");
 
 				if (next != IResource.class) {
-					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType(next);
-					type.getProfile().setValueAsString(resDef.getResourceProfile());
+					@SuppressWarnings("unchecked")
+					RuntimeResourceDefinition resDef = rr.getDefinitionForResourceType((Class<? extends IResource>) next);
+					type.getProfile().setValueAsString(resDef.getResourceProfile(theServerBase));
 				}
 			}
 
@@ -152,13 +174,13 @@ public class FhirDstu1 implements IFhirVersion {
 		type.setCode(fromCodeString);
 	}
 
-	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
+	private void fillProfile(Structure theStruct, StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild, String theServerBase) {
 
 		fillBasics(theElement, def, path, theChild);
 
 		String expectedPath = StringUtils.join(path, '.');
 
-		ourLog.info("Filling profile for: {} - Path: {}", expectedPath);
+		ourLog.debug("Filling profile for: {} - Path: {}", expectedPath);
 		String name = def.getName();
 		if (!expectedPath.equals(name)) {
 			path.pollLast();
@@ -200,7 +222,7 @@ public class FhirDstu1 implements IFhirVersion {
 
 				if (child instanceof RuntimeChildResourceBlockDefinition) {
 					RuntimeResourceBlockDefinition nextDef = (RuntimeResourceBlockDefinition) child.getSingleChildOrThrow();
-					fillProfile(theStruct, elem, nextDef, path, child);
+					fillProfile(theStruct, elem, nextDef, path, child, theServerBase);
 				} else if (child instanceof RuntimeChildContainedResources) {
 					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
@@ -211,10 +233,10 @@ public class FhirDstu1 implements IFhirVersion {
 					String nextName = childNamesIter.next();
 					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(nextName);
 					fillBasics(elem, nextDef, path, child);
-					fillName(elem, nextDef);
+					fillName(elem, nextDef, theServerBase);
 					while (childNamesIter.hasNext()) {
 						nextDef = child.getChildByName(childNamesIter.next());
-						fillName(elem, nextDef);
+						fillName(elem, nextDef, theServerBase);
 					}
 					path.pollLast();
 				} else {
@@ -230,7 +252,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		Profile retVal = new Profile();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
@@ -243,7 +265,7 @@ public class FhirDstu1 implements IFhirVersion {
 		retVal.setId(new IdDt(myId));
 
 		// Scan for extensions
-		scanForExtensions(retVal, def);
+		scanForExtensions(retVal, def, new HashMap<RuntimeChildDeclaredExtensionDefinition, String>());
 		Collections.sort(retVal.getExtensionDefn(), new Comparator<ExtensionDefn>() {
 			@Override
 			public int compare(ExtensionDefn theO1, ExtensionDefn theO2) {
@@ -259,19 +281,18 @@ public class FhirDstu1 implements IFhirVersion {
 		StructureElement element = struct.addElement();
 		element.getDefinition().setMin(1);
 		element.getDefinition().setMax("1");
-
-		fillProfile(struct, element, def, path, null);
+		fillProfile(struct, element, def, path, null, theServerBase);
 
 		retVal.getStructure().get(0).getElement().get(0).getDefinition().addType().getCode().setValue("Resource");
 
 		return retVal;
 	}
 
-	private void scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def) {
+	private Map<RuntimeChildDeclaredExtensionDefinition, String> scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def, Map<RuntimeChildDeclaredExtensionDefinition, String> theExtensionDefToCode) {
 		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
 		for (RuntimeChildDeclaredExtensionDefinition nextChild : cdef.getExtensions()) {
-			if (myExtensionDefToCode.containsKey(nextChild)) {
+			if (theExtensionDefToCode.containsKey(nextChild)) {
 				continue;
 			}
 
@@ -288,10 +309,10 @@ public class FhirDstu1 implements IFhirVersion {
 			}
 
 			defn.setCode(code);
-			if (myExtensionDefToCode.values().contains(code)) {
+			if (theExtensionDefToCode.values().contains(code)) {
 				throw new IllegalStateException("Duplicate extension code: " + code);
 			}
-			myExtensionDefToCode.put(nextChild, code);
+			theExtensionDefToCode.put(nextChild, code);
 
 			if (nextChild.getChildType() != null && IPrimitiveDatatype.class.isAssignableFrom(nextChild.getChildType())) {
 				RuntimePrimitiveDatatypeDefinition pdef = (RuntimePrimitiveDatatypeDefinition) nextChild.getSingleChildOrThrow();
@@ -301,21 +322,48 @@ public class FhirDstu1 implements IFhirVersion {
 				defn.getDefinition().addType().setCode(DataTypeEnum.VALUESET_BINDER.fromCodeString(pdef.getName()));
 			} else {
 				RuntimeResourceBlockDefinition pdef = (RuntimeResourceBlockDefinition) nextChild.getSingleChildOrThrow();
-				scanForExtensions(theProfile, pdef);
+				scanForExtensions(theProfile, pdef, theExtensionDefToCode);
 
 				for (RuntimeChildDeclaredExtensionDefinition nextChildExt : pdef.getExtensions()) {
 					StructureElementDefinitionType type = defn.getDefinition().addType();
 					type.setCode(DataTypeEnum.EXTENSION);
-					type.setProfile("#" + myExtensionDefToCode.get(nextChildExt));
+					type.setProfile("#" + theExtensionDefToCode.get(nextChildExt));
 				}
 
 			}
 		}
+		
+		return theExtensionDefToCode;
 	}
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer.getFhirContext());
+		return new ServerProfileProvider(theRestfulServer);
 	}
+	
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU1;
+	}
+
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		InputStream str = FhirDstu1.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
+		if (str == null) {
+			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+		return str;
+	}
+	
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "ca/uhn/fhir/model/dstu/schema";
+	}
+
+
 
 }

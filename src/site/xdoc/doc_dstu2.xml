@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>FHIR DSTU2 Support - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Working with DSTU2">
+
+			<p>
+				Although DSTU2 has not yet been balloted and finalized by HL7, 
+				there are several proposed changes which have been incorporated
+				into the current 
+				<a href="http://hl7-fhir.github.io/">Continuous Integration Builds</a>
+				of the FHIR specification itself and many (if not most) of these changes will 
+				end up in the final DSTU2 specification which is expected to be released 
+				in mid-2015.
+			</p>
+			<p>
+				The most interesting changes to DSTU2 include:
+			</p>
+			<ul>
+				<li>
+					New 
+					<a href="http://hl7-fhir.github.io/resource.html">"id" and "meta"</a>
+					elements which are present on all resources and explicitly state the resource's
+					ID, version, tags, and a few other things. All of these concepts had previously
+					existed in FHIR but were not a part of the resource body itself (rather they lived
+					in URLs and HTTP headers outside of the payload)
+				</li>
+				<li>
+					A new 
+					<a href="http://hl7-fhir.github.io/bundle.html">Bundle</a> 
+					format which is no longer based on Atom. The new format does resemble the
+					Atom format so it will not be unfamiliar to anyone who is used to DSTU1 bundles
+					but it has a few differences. On a conceptual level FHIR now thinks of Bundles as
+					resources themselves, so the new bundle also gains the meta element described above.  
+				</li>
+				<li>
+					In <a href="http://hl7-fhir.github.io/json.html">JSON encoding</a>, the 
+					encoding of extensions has changed a bit, so that extensions on non-primitive
+					elements now appear with the extension URL as the JSON key, instead of being 
+					a value in an object called "extension". See the JSON documentation to see how
+					this new style looks.
+				</li>
+				<li>
+					A number of new resources have been added, and some existing resources have changed.
+					One particularly visible (and non-backwards-compatible) change is that 
+					Patient.gender has changed from a CodeableConcept to a Code. While this new type
+					is much more intuitive (having multiple codings attached to a single gender field is
+					confusing) it does mean that existing DSTU1 Patient resources will not parse correctly 
+					as DSTU2 resources if they include a gender.
+				</li>
+			</ul>
+			
+			<subsection name="Supporting DSTU2 In your Applications">
+				
+				<p>
+					As of HAPI FHIR 0.9, support for DSTU2 has been added to the library. Although upgrading
+					existing applications from DSTU1 to DSTU2 will not be completely painless, we have
+					tried as much as possible to make it easy.
+				</p>
+				
+				<p>
+					First, support for DSTU2 capabilities has been added in a second optional dependency JAR which
+					you must add to your classpath. This JAR is called <code>hapi-structures-dev-[version].jar</code>.
+					See the <a href="./download.html">download page</a> for information on adding this JAR.
+				</p>
+				
+				<p>
+					The FHIR version you are targeting is a property of the 
+					<a href="http://jamesagnew.github.io/hapi-fhir/apidocs/ca/uhn/fhir/context/FhirContext.html">FhirContext</a>.
+					This means that if you use a FhirContext instance that is configured for DSTU2, any parsers, clients,
+					servers, etc. which use that context will be operating in DSTU2 mode.
+				</p>
+
+				<p>
+					To create a DSTU2 context, simply use the "forDev" factory method on the FhirContext class:
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="context" />
+					<param name="file" value="examples/src/main/java/example/Dstu2Examples.java" />
+				</macro>
+				
+			</subsection>
+			
+			<subsection name="DSTU2 Servers">
+				
+				<p>
+					To support DSTU2 in your server, simply set the FhirContext in the server to be
+					one configured for DSTU2. 
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="server" />
+					<param name="file" value="examples/src/main/java/example/Dstu2Examples.java" />
+				</macro>
+				
+				<p>
+					Note that it is possible to share your resource provider classes between 
+					servers supporting DSTU1 and servers supporting DSTU2 (including in the same WAR
+					instance on the same web server). This should make the process of upgrading your
+					server to the latest version of FHIR a bit easier.
+				</p>
+				
+			</subsection>
+
+		</section>
+		
+	</body>
+
+</document>

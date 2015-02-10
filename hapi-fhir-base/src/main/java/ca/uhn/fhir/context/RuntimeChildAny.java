@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -41,10 +42,10 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		List<Class<? extends IElement>> choiceTypes = new ArrayList<Class<? extends IElement>>();
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
 		
-		for (Class<? extends IElement> next : theClassToElementDefinitions.keySet()) {
+		for (Class<? extends IBase> next : theClassToElementDefinitions.keySet()) {
 			if (next.equals(XhtmlDt.class)) {
 				continue;
 			}

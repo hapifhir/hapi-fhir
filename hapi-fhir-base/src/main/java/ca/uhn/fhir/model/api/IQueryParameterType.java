@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,18 +41,20 @@ public interface IQueryParameterType {
 	public void setValueAsQueryToken(String theQualifier, String theValue);
 
 	/**
-	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
+	 * Returns a representation of this parameter's value as it will be represented "over the wire". In other
+	 * words, how it will be presented in a URL (although not URL escaped) 
 	 * 
 	 * <p>
 	 * See FHIR specification <a href="http://www.hl7.org/implement/standards/fhir/search.html#ptypes">2.2.2 Search
 	 * SearchParameter Types</a> for information on the <b>token</b> format
 	 * </p>
+	 * 
+	 * @return Returns a representation of this parameter's value as it will be represented "over the wire". In other
+	 * words, how it will be presented in a URL (although not URL escaped) 
 	 */
 	public String getValueAsQueryToken();
 	
 	/**
-	 * This method is generally only called by HAPI itself, and should not need to be called from user code. 
-	 *
 	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")
 	 */
 	public String getQueryParameterQualifier();

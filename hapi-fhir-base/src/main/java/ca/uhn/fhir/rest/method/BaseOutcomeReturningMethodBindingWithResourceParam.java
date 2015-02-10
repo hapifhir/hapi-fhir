@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,10 @@ package ca.uhn.fhir.rest.method;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -42,6 +44,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private int myResourceParameterIndex;
 	private String myResourceName;
 	private boolean myBinary;
+	private Class<? extends IResource> myResourceType;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -51,18 +54,27 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		int index = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
+				if (myResourceType != null) {
+					throw new ConfigurationException("Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
+				}
+				
 				resourceParameter = (ResourceParameter) next;
-				Class<? extends IResource> resourceType = resourceParameter.getResourceType();
+				Class<? extends IResource> providerResourceType = resourceParameter.getResourceType();
 
 				if (theProvider instanceof IResourceProvider) {
-					resourceType = ((IResourceProvider) theProvider).getResourceType();
+					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (resourceType.isAssignableFrom(Binary.class)) {
+				if (providerResourceType.isAssignableFrom(Binary.class)) {
 					myBinary = true;
 				}
 
-				myResourceName = theContext.getResourceDefinition(resourceType).getName();
+				myResourceType = resourceParameter.getResourceType();
+				if (Modifier.isAbstract(myResourceType.getModifiers())) {
+					myResourceType = providerResourceType;
+				}
+				
+				myResourceName = theContext.getResourceDefinition(providerResourceType).getName();
 
 				myResourceParameterIndex = index;
 			}
@@ -76,6 +88,11 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
+	protected Class<? extends IBaseResource> requestContainsResourceType() {
+		return myResourceType;
+	}
+
+	@Override
 	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
 		if (myBinary) {
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
@@ -84,18 +101,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		} else {
 			return super.parseIncomingServerResource(theRequest);
 		}
-	}
-
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**

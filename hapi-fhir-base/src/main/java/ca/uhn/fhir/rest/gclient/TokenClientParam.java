@@ -11,7 +11,7 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,7 @@ public class TokenClientParam implements IParam {
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
 		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
 		 * 
-		 * @param theIdentifier
+		 * @param theIdentifiers
 		 *            The identifier
 		 * @return A criterion
 		 */
@@ -147,7 +147,7 @@ public class TokenClientParam implements IParam {
 		 * Creates a search criterion that matches against the given collection of identifiers (system and code if both are present, or whatever is present).
 		 * In the query URL that is generated, identifiers will be joined with a ',' to create an OR query.
 		 * 
-		 * @param theIdentifier
+		 * @param theIdentifiers
 		 *            The identifier
 		 * @return A criterion
 		 */

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -185,7 +186,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	private final class FieldPlainMutator implements IMutator {
 		@Override
-		public void addValue(Object theTarget, IElement theValue) {
+		public void addValue(Object theTarget, IBase theValue) {
 			try {
 				myField.set(theTarget, theValue);
 			} catch (IllegalArgumentException e) {
@@ -216,12 +217,12 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	private final class FieldListMutator implements IMutator {
 		@Override
-		public void addValue(Object theTarget, IElement theValue) {
+		public void addValue(Object theTarget, IBase theValue) {
 			try {
 				@SuppressWarnings("unchecked")
-				List<IElement> existingList = (List<IElement>) myField.get(theTarget);
+				List<IBase> existingList = (List<IBase>) myField.get(theTarget);
 				if (existingList == null) {
-					existingList = new ArrayList<IElement>(2);
+					existingList = new ArrayList<IBase>(2);
 					myField.set(theTarget, existingList);
 				}
 				existingList.add(theValue);
@@ -282,11 +283,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 
 		@Override
-		public void addValue(Object theTarget, IElement theValue) {
+		public void addValue(Object theTarget, IBase theValue) {
 			@SuppressWarnings("unchecked")
-			List<IElement> existingList = (List<IElement>) myAccessor.getValues(theTarget);
+			List<IBase> existingList = (List<IBase>) myAccessor.getValues(theTarget);
 			if (existingList == null) {
-				existingList = new ArrayList<IElement>();
+				existingList = new ArrayList<IBase>();
 				try {
 					myMutatorMethod.invoke(theTarget, existingList);
 				} catch (IllegalAccessException e) {
@@ -335,7 +336,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 
 		@Override
-		public void addValue(Object theTarget, IElement theValue) {
+		public void addValue(Object theTarget, IBase theValue) {
 			try {
 				if (theValue != null && !myTargetReturnType.isAssignableFrom(theValue.getClass())) {
 					throw new ConfigurationException("Value for field " + myElementName + " expects type " + myTargetReturnType + " but got " + theValue.getClass());

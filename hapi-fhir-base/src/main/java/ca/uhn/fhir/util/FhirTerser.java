@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
@@ -50,7 +54,7 @@ public class FhirTerser {
 		myContext = theContext;
 	}
 
-	private <T extends IElement> void addUndeclaredExtensions(IElement theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition,
+	private <T extends IBase> void addUndeclaredExtensions(IBase theElement, BaseRuntimeElementDefinition<?> theDefinition, BaseRuntimeChildDefinition theChildDefinition,
 			IModelVisitor theCallback) {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
@@ -78,13 +82,13 @@ public class FhirTerser {
 	 *            The type to search for. Must not be null.
 	 * @return Returns a list of all matching elements
 	 */
-	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(IResource theResource, final Class<T> theType) {
+	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<T>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 		visit(theResource, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptElement(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+			public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
@@ -137,13 +141,24 @@ public class FhirTerser {
 	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
 		String name = theSubList.get(0);
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
-		List<? extends IElement> values = nextDef.getAccessor().getValues(theCurrentObj);
+		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
 		List<Object> retVal = new ArrayList<Object>();
 
 		if (theSubList.size() == 1) {
-			retVal.addAll(values);
+			if (nextDef instanceof RuntimeChildChoiceDefinition) {
+				for (IBase next : values) {
+					if (next != null) {
+						String childName = nextDef.getChildNameByDatatype(next.getClass());
+						if (theSubList.get(0).equals(childName)) {
+							retVal.add(next);
+						}
+					}
+				}
+			} else {
+				retVal.addAll(values);
+			}
 		} else {
-			for (IElement nextElement : values) {
+			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 				List<?> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()));
 				retVal.addAll(foundValues);
@@ -167,7 +182,7 @@ public class FhirTerser {
 
 	}
 
-	private <T extends IElement> void visit(IElement theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+	private <T extends IElement> void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
@@ -195,9 +210,9 @@ public class FhirTerser {
 		case RESOURCE: {
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
-				List<? extends IElement> values = nextChild.getAccessor().getValues(theElement);
+				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
 				if (values != null) {
-					for (IElement nextValue : values) {
+					for (IBase nextValue : values) {
 						if (nextValue == null) {
 							continue;
 						}

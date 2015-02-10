@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,28 +29,28 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum QuantityCompararatorEnum {
 
 	/**
-	 * Code Value: <b><</b>
+	 * Code Value: <b>&lt;</b>
 	 *
 	 * The actual value is less than the given value.
 	 */
 	LESSTHAN("<", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b><=</b>
+	 * Code Value: <b>&lt;=</b>
 	 *
 	 * The actual value is less than or equal to the given value.
 	 */
 	LESSTHAN_OR_EQUALS("<=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b>>=</b>
+	 * Code Value: <b>&gt;=</b>
 	 *
 	 * The actual value is greater than or equal to the given value.
 	 */
 	GREATERTHAN_OR_EQUALS(">=", "http://hl7.org/fhir/quantity-comparator"),
 	
 	/**
-	 * Code Value: <b>></b>
+	 * Code Value: <b>&gt;</b>
 	 *
 	 * The actual value is greater than the given value.
 	 */

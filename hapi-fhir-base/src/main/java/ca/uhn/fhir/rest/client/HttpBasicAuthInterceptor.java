@@ -18,7 +18,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 
 
 /**
- * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that that class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead 
+ * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that BasicAuthInterceptor class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead 
  */
 public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 

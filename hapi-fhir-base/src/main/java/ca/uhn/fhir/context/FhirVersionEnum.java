@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,44 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public enum FhirVersionEnum {
 
-	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1");
+	/*
+	 * ***********************
+	 * Don't auto-sort this type!!!
+	 * 
+	 * Or more accurately, entries should be sorted from OLDEST FHIR release 
+	 * to NEWEST FHIR release instead of alphabetically
+	 * ***********************
+	 */
 	
+	DSTU1("ca.uhn.fhir.model.dstu.FhirDstu1", null), 
+	
+	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null),
+	
+	DEV("ca.uhn.fhir.model.dev.FhirDev", null);
+
+
 	private final String myVersionClass;
+	private final FhirVersionEnum myEquivalent;
 	private volatile Boolean myPresentOnClasspath;
 	private volatile IFhirVersion myVersionImplementation;
 
-	FhirVersionEnum(String theVersionClass) {
+	FhirVersionEnum(String theVersionClass, FhirVersionEnum theEquivalent) {
 		myVersionClass = theVersionClass;
+		myEquivalent = theEquivalent;
+	}
+	
+	public boolean isEquivalentTo(FhirVersionEnum theVersion) {
+		if (this.equals(theVersion)) {
+			return true;
+		}
+		if (myEquivalent != null) {
+			return myEquivalent.equals(theVersion);
+		}
+		return false;
+	}
+	
+	public boolean isNewerThan(FhirVersionEnum theVersion) {
+		return ordinal() > theVersion.ordinal();
 	}
 	
 	/**

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,19 +72,30 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		 * Content-Location header, but we allow it in the PUT URL as well..
 		 */
 		String locationHeader = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_LOCATION);
-		IdDt id = new IdDt(locationHeader);
-		if (isNotBlank(id.getResourceType())) {
-			if (!getResourceName().equals(id.getResourceType())) {
-				throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
+		IdDt id = theRequest.getId();
+		if (isNotBlank(locationHeader)) {
+			id = new IdDt(locationHeader);
+			if (isNotBlank(id.getResourceType())) {
+				if (!getResourceName().equals(id.getResourceType())) {
+					throw new InvalidRequestException("Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
+				}
 			}
 		}
 
+		String ifMatchValue = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_MATCH);
+		if (isNotBlank(ifMatchValue)) {
+			ifMatchValue = MethodUtil.parseETagValue(ifMatchValue);
+			if (id != null && id.hasVersionIdPart() == false) {
+				id = id.withVersion(ifMatchValue);
+			}
+		}
+		
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
 				theRequest.setId(id);
 			}
 		}
-		
+
 		if (isNotBlank(locationHeader)) {
 			MethodOutcome mo = new MethodOutcome();
 			parseContentLocation(mo, getResourceName(), locationHeader);
@@ -114,7 +125,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		}
 		FhirContext context = getContext();
 
-		HttpPutClientInvocation retVal = MethodUtil.createUpdateInvocation(theResource, null,idDt, context);
+		HttpPutClientInvocation retVal = MethodUtil.createUpdateInvocation(theResource, null, idDt, context);
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
@@ -124,28 +135,13 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		return retVal;
 	}
 
-	
-
 	/*
-	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		if (super.incomingServerRequestMatchesMethod(theRequest)) {
-			if (myVersionIdParameterIndex != null) {
-				if (theRequest.getVersionId() == null) {
-					return false;
-				}
-			} else {
-				if (theRequest.getVersionId() != null) {
-					return false;
-				}
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-	*/
-	
+	 * @Override public boolean incomingServerRequestMatchesMethod(Request theRequest) { if
+	 * (super.incomingServerRequestMatchesMethod(theRequest)) { if (myVersionIdParameterIndex != null) { if
+	 * (theRequest.getVersionId() == null) { return false; } } else { if (theRequest.getVersionId() != null) { return
+	 * false; } } return true; } else { return false; } }
+	 */
+
 	@Override
 	protected Set<RequestType> provideAllowableRequestTypes() {
 		return Collections.singleton(RequestType.PUT);

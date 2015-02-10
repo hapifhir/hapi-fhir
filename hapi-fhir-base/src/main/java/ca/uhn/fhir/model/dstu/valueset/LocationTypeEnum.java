@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,49 +29,49 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum LocationTypeEnum {
 
 	/**
-	 * Display: <b>Building</b><br/>
+	 * Display: <b>Building</b><br>
 	 * Code Value: <b>bu</b>
 	 */
 	BUILDING("bu", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Wing</b><br/>
+	 * Display: <b>Wing</b><br>
 	 * Code Value: <b>wi</b>
 	 */
 	WING("wi", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Corridor</b><br/>
+	 * Display: <b>Corridor</b><br>
 	 * Code Value: <b>co</b>
 	 */
 	CORRIDOR("co", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Room</b><br/>
+	 * Display: <b>Room</b><br>
 	 * Code Value: <b>ro</b>
 	 */
 	ROOM("ro", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Vehicle</b><br/>
+	 * Display: <b>Vehicle</b><br>
 	 * Code Value: <b>ve</b>
 	 */
 	VEHICLE("ve", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>House</b><br/>
+	 * Display: <b>House</b><br>
 	 * Code Value: <b>ho</b>
 	 */
 	HOUSE("ho", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Cabinet</b><br/>
+	 * Display: <b>Cabinet</b><br>
 	 * Code Value: <b>ca</b>
 	 */
 	CABINET("ca", "http://hl7.org/fhir/location-physical-type"),
 	
 	/**
-	 * Display: <b>Road</b><br/>
+	 * Display: <b>Road</b><br>
 	 * Code Value: <b>rd</b>
 	 */
 	ROAD("rd", "http://hl7.org/fhir/location-physical-type"),

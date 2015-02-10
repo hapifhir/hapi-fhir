@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum ImmunizationRecommendationStatusCodesEnum {
 
 	/**
-	 * Display: <b>due</b><br/>
+	 * Display: <b>due</b><br>
 	 * Code Value: <b>due</b>
 	 *
 	 * The patient is due for their next vaccination
@@ -37,7 +37,7 @@ public enum ImmunizationRecommendationStatusCodesEnum {
 	DUE("due", "http://hl7.org/fhir/immunization-recommendation-status"),
 	
 	/**
-	 * Display: <b>overdue</b><br/>
+	 * Display: <b>overdue</b><br>
 	 * Code Value: <b>overdue</b>
 	 *
 	 * The patient is considered overdue for their next vaccination

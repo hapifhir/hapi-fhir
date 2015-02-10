@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
@@ -59,6 +60,7 @@ class SchemaBaseValidator implements IValidator {
 		sn.add("xml.xsd");
 		sn.add("xhtml1-strict.xsd");
 		sn.add("fhir-single.xsd");
+		sn.add("fhir-xhtml.xsd");
 		sn.add("tombstone.xsd");
 		sn.add("opensearch.xsd");
 		sn.add("opensearchscore.xsd");
@@ -67,6 +69,11 @@ class SchemaBaseValidator implements IValidator {
 	}
 
 	private Map<String, Schema> myKeyToSchema = new HashMap<String, Schema>();
+	private FhirContext myCtx;
+
+	SchemaBaseValidator(FhirContext theContext) {
+		myCtx = theContext;
+	}
 
 	private void doValidate(ValidationContext<?> theContext, String schemaName) {
 		Schema schema = loadSchema("dstu", schemaName);
@@ -113,7 +120,7 @@ class SchemaBaseValidator implements IValidator {
 	}
 
 	private Source loadXml(String theVersion, String theSystemId, String theSchemaName) {
-		String pathToBase = "ca/uhn/fhir/model/" + theVersion + "/schema/" + theSchemaName;
+		String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSchemaName;
 		ourLog.debug("Going to load resource: {}", pathToBase);
 		InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 		if (baseIs == null) {
@@ -179,7 +186,7 @@ class SchemaBaseValidator implements IValidator {
 
 	}
 
-	private static final class MyResourceResolver implements LSResourceResolver {
+	private final class MyResourceResolver implements LSResourceResolver {
 		private String myVersion;
 
 		private MyResourceResolver(String theVersion) {
@@ -193,22 +200,23 @@ class SchemaBaseValidator implements IValidator {
 				input.setPublicId(thePublicId);
 				input.setSystemId(theSystemId);
 				input.setBaseURI(theBaseURI);
-				String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
-				
+//				String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
+				String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSystemId;
+
 				ourLog.debug("Loading referenced schema file: " + pathToBase);
-				
+
 				InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
 				if (baseIs == null) {
-					throw new InternalErrorException("No FHIR-BASE schema found");
+					throw new InternalErrorException("Schema file not found: " + pathToBase);
 				}
 
 				input.setByteStream(baseIs);
-				
+
 				return input;
 
 			}
 
-			throw new ConfigurationException("Unknown schema: " + theBaseURI);
+			throw new ConfigurationException("Unknown schema: " + theSystemId);
 		}
 	}
 

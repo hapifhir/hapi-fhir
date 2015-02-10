@@ -8,8 +8,8 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -23,8 +23,8 @@ public class ValidatorExamples {
       // Create and populate a new patient object
       Patient p = new Patient();
       p.addName().addFamily("Smith").addGiven("John").addGiven("Q");
-      p.addIdentifier("urn:foo:identifiers", "12345");
-      p.addTelecom().setSystem(ContactSystemEnum.PHONE).setValue("416 123-4567");
+      p.addIdentifier().setSystem("urn:foo:identifiers").setValue("12345");
+      p.addTelecom().setSystem(ContactPointSystemEnum.PHONE).setValue("416 123-4567");
 
       // Request a validator and apply it
       FhirValidator val = ctx.newValidator();

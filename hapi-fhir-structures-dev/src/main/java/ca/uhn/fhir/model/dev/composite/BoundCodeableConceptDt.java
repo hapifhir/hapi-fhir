@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dev.composite;
  * #%L
  * HAPI FHIR Structures - DEV (FHIR Latest)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 * codings first. If theValue is null, existing codings are cleared and no
 	 * codings are added.
 	 * 
-	 * @param theValue
+	 * @param theValues
 	 *            The value to add, or <code>null</code>
 	 */
 	public void setValueAsEnum(Collection<T> theValues) {

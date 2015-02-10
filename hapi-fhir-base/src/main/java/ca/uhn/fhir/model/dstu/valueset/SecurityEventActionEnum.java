@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SecurityEventActionEnum {
 
 	/**
-	 * Display: <b>Create</b><br/>
+	 * Display: <b>Create</b><br>
 	 * Code Value: <b>C</b>
 	 *
 	 * Create a new database object, such as Placing an Order.
@@ -37,7 +37,7 @@ public enum SecurityEventActionEnum {
 	CREATE("C", "http://hl7.org/fhir/security-event-action"),
 	
 	/**
-	 * Display: <b>Read/View/Print</b><br/>
+	 * Display: <b>Read/View/Print</b><br>
 	 * Code Value: <b>R</b>
 	 *
 	 * Display or print data, such as a Doctor Census.
@@ -45,7 +45,7 @@ public enum SecurityEventActionEnum {
 	READ_VIEW_PRINT("R", "http://hl7.org/fhir/security-event-action"),
 	
 	/**
-	 * Display: <b>Update</b><br/>
+	 * Display: <b>Update</b><br>
 	 * Code Value: <b>U</b>
 	 *
 	 * Update data, such as Revise Patient Information.
@@ -53,7 +53,7 @@ public enum SecurityEventActionEnum {
 	UPDATE("U", "http://hl7.org/fhir/security-event-action"),
 	
 	/**
-	 * Display: <b>Delete</b><br/>
+	 * Display: <b>Delete</b><br>
 	 * Code Value: <b>D</b>
 	 *
 	 * Delete items, such as a doctor master file record.
@@ -61,7 +61,7 @@ public enum SecurityEventActionEnum {
 	DELETE("D", "http://hl7.org/fhir/security-event-action"),
 	
 	/**
-	 * Display: <b>Execute</b><br/>
+	 * Display: <b>Execute</b><br>
 	 * Code Value: <b>E</b>
 	 *
 	 * Perform a system or application function such as log-on, program execution or use of an object's method, or perform a query/search operation.

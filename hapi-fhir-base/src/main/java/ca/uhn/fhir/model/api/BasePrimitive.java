@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -67,9 +68,10 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 	}
 
 	@Override
-	public void setValue(T theValue) throws DataFormatException {
+	public IPrimitiveType<T> setValue(T theValue) throws DataFormatException {
 		myCoercedValue = theValue;
 		updateStringValue();
+		return this;
 	}
 
 	protected void updateStringValue() {

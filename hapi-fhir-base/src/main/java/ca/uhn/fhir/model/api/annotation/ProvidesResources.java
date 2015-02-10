@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,10 @@ import java.lang.annotation.RetentionPolicy;
  * These resources will automatically be added to the resource list used for profile generation.
  * <pre>
  * Examples:
- * {@code
- * @literal@ProvidesResources(resource=CustomObservation.class)
+ * {@literal @}ProvidesResources(resource=CustomObservation.class)
  * class CustomObservationResourceProvider implements IResourceProvider{...}
  *
- * @literal@ProvidesResources(resource={CustomPatient.class,CustomObservation.class}){...}
+ * {@literal @}ProvidesResources(resource={CustomPatient.class,CustomObservation.class}){...}
  * class FhirServer extends RestfulServer
  * }
  * </pre>

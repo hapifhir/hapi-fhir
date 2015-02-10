@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,8 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
- * Represents an <b>HTTP 412 Precondition Failed</b> response. This exception
- * should be thrown for an {@link Update} operation if that operation requires a version to 
- * be specified in an HTTP header, and none was.
+ * @deprecated Use {@link PreconditionFailedException} instead - This exception is
+ * strangely named and will be removed at some point.
  */
 public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
@@ -46,6 +45,21 @@ public class ResourceVersionNotSpecifiedException extends BaseServerResponseExce
 	 */
 	public ResourceVersionNotSpecifiedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
+	}
+
+	public ResourceVersionNotSpecifiedException(int theStatusCode, String error) {
+		super(theStatusCode, error);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param theMessage
+	 *            The message
+	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
+	 */
+	public ResourceVersionNotSpecifiedException(int theStatusCode, String theMessage, BaseOperationOutcome theOperationOutcome) {
+		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 
 }

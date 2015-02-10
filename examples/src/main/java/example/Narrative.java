@@ -3,8 +3,8 @@ package example;
 import java.io.IOException;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -14,7 +14,7 @@ public static void main(String[] args) throws DataFormatException, IOException {
 
 //START SNIPPET: example1
 Patient patient = new Patient();
-patient.addIdentifier("urn:foo", "7000135");
+patient.addIdentifier().setSystem("urn:foo").setValue("7000135");
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Edward");
 patient.addAddress().addLine("742 Evergreen Terrace").setCity("Springfield").setState("ZZ");
 

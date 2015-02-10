@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,25 +29,25 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum EncounterTypeEnum {
 
 	/**
-	 * Display: <b>Annual diabetes mellitus screening</b><br/>
+	 * Display: <b>Annual diabetes mellitus screening</b><br>
 	 * Code Value: <b>ADMS</b>
 	 */
 	ANNUAL_DIABETES_MELLITUS_SCREENING("ADMS", "http://hl7.org/fhir/encounter-type"),
 	
 	/**
-	 * Display: <b>Bone drilling/bone marrow punction in clinic</b><br/>
+	 * Display: <b>Bone drilling/bone marrow punction in clinic</b><br>
 	 * Code Value: <b>BD/BM-clin</b>
 	 */
 	BONE_DRILLING_BONE_MARROW_PUNCTION_IN_CLINIC("BD/BM-clin", "http://hl7.org/fhir/encounter-type"),
 	
 	/**
-	 * Display: <b>Infant colon screening - 60 minutes</b><br/>
+	 * Display: <b>Infant colon screening - 60 minutes</b><br>
 	 * Code Value: <b>CCS60</b>
 	 */
 	INFANT_COLON_SCREENING___60_MINUTES("CCS60", "http://hl7.org/fhir/encounter-type"),
 	
 	/**
-	 * Display: <b>Outpatient Kenacort injection</b><br/>
+	 * Display: <b>Outpatient Kenacort injection</b><br>
 	 * Code Value: <b>OKI</b>
 	 */
 	OUTPATIENT_KENACORT_INJECTION("OKI", "http://hl7.org/fhir/encounter-type"),

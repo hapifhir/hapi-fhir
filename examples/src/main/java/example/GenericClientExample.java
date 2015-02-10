@@ -8,19 +8,24 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 
 public class GenericClientExample {
 
    public static void simpleExample() {
       // START SNIPPET: simple
-      FhirContext ctx = new FhirContext();
-      String serverBase = "http://fhirtest.uhn.ca/base";
+      // We're connecting to a DSTU1 compliant server in this example
+      FhirContext ctx = FhirContext.forDstu1();
+      String serverBase = "http://fhirtest.uhn.ca/baseDstu1";
+      
       IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
       // Perform a search
@@ -42,25 +47,32 @@ public class GenericClientExample {
          // START SNIPPET: create
          Patient patient = new Patient();
          // ..populate the patient object..
-         patient.addIdentifier("urn:system", "12345");
+         patient.addIdentifier().setSystem("urn:system").setValue("12345");
          patient.addName().addFamily("Smith").addGiven("John");
 
          // Invoke the server create method (and send pretty-printed JSON
          // encoding to the server
          // instead of the default which is non-pretty printed XML)
-         client
-            .create()
+         MethodOutcome outcome = client.create()
             .resource(patient)
             .prettyPrint()
             .encodedJson()
             .execute();
+         
+         // The MethodOutcome object will contain information about the
+         // response from the server, including the ID of the created 
+         // resource, the OperationOutcome response, etc. (assuming that
+         // any of these things were provided by the server! They may not
+         // always be)
+         IdDt id = outcome.getId();
+         System.out.println("Got ID: " + id.getValue());
          // END SNIPPET: create
       }
       {
          // START SNIPPET: update
          Patient patient = new Patient();
          // ..populate the patient object..
-         patient.addIdentifier("urn:system", "12345");
+         patient.addIdentifier().setSystem("urn:system").setValue("12345");
          patient.addName().addFamily("Smith").addGiven("John");
 
          // To update a resource, it should have an ID set (if the resource
@@ -69,14 +81,46 @@ public class GenericClientExample {
          // have one though)
          patient.setId("Patient/123");
 
-         // Invoke the server create method (and send pretty-printed JSON
-         // encoding to the server
-         // instead of the default which is non-pretty printed XML)
-         client
-            .update()
+         // Invoke the server update method
+         MethodOutcome outcome = client.update()
             .resource(patient)
             .execute();
+
+         // The MethodOutcome object will contain information about the
+         // response from the server, including the ID of the created 
+         // resource, the OperationOutcome response, etc. (assuming that
+         // any of these things were provided by the server! They may not
+         // always be)
+         IdDt id = outcome.getId();
+         System.out.println("Got ID: " + id.getValue());
          // END SNIPPET: update
+      }
+      {
+         // START SNIPPET: etagupdate
+         // First, let's retrive the latest version of a resource
+         // from the server
+         Patient patient = client.read().resource(Patient.class).withId("123").execute();
+
+         // If the server is a version aware server, we should now know the latest version
+         // of the resource
+         System.out.println("Version ID: " + patient.getId().getVersionIdPart());
+         
+         // Now let's make a change to the resource
+         patient.setGender(AdministrativeGenderEnum.FEMALE);
+
+         // Invoke the server update method - Because the resource has
+         // a version, it will be included in the request sent to 
+         // the server
+         try {
+            MethodOutcome outcome = client
+               .update()
+               .resource(patient)
+               .execute();
+         } catch (PreconditionFailedException e) {
+            // If we get here, the latest version has changed
+            // on the server so our update failed.
+         }
+         // END SNIPPET: etagupdate
       }
       {
          // START SNIPPET: conformance
@@ -103,7 +147,7 @@ public class GenericClientExample {
          Bundle response = client.search()
                .forResource(Patient.class)
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
-               .and(Patient.PROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
+               .and(Patient.CAREPROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
                .execute();
          // END SNIPPET: search
 
@@ -180,23 +224,46 @@ public class GenericClientExample {
 
       {
          // START SNIPPET: read
-         IdDt id = new IdDt("Patient", "123");
-         Patient patient = client.read(Patient.class, id); // search for patient 123
+         // search for patient 123
+         Patient patient = client.read()
+                                 .resource(Patient.class)
+                                 .withId("123")
+                                 .execute(); 
          // END SNIPPET: read
       }
       {
          // START SNIPPET: vread
-         IdDt id = new IdDt("Patient", "123", "888");
-         Patient patient = client.vread(Patient.class, id); // search for version 888 of patient 123
+          // search for patient 123 (specific version 888)
+          Patient patient = client.read()
+                                  .resource(Patient.class)
+                                  .withIdAndVersion("123", "888")
+                                  .execute(); 
          // END SNIPPET: vread
       }
       {
          // START SNIPPET: readabsolute
-         IdDt id = new IdDt("http://example.com/fhir/Patient/123");
-         Patient patient = client.read(Patient.class, id); // search for patient 123 on example.com
+         // search for patient 123 on example.com
+         String url = "http://example.com/fhir/Patient/123";
+         Patient patient = client.read()
+                                 .resource(Patient.class)
+                                 .withUrl(url)
+                                 .execute(); 
          // END SNIPPET: readabsolute
       }
       
+      {
+         // START SNIPPET: etagread
+         // search for patient 123
+         Patient patient = client.read()
+                                 .resource(Patient.class)
+                                 .withId("123")
+                                 .ifVersionMatches("001").returnNull()
+                                 .execute(); 
+         if (patient == null) {
+            // resource has not changed
+         }
+         // END SNIPPET: etagread
+      }
       
       
       

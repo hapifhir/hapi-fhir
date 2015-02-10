@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,31 +40,31 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * <p>
  * The history command supports three usage patterns, as described in the
  * <a href="http://hl7.org/implement/standards/fhir/http.html#history">FHIR history</a> documentation:
+ * </p>
  * <ul>
  * <li>
- *   A search for the history of all resources on a server. In this case, {@link #resourceType()} 
- *   should be set to {@link AllResources} (as is the default) and the method should not have an ID parameter.
+ *   A search for the history of all resources on a server. In this case, {@link #type()} 
+ *   should be set to {@link IResource} (as is the default) and the method should not have an ID parameter.
  *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/_history{?[parameters]&_format=[mime-type]}</code>
+ *   	To invoke this pattern: <code>GET [base]/_history{?[parameters]&amp;_format=[mime-type]}</code>
  *   </li></ul>
  * </li>
  * <li>
- *   A search for the history of all instances of a specific resource type on a server. In this case, {@link #resourceType()} 
- *   should be set to the specific resource type (e.g. {@link Patient Patient.class} and the method should not have an ID parameter.
+ *   A search for the history of all instances of a specific resource type on a server. In this case, {@link #type()} 
+ *   should be set to the specific resource type (e.g. <code>Patient.class</code>) and the method should not have an ID parameter.
  *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/[type]/_history{?[parameters]&_format=[mime-type]}</code>
+ *   	To invoke this pattern: <code>GET [base]/[type]/_history{?[parameters]&amp;_format=[mime-type]}</code>
  *   </li></ul>
  * </li>
  * <li>
- *   A search for the history of a specific instances of a specific resource type on a server. In this case, {@link #resourceType()} 
- *   should be set to the specific resource type (e.g. {@link Patient Patient.class} and the method should 
+ *   A search for the history of a specific instances of a specific resource type on a server. In this case, {@link #type()} 
+ *   should be set to the specific resource type (e.g. <code>Patient.class</code> and the method should 
  *   have one parameter of type {@link IdDt} annotated with the {@link IdParam} annotation. 
  *   <ul><li>
- *   	To invoke this pattern: <code>GET [base]/[type]/[id]/_history{?[parameters]&_format=[mime-type]}</code>
+ *   	To invoke this pattern: <code>GET [base]/[type]/[id]/_history{?[parameters]&amp;_format=[mime-type]}</code>
  *   </li></ul>
  * </li>
  * </ul>
- * </p>
  * 
  * @see Count
  * @see Since

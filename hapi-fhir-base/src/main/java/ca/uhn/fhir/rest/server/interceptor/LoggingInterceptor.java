@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <p>
  * The following substitution variables are supported:
  * </p>
- * <table>
+ * <table summary="Substitution variables supported by this class">
  * <tr>
  * <td>${id}</td>
  * <td>The resource ID associated with this request (or "" if none)</td>
@@ -68,6 +68,10 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <td>${requestParameters}</td>
  * <td>The HTTP request parameters (or "")</td>
  * </tr>
+ * <tr>
+ * <td>${servletPath}</td>
+ * <td>The part of thre requesting URL that corresponds to the particular Servlet being called (see {@link HttpServletRequest#getServletPath()})</td>
+ * </tr>
  * </table>
  */
 public class LoggingInterceptor extends InterceptorAdapter {
@@ -76,7 +80,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 
 	private Logger myLogger = ourLog;
 	private String myMessageFormat = "${operationType} - ${idOrResourceName}";
-	
+
 	@Override
 	public boolean incomingRequestPostProcessed(final RequestDetails theRequestDetails, final HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 
@@ -132,14 +136,14 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					return myRequestDetails.getOtherOperationType().getCode();
 				}
 				return "";
-			}
-			if ("id".equals(theKey)) {
+			} else if ("id".equals(theKey)) {
 				if (myRequestDetails.getId() != null) {
 					return myRequestDetails.getId().getValue();
 				}
 				return "";
-			}
-			if ("idOrResourceName".equals(theKey)) {
+			} else if ("servletPath".equals(theKey)) {
+				return StringUtils.defaultString(myRequest.getServletPath());
+			} else if ("idOrResourceName".equals(theKey)) {
 				if (myRequestDetails.getId() != null) {
 					return myRequestDetails.getId().getValue();
 				}
@@ -147,8 +151,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					return myRequestDetails.getResourceName();
 				}
 				return "";
-			}
-			if (theKey.equals("requestParameters")) {
+			} else if (theKey.equals("requestParameters")) {
 				StringBuilder b = new StringBuilder();
 				for (Entry<String, String[]> next : myRequestDetails.getParameters().entrySet()) {
 					for (String nextValue : next.getValue()) {
@@ -167,12 +170,10 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					}
 				}
 				return b.toString();
-			}
-			if (theKey.startsWith("requestHeader.")) {
+			} else if (theKey.startsWith("requestHeader.")) {
 				String val = myRequest.getHeader(theKey.substring("requestHeader.".length()));
 				return StringUtils.defaultString(val);
-			}
-			if (theKey.startsWith("remoteAddr")) {
+			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
 			}
 			return "!VAL!";

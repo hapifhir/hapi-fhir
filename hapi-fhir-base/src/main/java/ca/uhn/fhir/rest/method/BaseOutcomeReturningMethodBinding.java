@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -32,6 +33,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -67,6 +69,40 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 	}
+
+	private void addLocationHeader(Request theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation) {
+		StringBuilder b = new StringBuilder();
+		b.append(theRequest.getFhirServerBase());
+		b.append('/');
+		b.append(getResourceName());
+		b.append('/');
+		b.append(response.getId().getIdPart());
+		if (response.getId().hasVersionIdPart()) {
+			b.append("/" + Constants.PARAM_HISTORY + "/");
+			b.append(response.getId().getVersionIdPart());
+		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
+			b.append("/" + Constants.PARAM_HISTORY + "/");
+			b.append(response.getVersionId().getValue());
+		}
+		theResponse.addHeader(headerLocation, b.toString());
+	}
+
+	protected abstract void addParametersForServerRequest(Request theRequest, Object[] theParams);
+
+	/**
+	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
+	 */
+	protected boolean allowVoidReturnType() {
+		return false;
+	}
+
+	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
+
+	/**
+	 * For servers, this method will match only incoming requests that match the given operation, or which have no
+	 * operation in the URL if this method returns null.
+	 */
+	protected abstract String getMatchingOperation();
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
@@ -165,7 +201,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			} else {
 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			}
-			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
+			addContentLocationHeaders(theRequest, servletResponse, response);
 			break;
 
 		case UPDATE:
@@ -174,10 +210,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			} else {
 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			}
-			if (response != null && response.getId() != null) {
-				addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
-				addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
-			}
+			addContentLocationHeaders(theRequest, servletResponse, response);
 			break;
 
 		case VALIDATE:
@@ -212,7 +245,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				writer.close();
 			}
 		} else {
-			servletResponse.setContentType(Constants.CT_TEXT);
+			servletResponse.setContentType(Constants.CT_TEXT_WITH_UTF8);
 			Writer writer = servletResponse.getWriter();
 			writer.close();
 		}
@@ -220,74 +253,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		// getMethod().in
 	}
 
+	private void addContentLocationHeaders(Request theRequest, HttpServletResponse servletResponse, MethodOutcome response) {
+		if (response != null && response.getId() != null) {
+			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
+			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
+		}
+	}
+
 	public boolean isReturnVoid() {
 		return myReturnVoid;
 	}
-
-	private void addLocationHeader(Request theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation) {
-		StringBuilder b = new StringBuilder();
-		b.append(theRequest.getFhirServerBase());
-		b.append('/');
-		b.append(getResourceName());
-		b.append('/');
-		b.append(response.getId().getIdPart());
-		if (response.getId().hasVersionIdPart()) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getId().getVersionIdPart());
-		} else if (response.getVersionId() != null && response.getVersionId().isEmpty() == false) {
-			b.append("/" + Constants.PARAM_HISTORY + "/");
-			b.append(response.getVersionId().getValue());
-		}
-		theResponse.addHeader(headerLocation, b.toString());
-	}
-
-	/*
-	 * @Override public void invokeServer(RestfulServer theServer, Request theRequest, HttpServletResponse theResponse)
-	 * throws BaseServerResponseException, IOException { Object[] params = new Object[getParameters().size()]; for (int
-	 * i = 0; i < getParameters().size(); i++) { IParameter param = getParameters().get(i); if (param != null) {
-	 * params[i] = param.translateQueryParametersIntoServerArgument(theRequest, null); } }
-	 * 
-	 * addParametersForServerRequest(theRequest, params);
-	 * 
-	 * MethodOutcome response = (MethodOutcome) invokeServerMethod(getProvider(), params);
-	 * 
-	 * if (response == null) { if (myReturnVoid == false) { throw new ConfigurationException("Method " +
-	 * getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null"); }
-	 * else { theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT); } } else if (!myReturnVoid) { if
-	 * (response.isCreated()) { theResponse.setStatus(Constants.STATUS_HTTP_201_CREATED); StringBuilder b = new
-	 * StringBuilder(); b.append(theRequest.getFhirServerBase()); b.append('/'); b.append(getResourceName());
-	 * b.append('/'); b.append(response.getId().getValue()); if (response.getVersionId() != null &&
-	 * response.getVersionId().isEmpty() == false) { b.append("/_history/");
-	 * b.append(response.getVersionId().getValue()); } theResponse.addHeader("Location", b.toString()); } else {
-	 * theResponse.setStatus(Constants.STATUS_HTTP_200_OK); } } else {
-	 * theResponse.setStatus(Constants.STATUS_HTTP_204_NO_CONTENT); }
-	 * 
-	 * theServer.addHeadersToResponse(theResponse);
-	 * 
-	 * Writer writer = theResponse.getWriter(); try { if (response != null) { OperationOutcome outcome = new
-	 * OperationOutcome(); if (response.getOperationOutcome() != null && response.getOperationOutcome().getIssue() !=
-	 * null) { outcome.getIssue().addAll(response.getOperationOutcome().getIssue()); } EncodingUtil encoding =
-	 * BaseMethodBinding.determineResponseEncoding(theRequest .getServletRequest(), theRequest.getParameters());
-	 * theResponse.setContentType(encoding.getResourceContentType()); IParser parser = encoding.newParser(getContext());
-	 * parser.encodeResourceToWriter(outcome, writer); } } finally { writer.close(); } // getMethod().in }
-	 */
-
-	protected abstract void addParametersForServerRequest(Request theRequest, Object[] theParams);
-
-	/**
-	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
-	 */
-	protected boolean allowVoidReturnType() {
-		return false;
-	}
-
-	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
-
-	/**
-	 * For servers, this method will match only incoming requests that match the given operation, or which have no
-	 * operation in the URL if this method returns null.
-	 */
-	protected abstract String getMatchingOperation();
 
 	/**
 	 * @throws IOException
@@ -295,8 +270,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
 		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
-		IResource resource = parser.parseResource(theRequest.getServletRequest().getReader());
-		return resource;
+		BufferedReader requestReader = theRequest.getServletRequest().getReader();
+		
+		Class<? extends IBaseResource> wantedResourceType = requestContainsResourceType();
+		if (wantedResourceType != null) {
+			return (IResource) parser.parseResource(wantedResourceType, requestReader);
+		} else {
+			return parser.parseResource(requestReader);
+		}
 	}
 
 	protected abstract Set<RequestType> provideAllowableRequestTypes();
@@ -306,6 +287,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 */
 	protected boolean requestContainsResource() {
 		return true;
+	}
+	
+	/**
+	 * Subclasses may override to provide a specific resource type that this method wants
+	 * as a parameter
+	 */
+	protected Class<? extends IBaseResource> requestContainsResourceType() {
+		return null;
 	}
 
 	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncoding, HttpServletResponse theResponse, Request theRequest) throws IOException {

@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SupplyItemTypeEnum {
 
 	/**
-	 * Display: <b>Central Supply</b><br/>
+	 * Display: <b>Central Supply</b><br>
 	 * Code Value: <b>medication</b>
 	 *
 	 * Supply is a kind of medication.
@@ -37,7 +37,7 @@ public enum SupplyItemTypeEnum {
 	CENTRAL_SUPPLY("medication", "http://hl7.org/fhir/supply-item-type"),
 	
 	/**
-	 * Display: <b>Device</b><br/>
+	 * Display: <b>Device</b><br>
 	 * Code Value: <b>device</b>
 	 *
 	 * What is supplied (or requested) is a device

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -35,37 +39,27 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.Constants;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
-	private int myConnectionRequestTimeout = 10000;
-	private int myConnectTimeout = 10000;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulClientFactory.class);
+	private int myConnectionRequestTimeout = DEFAULT_CONNECTION_REQUEST_TIMEOUT;
+	private int myConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	private FhirContext myContext;
 	private HttpClient myHttpClient;
 	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory>();
-	private int mySocketTimeout = 10000;
 	private HttpHost myProxy;
+	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
 
-	@Override
-	public void setProxy(String theHost, Integer thePort) {
-		if (theHost != null) {
-			myProxy = new HttpHost(theHost, thePort, "http");
-		} else {
-			myProxy = null;
-		}
-	}
+	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param theContext
-	 *            The context
-	 */
-	public RestfulClientFactory(FhirContext theFhirContext) {
-		myContext = theFhirContext;
-	}
+	private Set<String> myValidatedServerBaseUrls = new HashSet<String>();
 
 	/**
 	 * Constructor
@@ -74,13 +68,13 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	/**
-	 * Sets the context associated with this client factory. Must not be called more than once.
+	 * Constructor
+	 * 
+	 * @param theFhirContext
+	 *            The context
 	 */
-	public void setFhirContext(FhirContext theContext) {
-		if (myContext != null && myContext != theContext) {
-			throw new IllegalStateException("RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
-		}
-		myContext = theContext;
+	public RestfulClientFactory(FhirContext theFhirContext) {
+		myContext = theFhirContext;
 	}
 
 	public int getConnectionRequestTimeout() {
@@ -118,8 +112,20 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		return myHttpClient;
 	}
 
+	@Override
+	public ServerValidationModeEnum getServerValidationModeEnum() {
+		return myServerValidationMode;
+	}
+
+	@Override
 	public int getSocketTimeout() {
 		return mySocketTimeout;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
+		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
+		return proxy;
 	}
 
 	/**
@@ -139,16 +145,12 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
 
-		HttpClient client = getHttpClient();
-
-		String serverBase = theServerBase;
-		if (!serverBase.endsWith("/")) {
-			serverBase = serverBase + "/";
-		}
+		HttpClient httpClient = getHttpClient();
+		maybeValidateServerBase(theServerBase, httpClient);
 
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
-			invocationHandler = new ClientInvocationHandlerFactory(client, myContext, serverBase, theClientType);
+			invocationHandler = new ClientInvocationHandlerFactory(httpClient, myContext, theServerBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
 				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
 				invocationHandler.addBinding(nextMethod, binding);
@@ -162,8 +164,29 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public IGenericClient newGenericClient(String theServerBase) {
-		return new GenericClient(myContext, getHttpClient(), theServerBase);
+	public synchronized IGenericClient newGenericClient(String theServerBase) {
+		HttpClient httpClient = getHttpClient();
+		maybeValidateServerBase(theServerBase, httpClient);
+		return new GenericClient(myContext, httpClient, theServerBase);
+	}
+
+	private void maybeValidateServerBase(String theServerBase, HttpClient theHttpClient) {
+		String serverBase = theServerBase;
+		if (!serverBase.endsWith("/")) {
+			serverBase = serverBase + "/";
+		}
+
+		switch (myServerValidationMode) {
+		case NEVER:
+			break;
+		case ONCE:
+			if (!myValidatedServerBaseUrls.contains(serverBase)) {
+				validateServerBase(serverBase, theHttpClient);
+				myValidatedServerBaseUrls.add(serverBase);
+			}
+			break;
+		}
+
 	}
 
 	@Override
@@ -179,6 +202,16 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	/**
+	 * Sets the context associated with this client factory. Must not be called more than once.
+	 */
+	public void setFhirContext(FhirContext theContext) {
+		if (myContext != null && myContext != theContext) {
+			throw new IllegalStateException("RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
+		}
+		myContext = theContext;
+	}
+
+	/**
 	 * Sets the Apache HTTP client instance to be used by any new restful clients created by this factory. If set to
 	 * <code>null</code>, which is the default, a new HTTP client with default settings will be created.
 	 * 
@@ -191,15 +224,57 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
+	public void setProxy(String theHost, Integer thePort) {
+		if (theHost != null) {
+			myProxy = new HttpHost(theHost, thePort, "http");
+		} else {
+			myProxy = null;
+		}
+	}
+
+	@Override
+	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+		Validate.notNull(theServerValidationMode, "theServerValidationMode may not be null");
+		myServerValidationMode = theServerValidationMode;
+	}
+
+	@Override
 	public synchronized void setSocketTimeout(int theSocketTimeout) {
 		mySocketTimeout = theSocketTimeout;
 		myHttpClient = null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends IRestfulClient> T instantiateProxy(Class<T> theClientType, InvocationHandler theInvocationHandler) {
-		T proxy = (T) Proxy.newProxyInstance(theClientType.getClassLoader(), new Class[] { theClientType }, theInvocationHandler);
-		return proxy;
+	private void validateServerBase(String theServerBase, HttpClient theHttpClient) {
+
+		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase);
+		BaseConformance conformance;
+		try {
+			conformance = client.conformance();
+		} catch (FhirClientConnectionException e) {
+			throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA), e);
+		}
+
+		String serverFhirVersionString = conformance.getFhirVersionElement().getValueAsString();
+		FhirVersionEnum serverFhirVersionEnum = null;
+		if (StringUtils.isBlank(serverFhirVersionString)) {
+			// we'll be lenient and accept this
+		} else {
+			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
+			} else if (serverFhirVersionString.startsWith("0.4")) {
+				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
+			} else {
+				// we'll be lenient and accept this
+				ourLog.debug("Server conformance statement indicates unknown FHIR version: {}", serverFhirVersionString);
+			}
+		}
+
+		if (serverFhirVersionEnum != null) {
+			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
+			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
+				throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
+			}
+		}
 	}
 
 }

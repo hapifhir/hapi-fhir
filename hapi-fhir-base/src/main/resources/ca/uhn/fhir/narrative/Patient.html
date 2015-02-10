@@ -22,9 +22,9 @@ a browser.
 				<td>Address</td>
 				<td th:narrative="${resource.addressFirstRep}"></td>
 			</tr>
-			<tr th:if="${not resource.birthDate.empty}">
+			<tr th:if="${not resource.birthDateElement.empty}">
 				<td>Date of birth</td>
-				<td><span th:text="${#dates.format(resource.birthDate.value,'dd MMMM yyyy')}"></span></td>
+				<td><span th:text="${#dates.format(resource.birthDateElement.value,'dd MMMM yyyy')}"></span></td>
 			</tr>
 		</tbody>
 	</table>

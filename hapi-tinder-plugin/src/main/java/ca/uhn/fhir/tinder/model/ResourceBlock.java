@@ -4,6 +4,10 @@ import java.util.List;
 
 public class ResourceBlock extends Child {
 
+	public ResourceBlock() {
+		super();
+	}
+	
 	private String myForcedClassName;
 
 	@Override
@@ -57,11 +61,6 @@ public class ResourceBlock extends Child {
 
 	public boolean isBlock() {
 		return true;
-	}
-
-	@Override
-	public String getTypeSuffix() {
-		return "";
 	}
 
 	public void setForcedClassName(String theClassName) {

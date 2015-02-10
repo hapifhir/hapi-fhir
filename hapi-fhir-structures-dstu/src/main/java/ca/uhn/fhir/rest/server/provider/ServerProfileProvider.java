@@ -2,9 +2,9 @@ package ca.uhn.fhir.rest.server.provider;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,19 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import org.apache.http.HttpRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class ServerProfileProvider implements IResourceProvider {
 
-	private FhirContext myContext;
+	private final FhirContext myContext;
+	private final RestfulServer myRestfulServer;
 
-	public ServerProfileProvider(FhirContext theCtx) {
-		myContext = theCtx;
+	public ServerProfileProvider(RestfulServer theServer) {
+		myContext = theServer.getFhirContext();
+		myRestfulServer = theServer;
 	}
 	
 	@Override
@@ -49,31 +55,36 @@ public class ServerProfileProvider implements IResourceProvider {
 	}
 	
 	@Read()
-	public Profile getProfileById(@IdParam IdDt theId) {
+	public Profile getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getIdPart());
 		if (retVal==null) {
 			return null;
 		}
-		return (Profile) retVal.toProfile();
+		String serverBase = getServerBase(theRequest);
+		return (Profile) retVal.toProfile(serverBase);
 	}
 
 	@Search()
-	public List<Profile> getAllProfiles() {
+	public List<Profile> getAllProfiles(HttpServletRequest theRequest) {
+		final String serverBase = getServerBase(theRequest);
 		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitions());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
 			@Override
 			public int compare(RuntimeResourceDefinition theO1, RuntimeResourceDefinition theO2) {
 				int cmp = theO1.getName().compareTo(theO2.getName());
 				if (cmp==0) {
-					cmp=theO1.getResourceProfile().compareTo(theO2.getResourceProfile());
+					cmp=theO1.getResourceProfile(serverBase).compareTo(theO2.getResourceProfile(serverBase));
 				}
 				return cmp;
 			}});
 		ArrayList<Profile> retVal = new ArrayList<Profile>();
 		for (RuntimeResourceDefinition next : defs) {
-			retVal.add((Profile) next.toProfile());
+			retVal.add((Profile) next.toProfile(serverBase));
 		}
 		return retVal;
 	}
 
+	private String getServerBase(HttpServletRequest theHttpRequest) {
+		return myRestfulServer.getServerBaseForRequest(theHttpRequest);
+	}
 }

@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum QuestionnaireStatusEnum {
 
 	/**
-	 * Display: <b>draft</b><br/>
+	 * Display: <b>draft</b><br>
 	 * Code Value: <b>draft</b>
 	 *
 	 * This Questionnaire is used as a template but the template is not ready for use or publication.
@@ -37,7 +37,7 @@ public enum QuestionnaireStatusEnum {
 	DRAFT("draft", "http://hl7.org/fhir/questionnaire-status"),
 	
 	/**
-	 * Display: <b>published</b><br/>
+	 * Display: <b>published</b><br>
 	 * Code Value: <b>published</b>
 	 *
 	 * This Questionnaire is used as a template, is published and ready for use.
@@ -45,7 +45,7 @@ public enum QuestionnaireStatusEnum {
 	PUBLISHED("published", "http://hl7.org/fhir/questionnaire-status"),
 	
 	/**
-	 * Display: <b>retired</b><br/>
+	 * Display: <b>retired</b><br>
 	 * Code Value: <b>retired</b>
 	 *
 	 * This Questionnaire is used as a template but should no longer be used for new Questionnaires.
@@ -53,7 +53,7 @@ public enum QuestionnaireStatusEnum {
 	RETIRED("retired", "http://hl7.org/fhir/questionnaire-status"),
 	
 	/**
-	 * Display: <b>in progress</b><br/>
+	 * Display: <b>in progress</b><br>
 	 * Code Value: <b>in progress</b>
 	 *
 	 * This Questionnaire has been filled out with answers, but changes or additions are still expected to be made to it.
@@ -61,7 +61,7 @@ public enum QuestionnaireStatusEnum {
 	IN_PROGRESS("in progress", "http://hl7.org/fhir/questionnaire-status"),
 	
 	/**
-	 * Display: <b>complete</b><br/>
+	 * Display: <b>complete</b><br>
 	 * Code Value: <b>completed</b>
 	 *
 	 * This Questionnaire has been filled out with answers, and the current content is regarded as definitive.
@@ -69,7 +69,7 @@ public enum QuestionnaireStatusEnum {
 	COMPLETE("completed", "http://hl7.org/fhir/questionnaire-status"),
 	
 	/**
-	 * Display: <b>amended</b><br/>
+	 * Display: <b>amended</b><br>
 	 * Code Value: <b>amended</b>
 	 *
 	 * This Questionnaire has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.client;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
@@ -36,12 +38,13 @@ import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
+import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
 
 public interface IGenericClient {
-	
+
 	/**
 	 * Retrieves and returns the server conformance statement
 	 */
@@ -76,7 +79,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
-	 * @deprecated Use {@link #delete()) instead
+	 * @deprecated Use {@link #delete()} instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
 
@@ -88,7 +91,7 @@ public interface IGenericClient {
 	 * @param theId
 	 *            the ID of the resource to delete
 	 * @return An outcome
-	 * @deprecated Use {@link #delete()) instead
+	 * @deprecated Use {@link #delete()} instead
 	 */
 	MethodOutcome delete(Class<? extends IResource> theType, String theId);
 
@@ -101,58 +104,70 @@ public interface IGenericClient {
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to return the history for, or <code>null<code> to search for history across all resources
+	 *            The type of resource to return the history for, or
+	 *            <code>null</code> to search for history across all resources
 	 * @param theId
-	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource instances. Note that if this param is not null, <code>theType</code> must also not
-	 *            be null
+	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
+	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
 	 * @param theSince
 	 *            If not null, request that the server only return resources updated since this time
 	 * @param theLimit
-	 *            If not null, request that the server return no more than this number of resources. Note that the server may return less even if more are available, but should not return more
-	 *            according to the FHIR specification.
+	 *            If not null, request that the server return no more than this number of resources. Note that the
+	 *            server may return less even if more are available, but should not return more according to the FHIR
+	 *            specification.
 	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, IdDt theIdDt, DateTimeDt theSince, Integer theLimit);
+	<T extends IResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
-	 *            The type of resource to return the history for, or <code>null<code> to search for history across all resources
+	 *            The type of resource to return the history for, or
+	 *            <code>null</code> to search for history across all resources
 	 * @param theId
-	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource instances. Note that if this param is not null, <code>theType</code> must also not
-	 *            be null
+	 *            The ID of the resource to return the history for, or <code>null</code> to search for all resource
+	 *            instances. Note that if this param is not null, <code>theType</code> must also not be null
 	 * @param theSince
 	 *            If not null, request that the server only return resources updated since this time
 	 * @param theLimit
-	 *            If not null, request that the server return no more than this number of resources. Note that the server may return less even if more are available, but should not return more
-	 *            according to the FHIR specification.
+	 *            If not null, request that the server return no more than this number of resources. Note that the
+	 *            server may return less even if more are available, but should not return more according to the FHIR
+	 *            specification.
 	 * @return A bundle containing returned resources
 	 */
-	<T extends IResource> Bundle history(Class<T> theType, String theIdDt, DateTimeDt theSince, Integer theLimit);
+	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
-	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next" tag within the atom bundle.
+	 * Loads the previous/next bundle of resources from a paged set, using the link specified in the "link type=next"
+	 * tag within the atom bundle.
 	 * 
 	 * @see Bundle#getLinkNext()
 	 */
 	IGetPage loadPage();
 
 	/**
-	 * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a given resource instance, even if the ID passed in contains a version. If you
-	 * wish to request a specific version of a resource (the "vread" operation), use {@link #vread(Class, IdDt)} instead.
+	 * Fluent method for "read" and "vread" methods.
+	 */
+	IRead read();
+
+	/**
+	 * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
+	 * given resource instance, even if the ID passed in contains a version. If you wish to request a specific version
+	 * of a resource (the "vread" operation), use {@link #vread(Class, IdDt)} instead.
 	 * <p>
-	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the resource type and ID) the server base for the client will be ignored, and the URL
-	 * passed in will be queried.
+	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the
+	 * resource type and ID) the server base for the client will be ignored, and the URL passed in will be queried.
 	 * </p>
 	 * 
 	 * @param theType
 	 *            The type of resource to load
 	 * @param theId
-	 *            The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
+	 *            The ID to load, including the resource ID and the resource version ID. Valid values include
+	 *            "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
 	 * @return The resource
 	 */
-	<T extends IResource> T read(Class<T> theType, IdDt theId);
+	<T extends IBaseResource> T read(Class<T> theType, IdDt theId);
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -163,7 +178,7 @@ public interface IGenericClient {
 	 *            The ID to load
 	 * @return The resource
 	 */
-	<T extends IResource> T read(Class<T> theType, String theId);
+	<T extends IBaseResource> T read(Class<T> theType, String theId);
 
 	/**
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.
@@ -186,7 +201,8 @@ public interface IGenericClient {
 	IResource read(UriDt theUrl);
 
 	/**
-	 * Register a new interceptor for this client. An interceptor can be used to add additional logging, or add security headers, or pre-process responses, etc.
+	 * Register a new interceptor for this client. An interceptor can be used to add additional logging, or add security
+	 * headers, or pre-process responses, etc.
 	 */
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
@@ -198,9 +214,8 @@ public interface IGenericClient {
 	 * @param theType
 	 *            The type of resource to load
 	 * @param theParams
-	 * @return
 	 */
-	<T extends IResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
+	<T extends IBaseResource> Bundle search(Class<T> theType, Map<String, List<IQueryParameterType>> theParams);
 
 	/**
 	 * Perform the "search" operation using an absolute URL.
@@ -211,13 +226,13 @@ public interface IGenericClient {
 	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned bundle from the server
 	 */
-	<T extends IResource> Bundle search(Class<T> theType, UriDt theUrl);
+	<T extends IBaseResource> Bundle search(Class<T> theType, UriDt theUrl);
 
 	Bundle search(UriDt theUrl);
 
 	/**
-	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good production setting since it will result in a lot of extra logging, but it can be
-	 * useful for troubleshooting.
+	 * If set to <code>true</code>, the client will log all requests and all responses. This is probably not a good
+	 * production setting since it will result in a lot of extra logging, but it can be useful for troubleshooting.
 	 * 
 	 * @param theLogRequestAndResponse
 	 *            Should requests and responses be logged
@@ -234,14 +249,16 @@ public interface IGenericClient {
 	 * 
 	 * @param theResources
 	 *            The resources to create/update in a single transaction
-	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other {@link IResource#getResourceMetadata() metadata}
+	 * @return A list of resource stubs (<b>these will not be fully populated</b>) containing IDs and other
+	 *         {@link IResource#getResourceMetadata() metadata}
 	 * @deprecated Use {@link #transaction()}
 	 * 
 	 */
 	List<IResource> transaction(List<IResource> theResources);
 
 	/**
-	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 * Remove an intercaptor that was previously registered using
+	 * {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
 	 */
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
@@ -259,7 +276,7 @@ public interface IGenericClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(IdDt theIdDt, IResource theResource);
+	MethodOutcome update(IdDt theId, IResource theResource);
 
 	/**
 	 * Implementation of the "instance update" method.
@@ -270,13 +287,11 @@ public interface IGenericClient {
 	 *            The new resource body
 	 * @return An outcome containing the results and possibly the new version ID
 	 */
-	MethodOutcome update(String theIdDt, IResource theResource);
+	MethodOutcome update(String theId, IResource theResource);
 
 	/**
 	 * Implementation of the "type validate" method.
 	 * 
-	 * @param theId
-	 *            The ID to validate
 	 * @param theResource
 	 *            The resource to validate
 	 * @return An outcome containing any validation issues
@@ -284,19 +299,21 @@ public interface IGenericClient {
 	MethodOutcome validate(IResource theResource);
 
 	/**
-	 * Implementation of the "instance vread" method. Note that this method expects <code>theId</code> to contain a resource ID as well as a version ID, and will fail if it does not.
+	 * Implementation of the "instance vread" method. Note that this method expects <code>theId</code> to contain a
+	 * resource ID as well as a version ID, and will fail if it does not.
 	 * <p>
-	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the resource type and ID) the server base for the client will be ignored, and the URL
-	 * passed in will be queried.
+	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the
+	 * resource type and ID) the server base for the client will be ignored, and the URL passed in will be queried.
 	 * </p>
 	 * 
 	 * @param theType
 	 *            The type of resource to load
 	 * @param theId
-	 *            The ID to load, including the resource ID and the resource version ID. Valid values include "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
+	 *            The ID to load, including the resource ID and the resource version ID. Valid values include
+	 *            "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
 	 * @return The resource
 	 */
-	<T extends IResource> T vread(Class<T> theType, IdDt theId);
+	<T extends IBaseResource> T vread(Class<T> theType, IdDt theId);
 
 	/**
 	 * Implementation of the "instance vread" method.
@@ -323,6 +340,6 @@ public interface IGenericClient {
 	 *            The version ID
 	 * @return The resource
 	 */
-	<T extends IResource> T vread(Class<T> theType, String theId, String theVersionId);
+	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
 
 }

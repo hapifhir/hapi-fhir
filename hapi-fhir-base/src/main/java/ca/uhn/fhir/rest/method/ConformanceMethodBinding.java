@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -42,7 +43,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 //		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
 //			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
 //		}
-		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom(theMethod.getReturnType())) {
+		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom((Class<?>) theMethod.getGenericReturnType())) {
 			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
@@ -99,6 +100,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	public OtherOperationTypeEnum getOtherOperationType() {
 		return OtherOperationTypeEnum.METADATA;
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return null;
 	}
 
 }

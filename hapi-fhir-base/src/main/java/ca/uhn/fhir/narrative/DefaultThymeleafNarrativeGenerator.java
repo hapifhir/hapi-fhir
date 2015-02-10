@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * {@link ca.uhn.fhir.model.dstu.resource.Conformance} resource will be provided, which is designed to be used with 
+	 * Conformance resource will be provided, which is designed to be used with 
 	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
 	 * page which can assist users of the service.
 	 */
@@ -55,7 +55,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the
-	 * {@link ca.uhn.fhir.model.dstu.resource.Conformance} resource will be provided, which is designed to be used with 
+	 * Conformance resource will be provided, which is designed to be used with 
 	 * HAPI {@link RestfulServer} instances. This narrative provides a friendly search
 	 * page which can assist users of the service.
 	 */

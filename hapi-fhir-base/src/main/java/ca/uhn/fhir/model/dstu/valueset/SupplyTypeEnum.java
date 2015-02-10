@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SupplyTypeEnum {
 
 	/**
-	 * Display: <b>Central Supply</b><br/>
+	 * Display: <b>Central Supply</b><br>
 	 * Code Value: <b>central</b>
 	 *
 	 * Supply is stored and requested from central supply
@@ -37,7 +37,7 @@ public enum SupplyTypeEnum {
 	CENTRAL_SUPPLY("central", "http://hl7.org/fhir/supply-type"),
 	
 	/**
-	 * Display: <b>Non-Stock</b><br/>
+	 * Display: <b>Non-Stock</b><br>
 	 * Code Value: <b>nonstock</b>
 	 *
 	 * Supply is not onsite and must be requested from an outside vendor using a non-stock requisition

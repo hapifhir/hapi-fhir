@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SupplyDispenseStatusEnum {
 
 	/**
-	 * Display: <b>In Progress</b><br/>
+	 * Display: <b>In Progress</b><br>
 	 * Code Value: <b>in progress</b>
 	 *
 	 * Supply has been requested, but not dispensed.
@@ -37,7 +37,7 @@ public enum SupplyDispenseStatusEnum {
 	IN_PROGRESS("in progress", "http://hl7.org/fhir/valueset-supply-dispense-status"),
 	
 	/**
-	 * Display: <b>Dispensed</b><br/>
+	 * Display: <b>Dispensed</b><br>
 	 * Code Value: <b>dispensed</b>
 	 *
 	 * Supply is part of a pharmacy order and has been dispensed.
@@ -45,7 +45,7 @@ public enum SupplyDispenseStatusEnum {
 	DISPENSED("dispensed", "http://hl7.org/fhir/valueset-supply-dispense-status"),
 	
 	/**
-	 * Display: <b>Abandoned</b><br/>
+	 * Display: <b>Abandoned</b><br>
 	 * Code Value: <b>abandoned</b>
 	 *
 	 * Dispensing was not completed.

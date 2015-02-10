@@ -12,7 +12,15 @@ public class Example03_SimpleRestfulServer extends RestfulServer {
 
 	@Override
 	protected void initialize() throws ServletException {
+
+		// Set the resource providers used by this server 
 		setResourceProviders(new Example03_PatientResourceProvider());
+		
+		/* This just means to use Content-Types which are not technically
+		 * FHIR compliant if a browser is detected (so that they display
+		 * nicely for testing) */
+		setUseBrowserFriendlyContentTypes(true);
+		
 	}
 	
 	

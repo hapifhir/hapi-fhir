@@ -18,6 +18,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -161,6 +162,7 @@ public class TinderClientMojo extends AbstractMojo {
 		ctx.put("packageBase", myPackageBase);
 		ctx.put("className", myClientClassSimpleName);
 		ctx.put("resources", myResources);
+		ctx.put("esc", new EscapeTool());
 
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");

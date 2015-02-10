@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import ca.uhn.fhir.model.api.ICompositeElement;
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BaseRuntimeElementCompositeDefinition<T extends ICompositeElement> extends BaseRuntimeElementDefinition<T> {
+public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> extends BaseRuntimeElementDefinition<T> {
 
 	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<BaseRuntimeChildDefinition>();
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
@@ -76,7 +76,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 
 		for (BaseRuntimeChildDefinition next : myChildren) {
@@ -91,7 +91,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IComposite
 			}
 			for (String nextName : next.getValidChildNames()) {
 				if (myNameToChild.containsKey(nextName)) {
-					throw new ConfigurationException("Duplicate child name: " + nextName);
+					throw new ConfigurationException("Duplicate child name[" + nextName + "] in Element[" + getName() + "]");
 				} else {
 					myNameToChild.put(nextName, next);
 				}

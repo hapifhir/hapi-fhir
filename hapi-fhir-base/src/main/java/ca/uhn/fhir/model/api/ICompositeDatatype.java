@@ -1,10 +1,12 @@
 package ca.uhn.fhir.model.api;
 
+import org.hl7.fhir.instance.model.ICompositeType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +24,6 @@ package ca.uhn.fhir.model.api;
 
 
 
-public interface ICompositeDatatype extends IDatatype, ICompositeElement {
+public interface ICompositeDatatype extends IDatatype, ICompositeElement, ICompositeType {
 	
 }

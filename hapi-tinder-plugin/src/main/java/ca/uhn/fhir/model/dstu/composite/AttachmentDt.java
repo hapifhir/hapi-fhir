@@ -16,36 +16,35 @@
 
 package ca.uhn.fhir.model.dstu.composite;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+import java.math.BigDecimal;
+import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.base.composite.*;
 
-import java.util.List;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.valueset.ContactSystemEnum;
+import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.EventTimingEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu.valueset.UnitsOfTimeEnum;
+import ca.uhn.fhir.model.dstu.resource.ValueSet;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.BooleanDt;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -154,6 +153,25 @@ public class AttachmentDt
 		return myContentType;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>contentType</b> (Mime type of the content, with charset etc.).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate
+     * </p> 
+	 */
+	public CodeDt getContentTypeElement() {  
+		if (myContentType == null) {
+			myContentType = new CodeDt();
+		}
+		return myContentType;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>contentType</b> (Mime type of the content, with charset etc.)
 	 *
@@ -197,6 +215,25 @@ public class AttachmentDt
 		}
 		return myLanguage;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>language</b> (Human language of the content (BCP-47)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The human language of the content. The value can be any valid value according to BCP 47
+     * </p> 
+	 */
+	public CodeDt getLanguageElement() {  
+		if (myLanguage == null) {
+			myLanguage = new CodeDt();
+		}
+		return myLanguage;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>language</b> (Human language of the content (BCP-47))
@@ -242,6 +279,25 @@ public class AttachmentDt
 		return myData;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>data</b> (Data inline, base64ed).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The actual data of the attachment - a sequence of bytes. In XML, represented using base64
+     * </p> 
+	 */
+	public Base64BinaryDt getDataElement() {  
+		if (myData == null) {
+			myData = new Base64BinaryDt();
+		}
+		return myData;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>data</b> (Data inline, base64ed)
 	 *
@@ -285,6 +341,25 @@ public class AttachmentDt
 		}
 		return myUrl;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>url</b> (Uri where the data can be found).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * An alternative location where the data can be accessed
+     * </p> 
+	 */
+	public UriDt getUrlElement() {  
+		if (myUrl == null) {
+			myUrl = new UriDt();
+		}
+		return myUrl;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>url</b> (Uri where the data can be found)
@@ -330,6 +405,25 @@ public class AttachmentDt
 		return mySize;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>size</b> (Number of bytes of content (if url provided)).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The number of bytes of data that make up this attachment.
+     * </p> 
+	 */
+	public IntegerDt getSizeElement() {  
+		if (mySize == null) {
+			mySize = new IntegerDt();
+		}
+		return mySize;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>size</b> (Number of bytes of content (if url provided))
 	 *
@@ -374,6 +468,25 @@ public class AttachmentDt
 		return myHash;
 	}
 
+
+	/**
+	 * Gets the value(s) for <b>hash</b> (Hash of the data (sha-1, base64ed )).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * The calculated hash of the data using SHA-1. Represented using base64
+     * </p> 
+	 */
+	public Base64BinaryDt getHashElement() {  
+		if (myHash == null) {
+			myHash = new Base64BinaryDt();
+		}
+		return myHash;
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>hash</b> (Hash of the data (sha-1, base64ed ))
 	 *
@@ -417,6 +530,25 @@ public class AttachmentDt
 		}
 		return myTitle;
 	}
+
+
+	/**
+	 * Gets the value(s) for <b>title</b> (Label to display in place of the data).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A label or set of text to display in place of the data
+     * </p> 
+	 */
+	public StringDt getTitleElement() {  
+		if (myTitle == null) {
+			myTitle = new StringDt();
+		}
+		return myTitle;
+	}
+
 
 	/**
 	 * Sets the value(s) for <b>title</b> (Label to display in place of the data)

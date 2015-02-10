@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ package ca.uhn.fhir.context;
 
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeElementDefinition<XhtmlDt> {
@@ -37,7 +38,7 @@ public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeEle
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		// nothing
 	}
 

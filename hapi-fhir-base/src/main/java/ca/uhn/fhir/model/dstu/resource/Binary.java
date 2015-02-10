@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dstu.resource;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,24 @@ package ca.uhn.fhir.model.dstu.resource;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(name = "Binary", profile = "http://hl7.org/fhir/profiles/Binary", id = "binary")
 public class Binary extends BaseResource implements IResource {
 
+	@Child(name = "content", order = 1)
 	private Base64BinaryDt myContent = new Base64BinaryDt();
-	private String myContentType;
+
+	@Child(name = "contentType", order = 0)
+	private StringDt myContentType;
 
 	/**
 	 * Constructor
@@ -71,12 +76,15 @@ public class Binary extends BaseResource implements IResource {
 	}
 
 	public String getContentType() {
-		return myContentType;
+		if (myContentType == null) {
+			return null;
+		}
+		return myContentType.getValue();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return (myContent.isEmpty()) && StringUtils.isBlank(myContentType);
+		return (myContent.isEmpty()) && ElementUtil.isEmpty(myContentType);
 	}
 
 	public void setContent(byte[] theContent) {
@@ -88,12 +96,17 @@ public class Binary extends BaseResource implements IResource {
 	}
 
 	public void setContentType(String theContentType) {
-		myContentType = theContentType;
+		myContentType = new StringDt(theContentType);
 	}
 
 	@Override
 	public String getResourceName() {
 		return Binary.class.getName();
+	}
+
+	@Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU1;
 	}
 
 }

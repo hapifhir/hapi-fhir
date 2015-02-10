@@ -1,8 +1,8 @@
 package example;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 
 public class ResourceRefs {
 
@@ -17,12 +17,12 @@ public class ResourceRefs {
       // Create an organization, and give it a local ID
       Organization org = new Organization();
       org.setId("#localOrganization");
-      org.getName().setValue("Contained Test Organization");
+      org.getNameElement().setValue("Contained Test Organization");
 
       // Create a patient
       Patient patient = new Patient();
       patient.setId("Patient/1333");
-      patient.addIdentifier("urn:mrns", "253345");
+      patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 
       // Set the reference, and manually add the contained resource
       patient.getManagingOrganization().setReference("#localOrganization");

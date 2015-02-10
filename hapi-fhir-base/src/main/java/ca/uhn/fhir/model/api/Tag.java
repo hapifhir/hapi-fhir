@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,8 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	/**
+	 * Sets the label and returns a reference to this tag
+	 * 
 	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object
@@ -152,6 +154,8 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	/**
+	 * Sets the scheme and returns a reference to this tag
+	 * 
 	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object
@@ -162,6 +166,8 @@ public class Tag extends BaseElement implements IElement {
 	}
 
 	/**
+	 * Sets the term and returns a reference to this tag
+	 * 
 	 * @deprecated Tags will become immutable in a future release of HAPI in order to facilitate
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object

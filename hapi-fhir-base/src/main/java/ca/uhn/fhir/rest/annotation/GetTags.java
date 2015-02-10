@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public @interface GetTags {
 
 	/**
-	 * If set to a type other than the default (which is {@link IResource.class}
+	 * If set to a type other than the default (which is {@link IResource}
 	 * , this method is expected to return a TagList containing only tags which
 	 * are specific to the given resource type.
 	 */

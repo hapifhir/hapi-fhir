@@ -5,20 +5,20 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-dstu</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Structures - DSTU (FHIR 0.80)</name>
+	<name>HAPI FHIR Structures - DSTU1 (FHIR v0.80)</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -157,7 +157,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
+			<artifactId>java-hamcrest</artifactId>
 			<version>${hamcrest_version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -195,7 +195,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.8-SNAPSHOT</version>
+				<version>0.9-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -305,13 +305,13 @@
 		</pluginManagement>
 		<resources>
 			<resource>
-				<directory>${baseDir}/src/main/resources</directory>
+				<directory>${basedir}/src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>${baseDir}/target/generated-sources/tinder</directory>
+				<directory>${basedir}/target/generated-sources/tinder</directory>
 			</resource>
 			<resource>
-				<directory>${baseDir}/target/generated-resources/tinder</directory>
+				<directory>${basedir}/target/generated-resources/tinder</directory>
 			</resource>
 		</resources>
 	</build>

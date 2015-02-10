@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ package ca.uhn.fhir.context;
 
 import java.lang.reflect.Field;
 
-import ca.uhn.fhir.model.api.IDatatype;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
 public class RuntimeChildCompositeDatatypeDefinition extends BaseRuntimeChildDatatypeDefinition {
 
-	public RuntimeChildCompositeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IDatatype> theDatatype) {
+	public RuntimeChildCompositeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype) {
 		super(theField, theElementName, theChildAnnotation,theDescriptionAnnotation, theDatatype);
 	}
 

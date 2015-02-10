@@ -56,11 +56,18 @@
 					There are many places in the FHIR specification where a "coded" string is
 					used. This means that a code must be chosen from a list of allowable values.
 				</p>
-			
+				
+				<h4>Closed Valuesets / Codes</h4>
+				
 				<p>
-					In these cases, HAPI tries to simplify the process by providing Java Enum
-					types, which can be used to reduce complexity and provide compile-time
-					checking.
+					The FHIR specification defines a number of "closed" ValueSets, such as
+					the one used for
+					<!-- TODO: replace the link below with a non GitHub link once DSTU2 is balloted -->
+					<a href="http://hl7-fhir.github.io/administrative-gender.html">Patient.gender</a>
+					(<i>note that this field was not a closed ValueSet in DSTU1 but is as of DSTU2</i>).
+					These valuesets must either be empty, or be populated with a value drawn from
+					the list of allowable values defined by FHIR. HAPI provides special typesafe
+					Enums to help in dealing with these fields.
 				</p>
 				
 				<macro name="snippet">
@@ -68,6 +75,42 @@
 					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
 				</macro>
 
+				<h4>Open Valusets / CodeableConcepts</h4>
+				
+				<p>
+					The FHIR specification also defines a number of "open" ValueSets, such as
+					the one used for
+					<a href="http://hl7.org/implement/standards/fhir/valueset-marital-status.html">Patient.maritalStatus</a>.
+					These fields may define a set of allowable codes, but also allow you to 
+					use your own codes instead if none of the given codes matches your needs. This
+					is called an <a href="http://hl7.org/implement/standards/fhir/terminologies.html#incomplete">incomplete binding</a>.
+					Some fields may even define a set of codes that serve as nothing more than
+					an example as to the type of codes that would be used there. This is known as
+					an <a href="http://hl7.org/implement/standards/fhir/terminologies.html#example">example binding</a>.
+				</p>
+				
+				<p>
+					For these fields, a CodeableConcept datatype is generally used by the 
+					FHIR specification. This datatype allows multiple "codings", which
+					are a code and codesystem pair, optionally with a display name as well.
+					The following example shows how to interact with this type.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="codeableConcepts" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
+				</macro>
+
+				<p>
+					HAPI also provides typesafe enums to help in working with CodeableConcept
+					fields.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="codeableConceptEnums" />
+					<param name="file" value="examples/src/main/java/example/FhirDataModel.java" />
+				</macro>
+				
 			</subsection>
 			
 			<subsection name="Convenience Methods">

@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.composite;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,13 +87,14 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 	}
 	
 	/**
-	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
+	 * Gets the value(s) for <b>comparator</b> (&lt; | &lt;= | &gt;= | &gt; - how to understand the value).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
+     * How the value should be understood and represented - whether the actual value is greater or less than 
+     * the stated value due to measurement issues. E.g. if the comparator is \"&lt;\" , then the real value is &lt; stated value
      * </p> 
 	 */
 	public abstract BoundCodeDt<?> getComparatorElement();

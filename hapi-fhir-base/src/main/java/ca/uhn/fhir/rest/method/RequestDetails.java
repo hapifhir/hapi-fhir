@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,24 @@ import java.util.Map;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class RequestDetails {
 
 	private String myCompartmentName;
+	private String myCompleteUrl;
 	private IdDt myId;
 	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
 	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
+	private RestfulServer myServer;
 	private RestfulOperationSystemEnum mySystemOperationType;
-	private String myCompleteUrl;
-
 	public String getCompartmentName() {
 		return myCompartmentName;
+	}
+	public String getCompleteUrl() {
+		return myCompleteUrl;
 	}
 
 	public IdDt getId() {
@@ -61,12 +65,20 @@ public class RequestDetails {
 		return myResourceOperationType;
 	}
 
+	public RestfulServer getServer() {
+		return myServer;
+	}
+
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return mySystemOperationType;
 	}
 
 	public void setCompartmentName(String theCompartmentName) {
 		myCompartmentName = theCompartmentName;
+	}
+
+	public void setCompleteUrl(String theCompleteUrl) {
+		myCompleteUrl = theCompleteUrl;
 	}
 
 	public void setId(IdDt theId) {
@@ -89,16 +101,12 @@ public class RequestDetails {
 		myResourceOperationType = theResourceOperationType;
 	}
 
+	public void setServer(RestfulServer theServer) {
+		myServer = theServer;
+	}
+
 	public void setSystemOperationType(RestfulOperationSystemEnum theSystemOperationType) {
 		mySystemOperationType = theSystemOperationType;
-	}
-
-	public String getCompleteUrl() {
-		return myCompleteUrl;
-	}
-
-	public void setCompleteUrl(String theCompleteUrl) {
-		myCompleteUrl = theCompleteUrl;
 	}
 
 }

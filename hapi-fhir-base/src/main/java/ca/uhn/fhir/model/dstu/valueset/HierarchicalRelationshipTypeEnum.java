@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum HierarchicalRelationshipTypeEnum {
 
 	/**
-	 * Display: <b>Parent</b><br/>
+	 * Display: <b>Parent</b><br>
 	 * Code Value: <b>parent</b>
 	 *
 	 * The target resource is the parent of the focal specimen resource.
@@ -37,7 +37,7 @@ public enum HierarchicalRelationshipTypeEnum {
 	PARENT("parent", "http://hl7.org/fhir/hierarchical-relationship-type"),
 	
 	/**
-	 * Display: <b>Child</b><br/>
+	 * Display: <b>Child</b><br>
 	 * Code Value: <b>child</b>
 	 *
 	 * The target resource is the child of the focal specimen resource.

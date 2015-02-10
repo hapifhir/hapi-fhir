@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class FhirValidator {
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
 	public void setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
-		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator());
+		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
 	}
 
 	/**
@@ -125,7 +125,7 @@ public class FhirValidator {
 		if (theValidateAgainstStandardSchematron && !ourPhlocPresentOnClasspath) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_ERROR));
 		}
-		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator());
+		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator(myContext));
 	}
 
 	/**

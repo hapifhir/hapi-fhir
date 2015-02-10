@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,28 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.io.InputStream;
+
+import org.hl7.fhir.instance.model.IBaseResource;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public interface IFhirVersion {
 
-	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition);
-
-	Object createServerConformanceProvider(RestfulServer theServer);
-
+	FhirVersionEnum getVersion();
+	
 	IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer); 
 	
+	InputStream getFhirVersionPropertiesFile();
+	
+	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
+
+	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer);
+
+	String getPathToSchemaDefinitions();
+
 }

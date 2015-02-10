@@ -1,7 +1,6 @@
 package example;
 
 import java.io.IOException;
-import java.lang.annotation.Documented;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,17 +19,16 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.rest.annotation.TagListParam;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
-import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu.resource.Observation;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Organization;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -51,6 +49,7 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -72,6 +71,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -161,7 +161,7 @@ public List<Patient> findPatients(
 //START SNIPPET: referenceSimple
 @Search
 public List<Patient> findPatientsWithSimpleReference(
-		@OptionalParam(name=Patient.SP_PROVIDER) ReferenceParam theProvider
+		@OptionalParam(name=Patient.SP_CAREPROVIDER) ReferenceParam theProvider
 		) {
    List<Patient> retVal=new ArrayList<Patient>();
 
@@ -249,6 +249,45 @@ public List<Patient> findObservations(
 
 }
 //END SNIPPET: referenceWithStaticChain
+
+
+//START SNIPPET: referenceWithDynamicChain
+@Search()
+public List<Observation> findBySubject(
+      @RequiredParam(name=Observation.SP_SUBJECT, chainWhitelist = {"", Patient.SP_IDENTIFIER, Patient.SP_BIRTHDATE}) ReferenceParam subject
+      ) {
+    List<Observation> observations = new ArrayList<Observation>();
+
+    String chain = subject.getChain();
+    if (Patient.SP_IDENTIFIER.equals(chain)) {
+
+       // Because the chained parameter "subject.identifier" is actually of type
+       // "token", we convert the value to a token before processing it. 
+       TokenParam tokenSubject = subject.toTokenParam();
+       String system = tokenSubject.getSystem();
+       String identifier = tokenSubject.getValue();
+       
+       // TODO: populate all the observations for the identifier
+       
+    } else if (Patient.SP_BIRTHDATE.equals(chain)) {
+
+          // Because the chained parameter "subject.birthdate" is actually of type
+          // "date", we convert the value to a date before processing it. 
+          DateParam dateSubject = subject.toDateParam();
+          DateTimeDt birthDate = dateSubject.getValueAsDateTimeDt();
+          
+          // TODO: populate all the observations for the birthdate
+          
+    } else if ("".equals(chain)) {
+        
+       String resourceId = subject.getValue();
+        // TODO: populate all the observations for the resource id
+        
+    }
+
+    return observations;
+}
+//END SNIPPET: referenceWithDynamicChain
 
 
 //START SNIPPET: read
@@ -661,11 +700,13 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
 
   String versionId = theId.getVersionIdPart();
   if (versionId != null) {
-    // If the client passed in a version number in the request URL, which means they are
+    // If the client passed in a version number in an If-Match header, they are
     // doing a version-aware update. You may wish to throw an exception if the supplied
-    // version is not the latest version.
+    // version is not the latest version. Note that as of DSTU2 the FHIR specification uses
+    // ETags and If-Match to handle version aware updates, so PreconditionFailedException (HTTP 412)
+    // is used instead of ResourceVersionConflictException (HTTP 409)
     if (detectedVersionConflict) {
-      throw new ResourceVersionConflictException("Invalid version");
+      throw new PreconditionFailedException("Unexpected version");
     }
   }
   

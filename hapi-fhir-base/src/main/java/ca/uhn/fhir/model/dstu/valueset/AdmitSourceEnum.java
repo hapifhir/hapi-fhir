@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,61 +29,61 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum AdmitSourceEnum {
 
 	/**
-	 * Display: <b>Transferred from other hospital</b><br/>
+	 * Display: <b>Transferred from other hospital</b><br>
 	 * Code Value: <b>hosp-trans</b>
 	 */
 	TRANSFERRED_FROM_OTHER_HOSPITAL("hosp-trans", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>From accident/emergency department</b><br/>
+	 * Display: <b>From accident/emergency department</b><br>
 	 * Code Value: <b>emd</b>
 	 */
 	FROM_ACCIDENT_EMERGENCY_DEPARTMENT("emd", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>From outpatient department</b><br/>
+	 * Display: <b>From outpatient department</b><br>
 	 * Code Value: <b>outp</b>
 	 */
 	FROM_OUTPATIENT_DEPARTMENT("outp", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>Born in hospital</b><br/>
+	 * Display: <b>Born in hospital</b><br>
 	 * Code Value: <b>born</b>
 	 */
 	BORN_IN_HOSPITAL("born", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>General Practitioner referral</b><br/>
+	 * Display: <b>General Practitioner referral</b><br>
 	 * Code Value: <b>gp</b>
 	 */
 	GENERAL_PRACTITIONER_REFERRAL("gp", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>Medical Practitioner/physician referral</b><br/>
+	 * Display: <b>Medical Practitioner/physician referral</b><br>
 	 * Code Value: <b>mp</b>
 	 */
 	MEDICAL_PRACTITIONER_PHYSICIAN_REFERRAL("mp", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>From nursing home</b><br/>
+	 * Display: <b>From nursing home</b><br>
 	 * Code Value: <b>nursing</b>
 	 */
 	FROM_NURSING_HOME("nursing", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>From psychiatric hospital</b><br/>
+	 * Display: <b>From psychiatric hospital</b><br>
 	 * Code Value: <b>psych</b>
 	 */
 	FROM_PSYCHIATRIC_HOSPITAL("psych", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>From rehabilitation facility</b><br/>
+	 * Display: <b>From rehabilitation facility</b><br>
 	 * Code Value: <b>rehab</b>
 	 */
 	FROM_REHABILITATION_FACILITY("rehab", "http://hl7.org/fhir/admit-source"),
 	
 	/**
-	 * Display: <b>Other</b><br/>
+	 * Display: <b>Other</b><br>
 	 * Code Value: <b>other</b>
 	 */
 	OTHER("other", "http://hl7.org/fhir/admit-source"),

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ResourceParameter implements IParameter {
 
-	private Class<? extends IResource> myResourceName ;
+	private Class<? extends IResource> myResourceType;
 
 	public ResourceParameter(Class<? extends IResource> theParameterType) {
-		myResourceName =theParameterType;
+		myResourceType = theParameterType;
 	}
-	
+
 	@Override
 	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -53,12 +53,12 @@ public class ResourceParameter implements IParameter {
 	}
 
 	public Class<? extends IResource> getResourceType() {
-		return myResourceName;
+		return myResourceType;
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		// ignore for now
 	}
-	
+
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,25 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
+
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public interface INarrativeGenerator {
 
-	NarrativeDt generateNarrative(String theProfile, IResource theResource) throws DataFormatException;
+	NarrativeDt generateNarrative(String theProfile, IBaseResource theResource) throws DataFormatException;
 
-	NarrativeDt generateNarrative(IResource theResource);
+	NarrativeDt generateNarrative(IBaseResource theResource);
 
-	String generateTitle(IResource theResource);
+	String generateTitle(IBaseResource theResource);
 
-	String generateTitle(String theProfile, IResource theResource);
+	String generateTitle(String theProfile, IBaseResource theResource);
 
+	/**
+	 * This method is called automatically by the framework, you do not need to interact with this method.
+	 */
+	void setFhirContext(FhirContext theFhirContext);
+	
 }

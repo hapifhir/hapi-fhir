@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,8 +44,9 @@ public class ProvidedResourceScanner {
     /**
      * If {@code theProvider} is tagged with the {@code ProvidesResources} annotation, this method will add every resource listed
      * by the {@code resources} method.
-     * <p/>
-     * notes:
+     * <p>
+     * Notes:
+     * </p>
      * <ul>
      * <li>if {@code theProvider} isn't annotated with {@code resources} nothing is done; it's expected that most RestfulServers and
      * ResourceProviders won't be annotated.</li>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,17 +63,11 @@ public class XmlUtil {
 	private static volatile boolean ourHaveLoggedStaxImplementation;
 	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
-
 	private static final Attributes.Name IMPLEMENTATION_TITLE = new Attributes.Name("Implementation-Title");
-
 	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
-
 	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
-
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");
-
 	private static final Attributes.Name BUNDLE_VENDOR = new Attributes.Name("Bundle-Vendor");
-
 	private static final Attributes.Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
 
 	static {
@@ -210,10 +204,14 @@ public class XmlUtil {
 			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
 			 * being used (e.g. glassfish) so we don't set them there.
 			 */
-
-			if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
-				// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
-				inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
+			try {
+				Class.forName("com.ctc.wstx.stax.WstxInputFactory");
+				if (inputFactory instanceof com.ctc.wstx.stax.WstxInputFactory) {
+					// inputFactory.setProperty(WstxInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+					inputFactory.setProperty(WstxInputProperties.P_UNDECLARED_ENTITY_RESOLVER, XML_RESOLVER);
+				}
+			} catch (ClassNotFoundException e) {
+				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
 			}
 			ourInputFactory = inputFactory;
 		}
@@ -317,8 +315,13 @@ public class XmlUtil {
 			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
 			 * being used (e.g. glassfish) so we don't set them there.
 			 */
-			if (outputFactory instanceof WstxOutputFactory) {
-				outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+			try {
+				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+				if (outputFactory instanceof WstxOutputFactory) {
+					outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+				}
+			} catch (ClassNotFoundException e) {
+				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
 			}
 			ourOutputFactory = outputFactory;
 		}
@@ -357,6 +360,7 @@ public class XmlUtil {
 						case '"':
 						case '&':
 							hasEscapable = true;
+							break;
 						default:
 							break;
 						}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,27 @@ import java.lang.annotation.Target;
 public @interface ResourceDef {
 
 	/**
-	 * The name of the resource (e.g. "Patient" or "DiagnosticReport")
+	 * The name of the resource (e.g. "Patient" or "DiagnosticReport"). If you are defining your
+	 * own custom extension to a built-in FHIR resource definition type (e.g. you are extending
+	 * the built-in Patient class) you do not need to supply a value for this property, as it 
+	 * will be inferred from the parent class.
 	 */
 	String name() default "";
 
 	/**
-	 * if set, will be used as the id for any profiles generated for this resource
+	 * if set, will be used as the id for any profiles generated for this resource. This property
+	 * should be set for custom profile definition classes, and will be used as the resource ID
+	 * for the generated profile exported by the server. For example, if you set this value to
+	 * "hello" on a custom resource class, your server will automatically export a profile with the
+	 * identity: <code>http://localhost:8080/fhir/Profile/hello</code> (the base URL will be whatever
+	 * your server uses, not necessarily "http://localhost:8080/fhir")    
 	 */
 	String id() default "";
 	
 	/**
-	 * The URL indicating the profile for this resource definition, if known
+	 * The URL indicating the profile for this resource definition, if known. If this value is set
+	 * on a custom profile definition class in a server, the profile is assumed to be external to
+	 * the server, so the server will not export a profile for it.
 	 */
 	String profile() default "";
 	

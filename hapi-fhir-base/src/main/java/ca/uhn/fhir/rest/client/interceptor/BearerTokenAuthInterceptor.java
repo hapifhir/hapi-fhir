@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import ca.uhn.fhir.rest.server.Constants;
  * HTTP interceptor to be used for adding HTTP Authorization using "bearer tokens" to requests. Bearer tokens are used for protocols such as OAUTH2 (see the <a
  * href="http://tools.ietf.org/html/rfc6750">RFC 6750</a> specification on bearer token usage for more information).
  * <p>
- * This interceptor adds a header resembling the following:<br/>
- * &nbsp;&nbsp;&nbsp;<code>Authorization: Bearer dsfu9sd90fwp34.erw0-reu</code><br/>
+ * This interceptor adds a header resembling the following:<br>
+ * &nbsp;&nbsp;&nbsp;<code>Authorization: Bearer dsfu9sd90fwp34.erw0-reu</code><br>
  * where the token portion (at the end of the header) is supplied by the invoking code.
  * </p>
  * <p>

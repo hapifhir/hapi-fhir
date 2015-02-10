@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.util.UrlUtil;
 
-public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IResource> {
+public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
 
 	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
@@ -40,12 +43,25 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	private List<RuntimeSearchParam> mySearchParams;
 	private FhirContext myContext;
 	private String myId;
+	private final FhirVersionEnum myStructureVersion;
 
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IResource> theClass, ResourceDef theResourceAnnotation) {
+	public FhirVersionEnum getStructureVersion() {
+		return myStructureVersion;
+	}
+
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation) {
 		super(theResourceName, theClass);
 		myContext= theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
+		
+		try {
+			IBaseResource instance = theClass.newInstance();
+			myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();
+		} catch (Exception e) {
+			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
+		}
+		
 	}
 
 	public String getId() {
@@ -74,8 +90,28 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return ChildTypeEnum.RESOURCE;
 	}
 
+	@Deprecated
 	public String getResourceProfile() {
 		return myResourceProfile;
+	}
+
+	public String getResourceProfile(String theServerBase) {
+		String profile;
+		if (!myResourceProfile.isEmpty()) {
+			profile = myResourceProfile;
+		} else if (!myId.isEmpty()) {
+			profile = myId;
+		} else {
+			return "";
+		}
+
+		if (!UrlUtil.isValid(profile)) {
+			String profileWithUrl = theServerBase + "/Profile/" + profile;
+			if (UrlUtil.isValid(profileWithUrl)) {
+				return profileWithUrl;
+			}
+		}
+		return profile;
 	}
 
 	public RuntimeSearchParam getSearchParam(String theName) {
@@ -91,7 +127,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		super.sealAndInitialize(theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
@@ -115,17 +151,26 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		} while (target.equals(Object.class)==false);
 	}
 
+	@Deprecated
 	public synchronized IResource toProfile() {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this);
+		IResource retVal = myContext.getVersion().generateProfile(this, null);
 		myProfileDef = retVal;
 
 		return retVal;
 	}
 
+	public synchronized IResource toProfile(String theServerBase) {
+		if (myProfileDef != null) {
+			return myProfileDef;
+		}
 
+		IResource retVal = myContext.getVersion().generateProfile(this, theServerBase);
+		myProfileDef = retVal;
 
+		return retVal;
+	}
 }

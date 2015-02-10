@@ -43,7 +43,7 @@ public class MyOrganization extends Organization {
 	 * of this file.
 	 */
 	@Description(shortDefinition="Contains emergency contact details")
-	@Extension(url = "http://foo#billingCode", isModifier = false, definedLocally = true)
+	@Extension(url = "http://foo#emergencyContact", isModifier = false, definedLocally = true)
 	@Child(name = "emergencyContact", min=0, max=Child.MAX_UNLIMITED)
 	private List<EmergencyContact> myEmergencyContact;
 	

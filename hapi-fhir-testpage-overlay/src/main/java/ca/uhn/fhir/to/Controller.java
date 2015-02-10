@@ -42,8 +42,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.thymeleaf.TemplateEngine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -57,6 +59,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
@@ -83,8 +86,8 @@ public class Controller {
 	@Autowired
 	private TesterConfig myConfig;
 
-	@Autowired
-	private FhirContext myCtx;
+	private Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
+
 	private List<String> myFilterHeaders;
 
 	@Autowired
@@ -107,7 +110,7 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 		ResultType returnsResource = ResultType.RESOURCE;
 
 		long start = System.currentTimeMillis();
@@ -118,7 +121,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance", interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Loaded conformance", interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Displayed conformance profile");
 
@@ -131,16 +134,17 @@ public class Controller {
 		return "result";
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/delete" })
 	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
-			def = getResourceType(theReq);
+			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
 			theModel.put("errorMsg", e.toString());
 			return "resource";
@@ -157,12 +161,12 @@ public class Controller {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete(def.getImplementingClass(), new IdDt(id));
+			client.delete((Class<? extends IResource>) def.getImplementingClass(), new IdDt(id));
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}
 		long delay = System.currentTimeMillis() - start;
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		ourLog.info(logPrefix(theModel) + "Deleted resource of type " + def.getName());
 
@@ -174,7 +178,7 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		Class<? extends IResource> resType = null;
 		ResultType returnsResource = ResultType.TAGLIST;
@@ -185,13 +189,13 @@ public class Controller {
 			if (isNotBlank(theReq.getParameter(PARAM_RESOURCE))) {
 				RuntimeResourceDefinition def;
 				try {
-					def = getResourceType(theReq);
+					def = getResourceType(theRequest, theReq);
 				} catch (ServletException e) {
 					theModel.put("errorMsg", e.toString());
 					return "resource";
 				}
 
-				resType = def.getImplementingClass();
+				resType = (Class<? extends IResource>) def.getImplementingClass();
 				String id = theReq.getParameter("resource-tags-id");
 				if (isNotBlank(id)) {
 					String vid = theReq.getParameter("resource-tags-vid");
@@ -215,7 +219,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
@@ -233,8 +237,9 @@ public class Controller {
 	}
 
 	@RequestMapping(value = { "/", "/home" })
-	public String actionHome(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+	public String actionHome(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
+		ourLog.info(theServletRequest.toString());
 		return "home";
 	}
 
@@ -243,7 +248,7 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
@@ -267,7 +272,7 @@ public class Controller {
 
 		String outcomeDescription = "Bundle Page";
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
@@ -277,11 +282,11 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
-			def = getResourceType(theReq);
+			def = getResourceType(theRequest, theReq);
 		} catch (ServletException e) {
 			theModel.put("errorMsg", e.toString());
 			return "resource";
@@ -312,26 +317,62 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		return "result";
 	}
 
 	@RequestMapping({ "/resource" })
 	public String actionResource(final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		Conformance conformance = addCommonParams(theRequest, theModel);
+		IResource conformance = addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		String resourceName = theRequest.getResource();
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
+		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
 
 		TreeSet<String> includes = new TreeSet<String>();
 		TreeSet<String> sortParams = new TreeSet<String>();
 		List<RestQuery> queries = new ArrayList<Conformance.RestQuery>();
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<List<String>>();
+
+		switch (theRequest.getFhirVersion(myConfig)) {
+		case DEV:
+		case DSTU2:
+			haveSearchParams = extractSearchParamsDev(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
+			break;
+		case DSTU1:
+			haveSearchParams = extractSearchParamsDstu1(conformance, resourceName, includes, sortParams, queries, haveSearchParams, queryIncludes);
+			break;
+		default:
+			throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
+		}
+
+		theModel.put("includes", includes);
+		theModel.put("queries", queries);
+		theModel.put("haveSearchParams", haveSearchParams);
+		theModel.put("queryIncludes", queryIncludes);
+		theModel.put("sortParams", sortParams);
+
+		if (isNotBlank(theRequest.getUpdateId())) {
+			String updateId = theRequest.getUpdateId();
+			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
+			IResource updateResource = (IResource) client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
+			String updateResourceString = theRequest.newParser(getContext(theRequest)).setPrettyPrint(true).encodeResourceToString(updateResource);
+			theModel.put("updateResource", updateResourceString);
+			theModel.put("updateResourceId", updateId);
+		}
+
+		ourLog.info(logPrefix(theModel) + "Showing resource page: {}", resourceName);
+
+		return "resource";
+	}
+
+	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		Conformance conformance = (Conformance) theConformance;
 		for (Rest nextRest : conformance.getRest()) {
 			for (RestResource nextRes : nextRest.getResource()) {
 				if (nextRes.getType().getValue().equals(resourceName)) {
@@ -375,92 +416,35 @@ public class Controller {
 				}
 			}
 		}
-		theModel.put("includes", includes);
-		theModel.put("queries", queries);
-		theModel.put("haveSearchParams", haveSearchParams);
-		theModel.put("queryIncludes", queryIncludes);
-		theModel.put("sortParams", sortParams);
-
-		if (isNotBlank(theRequest.getUpdateId())) {
-			String updateId = theRequest.getUpdateId();
-			String updateVid = defaultIfEmpty(theRequest.getUpdateVid(), null);
-			IResource updateResource = client.read(def.getImplementingClass(), new IdDt(resourceName, updateId, updateVid));
-			String updateResourceString = theRequest.newParser(myCtx).setPrettyPrint(true).encodeResourceToString(updateResource);
-			theModel.put("updateResource", updateResourceString);
-			theModel.put("updateResourceId", updateId);
-		}
-
-		ourLog.info(logPrefix(theModel) + "Showing resource page: {}", resourceName);
-
-		return "resource";
+		return haveSearchParams;
 	}
 
-	public static class CaptureInterceptor implements IClientInterceptor {
-
-		private HttpRequestBase myLastRequest;
-		private HttpResponse myLastResponse;
-		private String myResponseBody;
-
-		@Override
-		public void interceptRequest(HttpRequestBase theRequest) {
-			assert myLastRequest == null;
-			myLastRequest = theRequest;
-		}
-
-		@Override
-		public void interceptResponse(HttpResponse theResponse) throws IOException {
-			assert myLastResponse == null;
-			myLastResponse = theResponse;
-
-			HttpEntity respEntity = theResponse.getEntity();
-			if (respEntity != null) {
-				final byte[] bytes;
-				try {
-					bytes = IOUtils.toByteArray(respEntity.getContent());
-				} catch (IllegalStateException e) {
-					throw new InternalErrorException(e);
+	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (StringDt next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
 				}
-
-				myResponseBody = new String(bytes, "UTF-8");
-				theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
 			}
 		}
-
-		public HttpRequestBase getLastRequest() {
-			return myLastRequest;
-		}
-
-		public HttpResponse getLastResponse() {
-			return myLastResponse;
-		}
-
-		private static class MyEntityWrapper extends HttpEntityWrapper {
-
-			private byte[] myBytes;
-
-			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
-				super(theWrappedEntity);
-				myBytes = theBytes;
-			}
-
-			@Override
-			public InputStream getContent() throws IOException {
-				return new ByteArrayInputStream(myBytes);
-			}
-
-			@Override
-			public void writeTo(OutputStream theOutstream) throws IOException {
-				theOutstream.write(myBytes);
-			}
-
-		}
-
-		public String getLastResponseBody() {
-			return myResponseBody;
-		}
-
+		return haveSearchParams;
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
 	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
 		addCommonParams(theRequest, theModel);
@@ -472,13 +456,13 @@ public class Controller {
 		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		IUntypedQuery search = client.search();
 		IQuery query;
 		if (isNotBlank(theReq.getParameter("resource"))) {
 			try {
-				query = search.forResource(getResourceType(theReq).getImplementingClass());
+				query = search.forResource((Class<? extends IResource>) getResourceType(theRequest, theReq).getImplementingClass());
 			} catch (ServletException e) {
 				theModel.put("errorMsg", e.toString());
 				return "resource";
@@ -553,7 +537,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		clientCodeJsonWriter.writeEnd();
 		clientCodeJsonWriter.close();
@@ -568,16 +552,16 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
 		Bundle bundle;
 		try {
 			if (body.startsWith("{")) {
-				bundle = myCtx.newJsonParser().parseBundle(body);
+				bundle = getContext(theRequest).newJsonParser().parseBundle(body);
 			} else if (body.startsWith("<")) {
-				bundle = myCtx.newXmlParser().parseBundle(body);
+				bundle = getContext(theRequest).newXmlParser().parseBundle(body);
 			} else {
 				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 				return "home";
@@ -598,7 +582,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction", interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, "Transaction", interceptor, theRequest);
 
 		return "result";
 	}
@@ -615,7 +599,7 @@ public class Controller {
 		return "result";
 	}
 
-	private Conformance addCommonParams(final HomeRequest theRequest, final ModelMap theModel) {
+	private IResource addCommonParams(final HomeRequest theRequest, final ModelMap theModel) {
 		if (myConfig.getDebugTemplatesMode()) {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
@@ -653,12 +637,12 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
-			RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
-			type = def.getImplementingClass();
+			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
+			type = (Class<? extends IResource>) def.getImplementingClass();
 		}
 
 		String body = validate ? theReq.getParameter("resource-validate-body") : theReq.getParameter("resource-create-body");
@@ -672,9 +656,9 @@ public class Controller {
 		IResource resource;
 		try {
 			if (body.startsWith("{")) {
-				resource = myCtx.newJsonParser().parseResource(type, body);
+				resource = getContext(theRequest).newJsonParser().parseResource(type, body);
 			} else if (body.startsWith("<")) {
-				resource = myCtx.newXmlParser().parseResource(type, body);
+				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
 			} else {
 				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 				return;
@@ -715,15 +699,15 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, outcomeDescription, interceptor, theRequest);
 
 		try {
 			if (validate) {
-				ourLog.info(logPrefix(theModel) + "Validated resource of type " + getResourceType(theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Validated resource of type " + getResourceType(theRequest, theReq).getName());
 			} else if (update) {
-				ourLog.info(logPrefix(theModel) + "Updated resource of type " + getResourceType(theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Updated resource of type " + getResourceType(theRequest, theReq).getName());
 			} else {
-				ourLog.info(logPrefix(theModel) + "Created resource of type " + getResourceType(theReq).getName());
+				ourLog.info(logPrefix(theModel) + "Created resource of type " + getResourceType(theRequest, theReq).getName());
 			}
 		} catch (Exception e) {
 			ourLog.warn("Failed to determine resource type from request", e);
@@ -735,13 +719,13 @@ public class Controller {
 		addCommonParams(theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(myCtx, myConfig, interceptor);
+		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
 
 		String id = null;
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
-			RuntimeResourceDefinition def = myCtx.getResourceDefinition(theRequest.getResource());
-			type = def.getImplementingClass();
+			RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
+			type = (Class<? extends IResource>) def.getImplementingClass();
 			id = StringUtils.defaultString(theReq.getParameter("resource-history-id"));
 		}
 
@@ -768,7 +752,7 @@ public class Controller {
 		}
 		long delay = System.currentTimeMillis() - start;
 
-		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription, interceptor);
+		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription, interceptor, theRequest);
 
 	}
 
@@ -932,9 +916,19 @@ public class Controller {
 		return b.toString();
 	}
 
-	private RuntimeResourceDefinition getResourceType(HttpServletRequest theReq) throws ServletException {
+	private FhirContext getContext(HomeRequest theRequest) {
+		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
+		FhirContext retVal = myContexts.get(version);
+		if (retVal == null) {
+			retVal = new FhirContext(version);
+			myContexts.put(version, retVal);
+		}
+		return retVal;
+	}
+
+	private RuntimeResourceDefinition getResourceType(HomeRequest theRequest, HttpServletRequest theReq) throws ServletException {
 		String resourceName = StringUtils.defaultString(theReq.getParameter(PARAM_RESOURCE));
-		RuntimeResourceDefinition def = myCtx.getResourceDefinition(resourceName);
+		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(resourceName);
 		if (def == null) {
 			throw new ServletException("Invalid resourceName: " + resourceName);
 		}
@@ -968,13 +962,13 @@ public class Controller {
 		}
 
 		List<String> values;
-		boolean addToWhere=true;
+		boolean addToWhere = true;
 		if ("token".equals(nextType)) {
 			if (isBlank(parts.get(2))) {
 				return true;
 			}
 			values = Collections.singletonList(StringUtils.join(parts, ""));
-			addToWhere=false;
+			addToWhere = false;
 			theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(2)));
 		} else if ("date".equals(nextType)) {
 			values = new ArrayList<String>();
@@ -1003,31 +997,43 @@ public class Controller {
 			theClientCodeJsonWriter.write("value", nextValue);
 			theClientCodeJsonWriter.writeEnd();
 			if (addToWhere) {
-			theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
+				theQuery.where(new StringClientParam(nextName + nextQualifier).matches().value(nextValue));
 			}
 
 		}
 
 		if (StringUtils.isNotBlank(theReq.getParameter("param." + paramIdxString + ".0.name"))) {
-			handleSearchParam(paramIdxString + ".0", theReq, theQuery , theClientCodeJsonWriter);
+			handleSearchParam(paramIdxString + ".0", theReq, theQuery, theClientCodeJsonWriter);
 		}
 
 		return true;
 	}
 
-	private Conformance loadAndAddConf(final HomeRequest theRequest, final ModelMap theModel) {
-		IGenericClient client = myCtx.newRestfulGenericClient(theRequest.getServerBase(myConfig));
+	private IResource loadAndAddConf(final HomeRequest theRequest, final ModelMap theModel) {
+		switch (theRequest.getFhirVersion(myConfig)) {
+		case DEV:
+			return loadAndAddConfDev(theRequest, theModel);
+		case DSTU1:
+			return loadAndAddConfDstu1(theRequest, theModel);
+		case DSTU2:
+			return loadAndAddConfDev(theRequest, theModel);
+		}
+		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
+	}
+
+	private Conformance loadAndAddConfDstu1(final HomeRequest theRequest, final ModelMap theModel) {
+		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(myConfig));
 
 		Conformance conformance;
 		try {
-			conformance = (Conformance)client.conformance();
+			conformance = (Conformance) client.conformance();
 		} catch (Exception e) {
 			ourLog.warn("Failed to load conformance statement", e);
 			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
 			conformance = new Conformance();
 		}
 
-		theModel.put("jsonEncodedConf", myCtx.newJsonParser().encodeResourceToString(conformance));
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
 
 		Map<String, Number> resourceCounts = new HashMap<String, Number>();
 		long total = 0;
@@ -1074,13 +1080,72 @@ public class Controller {
 		return conformance;
 	}
 
+	private IResource loadAndAddConfDev(final HomeRequest theRequest, final ModelMap theModel) {
+		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(myConfig));
+
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
+		try {
+			conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) client.conformance();
+		} catch (Exception e) {
+			ourLog.warn("Failed to load conformance statement", e);
+			theModel.put("errorMsg", "Failed to load conformance statement, error was: " + e.toString());
+			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
+		}
+
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
+
+		Map<String, Number> resourceCounts = new HashMap<String, Number>();
+		long total = 0;
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextResource : nextRest.getResource()) {
+				List<ExtensionDt> exts = nextResource.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+				if (exts != null && exts.size() > 0) {
+					Number nextCount = ((DecimalDt) (exts.get(0).getValue())).getValueAsNumber();
+					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
+					total += nextCount.longValue();
+				}
+			}
+		}
+		theModel.put("resourceCounts", resourceCounts);
+
+		if (total > 0) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource>() {
+					@Override
+					public int compare(ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO1, ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO2) {
+						DecimalDt count1 = new DecimalDt();
+						List<ExtensionDt> count1exts = theO1.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+						if (count1exts != null && count1exts.size() > 0) {
+							count1 = (DecimalDt) count1exts.get(0).getValue();
+						}
+						DecimalDt count2 = new DecimalDt();
+						List<ExtensionDt> count2exts = theO2.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+						if (count2exts != null && count2exts.size() > 0) {
+							count2 = (DecimalDt) count2exts.get(0).getValue();
+						}
+						int retVal = count2.compareTo(count1);
+						if (retVal == 0) {
+							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
+						}
+						return retVal;
+					}
+				});
+			}
+		}
+
+		theModel.put("conf", conformance);
+		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
+
+		return conformance;
+	}
+
 	private String logPrefix(ModelMap theModel) {
 		return "[server=" + theModel.get("serverId") + "] - ";
 	}
 
-	private String parseNarrative(EncodingEnum theCtEnum, String theResultBody) {
+	private String parseNarrative(HomeRequest theRequest, EncodingEnum theCtEnum, String theResultBody) {
 		try {
-			IResource resource = theCtEnum.newParser(myCtx).parseResource(theResultBody);
+			IResource resource = theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
 			String retVal = resource.getText().getDiv().getValueAsString();
 			return StringUtils.defaultString(retVal);
 		} catch (Exception e) {
@@ -1118,7 +1183,7 @@ public class Controller {
 	}
 
 	private void processAndAddLastClientInvocation(GenericClient theClient, ResultType theResultType, ModelMap theModelMap, long theLatency, String outcomeDescription,
-			CaptureInterceptor theInterceptor) {
+			CaptureInterceptor theInterceptor, HomeRequest theRequest) {
 		try {
 			HttpRequestBase lastRequest = theInterceptor.getLastRequest();
 			HttpResponse lastResponse = theInterceptor.getLastResponse();
@@ -1149,23 +1214,39 @@ public class Controller {
 				switch (ctEnum) {
 				case JSON:
 					if (theResultType == ResultType.RESOURCE) {
-						narrativeString = parseNarrative(ctEnum, resultBody);
+						narrativeString = parseNarrative(theRequest, ctEnum, resultBody);
 						resultDescription.append("JSON resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("JSON bundle");
-						bundle = myCtx.newJsonParser().parseBundle(resultBody);
+						bundle = getContext(theRequest).newJsonParser().parseBundle(resultBody);
 					}
 					break;
 				case XML:
 				default:
 					if (theResultType == ResultType.RESOURCE) {
-						narrativeString = parseNarrative(ctEnum, resultBody);
+						narrativeString = parseNarrative(theRequest, ctEnum, resultBody);
 						resultDescription.append("XML resource");
 					} else if (theResultType == ResultType.BUNDLE) {
 						resultDescription.append("XML bundle");
-						bundle = myCtx.newXmlParser().parseBundle(resultBody);
+						bundle = getContext(theRequest).newXmlParser().parseBundle(resultBody);
 					}
 					break;
+				}
+			}
+
+			/*
+			 * DSTU2 no longer has a title in the bundle format, but it's still
+			 * useful here..
+			 */
+			if (bundle != null) {
+				INarrativeGenerator gen = getContext(theRequest).getNarrativeGenerator();
+				if (gen != null) {
+					for (BundleEntry next : bundle.getEntries()) {
+						if (next.getTitle().isEmpty() && next.getResource() != null) {
+							String title = gen.generateTitle(next.getResource());
+							next.getTitle().setValue(title);
+						}
+					}
 				}
 			}
 
@@ -1198,6 +1279,72 @@ public class Controller {
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);
 			theModelMap.put("errorMsg", "Error during processing: " + e.getMessage());
+		}
+
+	}
+
+	public static class CaptureInterceptor implements IClientInterceptor {
+
+		private HttpRequestBase myLastRequest;
+		private HttpResponse myLastResponse;
+		private String myResponseBody;
+
+		public HttpRequestBase getLastRequest() {
+			return myLastRequest;
+		}
+
+		public HttpResponse getLastResponse() {
+			return myLastResponse;
+		}
+
+		public String getLastResponseBody() {
+			return myResponseBody;
+		}
+
+		@Override
+		public void interceptRequest(HttpRequestBase theRequest) {
+			assert myLastRequest == null;
+			myLastRequest = theRequest;
+		}
+
+		@Override
+		public void interceptResponse(HttpResponse theResponse) throws IOException {
+			assert myLastResponse == null;
+			myLastResponse = theResponse;
+
+			HttpEntity respEntity = theResponse.getEntity();
+			if (respEntity != null) {
+				final byte[] bytes;
+				try {
+					bytes = IOUtils.toByteArray(respEntity.getContent());
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
+
+				myResponseBody = new String(bytes, "UTF-8");
+				theResponse.setEntity(new MyEntityWrapper(respEntity, bytes));
+			}
+		}
+
+		private static class MyEntityWrapper extends HttpEntityWrapper {
+
+			private byte[] myBytes;
+
+			public MyEntityWrapper(HttpEntity theWrappedEntity, byte[] theBytes) {
+				super(theWrappedEntity);
+				myBytes = theBytes;
+			}
+
+			@Override
+			public InputStream getContent() throws IOException {
+				return new ByteArrayInputStream(myBytes);
+			}
+
+			@Override
+			public void writeTo(OutputStream theOutstream) throws IOException {
+				theOutstream.write(myBytes);
+			}
+
 		}
 
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,12 +53,12 @@ public @interface RequiredParam {
      * ID). 
      * <p>
      * Valid values for this parameter include:
+     * </p>
      * <ul>
      * <li><code>chainWhitelist={ OptionalParam.ALLOW_CHAIN_NOTCHAINED }</code> - Only allow resource reference (no chaining allowed for this parameter)</li>
      * <li><code>chainWhitelist={ OptionalParam.ALLOW_CHAIN_ANY }</code> - Allow any chaining at all (including a non chained value, <b>this is the default</b>)</li>
      * <li><code>chainWhitelist={ "foo", "bar" }</code> - Allow property.foo and property.bar</li>
      * </ul>
-     * </p>
      * <p>
      * Any values specified in 
      * {@link #chainBlacklist()} will supercede (have priority over) values
@@ -82,11 +82,11 @@ public @interface RequiredParam {
 	/**
 	 * This is the name for the parameter. Generally this should be a simple string (e.g. "name", or "identifier") which will be the name of the URL parameter used to populate this method parameter.
 	 * <p>
-	 * Most resource model classes have constants which may be used to supply values for this field, e.g. {@link Patient#SP_NAME} or {@link Observation#SP_DATE}
+	 * Most resource model classes have constants which may be used to supply values for this field, e.g. Patient.SP_NAME or Observation.SP_DATE
 	 * </p>
 	 * <p>
 	 * If you wish to specify a parameter for a resource reference which only accepts a specific chained value, it is also valid to supply a chained name here, such as "patient.name". It is
-	 * recommended to supply this using constants where possible, e.g. <code>{@link Observation#SP_SUBJECT} + '.' + {@link Patient#SP_IDENTIFIER}</code>
+	 * recommended to supply this using constants where possible, e.g. <code>Observation.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER</code>
 	 * </p>
 	 */
 	String name();

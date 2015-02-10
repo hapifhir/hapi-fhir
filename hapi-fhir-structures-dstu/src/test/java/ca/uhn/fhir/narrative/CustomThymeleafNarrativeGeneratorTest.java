@@ -5,13 +5,15 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 
 public class CustomThymeleafNarrativeGeneratorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorTest.class);
-
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testGenerator() {
 

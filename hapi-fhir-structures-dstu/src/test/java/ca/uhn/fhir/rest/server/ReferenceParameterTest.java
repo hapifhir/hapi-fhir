@@ -1,12 +1,41 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.*;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu.resource.Location;
+import ca.uhn.fhir.model.dstu.resource.Observation;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -17,83 +46,60 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.PortUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
 public class ReferenceParameterTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static CloseableHttpClient ourClient;
+	private static FhirContext ourCtx;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
+	private static ReferenceParam ourLastRefParam;
 
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-		ourCtx = servlet.getFhirContext();
+	@Before
+	public void before() {
+		ourLastRefParam = null;
 	}
 
 	@Test
-	public void testSearchWithValue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + "=123");
+	public void testParamTypesInConformanceStatement() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class, responseContent);
+
+		RestResource res = conf.getRestFirstRep().getResource().get(2);
+		assertEquals("Patient", res.getType().getValue());
+
+		RestResourceSearchParam param = res.getSearchParamFirstRep();
+		assertEquals(Patient.SP_PROVIDER, param.getName().getValue());
+
+		assertEquals(1, param.getTarget().size());
+		assertEquals(ResourceTypeEnum.ORGANIZATION, param.getTarget().get(0).getValueAsEnum());
+	}
+
+	@Test
+	public void testReadReturnVersionedReferenceInResponse() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/22");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-		assertEquals(1, entries.size());
-		Patient p = (Patient) entries.get(0).getResource();
-		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-		assertEquals("1", p.getName().get(1).getFamilyFirstRep().getValue());
-		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
+
+		assertThat(status.getFirstHeader("Content-Location").getValue(), containsString("Patient/22/_history/33"));
+
+		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
+		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
 	}
 
 	@Test
@@ -114,55 +120,6 @@ public class ReferenceParameterTest {
 
 		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
 		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
-	}
-
-	@Test
-	public void testReadReturnVersionedReferenceInResponse() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/22");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
-
-		assertThat(status.getFirstHeader("Content-Location").getValue(), containsString("Patient/22/_history/33"));
-
-		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
-		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
-	}
-
-	@Test
-	public void testSearchWithValueAndType() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization=123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-		assertEquals(1, entries.size());
-		Patient p = (Patient) entries.get(0).getResource();
-		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
-		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
-	}
-
-	@Test
-	public void testSearchWithValueAndTypeAndChain() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization.name=123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
-		assertEquals(1, entries.size());
-		Patient p = (Patient) entries.get(0).getResource();
-		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
-		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
-		assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
-
 	}
 
 	@Test
@@ -195,7 +152,7 @@ public class ReferenceParameterTest {
 		assertThat(responseContent, containsString("value=\"thePartOfId po123 null\""));
 		assertThat(responseContent, containsString("value=\"thePartOfName poname\""));
 	}
-	
+
 	@Test
 	public void testSearchWithMultipleParamsOfTheSameName4() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Organization?partof.fooChain=po123&partof.name=poname");
@@ -246,6 +203,38 @@ public class ReferenceParameterTest {
 	}
 
 	@Test
+	public void testSearchWithValue() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + "=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
+	}
+
+	@Test
+	public void testReferenceParamViewToken() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?provider.name=" + URLEncoder.encode("foo|bar", "UTF-8"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("foo|bar", ourLastRefParam.getValue());
+		assertEquals("foo", ourLastRefParam.toTokenParam().getSystem());
+		assertEquals("bar", ourLastRefParam.toTokenParam().getValue());
+	}
+
+	
+	
+	@Test
 	public void testSearchWithValueAndChain() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ".name=123");
@@ -264,25 +253,95 @@ public class ReferenceParameterTest {
 	}
 
 	@Test
-	public void testParamTypesInConformanceStatement() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata?_pretty=true");
+	public void testSearchWithValueAndType() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization=123");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2", p.getName().get(2).getFamilyFirstRep().getValue());
+	}
+
+	@Test
+	public void testSearchWithValueAndTypeAndChain() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Patient.SP_PROVIDER + ":Organization.name=123");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Conformance conf = ourCtx.newXmlParser().parseResource(Conformance.class, responseContent);
+		List<BundleEntry> entries = ourCtx.newXmlParser().parseBundle(responseContent).getEntries();
+		assertEquals(1, entries.size());
+		Patient p = (Patient) entries.get(0).getResource();
+		assertEquals("0123", p.getName().get(0).getFamilyFirstRep().getValue());
+		assertEquals("1Organization", p.getName().get(1).getFamilyFirstRep().getValue());
+		assertEquals("2name", p.getName().get(2).getFamilyFirstRep().getValue());
 
-		RestResource res = conf.getRestFirstRep().getResource().get(2);
-		assertEquals("Patient", res.getType().getValue());
+	}
 
-		RestResourceSearchParam param = res.getSearchParamFirstRep();
-		assertEquals(Patient.SP_PROVIDER, param.getName().getValue());
+	@AfterClass
+	public static void afterClass() throws Exception {
+		ourServer.stop();
+	}
 
-		assertEquals(1, param.getTarget().size());
-		assertEquals(ResourceTypeEnum.ORGANIZATION, param.getTarget().get(0).getValueAsEnum());
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer();
+		ourCtx = servlet.getFhirContext();
+		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+		ourCtx = servlet.getFhirContext();
+	}
+
+	public static class DummyLocationResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Location.class;
+		}
+
+		//@formatter:off
+		@Search
+		public List<Location> searchByNameWithDifferentChain(
+				@OptionalParam(name = "partof", chainWhitelist= {"bar"}) ReferenceParam theBarId) {
+			//@formatter:on
+
+			ArrayList<Location> retVal = new ArrayList<Location>();
+			if (theBarId != null) {
+				Location loc = new Location();
+				loc.setId("1");
+				loc.getName().setValue("theBarId " + theBarId.getValue() + " " + theBarId.getChain());
+				retVal.add(loc);
+			}
+			if (retVal.isEmpty()) {
+				ourLog.info("No values for bar - Going to fail");
+				throw new InternalErrorException("No Values for bar");
+			}
+
+			return retVal;
+		}
+
 	}
 
 	public static class DummyOrganizationResourceProvider implements IResourceProvider {
@@ -345,59 +404,11 @@ public class ReferenceParameterTest {
 		}
 
 	}
-	
-	
-	public static class DummyLocationResourceProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Location.class;
-		}
-
-		//@formatter:off
-		@Search
-		public List<Location> searchByNameWithDifferentChain(
-				@OptionalParam(name = "partof", chainWhitelist= {"bar"}) ReferenceParam theBarId) {
-			//@formatter:on
-
-			ArrayList<Location> retVal = new ArrayList<Location>();
-			if (theBarId != null) {
-				Location loc = new Location();
-				loc.setId("1");
-				loc.getName().setValue("theBarId " + theBarId.getValue() + " " + theBarId.getChain());
-				retVal.add(loc);
-			}
-			if (retVal.isEmpty()) {
-				ourLog.info("No values for bar - Going to fail");
-				throw new InternalErrorException("No Values for bar");
-			}
-
-			return retVal;
-		}
-
-	}
-	
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
-
-		@Search(queryName="findPatientWithVersion")
-		public List<Patient> findPatientWithVersion() {
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-
-			Patient p = createPatient();
-
-			retVal.add(p);
-
-			return retVal;
-		}
-
-		@Read
-		public Patient read(@IdParam IdDt theId) {
-			return createPatient();
-		}
 
 		private Patient createPatient() {
 			Patient p = new Patient();
@@ -410,9 +421,10 @@ public class ReferenceParameterTest {
 			return p;
 		}
 
-
 		@Search
 		public List<Patient> findPatient(@OptionalParam(name = Patient.SP_PROVIDER, targetTypes = { Organization.class }) ReferenceParam theParam) {
+			ourLastRefParam = theParam;
+
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
@@ -425,9 +437,25 @@ public class ReferenceParameterTest {
 			return retVal;
 		}
 
+		@Search(queryName = "findPatientWithVersion")
+		public List<Patient> findPatientWithVersion() {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			Patient p = createPatient();
+
+			retVal.add(p);
+
+			return retVal;
+		}
+
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdDt theId) {
+			return createPatient();
 		}
 
 	}

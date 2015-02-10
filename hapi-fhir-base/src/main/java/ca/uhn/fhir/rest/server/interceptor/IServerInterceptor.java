@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,9 @@ public interface IServerInterceptor {
 	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
-	 * @param theRequest
+	 * @param theServletRequest
 	 *            The incoming request
-	 * @param theResponse
+	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *            <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
@@ -113,9 +113,9 @@ public interface IServerInterceptor {
 	 *            A bean containing details about the request that is about to be processed, including
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
-	 * @param theRequest
+	 * @param theServletRequest
 	 *            The incoming request
-	 * @param theResponse
+	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *            <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
@@ -135,9 +135,9 @@ public interface IServerInterceptor {
 	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
 	 * @param theResponseObject
 	 *            The actual object which is being streamed to the client as a response
-	 * @param theRequest
+	 * @param theServletRequest
 	 *            The incoming request
-	 * @param theResponse
+	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *            <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
@@ -155,11 +155,9 @@ public interface IServerInterceptor {
 	 * @param theRequestDetails
 	 *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
 	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}.
-	 * @param theResponseObject
-	 *            The actual object which is being streamed to the client as a response
-	 * @param theRequest
+	 * @param theServletRequest
 	 *            The incoming request
-	 * @param theResponse
+	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *            <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
@@ -183,11 +181,9 @@ public interface IServerInterceptor {
 	 *            Contains either <code>null</code>, or a bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
 	 *            FHIR-specific aspects of the request which have been pulled out of the {@link HttpServletRequest servlet request}. This parameter may be
 	 *            null if the request processing did not successfully parse the incoming request, but will generally not be null.
-	 * @param theResponseObject
-	 *            The actual object which is being streamed to the client as a response
-	 * @param theRequest
+	 * @param theServletRequest
 	 *            The incoming request
-	 * @param theResponse
+	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
 	 *            <code>false</code>
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the

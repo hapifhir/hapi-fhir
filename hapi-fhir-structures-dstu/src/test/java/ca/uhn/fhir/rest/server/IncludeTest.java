@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
@@ -240,6 +240,11 @@ public class IncludeTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello&_include=foo&_include=baz");
 		HttpResponse status = ourClient.execute(httpGet);
 		assertEquals(400, status.getStatusLine().getStatusCode());
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		
+		ourLog.info(responseContent);
+		assertThat(responseContent,containsString("Invalid _include parameter value"));
 	}
 
 	@AfterClass
@@ -436,11 +441,13 @@ public class IncludeTest {
 		}
 		
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = { "foo", "bar" }) Set<Include> theIncludes) {
+		public List<Patient> findPatientWithSimpleNames(
+				@RequiredParam(name = Patient.SP_NAME) StringDt theName, 
+				@IncludeParam(allow = { "foo", "bar" }) Set<Include> theIncludes) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient p = new Patient();
-			p.addIdentifier("foo", "bar");
+			p.addIdentifier("Mr", "Test");
 
 			p.setId(theName.getValue());
 

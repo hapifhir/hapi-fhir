@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -37,10 +39,10 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
 	private BaseRuntimeElementDefinition<?> myRuntimeDef;
-	private List<Class<? extends IResource>> myResourceTypes;
+	private List<Class<? extends IBaseResource>> myResourceTypes;
 	private Set<String> myValidChildNames;
 
-	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IResource>> theResourceTypes) {
+	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceTypes = theResourceTypes;
 
@@ -50,7 +52,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
@@ -58,7 +60,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theDatatype) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
@@ -76,36 +78,48 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
 		myRuntimeDef.sealAndInitialize(theClassToElementDefinitions);
 
 		myValidChildNames = new HashSet<String>();
 		myValidChildNames.add(getElementName());
+		
+		/*
+		 * [elementName]Resource is not actually valid FHIR but we've encountered it in the wild
+		 * so we'll accept it just to be nice
+		 */
 		myValidChildNames.add(getElementName() + "Resource");
 
-		for (Class<? extends IResource> next : myResourceTypes) {
-			if (next == IResource.class) {
-				for (Entry<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> nextEntry : theClassToElementDefinitions.entrySet()) {
-					if (IResource.class.isAssignableFrom(nextEntry.getKey())) {
-						RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) nextEntry.getValue();
-						myValidChildNames.add(getElementName() + nextDef.getName());
-					}
-				}
-			} else {
-				RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);
-				if (nextDef == null) {
-					throw new ConfigurationException("Can't find child of type: " + next.getCanonicalName() + " in " + getField().getDeclaringClass());
-				}
-				myValidChildNames.add(getElementName() + nextDef.getName());
-			}
-		}
+		/*
+		 * Below has been disabled- We used to allow field names to contain the name of the resource
+		 * that they accepted. This wasn't valid but we accepted it just to be flexible because there
+		 * were some bad examples containing this. This causes conflicts with actual field names in 
+		 * recent definitions though, so it has been disabled as of HAPI 0.9 
+		 */
+//		for (Class<? extends IBaseResource> next : myResourceTypes) {
+//			if (next == IResource.class) {
+//				for (Entry<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> nextEntry : theClassToElementDefinitions.entrySet()) {
+//					if (IResource.class.isAssignableFrom(nextEntry.getKey())) {
+//						RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) nextEntry.getValue();
+//						myValidChildNames.add(getElementName() + nextDef.getName());
+//					}
+//				}
+//			} 
+//			else {
+//				RuntimeResourceDefinition nextDef = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);
+//				if (nextDef == null) {
+//					throw new ConfigurationException("Can't find child of type: " + next.getCanonicalName() + " in " + getField().getDeclaringClass());
+//				}
+//				myValidChildNames.add(getElementName() + nextDef.getName());
+//			}
+//		}
 
 		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 		myValidChildNames = Collections.unmodifiableSet(myValidChildNames);
 	}
 
-	public List<Class<? extends IResource>> getResourceTypes() {
+	public List<Class<? extends IBaseResource>> getResourceTypes() {
 		return myResourceTypes;
 	}
 

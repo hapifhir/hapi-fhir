@@ -5,7 +5,7 @@ package ca.uhn.fhir.model.dstu.valueset;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 public enum SecurityEventOutcomeEnum {
 
 	/**
-	 * Display: <b>Success</b><br/>
+	 * Display: <b>Success</b><br>
 	 * Code Value: <b>0</b>
 	 *
 	 * The operation completed successfully (whether with warnings or not).
@@ -37,7 +37,7 @@ public enum SecurityEventOutcomeEnum {
 	SUCCESS("0", "http://hl7.org/fhir/security-event-outcome"),
 	
 	/**
-	 * Display: <b>Minor failure</b><br/>
+	 * Display: <b>Minor failure</b><br>
 	 * Code Value: <b>4</b>
 	 *
 	 * The action was not successful due to some kind of catered for error (often equivalent to an HTTP 400 response).
@@ -45,7 +45,7 @@ public enum SecurityEventOutcomeEnum {
 	MINOR_FAILURE("4", "http://hl7.org/fhir/security-event-outcome"),
 	
 	/**
-	 * Display: <b>Serious failure</b><br/>
+	 * Display: <b>Serious failure</b><br>
 	 * Code Value: <b>8</b>
 	 *
 	 * The action was not successful due to some kind of unexpected error (often equivalent to an HTTP 500 response).
@@ -53,7 +53,7 @@ public enum SecurityEventOutcomeEnum {
 	SERIOUS_FAILURE("8", "http://hl7.org/fhir/security-event-outcome"),
 	
 	/**
-	 * Display: <b>Major failure</b><br/>
+	 * Display: <b>Major failure</b><br>
 	 * Code Value: <b>12</b>
 	 *
 	 * An error of such magnitude occurred that the system is not longer available for use (i.e. the system died).

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.api.IElement;
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -45,13 +46,13 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IElement> theType) {
+	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
 		assert theType.equals(ContainedDt.class);
 		return myElem;		
 	}
 
 	@Override
-	public String getChildNameByDatatype(Class<? extends IElement> theDatatype) {
+	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		assert theDatatype.equals(ContainedDt.class);
 		return getElementName();
 	}
@@ -62,7 +63,7 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IElement>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myElem = new RuntimeElemContainedResources();
 	}
 

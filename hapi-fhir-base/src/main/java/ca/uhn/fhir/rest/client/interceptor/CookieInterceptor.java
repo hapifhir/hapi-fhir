@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * HTTP interceptor to be used for adding Cookie to requests.
  * <p>
- * This interceptor adds a header resembling the following:<br/>
- * &nbsp;&nbsp;&nbsp;<code>Cookie: [key]=[value]</code><br/>
+ * This interceptor adds a header resembling the following:<br>
+ * &nbsp;&nbsp;&nbsp;<code>Cookie: [key]=[value]</code><br>
  * </p>
  */
 

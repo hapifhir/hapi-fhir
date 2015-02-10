@@ -88,7 +88,7 @@ public class TransactionWithBundleParamTest {
 		
 		ourLog.info(responseContent);
 		
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.size());
 
 		BundleEntry entry0 = bundle.getEntries().get(0);

@@ -19,6 +19,7 @@ package ca.uhn.fhir.testmodel;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -112,6 +113,10 @@ public class Patient extends BaseResource implements IResource {
 	}
 
   
+	@Override
+	public FhirVersionEnum getStructureFhirVersionEnum() {
+		return FhirVersionEnum.DSTU1;
+	}
 
 
 

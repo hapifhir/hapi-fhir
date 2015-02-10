@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * 
 	 * @param theComparator
 	 *            The comparator, or <code>null</code> for an equals comparator
-	 * @param theQuantity
+	 * @param theValue
 	 *            A quantity value
 	 * @param theSystem
 	 *            The unit system
@@ -73,7 +73,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * 
 	 * @param theComparator
 	 *            The comparator, or <code>null</code> for an equals comparator
-	 * @param theQuantity
+	 * @param theValue
 	 *            A quantity value
 	 * @param theSystem
 	 *            The unit system
@@ -92,7 +92,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * 
 	 * @param theComparator
 	 *            The comparator, or <code>null</code> for an equals comparator
-	 * @param theQuantity
+	 * @param theValue
 	 *            A quantity value
 	 * @param theSystem
 	 *            The unit system
@@ -110,7 +110,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * Constructor
 	 * 
 	 * @param theQuantity
-	 *            A quantity value (with no system or units), such as "100.0" or "<=4"
+	 *            A quantity value (with no system or units), such as "100.0" or "&lt;=4"
 	 */
 	public QuantityParam(String theQuantity) {
 		setValueAsQueryToken(null, theQuantity);
@@ -120,7 +120,7 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	 * Constructor
 	 * 
 	 * @param theQuantity
-	 *            A quantity value (with no system or units), such as "100.0" or "<=4"
+	 *            A quantity value (with no system or units), such as "100.0" or "&lt;=4"
 	 * @param theSystem
 	 *            The unit system
 	 * @param theUnits

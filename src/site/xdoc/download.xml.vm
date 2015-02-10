@@ -39,7 +39,7 @@
    <version>${project.version}</version>
 </dependency>]]></source>
 			
-			<subsection name="Supporting DEV Resources">
+			<subsection name="Supporting DEV (DSTU2) Resources">
 			
 				<p>
 					HAPI also has a <code>hapi-fhir-structures-dev-[version].jar</code>, which 
@@ -47,11 +47,11 @@
 					your classpath if you want to use resources that were created or updated by
 					HL7 after the DSTU1 release. Be warned though that using these resources
 					<b>can lead to incompatibility</b> between your application and other applications
-					if those applications use libraries that do not support DEV resources.
+					if those applications are designed to be compliant with FHIR DSTU1.
 				</p>
 				
 				<p>
-					If you are using Maven, ad the following dependency to include DEV resources:
+					If you are using Maven, add the following dependency to include DEV resources:
 				</p>
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
@@ -125,15 +125,20 @@
 					HAPI bundles (for release archives) and depends on (for Maven builds)
 					the <a href="http://woodstox.codehaus.org/">Woodstox</a> library, which
 					is a good implementation of StAX.  
-				</p>				
+				</p>
 				<p>
 					Upon starting up, HAPI will emit a log line indicating which StAX implementation
 					is being used, e.g:
 				</p>
 				<source>08:01:32.044 [main] INFO  ca.uhn.fhir.util.XmlUtil - FHIR XML procesing will use StAX implementation 'Woodstox XML-processor' version '4.4.0'</source>
 				<p>
-					If a different implementation is being used, you may want to consider using
-					Woodstox instead by setting the following system properties:	
+					Although most testing is done using the Woodstox implementation of
+					StAX, it is not required and HAPI should work correctly with any
+					compliant implementation of StAX. 
+				</p>
+				<p>
+					You can force Woodstox in an environment where multiple StAX libraries are
+					present by setting the following system properties:	
 				</p>				
 				<source>System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
 System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");

@@ -4,7 +4,7 @@ package ca.uhn.fhir.i18n;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,23 +37,27 @@ public class HapiLocalizer {
 		myBundle = ResourceBundle.getBundle(HapiLocalizer.class.getPackage().getName() + ".hapi-messages");
 	}
 
-	public String getMessage(String theKey, Object... theParameters) {
+	public String getMessage(Class<?> theType, String theKey, Object... theParameters) {
+		return getMessage(theType.getName() + '.' + theKey, theParameters);
+	}
+	
+	public String getMessage(String theQualifiedKey, Object... theParameters) {
 		if (theParameters != null && theParameters.length > 0) {
-			MessageFormat format = myKeyToMessageFormat.get(theKey);
+			MessageFormat format = myKeyToMessageFormat.get(theQualifiedKey);
 			if (format != null) {
 				return format.format(theParameters).toString();
 			}
 			
-			String formatString = myBundle.getString(theKey);
+			String formatString = myBundle.getString(theQualifiedKey);
 			if (formatString== null) {
 				formatString = "!MESSAGE!";
 			}
 			
 			format = new MessageFormat(formatString);
-			myKeyToMessageFormat.put(theKey, format);
+			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters).toString();
 		} else {
-			String retVal = myBundle.getString(theKey);
+			String retVal = myBundle.getString(theQualifiedKey);
 			if (retVal == null) {
 				retVal = "!MESSAGE!";
 			}

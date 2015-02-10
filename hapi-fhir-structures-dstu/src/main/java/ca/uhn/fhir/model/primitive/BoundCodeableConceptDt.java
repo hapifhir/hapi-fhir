@@ -2,9 +2,9 @@ package ca.uhn.fhir.model.primitive;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,8 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 * codings first. If theValue is null, existing codings are cleared and no
 	 * codings are added.
 	 * 
-	 * @param theValue
-	 *            The value to add, or <code>null</code>
+	 * @param theValues
+	 *            The values to add, or <code>null</code>
 	 */
 	public void setValueAsEnum(Collection<T> theValues) {
 		getCoding().clear();

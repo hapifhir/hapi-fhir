@@ -1,10 +1,13 @@
 package ca.uhn.example;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hamcrest.core.StringContains;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -24,51 +27,57 @@ public class ExampleTest {
 		if (ourServer != null) {
 			ourServer.stop();
 		}
-		
+
 		System.clearProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS");
-		
+
 	}
 
-	   public static boolean isWindows()
-	   {
-	      return System.getProperty("os.name").startsWith("Windows");
-	   }
-	
+	/**
+	 * Tests here have some weird windows inconsistency relating to the path for finding the WAR file. Since this test isn't really important to work multiplatform, we can skip it
+	 */
+	public static boolean isWindows() {
+		return System.getProperty("os.name").startsWith("Windows");
+	}
+
 	@Test
 	public void test01Search() throws Exception {
 		if (isWindows()) {
-			/*
-			 * Tests here have some weird windows inconsistency relating to the path for finding the WAR file.
-			 * Since this test isn't really important to work multiplatform, we can skip it
-			 */
+			return;
+		}
+
+		Bundle results = ourClient.search().forResource(Patient.class).execute();
+		assertEquals(1, results.size());
+	}
+
+	@Test
+	public void test02Read() throws Exception {
+		if (isWindows()) {
+			return;
+		}
+
+		Patient results = ourClient.read(Patient.class, "1");
+		assertThat(results.getNameFirstRep().getGivenAsSingleString(), StringContains.containsString("PatientOne"));
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		if (isWindows()) {
 			return;
 		}
 		
-		beforeClass();
-		
-		Bundle results = ourClient.search().forResource(Patient.class).execute();
-		assertEquals(1, results.size());
-	
-		
-	}
-	
-	/**
-	 * Not annotated with @BeforeClass so that we can skip if we're not running tests here
-	 */
-	public static void beforeClass() throws Exception {
 		if (ourPort != null) {
 			return;
 		}
-		
+
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 
-		String base = "http://localhost:" + ourPort+"/fhir";
-		System.setProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS", "example , Restful Server Example , " + base);		
-		
+		String base = "http://localhost:" + ourPort + "/fhir";
+		System.setProperty("ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS", "example , Restful Server Example , " + base);
+
 		WebAppContext root = new WebAppContext();
 		root.setAllowDuplicateFragmentNames(true);
-		
+
 		root.setWar("file:../restful-server-example/target/restful-server-example.war");
 		root.setContextPath("/");
 		root.setAttribute(WebAppContext.BASETEMPDIR, "target/tempextrtact");
@@ -83,7 +92,6 @@ public class ExampleTest {
 		ourCtx = new FhirContext();
 		ourClient = ourCtx.newRestfulGenericClient(base);
 
-
 	}
-	
+
 }

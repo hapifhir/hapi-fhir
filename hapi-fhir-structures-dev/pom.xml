@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>0.8-SNAPSHOT</version>
+		<version>0.9-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -18,23 +18,19 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>0.8-SNAPSHOT</version>
+			<version>0.9-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>${servlet_api_version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
-<!-- Testing -->
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>0.8-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
+
+		<!-- Testing -->
+		<!-- <dependency> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-fhir-structures-dstu</artifactId> 
+			<version>0.8</version> <scope>test</scope> </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -83,13 +79,13 @@
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
 			<version>${jetty_version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback_version}</version>
@@ -109,18 +105,18 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-schematron</artifactId>
-		    <version>${phloc_schematron_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-commons</artifactId>
-		    <version>${phloc_commons_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+			<version>${phloc_commons_version}</version>
 			<scope>test</scope>
 		</dependency>
-        
+
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -163,7 +159,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-all</artifactId>
+			<artifactId>java-hamcrest</artifactId>
 			<version>${hamcrest_version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -173,27 +169,13 @@
 			<version>${guava_version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-jwt</artifactId>
-		    <version>1.0.2.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
-		-->		
-		
+		<!-- <dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-web</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-config</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-jwt</artifactId> 
+			<version>1.0.2.RELEASE</version> <scope>test</scope> </dependency> -->
+
 	</dependencies>
 
 	<build>
@@ -201,7 +183,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>0.8-SNAPSHOT</version>
+				<version>0.9-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -213,19 +195,25 @@
 					<package>ca.uhn.fhir.model.dev</package>
 					<version>dev</version>
 					<baseResourceNames>
-						<baseResourceName>account</baseResourceName>
 						<baseResourceName>adversereaction</baseResourceName>
 						<baseResourceName>adversereactionrisk</baseResourceName>
 						<baseResourceName>alert</baseResourceName>
 						<baseResourceName>allergyintolerance</baseResourceName>
 						<baseResourceName>appointment</baseResourceName>
 						<baseResourceName>appointmentresponse</baseResourceName>
-						<baseResourceName>availability</baseResourceName>
+						<!--<baseResourceName>assessmentdefinition</baseResourceName>-->
+						<baseResourceName>basic</baseResourceName>
+						<!--<baseResourceName>binary</baseResourceName>-->
+						<!--<baseResourceName>bundle</baseResourceName>-->
+						<!--<baseResourceName>careactivity</baseResourceName>-->
 						<baseResourceName>careplan</baseResourceName>
-						<!--
-						Doesn't seem to work yet 
+						<baseResourceName>careplan2</baseResourceName>
 						<baseResourceName>claim</baseResourceName>
-						 -->
+						<baseResourceName>claimresponse</baseResourceName>
+						<baseResourceName>clinicalassessment</baseResourceName>
+						<!--<baseResourceName>commondataelement</baseResourceName>-->
+						<baseResourceName>communication</baseResourceName>
+						<baseResourceName>communicationrequest</baseResourceName>
 						<baseResourceName>composition</baseResourceName>
 						<baseResourceName>conceptmap</baseResourceName>
 						<baseResourceName>condition</baseResourceName>
@@ -233,20 +221,45 @@
 						<baseResourceName>contract</baseResourceName>
 						<baseResourceName>contraindication</baseResourceName>
 						<baseResourceName>coverage</baseResourceName>
+						<baseResourceName>dataelement</baseResourceName>
 						<baseResourceName>device</baseResourceName>
+						<baseResourceName>devicecomponent</baseResourceName>
+						<baseResourceName>devicemetric</baseResourceName>
 						<baseResourceName>deviceobservationreport</baseResourceName>
+						<baseResourceName>deviceuserequest</baseResourceName>
+						<baseResourceName>deviceusestatement</baseResourceName>
 						<baseResourceName>diagnosticorder</baseResourceName>
 						<baseResourceName>diagnosticreport</baseResourceName>
+						<!--<baseResourceName>document</baseResourceName>-->
+						<!--<baseResourceName>documentation</baseResourceName>-->
 						<baseResourceName>documentmanifest</baseResourceName>
 						<baseResourceName>documentreference</baseResourceName>
+						<!--<baseResourceName>eligibility</baseResourceName>-->
+						<baseResourceName>eligibilityrequest</baseResourceName>
+						<baseResourceName>eligibilityresponse</baseResourceName>
 						<baseResourceName>encounter</baseResourceName>
+						<!--<baseResourceName>enrollment</baseResourceName>-->
+						<baseResourceName>enrollmentrequest</baseResourceName>
+						<baseResourceName>enrollmentresponse</baseResourceName>
+						<baseResourceName>episodeofcare</baseResourceName>
+						<baseResourceName>explanationofbenefit</baseResourceName>
+						<baseResourceName>extensiondefinition</baseResourceName>
 						<baseResourceName>familyhistory</baseResourceName>
-						<baseResourceName>geneexpression</baseResourceName>
+						<!--<baseResourceName>geneexpression</baseResourceName>-->
 						<baseResourceName>geneticanalysis</baseResourceName>
+						<baseResourceName>goal</baseResourceName>
+						<!--<baseResourceName>goalrequest</baseResourceName>-->
 						<baseResourceName>group</baseResourceName>
+						<baseResourceName>gvfmeta</baseResourceName>
+						<baseResourceName>gvfvariant</baseResourceName>
+						<baseResourceName>healthcareservice</baseResourceName>
+						<baseResourceName>imagingobjectselection</baseResourceName>
 						<baseResourceName>imagingstudy</baseResourceName>
 						<baseResourceName>immunization</baseResourceName>
+						<!--<baseResourceName>immunizationprofile</baseResourceName>-->
 						<baseResourceName>immunizationrecommendation</baseResourceName>
+						<baseResourceName>institutionalclaim</baseResourceName>
+						<!--<baseResourceName>interestofcare</baseResourceName>-->
 						<baseResourceName>list</baseResourceName>
 						<baseResourceName>location</baseResourceName>
 						<baseResourceName>media</baseResourceName>
@@ -255,53 +268,71 @@
 						<baseResourceName>medicationdispense</baseResourceName>
 						<baseResourceName>medicationprescription</baseResourceName>
 						<baseResourceName>medicationstatement</baseResourceName>
+						<!--<baseResourceName>message</baseResourceName>-->
 						<baseResourceName>messageheader</baseResourceName>
-						<baseResourceName>microarray</baseResourceName>
-						<baseResourceName>namespace</baseResourceName>
+						<!--<baseResourceName>microarray</baseResourceName>-->
+						<!--<baseResourceName>namespace</baseResourceName>-->
+						<baseResourceName>namingsystem</baseResourceName>
+						<!--<baseResourceName>newbundle</baseResourceName>-->
 						<baseResourceName>nutritionorder</baseResourceName>
 						<baseResourceName>observation</baseResourceName>
 						<baseResourceName>operationdefinition</baseResourceName>
 						<baseResourceName>operationoutcome</baseResourceName>
+						<baseResourceName>oralhealthclaim</baseResourceName>
 						<baseResourceName>order</baseResourceName>
 						<baseResourceName>orderresponse</baseResourceName>
 						<baseResourceName>organization</baseResourceName>
 						<baseResourceName>other</baseResourceName>
 						<baseResourceName>patient</baseResourceName>
-						<!-- 
+						<baseResourceName>paymentnotice</baseResourceName>
+						<baseResourceName>paymentreconciliation</baseResourceName>
+						<baseResourceName>pendedrequest</baseResourceName>
 						<baseResourceName>person</baseResourceName>
-						-->
+						<baseResourceName>pharmacyclaim</baseResourceName>
+						<!--<baseResourceName>picture</baseResourceName>-->
 						<baseResourceName>practitioner</baseResourceName>
+						<!--<baseResourceName>problem</baseResourceName>-->
 						<baseResourceName>procedure</baseResourceName>
+						<baseResourceName>procedurerequest</baseResourceName>
+						<baseResourceName>professionalclaim</baseResourceName>
 						<baseResourceName>profile</baseResourceName>
-						<!--
-						Depends on "ActivityDefinition", which doesn't exist..
-						<baseResourceName>protocol</baseResourceName>
-						-->
+						<!--<baseResourceName>protocol</baseResourceName>-->
 						<baseResourceName>provenance</baseResourceName>
 						<baseResourceName>query</baseResourceName>
 						<baseResourceName>questionnaire</baseResourceName>
 						<baseResourceName>questionnaireanswers</baseResourceName>
+						<baseResourceName>readjudicate</baseResourceName>
 						<baseResourceName>referralrequest</baseResourceName>
 						<baseResourceName>relatedperson</baseResourceName>
 						<baseResourceName>remittance</baseResourceName>
+						<baseResourceName>reversal</baseResourceName>
 						<baseResourceName>riskassessment</baseResourceName>
+						<baseResourceName>schedule</baseResourceName>
+						<baseResourceName>searchparameter</baseResourceName>
 						<baseResourceName>securityclaim</baseResourceName>
 						<baseResourceName>securityevent</baseResourceName>
 						<baseResourceName>securitygroup</baseResourceName>
 						<baseResourceName>securityprincipal</baseResourceName>
-						<!-- 
-						What is this?
-						<baseResourceName>sequence</baseResourceName>
-						-->
+						<!--<baseResourceName>sequence</baseResourceName>
 						<baseResourceName>sequencinganalysis</baseResourceName>
-						<baseResourceName>sequencinglab</baseResourceName>
+						<baseResourceName>sequencinglab</baseResourceName>-->
 						<baseResourceName>slot</baseResourceName>
 						<baseResourceName>specimen</baseResourceName>
+						<baseResourceName>statusrequest</baseResourceName>
+						<baseResourceName>statusresponse</baseResourceName>
+						<!--<baseResourceName>study</baseResourceName>-->
 						<baseResourceName>subscription</baseResourceName>
 						<baseResourceName>substance</baseResourceName>
 						<baseResourceName>supply</baseResourceName>
+						<baseResourceName>supportingdocumentation</baseResourceName>
+						<!--<baseResourceName>test</baseResourceName>-->
 						<baseResourceName>user</baseResourceName>
 						<baseResourceName>valueset</baseResourceName>
+						<!--<baseResourceName>vcfmeta</baseResourceName>
+						<baseResourceName>vcfvariant</baseResourceName>-->
+						<baseResourceName>visionclaim</baseResourceName>
+						<baseResourceName>visionprescription</baseResourceName>
+						<!--<baseResourceName>visit</baseResourceName>-->
 					</baseResourceNames>
 					<buildDatatypes>true</buildDatatypes>
 				</configuration>
@@ -309,7 +340,8 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -336,6 +368,17 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-sources/tinder</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}/target/generated-resources/tinder</directory>
+			</resource>
+		</resources>
 	</build>
 
 	<reporting>

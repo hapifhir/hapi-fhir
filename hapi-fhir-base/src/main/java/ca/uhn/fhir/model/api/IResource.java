@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,8 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.Map;
-
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -37,9 +36,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * Note that this class is a part of HAPI's model API, used to define
  * structure classes. Users will often interact with this interface, but
  * should not need to implement it directly.
- * <p>
+ * </p>
  */
-public interface IResource extends ICompositeElement {
+public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
 
 	/**
 	 * Returns the contained resource list for this resource.
@@ -49,7 +48,7 @@ public interface IResource extends ICompositeElement {
 	 * encoding, and copying contained resources from this list to their
 	 * appropriate references when parsing) so it is generally not neccesary to
 	 * interact with this list directly. Instead, in a server you can place
-	 * resource instances in reference fields (such as {@link ca.uhn.fhir.model.dstu.resource.Patient#setManagingOrganization(ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt)})
+	 * resource instances in reference fields (such as <code>Patient#setManagingOrganization(ResourceReferenceDt)</code> )
 	 * and the resource will be automatically contained. In a client, contained resources will
 	 * be automatically populated into their appropriate fields by the HAPI parser.
 	 * </p>
@@ -88,7 +87,7 @@ public interface IResource extends ICompositeElement {
 	 * @see ResourceMetadataKeyEnum for a list of allowable keys and the object
 	 *      types that values of a given key must use.
 	 */
-	Map<ResourceMetadataKeyEnum<?>, Object> getResourceMetadata();
+	ResourceMetadataMap getResourceMetadata();
 
 	/**
 	 * Returns the narrative block for this resource
@@ -122,7 +121,7 @@ public interface IResource extends ICompositeElement {
 	 * @throws NullPointerException
 	 *             The map must not be null
 	 */
-	void setResourceMetadata(Map<ResourceMetadataKeyEnum<?>, Object> theMap);
+	void setResourceMetadata(ResourceMetadataMap theMap);
 
 	/**
 	 * Returns a String representing the name of this Resource. This return
@@ -133,4 +132,10 @@ public interface IResource extends ICompositeElement {
 	 */
 	String getResourceName();
 
+	/**
+	 * Returns the FHIR version represented by this structure
+	 */
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum();
+
+	
 }

@@ -44,22 +44,22 @@ public class ${className}
 
 #foreach ( $param in $searchParams )
 	/**
-	 * Search parameter constant for <b>${param.name}</b>
+	 * Search parameter constant for <b>$esc.html(${param.name})</b>
 	 * <p>
-	 * Description: <b>${param.description}</b><br/>
-	 * Type: <b>${param.type}</b><br/>
-	 * Path: <b>${param.path}</b><br/>
+	 * Description: <b>$esc.html(${param.description})</b><br>
+	 * Type: <b>$esc.html(${param.type})</b><br>
+	 * Path: <b>$esc.html(${param.path})</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="${param.name}", path="${param.path}", description="${param.description}", type="${param.type}" #{if}($param.compositeOf.empty == false) , compositeOf={ #{foreach}($compositeOf in $param.compositeOf) "${compositeOf}"#{if}($foreach.hasNext), #{end}#{end} } #{end} )
 	public static final String $param.constantName = "${param.name}";
 
 	/**
-	 * <b>Fluent Client</b> search parameter constant for <b>${param.name}</b>
+	 * <b>Fluent Client</b> search parameter constant for <b>$esc.html(${param.name})</b>
 	 * <p>
-	 * Description: <b>${param.description}</b><br/>
-	 * Type: <b>${param.type}</b><br/>
-	 * Path: <b>${param.path}</b><br/>
+	 * Description: <b>$esc.html(${param.description})</b><br>
+	 * Type: <b>$esc.html(${param.type})</b><br>
+	 * Path: <b>$esc.html(${param.path})</b><br>
 	 * </p>
 	 */
 #if( ${param.typeCapitalized} == 'Composite' )
@@ -90,6 +90,10 @@ public class ${className}
     @Override
     public String getResourceName() {
         return "${className.replaceAll("Resource", "")}";
+    }
+
+    public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
+    	return ca.uhn.fhir.context.FhirVersionEnum.${versionEnumName};
     }
 
 }

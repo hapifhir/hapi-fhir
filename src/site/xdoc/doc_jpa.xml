@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>JPA Server - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="JPA Server">
+
+			<p>
+				The HAPI FHIR 
+				<a href="./doc_rest_server.html">RestfulServer</a>
+				module can be used to create a FHIR server endpoint against an arbitrary
+				data source, which could be a database of your own design, an existing
+				clinical system, a set of files, or anything else you come up with.
+			</p>
+			<p>
+				HAPI also provides a specific database implementation which can be used to
+				provide a complete RESTful server implementation, backed by a database.
+				HAPI FHIR's JPA module is an implementation of a database storage layer, using
+				the JPA 2.0 API with Hibernate as the recommended implementation.
+			</p>
+			<p>
+				<b>Important Note: </b>
+				This implementation uses a fairly simple table design, with a 
+				single table being used to hold resource bodies (which are stored as 
+				GZipped CLOBs) and a set of tables to hold search indexes, tags, 
+				history details, etc. This design is only one of many possible ways
+				of designing a FHIR server so it is worth considering whether it
+				is appropriate for the problem you are trying to solve.
+			</p>
+			
+		</section>
+
+	</body>
+
+</document>

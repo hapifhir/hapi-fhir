@@ -88,6 +88,7 @@ public class ClientTest {
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ctx.getRestfulClientFactory().setHttpClient(httpClient);
+		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -147,6 +148,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
@@ -558,7 +560,10 @@ public class ClientTest {
 
 		// TODO: remove the read annotation and make sure we get a sensible
 		// error message to tell the user why the method isn't working
-		ClientWithoutAnnotation client = new FhirContext().newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
+		FhirContext ctx = new FhirContext();
+		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		
+		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
 
 		try {
 			client.read(new IdDt("8"));
@@ -1048,6 +1053,7 @@ public class ClientTest {
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
+		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	/**

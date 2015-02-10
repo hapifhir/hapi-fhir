@@ -2,9 +2,9 @@ package ca.uhn.fhir.rest.server.provider;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,9 +55,12 @@ import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.ExtensionConstants;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -69,7 +72,7 @@ import ca.uhn.fhir.util.ExtensionConstants;
  * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
-public class ServerConformanceProvider {
+public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
@@ -94,8 +97,9 @@ public class ServerConformanceProvider {
 	 * 
 	 * See the class documentation for an important note if you are extending this class
 	 */
+	@Override
 	@Metadata
-	public Conformance getServerConformance() {
+	public Conformance getServerConformance(HttpServletRequest theRequest) {
 		if (myConformance != null && myCache) {
 			return myConformance;
 		}
@@ -104,7 +108,7 @@ public class ServerConformanceProvider {
 
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(DateTimeDt.withCurrentTime());
-		retVal.setFhirVersion("0.80"); // TODO: pull from model
+		retVal.setFhirVersion("0.0.82-3059"); // TODO: pull from model
 		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser needs to be modified to actually allow it
 		
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
@@ -134,7 +138,7 @@ public class ServerConformanceProvider {
 			String resourceName = next.getResourceName();
 			RuntimeResourceDefinition def = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
 			resource.getType().setValue(def.getName());
-			resource.getProfile().setReference(new IdDt(def.getResourceProfile()));
+			resource.getProfile().setReference(new IdDt(def.getResourceProfile(myRestfulServer.getServerBaseForRequest(theRequest))));
 
 			TreeSet<String> includes = new TreeSet<String>();
 

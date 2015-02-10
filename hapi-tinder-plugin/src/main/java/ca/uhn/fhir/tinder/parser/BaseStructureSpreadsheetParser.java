@@ -50,16 +50,28 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		int index = 0;
 		for (InputStream nextInputStream : getInputStreams()) {
 
-			ourLog.info("Reading spreadsheet file {}", getInputStreamNames().get(index));
-			
+			String spreadsheetName = getInputStreamNames().get(index);
+			ourLog.info("Reading spreadsheet file {}", spreadsheetName);
+
 			Document file;
 			try {
 				file = XMLUtils.parse(nextInputStream, false);
 			} catch (Exception e) {
-				throw new Exception("Failed during reading: " + getInputStreamNames().get(index), e);
+				throw new Exception("Failed during reading: " + spreadsheetName, e);
 			}
 
-			Element dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(0);
+			Element dataElementsSheet = null;
+			for (int i = 0; i < file.getElementsByTagName("Worksheet").getLength() && dataElementsSheet == null; i++) {
+				dataElementsSheet = (Element) file.getElementsByTagName("Worksheet").item(i);
+				if (!"Data Elements".equals(dataElementsSheet.getAttributeNS("urn:schemas-microsoft-com:office:spreadsheet", "Name"))) {
+					dataElementsSheet = null;
+				}
+			}
+
+			if (dataElementsSheet == null) {
+				throw new Exception("Failed to find worksheet with name 'Data Elements' in spreadsheet: " + spreadsheetName);
+			}
+
 			NodeList tableList = dataElementsSheet.getElementsByTagName("Table");
 			Element table = (Element) tableList.item(0);
 
@@ -73,10 +85,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			BaseRootType resource = createRootType();
 			addResource(resource);
 
-			parseBasicElements(resourceRow, resource);
+			parseBasicElements(resourceRow, resource, null);
 
 			parseParameters(file, resource);
-			
+
 			resource.setId(resource.getName().toLowerCase());
 
 			if (this instanceof ResourceGeneratorUsingSpreadsheet) {
@@ -99,6 +111,16 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 
 				String type = cellValue(nextRow, myColType);
 
+				if (i < rows.getLength() - 1) {
+					Element followingRow = (Element) rows.item(i + 1);
+					if (followingRow != null) {
+						String followingName = cellValue(followingRow, 0);
+						if (followingName != null && followingName.startsWith(name + ".")) {
+							type = "";
+						}
+					}
+				}
+
 				Child elem;
 				if (StringUtils.isBlank(type) || type.startsWith("=")) {
 					elem = new ResourceBlock();
@@ -111,7 +133,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					elem = new SimpleChild();
 				}
 
-				parseBasicElements(nextRow, elem);
+				parseBasicElements(nextRow, elem, type);
 
 				elements.put(elem.getName(), elem);
 				BaseElement parent = elements.get(elem.getElementParentName());
@@ -128,15 +150,16 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				}
 
 				pathToResourceTypes.put(name, elem.getType());
+
 			}
-			
+
 			for (SearchParameter nextParam : resource.getSearchParameters()) {
 				if (nextParam.getType().equals("reference")) {
 					String path = nextParam.getPath();
 					List<String> targetTypes = pathToResourceTypes.get(path);
 					if (targetTypes != null) {
 						targetTypes = new ArrayList<String>(targetTypes);
-						for (Iterator<String> iter = targetTypes.iterator();iter.hasNext();) {
+						for (Iterator<String> iter = targetTypes.iterator(); iter.hasNext();) {
 							String next = iter.next();
 							if (next.equals("Any") || next.endsWith("Dt")) {
 								iter.remove();
@@ -150,7 +173,6 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			index++;
 		}
 
-		
 		ourLog.info("Parsed {} spreadsheet structures", getResources().size());
 
 	}
@@ -191,7 +213,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 				}
 
 				List<SearchParameter> compositeParams = new ArrayList<SearchParameter>();
-				
+
 				for (int j = 1; j < rows.getLength(); j++) {
 					Element nextRow = (Element) rows.item(j);
 					SearchParameter sp = new SearchParameter();
@@ -204,35 +226,35 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 					if (StringUtils.isNotBlank(sp.getName()) && !sp.getName().startsWith("!")) {
 						if (sp.getType().equals("composite")) {
 							compositeParams.add(sp);
-						}else {
-						theResource.addSearchParameter(sp);
+						} else {
+							theResource.addSearchParameter(sp);
 						}
 					}
 				}
 
 				for (SearchParameter nextCompositeParam : compositeParams) {
-//					if(true)continue;
-					
+					// if(true)continue;
+
 					if (isBlank(nextCompositeParam.getPath())) {
 						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has no path");
 					}
-					
-					if (nextCompositeParam.getPath().indexOf('&')==-1) {
+
+					if (nextCompositeParam.getPath().indexOf('&') == -1) {
 						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path with no '&': " + nextCompositeParam.getPath());
 					}
-					
+
 					String[] parts = nextCompositeParam.getPath().split("\\&");
 					List<List<SearchParameter>> compositeOf = new ArrayList<List<SearchParameter>>();
-					
+
 					for (String nextPart : parts) {
 						nextPart = nextPart.trim();
 						if (isBlank(nextPart)) {
 							continue;
 						}
-						
+
 						List<SearchParameter> part = new ArrayList<SearchParameter>();
 						compositeOf.add(part);
-						
+
 						Set<String> possibleMatches = new HashSet<String>();
 						possibleMatches.add(nextPart);
 						possibleMatches.add(theResource.getName() + "." + nextPart);
@@ -240,23 +262,32 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						possibleMatches.add(theResource.getName() + "." + nextPart.replace("[x]", "-[x]"));
 						possibleMatches.add(nextPart.replace("-[x]", "[x]"));
 						possibleMatches.add(theResource.getName() + "." + nextPart.replace("-[x]", "[x]"));
-						
+
 						for (SearchParameter nextParam : theResource.getSearchParameters()) {
 							if (possibleMatches.contains(nextParam.getPath()) || possibleMatches.contains(nextParam.getName())) {
 								part.add(nextParam);
 							}
 						}
-						
+
+						/*
+						 * Paths have changed in DSTU2
+						 */
+						for (SearchParameter nextParam : theResource.getSearchParameters()) {
+							if (nextPart.equals("value[x]") && nextParam.getName().startsWith("value-")) {
+								part.add(nextParam);
+							}
+						}
+
 						if (part.isEmpty()) {
 							throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has path that doesn't seem to correspond to any other params: " + nextPart);
 						}
-						
+
 					}
-					
+
 					if (compositeOf.size() > 2) {
 						throw new MojoExecutionException("Composite param " + nextCompositeParam.getName() + " has >2 parts, this isn't supported yet");
 					}
-					
+
 					for (SearchParameter part1 : compositeOf.get(0)) {
 						for (SearchParameter part2 : compositeOf.get(1)) {
 							SearchParameter composite = new SearchParameter();
@@ -269,8 +300,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 							composite.setCompositeTypes(Arrays.asList(WordUtils.capitalize(part1.getType()), WordUtils.capitalize(part2.getType())));
 						}
 					}
-					
-					
+
 				}
 			}
 		}
@@ -307,7 +337,7 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 		}
 	}
 
-	protected void parseBasicElements(Element theRowXml, BaseElement theTarget) {
+	private void parseBasicElements(Element theRowXml, BaseElement theTarget, String theTypeOrNull) {
 		String name = cellValue(theRowXml, myColName);
 		theTarget.setName(name);
 
@@ -320,9 +350,8 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 			theTarget.setCardMax(split[1]);
 		}
 
-		String type = cellValue(theRowXml, myColType);
+		String type = theTypeOrNull != null ? theTypeOrNull : cellValue(theRowXml, myColType);
 		theTarget.setTypeFromString(type);
-
 		theTarget.setBinding(cellValue(theRowXml, myColBinding));
 		theTarget.setShortName(cellValue(theRowXml, myColShortName));
 		theTarget.setDefinition(cellValue(theRowXml, myColDefinition));

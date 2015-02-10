@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class Constants {
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
+	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + "; charset=UTF-8";
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String FORMAT_JSON = "json";
@@ -47,9 +48,9 @@ public class Constants {
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
-	public static final String HEADER_CATEGORY = "Category";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
+	public static final String HEADER_CATEGORY = "Category";
 	public static final String HEADER_CATEGORY_LC = HEADER_CATEGORY.toLowerCase();
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
 	public static final String HEADER_CONTENT_ENCODING = "Content-Encoding";
@@ -60,10 +61,17 @@ public class Constants {
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	public static final String HEADER_ETAG = "ETag";
+	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
+	public static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
+	public static final String HEADER_IF_MATCH = "If-Match";
+	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
+	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_COUNT = "_count";
@@ -90,6 +98,7 @@ public class Constants {
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
+	public static final int STATUS_HTTP_304_NOT_MODIFIED = 304;
 	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
@@ -101,6 +110,7 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
+	public static final String URL_TOKEN_METADATA = "metadata";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

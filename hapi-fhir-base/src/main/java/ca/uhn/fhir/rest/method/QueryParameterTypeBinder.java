@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.method;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> implements IParamBinder {
+final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> implements IParamBinder<IQueryParameterType> {
 
 	QueryParameterTypeBinder(Class<? extends IQueryParameterType> theType, List<Class<? extends IQueryParameterType>> theCompositeTypes) {
 		super(theType, theCompositeTypes);
@@ -46,7 +46,7 @@ final class QueryParameterTypeBinder extends BaseBinder<IQueryParameterType> imp
 	}
 
 	@Override
-	public Object parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
+	public IQueryParameterType parse(String theName, List<QualifiedParamList> theParams) throws InternalErrorException, InvalidRequestException {
 		String value = theParams.get(0).get(0);
 		if (StringUtils.isBlank(value)) {
 			return null;

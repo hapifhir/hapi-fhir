@@ -1,15 +1,14 @@
 package example;
 
-import static ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum.OFFICIAL;
-import static ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum.SECONDARY;
-
 import java.io.IOException;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -24,12 +23,12 @@ public class QuickUsage {
 public static void main(String[] args) throws DataFormatException, IOException {
 
 Patient patient = new Patient();
-patient.addIdentifier().setUse(OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
-patient.addIdentifier().setUse(SECONDARY).setSystem("urn:fake:otherids").setValue("3287486");
+patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:fake:mrns").setValue("7000135");
+patient.addIdentifier().setUse(IdentifierUseEnum.SECONDARY).setSystem("urn:fake:otherids").setValue("3287486");
 
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
 
-patient.setGender(AdministrativeGenderCodesEnum.M);
+patient.setGender(AdministrativeGenderEnum.MALE);
 
 
 FhirContext ctx = new FhirContext();
