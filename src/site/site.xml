@@ -22,8 +22,8 @@
 		<logo name="Built with Maven 3" href="http://maven.apache.org" img="./images/maven-logo-mini.png" />
 	</poweredBy>
 
-	<publishDate position="top" format="yyyy-MM-dd" />
-	<version position="top" />
+	<publishDate position="bottom" format="yyyy-MM-dd" />
+	<version position="bottom" />
 
 	<!-- <version position="left" />  -->
 
@@ -50,26 +50,27 @@
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
 		</head>
 		
-		<!-- 
+		<breadcrumbs>
+			<item name="HAPI FHIR" href="/" />
+		</breadcrumbs>
+		
 		<links>
-			<item name="GitHub Page" href="https://github.com/jamesagnew/hapi-fhir/" />
-			<item name="hl7.org" href="http://hl7.org/" />
-			<item name="University Health Network" href="http://www.uhn.ca/" />
+			<item name="Download" href="./download.html" />
+			<item name="GitHub Project" href="https://github.com/jamesagnew/hapi-fhir/" />
 		</links>
-		-->
 		
 		<menu name="HAPI FHIR" inherit="top">
-			<item name="Welcome" href="index.html" />
+			<item name="Home" href="index.html" />
 			<item name="Download" href="./download.html" />
 			<item name="Upgrade Guide" href="./doc_upgrading.html" />
 			<item name="Changelog" href="./changes-report.html" />
+			<item name="License" href="license.html" />
 		</menu>
-
-		<menu name="Test Servers" inherit="top">
-			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
-			<item name="Vagrant (Private) Test Server" href="doc_vagrant.html"/>
+		
+		<menu name="Test Server" inherit="bottom">
+			<item name="Test Server" href="http://fhirtest.uhn.ca"/>
 		</menu>
-
+		
 		<menu name="Documentation" inherit="top">
 			<item name="Introduction" href="./doc_intro.html" >
 				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
@@ -113,12 +114,10 @@
 			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 		</menu>
 
-		<menu name="Reports" inherit="bottom">
+		<menu name="Maven Reports" inherit="bottom">
 			<item name="Developers" href="team-list.html" />
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
-			<item name="License" href="license.html" />
-			<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
 		</menu>
 
 	</body>
@@ -139,11 +138,33 @@
 	
 	<custom>
 		<reflowSkin>
+			<pages>
+				<index project="hapi-fhir">
+					<!-- Override the title 
+					<titleTemplate>Reflow Maven Skin</titleTemplate>
+					-->
+					<!-- no breadcrumbs on the main index page -->
+					<breadcrumbs>false</breadcrumbs>
+					<!-- no ToC on the main index page -->
+					<toc>false</toc>
+					<!--
+					<markPageHeader>false</markPageHeader>
+					<sections>
+						<carousel />
+						<columns>2</columns>
+						<body />
+						<sidebar />
+					</sections>
+					-->
+				</index>
+			</pages>
 			<theme>bootswatch-united</theme>
 			<toc>sidebar</toc>
+			<topNav>Test Server|Documentation|JavaDocs|Get Help</topNav>
 			<bottomNav maxSpan="9" >
 				<column>HAPI FHIR|Test Servers</column>
 				<column>Get Help|Reports</column>
+				<column>Maven Reports</column>
 			</bottomNav>
 			<!-- 
 			<highlightJs>true</highlightJs>
