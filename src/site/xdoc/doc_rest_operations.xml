@@ -584,10 +584,7 @@
 				<p>
 					FHIR allows for multiple parameters with the same key, and interprets
 					these as being an "AND" set. So, for example, a range of
-					<br />
-					<code>DATE &gt;= 2011-01-01</code>
-					and
-					<code>DATE &lt; 2011-02-01</code>
+					<code>date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
 					<br />
 					can be interpreted as any date within January 2011.
 				</p>

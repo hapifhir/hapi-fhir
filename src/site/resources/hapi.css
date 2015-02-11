@@ -88,8 +88,6 @@ a[name]:before {
 	line-height: 1.3em;
 }
 
-/*
-
 .syntaxhighlighter {
 	font-size: 0.85em !important;
 }
@@ -139,6 +137,7 @@ dfn {
 	border-bottom: 1px dotted #40A040;
 }
 
+/*
 a,a.externalLink,a:active,a:hover,a:link,a:visited {
 	color: #993300;
 }
