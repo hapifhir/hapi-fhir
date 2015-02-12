@@ -132,7 +132,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myUrlToChildExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 
 		BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(myChildType);

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.base.composite;
 
+import ca.uhn.fhir.model.api.IDatatype;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +22,6 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
-public class BaseContainedDt {
+public abstract class BaseContainedDt implements IDatatype {
 
 }

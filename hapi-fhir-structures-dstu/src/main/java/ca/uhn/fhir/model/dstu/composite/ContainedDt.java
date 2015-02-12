@@ -23,13 +23,13 @@ package ca.uhn.fhir.model.dstu.composite;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
-@DatatypeDef(name = "duration")
-public class ContainedDt implements IDatatype {
+@DatatypeDef(name = "contained")
+public class ContainedDt extends BaseContainedDt {
 
 	@Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IResource> myContainedResources;

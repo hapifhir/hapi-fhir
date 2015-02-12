@@ -127,8 +127,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theClassToElementDefinitions);
+	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
 

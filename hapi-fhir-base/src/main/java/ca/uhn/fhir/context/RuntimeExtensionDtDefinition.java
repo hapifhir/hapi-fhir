@@ -44,8 +44,8 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theClassToElementDefinitions);
+	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 		
 		/*
 		 * The "url" child is a weird child because it is not parsed and encoded in the normal way,

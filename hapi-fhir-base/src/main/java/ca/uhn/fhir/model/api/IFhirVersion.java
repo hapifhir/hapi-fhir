@@ -44,4 +44,8 @@ public interface IFhirVersion {
 
 	String getPathToSchemaDefinitions();
 
+	Class<? extends IDatatype> getResourceReferenceType();
+
+	Class<? extends IDatatype> getContainedType();
+
 }

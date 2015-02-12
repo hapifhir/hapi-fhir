@@ -1,4 +1,8 @@
-package ca.uhn.fhir.context;
+package ca.uhn.fhir.model.base.composite;
+
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.api.IDatatype;
 
 /*
  * #%L
@@ -20,17 +24,6 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IDatatype;
-
-public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<IDatatype> {
-
-	public RuntimeElemContainedResources(Class<? extends IDatatype> theClass) {
-		super("contained", theClass);
-	}
-
-	@Override
-	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
-		return ChildTypeEnum.CONTAINED_RESOURCES;
-	}
+public abstract class BaseNarrativeDt extends BaseIdentifiableElement implements ICompositeDatatype {
 
 }

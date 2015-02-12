@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,9 +75,9 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
@@ -253,11 +253,11 @@ class ModelScanner {
 				continue;
 			}
 			BaseRuntimeElementDefinition<?> next = nextEntry.getValue();
-			next.sealAndInitialize(myClassToElementDefinitions);
+			next.sealAndInitialize(myContext, myClassToElementDefinitions);
 		}
 
 		myRuntimeChildUndeclaredExtensionDefinition = new RuntimeChildUndeclaredExtensionDefinition();
-		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myClassToElementDefinitions);
+		myRuntimeChildUndeclaredExtensionDefinition.sealAndInitialize(myContext, myClassToElementDefinitions);
 
 		long time = System.currentTimeMillis() - start;
 		int size = myClassToElementDefinitions.size() - startSize;
@@ -493,7 +493,7 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			if (nextElementType.equals(ContainedDt.class) || (childAnnotation.name().equals("contained") && DomainResource.class.isAssignableFrom(theClass))) {
+			if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && DomainResource.class.isAssignableFrom(theClass))) {
 				/*
 				 * Child is contained resources
 				 */
@@ -575,7 +575,7 @@ class ModelScanner {
 					if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
-					} else if (NarrativeDt.class.getSimpleName().equals(nextElementType.getSimpleName()) || Narrative.class.getName().equals(nextElementType.getClass().getName())) {
+					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || Narrative.class.getName().equals(nextElementType.getClass().getName())) {
 						def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
@@ -644,7 +644,7 @@ class ModelScanner {
 		return retVal;
 	}
 
-	private String scanPrimitiveDatatype(Class<? extends IPrimitiveType> theClass, DatatypeDef theDatatypeDefinition) {
+	private String scanPrimitiveDatatype(Class<? extends IPrimitiveType<?>> theClass, DatatypeDef theDatatypeDefinition) {
 		ourLog.debug("Scanning resource class: {}", theClass.getName());
 
 		String resourceName = theDatatypeDefinition.name();

@@ -42,7 +42,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
 		
 		for (Class<? extends IBase> next : theClassToElementDefinitions.keySet()) {
@@ -83,7 +83,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 		
 		setChoiceTypes(choiceTypes);
 		
-		super.sealAndInitialize(theClassToElementDefinitions);
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 	}
 
 	

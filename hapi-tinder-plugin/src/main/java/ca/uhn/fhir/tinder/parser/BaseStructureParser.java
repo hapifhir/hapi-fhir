@@ -506,6 +506,10 @@ public abstract class BaseStructureParser {
 		}
 
 		if (theResourceOutputDirectory != null) {
+			
+			// Binary is manually generated but should still go in the list
+			myNameToResourceClass.put("Binary", thePackageBase + ".resource.Binary");
+			
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				FileWriter w = new FileWriter(versionFile, false);

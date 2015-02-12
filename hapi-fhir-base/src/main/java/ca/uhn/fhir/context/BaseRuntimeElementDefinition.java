@@ -128,10 +128,11 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	/**
 	 * Invoked prior to use to perform any initialization and make object
 	 * mutable
+	 * @param theContext TODO
 	 */
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		for (BaseRuntimeChildDefinition next : myExtensions) {
-			next.sealAndInitialize(theClassToElementDefinitions);
+			next.sealAndInitialize(theContext, theClassToElementDefinitions);
 		}
 
 		for (RuntimeChildDeclaredExtensionDefinition next : myExtensions) {
