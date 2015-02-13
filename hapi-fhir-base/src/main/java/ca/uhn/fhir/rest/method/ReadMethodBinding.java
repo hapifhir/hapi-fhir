@@ -36,7 +36,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -168,7 +168,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	@Override
 	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
-		Binary resource = new Binary(theResponseMimeType, contents);
+		
+		BaseBinary resource = (BaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+		resource.setContentType(theResponseMimeType);
+		resource.setContent(contents);
 
 		switch (getMethodReturnType()) {
 		case BUNDLE:

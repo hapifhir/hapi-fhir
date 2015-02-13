@@ -20,12 +20,13 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
-public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<IDatatype> {
+public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<BaseContainedDt> {
 
-	public RuntimeElemContainedResources(Class<? extends IDatatype> theClass) {
+	public RuntimeElemContainedResources(Class<? extends BaseContainedDt> theClass) {
 		super("contained", theClass);
+		assert BaseContainedDt.class.isAssignableFrom(theClass);
 	}
 
 	@Override

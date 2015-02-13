@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -30,7 +30,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -68,10 +66,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -1177,11 +1175,11 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("No narrative generator specified");
 			}
 
-			List<ResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
+			List<BaseResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
-				for (ResourceReferenceDt nextRef : references) {
+				for (BaseResourceReferenceDt nextRef : references) {
 					IResource nextRes = nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
@@ -1206,9 +1204,9 @@ public class RestfulServer extends HttpServlet {
 				}
 
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<ResourceReferenceDt>();
+				references = new ArrayList<BaseResourceReferenceDt>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, ResourceReferenceDt.class);
+					List<BaseResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
 					references.addAll(newReferences);
 				}
 
@@ -1449,8 +1447,8 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			if (isNotBlank(bin.getContentType())) {
 				theHttpResponse.setContentType(bin.getContentType());
 			} else {

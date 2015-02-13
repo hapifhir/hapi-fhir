@@ -26,6 +26,8 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -44,8 +46,8 @@ public interface IFhirVersion {
 
 	String getPathToSchemaDefinitions();
 
-	Class<? extends IDatatype> getResourceReferenceType();
+	Class<? extends BaseResourceReferenceDt> getResourceReferenceType();
 
-	Class<? extends IDatatype> getContainedType();
+	Class<? extends BaseContainedDt> getContainedType();
 
 }

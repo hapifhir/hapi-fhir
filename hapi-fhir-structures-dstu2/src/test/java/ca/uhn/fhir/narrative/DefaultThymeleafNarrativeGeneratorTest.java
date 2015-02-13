@@ -59,7 +59,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
-		String output = myGen.generateNarrative(value).getDiv().getValueAsString();
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
 
 		String title = myGen.generateTitle(value);
@@ -99,7 +101,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		value.addResult().setReference("Observation/2");
 		value.addResult().setReference("Observation/3");
 
-		String output = myGen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value).getDiv().getValueAsString();
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString(value.getName().getTextElement().getValue()));
@@ -126,8 +130,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 //		ourLog.info(output);
 //		assertEquals("Operation Outcome (2 issues)", output);
 
-		String nar = myGen.generateNarrative(null, oo).getDiv().getValueAsString();
-		ourLog.info(nar);
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(null, oo, narrative);
+		String output = narrative.getDiv().getValueAsString();
+
+		ourLog.info(output);
 
 //		oo = new OperationOutcome();
 //		oo.addIssue().setSeverity(IssueSeverityEnum.FATAL).setDetails("AA");
@@ -166,8 +173,10 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 			obs.setName(new CodeableConceptDt("AA", "BB"));
 			value.addResult().setResource(obs);
 		}
-		NarrativeDt generateNarrative = myGen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value);
-		String output = generateNarrative.getDiv().getValueAsString();
+
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative("http://hl7.org/fhir/profiles/DiagnosticReport", value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
@@ -195,7 +204,9 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		mp.setStatus(MedicationPrescriptionStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 		
-		NarrativeDt narrative = myGen.generateNarrative(mp);
+		NarrativeDt narrative = new NarrativeDt();
+		myGen.generateNarrative(mp, narrative);
+		
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin")>-1);
 		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE")>-1);
 		

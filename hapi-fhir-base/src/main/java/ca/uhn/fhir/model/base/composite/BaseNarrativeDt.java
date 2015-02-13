@@ -2,7 +2,9 @@ package ca.uhn.fhir.model.base.composite;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 /*
  * #%L
@@ -24,6 +26,13 @@ import ca.uhn.fhir.model.api.IDatatype;
  * #L%
  */
 
-public abstract class BaseNarrativeDt extends BaseIdentifiableElement implements ICompositeDatatype {
+/**
+ * @param <T> The narrative status enum type  
+ */
+public abstract class BaseNarrativeDt<T extends Enum<?>> extends BaseIdentifiableElement implements ICompositeDatatype {
 
+	public abstract BoundCodeDt<T> getStatus();  
+
+	public abstract XhtmlDt getDiv();
+	
 }

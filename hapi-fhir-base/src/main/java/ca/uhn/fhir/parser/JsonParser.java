@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -78,10 +80,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -387,7 +389,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theNextValue;
+			BaseResourceReferenceDt referenceDt = (BaseResourceReferenceDt) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -399,8 +401,8 @@ public class JsonParser extends BaseParser implements IParser {
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
-			if (referenceDt.getDisplay().isEmpty() == false) {
-				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplay().getValueAsString());
+			if (referenceDt.getDisplayElement().isEmpty() == false) {
+				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplayElement().getValueAsString());
 			}
 			theWriter.writeEnd();
 			break;
@@ -455,7 +457,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (gen != null) {
-					NarrativeDt narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
+					BaseNarrativeDt<?> narr = ((IResource)theResource).getText();
+					gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
 					if (narr != null) {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -480,7 +483,7 @@ public class JsonParser extends BaseParser implements IParser {
 			int valueIdx = 0;
 			for (IBase nextValue : values) {
 				if (nextValue == null || nextValue.isEmpty()) {
-					if (nextValue instanceof ContainedDt) {
+					if (nextValue instanceof BaseContainedDt) {
 						if (theIsSubElementWithinResource || getContainedResources().isEmpty()) {
 							continue;
 						}
@@ -646,8 +649,8 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {

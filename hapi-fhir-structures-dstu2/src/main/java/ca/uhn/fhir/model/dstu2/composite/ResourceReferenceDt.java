@@ -226,6 +226,11 @@ public class ResourceReferenceDt
 		return this; 
 	}
 
+	@Override
+	public StringDt getDisplayElement() {
+		return getDisplay();
+	}
+
  
 
 

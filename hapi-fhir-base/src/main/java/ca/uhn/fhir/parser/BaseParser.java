@@ -51,7 +51,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
@@ -120,8 +120,8 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
-			for (ResourceReferenceDt next : allElements) {
+			List<BaseResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
+			for (BaseResourceReferenceDt next : allElements) {
 				IResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
@@ -279,7 +279,7 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
-	protected String determineReferenceText(ResourceReferenceDt theRef) {
+	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
 		String reference = theRef.getReference().getValue();
 		if (isBlank(reference)) {
 			if (theRef.getResource() != null) {

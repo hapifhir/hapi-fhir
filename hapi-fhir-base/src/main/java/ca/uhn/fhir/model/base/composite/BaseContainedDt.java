@@ -1,6 +1,9 @@
 package ca.uhn.fhir.model.base.composite;
 
+import java.util.List;
+
 import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IResource;
 
 /*
  * #%L
@@ -23,5 +26,7 @@ import ca.uhn.fhir.model.api.IDatatype;
  */
 
 public abstract class BaseContainedDt implements IDatatype {
+
+	public abstract List<? extends IResource> getContainedResources();
 
 }

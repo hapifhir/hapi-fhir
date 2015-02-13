@@ -1,12 +1,18 @@
 package ca.uhn.fhir.model.base.resource;
 
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 
-public abstract class BaseBinary extends BaseResource implements IResource {
+public interface BaseBinary extends IResource {
 
-	public abstract byte[] getContent();
-	
-	public abstract String getContentType();
-	
+	byte[] getContent();
+
+	String getContentAsBase64();
+
+	String getContentType();
+
+	void setContent(byte[] theContent);
+
+	void setContentAsBase64(String theContent);
+
+	void setContentType(String theContentType);
 }

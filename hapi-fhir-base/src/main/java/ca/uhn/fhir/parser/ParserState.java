@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import org.hl7.fhir.instance.model.IPrimitiveType;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
@@ -64,10 +67,10 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -718,8 +721,8 @@ class ParserState<T> {
 			}
 
 			for (IResource next : resources) {
-				List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
-				for (ResourceReferenceDt nextRef : refs) {
+				List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+				for (BaseResourceReferenceDt nextRef : refs) {
 					if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
 						IResource target = idToResource.get(nextRef.getReference().getValue());
 						if (target != null) {
@@ -816,10 +819,10 @@ class ParserState<T> {
 		private static final int SUBSTATE_CONTENT = 2;
 		private static final int SUBSTATE_CT = 1;
 		private String myData;
-		private Binary myInstance;
+		private BaseBinary myInstance;
 		private int mySubState = 0;
 
-		public BinaryResourceStateForDstu1(PreResourceState thePreResourceState, Binary theInstance) {
+		public BinaryResourceStateForDstu1(PreResourceState thePreResourceState, BaseBinary theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 		}
@@ -1286,7 +1289,10 @@ class ParserState<T> {
 				}
 			}
 			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
-			preResCurrentElement.getContained().getContainedResources().add(res);
+			
+			@SuppressWarnings("unchecked")
+			List<IResource> containedResources = (List<IResource>) preResCurrentElement.getContained().getContainedResources();
+			containedResources.add(res);
 			
 		}
 
@@ -1336,7 +1342,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE_REF: {
-				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
@@ -1352,6 +1358,7 @@ class ParserState<T> {
 			}
 		}
 
+		
 		@Override
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
@@ -1372,6 +1379,18 @@ class ParserState<T> {
 			return myParentInstance;
 		}
 
+	}
+
+	private BaseResourceReferenceDt newResourceReferenceDt() {
+		BaseResourceReferenceDt newChildInstance;
+		try {
+			newChildInstance = (BaseResourceReferenceDt) myContext.getVersion().getResourceReferenceType().newInstance();
+		} catch (InstantiationException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		}
+		return newChildInstance;
 	}
 
 	private class ElementCompositeState<T2 extends IBase> extends BaseState {
@@ -1447,7 +1466,7 @@ class ParserState<T> {
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
 				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
@@ -1473,12 +1492,12 @@ class ParserState<T> {
 			case CONTAINED_RESOURCES: {
 				RuntimeElemContainedResources targetElem = (RuntimeElemContainedResources) target;
 				List<? extends IBase> values = child.getAccessor().getValues(myInstance);
-				ContainedDt newDt;
+				BaseContainedDt newDt;
 				if (values == null || values.isEmpty() || values.get(0) == null) {
 					newDt = targetElem.newInstance();
 					child.getMutator().addValue(myInstance, newDt);
 				} else {
-					newDt = (ContainedDt) values.get(0);
+					newDt = (BaseContainedDt) values.get(0);
 				}
 				ContainedResourcesState state = new ContainedResourcesState(getPreResourceState());
 				push(state);
@@ -1555,7 +1574,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE_REF: {
-				ResourceReferenceDt newChildInstance = new ResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
 				myExtension.setValue(newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
@@ -1707,7 +1726,7 @@ class ParserState<T> {
 		private Map<String, IBaseResource> myContainedResources = new HashMap<String, IBaseResource>();
 		private BundleEntry myEntry;
 		private IResource myInstance;
-		private List<ResourceReferenceDt> myResourceReferences = new ArrayList<ResourceReferenceDt>();
+		private List<BaseResourceReferenceDt> myResourceReferences = new ArrayList<BaseResourceReferenceDt>();
 		private Class<? extends IBaseResource> myResourceType;
 
 		public PreResourceState(BundleEntry theEntry, Class<? extends IBaseResource> theResourceType) {
@@ -1760,7 +1779,7 @@ class ParserState<T> {
 
 			String resourceName = def.getName();
 			if ("Binary".equals(resourceName) && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				push(new BinaryResourceStateForDstu1(getRootPreResourceState(), (Binary) myInstance));
+				push(new BinaryResourceStateForDstu1(getRootPreResourceState(), (BaseBinary) myInstance));
 			} else {
 				push(new ResourceState(getRootPreResourceState(), def, myInstance));
 			}
@@ -1775,7 +1794,7 @@ class ParserState<T> {
 			return myInstance;
 		}
 
-		public List<ResourceReferenceDt> getResourceReferences() {
+		public List<BaseResourceReferenceDt> getResourceReferences() {
 			return myResourceReferences;
 		}
 
@@ -1803,8 +1822,8 @@ class ParserState<T> {
 
 				@Override
 				public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-					if (theElement instanceof ResourceReferenceDt) {
-						ResourceReferenceDt nextRef = (ResourceReferenceDt) theElement;
+					if (theElement instanceof BaseResourceReferenceDt) {
+						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
@@ -1928,10 +1947,10 @@ class ParserState<T> {
 
 	private class ResourceReferenceState extends BaseState {
 
-		private ResourceReferenceDt myInstance;
+		private BaseResourceReferenceDt myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceState(PreResourceState thePreResourceState, ResourceReferenceDt theInstance) {
+		public ResourceReferenceState(PreResourceState thePreResourceState, BaseResourceReferenceDt theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
@@ -1945,12 +1964,12 @@ class ParserState<T> {
 
 			switch (mySubState) {
 			case DISPLAY:
-				myInstance.setDisplay(theValue);
+				myInstance.getDisplayElement().setValue(theValue);
 				break;
 			case INITIAL:
 				throw new DataFormatException("Unexpected attribute: " + theValue);
 			case REFERENCE:
-				myInstance.setReference(theValue);
+				myInstance.getReference().setValue(theValue);
 				break;
 			}
 		}

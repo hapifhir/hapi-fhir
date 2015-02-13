@@ -20,9 +20,8 @@ package ca.uhn.fhir.model.base.resource;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 
-public abstract class BaseSecurityEvent extends BaseResource implements IResource {
+public interface BaseSecurityEvent extends IResource {
 
 }

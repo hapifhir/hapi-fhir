@@ -20,7 +20,7 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,9 +63,7 @@ import org.thymeleaf.templateresolver.TemplateResolver;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
@@ -94,8 +92,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	@Override
-	public NarrativeDt generateNarrative(IBaseResource theResource) {
-		return generateNarrative( null, theResource);
+	public void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
+		generateNarrative(null, theResource, theNarrative);
 	}
 
 	@Override
@@ -110,7 +108,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	}
 
 	@Override
-	public NarrativeDt generateNarrative(String theProfile, IBaseResource theResource) {
+	public void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
 		if (!myInitialized) {
 			initialize();
 		}
@@ -129,7 +127,9 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		if (name == null) {
 			if (myIgnoreMissingTemplates) {
 				ourLog.debug("No narrative template available for profile: {}", theProfile);
-				return new NarrativeDt(new XhtmlDt("<div>No narrative template available for resource profile: " + theProfile + "</div>"), NarrativeStatusEnum.EMPTY);
+				theNarrative.getDiv().setValueAsString("<div>No narrative template available for resource profile: " + theProfile + "</div>");
+				theNarrative.getStatus().setValueAsString("empty");
+				return;
 			} else {
 				throw new DataFormatException("No narrative template for class " + theResource.getClass().getCanonicalName());
 			}
@@ -147,12 +147,15 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				ourLog.trace("Post-whitespace cleaning: ", result);
 			}
 
-			XhtmlDt div = new XhtmlDt(result);
-			return new NarrativeDt(div, NarrativeStatusEnum.GENERATED);
+			theNarrative.getDiv().setValueAsString(result);
+			theNarrative.getStatus().setValueAsString("generated");
+			return;
 		} catch (Exception e) {
 			if (myIgnoreFailures) {
 				ourLog.error("Failed to generate narrative", e);
-				return new NarrativeDt(new XhtmlDt("<div>No narrative available - Error: " + e.getMessage() + "</div>"), NarrativeStatusEnum.EMPTY);
+				theNarrative.getDiv().setValueAsString("<div>No narrative available - Error: " + e.getMessage() + "</div>");
+				theNarrative.getStatus().setValueAsString("empty");
+				return;
 			} else {
 				throw new DataFormatException(e);
 			}

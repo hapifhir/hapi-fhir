@@ -20,13 +20,12 @@ package ca.uhn.fhir.model.base.resource;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 //@ResourceDef(name="Conformance")
-public abstract class BaseConformance extends BaseResource implements IResource {
+public interface BaseConformance extends IResource {
 
 	public abstract StringDt getDescriptionElement();
 

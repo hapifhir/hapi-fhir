@@ -14,7 +14,7 @@
 
 
 
-package ca.uhn.fhir.model.dstu.composite;
+package ca.uhn.fhir.model.dev.composite;
 
 /*
  * #%L

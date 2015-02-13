@@ -20,7 +20,9 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -72,10 +74,10 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -463,7 +465,7 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			ResourceReferenceDt ref = (ResourceReferenceDt) nextValue;
+			BaseResourceReferenceDt ref = (BaseResourceReferenceDt) nextValue;
 			if (!ref.isEmpty()) {
 				theEventWriter.writeStartElement(childName);
 				encodeResourceReferenceToStreamWriter(theEventWriter, ref);
@@ -472,7 +474,7 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case CONTAINED_RESOURCES: {
-			ContainedDt value = (ContainedDt) nextValue;
+			BaseContainedDt value = (BaseContainedDt) nextValue;
 			/*
 			 * Disable per #103 for (IResource next : value.getContainedResources()) { if
 			 * (getContainedResources().getResourceId(next) != null) { continue; }
@@ -511,11 +513,11 @@ public class XmlParser extends BaseParser implements IParser {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition && !theIncludedResource) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (theResource instanceof IResource) {
-					NarrativeDt narr = ((IResource) theResource).getText();
+					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
 					if (gen != null && narr.isEmpty()) {
-						narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
+						gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
 					}
-					if (narr != null) {
+					if (narr.isEmpty()==false) {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
@@ -524,9 +526,10 @@ public class XmlParser extends BaseParser implements IParser {
 					}
 				} else {
 					Narrative narr1 = ((DomainResource) theResource).getText();
-					NarrativeDt narr2 = null;
+					BaseNarrativeDt<?> narr2 = null;
 					if (gen != null && narr1.isEmpty()) {
-						narr2 = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
+						// TODO: need to implement this
+						gen.generateNarrative(theResDef.getResourceProfile(), theResource, null);
 					}
 					if (narr2 != null) {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
@@ -544,7 +547,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			for (IBase nextValue : values) {
-				if ((nextValue == null || nextValue.isEmpty()) && !(nextValue instanceof ContainedDt)) {
+				if ((nextValue == null || nextValue.isEmpty()) && !(nextValue instanceof BaseContainedDt)) {
 					continue;
 				}
 				Class<? extends IBase> type = nextValue.getClass();
@@ -594,7 +597,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, ResourceReferenceDt theRef) throws XMLStreamException {
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, BaseResourceReferenceDt theRef) throws XMLStreamException {
 		String reference = determineReferenceText(theRef);
 
 		if (StringUtils.isNotBlank(reference)) {
@@ -602,9 +605,9 @@ public class XmlParser extends BaseParser implements IParser {
 			theEventWriter.writeAttribute("value", reference);
 			theEventWriter.writeEndElement();
 		}
-		if (!(theRef.getDisplay().isEmpty())) {
+		if (!(theRef.getDisplayElement().isEmpty())) {
 			theEventWriter.writeStartElement(RESREF_DISPLAY);
-			theEventWriter.writeAttribute("value", theRef.getDisplay().getValue());
+			theEventWriter.writeAttribute("value", theRef.getDisplayElement().getValue());
 			theEventWriter.writeEndElement();
 		}
 	}
@@ -718,8 +721,8 @@ public class XmlParser extends BaseParser implements IParser {
 
 		}
 
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				writeOptionalTagWithValue(theEventWriter, "contentType", bin.getContentType());
 				writeOptionalTagWithValue(theEventWriter, "content", bin.getContentAsBase64());
