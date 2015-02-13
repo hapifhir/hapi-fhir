@@ -22,12 +22,13 @@
 		<logo name="Built with Maven 3" href="http://maven.apache.org" img="./images/maven-logo-mini.png" />
 	</poweredBy>
 
-	<publishDate position="bottom" format="yyyy-MM-dd" />
-	<version position="bottom" />
+	<publishDate position="right" format="yyyy-MM-dd" />
+	<version position="right" />
 
 	<!-- <version position="left" />  -->
 
 	<body>
+	
 		<head>
 			<!-- Syntax Highlighter -->
 			<!--
@@ -51,7 +52,7 @@
 		</head>
 		
 		<breadcrumbs>
-			<item name="HAPI FHIR" href="/" />
+			<item name="HAPI FHIR" href="./index.html" />
 		</breadcrumbs>
 		
 		<links>
@@ -71,8 +72,8 @@
 			<item name="Test Server" href="http://fhirtest.uhn.ca"/>
 		</menu>
 		
-		<menu name="Documentation" inherit="top">
-			<item name="Introduction" href="./doc_intro.html" >
+		<menu name="Documentation" inherit="top" >
+			<item name="Introduction" href="./doc_intro.html">
 				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
 			</item>
 			
@@ -157,6 +158,9 @@
 					</sections>
 					-->
 				</index>
+				<doc_cors>
+					<shortTitle>CORS</shortTitle>
+				</doc_cors>
 			</pages>
 			<theme>bootswatch-united</theme>
 			<toc>sidebar</toc>

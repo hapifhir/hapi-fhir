@@ -393,7 +393,9 @@
 		var pres = elements[i].getElementsByTagName("pre");
 		for (var j = 0; j < pres.length; j++) {
 			var pre = pres[j];
-			if (pre.innerHTML.match(/\/\*/)) {
+			if (pre.innerHTML.match(/^\s*\&lt\;/)) {
+				pre.className = 'brush: xml';
+			} else if (pre.innerHTML.match(/\/\*/)) {
 				pre.className = 'brush: java';
 			} else if (pre.innerHTML.match(/^\/\//)) {
 				pre.className = 'brush: java';

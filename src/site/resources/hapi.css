@@ -109,11 +109,12 @@ a[name]:before {
 
 tt {
 	white-space: pre;
-	color: #448;
+	color: #846;
 	margin-bottom: 5px;
 	margin-top: 10px;
 	padding: 2px;
 	border: 1px solid #AAA;
+	background-color: #F0F0F0;
 }
 
 h1,h2,h3,h4,h5 {
