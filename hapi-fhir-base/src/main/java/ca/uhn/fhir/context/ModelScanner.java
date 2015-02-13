@@ -737,7 +737,7 @@ class ModelScanner {
 			if (searchParam != null) {
 				SearchParamTypeEnum paramType = SearchParamTypeEnum.valueOf(searchParam.type().toUpperCase());
 				if (paramType == null) {
-					throw new ConfigurationException("Searc param " + searchParam.name() + " has an invalid type: " + searchParam.type());
+					throw new ConfigurationException("Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
 				if (paramType == SearchParamTypeEnum.COMPOSITE) {
 					compositeFields.put(nextField, searchParam);

@@ -59,6 +59,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -1342,7 +1343,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE_REF: {
-				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt(null, myPreResourceState.myInstance);
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);
@@ -1381,10 +1382,13 @@ class ParserState<T> {
 
 	}
 
-	private BaseResourceReferenceDt newResourceReferenceDt() {
+	private BaseResourceReferenceDt newResourceReferenceDt(IBase theFirstTarget, IResource theTarget) {
+		
 		BaseResourceReferenceDt newChildInstance;
 		try {
-			newChildInstance = (BaseResourceReferenceDt) myContext.getVersion().getResourceReferenceType().newInstance();
+//			if (theFirstTarget instanceof IResource)
+			IFhirVersion version = theTarget.getStructureFhirVersionEnum().getVersionImplementation();
+			newChildInstance = version.getResourceReferenceType().newInstance();
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
 		} catch (IllegalAccessException e) {
@@ -1393,7 +1397,20 @@ class ParserState<T> {
 		return newChildInstance;
 	}
 
-	private class ElementCompositeState<T2 extends IBase> extends BaseState {
+	private BaseContainedDt newContainedDt(IResource theTarget) {
+	
+		BaseContainedDt newChildInstance;
+		try {
+			newChildInstance = theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType().newInstance();
+		} catch (InstantiationException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		}
+		return newChildInstance;
+	}
+
+private class ElementCompositeState<T2 extends IBase> extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private T2 myInstance;
@@ -1466,7 +1483,7 @@ class ParserState<T> {
 			}
 			case RESOURCE_REF: {
 				RuntimeResourceReferenceDefinition resourceRefTarget = (RuntimeResourceReferenceDefinition) target;
-				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt(myInstance, getPreResourceState().myInstance);
 				getPreResourceState().getResourceReferences().add(newChildInstance);
 				child.getMutator().addValue(myInstance, newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
@@ -1494,7 +1511,7 @@ class ParserState<T> {
 				List<? extends IBase> values = child.getAccessor().getValues(myInstance);
 				BaseContainedDt newDt;
 				if (values == null || values.isEmpty() || values.get(0) == null) {
-					newDt = targetElem.newInstance();
+					newDt = newContainedDt(getPreResourceState().myInstance);
 					child.getMutator().addValue(myInstance, newDt);
 				} else {
 					newDt = (BaseContainedDt) values.get(0);
@@ -1574,7 +1591,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE_REF: {
-				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt();
+				BaseResourceReferenceDt newChildInstance = newResourceReferenceDt(null, getPreResourceState().myInstance);
 				myExtension.setValue(newChildInstance);
 				ResourceReferenceState newState = new ResourceReferenceState(getPreResourceState(), newChildInstance);
 				push(newState);

@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Microarray
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient described by the microarray</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Microarray.subject.patient</b><br/>
+	 * Description: <b>Patient described by the microarray</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Microarray.subject.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="Microarray.subject.patient", description="Patient described by the microarray", type="reference"  )
@@ -247,9 +247,9 @@ public class Microarray
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient described by the microarray</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Microarray.subject.patient</b><br/>
+	 * Description: <b>Patient described by the microarray</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Microarray.subject.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -263,9 +263,9 @@ public class Microarray
 	/**
 	 * Search parameter constant for <b>gene</b>
 	 * <p>
-	 * Description: <b>Gene studied in the microarray</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Microarray.sample.gene.identity</b><br/>
+	 * Description: <b>Gene studied in the microarray</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Microarray.sample.gene.identity</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="gene", path="Microarray.sample.gene.identity", description="Gene studied in the microarray", type="string"  )
@@ -274,9 +274,9 @@ public class Microarray
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>gene</b>
 	 * <p>
-	 * Description: <b>Gene studied in the microarray</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Microarray.sample.gene.identity</b><br/>
+	 * Description: <b>Gene studied in the microarray</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Microarray.sample.gene.identity</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam GENE = new StringClientParam(SP_GENE);
@@ -284,9 +284,9 @@ public class Microarray
 	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
+	 * Description: <b>Coordinate of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Microarray.sample.gene.coordinate</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="coordinate", path="Microarray.sample.gene.coordinate", description="Coordinate of the gene", type="string"  )
@@ -295,9 +295,9 @@ public class Microarray
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Microarray.sample.gene.coordinate</b><br/>
+	 * Description: <b>Coordinate of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Microarray.sample.gene.coordinate</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam COORDINATE = new StringClientParam(SP_COORDINATE);

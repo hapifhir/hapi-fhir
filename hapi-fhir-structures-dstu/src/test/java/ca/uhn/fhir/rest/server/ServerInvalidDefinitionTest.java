@@ -11,13 +11,13 @@ import org.hamcrest.core.StringContains;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;

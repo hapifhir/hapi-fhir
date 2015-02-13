@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Substance
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of the substance</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Substance.type</b><br/>
+	 * Description: <b>The type of the substance</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Substance.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token"  )
@@ -247,9 +247,9 @@ public class Substance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of the substance</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Substance.type</b><br/>
+	 * Description: <b>The type of the substance</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Substance.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class Substance
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Substance.instance.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Substance.instance.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="", type="token"  )
@@ -268,9 +268,9 @@ public class Substance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Substance.instance.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Substance.instance.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -278,9 +278,9 @@ public class Substance
 	/**
 	 * Search parameter constant for <b>expiry</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Substance.instance.expiry</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Substance.instance.expiry</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="", type="date"  )
@@ -289,9 +289,9 @@ public class Substance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>expiry</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Substance.instance.expiry</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Substance.instance.expiry</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam EXPIRY = new DateClientParam(SP_EXPIRY);
@@ -299,9 +299,9 @@ public class Substance
 	/**
 	 * Search parameter constant for <b>quantity</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Substance.instance.quantity</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>Substance.instance.quantity</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="", type="number"  )
@@ -310,9 +310,9 @@ public class Substance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>quantity</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Substance.instance.quantity</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>Substance.instance.quantity</b><br>
 	 * </p>
 	 */
 	public static final NumberClientParam QUANTITY = new NumberClientParam(SP_QUANTITY);
@@ -320,9 +320,9 @@ public class Substance
 	/**
 	 * Search parameter constant for <b>substance</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Substance.ingredient.substance</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Substance.ingredient.substance</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="", type="reference"  )
@@ -331,9 +331,9 @@ public class Substance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>substance</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Substance.ingredient.substance</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Substance.ingredient.substance</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBSTANCE = new ReferenceClientParam(SP_SUBSTANCE);

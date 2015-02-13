@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.source</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="source", path="List.source", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.source</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
@@ -263,9 +263,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>item</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.entry.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.entry.item</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="item", path="List.entry.item", description="", type="reference"  )
@@ -274,9 +274,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>item</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.entry.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.entry.item</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ITEM = new ReferenceClientParam(SP_ITEM);
@@ -290,9 +290,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>empty-reason</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>List.emptyReason</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>List.emptyReason</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="", type="token"  )
@@ -301,9 +301,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>empty-reason</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>List.emptyReason</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>List.emptyReason</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EMPTY_REASON = new TokenClientParam(SP_EMPTY_REASON);
@@ -311,9 +311,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>List.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>List.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="List.date", description="", type="date"  )
@@ -322,9 +322,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>List.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>List.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -332,9 +332,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>List.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>List.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="List.code", description="", type="token"  )
@@ -343,9 +343,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>List.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>List.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -353,9 +353,9 @@ public class ListResource
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="List.subject", description="", type="reference"  )
@@ -364,9 +364,9 @@ public class ListResource
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>List.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>List.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);

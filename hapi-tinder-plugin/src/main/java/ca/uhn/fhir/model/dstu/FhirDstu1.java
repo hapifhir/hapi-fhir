@@ -2,9 +2,9 @@ package ca.uhn.fhir.model.dstu;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU (FHIR 0.80)
+ * HAPI FHIR Structures - DSTU1 (FHIR v0.80)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ package ca.uhn.fhir.model.dstu;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -60,6 +61,10 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Profile.ExtensionDefn;
 import ca.uhn.fhir.model.dstu.resource.Profile.Structure;
@@ -69,11 +74,8 @@ import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class FhirDstu1 implements IFhirVersion {
 
@@ -81,10 +83,7 @@ public class FhirDstu1 implements IFhirVersion {
 //	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 	private String myId;
 
-	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
-	}
+	
 
 	private void fillBasics(StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
 		if (path.isEmpty()) {
@@ -338,7 +337,13 @@ public class FhirDstu1 implements IFhirVersion {
 
 	@Override
 	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer) {
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
@@ -358,11 +363,21 @@ public class FhirDstu1 implements IFhirVersion {
 		return str;
 	}
 	
+
 	@Override
 	public String getPathToSchemaDefinitions() {
 		return "ca/uhn/fhir/model/dstu/schema";
 	}
 
+	@Override
+	public Class<? extends BaseResourceReferenceDt> getResourceReferenceType() {
+		return ResourceReferenceDt.class;
+	}
+
+	@Override
+	public Class<? extends BaseContainedDt> getContainedType() {
+		return ContainedDt.class;
+	}
 
 
 

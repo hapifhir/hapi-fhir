@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Encounter.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Encounter.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Encounter.identifier", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Encounter.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Encounter.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Encounter.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Encounter.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Encounter.status", description="", type="token"  )
@@ -268,9 +268,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Encounter.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Encounter.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -278,9 +278,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>A date within the period the Encounter lasted</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Encounter.period</b><br/>
+	 * Description: <b>A date within the period the Encounter lasted</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Encounter.period</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date"  )
@@ -289,9 +289,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>A date within the period the Encounter lasted</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Encounter.period</b><br/>
+	 * Description: <b>A date within the period the Encounter lasted</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Encounter.period</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -299,9 +299,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Encounter.subject", description="", type="reference"  )
@@ -310,9 +310,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -326,9 +326,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>length</b>
 	 * <p>
-	 * Description: <b>Length of encounter in days</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Encounter.length</b><br/>
+	 * Description: <b>Length of encounter in days</b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>Encounter.length</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number"  )
@@ -337,9 +337,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>length</b>
 	 * <p>
-	 * Description: <b>Length of encounter in days</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>Encounter.length</b><br/>
+	 * Description: <b>Length of encounter in days</b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>Encounter.length</b><br>
 	 * </p>
 	 */
 	public static final NumberClientParam LENGTH = new NumberClientParam(SP_LENGTH);
@@ -347,9 +347,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>indication</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.indication</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.indication</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="indication", path="Encounter.indication", description="", type="reference"  )
@@ -358,9 +358,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>indication</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.indication</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.indication</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam INDICATION = new ReferenceClientParam(SP_INDICATION);
@@ -374,9 +374,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.location.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.location.location</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location", path="Encounter.location.location", description="", type="reference"  )
@@ -385,9 +385,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Encounter.location.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Encounter.location.location</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
@@ -401,9 +401,9 @@ public class Encounter
 	/**
 	 * Search parameter constant for <b>location-period</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Encounter.location.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Encounter.location.period</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location-period", path="Encounter.location.period", description="", type="date"  )
@@ -412,9 +412,9 @@ public class Encounter
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location-period</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Encounter.location.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Encounter.location.period</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam LOCATION_PERIOD = new DateClientParam(SP_LOCATION_PERIOD);

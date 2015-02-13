@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Appointment
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Appointment.start</b><br/>
+	 * Description: <b>Appointment date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Appointment.start</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date"  )
@@ -247,9 +247,9 @@ public class Appointment
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Appointment.start</b><br/>
+	 * Description: <b>Appointment date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Appointment.start</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -257,9 +257,9 @@ public class Appointment
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The overall status of the appointment</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Appointment.status</b><br/>
+	 * Description: <b>The overall status of the appointment</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Appointment.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="string"  )
@@ -268,9 +268,9 @@ public class Appointment
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The overall status of the appointment</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Appointment.status</b><br/>
+	 * Description: <b>The overall status of the appointment</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Appointment.status</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam STATUS = new StringClientParam(SP_STATUS);
@@ -278,9 +278,9 @@ public class Appointment
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the sensitivity is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Appointment.participant.individual</b><br/>
+	 * Description: <b>The subject that the sensitivity is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Appointment.participant.individual</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Appointment.participant.individual", description="The subject that the sensitivity is about", type="reference"  )
@@ -289,9 +289,9 @@ public class Appointment
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the sensitivity is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Appointment.participant.individual</b><br/>
+	 * Description: <b>The subject that the sensitivity is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Appointment.participant.individual</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -305,9 +305,9 @@ public class Appointment
 	/**
 	 * Search parameter constant for <b>partstatus</b>
 	 * <p>
-	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Appointment.participant.status</b><br/>
+	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Appointment.participant.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment ", type="token"  )
@@ -316,9 +316,9 @@ public class Appointment
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partstatus</b>
 	 * <p>
-	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Appointment.participant.status</b><br/>
+	 * Description: <b>The Participation status of the subject, or other participant on the appointment </b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Appointment.participant.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PARTSTATUS = new TokenClientParam(SP_PARTSTATUS);

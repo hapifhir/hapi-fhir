@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>datewritten</b>
 	 * <p>
-	 * Description: <b>Return prescriptions written on this date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
+	 * Description: <b>Return prescriptions written on this date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationPrescription.dateWritten</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date", type="date"  )
@@ -247,9 +247,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>datewritten</b>
 	 * <p>
-	 * Description: <b>Return prescriptions written on this date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationPrescription.dateWritten</b><br/>
+	 * Description: <b>Return prescriptions written on this date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationPrescription.dateWritten</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATEWRITTEN = new DateClientParam(SP_DATEWRITTEN);
@@ -257,9 +257,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Return prescriptions with this encounter identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.encounter</b><br/>
+	 * Description: <b>Return prescriptions with this encounter identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.encounter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference"  )
@@ -268,9 +268,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Return prescriptions with this encounter identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.encounter</b><br/>
+	 * Description: <b>Return prescriptions with this encounter identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.encounter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
@@ -284,9 +284,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return prescriptions with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationPrescription.identifier</b><br/>
+	 * Description: <b>Return prescriptions with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationPrescription.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity", type="token"  )
@@ -295,9 +295,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return prescriptions with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationPrescription.identifier</b><br/>
+	 * Description: <b>Return prescriptions with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationPrescription.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -305,9 +305,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Code for medicine or text in medicine name</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.medication</b><br/>
+	 * Description: <b>Code for medicine or text in medicine name</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.medication</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationPrescription.medication", description="Code for medicine or text in medicine name", type="reference"  )
@@ -316,9 +316,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Code for medicine or text in medicine name</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.medication</b><br/>
+	 * Description: <b>Code for medicine or text in medicine name</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.medication</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
@@ -332,9 +332,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.patient</b><br/>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference"  )
@@ -343,9 +343,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationPrescription.patient</b><br/>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationPrescription.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -359,9 +359,9 @@ public class MedicationPrescription
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the prescription</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationPrescription.status</b><br/>
+	 * Description: <b>Status of the prescription</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationPrescription.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription", type="token"  )
@@ -370,9 +370,9 @@ public class MedicationPrescription
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the prescription</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationPrescription.status</b><br/>
+	 * Description: <b>Status of the prescription</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationPrescription.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -1307,13 +1307,13 @@ public class MedicationPrescription
 
  
 	/**
-	 * Gets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \"with meals\").
+	 * Gets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \&quot;with meals\&quot;).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public CodeableConceptDt getAdditionalInstructions() {  
@@ -1325,13 +1325,13 @@ public class MedicationPrescription
 
 
 	/**
-	 * Gets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \"with meals\").
+	 * Gets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \&quot;with meals\&quot;).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public CodeableConceptDt getAdditionalInstructionsElement() {  
@@ -1343,11 +1343,11 @@ public class MedicationPrescription
 
 
 	/**
-	 * Sets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \"with meals\")
+	 * Sets the value(s) for <b>additionalInstructions</b> (Supplemental instructions - e.g. \&quot;with meals\&quot;)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public DosageInstruction setAdditionalInstructions(CodeableConceptDt theValue) {
@@ -1363,7 +1363,7 @@ public class MedicationPrescription
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public IDatatype getTiming() {  
@@ -1378,7 +1378,7 @@ public class MedicationPrescription
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public IDatatype getTimingElement() {  
@@ -1391,7 +1391,7 @@ public class MedicationPrescription
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public DosageInstruction setTiming(IDatatype theValue) {
@@ -1401,7 +1401,7 @@ public class MedicationPrescription
 
   
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1416,7 +1416,7 @@ public class MedicationPrescription
 
 
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1431,7 +1431,7 @@ public class MedicationPrescription
 
 
 	/**
-	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x))
+	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x))
 	 *
      * <p>
      * <b>Definition:</b>

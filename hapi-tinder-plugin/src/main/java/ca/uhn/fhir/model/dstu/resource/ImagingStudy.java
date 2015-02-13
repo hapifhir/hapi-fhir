@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Who the study is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImagingStudy.subject</b><br/>
+	 * Description: <b>Who the study is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImagingStudy.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="ImagingStudy.subject", description="Who the study is about", type="reference"  )
@@ -247,9 +247,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Who the study is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImagingStudy.subject</b><br/>
+	 * Description: <b>Who the study is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImagingStudy.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The date the study was done was taken</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ImagingStudy.dateTime</b><br/>
+	 * Description: <b>The date the study was done was taken</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ImagingStudy.dateTime</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="ImagingStudy.dateTime", description="The date the study was done was taken", type="date"  )
@@ -274,9 +274,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The date the study was done was taken</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ImagingStudy.dateTime</b><br/>
+	 * Description: <b>The date the study was done was taken</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ImagingStudy.dateTime</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -284,9 +284,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>accession</b>
 	 * <p>
-	 * Description: <b>The accession id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.accessionNo</b><br/>
+	 * Description: <b>The accession id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.accessionNo</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="accession", path="ImagingStudy.accessionNo", description="The accession id for the image", type="token"  )
@@ -295,9 +295,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>accession</b>
 	 * <p>
-	 * Description: <b>The accession id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.accessionNo</b><br/>
+	 * Description: <b>The accession id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.accessionNo</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ACCESSION = new TokenClientParam(SP_ACCESSION);
@@ -305,9 +305,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>study</b>
 	 * <p>
-	 * Description: <b>The study id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.uid</b><br/>
+	 * Description: <b>The study id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.uid</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token"  )
@@ -316,9 +316,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>study</b>
 	 * <p>
-	 * Description: <b>The study id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.uid</b><br/>
+	 * Description: <b>The study id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.uid</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STUDY = new TokenClientParam(SP_STUDY);
@@ -326,9 +326,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>series</b>
 	 * <p>
-	 * Description: <b>The series id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.uid</b><br/>
+	 * Description: <b>The series id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.uid</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token"  )
@@ -337,9 +337,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>series</b>
 	 * <p>
-	 * Description: <b>The series id for the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.uid</b><br/>
+	 * Description: <b>The series id for the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.uid</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SERIES = new TokenClientParam(SP_SERIES);
@@ -347,9 +347,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>modality</b>
 	 * <p>
-	 * Description: <b>The modality of the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.modality</b><br/>
+	 * Description: <b>The modality of the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.modality</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token"  )
@@ -358,9 +358,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>modality</b>
 	 * <p>
-	 * Description: <b>The modality of the image</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.modality</b><br/>
+	 * Description: <b>The modality of the image</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.modality</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam MODALITY = new TokenClientParam(SP_MODALITY);
@@ -368,9 +368,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>size</b>
 	 * <p>
-	 * Description: <b>The size of the image in MB - may include > or < in the value</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>The size of the image in MB - may include &gt; or &lt; in the value</b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value", type="number"  )
@@ -379,9 +379,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>size</b>
 	 * <p>
-	 * Description: <b>The size of the image in MB - may include > or < in the value</b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>The size of the image in MB - may include &gt; or &lt; in the value</b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final NumberClientParam SIZE = new NumberClientParam(SP_SIZE);
@@ -389,9 +389,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>bodysite</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.bodySite</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="", type="token"  )
@@ -400,9 +400,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.bodySite</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.bodySite</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam BODYSITE = new TokenClientParam(SP_BODYSITE);
@@ -410,9 +410,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>uid</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.instance.uid</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="", type="token"  )
@@ -421,9 +421,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>uid</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.instance.uid</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.instance.uid</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam UID = new TokenClientParam(SP_UID);
@@ -431,9 +431,9 @@ public class ImagingStudy
 	/**
 	 * Search parameter constant for <b>dicom-class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="", type="token"  )
@@ -442,9 +442,9 @@ public class ImagingStudy
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dicom-class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImagingStudy.series.instance.sopclass</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DICOM_CLASS = new TokenClientParam(SP_DICOM_CLASS);
@@ -1067,7 +1067,7 @@ public class ImagingStudy
 	 * Add a value for <b>modality</b> (All series.modality if actual acquisition modalities) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addModality()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2220,7 +2220,7 @@ public class ImagingStudy
 
   
 	/**
-	 * Gets the value(s) for <b>url</b> (Retrieve URI (0008,1115 > 0008,1190)).
+	 * Gets the value(s) for <b>url</b> (Retrieve URI (0008,1115 &gt; 0008,1190)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2238,7 +2238,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Gets the value(s) for <b>url</b> (Retrieve URI (0008,1115 > 0008,1190)).
+	 * Gets the value(s) for <b>url</b> (Retrieve URI (0008,1115 &gt; 0008,1190)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2256,7 +2256,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Sets the value(s) for <b>url</b> (Retrieve URI (0008,1115 > 0008,1190))
+	 * Sets the value(s) for <b>url</b> (Retrieve URI (0008,1115 &gt; 0008,1190))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2269,7 +2269,7 @@ public class ImagingStudy
 	}
 
  	/**
-	 * Sets the value for <b>url</b> (Retrieve URI (0008,1115 > 0008,1190))
+	 * Sets the value for <b>url</b> (Retrieve URI (0008,1115 &gt; 0008,1190))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2790,7 +2790,7 @@ public class ImagingStudy
 
  
 	/**
-	 * Gets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 > 0008,0104 | 0042,0010 | 0008,0008)).
+	 * Gets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2808,7 +2808,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Gets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 > 0008,0104 | 0042,0010 | 0008,0008)).
+	 * Gets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2826,7 +2826,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Sets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 > 0008,0104 | 0042,0010 | 0008,0008))
+	 * Sets the value(s) for <b>title</b> (Description (0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2839,7 +2839,7 @@ public class ImagingStudy
 	}
 
  	/**
-	 * Sets the value for <b>title</b> (Description (0070,0080 | 0040,A043 > 0008,0104 | 0042,0010 | 0008,0008))
+	 * Sets the value for <b>title</b> (Description (0070,0080 | 0040,A043 &gt; 0008,0104 | 0042,0010 | 0008,0008))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2853,7 +2853,7 @@ public class ImagingStudy
 
  
 	/**
-	 * Gets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 > 0008,1190)).
+	 * Gets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 &gt; 0008,1190)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2871,7 +2871,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Gets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 > 0008,1190)).
+	 * Gets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 &gt; 0008,1190)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2889,7 +2889,7 @@ public class ImagingStudy
 
 
 	/**
-	 * Sets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 > 0008,1190))
+	 * Sets the value(s) for <b>url</b> (WADO-RS service where instance is available  (0008,1199 &gt; 0008,1190))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2902,7 +2902,7 @@ public class ImagingStudy
 	}
 
  	/**
-	 * Sets the value for <b>url</b> (WADO-RS service where instance is available  (0008,1199 > 0008,1190))
+	 * Sets the value for <b>url</b> (WADO-RS service where instance is available  (0008,1199 &gt; 0008,1190))
 	 *
      * <p>
      * <b>Definition:</b>

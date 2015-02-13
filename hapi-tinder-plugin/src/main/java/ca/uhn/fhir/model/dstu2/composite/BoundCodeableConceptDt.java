@@ -2,9 +2,9 @@ package ca.uhn.fhir.model.dstu2.composite;
 
 /*
  * #%L
- * HAPI FHIR Structures - DEV (FHIR Latest)
+ * HAPI FHIR Structures - DSTU2 (FHIR v0.4.0)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.Set;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.dev.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dev.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 
 @DatatypeDef(name = "CodeableConcept", isSpecialization = true)
 public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt implements IBoundCodeableConcept {
@@ -66,7 +66,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 * codings first. If theValue is null, existing codings are cleared and no
 	 * codings are added.
 	 * 
-	 * @param theValue
+	 * @param theValues
 	 *            The value to add, or <code>null</code>
 	 */
 	public void setValueAsEnum(Collection<T> theValues) {

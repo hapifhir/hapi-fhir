@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of sensitivity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
+	 * Description: <b>The type of sensitivity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>AllergyIntolerance.sensitivityType</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="AllergyIntolerance.sensitivityType", description="The type of sensitivity", type="token"  )
@@ -247,9 +247,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of sensitivity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>AllergyIntolerance.sensitivityType</b><br/>
+	 * Description: <b>The type of sensitivity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>AllergyIntolerance.sensitivityType</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>substance</b>
 	 * <p>
-	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.substance</b><br/>
+	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.substance</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="substance", path="AllergyIntolerance.substance", description="The name or code of the substance that produces the sensitivity", type="reference"  )
@@ -268,9 +268,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>substance</b>
 	 * <p>
-	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.substance</b><br/>
+	 * Description: <b>The name or code of the substance that produces the sensitivity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.substance</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBSTANCE = new ReferenceClientParam(SP_SUBSTANCE);
@@ -284,9 +284,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Recorded date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
+	 * Description: <b>Recorded date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>AllergyIntolerance.recordedDate</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Recorded date/time.", type="date"  )
@@ -295,9 +295,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Recorded date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>AllergyIntolerance.recordedDate</b><br/>
+	 * Description: <b>Recorded date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>AllergyIntolerance.recordedDate</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -305,9 +305,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the sensitivity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>AllergyIntolerance.status</b><br/>
+	 * Description: <b>The status of the sensitivity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>AllergyIntolerance.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="The status of the sensitivity", type="token"  )
@@ -316,9 +316,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the sensitivity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>AllergyIntolerance.status</b><br/>
+	 * Description: <b>The status of the sensitivity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>AllergyIntolerance.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -326,9 +326,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the sensitivity is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.subject</b><br/>
+	 * Description: <b>The subject that the sensitivity is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="The subject that the sensitivity is about", type="reference"  )
@@ -337,9 +337,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the sensitivity is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.subject</b><br/>
+	 * Description: <b>The subject that the sensitivity is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -353,9 +353,9 @@ public class AllergyIntolerance
 	/**
 	 * Search parameter constant for <b>recorder</b>
 	 * <p>
-	 * Description: <b>Who recorded the sensitivity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.recorder</b><br/>
+	 * Description: <b>Who recorded the sensitivity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.recorder</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference"  )
@@ -364,9 +364,9 @@ public class AllergyIntolerance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>recorder</b>
 	 * <p>
-	 * Description: <b>Who recorded the sensitivity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AllergyIntolerance.recorder</b><br/>
+	 * Description: <b>Who recorded the sensitivity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AllergyIntolerance.recorder</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RECORDER = new ReferenceClientParam(SP_RECORDER);

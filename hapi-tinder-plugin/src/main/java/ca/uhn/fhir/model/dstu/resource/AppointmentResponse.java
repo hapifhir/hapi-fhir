@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class AppointmentResponse
 	/**
 	 * Search parameter constant for <b>partstatus</b>
 	 * <p>
-	 * Description: <b>The overall status of the appointment</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
+	 * Description: <b>The overall status of the appointment</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>AppointmentResponse.participantStatus</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partstatus", path="AppointmentResponse.participantStatus", description="The overall status of the appointment", type="string"  )
@@ -247,9 +247,9 @@ public class AppointmentResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partstatus</b>
 	 * <p>
-	 * Description: <b>The overall status of the appointment</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>AppointmentResponse.participantStatus</b><br/>
+	 * Description: <b>The overall status of the appointment</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>AppointmentResponse.participantStatus</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PARTSTATUS = new StringClientParam(SP_PARTSTATUS);
@@ -257,9 +257,9 @@ public class AppointmentResponse
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the appointment response replies for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AppointmentResponse.individual</b><br/>
+	 * Description: <b>The subject that the appointment response replies for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AppointmentResponse.individual</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="AppointmentResponse.individual", description="The subject that the appointment response replies for", type="reference"  )
@@ -268,9 +268,9 @@ public class AppointmentResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the appointment response replies for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AppointmentResponse.individual</b><br/>
+	 * Description: <b>The subject that the appointment response replies for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AppointmentResponse.individual</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -284,9 +284,9 @@ public class AppointmentResponse
 	/**
 	 * Search parameter constant for <b>appointment</b>
 	 * <p>
-	 * Description: <b>The appointment that the response is attached to</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AppointmentResponse.appointment</b><br/>
+	 * Description: <b>The appointment that the response is attached to</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AppointmentResponse.appointment</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="appointment", path="AppointmentResponse.appointment", description="The appointment that the response is attached to", type="reference"  )
@@ -295,9 +295,9 @@ public class AppointmentResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>appointment</b>
 	 * <p>
-	 * Description: <b>The appointment that the response is attached to</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>AppointmentResponse.appointment</b><br/>
+	 * Description: <b>The appointment that the response is attached to</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>AppointmentResponse.appointment</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam APPOINTMENT = new ReferenceClientParam(SP_APPOINTMENT);
@@ -625,7 +625,7 @@ public class AppointmentResponse
 	 * Add a value for <b>participantType</b> (Role of participant in the appointment) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addParticipantType()} method.
 	 *
      * <p>
      * <b>Definition:</b>

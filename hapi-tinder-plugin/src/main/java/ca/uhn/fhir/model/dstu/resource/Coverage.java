@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>issuer</b>
 	 * <p>
-	 * Description: <b>The identity of the insurer</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Coverage.issuer</b><br/>
+	 * Description: <b>The identity of the insurer</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Coverage.issuer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference"  )
@@ -247,9 +247,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>issuer</b>
 	 * <p>
-	 * Description: <b>The identity of the insurer</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Coverage.issuer</b><br/>
+	 * Description: <b>The identity of the insurer</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Coverage.issuer</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ISSUER = new ReferenceClientParam(SP_ISSUER);
@@ -263,9 +263,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The primary identifier of the insured</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.identifier</b><br/>
+	 * Description: <b>The primary identifier of the insured</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token"  )
@@ -274,9 +274,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The primary identifier of the insured</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.identifier</b><br/>
+	 * Description: <b>The primary identifier of the insured</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -284,9 +284,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The kind of coverage</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.type</b><br/>
+	 * Description: <b>The kind of coverage</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token"  )
@@ -295,9 +295,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The kind of coverage</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.type</b><br/>
+	 * Description: <b>The kind of coverage</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -305,9 +305,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>plan</b>
 	 * <p>
-	 * Description: <b>A plan or policy identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.plan</b><br/>
+	 * Description: <b>A plan or policy identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.plan</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token"  )
@@ -316,9 +316,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>plan</b>
 	 * <p>
-	 * Description: <b>A plan or policy identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.plan</b><br/>
+	 * Description: <b>A plan or policy identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.plan</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PLAN = new TokenClientParam(SP_PLAN);
@@ -326,9 +326,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>subplan</b>
 	 * <p>
-	 * Description: <b>Sub-plan identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.subplan</b><br/>
+	 * Description: <b>Sub-plan identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.subplan</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier", type="token"  )
@@ -337,9 +337,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subplan</b>
 	 * <p>
-	 * Description: <b>Sub-plan identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.subplan</b><br/>
+	 * Description: <b>Sub-plan identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.subplan</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SUBPLAN = new TokenClientParam(SP_SUBPLAN);
@@ -347,9 +347,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>group</b>
 	 * <p>
-	 * Description: <b>Group identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.group</b><br/>
+	 * Description: <b>Group identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.group</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token"  )
@@ -358,9 +358,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>group</b>
 	 * <p>
-	 * Description: <b>Group identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.group</b><br/>
+	 * Description: <b>Group identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.group</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam GROUP = new TokenClientParam(SP_GROUP);
@@ -368,9 +368,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>dependent</b>
 	 * <p>
-	 * Description: <b>Dependent number</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.dependent</b><br/>
+	 * Description: <b>Dependent number</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.dependent</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token"  )
@@ -379,9 +379,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dependent</b>
 	 * <p>
-	 * Description: <b>Dependent number</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.dependent</b><br/>
+	 * Description: <b>Dependent number</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.dependent</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DEPENDENT = new TokenClientParam(SP_DEPENDENT);
@@ -389,9 +389,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>sequence</b>
 	 * <p>
-	 * Description: <b>Sequence number</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.sequence</b><br/>
+	 * Description: <b>Sequence number</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.sequence</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token"  )
@@ -400,9 +400,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>sequence</b>
 	 * <p>
-	 * Description: <b>Sequence number</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.sequence</b><br/>
+	 * Description: <b>Sequence number</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.sequence</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SEQUENCE = new TokenClientParam(SP_SEQUENCE);
@@ -410,9 +410,9 @@ public class Coverage
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the subscriber</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.subscriber.name</b><br/>
+	 * Description: <b>The name of the subscriber</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.subscriber.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Coverage.subscriber.name", description="The name of the subscriber", type="token"  )
@@ -421,9 +421,9 @@ public class Coverage
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the subscriber</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Coverage.subscriber.name</b><br/>
+	 * Description: <b>The name of the subscriber</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Coverage.subscriber.name</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);

@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class GVFVariant
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient being described </b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GVFVariant.subject.patient</b><br/>
+	 * Description: <b>Patient being described </b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GVFVariant.subject.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="GVFVariant.subject.patient", description="Patient being described ", type="reference"  )
@@ -247,9 +247,9 @@ public class GVFVariant
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient being described </b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GVFVariant.subject.patient</b><br/>
+	 * Description: <b>Patient being described </b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GVFVariant.subject.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -263,9 +263,9 @@ public class GVFVariant
 	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the variant being studied</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>Coordinate of the variant being studied</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="coordinate", path="", description="Coordinate of the variant being studied", type="string"  )
@@ -274,9 +274,9 @@ public class GVFVariant
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the variant being studied</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>Coordinate of the variant being studied</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final StringClientParam COORDINATE = new StringClientParam(SP_COORDINATE);

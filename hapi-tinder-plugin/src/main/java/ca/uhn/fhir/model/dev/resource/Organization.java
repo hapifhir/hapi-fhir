@@ -19,7 +19,6 @@ package ca.uhn.fhir.model.dev.resource;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -35,9 +34,9 @@ import ca.uhn.fhir.model.dev.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dev.composite.ContactPointDt;
 import ca.uhn.fhir.model.dev.composite.HumanNameDt;
 import ca.uhn.fhir.model.dev.composite.IdentifierDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dev.valueset.OrganizationTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -49,7 +48,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * HAPI/FHIR <b>Organization</b> Resource
- * ()
+ * (administration)
  *
  * <p>
  * <b>Definition:</b>
@@ -67,16 +66,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="Organization", profile="http://hl7.org/fhir/profiles/Organization")
+@ResourceDef(name="Organization", profile="http://hl7.org/fhir/profiles/Organization", id="organization")
 public class Organization 
     extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Organization.name</b><br/>
+	 * Description: <b>A portion of the organization's name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Organization.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string"  )
@@ -85,9 +84,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Organization.name</b><br/>
+	 * Description: <b>A portion of the organization's name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Organization.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -95,9 +94,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string"  )
@@ -106,9 +105,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
@@ -116,9 +115,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of organization</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.type</b><br/>
+	 * Description: <b>A code for the type of organization</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token"  )
@@ -127,9 +126,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of organization</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.type</b><br/>
+	 * Description: <b>A code for the type of organization</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -137,9 +136,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.identifier</b><br/>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token"  )
@@ -148,9 +147,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.identifier</b><br/>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -158,9 +157,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Organization.partOf</b><br/>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Organization.partOf</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference"  )
@@ -169,9 +168,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Organization.partOf</b><br/>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Organization.partOf</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PARTOF = new ReferenceClientParam(SP_PARTOF);
@@ -179,9 +178,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>active</b>
 	 * <p>
-	 * Description: <b>Whether the organization's record is active</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.active</b><br/>
+	 * Description: <b>Whether the organization's record is active</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.active</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token"  )
@@ -190,9 +189,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>active</b>
 	 * <p>
-	 * Description: <b>Whether the organization's record is active</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.active</b><br/>
+	 * Description: <b>Whether the organization's record is active</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.active</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ACTIVE = new TokenClientParam(SP_ACTIVE);
@@ -237,7 +236,7 @@ public class Organization
 
 	@Child(name="identifier", type=IdentifierDt.class, order=0, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id",
 		formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems"
 	)
 	private java.util.List<IdentifierDt> myIdentifier;
@@ -251,7 +250,7 @@ public class Organization
 	
 	@Child(name="type", type=CodeableConceptDt.class, order=2, min=0, max=1)	
 	@Description(
-		shortDefinition="OrganizationType",
+		shortDefinition="class",
 		formalDefinition="The kind of organization that this is"
 	)
 	private BoundCodeableConceptDt<OrganizationTypeEnum> myType;
@@ -286,17 +285,16 @@ public class Organization
 	private java.util.List<Contact> myContact;
 	
 	@Child(name="location", order=7, min=0, max=Child.MAX_UNLIMITED, type={
-			Organization.class
-		})
+		ca.uhn.fhir.model.dev.resource.Organization.class	})
 	@Description(
-		shortDefinition="",
+		shortDefinition="where",
 		formalDefinition="Location(s) the organization uses to provide services"
 	)
 	private java.util.List<ResourceReferenceDt> myLocation;
 	
 	@Child(name="active", type=BooleanDt.class, order=8, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="status",
 		formalDefinition="Whether the organization's record is still in active use"
 	)
 	private BooleanDt myActive;
@@ -313,7 +311,7 @@ public class Organization
 	}
 
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -330,7 +328,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> ()
+	 * Sets the value(s) for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -345,7 +343,7 @@ public class Organization
 	
 
 	/**
-	 * Adds and returns a new value for <b>identifier</b> ()
+	 * Adds and returns a new value for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -359,7 +357,7 @@ public class Organization
 	}
 
 	/**
-	 * Gets the first repetition for <b>identifier</b> (),
+	 * Gets the first repetition for <b>identifier</b> (id),
 	 * creating it if it does not already exist.
 	 *
      * <p>
@@ -436,7 +434,7 @@ public class Organization
 
  
 	/**
-	 * Gets the value(s) for <b>type</b> (OrganizationType).
+	 * Gets the value(s) for <b>type</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -453,7 +451,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>type</b> (OrganizationType)
+	 * Sets the value(s) for <b>type</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -468,7 +466,7 @@ public class Organization
 	
 
 	/**
-	 * Sets the value(s) for <b>type</b> (OrganizationType)
+	 * Sets the value(s) for <b>type</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -701,7 +699,7 @@ public class Organization
 	}
   
 	/**
-	 * Gets the value(s) for <b>location</b> ().
+	 * Gets the value(s) for <b>location</b> (where).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -718,7 +716,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>location</b> ()
+	 * Sets the value(s) for <b>location</b> (where)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -733,7 +731,7 @@ public class Organization
 	
 
 	/**
-	 * Adds and returns a new value for <b>location</b> ()
+	 * Adds and returns a new value for <b>location</b> (where)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -747,7 +745,7 @@ public class Organization
 	}
   
 	/**
-	 * Gets the value(s) for <b>active</b> ().
+	 * Gets the value(s) for <b>active</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -765,7 +763,7 @@ public class Organization
 
 	
 	/**
-	 * Gets the value(s) for <b>active</b> ().
+	 * Gets the value(s) for <b>active</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -779,7 +777,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>active</b> ()
+	 * Sets the value(s) for <b>active</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -794,7 +792,7 @@ public class Organization
 	
 
  	/**
-	 * Sets the value for <b>active</b> ()
+	 * Sets the value for <b>active</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -821,7 +819,7 @@ public class Organization
 	
 	@Child(name="purpose", type=CodeableConceptDt.class, order=0, min=0, max=1)	
 	@Description(
-		shortDefinition="ContactPartyType",
+		shortDefinition="",
 		formalDefinition="Indicates a purpose for which the contact can be reached"
 	)
 	private CodeableConceptDt myPurpose;
@@ -849,7 +847,7 @@ public class Organization
 	
 	@Child(name="gender", type=CodeDt.class, order=4, min=0, max=1)	
 	@Description(
-		shortDefinition="AdministrativeGender",
+		shortDefinition="",
 		formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."
 	)
 	private BoundCodeDt<AdministrativeGenderEnum> myGender;
@@ -866,7 +864,7 @@ public class Organization
 	}
 
 	/**
-	 * Gets the value(s) for <b>purpose</b> (ContactPartyType).
+	 * Gets the value(s) for <b>purpose</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -883,7 +881,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>purpose</b> (ContactPartyType)
+	 * Sets the value(s) for <b>purpose</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1027,7 +1025,7 @@ public class Organization
 
   
 	/**
-	 * Gets the value(s) for <b>gender</b> (AdministrativeGender).
+	 * Gets the value(s) for <b>gender</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1045,7 +1043,7 @@ public class Organization
 
 	
 	/**
-	 * Gets the value(s) for <b>gender</b> (AdministrativeGender).
+	 * Gets the value(s) for <b>gender</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1059,7 +1057,7 @@ public class Organization
 	}
 
 	/**
-	 * Sets the value(s) for <b>gender</b> (AdministrativeGender)
+	 * Sets the value(s) for <b>gender</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1074,7 +1072,7 @@ public class Organization
 	
 
 	/**
-	 * Sets the value(s) for <b>gender</b> (AdministrativeGender)
+	 * Sets the value(s) for <b>gender</b> ()
 	 *
      * <p>
      * <b>Definition:</b>

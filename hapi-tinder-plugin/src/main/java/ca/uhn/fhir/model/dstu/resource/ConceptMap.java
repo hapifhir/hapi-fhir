@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.identifier</b><br/>
+	 * Description: <b>The identifier of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map", type="token"  )
@@ -247,9 +247,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.identifier</b><br/>
+	 * Description: <b>The identifier of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.version</b><br/>
+	 * Description: <b>The version identifier of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token"  )
@@ -268,9 +268,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.version</b><br/>
+	 * Description: <b>The version identifier of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -278,9 +278,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.name</b><br/>
+	 * Description: <b>Name of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string"  )
@@ -289,9 +289,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.name</b><br/>
+	 * Description: <b>Name of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -299,9 +299,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string"  )
@@ -310,9 +310,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -320,9 +320,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.description</b><br/>
+	 * Description: <b>Text search in the description of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string"  )
@@ -331,9 +331,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the concept map</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ConceptMap.description</b><br/>
+	 * Description: <b>Text search in the description of the concept map</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ConceptMap.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -341,9 +341,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.status</b><br/>
+	 * Description: <b>Status of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token"  )
@@ -352,9 +352,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the concept map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.status</b><br/>
+	 * Description: <b>Status of the concept map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -362,9 +362,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The concept map publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ConceptMap.date</b><br/>
+	 * Description: <b>The concept map publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ConceptMap.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date"  )
@@ -373,9 +373,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The concept map publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ConceptMap.date</b><br/>
+	 * Description: <b>The concept map publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ConceptMap.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -383,9 +383,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b>The system for any concepts mapped by this concept map</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ConceptMap.source</b><br/>
+	 * Description: <b>The system for any concepts mapped by this concept map</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ConceptMap.source</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="source", path="ConceptMap.source", description="The system for any concepts mapped by this concept map", type="reference"  )
@@ -394,9 +394,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b>The system for any concepts mapped by this concept map</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ConceptMap.source</b><br/>
+	 * Description: <b>The system for any concepts mapped by this concept map</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ConceptMap.source</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
@@ -410,9 +410,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ConceptMap.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ConceptMap.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="target", path="ConceptMap.target", description="", type="reference"  )
@@ -421,9 +421,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ConceptMap.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ConceptMap.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
@@ -437,9 +437,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any destination concepts mapped by this map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.map.system</b><br/>
+	 * Description: <b>The system for any destination concepts mapped by this map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.map.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system", path="ConceptMap.concept.map.system", description="The system for any destination concepts mapped by this map", type="token"  )
@@ -448,9 +448,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any destination concepts mapped by this map</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.map.system</b><br/>
+	 * Description: <b>The system for any destination concepts mapped by this map</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.map.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
@@ -458,9 +458,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>dependson</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dependson", path="ConceptMap.concept.dependsOn.concept", description="", type="token"  )
@@ -469,9 +469,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dependson</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.dependsOn.concept</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DEPENDSON = new TokenClientParam(SP_DEPENDSON);
@@ -479,9 +479,9 @@ public class ConceptMap
 	/**
 	 * Search parameter constant for <b>product</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.map.product.concept</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="product", path="ConceptMap.concept.map.product.concept", description="", type="token"  )
@@ -490,9 +490,9 @@ public class ConceptMap
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>product</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ConceptMap.concept.map.product.concept</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ConceptMap.concept.map.product.concept</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PRODUCT = new TokenClientParam(SP_PRODUCT);

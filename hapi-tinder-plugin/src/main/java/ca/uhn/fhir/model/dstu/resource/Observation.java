@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the observation type</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.name</b><br/>
+	 * Description: <b>The name of the observation type</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type", type="token"  )
@@ -247,9 +247,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the observation type</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.name</b><br/>
+	 * Description: <b>The name of the observation type</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.name</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
@@ -257,9 +257,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>value-quantity</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br/>
-	 * Type: <b>quantity</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
+	 * Type: <b>quantity</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="value-quantity", path="Observation.value[x]", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity"  )
@@ -268,9 +268,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>value-quantity</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br/>
-	 * Type: <b>quantity</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
+	 * Type: <b>quantity</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	public static final QuantityClientParam VALUE_QUANTITY = new QuantityClientParam(SP_VALUE_QUANTITY);
@@ -278,9 +278,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>value-concept</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="value-concept", path="Observation.value[x]", description="The value of the observation, if the value is a CodeableConcept", type="token"  )
@@ -289,9 +289,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>value-concept</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a CodeableConcept</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VALUE_CONCEPT = new TokenClientParam(SP_VALUE_CONCEPT);
@@ -299,9 +299,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>value-date</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a Period</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a Period</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="value-date", path="Observation.value[x]", description="The value of the observation, if the value is a Period", type="date"  )
@@ -310,9 +310,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>value-date</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a Period</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a Period</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam VALUE_DATE = new DateClientParam(SP_VALUE_DATE);
@@ -320,9 +320,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>value-string</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="value-string", path="Observation.value[x]", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string"  )
@@ -331,9 +331,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>value-string</b>
 	 * <p>
-	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Observation.value[x]</b><br/>
+	 * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Observation.value[x]</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam VALUE_STRING = new StringClientParam(SP_VALUE_STRING);
@@ -341,9 +341,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Observation.applies[x]</b><br/>
+	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Observation.applies[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date"  )
@@ -352,9 +352,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Observation.applies[x]</b><br/>
+	 * Description: <b>Obtained date/time. If the obtained element is a period, a date that falls in the period</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Observation.applies[x]</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -362,9 +362,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the observation</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.status</b><br/>
+	 * Description: <b>The status of the observation</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token"  )
@@ -373,9 +373,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the observation</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.status</b><br/>
+	 * Description: <b>The status of the observation</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -383,9 +383,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>reliability</b>
 	 * <p>
-	 * Description: <b>The reliability of the observation</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.reliability</b><br/>
+	 * Description: <b>The reliability of the observation</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.reliability</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token"  )
@@ -394,9 +394,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>reliability</b>
 	 * <p>
-	 * Description: <b>The reliability of the observation</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.reliability</b><br/>
+	 * Description: <b>The reliability of the observation</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.reliability</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam RELIABILITY = new TokenClientParam(SP_RELIABILITY);
@@ -404,9 +404,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the observation is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.subject</b><br/>
+	 * Description: <b>The subject that the observation is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference"  )
@@ -415,9 +415,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject that the observation is about</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.subject</b><br/>
+	 * Description: <b>The subject that the observation is about</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -431,9 +431,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>performer</b>
 	 * <p>
-	 * Description: <b>Who and/or what performed the observation</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.performer</b><br/>
+	 * Description: <b>Who and/or what performed the observation</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.performer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="performer", path="Observation.performer", description="Who and/or what performed the observation", type="reference"  )
@@ -442,9 +442,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>performer</b>
 	 * <p>
-	 * Description: <b>Who and/or what performed the observation</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.performer</b><br/>
+	 * Description: <b>Who and/or what performed the observation</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.performer</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PERFORMER = new ReferenceClientParam(SP_PERFORMER);
@@ -458,9 +458,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.specimen</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.specimen</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="specimen", path="Observation.specimen", description="", type="reference"  )
@@ -469,9 +469,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.specimen</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.specimen</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
@@ -485,9 +485,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>related-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.related.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.related.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="related-type", path="Observation.related.type", description="", type="token"  )
@@ -496,9 +496,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>related-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Observation.related.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Observation.related.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam RELATED_TYPE = new TokenClientParam(SP_RELATED_TYPE);
@@ -506,9 +506,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>related-target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.related.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.related.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="related-target", path="Observation.related.target", description="", type="reference"  )
@@ -517,9 +517,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>related-target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Observation.related.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Observation.related.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RELATED_TARGET = new ReferenceClientParam(SP_RELATED_TARGET);
@@ -533,9 +533,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>name-value-quantity</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name-value-quantity", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-quantity" }  )
@@ -544,9 +544,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name-value-quantity</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, QuantityClientParam> NAME_VALUE_QUANTITY = new CompositeClientParam<TokenClientParam, QuantityClientParam>(SP_NAME_VALUE_QUANTITY);
@@ -554,9 +554,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>name-value-concept</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name-value-concept", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-concept" }  )
@@ -565,9 +565,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name-value-concept</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, TokenClientParam> NAME_VALUE_CONCEPT = new CompositeClientParam<TokenClientParam, TokenClientParam>(SP_NAME_VALUE_CONCEPT);
@@ -575,9 +575,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>name-value-date</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name-value-date", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-date" }  )
@@ -586,9 +586,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name-value-date</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, DateClientParam> NAME_VALUE_DATE = new CompositeClientParam<TokenClientParam, DateClientParam>(SP_NAME_VALUE_DATE);
@@ -596,9 +596,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>name-value-string</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name-value-string", path="name & value-[x]", description="Both name and one of the value parameters", type="composite"  , compositeOf={  "name",  "value-string" }  )
@@ -607,9 +607,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name-value-string</b>
 	 * <p>
-	 * Description: <b>Both name and one of the value parameters</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>name & value-[x]</b><br/>
+	 * Description: <b>Both name and one of the value parameters</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>name &amp; value-[x]</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, StringClientParam> NAME_VALUE_STRING = new CompositeClientParam<TokenClientParam, StringClientParam>(SP_NAME_VALUE_STRING);
@@ -617,9 +617,9 @@ public class Observation
 	/**
 	 * Search parameter constant for <b>related-target-related-type</b>
 	 * <p>
-	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>related-target & related-type</b><br/>
+	 * Description: <b>Related Observations - search on related-type and related-target together</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>related-target &amp; related-type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="related-target-related-type", path="related-target & related-type", description="Related Observations - search on related-type and related-target together", type="composite"  , compositeOf={  "related-target",  "related-type" }  )
@@ -628,9 +628,9 @@ public class Observation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>related-target-related-type</b>
 	 * <p>
-	 * Description: <b>Related Observations - search on related-type and related-target together</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>related-target & related-type</b><br/>
+	 * Description: <b>Related Observations - search on related-type and related-target together</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>related-target &amp; related-type</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<ReferenceClientParam, TokenClientParam> RELATED_TARGET_RELATED_TYPE = new CompositeClientParam<ReferenceClientParam, TokenClientParam>(SP_RELATED_TARGET_RELATED_TYPE);
@@ -771,7 +771,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Describes what was observed. Sometimes this is called the observation \"code\"
+     * Describes what was observed. Sometimes this is called the observation \&quot;code\&quot;
      * </p> 
 	 */
 	public CodeableConceptDt getName() {  
@@ -789,7 +789,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Describes what was observed. Sometimes this is called the observation \"code\"
+     * Describes what was observed. Sometimes this is called the observation \&quot;code\&quot;
      * </p> 
 	 */
 	public CodeableConceptDt getNameElement() {  
@@ -805,7 +805,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Describes what was observed. Sometimes this is called the observation \"code\"
+     * Describes what was observed. Sometimes this is called the observation \&quot;code\&quot;
      * </p> 
 	 */
 	public Observation setName(CodeableConceptDt theValue) {
@@ -991,7 +991,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
+     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \&quot;physiologically relevant time\&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
 	public IDatatype getApplies() {  
@@ -1006,7 +1006,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
+     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \&quot;physiologically relevant time\&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
 	public IDatatype getAppliesElement() {  
@@ -1019,7 +1019,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \"physiologically relevant time\". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
+     * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the \&quot;physiologically relevant time\&quot;. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself
      * </p> 
 	 */
 	public Observation setApplies(IDatatype theValue) {
@@ -1513,7 +1513,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as \"true\"
+     * Who was responsible for asserting the observed value as \&quot;true\&quot;
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getPerformer() {  
@@ -1531,7 +1531,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as \"true\"
+     * Who was responsible for asserting the observed value as \&quot;true\&quot;
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getPerformerElement() {  
@@ -1547,7 +1547,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as \"true\"
+     * Who was responsible for asserting the observed value as \&quot;true\&quot;
      * </p> 
 	 */
 	public Observation setPerformer(java.util.List<ResourceReferenceDt> theValue) {
@@ -1560,7 +1560,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * Who was responsible for asserting the observed value as \"true\"
+     * Who was responsible for asserting the observed value as \&quot;true\&quot;
      * </p> 
 	 */
 	public ResourceReferenceDt addPerformer() {
@@ -1785,7 +1785,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public QuantityDt getLow() {  
@@ -1803,7 +1803,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public QuantityDt getLowElement() {  
@@ -1819,7 +1819,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow(QuantityDt theValue) {
@@ -1832,7 +1832,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
@@ -1845,7 +1845,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
@@ -1858,7 +1858,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
@@ -1871,7 +1871,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
@@ -1884,7 +1884,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( double theValue) {
@@ -1897,7 +1897,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3
+     * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. &lt;2.3
      * </p> 
 	 */
 	public ReferenceRange setLow( long theValue) {
@@ -1913,7 +1913,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public QuantityDt getHigh() {  
@@ -1931,7 +1931,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public QuantityDt getHighElement() {  
@@ -1947,7 +1947,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh(QuantityDt theValue) {
@@ -1960,7 +1960,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theUnits) {
@@ -1973,7 +1973,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theUnits) {
@@ -1986,7 +1986,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  double theValue,  String theSystem,  String theUnits) {
@@ -1999,7 +1999,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( QuantityCompararatorEnum theComparator,  long theValue,  String theSystem,  String theUnits) {
@@ -2012,7 +2012,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( double theValue) {
@@ -2025,7 +2025,7 @@ public class Observation
 	 *
      * <p>
      * <b>Definition:</b>
-     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5
+     * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. &gt;5
      * </p> 
 	 */
 	public ReferenceRange setHigh( long theValue) {

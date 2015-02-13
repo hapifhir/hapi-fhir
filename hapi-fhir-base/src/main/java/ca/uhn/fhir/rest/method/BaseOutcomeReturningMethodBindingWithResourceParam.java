@@ -63,7 +63,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (providerResourceType.isAssignableFrom(BaseBinary.class)) {
+				if (BaseBinary.class.isAssignableFrom(providerResourceType)) {
 					myBinary = true;
 				}
 

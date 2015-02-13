@@ -214,11 +214,11 @@ public abstract class BaseStructureParser {
 		if ("ExtensionDt".equals(theNextType)) {
 			return (ExtensionDt.class.getCanonicalName());
 		}
-		if ("ResourceReferenceDt".equals(theNextType)) {
-			return ResourceReferenceDt.class.getCanonicalName();
-		}
+//		if ("ResourceReferenceDt".equals(theNextType)) {
+//			return "ca.uhn.fhir.model." + myVersion + ".composite." + ResourceReferenceDt.class.getSimpleName();
+//		}
 		if ("Binary".equals(theNextType)) {
-			return Binary.class.getCanonicalName();
+			return "ca.uhn.fhir.model." + myVersion + ".resource." + Binary.class.getSimpleName();
 		}
 		// if ("BoundCodeableConceptDt".equals(theNextType)) {
 		// return "ca.uhn.fhir.model." + myVersion + ".composite.BoundCodeableConceptDt";

@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of the device</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Device.type</b><br/>
+	 * Description: <b>The type of the device</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Device.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token"  )
@@ -247,9 +247,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of the device</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Device.type</b><br/>
+	 * Description: <b>The type of the device</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Device.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>manufacturer</b>
 	 * <p>
-	 * Description: <b>The manufacturer of the device</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.manufacturer</b><br/>
+	 * Description: <b>The manufacturer of the device</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.manufacturer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string"  )
@@ -268,9 +268,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
 	 * <p>
-	 * Description: <b>The manufacturer of the device</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.manufacturer</b><br/>
+	 * Description: <b>The manufacturer of the device</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.manufacturer</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam MANUFACTURER = new StringClientParam(SP_MANUFACTURER);
@@ -278,9 +278,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>model</b>
 	 * <p>
-	 * Description: <b>The model of the device</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.model</b><br/>
+	 * Description: <b>The model of the device</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.model</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string"  )
@@ -289,9 +289,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>model</b>
 	 * <p>
-	 * Description: <b>The model of the device</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.model</b><br/>
+	 * Description: <b>The model of the device</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.model</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam MODEL = new StringClientParam(SP_MODEL);
@@ -299,9 +299,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>The organization responsible for the device</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.owner</b><br/>
+	 * Description: <b>The organization responsible for the device</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.owner</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference"  )
@@ -310,9 +310,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>The organization responsible for the device</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.owner</b><br/>
+	 * Description: <b>The organization responsible for the device</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.owner</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ORGANIZATION = new ReferenceClientParam(SP_ORGANIZATION);
@@ -326,9 +326,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Device.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Device.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Device.identifier", description="", type="token"  )
@@ -337,9 +337,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Device.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Device.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -347,9 +347,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b>A location, where the resource is found</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.location</b><br/>
+	 * Description: <b>A location, where the resource is found</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.location</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference"  )
@@ -358,9 +358,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b>A location, where the resource is found</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.location</b><br/>
+	 * Description: <b>A location, where the resource is found</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.location</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
@@ -374,9 +374,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient information, if the resource is affixed to a person</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.patient</b><br/>
+	 * Description: <b>Patient information, if the resource is affixed to a person</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference"  )
@@ -385,9 +385,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient information, if the resource is affixed to a person</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Device.patient</b><br/>
+	 * Description: <b>Patient information, if the resource is affixed to a person</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Device.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -401,9 +401,9 @@ public class Device
 	/**
 	 * Search parameter constant for <b>udi</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.udi</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.udi</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="udi", path="Device.udi", description="", type="string"  )
@@ -412,9 +412,9 @@ public class Device
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>udi</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Device.udi</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Device.udi</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam UDI = new StringClientParam(SP_UDI);
@@ -760,7 +760,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
+     * The \&quot;model\&quot; - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
      * </p> 
 	 */
 	public StringDt getModel() {  
@@ -778,7 +778,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
+     * The \&quot;model\&quot; - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
      * </p> 
 	 */
 	public StringDt getModelElement() {  
@@ -794,7 +794,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
+     * The \&quot;model\&quot; - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
      * </p> 
 	 */
 	public Device setModel(StringDt theValue) {
@@ -807,7 +807,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The \"model\" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
+     * The \&quot;model\&quot; - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type
      * </p> 
 	 */
 	public Device setModel( String theString) {
@@ -1138,7 +1138,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location
+     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \&quot;in/with the patient\&quot;), or a coded location
      * </p> 
 	 */
 	public ResourceReferenceDt getLocation() {  
@@ -1156,7 +1156,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location
+     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \&quot;in/with the patient\&quot;), or a coded location
      * </p> 
 	 */
 	public ResourceReferenceDt getLocationElement() {  
@@ -1172,7 +1172,7 @@ public class Device
 	 *
      * <p>
      * <b>Definition:</b>
-     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \"in/with the patient\"), or a coded location
+     * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. \&quot;in/with the patient\&quot;), or a coded location
      * </p> 
 	 */
 	public Device setLocation(ResourceReferenceDt theValue) {

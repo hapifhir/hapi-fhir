@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Claim
 	/**
 	 * Search parameter constant for <b>number</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Claim.number</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Claim.number</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="number", path="Claim.number", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Claim
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>number</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Claim.number</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Claim.number</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NUMBER = new TokenClientParam(SP_NUMBER);

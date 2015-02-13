@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Location.identifier", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A (portion of the) name of the location</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Location.name</b><br/>
+	 * Description: <b>A (portion of the) name of the location</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Location.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string"  )
@@ -268,9 +268,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A (portion of the) name of the location</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Location.name</b><br/>
+	 * Description: <b>A (portion of the) name of the location</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Location.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -278,9 +278,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of location</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.type</b><br/>
+	 * Description: <b>A code for the type of location</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token"  )
@@ -289,9 +289,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of location</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.type</b><br/>
+	 * Description: <b>A code for the type of location</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -299,9 +299,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>A (part of the) address of the location</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Location.address</b><br/>
+	 * Description: <b>A (part of the) address of the location</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Location.address</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string"  )
@@ -310,9 +310,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>A (part of the) address of the location</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Location.address</b><br/>
+	 * Description: <b>A (part of the) address of the location</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Location.address</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
@@ -320,9 +320,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Searches for locations with a specific kind of status</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.status</b><br/>
+	 * Description: <b>Searches for locations with a specific kind of status</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token"  )
@@ -331,9 +331,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Searches for locations with a specific kind of status</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Location.status</b><br/>
+	 * Description: <b>Searches for locations with a specific kind of status</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Location.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -341,9 +341,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>The location of which this location is a part</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Location.partOf</b><br/>
+	 * Description: <b>The location of which this location is a part</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Location.partOf</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference"  )
@@ -352,9 +352,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>The location of which this location is a part</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Location.partOf</b><br/>
+	 * Description: <b>The location of which this location is a part</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Location.partOf</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PARTOF = new ReferenceClientParam(SP_PARTOF);
@@ -368,9 +368,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>near</b>
 	 * <p>
-	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token"  )
@@ -379,9 +379,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>near</b>
 	 * <p>
-	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NEAR = new TokenClientParam(SP_NEAR);
@@ -389,9 +389,9 @@ public class Location
 	/**
 	 * Search parameter constant for <b>near-distance</b>
 	 * <p>
-	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token"  )
@@ -400,9 +400,9 @@ public class Location
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
 	 * <p>
-	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A distance quantity to limit the near search to locations within a specific distance</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NEAR_DISTANCE = new TokenClientParam(SP_NEAR_DISTANCE);

@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class SequencingAnalysis
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>SequencingAnalysis.subject</b><br/>
+	 * Description: <b>Subject of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>SequencingAnalysis.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="SequencingAnalysis.subject", description="Subject of the analysis", type="reference"  )
@@ -247,9 +247,9 @@ public class SequencingAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>SequencingAnalysis.subject</b><br/>
+	 * Description: <b>Subject of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>SequencingAnalysis.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class SequencingAnalysis
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the analysis is updated</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>SequencingAnalysis.date</b><br/>
+	 * Description: <b>Date when result of the analysis is updated</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>SequencingAnalysis.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="SequencingAnalysis.date", description="Date when result of the analysis is updated", type="date"  )
@@ -274,9 +274,9 @@ public class SequencingAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the analysis is updated</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>SequencingAnalysis.date</b><br/>
+	 * Description: <b>Date when result of the analysis is updated</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>SequencingAnalysis.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -284,9 +284,9 @@ public class SequencingAnalysis
 	/**
 	 * Search parameter constant for <b>genome</b>
 	 * <p>
-	 * Description: <b>Name of the reference genome used in the analysis</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
+	 * Description: <b>Name of the reference genome used in the analysis</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingAnalysis.genome.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="genome", path="SequencingAnalysis.genome.name", description="Name of the reference genome used in the analysis", type="string"  )
@@ -295,9 +295,9 @@ public class SequencingAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>genome</b>
 	 * <p>
-	 * Description: <b>Name of the reference genome used in the analysis</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingAnalysis.genome.name</b><br/>
+	 * Description: <b>Name of the reference genome used in the analysis</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingAnalysis.genome.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam GENOME = new StringClientParam(SP_GENOME);

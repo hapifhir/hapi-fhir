@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class DeviceObservationReport
 	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.source</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="source", path="DeviceObservationReport.source", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class DeviceObservationReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.source</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
@@ -263,9 +263,9 @@ public class DeviceObservationReport
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>The compatment code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
+	 * Description: <b>The compatment code</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="DeviceObservationReport.virtualDevice.code", description="The compatment code", type="token"  )
@@ -274,9 +274,9 @@ public class DeviceObservationReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>The compatment code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br/>
+	 * Description: <b>The compatment code</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -284,9 +284,9 @@ public class DeviceObservationReport
 	/**
 	 * Search parameter constant for <b>channel</b>
 	 * <p>
-	 * Description: <b>The channel code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
+	 * Description: <b>The channel code</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="channel", path="DeviceObservationReport.virtualDevice.channel.code", description="The channel code", type="token"  )
@@ -295,9 +295,9 @@ public class DeviceObservationReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>channel</b>
 	 * <p>
-	 * Description: <b>The channel code</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br/>
+	 * Description: <b>The channel code</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CHANNEL = new TokenClientParam(SP_CHANNEL);
@@ -305,9 +305,9 @@ public class DeviceObservationReport
 	/**
 	 * Search parameter constant for <b>observation</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="observation", path="DeviceObservationReport.virtualDevice.channel.metric.observation", description="", type="reference"  )
@@ -316,9 +316,9 @@ public class DeviceObservationReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>observation</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.virtualDevice.channel.metric.observation</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam OBSERVATION = new ReferenceClientParam(SP_OBSERVATION);
@@ -332,9 +332,9 @@ public class DeviceObservationReport
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="DeviceObservationReport.subject", description="", type="reference"  )
@@ -343,9 +343,9 @@ public class DeviceObservationReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DeviceObservationReport.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DeviceObservationReport.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);

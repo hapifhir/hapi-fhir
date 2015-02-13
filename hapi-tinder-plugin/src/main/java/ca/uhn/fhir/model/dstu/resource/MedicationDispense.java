@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>destination</b>
 	 * <p>
-	 * Description: <b>Return dispenses that should be sent to a secific destination</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispense.destination</b><br/>
+	 * Description: <b>Return dispenses that should be sent to a secific destination</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispense.destination</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="destination", path="MedicationDispense.dispense.destination", description="Return dispenses that should be sent to a secific destination", type="reference"  )
@@ -247,9 +247,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>destination</b>
 	 * <p>
-	 * Description: <b>Return dispenses that should be sent to a secific destination</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispense.destination</b><br/>
+	 * Description: <b>Return dispenses that should be sent to a secific destination</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispense.destination</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam DESTINATION = new ReferenceClientParam(SP_DESTINATION);
@@ -263,9 +263,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>dispenser</b>
 	 * <p>
-	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispenser</b><br/>
+	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispenser</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific indiividual", type="reference"  )
@@ -274,9 +274,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dispenser</b>
 	 * <p>
-	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispenser</b><br/>
+	 * Description: <b>Return all dispenses performed by a specific indiividual</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispenser</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam DISPENSER = new ReferenceClientParam(SP_DISPENSER);
@@ -290,9 +290,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return dispenses with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.identifier</b><br/>
+	 * Description: <b>Return dispenses with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identity", type="token"  )
@@ -301,9 +301,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return dispenses with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.identifier</b><br/>
+	 * Description: <b>Return dispenses with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -311,9 +311,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Returns dispenses of this medicine</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispense.medication</b><br/>
+	 * Description: <b>Returns dispenses of this medicine</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispense.medication</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationDispense.dispense.medication", description="Returns dispenses of this medicine", type="reference"  )
@@ -322,9 +322,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Returns dispenses of this medicine</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.dispense.medication</b><br/>
+	 * Description: <b>Returns dispenses of this medicine</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.dispense.medication</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
@@ -338,9 +338,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.patient</b><br/>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference"  )
@@ -349,9 +349,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list dispenses  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.patient</b><br/>
+	 * Description: <b>The identity of a patient to list dispenses  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -365,9 +365,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>prescription</b>
 	 * <p>
-	 * Description: <b>The identity of a prescription to list dispenses from</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.authorizingPrescription</b><br/>
+	 * Description: <b>The identity of a prescription to list dispenses from</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.authorizingPrescription</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference"  )
@@ -376,9 +376,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
 	 * <p>
-	 * Description: <b>The identity of a prescription to list dispenses from</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.authorizingPrescription</b><br/>
+	 * Description: <b>The identity of a prescription to list dispenses from</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.authorizingPrescription</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PRESCRIPTION = new ReferenceClientParam(SP_PRESCRIPTION);
@@ -392,9 +392,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>responsibleparty</b>
 	 * <p>
-	 * Description: <b>Return all dispenses with the specified responsible party</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br/>
+	 * Description: <b>Return all dispenses with the specified responsible party</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference"  )
@@ -403,9 +403,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>responsibleparty</b>
 	 * <p>
-	 * Description: <b>Return all dispenses with the specified responsible party</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br/>
+	 * Description: <b>Return all dispenses with the specified responsible party</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationDispense.substitution.responsibleParty</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RESPONSIBLEPARTY = new ReferenceClientParam(SP_RESPONSIBLEPARTY);
@@ -419,9 +419,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the dispense</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.dispense.status</b><br/>
+	 * Description: <b>Status of the dispense</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.dispense.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="MedicationDispense.dispense.status", description="Status of the dispense", type="token"  )
@@ -430,9 +430,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>Status of the dispense</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.dispense.status</b><br/>
+	 * Description: <b>Status of the dispense</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.dispense.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -440,9 +440,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Return all dispenses of a specific type</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.dispense.type</b><br/>
+	 * Description: <b>Return all dispenses of a specific type</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.dispense.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="MedicationDispense.dispense.type", description="Return all dispenses of a specific type", type="token"  )
@@ -451,9 +451,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Return all dispenses of a specific type</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationDispense.dispense.type</b><br/>
+	 * Description: <b>Return all dispenses of a specific type</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationDispense.dispense.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -461,9 +461,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>whenhandedover</b>
 	 * <p>
-	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br/>
+	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="whenhandedover", path="MedicationDispense.dispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date"  )
@@ -472,9 +472,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>whenhandedover</b>
 	 * <p>
-	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br/>
+	 * Description: <b>Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationDispense.dispense.whenHandedOver</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam WHENHANDEDOVER = new DateClientParam(SP_WHENHANDEDOVER);
@@ -482,9 +482,9 @@ public class MedicationDispense
 	/**
 	 * Search parameter constant for <b>whenprepared</b>
 	 * <p>
-	 * Description: <b>Date when medication prepared</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br/>
+	 * Description: <b>Date when medication prepared</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="whenprepared", path="MedicationDispense.dispense.whenPrepared", description="Date when medication prepared", type="date"  )
@@ -493,9 +493,9 @@ public class MedicationDispense
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>whenprepared</b>
 	 * <p>
-	 * Description: <b>Date when medication prepared</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br/>
+	 * Description: <b>Date when medication prepared</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationDispense.dispense.whenPrepared</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam WHENPREPARED = new DateClientParam(SP_WHENPREPARED);
@@ -1894,13 +1894,13 @@ public class MedicationDispense
 	}
 
 	/**
-	 * Gets the value(s) for <b>additionalInstructions</b> (E.g. \"Take with food\").
+	 * Gets the value(s) for <b>additionalInstructions</b> (E.g. \&quot;Take with food\&quot;).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public CodeableConceptDt getAdditionalInstructions() {  
@@ -1912,13 +1912,13 @@ public class MedicationDispense
 
 
 	/**
-	 * Gets the value(s) for <b>additionalInstructions</b> (E.g. \"Take with food\").
+	 * Gets the value(s) for <b>additionalInstructions</b> (E.g. \&quot;Take with food\&quot;).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public CodeableConceptDt getAdditionalInstructionsElement() {  
@@ -1930,11 +1930,11 @@ public class MedicationDispense
 
 
 	/**
-	 * Sets the value(s) for <b>additionalInstructions</b> (E.g. \"Take with food\")
+	 * Sets the value(s) for <b>additionalInstructions</b> (E.g. \&quot;Take with food\&quot;)
 	 *
      * <p>
      * <b>Definition:</b>
-     * Additional instructions such as \"Swallow with plenty of water\" which may or may not be coded.
+     * Additional instructions such as \&quot;Swallow with plenty of water\&quot; which may or may not be coded.
      * </p> 
 	 */
 	public DispenseDosage setAdditionalInstructions(CodeableConceptDt theValue) {
@@ -1950,7 +1950,7 @@ public class MedicationDispense
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public IDatatype getTiming() {  
@@ -1965,7 +1965,7 @@ public class MedicationDispense
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public IDatatype getTimingElement() {  
@@ -1978,7 +1978,7 @@ public class MedicationDispense
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public DispenseDosage setTiming(IDatatype theValue) {
@@ -1988,7 +1988,7 @@ public class MedicationDispense
 
   
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2003,7 +2003,7 @@ public class MedicationDispense
 
 
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2018,7 +2018,7 @@ public class MedicationDispense
 
 
 	/**
-	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x))
+	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x))
 	 *
      * <p>
      * <b>Definition:</b>

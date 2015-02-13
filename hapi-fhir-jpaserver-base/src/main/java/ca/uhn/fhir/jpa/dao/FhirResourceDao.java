@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -88,11 +89,11 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -536,7 +537,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 										List<Object> values;
 										if ("*".equals(next.getValue())) {
 											values = new ArrayList<Object>();
-											values.addAll(t.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class));
+											values.addAll(t.getAllPopulatedChildElementsOfType(nextResource, BaseResourceReferenceDt.class));
 										} else if (next.getValue().startsWith(def.getName() + ".")) {
 											values = t.getValues(nextResource, next.getValue());
 										} else {
@@ -547,10 +548,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 											if (object == null) {
 												continue;
 											}
-											if (!(object instanceof ResourceReferenceDt)) {
+											if (!(object instanceof BaseResourceReferenceDt)) {
 												throw new InvalidRequestException("Path '" + next.getValue() + "' produced non ResourceReferenceDt value: " + object.getClass());
 											}
-											ResourceReferenceDt rr = (ResourceReferenceDt) object;
+											BaseResourceReferenceDt rr = (BaseResourceReferenceDt) object;
 											if (rr.getReference().isEmpty()) {
 												continue;
 											}

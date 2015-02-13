@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the lab</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>SequencingLab.subject</b><br/>
+	 * Description: <b>Subject of the lab</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>SequencingLab.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="SequencingLab.subject", description="Subject of the lab", type="reference"  )
@@ -247,9 +247,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the lab</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>SequencingLab.subject</b><br/>
+	 * Description: <b>Subject of the lab</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>SequencingLab.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b>Type of the specimen used for the lab</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.specimen.type</b><br/>
+	 * Description: <b>Type of the specimen used for the lab</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.specimen.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="specimen", path="SequencingLab.specimen.type", description="Type of the specimen used for the lab", type="string"  )
@@ -274,9 +274,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b>Type of the specimen used for the lab</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.specimen.type</b><br/>
+	 * Description: <b>Type of the specimen used for the lab</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.specimen.type</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam SPECIMEN = new StringClientParam(SP_SPECIMEN);
@@ -284,9 +284,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the lab is uploaded</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>SequencingLab.date</b><br/>
+	 * Description: <b>Date when result of the lab is uploaded</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>SequencingLab.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="SequencingLab.date", description="Date when result of the lab is uploaded", type="date"  )
@@ -295,9 +295,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the lab is uploaded</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>SequencingLab.date</b><br/>
+	 * Description: <b>Date when result of the lab is uploaded</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>SequencingLab.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -305,9 +305,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>Organization that does the lab</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.organization</b><br/>
+	 * Description: <b>Organization that does the lab</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.organization</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="organization", path="SequencingLab.organization", description="Organization that does the lab", type="string"  )
@@ -316,9 +316,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>Organization that does the lab</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.organization</b><br/>
+	 * Description: <b>Organization that does the lab</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.organization</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam ORGANIZATION = new StringClientParam(SP_ORGANIZATION);
@@ -326,9 +326,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>system-class</b>
 	 * <p>
-	 * Description: <b>Class of the sequencing system</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.system.class</b><br/>
+	 * Description: <b>Class of the sequencing system</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.system.class</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system-class", path="SequencingLab.system.class", description="Class of the sequencing system", type="string"  )
@@ -337,9 +337,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system-class</b>
 	 * <p>
-	 * Description: <b>Class of the sequencing system</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.system.class</b><br/>
+	 * Description: <b>Class of the sequencing system</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.system.class</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam SYSTEM_CLASS = new StringClientParam(SP_SYSTEM_CLASS);
@@ -347,9 +347,9 @@ public class SequencingLab
 	/**
 	 * Search parameter constant for <b>system-name</b>
 	 * <p>
-	 * Description: <b>Name of the sequencing system</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.system.name</b><br/>
+	 * Description: <b>Name of the sequencing system</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.system.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system-name", path="SequencingLab.system.name", description="Name of the sequencing system", type="string"  )
@@ -358,9 +358,9 @@ public class SequencingLab
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system-name</b>
 	 * <p>
-	 * Description: <b>Name of the sequencing system</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>SequencingLab.system.name</b><br/>
+	 * Description: <b>Name of the sequencing system</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>SequencingLab.system.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam SYSTEM_NAME = new StringClientParam(SP_SYSTEM_NAME);

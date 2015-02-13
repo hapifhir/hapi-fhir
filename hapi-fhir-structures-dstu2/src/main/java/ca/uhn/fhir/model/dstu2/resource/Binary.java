@@ -24,17 +24,16 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.ElementUtil;
 
 @ResourceDef(name = "Binary", profile = "http://hl7.org/fhir/profiles/Binary", id = "binary")
-public class Binary extends BaseResource implements IResource {
+public class Binary extends BaseResource implements BaseBinary {
 
 	@Child(name = "content", order = 1)
 	private Base64BinaryDt myContent = new Base64BinaryDt();

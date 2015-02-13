@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="DocumentReference.masterIdentifier | DocumentReference.identifier", description="", type="token"  )
@@ -247,9 +247,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.masterIdentifier | DocumentReference.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="DocumentReference.subject", description="", type="reference"  )
@@ -268,9 +268,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -284,9 +284,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="DocumentReference.type", description="", type="token"  )
@@ -295,9 +295,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -305,9 +305,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.class</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.class</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="class", path="DocumentReference.class", description="", type="token"  )
@@ -316,9 +316,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.class</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.class</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CLASS = new TokenClientParam(SP_CLASS);
@@ -326,9 +326,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.author</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="author", path="DocumentReference.author", description="", type="reference"  )
@@ -337,9 +337,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.author</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
@@ -353,9 +353,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>custodian</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.custodian</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.custodian</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="custodian", path="DocumentReference.custodian", description="", type="reference"  )
@@ -364,9 +364,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>custodian</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.custodian</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.custodian</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam CUSTODIAN = new ReferenceClientParam(SP_CUSTODIAN);
@@ -380,9 +380,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>authenticator</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.authenticator</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.authenticator</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="authenticator", path="DocumentReference.authenticator", description="", type="reference"  )
@@ -391,9 +391,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>authenticator</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.authenticator</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.authenticator</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHENTICATOR = new ReferenceClientParam(SP_AUTHENTICATOR);
@@ -407,9 +407,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.created</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="created", path="DocumentReference.created", description="", type="date"  )
@@ -418,9 +418,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.created</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam CREATED = new DateClientParam(SP_CREATED);
@@ -428,9 +428,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>indexed</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.indexed</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.indexed</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="indexed", path="DocumentReference.indexed", description="", type="date"  )
@@ -439,9 +439,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>indexed</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.indexed</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.indexed</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam INDEXED = new DateClientParam(SP_INDEXED);
@@ -449,9 +449,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="DocumentReference.status", description="", type="token"  )
@@ -460,9 +460,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -470,9 +470,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>relatesto</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.relatesTo.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.relatesTo.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="", type="reference"  )
@@ -481,9 +481,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>relatesto</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentReference.relatesTo.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentReference.relatesTo.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RELATESTO = new ReferenceClientParam(SP_RELATESTO);
@@ -497,9 +497,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>relation</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.relatesTo.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.relatesTo.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="relation", path="DocumentReference.relatesTo.code", description="", type="token"  )
@@ -508,9 +508,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>relation</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.relatesTo.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.relatesTo.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam RELATION = new TokenClientParam(SP_RELATION);
@@ -518,9 +518,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentReference.description</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentReference.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="DocumentReference.description", description="", type="string"  )
@@ -529,9 +529,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentReference.description</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentReference.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -539,9 +539,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>confidentiality</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.confidentiality</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.confidentiality</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="confidentiality", path="DocumentReference.confidentiality", description="", type="token"  )
@@ -550,9 +550,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.confidentiality</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.confidentiality</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CONFIDENTIALITY = new TokenClientParam(SP_CONFIDENTIALITY);
@@ -560,9 +560,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>language</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.primaryLanguage</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.primaryLanguage</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="language", path="DocumentReference.primaryLanguage", description="", type="token"  )
@@ -571,9 +571,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>language</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.primaryLanguage</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.primaryLanguage</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam LANGUAGE = new TokenClientParam(SP_LANGUAGE);
@@ -581,9 +581,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>format</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.format</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.format</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="format", path="DocumentReference.format", description="", type="token"  )
@@ -592,9 +592,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>format</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.format</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.format</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FORMAT = new TokenClientParam(SP_FORMAT);
@@ -602,9 +602,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>size</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>DocumentReference.size</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>DocumentReference.size</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="size", path="DocumentReference.size", description="", type="number"  )
@@ -613,9 +613,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>size</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>DocumentReference.size</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>DocumentReference.size</b><br>
 	 * </p>
 	 */
 	public static final NumberClientParam SIZE = new NumberClientParam(SP_SIZE);
@@ -623,9 +623,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentReference.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentReference.location</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location", path="DocumentReference.location", description="", type="string"  )
@@ -634,9 +634,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentReference.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentReference.location</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam LOCATION = new StringClientParam(SP_LOCATION);
@@ -644,9 +644,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>event</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.context.event</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.context.event</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="event", path="DocumentReference.context.event", description="", type="token"  )
@@ -655,9 +655,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>event</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.context.event</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.context.event</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EVENT = new TokenClientParam(SP_EVENT);
@@ -665,9 +665,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>period</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.context.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.context.period</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="period", path="DocumentReference.context.period", description="", type="date"  )
@@ -676,9 +676,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>period</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentReference.context.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentReference.context.period</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam PERIOD = new DateClientParam(SP_PERIOD);
@@ -686,9 +686,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>facility</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.context.facilityType</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.context.facilityType</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="facility", path="DocumentReference.context.facilityType", description="", type="token"  )
@@ -697,9 +697,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>facility</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentReference.context.facilityType</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentReference.context.facilityType</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FACILITY = new TokenClientParam(SP_FACILITY);
@@ -707,9 +707,9 @@ public class DocumentReference
 	/**
 	 * Search parameter constant for <b>relatesto-relation</b>
 	 * <p>
-	 * Description: <b>Combination of relation and relatesTo</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>relatesto & relation</b><br/>
+	 * Description: <b>Combination of relation and relatesTo</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>relatesto &amp; relation</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="relatesto-relation", path="relatesto & relation", description="Combination of relation and relatesTo", type="composite"  , compositeOf={  "relatesto",  "relation" }  )
@@ -718,9 +718,9 @@ public class DocumentReference
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>relatesto-relation</b>
 	 * <p>
-	 * Description: <b>Combination of relation and relatesTo</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>relatesto & relation</b><br/>
+	 * Description: <b>Combination of relation and relatesTo</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>relatesto &amp; relation</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<ReferenceClientParam, TokenClientParam> RELATESTO_RELATION = new CompositeClientParam<ReferenceClientParam, TokenClientParam>(SP_RELATESTO_RELATION);
@@ -1827,7 +1827,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public StringDt getDescription() {  
@@ -1845,7 +1845,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public StringDt getDescriptionElement() {  
@@ -1861,7 +1861,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public DocumentReference setDescription(StringDt theValue) {
@@ -1874,7 +1874,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public DocumentReference setDescription( String theString) {
@@ -3087,7 +3087,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act
      * </p> 
 	 */
 	public java.util.List<CodeableConceptDt> getEvent() {  
@@ -3105,7 +3105,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act
      * </p> 
 	 */
 	public java.util.List<CodeableConceptDt> getEventElement() {  
@@ -3121,7 +3121,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act
      * </p> 
 	 */
 	public Context setEvent(java.util.List<CodeableConceptDt> theValue) {
@@ -3134,7 +3134,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act
      * </p> 
 	 */
 	public CodeableConceptDt addEvent() {
@@ -3149,7 +3149,7 @@ public class DocumentReference
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act
      * </p> 
 	 */
 	public CodeableConceptDt getEventFirstRep() {

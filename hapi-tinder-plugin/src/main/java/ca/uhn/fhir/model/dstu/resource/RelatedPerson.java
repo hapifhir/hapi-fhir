@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>A patient Identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>RelatedPerson.identifier</b><br/>
+	 * Description: <b>A patient Identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>RelatedPerson.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token"  )
@@ -247,9 +247,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>A patient Identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>RelatedPerson.identifier</b><br/>
+	 * Description: <b>A patient Identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>RelatedPerson.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of name in any name part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.name</b><br/>
+	 * Description: <b>A portion of name in any name part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string"  )
@@ -268,9 +268,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of name in any name part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.name</b><br/>
+	 * Description: <b>A portion of name in any name part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -278,9 +278,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string"  )
@@ -289,9 +289,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
@@ -299,9 +299,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>telecom</b>
 	 * <p>
-	 * Description: <b>The value in any kind of contact</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.telecom</b><br/>
+	 * Description: <b>The value in any kind of contact</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.telecom</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string"  )
@@ -310,9 +310,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
 	 * <p>
-	 * Description: <b>The value in any kind of contact</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.telecom</b><br/>
+	 * Description: <b>The value in any kind of contact</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.telecom</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam TELECOM = new StringClientParam(SP_TELECOM);
@@ -320,9 +320,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>An address in any kind of address/part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.address</b><br/>
+	 * Description: <b>An address in any kind of address/part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.address</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string"  )
@@ -331,9 +331,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>An address in any kind of address/part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>RelatedPerson.address</b><br/>
+	 * Description: <b>An address in any kind of address/part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>RelatedPerson.address</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
@@ -341,9 +341,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>gender</b>
 	 * <p>
-	 * Description: <b>Gender of the person</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>RelatedPerson.gender</b><br/>
+	 * Description: <b>Gender of the person</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>RelatedPerson.gender</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token"  )
@@ -352,9 +352,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>gender</b>
 	 * <p>
-	 * Description: <b>Gender of the person</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>RelatedPerson.gender</b><br/>
+	 * Description: <b>Gender of the person</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>RelatedPerson.gender</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam GENDER = new TokenClientParam(SP_GENDER);
@@ -362,9 +362,9 @@ public class RelatedPerson
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The patient this person is related to</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>RelatedPerson.patient</b><br/>
+	 * Description: <b>The patient this person is related to</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>RelatedPerson.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference"  )
@@ -373,9 +373,9 @@ public class RelatedPerson
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The patient this person is related to</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>RelatedPerson.patient</b><br/>
+	 * Description: <b>The patient this person is related to</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>RelatedPerson.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
