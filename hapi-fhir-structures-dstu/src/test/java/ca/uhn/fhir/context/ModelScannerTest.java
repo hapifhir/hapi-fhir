@@ -14,7 +14,7 @@ public class ModelScannerTest {
 	/** This failed at one point */
 	@Test
 	public void testCarePlan() throws DataFormatException {
-		new ModelScanner(new FhirContext(), CarePlan.class);
+		FhirContext.forDstu1().getResourceDefinition(CarePlan.class);
 	}
 	
 	@Test
@@ -34,8 +34,8 @@ public class ModelScannerTest {
 	@Test
 	public void testScanExtensionTypes() throws DataFormatException {
 		
-		ModelScanner scanner = new ModelScanner(new FhirContext(),ResourceWithExtensionsA.class);
-		RuntimeResourceDefinition def = (RuntimeResourceDefinition) scanner.getClassToElementDefinitions().get(ResourceWithExtensionsA.class);
+		FhirContext ctx = FhirContext.forDstu1();
+		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsA.class);
 		
 		assertEquals(RuntimeChildCompositeDatatypeDefinition.class, def.getChildByNameOrThrowDataFormatException("identifier").getClass());
 		

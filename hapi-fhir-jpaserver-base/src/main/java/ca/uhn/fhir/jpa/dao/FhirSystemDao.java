@@ -54,9 +54,9 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
@@ -249,8 +249,8 @@ public class FhirSystemDao extends BaseFhirDao implements IFhirSystemDao {
 		}
 
 		for (IResource nextResource : theResources) {
-			List<ResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, ResourceReferenceDt.class);
-			for (ResourceReferenceDt nextRef : allRefs) {
+			List<BaseResourceReferenceDt> allRefs = terser.getAllPopulatedChildElementsOfType(nextResource, BaseResourceReferenceDt.class);
+			for (BaseResourceReferenceDt nextRef : allRefs) {
 				IdDt nextId = nextRef.getReference();
 				if (idConversions.containsKey(nextId)) {
 					IdDt newId = idConversions.get(nextId);

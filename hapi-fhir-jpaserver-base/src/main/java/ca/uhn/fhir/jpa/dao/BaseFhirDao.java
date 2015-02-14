@@ -83,7 +83,6 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -537,8 +536,8 @@ public abstract class BaseFhirDao implements IDao {
 
 		theEntity.setResourceType(toResourceName(theResource));
 
-		List<ResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
-		for (ResourceReferenceDt nextRef : refs) {
+		List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
+		for (BaseResourceReferenceDt nextRef : refs) {
 			if (nextRef.getReference().isEmpty() == false) {
 				if (nextRef.getReference().hasVersionIdPart()) {
 					nextRef.setReference(nextRef.getReference().toUnqualifiedVersionless());

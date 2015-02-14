@@ -121,6 +121,34 @@ class ParserState<T> {
 		return myState.isPreResource();
 	}
 
+	private BaseContainedDt newContainedDt(IResource theTarget) {
+
+		BaseContainedDt newChildInstance;
+		try {
+			newChildInstance = theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType().newInstance();
+		} catch (InstantiationException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		}
+		return newChildInstance;
+	}
+
+	private BaseResourceReferenceDt newResourceReferenceDt(IBase theFirstTarget, IResource theTarget) {
+
+		BaseResourceReferenceDt newChildInstance;
+		try {
+			// if (theFirstTarget instanceof IResource)
+			IFhirVersion version = theTarget.getStructureFhirVersionEnum().getVersionImplementation();
+			newChildInstance = version.getResourceReferenceType().newInstance();
+		} catch (InstantiationException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		} catch (IllegalAccessException e) {
+			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
+		}
+		return newChildInstance;
+	}
+
 	private void pop() {
 		myState = myState.myStack;
 		myState.wereBack();
@@ -237,10 +265,10 @@ class ParserState<T> {
 		private static final int STATE_TERM = 1;
 
 		private int myCatState = STATE_NONE;
-		private TagList myTagList;
-		private String myTerm;
 		private String myLabel;
 		private String myScheme;
+		private TagList myTagList;
+		private String myTerm;
 
 		public AtomCategoryState(TagList theTagList) {
 			super(null);
@@ -932,6 +960,33 @@ class ParserState<T> {
 
 	}
 
+	public class BundleEntrySearchState extends BaseState {
+
+		private BundleEntry myEntry;
+
+		public BundleEntrySearchState(BundleEntry theEntry) {
+			super(null);
+			myEntry = theEntry;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			if ("mode".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getSearchMode()));
+			} else if ("score".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getScore()));
+			} else {
+				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
+			}
+		}
+
+	}
+
 	public class BundleEntryState extends BaseState {
 
 		private BundleEntry myEntry;
@@ -1030,34 +1085,6 @@ class ParserState<T> {
 
 	}
 
-	
-	public class BundleEntrySearchState extends BaseState {
-
-		private BundleEntry myEntry;
-
-		public BundleEntrySearchState(BundleEntry theEntry) {
-			super(null);
-			myEntry = theEntry;
-		}
-
-		@Override
-		public void endingElement() throws DataFormatException {
-			pop();
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if ("mode".equals(theLocalPart)) {
-				push(new PrimitiveState(getPreResourceState(), myEntry.getSearchMode()));
-			} else if ("score".equals(theLocalPart)) {
-				push(new PrimitiveState(getPreResourceState(), myEntry.getScore()));
-			} else {
-				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
-			}
-		}
-
-	}
-
 	public class BundleEntryTransactionState extends BaseState {
 
 		private BundleEntry myEntry;
@@ -1084,15 +1111,15 @@ class ParserState<T> {
 		}
 
 	}
-	
+
 	private class BundleLinkState extends BaseState {
 
 		private BundleEntry myEntry;
 		private String myHref;
-		private Bundle myInstance;
-		private String myRel;
 		private boolean myInRelation = false;
+		private Bundle myInstance;
 		private boolean myInUrl = false;
+		private String myRel;
 
 		public BundleLinkState(Bundle theInstance) {
 			super(null);
@@ -1179,34 +1206,6 @@ class ParserState<T> {
 		}
 
 		@Override
-		public void wereBack() {
-			for (BundleEntry nextEntry : myInstance.getEntries()) {
-				IResource nextResource = nextEntry.getResource();
-				
-				String bundleBaseUrl = myInstance.getLinkBase().getValue();
-				String entryBaseUrl = nextEntry.getLinkBase().getValue();
-				String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
-				String resourceName = myContext.getResourceDefinition(nextResource).getName();
-				String bundleIdPart = nextResource.getId().getIdPart();
-				if (isNotBlank(bundleIdPart)) {
-					if (isNotBlank(entryBaseUrl)) {
-						nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-					} else {
-						nextResource.setId(new IdDt(bundleBaseUrl, resourceName, bundleIdPart, version));
-					}
-				}
-			}
-			
-			String bundleVersion = (String) myInstance.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION);
-			String baseUrl = myInstance.getLinkBase().getValue();
-			String id = myInstance.getId().getIdPart();
-			if (isNotBlank(id)) {
-				myInstance.setId(new IdDt(baseUrl, "Bundle", id, bundleVersion));
-			}
-			
-		}
-
-		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("id".equals(theLocalPart)) {
 				push(new PrimitiveState(null, myInstance.getId()));
@@ -1264,12 +1263,40 @@ class ParserState<T> {
 			return myInstance;
 		}
 
+		@Override
+		public void wereBack() {
+			for (BundleEntry nextEntry : myInstance.getEntries()) {
+				IResource nextResource = nextEntry.getResource();
+
+				String bundleBaseUrl = myInstance.getLinkBase().getValue();
+				String entryBaseUrl = nextEntry.getLinkBase().getValue();
+				String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
+				String resourceName = myContext.getResourceDefinition(nextResource).getName();
+				String bundleIdPart = nextResource.getId().getIdPart();
+				if (isNotBlank(bundleIdPart)) {
+					if (isNotBlank(entryBaseUrl)) {
+						nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+					} else {
+						nextResource.setId(new IdDt(bundleBaseUrl, resourceName, bundleIdPart, version));
+					}
+				}
+			}
+
+			String bundleVersion = (String) myInstance.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION);
+			String baseUrl = myInstance.getLinkBase().getValue();
+			String id = myInstance.getId().getIdPart();
+			if (isNotBlank(id)) {
+				myInstance.setId(new IdDt(baseUrl, "Bundle", id, bundleVersion));
+			}
+
+		}
+
 	}
 
 	private class ContainedResourcesState extends PreResourceState {
 
 		public ContainedResourcesState(PreResourceState thePreResourcesState) {
-			super(thePreResourcesState);
+			super(thePreResourcesState, thePreResourcesState.myInstance.getStructureFhirVersionEnum());
 		}
 
 		@Override
@@ -1290,11 +1317,11 @@ class ParserState<T> {
 				}
 			}
 			IResource preResCurrentElement = (IResource) getPreResourceState().getCurrentElement();
-			
+
 			@SuppressWarnings("unchecked")
 			List<IResource> containedResources = (List<IResource>) preResCurrentElement.getContained().getContainedResources();
 			containedResources.add(res);
-			
+
 		}
 
 	}
@@ -1359,7 +1386,6 @@ class ParserState<T> {
 			}
 		}
 
-		
 		@Override
 		public void enteringNewElementExtension(StartElement theElement, String theUrlAttr, boolean theIsModifier) {
 			RuntimeChildDeclaredExtensionDefinition declaredExtension = myDefinition.getChildExtensionForUrl(theUrlAttr);
@@ -1382,35 +1408,7 @@ class ParserState<T> {
 
 	}
 
-	private BaseResourceReferenceDt newResourceReferenceDt(IBase theFirstTarget, IResource theTarget) {
-		
-		BaseResourceReferenceDt newChildInstance;
-		try {
-//			if (theFirstTarget instanceof IResource)
-			IFhirVersion version = theTarget.getStructureFhirVersionEnum().getVersionImplementation();
-			newChildInstance = version.getResourceReferenceType().newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		}
-		return newChildInstance;
-	}
-
-	private BaseContainedDt newContainedDt(IResource theTarget) {
-	
-		BaseContainedDt newChildInstance;
-		try {
-			newChildInstance = theTarget.getStructureFhirVersionEnum().getVersionImplementation().getContainedType().newInstance();
-		} catch (InstantiationException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		} catch (IllegalAccessException e) {
-			throw new ConfigurationException("Failed to instantiate " + myContext.getVersion().getResourceReferenceType(), e);
-		}
-		return newChildInstance;
-	}
-
-private class ElementCompositeState<T2 extends IBase> extends BaseState {
+	private class ElementCompositeState<T2 extends IBase> extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private T2 myInstance;
@@ -1578,7 +1576,7 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				myExtension.setValue(newChildInstance);
-				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
+				ElementCompositeState<IBase> newState = new ElementCompositeState<IBase>(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1716,33 +1714,12 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 
 	}
 
-	private class ResourceState extends ElementCompositeState<IResource>
-	{
-
-		public ResourceState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance) {
-			super(thePreResourceState, theDef, theInstance);
-		}
-
-		@Override
-		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
-			if ("id".equals(theChildName)) {
-				push(new PrimitiveState(getPreResourceState(), getCurrentElement().getId()));
-			} else if ("meta".equals(theChildName)) {
-				push(new MetaElementState(getPreResourceState(), getCurrentElement().getResourceMetadata()));
-			}else {
-				super.enteringNewElement(theNamespace, theChildName);
-			}
-		}
-
-		
-	}
-	
-	
 	private class PreResourceState extends BaseState {
 
 		private Map<String, IBaseResource> myContainedResources = new HashMap<String, IBaseResource>();
 		private BundleEntry myEntry;
 		private IResource myInstance;
+		private FhirVersionEnum myParentVersion;
 		private List<BaseResourceReferenceDt> myResourceReferences = new ArrayList<BaseResourceReferenceDt>();
 		private Class<? extends IBaseResource> myResourceType;
 
@@ -1750,6 +1727,11 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 			super(null);
 			myEntry = theEntry;
 			myResourceType = theResourceType;
+			if (theResourceType != null) {
+				myParentVersion = myContext.getResourceDefinition(theResourceType).getStructureVersion();
+			} else {
+				myParentVersion = myContext.getVersion().getVersion();
+			}
 		}
 
 		/**
@@ -1757,12 +1739,13 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 		 *            May be null
 		 */
 		public PreResourceState(Class<? extends IBaseResource> theResourceType) {
-			super(null);
-			myResourceType = theResourceType;
+			this(null, theResourceType);
 		}
 
-		public PreResourceState(PreResourceState thePreResourcesState) {
+		public PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
+			Validate.notNull(theParentVersion);
+			myParentVersion = theParentVersion;
 		}
 
 		@Override
@@ -1774,9 +1757,9 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> definition;
 			if (myResourceType == null) {
-				definition = myContext.getResourceDefinition(theLocalPart);
+				definition = myContext.getResourceDefinition(myParentVersion, theLocalPart);
 				if ((definition == null)) {
-					throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
+					throw new DataFormatException("Element '" + theLocalPart + "' is not a known resource type, expected a resource at this position");
 				}
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
@@ -1954,7 +1937,7 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 			push(new SwallowChildrenWholeState(getPreResourceState()));
 			return;
 		}
-		
+
 		@Override
 		protected IBase getCurrentElement() {
 			return myInstance;
@@ -2035,6 +2018,25 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
+	private class ResourceState extends ElementCompositeState<IResource> {
+
+		public ResourceState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance) {
+			super(thePreResourceState, theDef, theInstance);
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
+			if ("id".equals(theChildName)) {
+				push(new PrimitiveState(getPreResourceState(), getCurrentElement().getId()));
+			} else if ("meta".equals(theChildName)) {
+				push(new MetaElementState(getPreResourceState(), getCurrentElement().getResourceMetadata()));
+			} else {
+				super.enteringNewElement(theNamespace, theChildName);
+			}
+		}
+
+	}
+
 	private class SwallowChildrenWholeState extends BaseState {
 
 		private int myDepth;
@@ -2095,11 +2097,11 @@ private class ElementCompositeState<T2 extends IBase> extends BaseState {
 
 		private static final int SCHEME = 3;
 		private static final int TERM = 1;
+		private String myLabel;
+		private String myScheme;
 		private int mySubState = 0;
 		private TagList myTagList;
 		private String myTerm;
-		private String myLabel;
-		private String myScheme;
 
 		public TagState(TagList theTagList) {
 			super(null);

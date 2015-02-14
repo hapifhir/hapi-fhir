@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -62,28 +62,6 @@ public abstract class BaseParser implements IParser {
 
 	public BaseParser(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	protected String fixContainedResourceId(String theValue) {
-		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
-			return theValue.substring(1);
-		}
-		return theValue;
-	}
-
-	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
-		IResource resource = theEntry.getResource();
-		if (resource == null) {
-			return null;
-		}
-		
-		String resourceBaseUrl = null;
-		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
-			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
-				resourceBaseUrl = resource.getId().getBaseUrl();
-			}
-		}
-		return resourceBaseUrl;
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
@@ -175,6 +153,40 @@ public abstract class BaseParser implements IParser {
 		myContainedResources = contained;
 	}
 
+	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
+		String reference = theRef.getReference().getValue();
+		if (isBlank(reference)) {
+			if (theRef.getResource() != null) {
+				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
+				if (containedId != null && !containedId.isEmpty()) {
+					if (containedId.isLocal()) {
+						reference = containedId.getValue();
+					} else {
+						reference = "#" + containedId.getValue();
+					}
+				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
+					reference = theRef.getResource().getId().getValue();
+				}
+			}
+		}
+		return reference;
+	}
+
+	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
+		IResource resource = theEntry.getResource();
+		if (resource == null) {
+			return null;
+		}
+		
+		String resourceBaseUrl = null;
+		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
+			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
+				resourceBaseUrl = resource.getId().getBaseUrl();
+			}
+		}
+		return resourceBaseUrl;
+	}
+
 	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
 		if (theBundle == null) {
@@ -210,6 +222,13 @@ public abstract class BaseParser implements IParser {
 			throw new Error("Encountered IOException during write to string - This should not happen!");
 		}
 		return stringWriter.toString();
+	}
+
+	protected String fixContainedResourceId(String theValue) {
+		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
+			return theValue.substring(1);
+		}
+		return theValue;
 	}
 
 	ContainedResources getContainedResources() {
@@ -279,30 +298,11 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
-	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
-		String reference = theRef.getReference().getValue();
-		if (isBlank(reference)) {
-			if (theRef.getResource() != null) {
-				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
-				if (containedId != null && !containedId.isEmpty()) {
-					if (containedId.isLocal()) {
-						reference = containedId.getValue();
-					} else {
-						reference = "#" + containedId.getValue();
-					}
-				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
-					reference = theRef.getResource().getId().getValue();
-				}
-			}
-		}
-		return reference;
-	}
-
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
-		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
 		private List<IBaseResource> myResources = new ArrayList<IBaseResource>();
+		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
 
 		public void addContained(IBaseResource theResource) {
 			if (myResourceToId.containsKey(theResource)) {

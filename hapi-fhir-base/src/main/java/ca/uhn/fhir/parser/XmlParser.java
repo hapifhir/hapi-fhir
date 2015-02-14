@@ -926,7 +926,6 @@ public class XmlParser extends BaseParser implements IParser {
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) {
 		XMLEventReader streamReader = createStreamReader(theReader);
-
 		return parseResource(theResourceType, streamReader);
 	}
 

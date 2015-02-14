@@ -76,11 +76,12 @@ public class FhirContext {
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
 	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
-	private Map<String, String> myNameToResourceType;
+	private Map<String, Class<? extends IBaseResource>> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private final IFhirVersion myVersion;
+	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
 	 * Default constructor. In most cases this is the right constructor to use.
@@ -124,16 +125,8 @@ public class FhirContext {
 		scanResourceTypes(toElementList(theResourceTypes));
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
-		if (theResourceTypes == null) {
-			return null;
-		}
-		List<Class<? extends IElement>> resTypes = new ArrayList<Class<? extends IElement>>();
-		for (Class<? extends IBaseResource> next : theResourceTypes) {
-			resTypes.add((Class<? extends IElement>) next);
-		}
-		return resTypes;
+	private String createUnknownResourceNameError(String theResourceName, FhirVersionEnum theVersion) {
+		return getLocalizer().getMessage(FhirContext.class, "unknownResourceName", theResourceName, theVersion);
 	}
 
 	/**
@@ -189,6 +182,32 @@ public class FhirContext {
 		return retVal;
 	}
 
+	public RuntimeResourceDefinition getResourceDefinition(FhirVersionEnum theVersion, String theResourceName) {
+		Validate.notNull(theVersion, "theVersion can not be null");
+		
+		if (theVersion.equals(myVersion.getVersion())) {
+			return getResourceDefinition(theResourceName);
+		}
+
+		Map<String, Class<? extends IBaseResource>> nameToType = myVersionToNameToResourceType.get(theVersion);
+		if (nameToType == null) {
+			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
+			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion);
+			
+			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String,Class<? extends IBaseResource>>>();
+			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
+			newVersionToNameToResourceType.put(theVersion, nameToType);
+			myVersionToNameToResourceType = newVersionToNameToResourceType;
+		}
+		
+		Class<? extends IBaseResource> resourceType = nameToType.get(theResourceName.toLowerCase());
+		if (resourceType==null) {
+			throw new DataFormatException(createUnknownResourceNameError(theResourceName, theVersion));
+		}
+		
+		return getResourceDefinition(resourceType);
+	}
+
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
@@ -218,23 +237,12 @@ public class FhirContext {
 		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(resourceName);
 
 		if (retVal == null) {
-			try {
-				String className = myNameToResourceType.get(resourceName.toLowerCase());
-				if (className == null) {
-					// Binary is added to the fhirversion.properties file now so it's not a special case here
-//					if ("binary".equals(resourceName.toLowerCase())) {
-//						// Binary is not generated so it's not in the list of potential resources
-//						className = Binary.class.getName();
-//					} else {
-						throw new DataFormatException("Unknown resource name[" + resourceName + "]");
-//					}
-				}
-				Class<?> clazz = Class.forName(className);
-				if (IResource.class.isAssignableFrom(clazz)) {
-					retVal = scanResourceType((Class<? extends IResource>) clazz);
-				}
-			} catch (ClassNotFoundException e) {
-				throw new DataFormatException("Unknown resource name[" + resourceName + "]");
+			Class<? extends IBaseResource> clazz = myNameToResourceType.get(resourceName.toLowerCase());
+			if (clazz == null) {
+				throw new DataFormatException(createUnknownResourceNameError(resourceName, myVersion.getVersion()));
+			}
+			if (IResource.class.isAssignableFrom(clazz)) {
+				retVal = scanResourceType((Class<? extends IResource>) clazz);
 			}
 		}
 
@@ -358,13 +366,6 @@ public class FhirContext {
 		return new XmlParser(this);
 	}
 
-	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
-		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
-		resourceTypes.add(theResourceType);
-		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
-		return (RuntimeResourceDefinition) defs.get(theResourceType);
-	}
-
 	private BaseRuntimeElementDefinition<?> scanDatatype(Class<? extends IElement> theResourceType) {
 		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
 		resourceTypes.add(theResourceType);
@@ -372,8 +373,15 @@ public class FhirContext {
 		return defs.get(theResourceType);
 	}
 
+	private RuntimeResourceDefinition scanResourceType(Class<? extends IResource> theResourceType) {
+		ArrayList<Class<? extends IElement>> resourceTypes = new ArrayList<Class<? extends IElement>>();
+		resourceTypes.add(theResourceType);
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> defs = scanResourceTypes(resourceTypes);
+		return (RuntimeResourceDefinition) defs.get(theResourceType);
+	}
+
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> scanResourceTypes(Collection<Class<? extends IElement>> theResourceTypes) {
-		ModelScanner scanner = new ModelScanner(this, myClassToElementDefinition, theResourceTypes);
+		ModelScanner scanner = new ModelScanner(this, myVersion.getVersion(), myClassToElementDefinition, theResourceTypes);
 		if (myRuntimeChildUndeclaredExtensionDefinition == null) {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}
@@ -414,6 +422,39 @@ public class FhirContext {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
+	@SuppressWarnings("unchecked")
+	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
+		if (theResourceTypes == null) {
+			return null;
+		}
+		List<Class<? extends IElement>> resTypes = new ArrayList<Class<? extends IElement>>();
+		for (Class<? extends IBaseResource> next : theResourceTypes) {
+			resTypes.add((Class<? extends IElement>) next);
+		}
+		return resTypes;
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
+	 */
+	public static FhirContext forDev() {
+		return new FhirContext(FhirVersionEnum.DEV);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1}
+	 */
+	public static FhirContext forDstu1() {
+		return new FhirContext(FhirVersionEnum.DSTU1);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2}
+	 */
+	public static FhirContext forDstu2() {
+		return new FhirContext(FhirVersionEnum.DSTU2);
+	}
+
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		retVal.add(theResourceType);
@@ -430,27 +471,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU1}
-	 */
-	public static FhirContext forDstu1() {
-		return new FhirContext(FhirVersionEnum.DSTU1);
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
-	 */
-	public static FhirContext forDev() {
-		return new FhirContext(FhirVersionEnum.DEV);
-	}
-
-	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU2}
-	 */
-	public static FhirContext forDstu2() {
-		return new FhirContext(FhirVersionEnum.DSTU2);
 	}
 
 }

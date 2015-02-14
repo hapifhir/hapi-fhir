@@ -1104,7 +1104,7 @@ public class JsonParser extends BaseParser implements IParser {
 			def = myContext.getResourceDefinition(resourceType);
 		}
 
-		ParserState<? extends IBaseResource> state = (ParserState<? extends IBaseResource>) ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
+		ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
 		state.enteringNewElement(null, def.getName());
 
 		parseChildren(object, state);
@@ -1115,11 +1115,6 @@ public class JsonParser extends BaseParser implements IParser {
 		T retVal = (T) state.getObject();
 
 		return retVal;
-	}
-
-	@Override
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
-		return parseResource(theResourceType, new StringReader(theMessageString));
 	}
 
 	@Override

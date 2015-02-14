@@ -71,7 +71,7 @@ public class ResourceProviderDstu2Test {
 	/**
 	 * Test for issue #60
 	 */
-	//@Test
+	@Test
 	public void testStoreUtf8Characters() throws Exception {
 		Organization org = new Organization();
 		org.setName("測試醫院");
@@ -97,7 +97,7 @@ public class ResourceProviderDstu2Test {
 	/**
 	 * Test for issue #60
 	 */
-	//@Test
+	@Test
 	public void testReadAllInstancesOfType() throws Exception {
 		Patient pat;
 		
@@ -121,7 +121,7 @@ public class ResourceProviderDstu2Test {
 	}
 
 	
-	//@Test
+	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue( "testSearchWithInclude01");
@@ -151,7 +151,7 @@ public class ResourceProviderDstu2Test {
 	}
 
 	
-	//@Test
+	@Test
 	public void testCountParam() throws Exception {
 		// NB this does not get used- The paging provider has its own limits built in
 		ourDaoConfig.setHardSearchLimit(100);
@@ -177,7 +177,7 @@ public class ResourceProviderDstu2Test {
 	/**
 	 * See issue #52
 	 */
-	//@Test
+	@Test
 	public void testImagingStudyResources() throws Exception {
 		IGenericClient client = ourClient;
 
@@ -216,7 +216,7 @@ public class ResourceProviderDstu2Test {
 	/**
 	 * See issue #52
 	 */
-	//@Test
+	@Test
 	public void testDocumentReferenceResources() throws Exception {
 		IGenericClient client = ourClient;
 
@@ -234,7 +234,7 @@ public class ResourceProviderDstu2Test {
 	/**
 	 * See issue #52
 	 */
-	//@Test
+	@Test
 	public void testDiagnosticOrderResources() throws Exception {
 		IGenericClient client = ourClient;
 
@@ -267,7 +267,7 @@ public class ResourceProviderDstu2Test {
 		}
 	}
 
-	//@Test
+	@Test
 	public void testCreateWithClientSuppliedId() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system:rpdstu2", "testCreateWithId01");
 
@@ -297,7 +297,7 @@ public class ResourceProviderDstu2Test {
 		assertNotNull(history.getEntries().get(0).getResource());
 	}
 
-	//@Test
+	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");
 		delete("Location", Location.SP_NAME, "testDeepChainingL2");
@@ -336,7 +336,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testSaveAndRetrieveExistingNarrative() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSaveAndRetrieveExistingNarrative01");
 
@@ -351,7 +351,7 @@ public class ResourceProviderDstu2Test {
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
-	//@Test
+	@Test
 	public void testSaveAndRetrieveWithContained() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSaveAndRetrieveWithContained01");
@@ -372,7 +372,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testSaveAndRetrieveWithoutNarrative() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
@@ -383,7 +383,7 @@ public class ResourceProviderDstu2Test {
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
 	}
 
-	//@Test
+	@Test
 	public void testSearchByIdentifier() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier01");
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByIdentifier02");
@@ -404,7 +404,7 @@ public class ResourceProviderDstu2Test {
 		assertEquals(BundleEntrySearchModeEnum.MATCH, actual.getEntries().get(0).getSearchMode().getValueAsEnum());
 	}
 
-	//@Test
+	@Test
 	public void testSearchByIdentifierWithoutSystem() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "", "testSearchByIdentifierWithoutSystem01");
 
@@ -418,7 +418,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testSearchByResourceChain() {
 		delete("Organization", Organization.SP_NAME, "testSearchByResourceChainName01");
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testSearchByResourceChain01");
@@ -453,7 +453,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testTryToCreateResourceWithReferenceThatDoesntExist01");
 
@@ -471,7 +471,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testUpdateRejectsInvalidTypes() throws InterruptedException {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateRejectsInvalidTypes");
 
@@ -498,7 +498,7 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	//@Test
+	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
 		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
 
