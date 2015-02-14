@@ -84,6 +84,12 @@ public class TinderStructuresMojo extends AbstractMojo {
 			throw new MojoFailureException("Failed to load valuesets", e);
 		}
 
+		/*
+		 * A few enums are not found by default because none of the generated classes
+		 * refer to them, but we still want them.
+		 */
+		vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
+
 		ourLog.info("Loading Datatypes...");
 
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();

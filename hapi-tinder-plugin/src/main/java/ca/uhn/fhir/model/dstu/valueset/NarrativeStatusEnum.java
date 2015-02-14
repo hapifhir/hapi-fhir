@@ -1,64 +1,39 @@
 
 package ca.uhn.fhir.model.dstu.valueset;
 
-/*
- * #%L
- * HAPI FHIR - Core Library
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
+import ca.uhn.fhir.model.api.*;
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum NarrativeStatusEnum {
 
 	/**
-	 * generated
-	 * 
+	 * Code Value: <b>generated</b>
 	 *
 	 * The contents of the narrative are entirely generated from the structured data in the resource.
 	 */
-	GENERATED("generated","http://hl7.org/fhir/narrative-status"),
+	GENERATED("generated", "http://hl7.org/fhir/narrative-status"),
 	
 	/**
-	 * extensions
-	 * 
+	 * Code Value: <b>extensions</b>
 	 *
 	 * The contents of the narrative are entirely generated from the structured data in the resource and some of the content is generated from extensions.
 	 */
-	EXTENSIONS("extensions","http://hl7.org/fhir/narrative-status"),
+	EXTENSIONS("extensions", "http://hl7.org/fhir/narrative-status"),
 	
 	/**
-	 * additional
-	 * 
+	 * Code Value: <b>additional</b>
 	 *
 	 * The contents of the narrative contain additional information not found in the structured data.
 	 */
-	ADDITIONAL("additional","http://hl7.org/fhir/narrative-status"),
+	ADDITIONAL("additional", "http://hl7.org/fhir/narrative-status"),
 	
 	/**
-	 * empty
-	 * 
+	 * Code Value: <b>empty</b>
 	 *
 	 * the contents of the narrative are some equivalent of "No human-readable text provided for this resource".
 	 */
-	EMPTY("empty","http://hl7.org/fhir/narrative-status"),
+	EMPTY("empty", "http://hl7.org/fhir/narrative-status"),
 	
 	;
 	
@@ -150,5 +125,6 @@ public enum NarrativeStatusEnum {
 		myCode = theCode;
 		mySystem = theSystem;
 	}
+
 	
 }
