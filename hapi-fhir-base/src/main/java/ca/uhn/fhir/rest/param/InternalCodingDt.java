@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -345,7 +345,7 @@ public class InternalCodingDt
      * The set of possible coded values this coding was chosen from or constrained by
      * </p> 
 	 */
-	public ResourceReferenceDt getValueSet() {
+	public BaseResourceReferenceDt getValueSet() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -357,7 +357,7 @@ public class InternalCodingDt
      * The set of possible coded values this coding was chosen from or constrained by
      * </p> 
 	 */
-	public InternalCodingDt setValueSet(ResourceReferenceDt theValue) {
+	public InternalCodingDt setValueSet(BaseResourceReferenceDt theValue) {
 		throw new UnsupportedOperationException();
 	}
 

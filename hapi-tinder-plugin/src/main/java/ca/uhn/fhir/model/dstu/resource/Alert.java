@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Alert
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The identity of a subject to list alerts for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Alert.subject</b><br/>
+	 * Description: <b>The identity of a subject to list alerts for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Alert.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Alert.subject", description="The identity of a subject to list alerts for", type="reference"  )
@@ -247,9 +247,9 @@ public class Alert
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The identity of a subject to list alerts for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Alert.subject</b><br/>
+	 * Description: <b>The identity of a subject to list alerts for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Alert.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);

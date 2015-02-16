@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class User
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>User.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>User.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="User.name", description="", type="string"  )
@@ -247,9 +247,9 @@ public class User
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>User.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>User.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -257,9 +257,9 @@ public class User
 	/**
 	 * Search parameter constant for <b>provider</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>User.provider</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>User.provider</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="provider", path="User.provider", description="", type="token"  )
@@ -268,9 +268,9 @@ public class User
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>provider</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>User.provider</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>User.provider</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PROVIDER = new TokenClientParam(SP_PROVIDER);
@@ -278,9 +278,9 @@ public class User
 	/**
 	 * Search parameter constant for <b>login</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>User.login</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>User.login</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="login", path="User.login", description="", type="string"  )
@@ -289,9 +289,9 @@ public class User
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>login</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>User.login</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>User.login</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam LOGIN = new StringClientParam(SP_LOGIN);
@@ -299,9 +299,9 @@ public class User
 	/**
 	 * Search parameter constant for <b>level</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>User.level</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>User.level</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="level", path="User.level", description="", type="token"  )
@@ -310,9 +310,9 @@ public class User
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>level</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>User.level</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>User.level</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam LEVEL = new TokenClientParam(SP_LEVEL);
@@ -320,9 +320,9 @@ public class User
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>User.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>User.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="User.patient", description="", type="reference"  )
@@ -331,9 +331,9 @@ public class User
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>User.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>User.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);

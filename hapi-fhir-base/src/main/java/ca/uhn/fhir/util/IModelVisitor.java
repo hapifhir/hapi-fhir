@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,7 +29,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 
 /**
- * @see FhirTerser#visit(ca.uhn.fhir.model.api.IResource, IModelVisitor)
+ * @see FhirTerser#visit(IBaseResource, IModelVisitor)
  */
 public interface IModelVisitor {
 

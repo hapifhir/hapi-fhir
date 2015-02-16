@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 
 public class CustomThymeleafNarrativeGeneratorTest {
@@ -27,7 +27,8 @@ public class CustomThymeleafNarrativeGeneratorTest {
 		p.addAddress().addLine("line1").addLine("line2");
 		p.getName().addFamily("fam1").addGiven("given");
 
-		NarrativeDt narrative = gen.generateNarrative(p);
+		NarrativeDt narrative = new NarrativeDt();
+		gen.generateNarrative(p, narrative);
 
 		String actual = narrative.getDiv().getValueAsString();
 		ourLog.info(actual);

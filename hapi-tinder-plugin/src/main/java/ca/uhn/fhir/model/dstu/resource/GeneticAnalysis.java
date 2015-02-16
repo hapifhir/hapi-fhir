@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class GeneticAnalysis
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneticAnalysis.subject</b><br/>
+	 * Description: <b>Subject of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneticAnalysis.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="GeneticAnalysis.subject", description="Subject of the analysis", type="reference"  )
@@ -247,9 +247,9 @@ public class GeneticAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>Subject of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneticAnalysis.subject</b><br/>
+	 * Description: <b>Subject of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneticAnalysis.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class GeneticAnalysis
 	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b>Author of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneticAnalysis.author</b><br/>
+	 * Description: <b>Author of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneticAnalysis.author</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="author", path="GeneticAnalysis.author", description="Author of the analysis", type="reference"  )
@@ -274,9 +274,9 @@ public class GeneticAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b>Author of the analysis</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneticAnalysis.author</b><br/>
+	 * Description: <b>Author of the analysis</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneticAnalysis.author</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
@@ -290,9 +290,9 @@ public class GeneticAnalysis
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the analysis is uploaded</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>GeneticAnalysis.date</b><br/>
+	 * Description: <b>Date when result of the analysis is uploaded</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>GeneticAnalysis.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="GeneticAnalysis.date", description="Date when result of the analysis is uploaded", type="date"  )
@@ -301,9 +301,9 @@ public class GeneticAnalysis
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>Date when result of the analysis is uploaded</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>GeneticAnalysis.date</b><br/>
+	 * Description: <b>Date when result of the analysis is uploaded</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>GeneticAnalysis.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);

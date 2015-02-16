@@ -21,9 +21,9 @@ package ca.uhn.fhir.model.api;
  */
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
@@ -54,7 +54,7 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	 * </p>
 	 * TODO: document contained resources and link there
 	 */
-	ContainedDt getContained();
+	BaseContainedDt getContained();
 
 	/**
 	 * Returns the ID of this resource. Note that this identifier is the URL (or a portion
@@ -92,7 +92,7 @@ public interface IResource extends ICompositeElement, org.hl7.fhir.instance.mode
 	/**
 	 * Returns the narrative block for this resource
 	 */
-	NarrativeDt getText();
+	BaseNarrativeDt getText();
 	
 	/**
 	 * Sets the ID of this resource. Note that this identifier is the URL (or a portion

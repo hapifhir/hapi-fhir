@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Order.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Order.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Order.date", description="", type="date"  )
@@ -247,9 +247,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Order.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Order.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -257,9 +257,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Order.subject", description="", type="reference"  )
@@ -268,9 +268,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -284,9 +284,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.source</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="source", path="Order.source", description="", type="reference"  )
@@ -295,9 +295,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>source</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.source</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.source</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SOURCE = new ReferenceClientParam(SP_SOURCE);
@@ -311,9 +311,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="target", path="Order.target", description="", type="reference"  )
@@ -322,9 +322,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
@@ -338,9 +338,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>authority</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.authority</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.authority</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="authority", path="Order.authority", description="", type="reference"  )
@@ -349,9 +349,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>authority</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.authority</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.authority</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHORITY = new ReferenceClientParam(SP_AUTHORITY);
@@ -365,9 +365,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>when_code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Order.when.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Order.when.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="when_code", path="Order.when.code", description="", type="token"  )
@@ -376,9 +376,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>when_code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Order.when.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Order.when.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam WHEN_CODE = new TokenClientParam(SP_WHEN_CODE);
@@ -386,9 +386,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>when</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Order.when.schedule</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Order.when.schedule</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="when", path="Order.when.schedule", description="", type="date"  )
@@ -397,9 +397,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>when</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Order.when.schedule</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Order.when.schedule</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam WHEN = new DateClientParam(SP_WHEN);
@@ -407,9 +407,9 @@ public class Order
 	/**
 	 * Search parameter constant for <b>detail</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.detail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.detail</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="detail", path="Order.detail", description="", type="reference"  )
@@ -418,9 +418,9 @@ public class Order
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>detail</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Order.detail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Order.detail</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam DETAIL = new ReferenceClientParam(SP_DETAIL);

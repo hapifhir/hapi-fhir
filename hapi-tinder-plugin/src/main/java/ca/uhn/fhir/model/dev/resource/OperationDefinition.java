@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -34,11 +33,11 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.dev.composite.CodingDt;
 import ca.uhn.fhir.model.dev.composite.ContactPointDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.valueset.OperationKindEnum;
 import ca.uhn.fhir.model.dev.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dev.valueset.ResourceProfileStatusEnum;
 import ca.uhn.fhir.model.dev.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -54,7 +53,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * HAPI/FHIR <b>OperationDefinition</b> Resource
- * ()
+ * (infrastructure)
  *
  * <p>
  * <b>Definition:</b>
@@ -72,16 +71,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/profiles/OperationDefinition")
+@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/profiles/OperationDefinition", id="operationdefinition")
 public class OperationDefinition 
     extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="OperationDefinition.identifier", description="", type="token"  )
@@ -90,9 +89,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -100,9 +99,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.version</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="OperationDefinition.version", description="", type="token"  )
@@ -111,9 +110,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.version</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -121,9 +120,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>title</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>OperationDefinition.title</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>OperationDefinition.title</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="title", path="OperationDefinition.title", description="", type="string"  )
@@ -132,9 +131,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>title</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>OperationDefinition.title</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>OperationDefinition.title</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam TITLE = new StringClientParam(SP_TITLE);
@@ -142,9 +141,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>OperationDefinition.publisher</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>OperationDefinition.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="", type="string"  )
@@ -153,9 +152,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>OperationDefinition.publisher</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>OperationDefinition.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -163,9 +162,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="OperationDefinition.code", description="", type="token"  )
@@ -174,9 +173,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -184,9 +183,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="OperationDefinition.status", description="", type="token"  )
@@ -195,9 +194,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -205,9 +204,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>OperationDefinition.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>OperationDefinition.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="OperationDefinition.date", description="", type="date"  )
@@ -216,9 +215,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>OperationDefinition.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>OperationDefinition.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -226,9 +225,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>kind</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.kind</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.kind</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="", type="token"  )
@@ -237,9 +236,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>kind</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.kind</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.kind</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam KIND = new TokenClientParam(SP_KIND);
@@ -247,9 +246,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="OperationDefinition.name", description="", type="token"  )
@@ -258,9 +257,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.name</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
@@ -268,9 +267,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>base</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OperationDefinition.base</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OperationDefinition.base</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="base", path="OperationDefinition.base", description="", type="reference"  )
@@ -279,9 +278,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>base</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OperationDefinition.base</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OperationDefinition.base</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam BASE = new ReferenceClientParam(SP_BASE);
@@ -289,9 +288,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.system</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system", path="OperationDefinition.system", description="", type="token"  )
@@ -300,9 +299,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.system</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
@@ -310,9 +309,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="OperationDefinition.type", description="", type="token"  )
@@ -321,9 +320,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -331,9 +330,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>instance</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.instance</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.instance</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="", type="token"  )
@@ -342,9 +341,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>instance</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OperationDefinition.instance</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OperationDefinition.instance</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam INSTANCE = new TokenClientParam(SP_INSTANCE);
@@ -352,9 +351,9 @@ public class OperationDefinition
 	/**
 	 * Search parameter constant for <b>profile</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OperationDefinition.parameter.profile</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OperationDefinition.parameter.profile</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="", type="reference"  )
@@ -363,9 +362,9 @@ public class OperationDefinition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>profile</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OperationDefinition.parameter.profile</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OperationDefinition.parameter.profile</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PROFILE = new ReferenceClientParam(SP_PROFILE);
@@ -458,14 +457,14 @@ public class OperationDefinition
 
 	@Child(name="identifier", type=UriDt.class, order=0, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id",
 		formalDefinition="The identifier that is used to identify this operation definition when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)"
 	)
 	private UriDt myIdentifier;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id.version",
 		formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp"
 	)
 	private StringDt myVersion;
@@ -479,7 +478,7 @@ public class OperationDefinition
 	
 	@Child(name="publisher", type=StringDt.class, order=3, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="who.witness",
 		formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile"
 	)
 	private StringDt myPublisher;
@@ -507,7 +506,7 @@ public class OperationDefinition
 	
 	@Child(name="status", type=CodeDt.class, order=7, min=1, max=1)	
 	@Description(
-		shortDefinition="ResourceProfileStatus",
+		shortDefinition="status",
 		formalDefinition="The status of the profile"
 	)
 	private BoundCodeDt<ResourceProfileStatusEnum> myStatus;
@@ -521,21 +520,21 @@ public class OperationDefinition
 	
 	@Child(name="date", type=DateTimeDt.class, order=9, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="when.recorded",
 		formalDefinition="The date that this version of the profile was published"
 	)
 	private DateTimeDt myDate;
 	
 	@Child(name="kind", type=CodeDt.class, order=10, min=1, max=1)	
 	@Description(
-		shortDefinition="OperationKind",
+		shortDefinition="class",
 		formalDefinition="Whether this is operation or named query"
 	)
 	private BoundCodeDt<OperationKindEnum> myKind;
 	
 	@Child(name="name", type=CodeDt.class, order=11, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="The name used to invoke the operation"
 	)
 	private CodeDt myName;
@@ -564,7 +563,7 @@ public class OperationDefinition
 	
 	@Child(name="type", type=CodeDt.class, order=15, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="ResourceType",
+		shortDefinition="",
 		formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context)"
 	)
 	private java.util.List<BoundCodeDt<ResourceTypeEnum>> myType;
@@ -595,7 +594,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -613,7 +612,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -627,7 +626,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> ()
+	 * Sets the value(s) for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -642,7 +641,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>identifier</b> ()
+	 * Sets the value for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -656,7 +655,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -674,7 +673,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -688,7 +687,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>version</b> ()
+	 * Sets the value(s) for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -703,7 +702,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>version</b> ()
+	 * Sets the value for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -778,7 +777,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -796,7 +795,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -810,7 +809,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>publisher</b> ()
+	 * Sets the value(s) for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -825,7 +824,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>publisher</b> ()
+	 * Sets the value for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1024,7 +1023,7 @@ public class OperationDefinition
 	}
   
 	/**
-	 * Gets the value(s) for <b>status</b> (ResourceProfileStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1042,7 +1041,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>status</b> (ResourceProfileStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1056,7 +1055,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ResourceProfileStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1071,7 +1070,7 @@ public class OperationDefinition
 	
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ResourceProfileStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1146,7 +1145,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1164,7 +1163,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1178,7 +1177,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>date</b> ()
+	 * Sets the value(s) for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1193,7 +1192,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1206,7 +1205,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1220,7 +1219,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>kind</b> (OperationKind).
+	 * Gets the value(s) for <b>kind</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1238,7 +1237,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>kind</b> (OperationKind).
+	 * Gets the value(s) for <b>kind</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1252,7 +1251,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>kind</b> (OperationKind)
+	 * Sets the value(s) for <b>kind</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1267,7 +1266,7 @@ public class OperationDefinition
 	
 
 	/**
-	 * Sets the value(s) for <b>kind</b> (OperationKind)
+	 * Sets the value(s) for <b>kind</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1281,7 +1280,7 @@ public class OperationDefinition
 
   
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1299,7 +1298,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1313,7 +1312,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (!)
+	 * Sets the value(s) for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1328,7 +1327,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>name</b> (!)
+	 * Sets the value for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1497,7 +1496,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>type</b> (ResourceType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1514,7 +1513,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>type</b> (ResourceType)
+	 * Sets the value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1529,7 +1528,7 @@ public class OperationDefinition
 	
 
 	/**
-	 * Add a value for <b>type</b> (ResourceType) using an enumerated type. This
+	 * Add a value for <b>type</b> () using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
 	 * you may also use the {@link #addType()} method.
@@ -1546,7 +1545,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Gets the first repetition for <b>type</b> (ResourceType),
+	 * Gets the first repetition for <b>type</b> (),
 	 * creating it if it does not already exist.
 	 *
      * <p>
@@ -1562,7 +1561,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Add a value for <b>type</b> (ResourceType)
+	 * Add a value for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1576,7 +1575,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s), and clears any existing value(s) for <b>type</b> (ResourceType)
+	 * Sets the value(s), and clears any existing value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1727,14 +1726,14 @@ public class OperationDefinition
 	
 	@Child(name="name", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="The name of used to identify the parameter"
 	)
 	private CodeDt myName;
 	
 	@Child(name="use", type=CodeDt.class, order=1, min=1, max=1)	
 	@Description(
-		shortDefinition="OperationParameterUse",
+		shortDefinition="",
 		formalDefinition="Whether this is an input or an output parameter"
 	)
 	private BoundCodeDt<OperationParameterUseEnum> myUse;
@@ -1762,7 +1761,7 @@ public class OperationDefinition
 	
 	@Child(name="type", type=CodeDt.class, order=5, min=0, max=1)	
 	@Description(
-		shortDefinition="OperationParameterType",
+		shortDefinition="",
 		formalDefinition="The type for this parameter"
 	)
 	private CodeDt myType;
@@ -1794,7 +1793,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1812,7 +1811,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1826,7 +1825,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (!)
+	 * Sets the value(s) for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1841,7 +1840,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>name</b> (!)
+	 * Sets the value for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1855,7 +1854,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>use</b> (OperationParameterUse).
+	 * Gets the value(s) for <b>use</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1873,7 +1872,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>use</b> (OperationParameterUse).
+	 * Gets the value(s) for <b>use</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1887,7 +1886,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>use</b> (OperationParameterUse)
+	 * Sets the value(s) for <b>use</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1902,7 +1901,7 @@ public class OperationDefinition
 	
 
 	/**
-	 * Sets the value(s) for <b>use</b> (OperationParameterUse)
+	 * Sets the value(s) for <b>use</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2099,7 +2098,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>type</b> (OperationParameterType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2117,7 +2116,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>type</b> (OperationParameterType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2131,7 +2130,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>type</b> (OperationParameterType)
+	 * Sets the value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2146,7 +2145,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>type</b> (OperationParameterType)
+	 * Sets the value for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2271,7 +2270,7 @@ public class OperationDefinition
 	
 	@Child(name="name", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="The name of used to identify the parameter"
 	)
 	private CodeDt myName;
@@ -2299,7 +2298,7 @@ public class OperationDefinition
 	
 	@Child(name="type", type=CodeDt.class, order=4, min=1, max=1)	
 	@Description(
-		shortDefinition="OperationParameterType",
+		shortDefinition="",
 		formalDefinition="The type for this parameter"
 	)
 	private CodeDt myType;
@@ -2324,7 +2323,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2342,7 +2341,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>name</b> (!).
+	 * Gets the value(s) for <b>name</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2356,7 +2355,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>name</b> (!)
+	 * Sets the value(s) for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2371,7 +2370,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>name</b> (!)
+	 * Sets the value for <b>name</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2568,7 +2567,7 @@ public class OperationDefinition
 
  
 	/**
-	 * Gets the value(s) for <b>type</b> (OperationParameterType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2586,7 +2585,7 @@ public class OperationDefinition
 
 	
 	/**
-	 * Gets the value(s) for <b>type</b> (OperationParameterType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2600,7 +2599,7 @@ public class OperationDefinition
 	}
 
 	/**
-	 * Sets the value(s) for <b>type</b> (OperationParameterType)
+	 * Sets the value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2615,7 +2614,7 @@ public class OperationDefinition
 	
 
  	/**
-	 * Sets the value for <b>type</b> (OperationParameterType)
+	 * Sets the value for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>

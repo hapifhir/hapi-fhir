@@ -45,7 +45,6 @@ import ca.uhn.fhir.model.dev.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dev.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.dev.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;

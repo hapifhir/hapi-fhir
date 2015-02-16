@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -58,18 +58,18 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
 	private String myCompartmentName;
-	private Class<? extends IResource> myDeclaredResourceType;
+	private Class<? extends IBaseResource> myDeclaredResourceType;
 	private String myDescription;
 	private Integer myIdParamIndex;
 	private String myQueryName;
 
 	@SuppressWarnings("unchecked")
-	public SearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
-		this.myDeclaredResourceType = (Class<? extends IResource>) theMethod.getReturnType();
+		this.myDeclaredResourceType = (Class<? extends IBaseResource>) theMethod.getReturnType();
 		this.myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		Description desc = theMethod.getAnnotation(Description.class);
@@ -118,7 +118,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public Class<? extends IResource> getDeclaredResourceType() {
+	public Class<? extends IBaseResource> getDeclaredResourceType() {
 		return myDeclaredResourceType;
 	}
 

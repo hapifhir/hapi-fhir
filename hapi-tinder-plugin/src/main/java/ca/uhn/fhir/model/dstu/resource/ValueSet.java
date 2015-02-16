@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.identifier</b><br/>
+	 * Description: <b>The identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token"  )
@@ -247,9 +247,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.identifier</b><br/>
+	 * Description: <b>The identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.version</b><br/>
+	 * Description: <b>The version identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token"  )
@@ -268,9 +268,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.version</b><br/>
+	 * Description: <b>The version identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -278,9 +278,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.name</b><br/>
+	 * Description: <b>The name of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string"  )
@@ -289,9 +289,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.name</b><br/>
+	 * Description: <b>The name of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -299,9 +299,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string"  )
@@ -310,9 +310,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -320,9 +320,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.description</b><br/>
+	 * Description: <b>Text search in the description of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string"  )
@@ -331,9 +331,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.description</b><br/>
+	 * Description: <b>Text search in the description of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -341,9 +341,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.status</b><br/>
+	 * Description: <b>The status of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token"  )
@@ -352,9 +352,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.status</b><br/>
+	 * Description: <b>The status of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -362,9 +362,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The value set publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ValueSet.date</b><br/>
+	 * Description: <b>The value set publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ValueSet.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date"  )
@@ -373,9 +373,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The value set publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ValueSet.date</b><br/>
+	 * Description: <b>The value set publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ValueSet.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -383,9 +383,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any codes defined by this value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.system</b><br/>
+	 * Description: <b>The system for any codes defined by this value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token"  )
@@ -394,9 +394,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any codes defined by this value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.system</b><br/>
+	 * Description: <b>The system for any codes defined by this value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
@@ -404,9 +404,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code defined in the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * Description: <b>A code defined in the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.concept.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token"  )
@@ -415,9 +415,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code defined in the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * Description: <b>A code defined in the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.concept.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -425,9 +425,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>reference</b>
 	 * <p>
-	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.compose.include.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token"  )
@@ -436,9 +436,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>reference</b>
 	 * <p>
-	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.compose.include.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam REFERENCE = new TokenClientParam(SP_REFERENCE);

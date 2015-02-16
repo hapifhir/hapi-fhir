@@ -40,7 +40,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -162,8 +162,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 		String url = b.toString();
 
-		if (myResource != null && Binary.class.isAssignableFrom(myResource.getClass())) {
-			Binary binary = (Binary) myResource;
+		if (myResource != null && BaseBinary.class.isAssignableFrom(myResource.getClass())) {
+			BaseBinary binary = (BaseBinary) myResource;
 			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent(), ContentType.parse(binary.getContentType()));
 			HttpRequestBase retVal = createRequest(url, entity);
 			return retVal;

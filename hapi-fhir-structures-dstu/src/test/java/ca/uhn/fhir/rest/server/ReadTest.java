@@ -24,9 +24,9 @@ import org.junit.Test;
 import com.google.common.net.UrlEscapers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;

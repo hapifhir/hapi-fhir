@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +51,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -78,10 +81,10 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -338,28 +341,28 @@ public class JsonParser extends BaseParser implements IParser {
 
 		switch (theChildDef.getChildType()) {
 		case PRIMITIVE_DATATYPE: {
-			IPrimitiveDatatype<?> value = (IPrimitiveDatatype<?>) theNextValue;
+			IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
 			if (isBlank(value.getValueAsString())) {
 				break;
 			}
 
-			if (value instanceof IntegerDt) {
+			if (value instanceof IBaseIntegerDatatype) {
 				if (theChildName != null) {
-					theWriter.write(theChildName, ((IntegerDt) value).getValue());
+					theWriter.write(theChildName, ((IBaseIntegerDatatype) value).getValue());
 				} else {
-					theWriter.write(((IntegerDt) value).getValue());
+					theWriter.write(((IBaseIntegerDatatype) value).getValue());
 				}
-			} else if (value instanceof DecimalDt) {
+			} else if (value instanceof IBaseDecimalDatatype) {
 				if (theChildName != null) {
-					theWriter.write(theChildName, ((DecimalDt) value).getValue());
+					theWriter.write(theChildName, ((IBaseDecimalDatatype) value).getValue());
 				} else {
-					theWriter.write(((DecimalDt) value).getValue());
+					theWriter.write(((IBaseDecimalDatatype) value).getValue());
 				}
-			} else if (value instanceof BooleanDt) {
+			} else if (value instanceof IBaseBooleanDatatype) {
 				if (theChildName != null) {
-					theWriter.write(theChildName, ((BooleanDt) value).getValue());
+					theWriter.write(theChildName, ((IBaseBooleanDatatype) value).getValue());
 				} else {
-					theWriter.write(((BooleanDt) value).getValue());
+					theWriter.write(((IBaseBooleanDatatype) value).getValue());
 				}
 			} else {
 				String valueStr = value.getValueAsString();
@@ -387,7 +390,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			ResourceReferenceDt referenceDt = (ResourceReferenceDt) theNextValue;
+			BaseResourceReferenceDt referenceDt = (BaseResourceReferenceDt) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -399,8 +402,8 @@ public class JsonParser extends BaseParser implements IParser {
 			if (StringUtils.isNotBlank(reference)) {
 				theWriter.write(XmlParser.RESREF_REFERENCE, reference);
 			}
-			if (referenceDt.getDisplay().isEmpty() == false) {
-				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplay().getValueAsString());
+			if (referenceDt.getDisplayElement().isEmpty() == false) {
+				theWriter.write(XmlParser.RESREF_DISPLAY, referenceDt.getDisplayElement().getValueAsString());
 			}
 			theWriter.writeEnd();
 			break;
@@ -441,6 +444,11 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 			break;
 		}
+		case RESOURCE:
+			IBaseResource resource = (IBaseResource) theNextValue;
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
+			encodeResourceToJsonStreamWriter(def, resource, theWriter, theChildName, true);
+			break;
 		case UNDECL_EXT:
 		default:
 			throw new IllegalStateException("Should not have this state here: " + theChildDef.getChildType().name());
@@ -455,7 +463,8 @@ public class JsonParser extends BaseParser implements IParser {
 
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				if (gen != null) {
-					NarrativeDt narr = gen.generateNarrative(theResDef.getResourceProfile(), theResource);
+					BaseNarrativeDt<?> narr = ((IResource)theResource).getText();
+					gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
 					if (narr != null) {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -480,7 +489,7 @@ public class JsonParser extends BaseParser implements IParser {
 			int valueIdx = 0;
 			for (IBase nextValue : values) {
 				if (nextValue == null || nextValue.isEmpty()) {
-					if (nextValue instanceof ContainedDt) {
+					if (nextValue instanceof BaseContainedDt) {
 						if (theIsSubElementWithinResource || getContainedResources().isEmpty()) {
 							continue;
 						}
@@ -607,8 +616,8 @@ public class JsonParser extends BaseParser implements IParser {
 					resourceId = res.getId().getIdPart();
 				}
 			}
-		} else if (theResource instanceof Resource) {
-			Resource res = (Resource) theResource;
+		} else if (theResource instanceof IAnyResource) {
+			IAnyResource res = (IAnyResource) theResource;
 			if (theIsSubElementWithinResource && StringUtils.isNotBlank(res.getId())) {
 				resourceId = res.getId();
 			}
@@ -646,13 +655,14 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theIsSubElementWithinResource);
 		}
+		
 		theEventWriter.writeEnd();
 	}
 
@@ -1101,7 +1111,7 @@ public class JsonParser extends BaseParser implements IParser {
 			def = myContext.getResourceDefinition(resourceType);
 		}
 
-		ParserState<? extends IBaseResource> state = (ParserState<? extends IBaseResource>) ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
+		ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
 		state.enteringNewElement(null, def.getName());
 
 		parseChildren(object, state);
@@ -1112,11 +1122,6 @@ public class JsonParser extends BaseParser implements IParser {
 		T retVal = (T) state.getObject();
 
 		return retVal;
-	}
-
-	@Override
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
-		return parseResource(theResourceType, new StringReader(theMessageString));
 	}
 
 	@Override

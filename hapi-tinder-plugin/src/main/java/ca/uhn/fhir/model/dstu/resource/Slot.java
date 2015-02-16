@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Slot
 	/**
 	 * Search parameter constant for <b>slottype</b>
 	 * <p>
-	 * Description: <b>The type of appointments that can be booked into the slot</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Slot.type</b><br/>
+	 * Description: <b>The type of appointments that can be booked into the slot</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Slot.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="slottype", path="Slot.type", description="The type of appointments that can be booked into the slot", type="token"  )
@@ -247,9 +247,9 @@ public class Slot
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>slottype</b>
 	 * <p>
-	 * Description: <b>The type of appointments that can be booked into the slot</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Slot.type</b><br/>
+	 * Description: <b>The type of appointments that can be booked into the slot</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Slot.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SLOTTYPE = new TokenClientParam(SP_SLOTTYPE);
@@ -257,9 +257,9 @@ public class Slot
 	/**
 	 * Search parameter constant for <b>availability</b>
 	 * <p>
-	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Slot.availability</b><br/>
+	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Slot.availability</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="availability", path="Slot.availability", description="The Availability Resource that we are seeking a slot within", type="reference"  )
@@ -268,9 +268,9 @@ public class Slot
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>availability</b>
 	 * <p>
-	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Slot.availability</b><br/>
+	 * Description: <b>The Availability Resource that we are seeking a slot within</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Slot.availability</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AVAILABILITY = new ReferenceClientParam(SP_AVAILABILITY);
@@ -284,9 +284,9 @@ public class Slot
 	/**
 	 * Search parameter constant for <b>start</b>
 	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Slot.start</b><br/>
+	 * Description: <b>Appointment date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Slot.start</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="start", path="Slot.start", description="Appointment date/time.", type="date"  )
@@ -295,9 +295,9 @@ public class Slot
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>start</b>
 	 * <p>
-	 * Description: <b>Appointment date/time.</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Slot.start</b><br/>
+	 * Description: <b>Appointment date/time.</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Slot.start</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam START = new DateClientParam(SP_START);
@@ -305,9 +305,9 @@ public class Slot
 	/**
 	 * Search parameter constant for <b>fbtype</b>
 	 * <p>
-	 * Description: <b>The free/busy status of the appointment</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Slot.freeBusyType</b><br/>
+	 * Description: <b>The free/busy status of the appointment</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Slot.freeBusyType</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="fbtype", path="Slot.freeBusyType", description="The free/busy status of the appointment", type="token"  )
@@ -316,9 +316,9 @@ public class Slot
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>fbtype</b>
 	 * <p>
-	 * Description: <b>The free/busy status of the appointment</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Slot.freeBusyType</b><br/>
+	 * Description: <b>The free/busy status of the appointment</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Slot.freeBusyType</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FBTYPE = new TokenClientParam(SP_FBTYPE);

@@ -37,22 +37,15 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dev.resource.Conformance;
 import ca.uhn.fhir.model.dev.resource.Conformance.Rest;
-import ca.uhn.fhir.model.dev.resource.Conformance.RestOperation;
 import ca.uhn.fhir.model.dev.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dev.resource.Conformance.RestResourceInteraction;
 import ca.uhn.fhir.model.dev.resource.Conformance.RestResourceSearchParam;
-import ca.uhn.fhir.model.dev.resource.OperationDefinition;
-import ca.uhn.fhir.model.dev.resource.OperationDefinition.Parameter;
 import ca.uhn.fhir.model.dev.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dev.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dev.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dev.valueset.TypeRestfulInteractionEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
@@ -64,7 +57,6 @@ import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.ExtensionConstants;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation

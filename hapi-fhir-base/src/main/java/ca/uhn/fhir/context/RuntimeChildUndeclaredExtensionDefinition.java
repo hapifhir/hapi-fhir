@@ -35,7 +35,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildDefinition {
 
@@ -51,12 +50,13 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IAccessor getAccessor() {
 		return new IAccessor() {
 			@Override
-			public List<? extends IBase> getValues(Object theTarget) {
+			public List<IBase> getValues(Object theTarget) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (target.getValue() != null) {
-					return Collections.singletonList(target.getValue());
+					return Collections.singletonList((IBase)target.getValue());
 				}
-				return target.getUndeclaredExtensions();
+				ArrayList<IBase> retVal = new ArrayList<IBase>(target.getUndeclaredExtensions());
+				return retVal;
 			}
 		};
 	}
@@ -112,7 +112,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 
@@ -142,14 +142,14 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		}
 
 		// Resource Reference
-		myDatatypeToAttributeName.put(ResourceReferenceDt.class, "valueResource");
+		myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), "valueResource");
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
-		def.sealAndInitialize(theClassToElementDefinitions);
+		def.sealAndInitialize(theContext, theClassToElementDefinitions);
 		myAttributeNameToDefinition.put("valueResource", def);
 		myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
-		myDatatypeToDefinition.put(ResourceReferenceDt.class, def);
+		myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
 	}
 
 	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {

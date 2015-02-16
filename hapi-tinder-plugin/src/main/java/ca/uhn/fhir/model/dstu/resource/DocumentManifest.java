@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier | DocumentManifest.identifier", description="", type="token"  )
@@ -247,9 +247,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.masterIdentifier | DocumentManifest.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="", type="reference"  )
@@ -268,9 +268,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -284,9 +284,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="DocumentManifest.type", description="", type="token"  )
@@ -295,9 +295,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -305,9 +305,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>recipient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.recipient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.recipient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="", type="reference"  )
@@ -316,9 +316,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>recipient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.recipient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.recipient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RECIPIENT = new ReferenceClientParam(SP_RECIPIENT);
@@ -332,9 +332,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.author</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="author", path="DocumentManifest.author", description="", type="reference"  )
@@ -343,9 +343,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.author</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
@@ -359,9 +359,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentManifest.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentManifest.created</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="created", path="DocumentManifest.created", description="", type="date"  )
@@ -370,9 +370,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DocumentManifest.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DocumentManifest.created</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam CREATED = new DateClientParam(SP_CREATED);
@@ -380,9 +380,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="DocumentManifest.status", description="", type="token"  )
@@ -391,9 +391,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -401,9 +401,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>supersedes</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.supercedes</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.supercedes</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="", type="reference"  )
@@ -412,9 +412,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>supersedes</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.supercedes</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.supercedes</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUPERSEDES = new ReferenceClientParam(SP_SUPERSEDES);
@@ -428,9 +428,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentManifest.description</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentManifest.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="DocumentManifest.description", description="", type="string"  )
@@ -439,9 +439,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DocumentManifest.description</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DocumentManifest.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -449,9 +449,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>confidentiality</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.confidentiality</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.confidentiality</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="", type="token"  )
@@ -460,9 +460,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>confidentiality</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DocumentManifest.confidentiality</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DocumentManifest.confidentiality</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CONFIDENTIALITY = new TokenClientParam(SP_CONFIDENTIALITY);
@@ -470,9 +470,9 @@ public class DocumentManifest
 	/**
 	 * Search parameter constant for <b>content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.content</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.content</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="content", path="DocumentManifest.content", description="", type="reference"  )
@@ -481,9 +481,9 @@ public class DocumentManifest
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DocumentManifest.content</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DocumentManifest.content</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam CONTENT = new ReferenceClientParam(SP_CONTENT);
@@ -1291,7 +1291,7 @@ public class DocumentManifest
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public StringDt getDescription() {  
@@ -1309,7 +1309,7 @@ public class DocumentManifest
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public StringDt getDescriptionElement() {  
@@ -1325,7 +1325,7 @@ public class DocumentManifest
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public DocumentManifest setDescription(StringDt theValue) {
@@ -1338,7 +1338,7 @@ public class DocumentManifest
 	 *
      * <p>
      * <b>Definition:</b>
-     * Human-readable description of the source document. This is sometimes known as the \"title\"
+     * Human-readable description of the source document. This is sometimes known as the \&quot;title\&quot;
      * </p> 
 	 */
 	public DocumentManifest setDescription( String theString) {

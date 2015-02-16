@@ -20,12 +20,13 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
-public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<ContainedDt> {
+public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<BaseContainedDt> {
 
-	public RuntimeElemContainedResources() {
-		super("contained", ContainedDt.class);
+	public RuntimeElemContainedResources(Class<? extends BaseContainedDt> theClass) {
+		super("contained", theClass);
+		assert BaseContainedDt.class.isAssignableFrom(theClass);
 	}
 
 	@Override

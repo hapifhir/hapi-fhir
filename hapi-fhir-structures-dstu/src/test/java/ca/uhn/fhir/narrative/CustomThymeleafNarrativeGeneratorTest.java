@@ -1,7 +1,7 @@
 package ca.uhn.fhir.narrative;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
@@ -12,7 +12,6 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 public class CustomThymeleafNarrativeGeneratorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorTest.class);
-	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testGenerator() {
@@ -25,7 +24,8 @@ public class CustomThymeleafNarrativeGeneratorTest {
 		p.getAddress().addLine("line1").addLine("line2");
 		p.getName().addFamily("fam1").addGiven("given");
 
-		NarrativeDt narrative = gen.generateNarrative(p);
+		NarrativeDt narrative = new NarrativeDt();
+		gen.generateNarrative(p, narrative);
 
 		String actual = narrative.getDiv().getValueAsString();
 		ourLog.info(actual);

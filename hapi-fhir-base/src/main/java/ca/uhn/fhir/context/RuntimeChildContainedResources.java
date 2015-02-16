@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +30,7 @@ import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
 public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefinition {
 
@@ -47,13 +48,13 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		assert theType.equals(ContainedDt.class);
-		return myElem;		
+		assert BaseContainedDt.class.isAssignableFrom(theType);
+		return myElem;
 	}
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		assert theDatatype.equals(ContainedDt.class);
+		assert BaseContainedDt.class.isAssignableFrom(theDatatype);
 		return getElementName();
 	}
 
@@ -63,8 +64,17 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myElem = new RuntimeElemContainedResources();
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		Class<?> actualType = theContext.getVersion().getContainedType();
+		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
+			@SuppressWarnings("unchecked")
+			Class<? extends BaseContainedDt> type = (Class<? extends BaseContainedDt>) actualType;
+			myElem = new RuntimeElemContainedResources(type);
+		} else if (ArrayList.class.isAssignableFrom(actualType)) {
+			myElem = null;
+		} else {
+			throw new ConfigurationException("Fhir Version definition returned invalid contained type: " + actualType);
+		}
 	}
 
 }

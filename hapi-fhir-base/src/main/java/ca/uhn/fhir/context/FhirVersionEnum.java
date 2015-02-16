@@ -38,7 +38,9 @@ public enum FhirVersionEnum {
 	
 	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null),
 	
-	DEV("ca.uhn.fhir.model.dev.FhirDev", null);
+	DEV("ca.uhn.fhir.model.dev.FhirDev", null), 
+	
+	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", null);
 
 
 	private final String myVersionClass;

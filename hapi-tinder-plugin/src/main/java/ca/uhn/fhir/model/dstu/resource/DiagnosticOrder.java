@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>actor</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>actor</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.event.actor | DiagnosticOrder.item.event.actor</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ACTOR = new ReferenceClientParam(SP_ACTOR);
@@ -269,9 +269,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>bodysite</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.bodySite</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite", description="", type="token"  )
@@ -280,9 +280,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>bodysite</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.bodySite</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.bodySite</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam BODYSITE = new TokenClientParam(SP_BODYSITE);
@@ -290,9 +290,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="", type="token"  )
@@ -301,9 +301,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -311,9 +311,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>event-date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticOrder.event.dateTime</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="", type="date"  )
@@ -322,9 +322,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>event-date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticOrder.event.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticOrder.event.dateTime</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam EVENT_DATE = new DateClientParam(SP_EVENT_DATE);
@@ -332,9 +332,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.encounter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.encounter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="", type="reference"  )
@@ -343,9 +343,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.encounter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.encounter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
@@ -359,9 +359,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="", type="token"  )
@@ -370,9 +370,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -380,9 +380,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>item-date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="", type="date"  )
@@ -391,9 +391,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>item-date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticOrder.item.event.dateTime</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam ITEM_DATE = new DateClientParam(SP_ITEM_DATE);
@@ -401,9 +401,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>item-past-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.event.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="", type="token"  )
@@ -412,9 +412,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>item-past-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.event.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.event.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ITEM_PAST_STATUS = new TokenClientParam(SP_ITEM_PAST_STATUS);
@@ -422,9 +422,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>item-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="", type="token"  )
@@ -433,9 +433,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>item-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.item.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.item.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ITEM_STATUS = new TokenClientParam(SP_ITEM_STATUS);
@@ -443,9 +443,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>orderer</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.orderer</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.orderer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="", type="reference"  )
@@ -454,9 +454,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>orderer</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.orderer</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.orderer</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ORDERER = new ReferenceClientParam(SP_ORDERER);
@@ -470,9 +470,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>event-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.event.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.event.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="", type="token"  )
@@ -481,9 +481,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>event-status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.event.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.event.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EVENT_STATUS = new TokenClientParam(SP_EVENT_STATUS);
@@ -491,9 +491,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen | DiagnosticOrder.item.specimen", description="", type="reference"  )
@@ -502,9 +502,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.specimen | DiagnosticOrder.item.specimen</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
@@ -524,9 +524,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="", type="token"  )
@@ -535,9 +535,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticOrder.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticOrder.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -545,9 +545,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="", type="reference"  )
@@ -556,9 +556,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticOrder.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticOrder.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -572,9 +572,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>item-past-status-item-date</b>
 	 * <p>
-	 * Description: <b>A combination of item-past-status and item-date</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>item-past-status & item-date</b><br/>
+	 * Description: <b>A combination of item-past-status and item-date</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>item-past-status &amp; item-date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="item-past-status-item-date", path="item-past-status & item-date", description="A combination of item-past-status and item-date", type="composite"  , compositeOf={  "item-past-status",  "item-date" }  )
@@ -583,9 +583,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>item-past-status-item-date</b>
 	 * <p>
-	 * Description: <b>A combination of item-past-status and item-date</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>item-past-status & item-date</b><br/>
+	 * Description: <b>A combination of item-past-status and item-date</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>item-past-status &amp; item-date</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, DateClientParam> ITEM_PAST_STATUS_ITEM_DATE = new CompositeClientParam<TokenClientParam, DateClientParam>(SP_ITEM_PAST_STATUS_ITEM_DATE);
@@ -593,9 +593,9 @@ public class DiagnosticOrder
 	/**
 	 * Search parameter constant for <b>event-status-event-date</b>
 	 * <p>
-	 * Description: <b>A combination of past-status and date</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>event-status & event-date</b><br/>
+	 * Description: <b>A combination of past-status and date</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>event-status &amp; event-date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="event-status-event-date", path="event-status & event-date", description="A combination of past-status and date", type="composite"  , compositeOf={  "event-status",  "event-date" }  )
@@ -604,9 +604,9 @@ public class DiagnosticOrder
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>event-status-event-date</b>
 	 * <p>
-	 * Description: <b>A combination of past-status and date</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>event-status & event-date</b><br/>
+	 * Description: <b>A combination of past-status and date</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>event-status &amp; event-date</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, DateClientParam> EVENT_STATUS_EVENT_DATE = new CompositeClientParam<TokenClientParam, DateClientParam>(SP_EVENT_STATUS_EVENT_DATE);

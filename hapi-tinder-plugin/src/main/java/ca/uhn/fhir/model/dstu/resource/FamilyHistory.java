@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class FamilyHistory
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The identity of a subject to list family history items for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>FamilyHistory.subject</b><br/>
+	 * Description: <b>The identity of a subject to list family history items for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>FamilyHistory.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="FamilyHistory.subject", description="The identity of a subject to list family history items for", type="reference"  )
@@ -247,9 +247,9 @@ public class FamilyHistory
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The identity of a subject to list family history items for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>FamilyHistory.subject</b><br/>
+	 * Description: <b>The identity of a subject to list family history items for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>FamilyHistory.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -682,7 +682,7 @@ public class FamilyHistory
 	 *
      * <p>
      * <b>Definition:</b>
-     * This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"
+     * This will either be a name or a description.  E.g. \&quot;Aunt Susan\&quot;, \&quot;my cousin with the red hair\&quot;
      * </p> 
 	 */
 	public StringDt getName() {  
@@ -700,7 +700,7 @@ public class FamilyHistory
 	 *
      * <p>
      * <b>Definition:</b>
-     * This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"
+     * This will either be a name or a description.  E.g. \&quot;Aunt Susan\&quot;, \&quot;my cousin with the red hair\&quot;
      * </p> 
 	 */
 	public StringDt getNameElement() {  
@@ -716,7 +716,7 @@ public class FamilyHistory
 	 *
      * <p>
      * <b>Definition:</b>
-     * This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"
+     * This will either be a name or a description.  E.g. \&quot;Aunt Susan\&quot;, \&quot;my cousin with the red hair\&quot;
      * </p> 
 	 */
 	public Relation setName(StringDt theValue) {
@@ -729,7 +729,7 @@ public class FamilyHistory
 	 *
      * <p>
      * <b>Definition:</b>
-     * This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"
+     * This will either be a name or a description.  E.g. \&quot;Aunt Susan\&quot;, \&quot;my cousin with the red hair\&quot;
      * </p> 
 	 */
 	public Relation setName( String theString) {

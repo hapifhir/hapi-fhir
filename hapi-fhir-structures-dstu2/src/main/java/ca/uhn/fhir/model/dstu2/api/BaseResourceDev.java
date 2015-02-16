@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.dstu2.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.BaseResource;
+import ca.uhn.fhir.model.dstu2.resource.BaseResource;
 
 public abstract class BaseResourceDev extends BaseResource {
 

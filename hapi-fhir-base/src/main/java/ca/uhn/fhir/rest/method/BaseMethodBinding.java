@@ -254,9 +254,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return null;
 		}
 
-		Class<? extends IResource> returnType;
+		Class<? extends IBaseResource> returnType;
 
-		Class<? extends IResource> returnTypeFromRp = null;
+		Class<? extends IBaseResource> returnTypeFromRp = null;
 		if (theProvider instanceof IResourceProvider) {
 			returnTypeFromRp = ((IResourceProvider) theProvider).getResourceType();
 			if (!verifyIsValidResourceReturnType(returnTypeFromRp)) {

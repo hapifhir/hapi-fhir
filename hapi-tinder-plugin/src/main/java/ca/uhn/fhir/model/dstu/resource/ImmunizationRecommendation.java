@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="ImmunizationRecommendation.subject", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>vaccine-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="vaccine-type", path="ImmunizationRecommendation.recommendation.vaccineType", description="", type="token"  )
@@ -274,9 +274,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>vaccine-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.vaccineType</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VACCINE_TYPE = new TokenClientParam(SP_VACCINE_TYPE);
@@ -284,9 +284,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="", type="token"  )
@@ -295,9 +295,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -305,9 +305,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="", type="date"  )
@@ -316,9 +316,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -326,9 +326,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>dose-number</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="", type="number"  )
@@ -337,9 +337,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>number</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>number</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.doseNumber</b><br>
 	 * </p>
 	 */
 	public static final NumberClientParam DOSE_NUMBER = new NumberClientParam(SP_DOSE_NUMBER);
@@ -347,9 +347,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="", type="token"  )
@@ -358,9 +358,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.forecastStatus</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -368,9 +368,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>dose-sequence</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="", type="token"  )
@@ -379,9 +379,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.protocol.doseSequence</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DOSE_SEQUENCE = new TokenClientParam(SP_DOSE_SEQUENCE);
@@ -389,9 +389,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>support</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="", type="reference"  )
@@ -400,9 +400,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>support</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingImmunization</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUPPORT = new ReferenceClientParam(SP_SUPPORT);
@@ -416,9 +416,9 @@ public class ImmunizationRecommendation
 	/**
 	 * Search parameter constant for <b>information</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="", type="reference"  )
@@ -427,9 +427,9 @@ public class ImmunizationRecommendation
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>information</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>ImmunizationRecommendation.recommendation.supportingPatientInformation</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam INFORMATION = new ReferenceClientParam(SP_INFORMATION);

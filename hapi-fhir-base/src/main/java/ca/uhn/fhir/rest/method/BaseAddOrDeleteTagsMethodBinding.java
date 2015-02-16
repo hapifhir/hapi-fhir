@@ -24,10 +24,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -52,7 +55,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> {
 
-	private Class<? extends IResource> myType;
+	private Class<? extends IBaseResource> myType;
 	private Integer myIdParamIndex;
 	private Integer myVersionIdParamIndex;
 	private String myResourceName;
@@ -67,9 +70,10 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			myType = theTypeFromMethodAnnotation;
 		}
 
-		if (myType.equals(IResource.class)) {
+		if (Modifier.isInterface(myType.getModifiers())) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' does not specify a resource type, but has an @" + IdParam.class.getSimpleName() + " parameter. Please specity a resource type in the method annotation on this method");
 		}
+		
 		myResourceName = theConetxt.getResourceDefinition(myType).getName();
 
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
@@ -132,7 +136,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 
 		TagList tagList = (TagList) theArgs[myTagListParamIndex];
 
-		Class<? extends IResource> type = myType;
+		Class<? extends IBaseResource> type = myType;
 		assert type != null;
 
 		if (isDelete()) {

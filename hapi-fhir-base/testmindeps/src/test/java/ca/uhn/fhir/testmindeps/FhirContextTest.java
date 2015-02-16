@@ -26,8 +26,8 @@ public class FhirContextTest {
       assertEquals(Patient.class, def.getImplementingClass());
 
       ctx = FhirContext.forDstu1();
-      def = ctx.getResourceDefinition(ca.uhn.fhir.model.dev.resource.Patient.class);
-      assertEquals(ca.uhn.fhir.model.dev.resource.Patient.class, def.getImplementingClass());
+      def = ctx.getResourceDefinition(ca.uhn.fhir.model.dstu2.resource.Patient.class);
+      assertEquals(ca.uhn.fhir.model.dstu2.resource.Patient.class, def.getImplementingClass());
       def = ctx.getResourceDefinition("Patient");
       assertEquals(Patient.class, def.getImplementingClass());
 

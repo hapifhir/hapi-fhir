@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -480,7 +480,7 @@ public class MessageHeader
 	 *
      * <p>
      * <b>Definition:</b>
-     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-type\"
+     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \&quot;http://hl7.org/fhir/message-type\&quot;
      * </p> 
 	 */
 	public CodingDt getEvent() {  
@@ -498,7 +498,7 @@ public class MessageHeader
 	 *
      * <p>
      * <b>Definition:</b>
-     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-type\"
+     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \&quot;http://hl7.org/fhir/message-type\&quot;
      * </p> 
 	 */
 	public CodingDt getEventElement() {  
@@ -514,7 +514,7 @@ public class MessageHeader
 	 *
      * <p>
      * <b>Definition:</b>
-     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \"http://hl7.org/fhir/message-type\"
+     * Code that identifies the event this message represents and connects it with it's definition. Events defined as part of the FHIR specification have the system value \&quot;http://hl7.org/fhir/message-type\&quot;
      * </p> 
 	 */
 	public MessageHeader setEvent(CodingDt theValue) {
@@ -803,7 +803,7 @@ public class MessageHeader
 
   
 	/**
-	 * Gets the value(s) for <b>receiver</b> (Intended \"real-world\" recipient for the data).
+	 * Gets the value(s) for <b>receiver</b> (Intended \&quot;real-world\&quot; recipient for the data).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -821,7 +821,7 @@ public class MessageHeader
 
 
 	/**
-	 * Gets the value(s) for <b>receiver</b> (Intended \"real-world\" recipient for the data).
+	 * Gets the value(s) for <b>receiver</b> (Intended \&quot;real-world\&quot; recipient for the data).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -839,7 +839,7 @@ public class MessageHeader
 
 
 	/**
-	 * Sets the value(s) for <b>receiver</b> (Intended \"real-world\" recipient for the data)
+	 * Sets the value(s) for <b>receiver</b> (Intended \&quot;real-world\&quot; recipient for the data)
 	 *
      * <p>
      * <b>Definition:</b>

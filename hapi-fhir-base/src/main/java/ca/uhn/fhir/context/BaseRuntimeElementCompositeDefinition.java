@@ -76,11 +76,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theClassToElementDefinitions);
+	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		for (BaseRuntimeChildDefinition next : myChildren) {
-			next.sealAndInitialize(theClassToElementDefinitions);
+			next.sealAndInitialize(theContext, theClassToElementDefinitions);
 		}
 
 		myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();

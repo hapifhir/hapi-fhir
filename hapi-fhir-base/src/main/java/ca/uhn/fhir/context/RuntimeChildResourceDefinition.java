@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +48,9 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 		myResourceTypes = theResourceTypes;
 
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
-			throw new ConfigurationException("Field '" + theField.getName() + "' on type '" + theField.getDeclaringClass().getCanonicalName() + "' has no resource types noted");
+			myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
+			myResourceTypes.add(IBaseResource.class);
+//			throw new ConfigurationException("Field '" + theField.getName() + "' on type '" + theField.getDeclaringClass().getCanonicalName() + "' has no resource types noted");
 		}
 	}
 
@@ -78,9 +81,9 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
-		myRuntimeDef.sealAndInitialize(theClassToElementDefinitions);
+		myRuntimeDef.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myValidChildNames = new HashSet<String>();
 		myValidChildNames.add(getElementName());

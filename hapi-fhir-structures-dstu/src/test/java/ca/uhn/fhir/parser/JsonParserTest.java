@@ -21,8 +21,10 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
@@ -890,11 +893,34 @@ public class JsonParserTest {
 		Organization org = new Organization();
 		patient.getManagingOrganization().setResource(org);
 
-		INarrativeGenerator gen = mock(INarrativeGenerator.class);
-		XhtmlDt xhtmlDt = new XhtmlDt("<div>help</div>");
-		NarrativeDt nar = new NarrativeDt(xhtmlDt, NarrativeStatusEnum.GENERATED);
-		when(gen.generateNarrative(eq("http://hl7.org/fhir/profiles/Patient"), eq(patient))).thenReturn(nar);
+		INarrativeGenerator gen = new INarrativeGenerator() {
 
+			@Override
+			public void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) throws DataFormatException {
+				theNarrative.getDiv().setValueAsString("<div>help</div>");
+				theNarrative.getStatus().setValueAsString("generated");
+			}
+
+			@Override
+			public void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public String generateTitle(IBaseResource theResource) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public String generateTitle(String theProfile, IBaseResource theResource) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setFhirContext(FhirContext theFhirContext) {
+				// nothing
+			}};
+			
 		FhirContext context = new FhirContext();
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newJsonParser();

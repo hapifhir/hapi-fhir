@@ -23,14 +23,14 @@ package ca.uhn.fhir.narrative;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
+import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public interface INarrativeGenerator {
 
-	NarrativeDt generateNarrative(String theProfile, IBaseResource theResource) throws DataFormatException;
+	void generateNarrative(String theProfile, IBaseResource theResource, BaseNarrativeDt<?> theNarrative) throws DataFormatException;
 
-	NarrativeDt generateNarrative(IBaseResource theResource);
+	void generateNarrative(IBaseResource theResource, BaseNarrativeDt<?> theNarrative);
 
 	String generateTitle(IBaseResource theResource);
 

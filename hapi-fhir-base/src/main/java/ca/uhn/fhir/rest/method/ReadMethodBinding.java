@@ -31,12 +31,13 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -60,7 +61,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	private boolean mySupportsVersion;
 	private Integer myVersionIdIndex;
 
-	public ReadMethodBinding(Class<? extends IResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public ReadMethodBinding(Class<? extends IBaseResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
 		Validate.notNull(theMethod, "Method must not be null");
@@ -168,7 +169,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	@Override
 	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
-		Binary resource = new Binary(theResponseMimeType, contents);
+		
+		BaseBinary resource = (BaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+		resource.setContentType(theResponseMimeType);
+		resource.setContent(contents);
 
 		switch (getMethodReturnType()) {
 		case BUNDLE:

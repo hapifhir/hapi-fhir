@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>kind</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.kind</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.kind</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="kind", path="Supply.kind", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>kind</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.kind</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.kind</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam KIND = new TokenClientParam(SP_KIND);
@@ -257,9 +257,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Supply.identifier", description="", type="token"  )
@@ -268,9 +268,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -278,9 +278,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Supply.status", description="", type="token"  )
@@ -289,9 +289,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -299,9 +299,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Supply.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Supply.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="Supply.patient", description="", type="reference"  )
@@ -310,9 +310,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Supply.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Supply.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -326,9 +326,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>supplier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Supply.dispense.supplier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Supply.dispense.supplier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="", type="reference"  )
@@ -337,9 +337,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>supplier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Supply.dispense.supplier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Supply.dispense.supplier</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUPPLIER = new ReferenceClientParam(SP_SUPPLIER);
@@ -353,9 +353,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>dispenseid</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.dispense.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.dispense.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="", type="token"  )
@@ -364,9 +364,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dispenseid</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.dispense.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.dispense.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DISPENSEID = new TokenClientParam(SP_DISPENSEID);
@@ -374,9 +374,9 @@ public class Supply
 	/**
 	 * Search parameter constant for <b>dispensestatus</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.dispense.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.dispense.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="", type="token"  )
@@ -385,9 +385,9 @@ public class Supply
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>dispensestatus</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Supply.dispense.status</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Supply.dispense.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DISPENSESTATUS = new TokenClientParam(SP_DISPENSESTATUS);

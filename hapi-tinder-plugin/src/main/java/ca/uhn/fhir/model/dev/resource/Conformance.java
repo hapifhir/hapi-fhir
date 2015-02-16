@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.dev.composite.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.dev.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dev.composite.CodingDt;
 import ca.uhn.fhir.model.dev.composite.ContactPointDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.valueset.ConformanceEventModeEnum;
 import ca.uhn.fhir.model.dev.valueset.ConformanceStatementStatusEnum;
 import ca.uhn.fhir.model.dev.valueset.DocumentModeEnum;
@@ -46,7 +47,6 @@ import ca.uhn.fhir.model.dev.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.dev.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.dev.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dev.valueset.TypeRestfulInteractionEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -82,16 +82,15 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance")
-public class Conformance 
-    extends  ca.uhn.fhir.model.base.resource.BaseConformance     implements IResource {
+@ResourceDef(name="Conformance", profile="http://hl7.org/fhir/profiles/Conformance", id="conformance")
+public class Conformance extends BaseResource implements ca.uhn.fhir.model.base.resource.BaseConformance {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.identifier</b><br/>
+	 * Description: <b>The identifier of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Conformance.identifier", description="The identifier of the conformance statement", type="token"  )
@@ -100,9 +99,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.identifier</b><br/>
+	 * Description: <b>The identifier of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -110,9 +109,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.version</b><br/>
+	 * Description: <b>The version identifier of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token"  )
@@ -121,9 +120,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.version</b><br/>
+	 * Description: <b>The version identifier of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -131,9 +130,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.name</b><br/>
+	 * Description: <b>Name of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string"  )
@@ -142,9 +141,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.name</b><br/>
+	 * Description: <b>Name of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -152,9 +151,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string"  )
@@ -163,9 +162,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -173,9 +172,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.description</b><br/>
+	 * Description: <b>Text search in the description of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string"  )
@@ -184,9 +183,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the conformance statement</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.description</b><br/>
+	 * Description: <b>Text search in the description of the conformance statement</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -194,9 +193,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.status</b><br/>
+	 * Description: <b>The current status of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token"  )
@@ -205,9 +204,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.status</b><br/>
+	 * Description: <b>The current status of the conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -215,9 +214,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The conformance statement publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Conformance.date</b><br/>
+	 * Description: <b>The conformance statement publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Conformance.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date", type="date"  )
@@ -226,9 +225,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The conformance statement publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Conformance.date</b><br/>
+	 * Description: <b>The conformance statement publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Conformance.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -236,9 +235,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>software</b>
 	 * <p>
-	 * Description: <b>Part of a the name of a software application</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.software.name</b><br/>
+	 * Description: <b>Part of a the name of a software application</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.software.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application", type="string"  )
@@ -247,9 +246,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>software</b>
 	 * <p>
-	 * Description: <b>Part of a the name of a software application</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Conformance.software.name</b><br/>
+	 * Description: <b>Part of a the name of a software application</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Conformance.software.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam SOFTWARE = new StringClientParam(SP_SOFTWARE);
@@ -257,9 +256,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>fhirversion</b>
 	 * <p>
-	 * Description: <b>The version of FHIR</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.version</b><br/>
+	 * Description: <b>The version of FHIR</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token"  )
@@ -268,9 +267,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>fhirversion</b>
 	 * <p>
-	 * Description: <b>The version of FHIR</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.version</b><br/>
+	 * Description: <b>The version of FHIR</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FHIRVERSION = new TokenClientParam(SP_FHIRVERSION);
@@ -278,9 +277,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>resource</b>
 	 * <p>
-	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.resource.type</b><br/>
+	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.resource.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token"  )
@@ -289,9 +288,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>resource</b>
 	 * <p>
-	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.resource.type</b><br/>
+	 * Description: <b>Name of a resource mentioned in a conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.resource.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam RESOURCE = new TokenClientParam(SP_RESOURCE);
@@ -299,9 +298,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>event</b>
 	 * <p>
-	 * Description: <b>Event code in a conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.messaging.event.code</b><br/>
+	 * Description: <b>Event code in a conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.messaging.event.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token"  )
@@ -310,9 +309,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>event</b>
 	 * <p>
-	 * Description: <b>Event code in a conformance statement</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.messaging.event.code</b><br/>
+	 * Description: <b>Event code in a conformance statement</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.messaging.event.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EVENT = new TokenClientParam(SP_EVENT);
@@ -320,9 +319,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>mode</b>
 	 * <p>
-	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.mode</b><br/>
+	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.mode</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token"  )
@@ -331,9 +330,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>mode</b>
 	 * <p>
-	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.mode</b><br/>
+	 * Description: <b>Mode - restful (server/client) or messaging (sender/receiver)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.mode</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam MODE = new TokenClientParam(SP_MODE);
@@ -341,9 +340,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>profile</b>
 	 * <p>
-	 * Description: <b>A profile id invoked in a conformance statement</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Conformance.rest.resource.profile</b><br/>
+	 * Description: <b>A profile id invoked in a conformance statement</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Conformance.rest.resource.profile</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference"  )
@@ -352,9 +351,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>profile</b>
 	 * <p>
-	 * Description: <b>A profile id invoked in a conformance statement</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Conformance.rest.resource.profile</b><br/>
+	 * Description: <b>A profile id invoked in a conformance statement</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Conformance.rest.resource.profile</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PROFILE = new ReferenceClientParam(SP_PROFILE);
@@ -362,9 +361,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>format</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.format</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.format</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="format", path="Conformance.format", description="", type="token"  )
@@ -373,9 +372,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>format</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.format</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.format</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FORMAT = new TokenClientParam(SP_FORMAT);
@@ -383,9 +382,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>security</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.security</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.security</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="security", path="Conformance.rest.security", description="", type="token"  )
@@ -394,9 +393,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>security</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Conformance.rest.security</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Conformance.rest.security</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SECURITY = new TokenClientParam(SP_SECURITY);
@@ -404,9 +403,9 @@ public class Conformance
 	/**
 	 * Search parameter constant for <b>supported-profile</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Conformance.profile</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Conformance.profile</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="", type="reference"  )
@@ -415,9 +414,9 @@ public class Conformance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>supported-profile</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Conformance.profile</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Conformance.profile</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUPPORTED_PROFILE = new ReferenceClientParam(SP_SUPPORTED_PROFILE);
@@ -1490,7 +1489,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
+     * A list of profiles supported by the system. For a server, \&quot;supported by the system\&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getProfile() {  
@@ -1505,7 +1504,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
+     * A list of profiles supported by the system. For a server, \&quot;supported by the system\&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
 	public Conformance setProfile(java.util.List<ResourceReferenceDt> theValue) {
@@ -1520,7 +1519,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
+     * A list of profiles supported by the system. For a server, \&quot;supported by the system\&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile.
      * </p> 
 	 */
 	public ResourceReferenceDt addProfile() {
@@ -2542,7 +2541,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \&quot;http://hl7.org/fhir/documents/mailbox\&quot;. Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
 	public java.util.List<UriDt> getDocumentMailbox() {  
@@ -2557,7 +2556,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \&quot;http://hl7.org/fhir/documents/mailbox\&quot;. Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
 	public Rest setDocumentMailbox(java.util.List<UriDt> theValue) {
@@ -2572,7 +2571,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \&quot;http://hl7.org/fhir/documents/mailbox\&quot;. Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
 	public UriDt addDocumentMailbox() {
@@ -2587,7 +2586,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \&quot;http://hl7.org/fhir/documents/mailbox\&quot;. Other specifications can declare their own identifier for this purpose
      * </p> 
 	 */
 	public UriDt getDocumentMailboxFirstRep() {
@@ -2601,7 +2600,7 @@ public class Conformance
 	 *
      * <p>
      * <b>Definition:</b>
-     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose
+     * A list of profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \&quot;http://hl7.org/fhir/documents/mailbox\&quot;. Other specifications can declare their own identifier for this purpose
      * </p> 
      *
      * @return Returns a reference to this object, to allow for simple chaining.
@@ -2766,7 +2765,7 @@ public class Conformance
 	 * Add a value for <b>service</b> (RestfulSecurityService) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addService()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -4186,7 +4185,7 @@ public class Conformance
 	 * Add a value for <b>target</b> (ResourceType) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addTarget()} method.
 	 *
      * <p>
      * <b>Definition:</b>

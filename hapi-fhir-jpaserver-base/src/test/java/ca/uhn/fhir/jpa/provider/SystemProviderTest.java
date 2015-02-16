@@ -42,7 +42,7 @@ public class SystemProviderTest {
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/test-server-seed-bundle.json");
-		Bundle bundle = new FhirContext().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
+		Bundle bundle = FhirContext.forDstu1().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
 		List<IResource> res = bundle.toListOfResources();
 		
 		ourClient.transaction().withResources(res).execute();
@@ -100,6 +100,7 @@ public class SystemProviderTest {
 
 		ourCtx = restServer.getFhirContext();
 
+		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
 		ourClient.setLogRequestAndResponse(true);
 	}

@@ -34,7 +34,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -78,7 +77,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@SuppressWarnings("unchecked")
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myNameToChildDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
@@ -94,7 +93,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
-				nextDef.sealAndInitialize(theClassToElementDefinitions);
+				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
@@ -106,9 +105,10 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			}
 			
 			if (IBaseResource.class.isAssignableFrom(next)) {
-				myDatatypeToElementDefinition.put(ResourceReferenceDt.class, nextDef);
+				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
+				myDatatypeToElementDefinition.put(refType, nextDef);
 				alternateElementName = getElementName() + "Resource";
-				myDatatypeToElementName.put(ResourceReferenceDt.class, alternateElementName);
+				myDatatypeToElementName.put(refType, alternateElementName);
 			}
 			
 			myDatatypeToElementDefinition.put(next, nextDef);

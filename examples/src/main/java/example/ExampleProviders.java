@@ -23,7 +23,7 @@ public class PlainProvider {
    * determine the resource type so it must be explicitly stated.
    */
   @Search(type=Patient.class)
-  public Bundle searchForPatients(@RequiredParam(name="name") StringDt theName) {
+  public Bundle searchForPatients(@RequiredParam(name=Patient.SP_NAME) StringDt theName) {
     Bundle retVal = new Bundle();
     // perform search
     return retVal;
