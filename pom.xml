@@ -172,6 +172,7 @@
 		<junit_version>4.12</junit_version>
 		<logback_version>1.1.2</logback_version>
 		<maven_assembly_plugin_version>2.4.1</maven_assembly_plugin_version>
+		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_javadoc_plugin_version>2.10.1</maven_javadoc_plugin_version>
 		<maven_jxr_plugin_version>2.5</maven_jxr_plugin_version>
 		<maven_license_plugin_version>1.7</maven_license_plugin_version>
@@ -190,6 +191,8 @@
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<woodstox_version>4.4.0</woodstox_version>
+
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<build>
@@ -715,7 +718,8 @@
 				<module>restful-server-example-test</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
-			<!--	<module>hapi-fhir-dist</module> -->
+				<module>hapi-fhir-android</module>
+				<module>hapi-fhir-dist</module>
 			</modules>
 		</profile>
 	</profiles>

@@ -57,18 +57,18 @@ import com.ctc.wstx.stax.WstxOutputFactory;
  * This class contains code adapted from the Apache Axiom project.
  */
 public class XmlUtil {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
-	private static volatile XMLOutputFactory ourOutputFactory;
-	private static volatile XMLInputFactory ourInputFactory;
-	private static volatile boolean ourHaveLoggedStaxImplementation;
-	private static final Map<String, Integer> VALID_ENTITY_NAMES;
-	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
-	private static final Attributes.Name IMPLEMENTATION_TITLE = new Attributes.Name("Implementation-Title");
-	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
-	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");
 	private static final Attributes.Name BUNDLE_VENDOR = new Attributes.Name("Bundle-Vendor");
 	private static final Attributes.Name BUNDLE_VERSION = new Attributes.Name("Bundle-Version");
+	private static final Attributes.Name IMPLEMENTATION_TITLE = new Attributes.Name("Implementation-Title");
+	private static final Attributes.Name IMPLEMENTATION_VENDOR = new Attributes.Name("Implementation-Vendor");
+	private static final Attributes.Name IMPLEMENTATION_VERSION = new Attributes.Name("Implementation-Version");
+	private static volatile boolean ourHaveLoggedStaxImplementation;
+	private static volatile XMLInputFactory ourInputFactory;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlUtil.class);
+	private static volatile XMLOutputFactory ourOutputFactory;
+	private static final Map<String, Integer> VALID_ENTITY_NAMES;
+	private static final ExtendedEntityReplacingXmlResolver XML_RESOLVER = new ExtendedEntityReplacingXmlResolver();
 
 	static {
 		HashMap<String, Integer> validEntityNames = new HashMap<String, Integer>();
@@ -189,6 +189,18 @@ public class XmlUtil {
 		return er;
 	}
 
+	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
+		XMLStreamWriter retVal = outputFactory.createXMLStreamWriter(theWriter);
+		return retVal;
+	}
+
+	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
+		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
+		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
+		return retVal;
+	}
+
 	private static XMLInputFactory getOrCreateInputFactory() throws FactoryConfigurationError {
 		if (ourInputFactory == null) {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -216,6 +228,56 @@ public class XmlUtil {
 			ourInputFactory = inputFactory;
 		}
 		return ourInputFactory;
+	}
+
+	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
+		if (ourOutputFactory == null) {
+			XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+
+			if (!ourHaveLoggedStaxImplementation) {
+				logStaxImplementation(outputFactory.getClass());
+			}
+
+			/*
+			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
+			 * being used (e.g. glassfish) so we don't set them there.
+			 */
+			try {
+				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
+				if (outputFactory instanceof WstxOutputFactory) {
+					outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+				}
+			} catch (ClassNotFoundException e) {
+				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
+			}
+			ourOutputFactory = outputFactory;
+		}
+		return ourOutputFactory;
+	}
+
+	private static URL getRootUrlForClass(Class<?> cls) {
+		ClassLoader classLoader = cls.getClassLoader();
+		String resource = cls.getName().replace('.', '/') + ".class";
+		if (classLoader == null) {
+			// A null class loader means the bootstrap class loader. In this case we use the
+			// system class loader. This is safe since we can assume that the system class
+			// loader uses parent first as delegation policy.
+			classLoader = ClassLoader.getSystemClassLoader();
+		}
+		URL url = classLoader.getResource(resource);
+		if (url == null) {
+			return null;
+		}
+		String file = url.getFile();
+		if (file.endsWith(resource)) {
+			try {
+				return new URL(url.getProtocol(), url.getHost(), url.getPort(), file.substring(0, file.length() - resource.length()));
+			} catch (MalformedURLException ex) {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 
 	private static void logStaxImplementation(Class<?> theClass) {
@@ -262,70 +324,21 @@ public class XmlUtil {
 		}
 	}
 
-	private static URL getRootUrlForClass(Class<?> cls) {
-		ClassLoader classLoader = cls.getClassLoader();
-		String resource = cls.getName().replace('.', '/') + ".class";
-		if (classLoader == null) {
-			// A null class loader means the bootstrap class loader. In this case we use the
-			// system class loader. This is safe since we can assume that the system class
-			// loader uses parent first as delegation policy.
-			classLoader = ClassLoader.getSystemClassLoader();
-		}
-		URL url = classLoader.getResource(resource);
-		if (url == null) {
-			return null;
-		}
-		String file = url.getFile();
-		if (file.endsWith(resource)) {
-			try {
-				return new URL(url.getProtocol(), url.getHost(), url.getPort(), file.substring(0, file.length() - resource.length()));
-			} catch (MalformedURLException ex) {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
-
-	public static XMLStreamWriter createXmlStreamWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
-		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
-		XMLStreamWriter retVal = outputFactory.createXMLStreamWriter(theWriter);
-		return retVal;
-	}
-
-	public static XMLEventWriter createXmlWriter(Writer theWriter) throws FactoryConfigurationError, XMLStreamException {
-		XMLOutputFactory outputFactory = getOrCreateOutputFactory();
-		XMLEventWriter retVal = outputFactory.createXMLEventWriter(theWriter);
-		return retVal;
-	}
-
 	public static void main(String[] args) {
 		System.out.println(Character.toString((char) 167));
 	}
 
-	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
-		if (ourOutputFactory == null) {
-			XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-
-			if (!ourHaveLoggedStaxImplementation) {
-				logStaxImplementation(outputFactory.getClass());
-			}
-
-			/*
-			 * Note that these properties are Woodstox specific and they cause a crash in environments where SJSXP is
-			 * being used (e.g. glassfish) so we don't set them there.
-			 */
-			try {
-				Class.forName("com.ctc.wstx.stax.WstxOutputFactory");
-				if (outputFactory instanceof WstxOutputFactory) {
-					outputFactory.setProperty(XMLOutputFactory2.P_TEXT_ESCAPER, new MyEscaper());
+	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
+		@Override
+		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) throws XMLStreamException {
+			if (thePublicID == null && theSystemID == null) {
+				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
+					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
 				}
-			} catch (ClassNotFoundException e) {
-				ourLog.debug("WstxOutputFactory (Woodstox) not found on classpath");
 			}
-			ourOutputFactory = outputFactory;
+
+			return null;
 		}
-		return ourOutputFactory;
 	}
 
 	public static class MyEscaper implements EscapingWriterFactory {
@@ -377,19 +390,6 @@ public class XmlUtil {
 			};
 		}
 
-	}
-
-	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
-		@Override
-		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) throws XMLStreamException {
-			if (thePublicID == null && theSystemID == null) {
-				if (theNamespace != null && VALID_ENTITY_NAMES.containsKey(theNamespace)) {
-					return new String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
-				}
-			}
-
-			return null;
-		}
 	}
 
 }
