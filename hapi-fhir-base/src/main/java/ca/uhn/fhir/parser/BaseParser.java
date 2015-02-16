@@ -36,11 +36,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -81,9 +81,9 @@ public abstract class BaseParser implements IParser {
 					existingIdToContainedResource.put(nextId, next);
 				}
 			}
-		} else if (theTarget instanceof DomainResource) {
-			List<Resource> containedResources = ((DomainResource) theTarget).getContained();
-			for (Resource next : containedResources) {
+		} else if (theTarget instanceof IDomainResource) {
+			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
+			for (IAnyResource next : containedResources) {
 				String nextId = next.getId();
 				if (StringUtils.isNotBlank(nextId)) {
 					allIds.add(nextId);
@@ -122,9 +122,9 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<Reference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, Reference.class);
-			for (Reference next : allElements) {
-				Resource resource = next.getResource();
+			List<IReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IReference.class);
+			for (IReference next : allElements) {
+				IAnyResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getIdElement().isEmpty() || resource.getId().startsWith("#")) {
 						theContained.addContained(resource);
@@ -312,8 +312,8 @@ public abstract class BaseParser implements IParser {
 			IdDt newId;
 			if (theResource instanceof IResource && ((IResource) theResource).getId().isLocal()) {
 				newId = ((IResource) theResource).getId();
-			} else if (theResource instanceof Resource && ((Resource)theResource).getId() != null && ((Resource)theResource).getId().startsWith("#")) {
-				newId = new IdDt(((Resource)theResource).getId());
+			} else if (theResource instanceof IAnyResource && ((IAnyResource)theResource).getId() != null && ((IAnyResource)theResource).getId().startsWith("#")) {
+				newId = new IdDt(((IAnyResource)theResource).getId());
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());

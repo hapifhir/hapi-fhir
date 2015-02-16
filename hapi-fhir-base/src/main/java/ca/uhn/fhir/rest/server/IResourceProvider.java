@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 public interface IResourceProvider {
 
@@ -29,6 +29,6 @@ public interface IResourceProvider {
 	 * 
 	 * @return Returns the type of resource returned by this provider
 	 */
-	Class<? extends IResource> getResourceType();
+	Class<? extends IBaseResource> getResourceType();
 
 }

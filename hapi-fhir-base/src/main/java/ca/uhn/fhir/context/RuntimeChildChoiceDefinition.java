@@ -32,10 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 
 public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefinition {
 
@@ -107,7 +105,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			}
 			
 			if (IBaseResource.class.isAssignableFrom(next)) {
-				Class<? extends BaseResourceReferenceDt> refType = theContext.getVersion().getResourceReferenceType();
+				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
 				myDatatypeToElementDefinition.put(refType, nextDef);
 				alternateElementName = getElementName() + "Resource";
 				myDatatypeToElementName.put(refType, alternateElementName);

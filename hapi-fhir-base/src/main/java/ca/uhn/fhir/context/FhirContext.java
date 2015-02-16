@@ -116,6 +116,8 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU1.getVersionImplementation();
 		} else if (FhirVersionEnum.DSTU2.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DSTU2.getVersionImplementation();
+		} else if (FhirVersionEnum.DSTU2_HL7ORG.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.DSTU2_HL7ORG.getVersionImplementation();
 		} else if (FhirVersionEnum.DEV.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.DEV.getVersionImplementation();
 		} else {
@@ -241,7 +243,7 @@ public class FhirContext {
 			if (clazz == null) {
 				throw new DataFormatException(createUnknownResourceNameError(resourceName, myVersion.getVersion()));
 			}
-			if (IResource.class.isAssignableFrom(clazz)) {
+			if (IBaseResource.class.isAssignableFrom(clazz)) {
 				retVal = scanResourceType((Class<? extends IResource>) clazz);
 			}
 		}
@@ -471,6 +473,10 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
+	}
+
+	public static FhirContext forDstu2Hl7Org() {
+		return new FhirContext(FhirVersionEnum.DSTU2_HL7ORG);
 	}
 
 }

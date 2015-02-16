@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
 		assert BaseContainedDt.class.isAssignableFrom(theType);
-		return myElem;		
+		return myElem;
 	}
 
 	@Override
@@ -64,7 +65,16 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myElem = new RuntimeElemContainedResources(theContext.getVersion().getContainedType());
+		Class<?> actualType = theContext.getVersion().getContainedType();
+		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
+			@SuppressWarnings("unchecked")
+			Class<? extends BaseContainedDt> type = (Class<? extends BaseContainedDt>) actualType;
+			myElem = new RuntimeElemContainedResources(type);
+		} else if (ArrayList.class.isAssignableFrom(actualType)) {
+			myElem = null;
+		} else {
+			throw new ConfigurationException("Fhir Version definition returned invalid contained type: " + actualType);
+		}
 	}
 
 }

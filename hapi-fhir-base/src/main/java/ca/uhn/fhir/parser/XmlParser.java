@@ -20,9 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -47,11 +45,11 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.INarrative;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -525,7 +523,7 @@ public class XmlParser extends BaseParser implements IParser {
 						continue;
 					}
 				} else {
-					Narrative narr1 = ((DomainResource) theResource).getText();
+					INarrative narr1 = ((IDomainResource) theResource).getText();
 					BaseNarrativeDt<?> narr2 = null;
 					if (gen != null && narr1.isEmpty()) {
 						// TODO: need to implement this
@@ -673,7 +671,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		} else {
 			// HL7 structs
-			Resource resource = (Resource) theResource;
+			IAnyResource resource = (IAnyResource) theResource;
 			if (StringUtils.isNotBlank(resource.getId())) {
 				resourceId = resource.getId();
 			}

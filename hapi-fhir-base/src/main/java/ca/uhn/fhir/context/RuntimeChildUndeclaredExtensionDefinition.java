@@ -50,12 +50,13 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IAccessor getAccessor() {
 		return new IAccessor() {
 			@Override
-			public List<? extends IBase> getValues(Object theTarget) {
+			public List<IBase> getValues(Object theTarget) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (target.getValue() != null) {
-					return Collections.singletonList(target.getValue());
+					return Collections.singletonList((IBase)target.getValue());
 				}
-				return target.getUndeclaredExtensions();
+				ArrayList<IBase> retVal = new ArrayList<IBase>(target.getUndeclaredExtensions());
+				return retVal;
 			}
 		};
 	}

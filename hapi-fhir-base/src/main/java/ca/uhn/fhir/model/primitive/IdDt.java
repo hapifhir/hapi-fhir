@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -525,8 +525,8 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			((IResource) theResouce).setId(new IdDt(getValue()));
-		} else if (theResouce instanceof Resource) {
-			((Resource) theResouce).setId(getIdPart());
+		} else if (theResouce instanceof IAnyResource) {
+			((IAnyResource) theResouce).setId(getIdPart());
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
@@ -540,7 +540,7 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			return ((IResource) theResouce).getId();
-		} else if (theResouce instanceof Resource) {
+		} else if (theResouce instanceof IAnyResource) {
 			// TODO: implement
 			throw new UnsupportedOperationException();
 		} else {

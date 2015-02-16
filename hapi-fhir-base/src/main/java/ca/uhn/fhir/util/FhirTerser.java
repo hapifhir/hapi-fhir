@@ -232,7 +232,8 @@ public class FhirTerser {
 							b.append(childDef.getName());
 							b.append(" - Valid types: ");
 							for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext();) {
-								b.append(nextChild.getChildByName(iter.next()).getImplementingClass().getSimpleName());
+								BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
+								b.append(childByName.getImplementingClass().getSimpleName());
 								if (iter.hasNext()) {
 									b.append(", ");
 								}
@@ -268,7 +269,7 @@ public class FhirTerser {
 	 * @param theVisitor
 	 *            The visitor
 	 */
-	public void visit(IResource theResource, IModelVisitor theVisitor) {
+	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 		visit(theResource, null, def, theVisitor);
 	}

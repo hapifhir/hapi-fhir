@@ -55,6 +55,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -770,7 +771,7 @@ public class RestfulServer extends HttpServlet {
 				Map<String, IResourceProvider> typeToProvider = new HashMap<String, IResourceProvider>();
 				for (IResourceProvider nextProvider : resourceProvider) {
 
-					Class<? extends IResource> resourceType = nextProvider.getResourceType();
+					Class<? extends IBaseResource> resourceType = nextProvider.getResourceType();
 					if (resourceType == null) {
 						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
 					}

@@ -51,7 +51,6 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		if (myName.endsWith("Dt")) {
 			myName = myName.substring(0, myName.length() - 2);
 		}
-			
 		
 		myImplementingClass = theImplementingClass;
 	}

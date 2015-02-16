@@ -42,7 +42,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private int myResourceParameterIndex;
 	private String myResourceName;
 	private boolean myBinary;
-	private Class<? extends IResource> myResourceType;
+	private Class<? extends IBaseResource> myResourceType;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -57,7 +57,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 				}
 				
 				resourceParameter = (ResourceParameter) next;
-				Class<? extends IResource> providerResourceType = resourceParameter.getResourceType();
+				Class<? extends IBaseResource> providerResourceType = resourceParameter.getResourceType();
 
 				if (theProvider instanceof IResourceProvider) {
 					providerResourceType = ((IResourceProvider) theProvider).getResourceType();

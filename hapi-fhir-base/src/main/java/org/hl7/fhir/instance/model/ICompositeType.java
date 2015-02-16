@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +22,6 @@ package org.hl7.fhir.instance.model;
  * #L%
  */
 
-public interface ICompositeType extends IBase {
+public interface ICompositeType extends IBaseDatatype {
 
 }

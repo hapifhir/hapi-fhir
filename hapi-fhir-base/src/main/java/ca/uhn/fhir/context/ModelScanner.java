@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,14 +48,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IDatatypeElement;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.INarrative;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -110,7 +114,7 @@ class ModelScanner {
 	}
 
 	private void addScanAlso(Class<? extends IBase> theType) {
-		if (theType.isInterface()) {
+		if (theType.isInterface() || Modifier.isAbstract(theType.getModifiers())) {
 			return;
 		}
 		myScanAlso.add(theType);
@@ -264,7 +268,7 @@ class ModelScanner {
 
 		ResourceDef resourceDefinition = pullAnnotation(theClass, ResourceDef.class);
 		if (resourceDefinition != null) {
-			if (!IResource.class.isAssignableFrom(theClass)) {
+			if (!IBaseResource.class.isAssignableFrom(theClass)) {
 				throw new ConfigurationException("Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
 			@SuppressWarnings("unchecked")
@@ -288,11 +292,10 @@ class ModelScanner {
 		}
 
 		Block blockDefinition = pullAnnotation(theClass, Block.class);
+
 		if (blockDefinition != null) {
-			if (IResourceBlock.class.isAssignableFrom(theClass)) {
-				@SuppressWarnings("unchecked")
-				Class<? extends IResourceBlock> blockClass = (Class<? extends IResourceBlock>) theClass;
-				scanBlock(blockClass);
+			if (IResourceBlock.class.isAssignableFrom(theClass) || IBackboneElement.class.isAssignableFrom(theClass) || IDatatypeElement.class.isAssignableFrom(theClass)) {
+				scanBlock(theClass);
 			} else {
 				throw new ConfigurationException("Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
 			}
@@ -303,7 +306,7 @@ class ModelScanner {
 		}
 	}
 
-	private void scanBlock(Class<? extends IResourceBlock> theClass) {
+	private void scanBlock(Class<? extends IBase> theClass) {
 		ourLog.debug("Scanning resource block class: {}", theClass.getName());
 
 		String resourceName = theClass.getCanonicalName();
@@ -344,7 +347,7 @@ class ModelScanner {
 		Class<? extends IBase> current = theClass;
 		do {
 			classes.push(current);
-			if (ICompositeElement.class.isAssignableFrom(current.getSuperclass())) {
+			if (IBase.class.isAssignableFrom(current.getSuperclass())) {
 				current = (Class<? extends IBase>) current.getSuperclass();
 			} else {
 				current = null;
@@ -456,8 +459,8 @@ class ModelScanner {
 			if (order != Child.ORDER_UNKNOWN) {
 				order = order + baseElementOrder;
 			}
-//			int min = childAnnotation.min();
-//			int max = childAnnotation.max();
+			// int min = childAnnotation.min();
+			// int max = childAnnotation.max();
 
 			/*
 			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any given
@@ -485,14 +488,21 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && DomainResource.class.isAssignableFrom(theClass))) {
+			if (IAnyResource.class.isAssignableFrom(nextElementType)) {
+				/*
+				 * Child is a resource as a direct child, as in Bundle.entry.resource
+				 */
+				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
+				orderMap.put(order, def);
+
+			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IDomainResource.class.isAssignableFrom(theClass))) {
 				/*
 				 * Child is contained resources
 				 */
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !Reference.class.isAssignableFrom(nextElementType)) {
+			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a choice element
 				 */
@@ -520,7 +530,7 @@ class ModelScanner {
 				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
 				}
-			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || Reference.class.isAssignableFrom(nextElementType)) {
+			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource reference
 				 */
@@ -535,7 +545,7 @@ class ModelScanner {
 				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 				orderMap.put(order, def);
 
-			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || BackboneElement.class.isAssignableFrom(nextElementType)) {
+			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBackboneElement.class.isAssignableFrom(nextElementType) || IDatatypeElement.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource block (i.e. a sub-tag within a resource) TODO: do these have a better name
 				 * according to HL7?
@@ -546,12 +556,12 @@ class ModelScanner {
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType)) {
+			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "org.hl7.fhir.instance.model.Type".equals(nextElementType.getName())) {
 
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType)) {
+			} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType) || IBaseDatatype.class.isAssignableFrom(nextElementType) || IBaseExtension.class.isAssignableFrom(nextElementType)) {
 				Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
 
 				addScanAlso(nextDatatype);
@@ -567,7 +577,7 @@ class ModelScanner {
 					if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
-					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || Narrative.class.getName().equals(nextElementType.getClass().getName())) {
+					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.getName().equals(nextElementType.getClass().getName())) {
 						def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
@@ -726,16 +736,22 @@ class ModelScanner {
 					if (theDatatypes != null) {
 						try {
 							// Datatypes
-							@SuppressWarnings("unchecked")
-							Class<? extends IElement> nextClass = (Class<? extends IElement>) Class.forName(nextValue);
-							if (!IElement.class.isAssignableFrom(nextClass)) {
-								ourLog.warn("Class is not assignable from " + IElement.class.getSimpleName() + ": " + nextValue);
+							Class<?> dtType = Class.forName(nextValue);
+							if (IElement.class.isAssignableFrom(dtType)) {
+								@SuppressWarnings("unchecked")
+								Class<? extends IElement> nextClass = (Class<? extends IElement>) dtType;
+								theDatatypes.add(nextClass);
+							} else if (IBaseDatatype.class.isAssignableFrom(dtType)) {
+								@SuppressWarnings("unchecked")
+								Class<? extends IBaseDatatype> nextClass = (Class<? extends IBaseDatatype>) dtType;
+								theDatatypes.add(nextClass);
+							} else {
+								ourLog.warn("Class is not assignable from " + IElement.class.getSimpleName() + " or " + IBaseDatatype.class.getSimpleName() + ": " + nextValue);
 								continue;
 							}
 
-							theDatatypes.add(nextClass);
 						} catch (ClassNotFoundException e) {
-							ourLog.error("Unknown class[" + nextValue+ "] for data type definition: " + nextKey.substring("datatype.".length()), e);
+							ourLog.error("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
 						}
 					}
 				} else if (nextKey.startsWith("resource.")) {
@@ -751,7 +767,7 @@ class ModelScanner {
 
 						theResourceTypes.put(resName, nextClass);
 					} catch (ClassNotFoundException e) {
-						ourLog.error("Unknown class[" + nextValue+ "] for resource definition: " + nextKey.substring("resource.".length()), e);
+						ourLog.error("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
 					}
 				} else {
 					ourLog.warn("Unexpected property in version property file: {}={}", nextKey, nextValue);
