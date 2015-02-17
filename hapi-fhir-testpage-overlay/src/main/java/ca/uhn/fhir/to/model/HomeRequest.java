@@ -1,7 +1,8 @@
 package ca.uhn.fhir.to.model;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -38,12 +39,23 @@ public class HomeRequest {
 		return myResource;
 	}
 
-	public String getServerBase(TesterConfig theConfig) {
+	public String getServerBase(HttpServletRequest theRequest, TesterConfig theConfig) {
+		String retVal;
 		if (isBlank(myServerId) && !theConfig.getIdToServerBase().containsKey(myServerId)) {
-			return theConfig.getIdToServerBase().entrySet().iterator().next().getValue();
+			retVal = theConfig.getIdToServerBase().entrySet().iterator().next().getValue();
 		} else {
-			return theConfig.getIdToServerBase().get(myServerId);
+			retVal = theConfig.getIdToServerBase().get(myServerId);
 		}
+
+		if (retVal.contains("${serverBase}")) {
+			String base = theRequest.getRequestURL().toString();
+			if (base.endsWith("/")) {
+				base = base.substring(0, base.length() - 1);
+			}
+			retVal = retVal.replace("${serverBase}", base);
+		}
+
+		return retVal;
 	}
 
 	@ModelAttribute("serverId")
@@ -91,32 +103,32 @@ public class HomeRequest {
 		myServerId = theServerId;
 	}
 
-	public GenericClient newClient(FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
-		GenericClient retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theConfig));
+	public GenericClient newClient(HttpServletRequest theRequest, FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
+		GenericClient retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
 		retVal.setKeepResponses(true);
-		
+
 		if ("true".equals(getPretty())) {
 			retVal.setPrettyPrint(true);
 		} else if ("false".equals(getPretty())) {
 			retVal.setPrettyPrint(false);
 		}
-		
+
 		if ("xml".equals(getEncoding())) {
-			retVal.setEncoding( EncodingEnum.XML);
+			retVal.setEncoding(EncodingEnum.XML);
 		} else if ("json".equals(getEncoding())) {
-			retVal.setEncoding( EncodingEnum.JSON);
-		} 
+			retVal.setEncoding(EncodingEnum.JSON);
+		}
 
 		retVal.registerInterceptor(theInterceptor);
-		
+
 		final String remoteAddr = org.slf4j.MDC.get("req.remoteAddr");
 		retVal.registerInterceptor(new IClientInterceptor() {
-			
+
 			@Override
 			public void interceptResponse(HttpResponse theRequest) {
 				// nothing
 			}
-			
+
 			@Override
 			public void interceptRequest(HttpRequestBase theRequest) {
 				if (isNotBlank(remoteAddr)) {
@@ -124,17 +136,15 @@ public class HomeRequest {
 				}
 			}
 		});
-		
-		
+
 		return retVal;
 	}
-	
+
 	public IParser newParser(FhirContext theCtx) {
 		if ("json".equals(getEncoding())) {
 			return theCtx.newJsonParser();
-		} 
+		}
 		return theCtx.newXmlParser();
 	}
-
 
 }
