@@ -429,7 +429,7 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 

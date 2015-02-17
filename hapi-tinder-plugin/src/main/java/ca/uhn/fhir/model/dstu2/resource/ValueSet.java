@@ -502,7 +502,7 @@ public class ValueSet
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public URI getIdentifier() {  
+	public String getIdentifier() {  
 		return getIdentifierElement().getValue();
 	}
 
@@ -1533,7 +1533,7 @@ public class ValueSet
      * 
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 
@@ -2724,7 +2724,7 @@ public class ValueSet
      * The code system from which the selected codes come from
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 
@@ -3719,7 +3719,7 @@ public class ValueSet
      * The system in which the code for this item in the expansion is defined
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 

@@ -538,7 +538,7 @@ public class Profile
      * The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems
      * </p> 
 	 */
-	public URI getUrl() {  
+	public String getUrl() {  
 		return getUrlElement().getValue();
 	}
 
@@ -1470,7 +1470,7 @@ public class Profile
      * The structure that is the base on which this set of constraints is derived from.
      * </p> 
 	 */
-	public URI getBase() {  
+	public String getBase() {  
 		return getBaseElement().getValue();
 	}
 
@@ -1709,7 +1709,7 @@ public class Profile
      * A URI that identifies the specification that this mapping is expressed to
      * </p> 
 	 */
-	public URI getUri() {  
+	public String getUri() {  
 		return getUriElement().getValue();
 	}
 

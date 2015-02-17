@@ -178,4 +178,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		return retVal;
 	}
+
+	public boolean isBundle() {
+		return "Bundle".equals(getName());
+	}
 }

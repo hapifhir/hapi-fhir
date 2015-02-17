@@ -94,7 +94,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			myResourceListCollectionType = collectionType;
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
-			myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
+			if (theConetxt.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
+				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
+			}else {
+				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
+			}
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
@@ -202,7 +206,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
@@ -239,23 +243,32 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		HttpServletResponse response = theRequest.getServletResponse();
-		IBundleProvider result = invokeServer(theRequest, params);
+		Object resultObj = invokeServer(theRequest, params);
 		switch (getReturnType()) {
-		case BUNDLE:
+		case BUNDLE:{
 
-			Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
-
-			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = theServer.getInterceptors().get(i);
-				boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
-				if (!continueProcessing) {
-					return;
+			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
+				IResource resource = (IResource) resultObj;
+				RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+				break;
+			} else {
+				IBundleProvider result = (IBundleProvider) resultObj;
+				Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
+	
+				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+					IServerInterceptor next = theServer.getInterceptors().get(i);
+					boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+					if (!continueProcessing) {
+						return;
+					}
 				}
+	
+				RestfulServer.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
+				break;
 			}
-
-			RestfulServer.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
-			break;
-		case RESOURCE:
+		}
+		case RESOURCE:{
+			IBundleProvider result = (IBundleProvider) resultObj;
 			if (result.size() == 0) {
 				throw new ResourceNotFoundException(theRequest.getId());
 			} else if (result.size() > 1) {
@@ -274,6 +287,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 			break;
+		}
 		}
 	}
 
@@ -295,7 +309,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, LIST_OF_RESOURCES, RESOURCE
+		BUNDLE, BUNDLE_PROVIDER, LIST_OF_RESOURCES, RESOURCE, BUNDLE_RESOURCE
 	}
 
 	public enum ReturnTypeEnum {

@@ -18,13 +18,15 @@ package ca.uhn.fhir.model.dev.composite;
 
 import java.net.URI;
 import java.math.BigDecimal;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.base.composite.*;
-
 import ca.uhn.fhir.model.dev.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dev.valueset.AggregationModeEnum;
 import ca.uhn.fhir.model.dev.valueset.BindingConformanceEnum;
@@ -354,7 +356,7 @@ public class AttachmentDt
      * An alternative location where the data can be accessed
      * </p> 
 	 */
-	public URI getUrl() {  
+	public String getUrl() {  
 		return getUrlElement().getValue();
 	}
 

@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -35,18 +37,56 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class TransactionParamBinder implements IParameter {
 
-	private boolean myParamIsBundle;
 	private FhirContext myContext;
-	private boolean myParamIsResource;
-
+	private ParamStyle myParamStyle;
+	private Class<? extends IBaseResource> myResourceBundleType;
+	
 	public TransactionParamBinder(FhirContext theContext) {
 		myContext = theContext;
+	}
+
+	private String createParameterTypeError(Method theMethod) {
+		return "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName() + "> or Bundle";
+	}
+
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		if (theOuterCollectionType != null) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but can not be a collection of collections");
+		}
+		if (theParameterType.equals(Bundle.class)) {
+			myParamStyle = ParamStyle.DSTU1_BUNDLE;
+			if (theInnerCollectionType != null) {
+				throw new ConfigurationException(createParameterTypeError(theMethod));
+			}
+		} else if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseResource> parameterType = (Class<? extends IBaseResource>) theParameterType;
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(parameterType);
+			if ("Bundle".equals(def.getName())) {
+				myParamStyle = ParamStyle.RESOURCE_BUNDLE;
+				myResourceBundleType = parameterType;
+			} else {
+				throw new ConfigurationException(createParameterTypeError(theMethod));
+			}
+		} else {
+			if (theInnerCollectionType.equals(List.class) == false) {
+				throw new ConfigurationException(createParameterTypeError(theMethod));
+			}
+			if (theParameterType.equals(IResource.class) == false) {
+				throw new ConfigurationException(createParameterTypeError(theMethod));
+			}
+			myParamStyle = ParamStyle.RESOURCE_LIST;
+		}
 	}
 
 	@Override
@@ -57,54 +97,51 @@ class TransactionParamBinder implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		Bundle resource = (Bundle) theRequestContents;
-		if (myParamIsBundle) {
-			return resource;
+
+		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+		IParser parser = encoding.newParser(myContext);
+
+		BufferedReader reader;
+		try {
+			reader = theRequest.getServletRequest().getReader();
+		} catch (IOException e) {
+			throw new InternalErrorException("Failed to read incoming payload", e);
 		}
 
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
-		for (BundleEntry next : resource.getEntries()) {
-			if (next.getResource() != null) {
-				retVal.add(next.getResource());
+		switch (myParamStyle) {
+		case DSTU1_BUNDLE: {
+			Bundle bundle;
+			bundle = parser.parseBundle(reader);
+			return bundle;
+		}
+		case RESOURCE_LIST: {
+			Bundle bundle = parser.parseBundle(reader);
+			ArrayList<IResource> resourceList = new ArrayList<IResource>();
+			for (BundleEntry next : bundle.getEntries()) {
+				if (next.getResource() != null) {
+					resourceList.add(next.getResource());
+				}
 			}
+			return resourceList;
+		}
+		case RESOURCE_BUNDLE:
+			return parser.parseResource(myResourceBundleType, reader);
 		}
 
-		return retVal;
+		throw new IllegalStateException("Unknown type: " + myParamStyle); // should not happen
 	}
 
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but can not be a collection of collections");
-		}
-		if (theParameterType.equals(Bundle.class)) {
-			myParamIsBundle=true;
-			if (theInnerCollectionType!=null) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
-			}
-		} else if (Modifier.isInterface(theParameterType.getModifiers()) == false && IBaseResource.class.isAssignableFrom(theParameterType)) {
-			@SuppressWarnings("unchecked")
-			Class<? extends IBaseResource> parameterType = (Class<? extends IBaseResource>) theParameterType;
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(parameterType);
-			if ("Bundle".equals(def.getName())) {
-				myParamIsResource = true;
-			} else {
-				throw new ConfigurationException(createParameterTypeError(theMethod));				
-			}
-		} else {
-			myParamIsBundle=false;
-			if (theInnerCollectionType.equals(List.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
-			}
-			if (theParameterType.equals(IResource.class) == false) {
-				throw new ConfigurationException(createParameterTypeError(theMethod));
-			}
-		}
+	public ParamStyle getParamStyle() {
+		return myParamStyle;
 	}
 
-	private String createParameterTypeError(Method theMethod) {
-		return "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is annotated with @" + TransactionParam.class.getName() + " but is not of type List<" + IResource.class.getCanonicalName()
-				+ "> or Bundle";
+	enum ParamStyle {
+		/** Old style bundle (defined in hapi-fhir-base) */
+		DSTU1_BUNDLE,
+		/** New style bundle (defined in hapi-fhir-structures-* as a resource definition itself */
+		RESOURCE_BUNDLE,
+		/** List of resources */
+		RESOURCE_LIST
 	}
 
 }

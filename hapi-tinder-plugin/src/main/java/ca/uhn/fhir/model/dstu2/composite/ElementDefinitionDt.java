@@ -2209,7 +2209,7 @@ public class ElementDefinitionDt
      * Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile
      * </p> 
 	 */
-	public URI getProfile() {  
+	public String getProfile() {  
 		return getProfileElement().getValue();
 	}
 

@@ -621,7 +621,7 @@ public class OperationDefinition
      * The identifier that is used to identify this operation definition when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public URI getIdentifier() {  
+	public String getIdentifier() {  
 		return getIdentifierElement().getValue();
 	}
 

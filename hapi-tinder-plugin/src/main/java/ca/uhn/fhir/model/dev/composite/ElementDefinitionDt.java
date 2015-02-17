@@ -18,13 +18,15 @@ package ca.uhn.fhir.model.dev.composite;
 
 import java.net.URI;
 import java.math.BigDecimal;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.base.composite.*;
-
 import ca.uhn.fhir.model.dev.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dev.valueset.AggregationModeEnum;
 import ca.uhn.fhir.model.dev.valueset.BindingConformanceEnum;
@@ -2207,7 +2209,7 @@ public class ElementDefinitionDt
      * Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile
      * </p> 
 	 */
-	public URI getProfile() {  
+	public String getProfile() {  
 		return getProfileElement().getValue();
 	}
 

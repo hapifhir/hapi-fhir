@@ -2106,7 +2106,7 @@ public class DataElement
      * A URI that identifies the specification that this mapping is expressed to
      * </p> 
 	 */
-	public URI getUri() {  
+	public String getUri() {  
 		return getUriElement().getValue();
 	}
 

@@ -313,7 +313,7 @@ public class IdentifierDt
      * Establishes the namespace in which set of possible id values is unique.
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 

@@ -47,17 +47,24 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		if (myDatatype.equals(theDatatype)) {
-			return getElementName();
+		Class<?> nextType = theDatatype;
+		while(nextType.equals(Object.class)==false) {
+			if (myDatatype.equals(nextType)) {
+				return getElementName();
+			}
+			nextType = nextType.getSuperclass();
 		}
 		return null;
 	}
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
-		Class<? extends IBase> datatype = theDatatype;
-		if (myDatatype.equals(datatype)) {
-			return myElementDefinition;
+		Class<?> nextType = theDatatype;
+		while(nextType.equals(Object.class)==false) {
+			if (myDatatype.equals(nextType)) {
+				return myElementDefinition;
+			}
+			nextType = nextType.getSuperclass();
 		}
 		return null;
 	}

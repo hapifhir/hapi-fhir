@@ -356,7 +356,7 @@ public class AttachmentDt
      * An alternative location where the data can be accessed
      * </p> 
 	 */
-	public URI getUrl() {  
+	public String getUrl() {  
 		return getUrlElement().getValue();
 	}
 

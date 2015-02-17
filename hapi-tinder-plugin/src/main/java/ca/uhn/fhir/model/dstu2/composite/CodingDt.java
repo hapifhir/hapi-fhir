@@ -182,7 +182,7 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 

@@ -2084,7 +2084,7 @@ public class Conformance extends BaseResource implements ca.uhn.fhir.model.base.
      * A base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.
      * </p> 
 	 */
-	public URI getUrl() {  
+	public String getUrl() {  
 		return getUrlElement().getValue();
 	}
 
@@ -3994,7 +3994,7 @@ public class Conformance extends BaseResource implements ca.uhn.fhir.model.base.
      * A formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter
      * </p> 
 	 */
-	public URI getDefinition() {  
+	public String getDefinition() {  
 		return getDefinitionElement().getValue();
 	}
 
@@ -4707,7 +4707,7 @@ public class Conformance extends BaseResource implements ca.uhn.fhir.model.base.
      * An address to which messages and/or replies are to be sent.
      * </p> 
 	 */
-	public URI getEndpoint() {  
+	public String getEndpoint() {  
 		return getEndpointElement().getValue();
 	}
 

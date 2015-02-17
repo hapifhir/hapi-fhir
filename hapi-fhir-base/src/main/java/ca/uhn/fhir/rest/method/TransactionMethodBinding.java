@@ -38,9 +38,11 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.method.TransactionParamBinder.ParamStyle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -50,6 +52,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private int myTransactionParamIndex;
+	private ParamStyle myTransactionParamStyle;
 
 	public TransactionMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(null, theMethod, theConetxt, theProvider);
@@ -58,7 +61,12 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		int index = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof TransactionParamBinder) {
+				if (myTransactionParamIndex != -1) {
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
+							+ " methods");
+				}
 				myTransactionParamIndex = index;
+				myTransactionParamStyle = ((TransactionParamBinder) next).getParamStyle();
 			}
 			index++;
 		}
@@ -94,7 +102,20 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		
+		/*
+		 * The design of HAPI's transaction method for DSTU1 support assumed that a
+		 * transaction was just an update on a bunch of resources (because that's what
+		 * it was), but in DSTU2 transaction has become much more broad, so we no longer
+		 * hold the user's hand much here.
+		 */
+		if (myTransactionParamStyle == ParamStyle.RESOURCE_BUNDLE) {
+			// This is the DSTU2 style
+			Object response = invokeServerMethod(theMethodParams);
+			return response;
+		}
+		
 		// Grab the IDs of all of the resources in the transaction
 		List<IResource> resources;
 		if (theMethodParams[myTransactionParamIndex] instanceof Bundle) {
@@ -102,7 +123,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		} else {
 			resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
 		}
-		
+
 		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
 		for (IResource next : resources) {
 			oldIds.put(next, next.getId());
@@ -113,16 +134,12 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		IBundleProvider retVal = toResourceList(response);
 
 		/*
-		int offset = 0;
-		if (retVal.size() != resources.size()) {
-			if (retVal.size() > 0 && retVal.getResources(0, 1).get(0) instanceof OperationOutcome) {
-				offset = 1;
-			} else {
-				throw new InternalErrorException("Transaction bundle contained " + resources.size() + " entries, but server method response contained " + retVal.size() + " entries (must be the same)");
-			}
-		}
+		 * int offset = 0; if (retVal.size() != resources.size()) { if (retVal.size() > 0 && retVal.getResources(0,
+		 * 1).get(0) instanceof OperationOutcome) { offset = 1; } else { throw new
+		 * InternalErrorException("Transaction bundle contained " + resources.size() +
+		 * " entries, but server method response contained " + retVal.size() + " entries (must be the same)"); } }
 		 */
-		
+
 		List<IResource> retResources = retVal.getResources(0, retVal.size());
 		for (int i = 0; i < retResources.size(); i++) {
 			IdDt oldId = oldIds.get(retResources.get(i));
@@ -141,17 +158,11 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		return retVal;
-
-		
-		
-			}
+	}
 
 	@Override
 	protected Object parseRequestObject(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-		IParser parser = encoding.newParser(getContext());
-		Bundle bundle = parser.parseBundle(theRequest.getServletRequest().getReader());
-		return bundle;
+		return null; // This is parsed in TransactionParamBinder
 	}
 
 	@Override
