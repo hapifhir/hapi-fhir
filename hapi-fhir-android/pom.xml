@@ -12,7 +12,7 @@
 	<artifactId>hapi-fhir-android</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Distribution Archive</name>
+	<name>HAPI FHIR - Android</name>
 
 	<dependencies>
 		<dependency>

@@ -40,7 +40,7 @@ public class SearchParameter {
 	}
 
 	public String getDescription() {
-		return StringUtils.defaultString(myDescription);
+		return BaseElement.toStringConstant(myDescription);
 	}
 
 	public String getFluentConstantName() {

@@ -488,7 +488,7 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			if (IAnyResource.class.isAssignableFrom(nextElementType)) {
+			if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */

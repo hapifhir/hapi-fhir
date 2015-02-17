@@ -3,7 +3,7 @@
   <meta>
     <versionId value="1"/> 
     <lastUpdated value="2014-08-18T01:43:30Z"/>
-  </meta> 
+  </meta>
   <type value="searchset"/>  
   <base value="http://example.com/base"/> 
   <total value="3"/>
@@ -16,13 +16,6 @@
     <url value="https://example.com/base/MedicationPrescription?patient=347&amp;_include=MedicationPrescription.medication"/>
   </link>
   <entry>
-    <search>
-      <mode value="match"/> 
-      <score value="1"/>
-    </search>
-    <transaction>
-      <match value="http://foo?search"/>
-    </transaction>
     <resource>
       <MedicationPrescription>
         <id value="3123"/>
@@ -38,15 +31,22 @@
         </medication>
       </MedicationPrescription>
     </resource>
+    <search>
+      <mode value="match"/> 
+      <score value="1"/>
+    </search>
+    <transaction>
+      <url value="http://foo?search"/>
+    </transaction>
   </entry>
   <entry>
-    <search>
-      <mode value="include"/> 
-    </search>
     <resource>
       <Medication>
         <id value="example"/>
       </Medication>
     </resource>
+    <search>
+      <mode value="include"/> 
+    </search>
   </entry>
 </Bundle>

@@ -38,18 +38,23 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -266,6 +271,57 @@ public abstract class BaseParser implements IParser {
 		return parseResource(null, theReader);
 	}
 
+	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
+	
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+		T retVal = doParseResource(theResourceType, theReader);
+		
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
+		if ("Bundle".equals(def.getName())) {
+			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
+			if (base != null && base.size() > 0) {
+				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
+				IResource res = ((IResource)retVal);
+				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
+			}
+			
+			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
+			if (entries != null) {
+				for (IBase nextEntry : entries) {
+					List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
+					
+					if (entryBase == null || entryBase.isEmpty()) {
+						entryBase = base;
+					}
+					
+					if (entryBase != null && entryBase.size() > 0) {
+						IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
+						
+						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+						if (entryResources != null && entryResources.size() > 0) {
+							IResource res = (IResource) entryResources.get(0);
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
+							String versionIdPart = res.getId().getVersionIdPart();
+							if (isBlank(versionIdPart)) {
+								versionIdPart = ResourceMetadataKeyEnum.VERSION.get(res);
+							}
+							
+							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
+						}
+						
+					}
+					
+					
+				}
+			}
+			
+		}
+		
+		return retVal;
+	}
+	
 	@Override
 	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theMessageString);

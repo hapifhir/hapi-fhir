@@ -20,10 +20,6 @@
   ],
   "entry": [
     {
-      "search": {
-        "mode": "match",
-        "score": 1
-      },
       "resource": {
         "resourceType": "MedicationPrescription",
         "id": "3123",
@@ -37,15 +33,19 @@
         "medication": {
           "reference": "Medication/example"
         }
+      },
+      "search": {
+        "mode": "match",
+        "score": 1
       }
     },
     {
-      "search": {
-        "mode": "include"
-      },
       "resource": {
         "resourceType": "Medication",
         "id": "example"
+      },
+      "search": {
+        "mode": "include"
       }
     }
   ]

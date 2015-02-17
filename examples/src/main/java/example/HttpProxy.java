@@ -18,7 +18,10 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 public class HttpProxy {
 
    public static void main(String[] args) {
-      
+      /*
+       * This is out ot date - Just keeping
+       * it in case it's helpful...
+       */
       final String authUser = "username"; 
       final String authPassword = "password"; 
       CredentialsProvider credsProvider = new BasicCredentialsProvider();

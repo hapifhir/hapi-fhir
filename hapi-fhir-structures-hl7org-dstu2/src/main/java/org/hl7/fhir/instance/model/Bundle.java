@@ -40,12 +40,13 @@ import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.utilities.Utilities;
 /**
  * A container for a group of resources.
  */
 @ResourceDef(name="Bundle", profile="http://hl7.org/fhir/Profile/Bundle")
-public class Bundle extends Resource {
+public class Bundle extends Resource implements IBaseBundle {
 
     public enum BundleType {
         /**

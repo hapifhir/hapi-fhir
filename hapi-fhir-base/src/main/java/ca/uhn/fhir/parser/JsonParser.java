@@ -277,6 +277,13 @@ public class JsonParser extends BaseParser implements IParser {
 
 			writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
 
+			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
+			IResource resource = nextEntry.getResource();
+			if (resource != null && !resource.isEmpty() && !deleted) {
+				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
+				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "resource", false);
+			}
+			
 			if (nextEntry.getSearchMode().isEmpty() == false || nextEntry.getScore().isEmpty() == false) {
 				theEventWriter.writeStartObject("search");
 				writeOptionalTagWithTextNode(theEventWriter, "mode", nextEntry.getSearchMode().getValueAsString());
@@ -288,11 +295,10 @@ public class JsonParser extends BaseParser implements IParser {
 			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
 				theEventWriter.writeStartObject("transaction");
 				writeOptionalTagWithTextNode(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
-				writeOptionalTagWithTextNode(theEventWriter, "match", nextEntry.getLinkSearch().getValue());
+				writeOptionalTagWithTextNode(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEnd();
 			}
 
-			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
 			if (deleted) {
 				theEventWriter.writeStartObject("deleted");
 				if (nextEntry.getResource() != null) {
@@ -319,11 +325,6 @@ public class JsonParser extends BaseParser implements IParser {
 			//
 			// writeAuthor(nextEntry, theEventWriter);
 
-			IResource resource = nextEntry.getResource();
-			if (resource != null && !resource.isEmpty() && !deleted) {
-				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(resource);
-				encodeResourceToJsonStreamWriter(resDef, resource, theEventWriter, "resource", false);
-			}
 
 			if (nextEntry.getSummary().isEmpty() == false) {
 				theEventWriter.write("summary", nextEntry.getSummary().getValueAsString());
@@ -1096,7 +1097,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) {
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
 		JsonReader reader = Json.createReader(theReader);
 		JsonObject object = reader.readObject();
 

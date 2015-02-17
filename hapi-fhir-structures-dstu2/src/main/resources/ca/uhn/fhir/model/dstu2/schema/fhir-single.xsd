@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Sat, Feb 7, 2015 18:18+0000 for FHIR v0.4.0 
+  Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.4.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
@@ -351,6 +351,7 @@
       <xs:element ref="Specimen"/>
       <xs:element ref="StatusRequest"/>
       <xs:element ref="StatusResponse"/>
+      <xs:element ref="StructureDefinition"/>
       <xs:element ref="Subscription"/>
       <xs:element ref="Substance"/>
       <xs:element ref="Supply"/>
@@ -358,6 +359,7 @@
       <xs:element ref="ValueSet"/>
       <xs:element ref="VisionClaim"/>
       <xs:element ref="VisionPrescription"/>
+      <xs:element ref="Parameters"/>
     </xs:choice>
   </xs:complexType>
   <xs:complexType name="Extension">
@@ -2301,7 +2303,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
   </xs:complexType>
   <xs:complexType name="DomainResource">
     <xs:annotation>
-      <xs:documentation></xs:documentation>
+      <xs:documentation>A resource that includes narrative, extensions, and contained resources.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="Resource">
@@ -2329,6 +2331,41 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ExtensionContext-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="resource">
+        <xs:annotation>
+          <xs:documentation>The context is all elements matching a particular resource element path.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="datatype">
+        <xs:annotation>
+          <xs:documentation>The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mapping">
+        <xs:annotation>
+          <xs:documentation>The context is all nodes whose mapping to a specified reference model corresponds to a particular mapping structure.  The context identifies the mapping target. The mapping should clearly identify where such an extension could be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extension">
+        <xs:annotation>
+          <xs:documentation>The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ExtensionContext">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="ExtensionContext-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
   </xs:complexType>
   <xs:simpleType name="DataAbsentReason-list">
     <xs:restriction base="xs:string">
@@ -2447,7 +2484,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The value is no longer available</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="nil known">
+      <xs:enumeration value="nil-known">
         <xs:annotation>
           <xs:documentation>The are no known applicable values in this context</xs:documentation>
         </xs:annotation>
@@ -2717,7 +2754,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The Patient is present for the encounter, however is not currently meeting with a practitioner.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The Encounter has begun and the patient is present / the practitioner and the patient are meeting.</xs:documentation>
         </xs:annotation>
@@ -2912,7 +2949,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="not in">
+      <xs:enumeration value="not-in">
         <xs:annotation>
           <xs:documentation>The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
         </xs:annotation>
@@ -2942,7 +2979,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This reference has been superseded by another reference.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>This reference was created in error.</xs:documentation>
         </xs:annotation>
@@ -3727,6 +3764,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="StructureDefinition">
+        <xs:annotation>
+          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
           <xs:documentation>Todo.</xs:documentation>
@@ -4372,6 +4414,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="StructureDefinition">
+        <xs:annotation>
+          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
           <xs:documentation>Todo.</xs:documentation>
@@ -4442,7 +4489,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.</xs:documentation>
         </xs:annotation>
@@ -4534,7 +4581,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The alert does not need to be displayed any more.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The alert was added in error, and should no longer be displayed.</xs:documentation>
         </xs:annotation>
@@ -5468,6 +5515,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>The Base URL for the resource, if different to the base URL specified for the bundle as a whole.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="ResourceContainer">
+            <xs:annotation>
+              <xs:documentation>The Resources for the entry.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="search" type="Bundle.Search" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>Information about the search process that lead to the creation of this entry.</xs:documentation>
@@ -5478,14 +5530,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>Additional information about how this entry should be processed as part of a transaction.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="ResourceContainer">
+          <xs:element name="transactionResponse" type="Bundle.TransactionResponse" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>The Resources for the entry.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="information" type="Bundle.Information" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>Information about the resource (if deleted, or if a summary transaction response).</xs:documentation>
+              <xs:documentation>Additional information about how this entry should be processed as part of a transaction.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -5520,43 +5567,98 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="operation" minOccurs="1" maxOccurs="1" type="TransactionOperation">
+          <xs:element name="method" minOccurs="1" maxOccurs="1" type="HTTPVerb">
             <xs:annotation>
-              <xs:documentation>The operation associated with this entry in either a update history, or a transaction/ transaction response.</xs:documentation>
+              <xs:documentation>The HTTP verb for this entry in either a update history, or a transaction/ transaction response.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="match" minOccurs="0" maxOccurs="1" type="uri">
+          <xs:element name="url" minOccurs="1" maxOccurs="1" type="uri">
             <xs:annotation>
               <xs:documentation>A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="ifNoneMatch" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="ifMatch" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Only perform the operation if the Etag value matches. For more information, see the API section &quot;Managing Resource Contention&quot;.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="ifModifiedSince" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Only perform the operation if the last updated date matches. For more information, see the API section &quot;Managing Resource Contention&quot;.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="ifNoneExist" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Bundle.Information">
+  <xs:complexType name="Bundle.TransactionResponse">
     <xs:annotation>
       <xs:documentation>A container for a group of resources.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation>The type of resource (required to construct the identity - e.g. identity Patient/345 is type + id).</xs:documentation>
+              <xs:documentation>The status code returned by processing this entry.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="resourceId" minOccurs="1" maxOccurs="1" type="id">
+          <xs:element name="location" minOccurs="0" maxOccurs="1" type="uri">
             <xs:annotation>
-              <xs:documentation>The id of the resource  (required to construct the identity - e.g. identity Patient/345 is type + id).</xs:documentation>
+              <xs:documentation>The location header created by processing this operation.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="meta" minOccurs="0" maxOccurs="1" type="Meta">
+          <xs:element name="etag" minOccurs="0" maxOccurs="unbounded" type="string">
             <xs:annotation>
-              <xs:documentation>The meta information for the resource. Optional - only provided if there is a need for version id, last updated, and/or tag, profile and security information.</xs:documentation>
+              <xs:documentation>The etag for the resource, it the operation for the entry produced a versioned resource.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="HTTPVerb-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="GET">
+        <xs:annotation>
+          <xs:documentation>HTTP GET.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="POST">
+        <xs:annotation>
+          <xs:documentation>HTTP POST.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PUT">
+        <xs:annotation>
+          <xs:documentation>HTTP PUT.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="DELETE">
+        <xs:annotation>
+          <xs:documentation>HTTP DELETE.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="HTTPVerb">
+    <xs:annotation>
+      <xs:documentation>HTTP verbs (in the HTTP command line)</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="HTTPVerb-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -5632,41 +5734,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="BundleType-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="TransactionOperation-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="create">
-        <xs:annotation>
-          <xs:documentation></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="update">
-        <xs:annotation>
-          <xs:documentation></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="delete">
-        <xs:annotation>
-          <xs:documentation></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="noop">
-        <xs:annotation>
-          <xs:documentation>No Operation occurred - only valid in a transaction response.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="TransactionOperation">
-    <xs:annotation>
-      <xs:documentation>The operation associated with an entry in either a update history, or a transaction/ transaction response</xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="TransactionOperation-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -5976,7 +6043,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
   </xs:complexType>
   <xs:simpleType name="CarePlanGoalStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).</xs:documentation>
         </xs:annotation>
@@ -6011,7 +6078,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
   </xs:complexType>
   <xs:simpleType name="CarePlanActivityStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="not started">
+      <xs:enumeration value="not-started">
         <xs:annotation>
           <xs:documentation>Activity is planned but no action has yet been taken.</xs:documentation>
         </xs:annotation>
@@ -6021,12 +6088,12 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Appointment or other booking has occurred but activity has not yet begun.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>Activity has been started but is not yet complete.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="on hold">
+      <xs:enumeration value="on-hold">
         <xs:annotation>
           <xs:documentation>Activity was started but has temporarily ceased with an expectation of resumption at a future time.</xs:documentation>
         </xs:annotation>
@@ -6909,7 +6976,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
   </xs:complexType>
   <xs:simpleType name="CommunicationStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The communication transmission is ongoing.</xs:documentation>
         </xs:annotation>
@@ -7080,7 +7147,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The receiving system has accepted the order, but work has not yet commenced.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The work to fulfill the order is happening.</xs:documentation>
         </xs:annotation>
@@ -8068,6 +8135,21 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>A flag to indicate that the server allows the client to create new identities on the server. If the update operation is used (client) or allowed (server) to a new location where a resource doesn't already exist. This means that the server allows the client to create new identities on the server.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="conditionalCreate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag that indicates that the server supports conditional create.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalUpdate" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag that indicates that the server supports conditional update.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conditionalDelete" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>A flag that indicates that the server supports conditional delete.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="searchInclude" minOccurs="0" maxOccurs="unbounded" type="string">
             <xs:annotation>
               <xs:documentation>A list of _include values supported by the server.</xs:documentation>
@@ -8075,7 +8157,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           </xs:element>
           <xs:element name="searchParam" type="Conformance.SearchParam" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation>Additional search parameters for implementations to support and/or make use of.</xs:documentation>
+              <xs:documentation>Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -9206,7 +9288,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The data element is sufficiently well-constrained that multiple pieces of data captured according to the constraints of the data element will be comparable (though in some cases, a degree of automated conversion/normalization may be required).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="fully specified">
+      <xs:enumeration value="fully-specified">
         <xs:annotation>
           <xs:documentation>The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable.</xs:documentation>
         </xs:annotation>
@@ -9868,7 +9950,7 @@ period.</xs:documentation>
           <xs:documentation>The receiving system has accepted the request but work has not yet commenced.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The work to fulfill the order is happening.</xs:documentation>
         </xs:annotation>
@@ -10164,7 +10246,7 @@ period.</xs:documentation>
           <xs:documentation>The receiving system has accepted the order, but work has not yet commenced.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The work to fulfill the order is happening.</xs:documentation>
         </xs:annotation>
@@ -10278,6 +10360,11 @@ period.</xs:documentation>
           <xs:element name="performer" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>The diagnostic service that is responsible for issuing the report.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation>The link to the health care event (encounter) when the order was made.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="Identifier">
@@ -10399,7 +10486,7 @@ period.</xs:documentation>
           <xs:documentation>The report is unavailable because the measurement was not started or not completed (also sometimes called &quot;aborted&quot;).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The report has been withdrawn following previous Final release.</xs:documentation>
         </xs:annotation>
@@ -10430,7 +10517,7 @@ period.</xs:documentation>
     <xs:complexContent>
       <xs:extension base="DomainResource">
         <xs:sequence>
-          <xs:element name="masterIdentifier" minOccurs="1" maxOccurs="1" type="Identifier">
+          <xs:element name="masterIdentifier" minOccurs="0" maxOccurs="1" type="Identifier">
             <xs:annotation>
               <xs:documentation>A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts.</xs:documentation>
            </xs:annotation>
@@ -10440,7 +10527,7 @@ period.</xs:documentation>
               <xs:documentation>Other identifiers associated with the document, including version independent, source record and workflow related identifiers.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="subject" minOccurs="1" maxOccurs="unbounded" type="Reference">
+          <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case).</xs:documentation>
            </xs:annotation>
@@ -10512,7 +10599,7 @@ period.</xs:documentation>
     <xs:complexContent>
       <xs:extension base="DomainResource">
         <xs:sequence>
-          <xs:element name="masterIdentifier" minOccurs="1" maxOccurs="1" type="Identifier">
+          <xs:element name="masterIdentifier" minOccurs="0" maxOccurs="1" type="Identifier">
             <xs:annotation>
               <xs:documentation>Document identifier as assigned by the source of the document. This identifier is specific to this version of the document. This unique identifier may be used elsewhere to identify this version of the document.</xs:documentation>
            </xs:annotation>
@@ -10522,19 +10609,24 @@ period.</xs:documentation>
               <xs:documentation>Other identifiers associated with the document, including version independent, source record and workflow related identifiers.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="subject" minOccurs="1" maxOccurs="1" type="Reference">
+          <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation>Specifies the particular kind of document (e.g. Patient Summary, Discharge Summary, Prescription, etc.).</xs:documentation>
+              <xs:documentation>The type code specifies the precise type of document from the user perspective. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="class" minOccurs="0" maxOccurs="1" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation>A categorization for the type of the document. This may be implied by or derived from the code specified in the Document Type.</xs:documentation>
+              <xs:documentation>The class code specifying the high-level use classification of the document type (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="format" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation>An identifier that identifies the the document encoding, structure and template that the document conforms to beyond the base format indicated in the mimeType.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="author" minOccurs="1" maxOccurs="unbounded" type="Reference">
@@ -10589,42 +10681,12 @@ period.</xs:documentation>
           </xs:element>
           <xs:element name="confidentiality" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation>A code specifying the level of confidentiality of the XDS Document.</xs:documentation>
+              <xs:documentation>A set of Security-Tag codes specifying the level of privacy/security of the Document.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="primaryLanguage" minOccurs="0" maxOccurs="1" type="code">
+          <xs:element name="content" minOccurs="1" maxOccurs="unbounded" type="Attachment">
             <xs:annotation>
-              <xs:documentation>The primary language in which the source document is written.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="mimeType" minOccurs="1" maxOccurs="1" type="code">
-            <xs:annotation>
-              <xs:documentation>The mime type of the source document.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="format" minOccurs="0" maxOccurs="unbounded" type="uri">
-            <xs:annotation>
-              <xs:documentation>An identifier that identifies that the format and content of the document conforms to additional rules beyond the base format indicated in the mimeType.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="size" minOccurs="0" maxOccurs="1" type="integer">
-            <xs:annotation>
-              <xs:documentation>The size of the source document this reference refers to in bytes.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="hash" minOccurs="0" maxOccurs="1" type="base64Binary">
-            <xs:annotation>
-              <xs:documentation>A hash of the source document to ensure that changes have not occurred.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="location" minOccurs="0" maxOccurs="1" type="uri">
-            <xs:annotation>
-              <xs:documentation>A url at which the document can be accessed.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="service" type="DocumentReference.Service" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>A description of a service call that can be used to retrieve the document.</xs:documentation>
+              <xs:documentation>The document or url to the document along with critical metadata to prove content has integrity.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="context" type="DocumentReference.Context" minOccurs="0" maxOccurs="1">
@@ -10651,53 +10713,6 @@ period.</xs:documentation>
           <xs:element name="target" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>The target document of this relationship.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="DocumentReference.Service">
-    <xs:annotation>
-      <xs:documentation>A reference to a document.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
-            <xs:annotation>
-              <xs:documentation>The type of the service that can be used to access the documents.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="address" minOccurs="0" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation>Where the service end-point is located.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="parameter" type="DocumentReference.Parameter" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>A list of named parameters that is used in the service call.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="DocumentReference.Parameter">
-    <xs:annotation>
-      <xs:documentation>A reference to a document.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation>The name of a parameter.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="value" minOccurs="0" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation>The value of the named parameter.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -10904,7 +10919,7 @@ period.</xs:documentation>
           </xs:element>
           <xs:element name="status" minOccurs="1" maxOccurs="1" type="EncounterState">
             <xs:annotation>
-              <xs:documentation>planned | arrived | in progress | onleave | finished | cancelled.</xs:documentation>
+              <xs:documentation>planned | arrived | in-progress | onleave | finished | cancelled.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="statusHistory" type="Encounter.StatusHistory" minOccurs="0" maxOccurs="unbounded">
@@ -11000,7 +11015,7 @@ period.</xs:documentation>
         <xs:sequence>
           <xs:element name="status" minOccurs="1" maxOccurs="1" type="EncounterState">
             <xs:annotation>
-              <xs:documentation>planned | arrived | in progress | onleave | finished | cancelled.</xs:documentation>
+              <xs:documentation>planned | arrived | in-progress | onleave | finished | cancelled.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="period" minOccurs="1" maxOccurs="1" type="Period">
@@ -11648,41 +11663,6 @@ period.</xs:documentation>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="ExtensionContext-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="resource">
-        <xs:annotation>
-          <xs:documentation>The context is all elements matching a particular resource element path.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="datatype">
-        <xs:annotation>
-          <xs:documentation>The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="mapping">
-        <xs:annotation>
-          <xs:documentation>The context is all nodes whose mapping to a specified reference model corresponds to a particular mapping structure.  The context identifies the mapping target. The mapping should clearly identify where such an extension could be used.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="extension">
-        <xs:annotation>
-          <xs:documentation>The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="ExtensionContext">
-    <xs:annotation>
-      <xs:documentation>How an extension context is interpreted</xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="ExtensionContext-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:element name="FamilyHistory" type="FamilyHistory">
     <xs:annotation>
       <xs:documentation>Significant health events and conditions for people related to the subject relevant in the context of care for the subject.</xs:documentation>
@@ -11875,7 +11855,7 @@ period.</xs:documentation>
           <xs:documentation>A goal is planned for this patient.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).</xs:documentation>
         </xs:annotation>
@@ -12334,13 +12314,7 @@ period.</xs:documentation>
               <xs:documentation>Study instance uid of the SOP instances in the selection.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="retrieveAETitle" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation>The DICOM Application Entity Title where the study can be retrieved.
-Note that this AE Title is provided to retrieve all SOP instances of the study, not only those in the selection.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="retrieveUrl" minOccurs="0" maxOccurs="1" type="uri">
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
             <xs:annotation>
               <xs:documentation>WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection.</xs:documentation>
            </xs:annotation>
@@ -12361,18 +12335,12 @@ Note that this AE Title is provided to retrieve all SOP instances of the study, 
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="uid" minOccurs="1" maxOccurs="1" type="oid">
+          <xs:element name="uid" minOccurs="0" maxOccurs="1" type="oid">
             <xs:annotation>
               <xs:documentation>Series instance uid of the SOP instances in the selection.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="retrieveAETitle" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation>The DICOM Application Entity Title where the series can be retrieved.
-Note that this AE Title is provided to retrieve all SOP instances of the series not only those in the selection.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="retrieveUrl" minOccurs="0" maxOccurs="1" type="uri">
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="uri">
             <xs:annotation>
               <xs:documentation>WADO-RS URL to retrieve the series Note that this URL retrieves all SOP instances of the series not only those in the selection.</xs:documentation>
            </xs:annotation>
@@ -12403,14 +12371,35 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
               <xs:documentation>SOP Instance uid of the selected instance.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="retrieveAETitle" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation>The DICOM Application Entity Title where the DICOM SOP instance can be retrieved.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="retrieveUrl" minOccurs="0" maxOccurs="1" type="uri">
+          <xs:element name="url" minOccurs="1" maxOccurs="1" type="uri">
             <xs:annotation>
               <xs:documentation>WADO-RS URL to retrieve the DICOM SOP Instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="frames" type="ImagingObjectSelection.Frames" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>Identity and location information of the frames in the selected instance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ImagingObjectSelection.Frames">
+    <xs:annotation>
+      <xs:documentation>A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="frameNumbers" minOccurs="1" maxOccurs="unbounded" type="integer">
+            <xs:annotation>
+              <xs:documentation>The frame numbers in the frame set.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="url" minOccurs="1" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>WADO-RS URL to retrieve the DICOM frames.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -13151,7 +13140,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
         <xs:sequence>
           <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
             <xs:annotation>
-              <xs:documentation>A unique identifier assigned to this adverse reaction record.</xs:documentation>
+              <xs:documentation>A unique identifier assigned to this immunization record.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="date" minOccurs="1" maxOccurs="1" type="dateTime">
@@ -13164,14 +13153,14 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
               <xs:documentation>Vaccine that was administered or was to be administered.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="subject" minOccurs="1" maxOccurs="1" type="Reference">
+          <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation>The patient to whom the vaccine was to be administered.</xs:documentation>
+              <xs:documentation>The patient who either received or did not receive the immunization.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="refusedIndicator" minOccurs="1" maxOccurs="1" type="boolean">
+          <xs:element name="wasNotGiven" minOccurs="1" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation>Indicates if the vaccination was refused.</xs:documentation>
+              <xs:documentation>Indicates if the vaccination was or was not given.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="reported" minOccurs="1" maxOccurs="1" type="boolean">
@@ -13187,6 +13176,11 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:element name="requester" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>Clinician who ordered the vaccination.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation>The visit or admission or other contact between patient and health care provider the immunization was performed as part of.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="manufacturer" minOccurs="0" maxOccurs="1" type="Reference">
@@ -13226,7 +13220,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           </xs:element>
           <xs:element name="explanation" type="Immunization.Explanation" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>Reasons why a vaccine was administered or refused.</xs:documentation>
+              <xs:documentation>Reasons why a vaccine was or was not administered.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="reaction" type="Immunization.Reaction" minOccurs="0" maxOccurs="unbounded">
@@ -13255,9 +13249,9 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
               <xs:documentation>Reasons why a vaccine was administered.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="refusalReason" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+          <xs:element name="reasonNotGiven" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
-              <xs:documentation>Refusal or exemption reasons.</xs:documentation>
+              <xs:documentation>Reason why a vaccine was not administered.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -13359,9 +13353,9 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
               <xs:documentation>A unique identifier assigned to this particular recommendation record.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="subject" minOccurs="1" maxOccurs="1" type="Reference">
+          <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation>The patient who is the subject of the profile.</xs:documentation>
+              <xs:documentation>The patient for whom the recommendations are for.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="recommendation" type="ImmunizationRecommendation.Recommendation" minOccurs="1" maxOccurs="unbounded">
@@ -14641,12 +14635,12 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
   </xs:complexType>
   <xs:simpleType name="MedicationAdministrationStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The administration has started but has not yet completed.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="on hold">
+      <xs:enumeration value="on-hold">
         <xs:annotation>
           <xs:documentation>Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called &quot;suspended&quot;.</xs:documentation>
         </xs:annotation>
@@ -14656,7 +14650,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:documentation>All actions that are implied by the administration have occurred.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The administration was entered in error and therefore nullified.</xs:documentation>
         </xs:annotation>
@@ -14867,12 +14861,12 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
   </xs:complexType>
   <xs:simpleType name="MedicationDispenseStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The dispense has started but has not yet completed.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="on hold">
+      <xs:enumeration value="on-hold">
         <xs:annotation>
           <xs:documentation>Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called &quot;suspended&quot;.</xs:documentation>
         </xs:annotation>
@@ -14882,7 +14876,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:documentation>All actions that are implied by the dispense have occurred.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The dispense was entered in error and therefore nullified.</xs:documentation>
         </xs:annotation>
@@ -15116,7 +15110,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:documentation>The prescription is 'actionable', but not all actions that are implied by it have occurred yet.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="on hold">
+      <xs:enumeration value="on-hold">
         <xs:annotation>
           <xs:documentation>Actions implied by the prescription have been temporarily halted, but are expected to continue later.  May also be called &quot;suspended&quot;.</xs:documentation>
         </xs:annotation>
@@ -15126,7 +15120,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:documentation>All actions that are implied by the prescription have occurred (this will rarely be made explicit).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The prescription was entered in error and therefore nullified.</xs:documentation>
         </xs:annotation>
@@ -15194,7 +15188,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           </xs:element>
           <xs:element name="status" minOccurs="1" maxOccurs="1" type="MedicationStatementStatus">
             <xs:annotation>
-              <xs:documentation>A code specifying the state of the statement.  Generally this will be in progress or completed state.</xs:documentation>
+              <xs:documentation>A code specifying the state of the statement.  Generally this will be in-progress or completed state.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="wasNotGiven" minOccurs="0" maxOccurs="1" type="boolean">
@@ -15300,7 +15294,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
   </xs:complexType>
   <xs:simpleType name="MedicationStatementStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The medication is still being taken.</xs:documentation>
         </xs:annotation>
@@ -15310,7 +15304,7 @@ Note that this AE Title is provided to retrieve all SOP instances of the series 
           <xs:documentation>All actions that are implied by the statement have occurred.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The statement was entered in error and therefore nullified.</xs:documentation>
         </xs:annotation>
@@ -16146,6 +16140,11 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation>Who was responsible for asserting the observed value as &quot;true&quot;.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="device" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation>The device used to generate the observation data.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation>The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.</xs:documentation>
@@ -16299,7 +16298,7 @@ other observer (for example a relative or EMT), or any observation made about th
           <xs:documentation>The observation is unavailable because the measurement was not started or not completed (also sometimes called &quot;aborted&quot;).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The observation has been withdrawn following previous Final release.</xs:documentation>
         </xs:annotation>
@@ -19153,7 +19152,7 @@ other observer (for example a relative or EMT), or any observation made about th
           <xs:documentation>The receiving system has accepted the request, but work has not yet commenced.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The work to fulfill the request is happening.</xs:documentation>
         </xs:annotation>
@@ -20360,7 +20359,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:simpleType name="QuestionnaireAnswersStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>This QuestionnaireAnswers has been partially filled out with answers, but changes or additions are still expected to be made to it.</xs:documentation>
         </xs:annotation>
@@ -22153,6 +22152,261 @@ other observer (for example a relative or EMT), or any observation made about th
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:element name="StructureDefinition" type="StructureDefinition">
+    <xs:annotation>
+      <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="StructureDefinition">
+    <xs:annotation>
+      <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="url" minOccurs="1" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+            <xs:annotation>
+              <xs:documentation>Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="version" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A free text natural language name identifying the Profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="display" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Defined so that applications can use this name when displaying the value of the extension to the user.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="publisher" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Details of the individual or organization who accepts responsibility for publishing the profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="telecom" minOccurs="0" maxOccurs="unbounded" type="ContactPoint">
+            <xs:annotation>
+              <xs:documentation>Contact details to assist a user in finding and communicating with the publisher.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A free text natural language description of the profile and its use.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="unbounded" type="Coding">
+            <xs:annotation>
+              <xs:documentation>A set of terms from external terminologies that may be used to assist with indexing and searching of templates.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="StructureDefinitionStatus">
+            <xs:annotation>
+              <xs:documentation>The status of the profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="experimental" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation>This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="date" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation>The date that this version of the profile was published.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="requirements" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>The Scope and Usage that this profile was created to meet.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation>The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="mapping" type="StructureDefinition.Mapping" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>An external specification that the content is mapped to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="StructureDefinitionType">
+            <xs:annotation>
+              <xs:documentation>Defines the type of structure that this definition is describing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="contextType" minOccurs="0" maxOccurs="1" type="ExtensionContext">
+            <xs:annotation>
+              <xs:documentation>Identifies the type of context to which the extension applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="context" minOccurs="0" maxOccurs="unbounded" type="string">
+            <xs:annotation>
+              <xs:documentation>Identifies the types of resource or data type elements to which the extension can be applied.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="base" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>The structure that is the base on which this set of constraints is derived from.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="snapshot" type="StructureDefinition.Snapshot" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="differential" type="StructureDefinition.Differential" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>A differential view is expressed relative to the base profile - a statement of differences that it applies.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="StructureDefinition.Mapping">
+    <xs:annotation>
+      <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="identity" minOccurs="1" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation>An Internal id that is used to identify this mapping set when specific mappings are made.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="uri" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation>A URI that identifies the specification that this mapping is expressed to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>A name for the specification that is being mapped to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="comments" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation>Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="StructureDefinition.Snapshot">
+    <xs:annotation>
+      <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="element" minOccurs="1" maxOccurs="unbounded" type="ElementDefinition">
+            <xs:annotation>
+              <xs:documentation>Captures constraints on each element within the resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="StructureDefinition.Differential">
+    <xs:annotation>
+      <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="element" minOccurs="1" maxOccurs="unbounded" type="ElementDefinition">
+            <xs:annotation>
+              <xs:documentation>Captures constraints on each element within the resource.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="StructureDefinitionType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="abstract">
+        <xs:annotation>
+          <xs:documentation>An abstract Type. Structure Definitions for abstract types are provided for structural completeness, and to support functions such as code generation.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="type">
+        <xs:annotation>
+          <xs:documentation>A data type - either a primitive or complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="resource">
+        <xs:annotation>
+          <xs:documentation>A resource defined by the FHIR specification.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="constraint">
+        <xs:annotation>
+          <xs:documentation>A set of constraints on a resource or data type that describe how it is used for a particular use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extension">
+        <xs:annotation>
+          <xs:documentation>A definition of an extension that can be used in a FHIR resource (or a set of constraints on an exsting extension).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="StructureDefinitionType">
+    <xs:annotation>
+      <xs:documentation>Defines the type of structure that a definition is describing</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="StructureDefinitionType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="StructureDefinitionStatus-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="draft">
+        <xs:annotation>
+          <xs:documentation>This profile is still under development.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation>This profile is ready for normal use.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="retired">
+        <xs:annotation>
+          <xs:documentation>This profile has been deprecated, withdrawn or superseded and should no longer be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="StructureDefinitionStatus">
+    <xs:annotation>
+      <xs:documentation>The lifecycle status of a StructureDefinition</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="StructureDefinitionStatus-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:element name="Subscription" type="Subscription">
     <xs:annotation>
       <xs:documentation>Todo.</xs:documentation>
@@ -22536,7 +22790,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:simpleType name="SupplyDispenseStatus-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>Supply has been requested, but not dispensed.</xs:documentation>
         </xs:annotation>
@@ -22737,11 +22991,6 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation>A free text natural language name describing the value set.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="purpose" minOccurs="0" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation>This should describe &quot;the semantic space&quot; to be included in the value set. This can also describe the approach taken to build the value set.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="immutable" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
               <xs:documentation>If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.</xs:documentation>
@@ -22759,7 +23008,7 @@ other observer (for example a relative or EMT), or any observation made about th
           </xs:element>
           <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation>A free text natural language description of the use of the value set - reason for definition, conditions of use, etc. The description may include a list of expected usages for the value set.</xs:documentation>
+              <xs:documentation>A free text natural language description of the use of the value set - reason for definition, &quot;the semantic space&quot; to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="copyright" minOccurs="0" maxOccurs="1" type="string">

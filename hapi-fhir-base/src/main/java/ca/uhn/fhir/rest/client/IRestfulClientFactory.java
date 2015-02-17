@@ -151,6 +151,14 @@ public interface IRestfulClientFactory {
 	void setProxy(String theHost, Integer thePort);
 
 	/**
+	 * Sets the credentials to use to authenticate with the HTTP proxy,
+	 * if one is defined. Set to null to use no authentication with the proxy.
+	 * @param theUsername The username
+	 * @param thePassword The password
+	 */
+	void setProxyCredentials(String theUsername, String thePassword);
+
+	/**
 	 * Sets the server validation mode for any clients created from this factory. Server 
 	 * validation involves the client requesting the server's conformance statement
 	 * to determine whether the server is appropriate for the given client. 

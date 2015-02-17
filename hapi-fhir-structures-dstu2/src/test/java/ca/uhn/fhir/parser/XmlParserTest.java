@@ -86,6 +86,38 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testParseAndEncodeBundleNewStyle() throws Exception {
+		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example.xml"));
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType());
+		assertEquals(3, parsed.getTotal().intValue());
+		assertEquals("http://example.com/base", parsed.getBaseElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
+
+		assertEquals(2, parsed.getEntry().size());
+		assertEquals("http://foo?search", parsed.getEntry().get(0).getTransaction().getUrlElement().getValueAsString());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+//		assertEquals("3123", p.getId().getValue());
+
+		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+
+		Diff d = new Diff(new StringReader(content), new StringReader(reencoded));
+		assertTrue(d.toString(), d.identical());
+
+	}
+
+	
+	@Test
 	public void testEncodeAndParseBundleWithoutResourceIds() {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system").setValue("someval");
@@ -144,14 +176,6 @@ public class XmlParserTest {
 			"   </link>\n" + 
 			"   <entry>\n" + 
 			"      <base value=\"http://foo/fhirBase2\"/>\n" + 
-			"      <search>\n" +
-			"         <mode value=\"match\"/>\n" +
-			"         <score value=\"0.123\"/>\n" +
-			"      </search>\n" +
-			"      <transaction>\n" +
-			"         <operation value=\"create\"/>\n" +
-			"         <match value=\"http://foo/Patient?identifier=value\"/>\n" +
-			"      </transaction>\n" +
 			"      <resource>\n" + 
 			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 			"            <id value=\"1\"/>\n" + 
@@ -162,6 +186,14 @@ public class XmlParserTest {
 			"            <birthDate value=\"2012-01-02\"/>\n" + 
 			"         </Patient>\n" + 
 			"      </resource>\n" + 
+			"      <search>\n" +
+			"         <mode value=\"match\"/>\n" +
+			"         <score value=\"0.123\"/>\n" +
+			"      </search>\n" +
+			"      <transaction>\n" +
+			"         <operation value=\"create\"/>\n" +
+			"         <url value=\"http://foo/Patient?identifier=value\"/>\n" +
+			"      </transaction>\n" +
 			"   </entry>\n" + 
 			"</Bundle>";
 		//@formatter:on

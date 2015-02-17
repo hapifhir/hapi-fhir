@@ -217,6 +217,9 @@ public abstract class BaseStructureParser {
 //		if ("ResourceReferenceDt".equals(theNextType)) {
 //			return "ca.uhn.fhir.model." + myVersion + ".composite." + ResourceReferenceDt.class.getSimpleName();
 //		}
+		if ("ResourceDt".equals(theNextType)) {
+			return IResource.class.getCanonicalName();
+		}
 		if ("Binary".equals(theNextType)) {
 			return "ca.uhn.fhir.model." + myVersion + ".resource." + Binary.class.getSimpleName();
 		}

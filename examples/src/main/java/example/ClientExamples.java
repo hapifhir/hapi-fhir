@@ -20,8 +20,15 @@ public class ClientExamples {
    public void createProxy() {
       // START SNIPPET: proxy
       FhirContext ctx = new FhirContext();
+
+      // Set connections to access the network via the HTTP proxy at
+      // example.com : 8888
       ctx.getRestfulClientFactory().setProxy("example.com", 8888);
 
+      // If the proxy requires authentication, use the following as well
+      ctx.getRestfulClientFactory().setProxyCredentials("theUsername", "thePassword");
+      
+      // Create the client
       IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
       // END SNIPPET: proxy
    }

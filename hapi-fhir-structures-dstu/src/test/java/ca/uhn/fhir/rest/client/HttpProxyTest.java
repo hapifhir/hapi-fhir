@@ -86,25 +86,27 @@ public class HttpProxyTest {
 		server.start();
 		try {
 
-			final String authUser = "username";
-			final String authPassword = "password";
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope("127.0.0.1", port), new UsernamePasswordCredentials(authUser, authPassword));
+//			final String authUser = "username";
+//			final String authPassword = "password";
+//			CredentialsProvider credsProvider = new BasicCredentialsProvider();
+//			credsProvider.setCredentials(new AuthScope("127.0.0.1", port), new UsernamePasswordCredentials(authUser, authPassword));
+//
+//			HttpHost myProxy = new HttpHost("127.0.0.1", port);
+//
+//			//@formatter:off
+//			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+//			clientBuilder
+//				.setProxy(myProxy)
+//				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
+//				.setDefaultCredentialsProvider(credsProvider)
+//				.disableCookieManagement();
+//			CloseableHttpClient httpClient = clientBuilder.build();
+//			//@formatter:on
+//			ourCtx.getRestfulClientFactory().setHttpClient(httpClient);
 
-			HttpHost myProxy = new HttpHost("127.0.0.1", port);
-
-			//@formatter:off
-			HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-			clientBuilder
-				.setProxy(myProxy)
-				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy())
-				.setDefaultCredentialsProvider(credsProvider)
-				.disableCookieManagement();
-			CloseableHttpClient httpClient = clientBuilder.build();
-			//@formatter:on
-
-			ourCtx.getRestfulClientFactory().setHttpClient(httpClient);
-
+			ourCtx.getRestfulClientFactory().setProxy("127.0.0.1", port);
+			ourCtx.getRestfulClientFactory().setProxyCredentials("username", "password");
+			
 			String baseUri = "http://99.99.99.99:" + port + "/rootctx/rcp2/fhirctx/fcp2";
 			IGenericClient client = ourCtx.newRestfulGenericClient(baseUri);
 

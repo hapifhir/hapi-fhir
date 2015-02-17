@@ -1,0 +1,52 @@
+<Bundle xmlns="http://hl7.org/fhir">
+  <id value="example"/>
+  <meta>
+    <versionId value="1"/> 
+    <lastUpdated value="2014-08-18T01:43:30Z"/>
+  </meta>
+  <type value="searchset"/>  
+  <base value="http://example.com/base"/> 
+  <total value="3"/>
+  <link>
+    <relation value="next"/>
+    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&amp;page=2"/>
+  </link>
+  <link>
+    <relation value="self"/>
+    <url value="https://example.com/base/MedicationPrescription?patient=347&amp;_include=MedicationPrescription.medication"/>
+  </link>
+  <entry>
+    <resource>
+      <MedicationPrescription>
+        <id value="3123"/>
+        <meta>
+        	<versionId value="1"/>
+        	<lastUpdated value="2014-08-16T05:31:17Z"/>
+        </meta>
+        <patient>
+          <reference value="Patient/347"/>
+        </patient>
+        <medication>
+          <reference value="Medication/example"/>
+        </medication>
+      </MedicationPrescription>
+    </resource>
+    <search>
+      <mode value="match"/> 
+      <score value="1"/>
+    </search>
+    <transaction>
+      <url value="http://foo?search"/>
+    </transaction>
+  </entry>
+  <entry>
+    <resource>
+      <Medication>
+        <id value="example"/>
+      </Medication>
+    </resource>
+    <search>
+      <mode value="include"/> 
+    </search>
+  </entry>
+</Bundle>

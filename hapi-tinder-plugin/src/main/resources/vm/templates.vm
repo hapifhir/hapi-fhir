@@ -51,7 +51,20 @@
 	}
 
 #foreach ( $child in $childElements )
-#if ( $child.primitive && $child.repeatable == false )
+#if ( $child.referenceType == 'IResource' )
+	/**
+	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * $esc.html(${child.definition})
+     * </p> 
+	 */
+	public ${child.referenceType} get${child.methodName}() {  
+		return ${child.variableName};
+	}
+
+#elseif ( $child.primitive && $child.repeatable == false )
 	/**
 	 * Gets the value(s) for <b>${child.elementName}</b> ($esc.html(${child.shortName})).
 	 * creating it if it does

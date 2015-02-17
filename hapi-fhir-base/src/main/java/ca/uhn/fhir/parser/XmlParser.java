@@ -81,6 +81,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
@@ -385,7 +386,21 @@ public class XmlParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.writeStartElement("entry");
 
+			boolean deleted = false;
+			if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
+				deleted = true;
+			}
+			
 			writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
+
+			IResource resource = nextEntry.getResource();
+			if (resource != null && !resource.isEmpty() && !deleted) {
+				theEventWriter.writeStartElement("resource");
+				encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+				theEventWriter.writeEndElement(); // content
+			} else {
+				ourLog.debug("Bundle entry contains null resource");
+			}
 
 			if (nextEntry.getSearchMode().isEmpty() == false || nextEntry.getScore().isEmpty() == false) {
 				theEventWriter.writeStartElement("search");
@@ -398,28 +413,17 @@ public class XmlParser extends BaseParser implements IParser {
 			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
 				theEventWriter.writeStartElement("transaction");
 				writeOptionalTagWithValue(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
-				writeOptionalTagWithValue(theEventWriter, "match", nextEntry.getLinkSearch().getValue());
+				writeOptionalTagWithValue(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEndElement();
 			}
 
-			boolean deleted = false;
-			if (nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false) {
-				deleted = true;
+			if (deleted) {
 				theEventWriter.writeStartElement("deleted");
 				writeOptionalTagWithValue(theEventWriter, "type", nextEntry.getId().getResourceType());
 				writeOptionalTagWithValue(theEventWriter, "id", nextEntry.getId().getIdPart());
 				writeOptionalTagWithValue(theEventWriter, "versionId", nextEntry.getId().getVersionIdPart());
 				writeOptionalTagWithValue(theEventWriter, "instant", nextEntry.getDeletedAt().getValueAsString());
 				theEventWriter.writeEndElement();
-			}
-
-			IResource resource = nextEntry.getResource();
-			if (resource != null && !resource.isEmpty() && !deleted) {
-				theEventWriter.writeStartElement("resource");
-				encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
-				theEventWriter.writeEndElement(); // content
-			} else {
-				ourLog.debug("Bundle entry contains null resource");
 			}
 
 			theEventWriter.writeEndElement(); // entry
@@ -488,7 +492,11 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE: {
-			throw new IllegalStateException(); // should not happen
+			theEventWriter.writeStartElement(childName);
+			IBaseResource resource = (IBaseResource) nextValue;
+			encodeResourceToXmlStreamWriter(resource, theEventWriter, false);
+			theEventWriter.writeEndElement();
+			break;
 		}
 		case PRIMITIVE_XHTML: {
 			XhtmlDt dt = (XhtmlDt) nextValue;
@@ -703,7 +711,11 @@ public class XmlParser extends BaseParser implements IParser {
 			IdDt resourceId = resource.getId();
 			if (resourceId != null && isNotBlank(resourceId.getVersionIdPart()) || (updated != null && !updated.isEmpty())) {
 				theEventWriter.writeStartElement("meta");
-				writeOptionalTagWithValue(theEventWriter, "versionId", resourceId.getVersionIdPart());
+				String versionIdPart = resourceId.getVersionIdPart();
+				if (isBlank(versionIdPart)) {
+					versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
+				}
+				writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 				if (updated != null) {
 					writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 				}
@@ -922,7 +934,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) {
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
 		XMLEventReader streamReader = createStreamReader(theReader);
 		return parseResource(theResourceType, streamReader);
 	}

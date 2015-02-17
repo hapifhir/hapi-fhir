@@ -1121,7 +1121,7 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("operation".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getTransactionOperation()));
-			} else if ("match".equals(theLocalPart)) {
+			} else if ("url".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
 			} else {
 				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
@@ -1658,6 +1658,8 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("versionId")) {
 				push(new MetaVersionElementState(getPreResourceState(), myMap));
+//			} else if (theLocalPart.equals("profile")) {
+//				
 			} else if (theLocalPart.equals("lastUpdated")) {
 				InstantDt updated = new InstantDt();
 				push(new PrimitiveState(getPreResourceState(), updated));
@@ -1759,10 +1761,23 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-
 			if (myEntry == null) {
 				myObject = (T) getCurrentElement();
 			}
+
+			IResource nextResource = (IResource) getCurrentElement();
+			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
+			String resourceName = myContext.getResourceDefinition(nextResource).getName();
+			String bundleIdPart = nextResource.getId().getIdPart();
+			if (isNotBlank(bundleIdPart)) {
+//				if (isNotBlank(entryBaseUrl)) {
+//					nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+//				} else {
+					nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
+//				}
+			}
+
+			
 		}
 
 		@Override
