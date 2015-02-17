@@ -151,23 +151,23 @@ public interface IGenericClient {
 	 */
 	IRead read();
 
-	/**
-	 * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
-	 * given resource instance, even if the ID passed in contains a version. If you wish to request a specific version
-	 * of a resource (the "vread" operation), use {@link #vread(Class, IdDt)} instead.
-	 * <p>
-	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the
-	 * resource type and ID) the server base for the client will be ignored, and the URL passed in will be queried.
-	 * </p>
-	 * 
-	 * @param theType
-	 *            The type of resource to load
-	 * @param theId
-	 *            The ID to load, including the resource ID and the resource version ID. Valid values include
-	 *            "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
-	 * @return The resource
-	 */
-	<T extends IBaseResource> T read(Class<T> theType, IdDt theId);
+//	/**
+//	 * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
+//	 * given resource instance, even if the ID passed in contains a version. If you wish to request a specific version
+//	 * of a resource (the "vread" operation), use {@link #vread(Class, IdDt)} instead.
+//	 * <p>
+//	 * Note that if an absolute resource ID is passed in (i.e. a URL containing a protocol and host as well as the
+//	 * resource type and ID) the server base for the client will be ignored, and the URL passed in will be queried.
+//	 * </p>
+//	 * 
+//	 * @param theType
+//	 *            The type of resource to load
+//	 * @param theId
+//	 *            The ID to load, including the resource ID and the resource version ID. Valid values include
+//	 *            "Patient/123/_history/222", or "http://example.com/fhir/Patient/123/_history/222"
+//	 * @return The resource
+//	 */
+//	<T extends IBaseResource> T read(Class<T> theType, IdDt theId);
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -189,7 +189,7 @@ public interface IGenericClient {
 	 *            The absolute URL, e.g. "http://example.com/fhir/Patient/123"
 	 * @return The returned resource from the server
 	 */
-	<T extends IResource> T read(Class<T> theType, UriDt theUrl);
+	<T extends IBaseResource> T read(Class<T> theType, UriDt theUrl);
 
 	/**
 	 * Perform the "read" operation (retrieve the latest version of a resource instance by ID) using an absolute URL.

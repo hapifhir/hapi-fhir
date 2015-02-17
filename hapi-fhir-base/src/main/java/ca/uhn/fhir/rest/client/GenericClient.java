@@ -237,10 +237,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new LoadPageInternal();
 	}
 
-	@Override
-	public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
-		return doReadOrVRead(theType, theId, false, null, null);
-	}
+//	@Override
+//	public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
+//		return doReadOrVRead(theType, theId, false, null, null);
+//	}
 
 	@Override
 	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
@@ -248,8 +248,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public <T extends IResource> T read(final Class<T> theType, UriDt theUrl) {
-		return read(theType, new IdDt(theUrl));
+	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
+		IdDt id = theUrl instanceof IdDt ? ((IdDt)theUrl) : new IdDt(theUrl);
+		return doReadOrVRead(theType, id, false, null, null);
 	}
 
 	@Override

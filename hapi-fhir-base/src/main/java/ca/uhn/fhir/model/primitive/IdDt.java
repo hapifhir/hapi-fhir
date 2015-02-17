@@ -51,7 +51,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * </p>
  */
 @DatatypeDef(name = "id")
-public class IdDt implements IPrimitiveDatatype<String> {
+public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;

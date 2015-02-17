@@ -496,7 +496,7 @@ public class MethodUtil {
 	
 	
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(Method theMethod, Object theProvider) {
+	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -590,7 +590,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter();
 					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParamBinder();
+						param = new TransactionParamBinder(theContext);
 					} else {
 						continue;
 					}

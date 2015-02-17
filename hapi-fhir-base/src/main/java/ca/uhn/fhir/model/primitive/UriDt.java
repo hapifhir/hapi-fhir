@@ -28,10 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "uri")
-public class UriDt extends BasePrimitive<URI> {
+public class UriDt extends BasePrimitive<String> {
 
 	/**
 	 * Creates a new UriDt instance which uses the given OID as the content (and prepends "urn:oid:" to the OID string
@@ -67,8 +66,8 @@ public class UriDt extends BasePrimitive<URI> {
 	}
 
 	@Override
-	protected String encode(URI theValue) {
-		return getValue().toASCIIString();
+	protected String encode(String theValue) {
+		return theValue;
 	}
 
 	@Override
@@ -88,8 +87,8 @@ public class UriDt extends BasePrimitive<URI> {
 			return false;
 		}
 
-		URI normalize = normalize(getValue());
-		URI normalize2 = normalize(other.getValue());
+		String normalize = normalize(getValue());
+		String normalize2 = normalize(other.getValue());
 		return normalize.equals(normalize2);
 	}
 
@@ -107,17 +106,23 @@ public class UriDt extends BasePrimitive<URI> {
 		final int prime = 31;
 		int result = 1;
 
-		URI normalize = normalize(getValue());
+		String normalize = normalize(getValue());
 		result = prime * result + ((normalize == null) ? 0 : normalize.hashCode());
 
 		return result;
 	}
 
-	private URI normalize(URI theValue) {
+	private String normalize(String theValue) {
 		if (theValue == null) {
 			return null;
 		}
-		URI retVal = (theValue.normalize());
+		URI retVal;
+		try {
+			retVal = new URI(theValue).normalize();
+		} catch (URISyntaxException e1) {
+			ourLog.debug("Failed to normalize URL '{}', message was: {}", theValue, e1.toString());
+			return theValue;
+		}
 		String urlString = retVal.toString();
 		if (urlString.endsWith("/") && urlString.length() > 1) {
 			try {
@@ -126,16 +131,12 @@ public class UriDt extends BasePrimitive<URI> {
 				ourLog.debug("Failed to normalize URL '{}', message was: {}", urlString, e.toString());
 			}
 		}
-		return retVal;
+		return retVal.toASCIIString();
 	}
 
 	@Override
-	protected URI parse(String theValue) {
-		try {
-			return new URI(theValue);
-		} catch (URISyntaxException e) {
-			throw new DataFormatException("Unable to parse URI value", e);
-		}
+	protected String parse(String theValue) {
+		return theValue;
 	}
 
 }

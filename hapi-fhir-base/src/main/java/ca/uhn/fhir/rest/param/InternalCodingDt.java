@@ -361,6 +361,11 @@ public class InternalCodingDt
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public StringDt getDisplayElement() {
+		return getDisplay();
+	}
+
   
 
 
