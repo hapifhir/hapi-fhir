@@ -78,8 +78,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	private Class<? extends IResource> myResourceType;
 
 	@SuppressWarnings("unchecked")
-	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theConetxt, Object theProvider) {
-		super(theMethod, theConetxt, theProvider);
+	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+		super(theMethod, theContext, theProvider);
 
 		Class<?> methodReturnType = theMethod.getReturnType();
 		if (Collection.class.isAssignableFrom(methodReturnType)) {
@@ -94,9 +94,9 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			myResourceListCollectionType = collectionType;
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
-			if (theConetxt.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
+			if (Modifier.isAbstract(methodReturnType.getModifiers())==false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
-			}else {
+			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
 			}
 		} else if (Bundle.class.isAssignableFrom(methodReturnType)) {
