@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -257,35 +257,35 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name="ruleset", type={Coding.class}, order=0, min=0, max=1)
+    @Child(name="ruleset", type={Coding.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name="originalRuleset", type={Coding.class}, order=1, min=0, max=1)
+    @Child(name="originalRuleset", type={Coding.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when this resource was created.
      */
-    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name="created", type={DateTimeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
      * The Insurer, organization or Provider who is target  of the submission.
      */
-    @Child(name="target", type={Organization.class, Practitioner.class}, order=3, min=0, max=1)
+    @Child(name="target", type={Organization.class, Practitioner.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Insurer or Provider", formalDefinition="The Insurer, organization or Provider who is target  of the submission." )
     protected Reference target;
 
@@ -297,7 +297,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name="provider", type={Practitioner.class}, order=4, min=0, max=1)
+    @Child(name="provider", type={Practitioner.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference provider;
 
@@ -309,7 +309,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name="organization", type={Organization.class}, order=5, min=0, max=1)
+    @Child(name="organization", type={Organization.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference organization;
 
@@ -321,7 +321,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * Original request.
      */
-    @Child(name="request", type={}, order=6, min=0, max=1)
+    @Child(name="request", type={}, order=7, min=0, max=1)
     @Description(shortDefinition="Request reference", formalDefinition="Original request." )
     protected Reference request;
 
@@ -333,7 +333,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * Original response.
      */
-    @Child(name="response", type={}, order=7, min=0, max=1)
+    @Child(name="response", type={}, order=8, min=0, max=1)
     @Description(shortDefinition="Response reference", formalDefinition="Original response." )
     protected Reference response;
 
@@ -345,7 +345,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * Person who created the submission.
      */
-    @Child(name="author", type={Practitioner.class}, order=8, min=0, max=1)
+    @Child(name="author", type={Practitioner.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Author", formalDefinition="Person who created the submission." )
     protected Reference author;
 
@@ -357,7 +357,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * The patient who is directly or indirectly the subject of the supporting information.
      */
-    @Child(name="subject", type={Patient.class}, order=9, min=0, max=1)
+    @Child(name="subject", type={Patient.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Patient", formalDefinition="The patient who is directly or indirectly the subject of the supporting information." )
     protected Reference subject;
 
@@ -369,7 +369,7 @@ public class SupportingDocumentation extends DomainResource {
     /**
      * Supporting Files.
      */
-    @Child(name="detail", type={}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="detail", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supporting Files", formalDefinition="Supporting Files." )
     protected List<SupportingDocumentationDetailComponent> detail;
 
@@ -912,14 +912,14 @@ public class SupportingDocumentation extends DomainResource {
     return ResourceType.SupportingDocumentation;
    }
 
-  @SearchParamDefinition(name="author", path="SupportingDocumentation.author", description="The person who generated this resource", type="reference" )
-  public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="patient", path="SupportingDocumentation.subject", description="The patient to  whom the documents refer", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="subject", path="SupportingDocumentation.subject", description="The patient to  whom the documents refer", type="reference" )
-  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="identifier", path="SupportingDocumentation.identifier", description="The business identifier of the Eligibility", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="author", path="SupportingDocumentation.author", description="The person who generated this resource", type="reference" )
+  public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="subject", path="SupportingDocumentation.subject", description="The patient to  whom the documents refer", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="SupportingDocumentation.subject", description="The patient to  whom the documents refer", type="reference" )
+  public static final String SP_PATIENT = "patient";
 
 }
 

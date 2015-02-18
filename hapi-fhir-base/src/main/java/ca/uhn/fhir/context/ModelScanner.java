@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +65,6 @@ import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.ICodeEnum;
-import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -321,7 +320,7 @@ class ModelScanner {
 	}
 
 	private void scanCompositeDatatype(Class<? extends ICompositeType> theClass, DatatypeDef theDatatypeDefinition) {
-		ourLog.debug("Scanning resource class: {}", theClass.getName());
+		ourLog.debug("Scanning datatype class: {}", theClass.getName());
 
 		RuntimeCompositeDatatypeDefinition resourceDef;
 		if (theClass.equals(ExtensionDt.class)) {

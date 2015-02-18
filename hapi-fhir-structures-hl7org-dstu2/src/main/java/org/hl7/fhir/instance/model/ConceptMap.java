@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -1092,91 +1092,91 @@ public class ConceptMap extends DomainResource {
     /**
      * The identifier that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI).
      */
-    @Child(name="identifier", type={StringType.class}, order=-1, min=0, max=1)
+    @Child(name="identifier", type={StringType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Logical id to reference this concept map", formalDefinition="The identifier that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)." )
     protected StringType identifier;
 
     /**
      * The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name="version", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name="version", type={StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Logical id for this version of the concept map", formalDefinition="The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name describing the concept map.
      */
-    @Child(name="name", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name="name", type={StringType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Informal name for this concept map", formalDefinition="A free text natural language name describing the concept map." )
     protected StringType name;
 
     /**
      * The name of the individual or organization that published the concept map.
      */
-    @Child(name="publisher", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name="publisher", type={StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the concept map." )
     protected StringType publisher;
 
     /**
      * Contacts of the publisher to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="telecom", type={ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contacts of the publisher to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.
      */
-    @Child(name="description", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Human language description of the concept map", formalDefinition="A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc." )
     protected StringType description;
 
     /**
      * A copyright statement relating to the concept map and/or its contents.
      */
-    @Child(name="copyright", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name="copyright", type={StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="About the concept map or its content", formalDefinition="A copyright statement relating to the concept map and/or its contents." )
     protected StringType copyright;
 
     /**
      * The status of the concept map.
      */
-    @Child(name="status", type={CodeType.class}, order=6, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the concept map." )
     protected Enumeration<ValuesetStatus> status;
 
     /**
      * This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name="experimental", type={BooleanType.class}, order=7, min=0, max=1)
+    @Child(name="experimental", type={BooleanType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The date that the concept map status was last changed.
      */
-    @Child(name="date", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name="date", type={DateTimeType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Date for given status", formalDefinition="The date that the concept map status was last changed." )
     protected DateTimeType date;
 
     /**
      * The source value set that specifies the concepts that are being mapped.
      */
-    @Child(name="source", type={UriType.class, ValueSet.class, Profile.class}, order=9, min=1, max=1)
+    @Child(name="source", type={UriType.class, ValueSet.class, Profile.class}, order=10, min=1, max=1)
     @Description(shortDefinition="Identifies the source of the concepts which are being mapped", formalDefinition="The source value set that specifies the concepts that are being mapped." )
     protected Type source;
 
     /**
      * The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.
      */
-    @Child(name="target", type={UriType.class, ValueSet.class, Profile.class}, order=10, min=1, max=1)
+    @Child(name="target", type={UriType.class, ValueSet.class, Profile.class}, order=11, min=1, max=1)
     @Description(shortDefinition="Provides context to the mappings", formalDefinition="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made." )
     protected Type target;
 
     /**
      * Mappings for an individual concept in the source to one or more concepts in the target.
      */
-    @Child(name="element", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="element", type={}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Mappings for a concept from the source set", formalDefinition="Mappings for an individual concept in the source to one or more concepts in the target." )
     protected List<ConceptMapElementComponent> element;
 
@@ -1849,30 +1849,30 @@ public class ConceptMap extends DomainResource {
     return ResourceType.ConceptMap;
    }
 
-  @SearchParamDefinition(name="product", path="ConceptMap.element.map.product.element", description="Reference to element/field/valueset mapping depends on", type="token" )
-  public static final String SP_PRODUCT = "product";
-  @SearchParamDefinition(name="dependson", path="ConceptMap.element.dependsOn.element", description="Reference to element/field/valueset mapping depends on", type="token" )
-  public static final String SP_DEPENDSON = "dependson";
-  @SearchParamDefinition(name="system", path="ConceptMap.element.map.codeSystem", description="The system for any destination concepts mapped by this map", type="token" )
-  public static final String SP_SYSTEM = "system";
-  @SearchParamDefinition(name="source", path="ConceptMap.source[x]", description="The system for any concepts mapped by this concept map", type="reference" )
-  public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="target", path="ConceptMap.target[x]", description="Provides context to the mappings", type="reference" )
-  public static final String SP_TARGET = "target";
   @SearchParamDefinition(name="date", path="ConceptMap.date", description="The concept map publication date", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="The identifier of the concept map", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="product", path="ConceptMap.element.map.product.element", description="Reference to element/field/valueset mapping depends on", type="token" )
+  public static final String SP_PRODUCT = "product";
+  @SearchParamDefinition(name="system", path="ConceptMap.element.map.codeSystem", description="The system for any destination concepts mapped by this map", type="token" )
+  public static final String SP_SYSTEM = "system";
+  @SearchParamDefinition(name="dependson", path="ConceptMap.element.dependsOn.element", description="Reference to element/field/valueset mapping depends on", type="token" )
+  public static final String SP_DEPENDSON = "dependson";
+  @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
+  public static final String SP_NAME = "name";
   @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="source", path="ConceptMap.source[x]", description="The system for any concepts mapped by this concept map", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
   public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="target", path="ConceptMap.target[x]", description="Provides context to the mappings", type="reference" )
+  public static final String SP_TARGET = "target";
 
 }
 

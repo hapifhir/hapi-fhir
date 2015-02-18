@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -1124,28 +1124,28 @@ public class Specimen extends DomainResource {
     /**
      * Id for specimen.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Identifier", formalDefinition="Id for specimen." )
     protected List<Identifier> identifier;
 
     /**
      * Kind of material that forms the specimen.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=0, min=0, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Kind of material that forms the specimen", formalDefinition="Kind of material that forms the specimen." )
     protected CodeableConcept type;
 
     /**
      * Parent specimen from which the focal specimen was a component.
      */
-    @Child(name="source", type={}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="source", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Parent of specimen", formalDefinition="Parent specimen from which the focal specimen was a component." )
     protected List<SpecimenSourceComponent> source;
 
     /**
      * Where the specimen came from. This may be from the patient(s) or from the environment or a device.
      */
-    @Child(name="subject", type={Patient.class, Group.class, Device.class, Substance.class}, order=2, min=1, max=1)
+    @Child(name="subject", type={Patient.class, Group.class, Device.class, Substance.class}, order=3, min=1, max=1)
     @Description(shortDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device", formalDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device." )
     protected Reference subject;
 
@@ -1157,35 +1157,35 @@ public class Specimen extends DomainResource {
     /**
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      */
-    @Child(name="accessionIdentifier", type={Identifier.class}, order=3, min=0, max=1)
+    @Child(name="accessionIdentifier", type={Identifier.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Identifier assigned by the lab", formalDefinition="The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures." )
     protected Identifier accessionIdentifier;
 
     /**
      * Time when specimen was received for processing or testing.
      */
-    @Child(name="receivedTime", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name="receivedTime", type={DateTimeType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="The time when specimen was received for processing", formalDefinition="Time when specimen was received for processing or testing." )
     protected DateTimeType receivedTime;
 
     /**
      * Details concerning the specimen collection.
      */
-    @Child(name="collection", type={}, order=5, min=0, max=1)
+    @Child(name="collection", type={}, order=6, min=0, max=1)
     @Description(shortDefinition="Collection details", formalDefinition="Details concerning the specimen collection." )
     protected SpecimenCollectionComponent collection;
 
     /**
      * Details concerning treatment and processing steps for the specimen.
      */
-    @Child(name="treatment", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="treatment", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Treatment and processing step details", formalDefinition="Details concerning treatment and processing steps for the specimen." )
     protected List<SpecimenTreatmentComponent> treatment;
 
     /**
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      */
-    @Child(name="container", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="container", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Direct container of specimen (tube/slide, etc)", formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here." )
     protected List<SpecimenContainerComponent> container;
 
@@ -1564,28 +1564,28 @@ public class Specimen extends DomainResource {
     return ResourceType.Specimen;
    }
 
-  @SearchParamDefinition(name="site", path="Specimen.collection.bodySite[x]", description="The source or body site from where the specimen came", type="token" )
-  public static final String SP_SITE = "site";
-  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
-  public static final String SP_COLLECTOR = "collector";
-  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="Specimen.source.target", description="The parent of the specimen", type="reference" )
-  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token" )
   public static final String SP_CONTAINER = "container";
-  @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
-  public static final String SP_COLLECTED = "collected";
+  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="site", path="Specimen.collection.bodySite[x]", description="The source or body site from where the specimen came", type="token" )
+  public static final String SP_SITE = "site";
   @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
-  public static final String SP_CONTAINERID = "containerid";
+  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
+  public static final String SP_COLLECTED = "collected";
+  @SearchParamDefinition(name="source", path="Specimen.source.target", description="The parent of the specimen", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
   public static final String SP_ACCESSION = "accession";
   @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
+  public static final String SP_CONTAINERID = "containerid";
+  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
+  public static final String SP_COLLECTOR = "collector";
 
 }
 

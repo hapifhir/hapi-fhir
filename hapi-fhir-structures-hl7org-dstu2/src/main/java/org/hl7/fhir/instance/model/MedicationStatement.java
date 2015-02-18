@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -519,14 +519,14 @@ public class MedicationStatement extends DomainResource {
     /**
      * External identifier - FHIR will generate its own internal IDs (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Identifier", formalDefinition="External identifier - FHIR will generate its own internal IDs (probably URLs) which do not need to be explicitly managed by the resource.  The identifier here is one that would be used by another non-FHIR system - for example an automated medication pump would provide a record each time it operated; an administration while the patient was off the ward might be made with a different system and entered after the event.  Particularly important if these records have to be updated." )
     protected List<Identifier> identifier;
 
     /**
      * The person or animal who is /was taking the medication.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=0, max=1)
+    @Child(name="patient", type={Patient.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Who was/is taking medication", formalDefinition="The person or animal who is /was taking the medication." )
     protected Reference patient;
 
@@ -538,7 +538,7 @@ public class MedicationStatement extends DomainResource {
     /**
      * The person who provided the information about the taking of this medication.
      */
-    @Child(name="informationSource", type={Patient.class, Practitioner.class, RelatedPerson.class}, order=1, min=0, max=1)
+    @Child(name="informationSource", type={Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=0, max=1)
     @Description(shortDefinition="", formalDefinition="The person who provided the information about the taking of this medication." )
     protected Reference informationSource;
 
@@ -550,56 +550,56 @@ public class MedicationStatement extends DomainResource {
     /**
      * The date when the medication statement was asserted by the information source.
      */
-    @Child(name="dateAsserted", type={DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name="dateAsserted", type={DateTimeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="When the statement was asserted?", formalDefinition="The date when the medication statement was asserted by the information source." )
     protected DateTimeType dateAsserted;
 
     /**
      * A code specifying the state of the statement.  Generally this will be in-progress or completed state.
      */
-    @Child(name="status", type={CodeType.class}, order=3, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="in-progress | completed | entered-in-error", formalDefinition="A code specifying the state of the statement.  Generally this will be in-progress or completed state." )
     protected Enumeration<MedicationStatementStatus> status;
 
     /**
      * Set this to true if the record is saying that the medication was NOT taken.
      */
-    @Child(name="wasNotGiven", type={BooleanType.class}, order=4, min=0, max=1)
+    @Child(name="wasNotGiven", type={BooleanType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="True if medication is/was not being taken", formalDefinition="Set this to true if the record is saying that the medication was NOT taken." )
     protected BooleanType wasNotGiven;
 
     /**
      * A code indicating why the medication was not taken.
      */
-    @Child(name="reasonNotGiven", type={CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="reasonNotGiven", type={CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="True if asserting medication was not given", formalDefinition="A code indicating why the medication was not taken." )
     protected List<CodeableConcept> reasonNotGiven;
 
     /**
      * A reason for why the medication is being/was taken.
      */
-    @Child(name="reasonForUse", type={CodeableConcept.class, Condition.class}, order=6, min=0, max=1)
+    @Child(name="reasonForUse", type={CodeableConcept.class, Condition.class}, order=7, min=0, max=1)
     @Description(shortDefinition="", formalDefinition="A reason for why the medication is being/was taken." )
     protected Type reasonForUse;
 
     /**
      * The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the 'wasNotGiven' attribute is true).
      */
-    @Child(name="effective", type={DateTimeType.class, Period.class}, order=7, min=0, max=1)
+    @Child(name="effective", type={DateTimeType.class, Period.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Over what period was medication consumed?", formalDefinition="The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the 'wasNotGiven' attribute is true)." )
     protected Type effective;
 
     /**
      * Provides extra information about the medication statement that is not conveyed by the other attributes.
      */
-    @Child(name="note", type={StringType.class}, order=8, min=0, max=1)
+    @Child(name="note", type={StringType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Further information about the statement", formalDefinition="Provides extra information about the medication statement that is not conveyed by the other attributes." )
     protected StringType note;
 
     /**
      * Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
      */
-    @Child(name="medication", type={Medication.class}, order=9, min=0, max=1)
+    @Child(name="medication", type={Medication.class}, order=10, min=0, max=1)
     @Description(shortDefinition="What medication was taken?", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
     protected Reference medication;
 
@@ -611,7 +611,7 @@ public class MedicationStatement extends DomainResource {
     /**
      * Indicates how the medication is/was used by the patient.
      */
-    @Child(name="dosage", type={}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="dosage", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
     protected List<MedicationStatementDosageComponent> dosage;
 
@@ -1194,16 +1194,16 @@ public class MedicationStatement extends DomainResource {
     return ResourceType.MedicationStatement;
    }
 
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference" )
-  public static final String SP_MEDICATION = "medication";
-  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="string" )
-  public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference" )
+  public static final String SP_MEDICATION = "medication";
   @SearchParamDefinition(name="effectivedate", path="MedicationStatement.effective[x]", description="Date when patient was taking (or not taking) the medication", type="date" )
   public static final String SP_EFFECTIVEDATE = "effectivedate";
+  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="string" )
+  public static final String SP_STATUS = "status";
 
 }
 

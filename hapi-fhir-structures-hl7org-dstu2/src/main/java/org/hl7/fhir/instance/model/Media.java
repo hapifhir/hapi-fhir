@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -134,35 +134,35 @@ public class Media extends DomainResource {
     /**
      * Whether the media is a photo (still image), an audio recording, or a video recording.
      */
-    @Child(name="type", type={CodeType.class}, order=-1, min=1, max=1)
+    @Child(name="type", type={CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="photo | video | audio", formalDefinition="Whether the media is a photo (still image), an audio recording, or a video recording." )
     protected Enumeration<MediaType> type;
 
     /**
      * Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.
      */
-    @Child(name="subtype", type={CodeableConcept.class}, order=0, min=0, max=1)
+    @Child(name="subtype", type={CodeableConcept.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The type of acquisition equipment/process", formalDefinition="Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality." )
     protected CodeableConcept subtype;
 
     /**
      * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.
      */
-    @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifier(s) for the image", formalDefinition="Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers." )
     protected List<Identifier> identifier;
 
     /**
      * The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
      */
-    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name="created", type={DateTimeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="When the media was taken/recorded (start)", formalDefinition="The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording." )
     protected DateTimeType created;
 
     /**
      * Who/What this Media is a record of.
      */
-    @Child(name="subject", type={Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order=3, min=0, max=1)
+    @Child(name="subject", type={Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Who/What this Media is a record of", formalDefinition="Who/What this Media is a record of." )
     protected Reference subject;
 
@@ -174,7 +174,7 @@ public class Media extends DomainResource {
     /**
      * The person who administered the collection of the image.
      */
-    @Child(name="operator", type={Practitioner.class}, order=4, min=0, max=1)
+    @Child(name="operator", type={Practitioner.class}, order=5, min=0, max=1)
     @Description(shortDefinition="The person who generated the image", formalDefinition="The person who administered the collection of the image." )
     protected Reference operator;
 
@@ -186,49 +186,49 @@ public class Media extends DomainResource {
     /**
      * The name of the imaging view e.g Lateral or Antero-posterior (AP).
      */
-    @Child(name="view", type={CodeableConcept.class}, order=5, min=0, max=1)
+    @Child(name="view", type={CodeableConcept.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Imaging view e.g Lateral or Antero-posterior", formalDefinition="The name of the imaging view e.g Lateral or Antero-posterior (AP)." )
     protected CodeableConcept view;
 
     /**
      * The name of the device / manufacturer of the device  that was used to make the recording.
      */
-    @Child(name="deviceName", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name="deviceName", type={StringType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Name of the device/manufacturer", formalDefinition="The name of the device / manufacturer of the device  that was used to make the recording." )
     protected StringType deviceName;
 
     /**
      * Height of the image in pixels(photo/video).
      */
-    @Child(name="height", type={IntegerType.class}, order=7, min=0, max=1)
+    @Child(name="height", type={IntegerType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Height of the image in pixels(photo/video)", formalDefinition="Height of the image in pixels(photo/video)." )
     protected IntegerType height;
 
     /**
      * Width of the image in pixels (photo/video).
      */
-    @Child(name="width", type={IntegerType.class}, order=8, min=0, max=1)
+    @Child(name="width", type={IntegerType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Width of the image in pixels (photo/video)", formalDefinition="Width of the image in pixels (photo/video)." )
     protected IntegerType width;
 
     /**
      * The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.
      */
-    @Child(name="frames", type={IntegerType.class}, order=9, min=0, max=1)
+    @Child(name="frames", type={IntegerType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Number of frames if > 1 (photo)", formalDefinition="The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required." )
     protected IntegerType frames;
 
     /**
      * The duration of the recording in seconds - for audio and video.
      */
-    @Child(name="duration", type={IntegerType.class}, order=10, min=0, max=1)
+    @Child(name="duration", type={IntegerType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="Length in seconds (audio / video)", formalDefinition="The duration of the recording in seconds - for audio and video." )
     protected IntegerType duration;
 
     /**
      * The actual content of the media - inline or by direct reference to the media source file.
      */
-    @Child(name="content", type={Attachment.class}, order=11, min=1, max=1)
+    @Child(name="content", type={Attachment.class}, order=12, min=1, max=1)
     @Description(shortDefinition="Actual Media - reference or data", formalDefinition="The actual content of the media - inline or by direct reference to the media source file." )
     protected Attachment content;
 
@@ -836,20 +836,20 @@ public class Media extends DomainResource {
     return ResourceType.Media;
    }
 
-  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view e.g Lateral or Antero-posterior", type="token" )
+  public static final String SP_VIEW = "view";
+  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
+  public static final String SP_SUBTYPE = "subtype";
   @SearchParamDefinition(name="created", path="Media.created", description="When the media was taken/recorded (start)", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
-  public static final String SP_SUBTYPE = "subtype";
-  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view e.g Lateral or Antero-posterior", type="token" )
-  public static final String SP_VIEW = "view";
+  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference" )
   public static final String SP_OPERATOR = "operator";
 

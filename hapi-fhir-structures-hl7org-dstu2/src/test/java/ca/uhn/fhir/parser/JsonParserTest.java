@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.Conformance;
+import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.Extension;
@@ -32,6 +33,7 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.List_;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
@@ -63,7 +65,7 @@ public class JsonParserTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("foo").setValue("bar");
 		p.getText().setStatus(NarrativeStatus.GENERATED);
-		p.getText().setDiv("<div>hello</div>");
+		p.getText().setDivAsString("<div>hello</div>");
 
 		Bundle b = new Bundle();
 		b.setTotal(123);
@@ -73,7 +75,7 @@ public class JsonParserTest {
 		ourLog.info(out);
 		assertThat(out, containsString("<div>hello</div>"));
 
-		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
+		p.getText().setDivAsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
 		out = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(out);
 		// Backslashes need to be escaped because they are in a JSON value
@@ -262,14 +264,14 @@ public class JsonParserTest {
 	public void testNestedContainedResources() {
 
 		Observation A = new Observation();
-		A.getName().setText("A");
+		A.getCode().setText("A");
 
 		Observation B = new Observation();
-		B.getName().setText("B");
+		B.getCode().setText("B");
 		A.addRelated().setTarget(new Reference(B));
 
 		Observation C = new Observation();
-		C.getName().setText("C");
+		C.getCode().setText("C");
 		B.addRelated().setTarget(new Reference(C));
 
 		String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
@@ -285,13 +287,13 @@ public class JsonParserTest {
 		assertEquals(-1, idx1);
 
 		Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
-		assertEquals("A", obs.getName().getTextElement().getValue());
+		assertEquals("A", obs.getCode().getTextElement().getValue());
 
 		Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
-		assertEquals("B", obsB.getName().getTextElement().getValue());
+		assertEquals("B", obsB.getCode().getTextElement().getValue());
 
 		Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
-		assertEquals("C", obsC.getName().getTextElement().getValue());
+		assertEquals("C", obsC.getCode().getTextElement().getValue());
 
 	}
 
@@ -470,13 +472,13 @@ public class JsonParserTest {
 		// Create an organization, note that the organization does not have an ID
 		Organization org = new Organization();
 		org.getNameElement().setValue("Contained Test Organization");
-		org.getText().setDiv("<div>FOOBAR</div>");
+		org.getText().setDivAsString("<div>FOOBAR</div>");
 
 		// Create a patient
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue( "253345");
-		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getText().setDivAsString("<div>BARFOO</div>");
 		patient.getManagingOrganization().setResource(org);
 
 		String encoded = parser.encodeResourceToString(patient);
@@ -597,7 +599,7 @@ public class JsonParserTest {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
-		rpt.getText().setDiv("AAA");
+		rpt.getText().setDivAsString("AAA");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);
@@ -677,6 +679,7 @@ public class JsonParserTest {
 		code.setDisplay("someDisplay");
 		code.addExtension().setUrl("urn:alt").setValue( new StringType("alt name"));
 
+		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
 		ourLog.info(encoded);
 
@@ -687,6 +690,59 @@ public class JsonParserTest {
 
 	}
 
+	
+	@Test
+	public void testMoreExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		Extension ext = new Extension();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
+
+		// Add the extension to the resource
+		patient.getExtension().add(ext);
+		// END SNIPPET: resourceExtension
+
+		// START SNIPPET: resourceStringExtension
+		HumanName name = patient.addName();
+		name.addFamily("Shmoe");
+		StringType given = name.addGivenElement();
+		given.setValue("Joe");
+		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
+		given.getExtension().add(ext2);
+
+		StringType given2 = name.addGivenElement();
+		given2.setValue("Shmoe");
+		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
+		given2.getExtension().add(given2ext);
+		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
+		// END SNIPPET: resourceStringExtension
+
+		// START SNIPPET: subExtension
+		Extension parent = new Extension().setUrl("http://example.com#parent");
+		patient.getExtension().add(parent);
+
+		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		parent.getExtension().add(child1);
+
+		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		parent.getExtension().add(child2);
+		// END SNIPPET: subExtension
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension><url value=\"http://example.com/extensions#someext\"/><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(
+				enc,
+				containsString("<extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><url value=\"http://example.com#parent\"/></extension>"));
+		assertThat(enc, containsString("<given value=\"Joe\"><extension><url value=\"http://examples.com#givenext\"/><valueString value=\"given\"/></extension></given>"));
+	}
+
+	
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
 		IParser parser = new FhirContext().newJsonParser();
@@ -940,7 +996,7 @@ public class JsonParserTest {
 		Reference reference = res.getResult().get(1);
 		Observation obs = (Observation) reference.getResource();
 
-		assertEquals("789-8", obs.getName().getCoding().get(0).getCode());
+		assertEquals("789-8", obs.getCode().getCoding().get(0).getCode());
 	}
 
 	@BeforeClass

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -393,35 +393,35 @@ public class BodySite extends DomainResource {
     /**
      * Identifier for this instance of the anatomical location.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Bodysite identifier", formalDefinition="Identifier for this instance of the anatomical location." )
     protected List<Identifier> identifier;
 
     /**
      * The Specific and identified anatomical location.
      */
-    @Child(name="specificLocation", type={}, order=0, min=0, max=1)
+    @Child(name="specificLocation", type={}, order=1, min=0, max=1)
     @Description(shortDefinition="Specific anatomical location", formalDefinition="The Specific and identified anatomical location." )
     protected BodySiteSpecificLocationComponent specificLocation;
 
     /**
      * Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference.
      */
-    @Child(name="relativeLocation", type={}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="relativeLocation", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Relative anatomical location(s)", formalDefinition="Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference." )
     protected List<BodySiteRelativeLocationComponent> relativeLocation;
 
     /**
      * Description of anatomical location.
      */
-    @Child(name="description", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name="description", type={StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="The Description of anatomical location", formalDefinition="Description of anatomical location." )
     protected StringType description;
 
     /**
      * Image or images used to identify a location.
      */
-    @Child(name="image", type={Attachment.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="image", type={Attachment.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Attached images", formalDefinition="Image or images used to identify a location." )
     protected List<Attachment> image;
 

@@ -2,7 +2,9 @@ package org.hl7.fhir.instance.model.api;
 
 import java.util.Date;
 
-public interface IMetaType {
+import org.hl7.fhir.instance.model.ICompositeType;
+
+public interface IMetaType extends ICompositeType {
 
 	ICoding addTag();
 

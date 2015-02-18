@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -765,14 +765,14 @@ public class Contract extends DomainResource {
     /**
      * Unique Id for this contract.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contract identifier", formalDefinition="Unique Id for this contract." )
     protected List<Identifier> identifier;
 
     /**
      * Who and/or what this is about: typically Patient, Organization, property.
      */
-    @Child(name="subject", type={}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="subject", type={}, order=1, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Subject", formalDefinition="Who and/or what this is about: typically Patient, Organization, property." )
     protected List<Reference> subject;
     /**
@@ -784,7 +784,7 @@ public class Contract extends DomainResource {
     /**
      * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
      */
-    @Child(name="authority", type={Organization.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="authority", type={Organization.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Authority", formalDefinition="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action. Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc." )
     protected List<Reference> authority;
     /**
@@ -796,7 +796,7 @@ public class Contract extends DomainResource {
     /**
      * A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations.
      */
-    @Child(name="domain", type={Location.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="domain", type={Location.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Domain", formalDefinition="A Location includes both incidental locations (a place which is used for healthcare without prior designation or authorization) and dedicated, formally appointed locations." )
     protected List<Reference> domain;
     /**
@@ -808,70 +808,70 @@ public class Contract extends DomainResource {
     /**
      * Type of contract (Privacy-Security, Agreement, Insurance).
      */
-    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Type of contract", formalDefinition="Type of contract (Privacy-Security, Agreement, Insurance)." )
     protected CodeableConcept type;
 
     /**
      * More specific type of contract (Privacy, Disclosure-Authorization, Advanced-Directive, DNR, Authorization-to-Treat).
      */
-    @Child(name="subtype", type={CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="subtype", type={CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Subtype of contract", formalDefinition="More specific type of contract (Privacy, Disclosure-Authorization, Advanced-Directive, DNR, Authorization-to-Treat)." )
     protected List<CodeableConcept> subtype;
 
     /**
      * When this was issued.
      */
-    @Child(name="issued", type={DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name="issued", type={DateTimeType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="When this was issued", formalDefinition="When this was issued." )
     protected DateTimeType issued;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="applies", type={Period.class}, order=6, min=0, max=1)
+    @Child(name="applies", type={Period.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Effective time", formalDefinition="Relevant time/time-period when applicable." )
     protected Period applies;
 
     /**
      * The number of repetitions of a service or product.
      */
-    @Child(name="quantity", type={Quantity.class}, order=7, min=0, max=1)
+    @Child(name="quantity", type={Quantity.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
     protected Quantity quantity;
 
     /**
      * The unit price product.
      */
-    @Child(name="unitPrice", type={Money.class}, order=8, min=0, max=1)
+    @Child(name="unitPrice", type={Money.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="The unit price product." )
     protected Money unitPrice;
 
     /**
      * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
      */
-    @Child(name="factor", type={DecimalType.class}, order=9, min=0, max=1)
+    @Child(name="factor", type={DecimalType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
     protected DecimalType factor;
 
     /**
      * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point.
      */
-    @Child(name="points", type={DecimalType.class}, order=10, min=0, max=1)
+    @Child(name="points", type={DecimalType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="Difficulty scaling factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point." )
     protected DecimalType points;
 
     /**
      * The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
      */
-    @Child(name="net", type={Money.class}, order=11, min=0, max=1)
+    @Child(name="net", type={Money.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
     protected Money net;
 
     /**
      * Contract author or responsible party.
      */
-    @Child(name="author", type={Practitioner.class, RelatedPerson.class, Organization.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="author", type={Practitioner.class, RelatedPerson.class, Organization.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contract author or responsible party", formalDefinition="Contract author or responsible party." )
     protected List<Reference> author;
     /**
@@ -883,7 +883,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="grantor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="grantor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="First Party or delegator", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> grantor;
     /**
@@ -895,7 +895,7 @@ public class Contract extends DomainResource {
     /**
      * The Second party to the contract, may be the party who accepts obligations or be that to which rights are delegated.
      */
-    @Child(name="grantee", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="grantee", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Second Party or delegatee", formalDefinition="The Second party to the contract, may be the party who accepts obligations or be that to which rights are delegated." )
     protected List<Reference> grantee;
     /**
@@ -907,7 +907,7 @@ public class Contract extends DomainResource {
     /**
      * Who witnesses the contract.
      */
-    @Child(name="witness", type={Practitioner.class, RelatedPerson.class, Patient.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="witness", type={Practitioner.class, RelatedPerson.class, Patient.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Witness to the contract", formalDefinition="Who witnesses the contract." )
     protected List<Reference> witness;
     /**
@@ -919,7 +919,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="executor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="executor", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Trustee", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> executor;
     /**
@@ -931,7 +931,7 @@ public class Contract extends DomainResource {
     /**
      * First Party to the contract, may be the party who confers or delegates the rights defined in the contract.
      */
-    @Child(name="notary", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="notary", type={Practitioner.class, RelatedPerson.class, Organization.class, Patient.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Notary Public", formalDefinition="First Party to the contract, may be the party who confers or delegates the rights defined in the contract." )
     protected List<Reference> notary;
     /**
@@ -943,70 +943,70 @@ public class Contract extends DomainResource {
     /**
      * List or contract signatures.
      */
-    @Child(name="signer", type={}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="signer", type={}, order=19, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Signer", formalDefinition="List or contract signatures." )
     protected List<ContractSignerComponent> signer;
 
     /**
      * The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time.
      */
-    @Child(name="term", type={}, order=19, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="term", type={}, order=20, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="The terms of the Contract", formalDefinition="The itemized terms of the contract. The legal clause or conditions of the Contract that requires or prevents either one or both parties to perform a particular requirement by some specified time." )
     protected List<ContractTermComponent> term;
 
     /**
      * Legally binding contract.
      */
-    @Child(name="binding", type={Attachment.class}, order=20, min=0, max=1)
+    @Child(name="binding", type={Attachment.class}, order=21, min=0, max=1)
     @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding contract." )
     protected Attachment binding;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="bindingDateTime", type={DateTimeType.class}, order=21, min=0, max=1)
+    @Child(name="bindingDateTime", type={DateTimeType.class}, order=22, min=0, max=1)
     @Description(shortDefinition="Binding Contract effective time", formalDefinition="Relevant time/time-period when applicable." )
     protected DateTimeType bindingDateTime;
 
     /**
      * Friendly Human readable form (might be a reference to the UI used to capture the contract).
      */
-    @Child(name="friendly", type={Attachment.class}, order=22, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="friendly", type={Attachment.class}, order=23, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Human readable contract text", formalDefinition="Friendly Human readable form (might be a reference to the UI used to capture the contract)." )
     protected List<Attachment> friendly;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="friendlyDateTime", type={DateTimeType.class}, order=23, min=0, max=1)
+    @Child(name="friendlyDateTime", type={DateTimeType.class}, order=24, min=0, max=1)
     @Description(shortDefinition="Human readable contract text effective time", formalDefinition="Relevant time/time-period when applicable." )
     protected DateTimeType friendlyDateTime;
 
     /**
      * Legal text in Human readable form.
      */
-    @Child(name="legal", type={Attachment.class}, order=24, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="legal", type={Attachment.class}, order=25, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Legal contract text", formalDefinition="Legal text in Human readable form." )
     protected List<Attachment> legal;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="legalDateTime", type={DateTimeType.class}, order=25, min=0, max=1)
+    @Child(name="legalDateTime", type={DateTimeType.class}, order=26, min=0, max=1)
     @Description(shortDefinition="Legal contract text date time", formalDefinition="Relevant time/time-period when applicable." )
     protected DateTimeType legalDateTime;
 
     /**
      * Computable Policy rules (e.g. XACML, DKAL, SecPal).
      */
-    @Child(name="rule", type={Attachment.class}, order=26, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="rule", type={Attachment.class}, order=27, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Computable contract text", formalDefinition="Computable Policy rules (e.g. XACML, DKAL, SecPal)." )
     protected List<Attachment> rule;
 
     /**
      * Relevant time/time-period when applicable.
      */
-    @Child(name="ruleDateTime", type={DateTimeType.class}, order=27, min=0, max=1)
+    @Child(name="ruleDateTime", type={DateTimeType.class}, order=28, min=0, max=1)
     @Description(shortDefinition="Computable contract text effect time", formalDefinition="Relevant time/time-period when applicable." )
     protected DateTimeType ruleDateTime;
 
@@ -2277,10 +2277,10 @@ public class Contract extends DomainResource {
     return ResourceType.Contract;
    }
 
-  @SearchParamDefinition(name="patient", path="Contract.subject", description="The identity of the target of the contract (if a patient)", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="subject", path="Contract.subject", description="The identity of the target of the contract", type="reference" )
   public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="Contract.subject", description="The identity of the target of the contract (if a patient)", type="reference" )
+  public static final String SP_PATIENT = "patient";
 
 }
 

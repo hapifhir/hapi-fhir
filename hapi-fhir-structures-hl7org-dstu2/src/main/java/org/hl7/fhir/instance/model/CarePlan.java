@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -1855,14 +1855,14 @@ public class CarePlan extends DomainResource {
     /**
      * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this plan", formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the patient/subject whose intended care is described by the plan.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=0, max=1)
+    @Child(name="patient", type={Patient.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Who care plan is for", formalDefinition="Identifies the patient/subject whose intended care is described by the plan." )
     protected Reference patient;
 
@@ -1874,28 +1874,28 @@ public class CarePlan extends DomainResource {
     /**
      * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="planned | active | completed", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record." )
     protected Enumeration<CarePlanStatus> status;
 
     /**
      * Indicates when the plan did (or is intended to) come into effect and end.
      */
-    @Child(name="period", type={Period.class}, order=2, min=0, max=1)
+    @Child(name="period", type={Period.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Time period plan covers", formalDefinition="Indicates when the plan did (or is intended to) come into effect and end." )
     protected Period period;
 
     /**
      * Identifies the most recent date on which the plan has been revised.
      */
-    @Child(name="modified", type={DateTimeType.class}, order=3, min=0, max=1)
+    @Child(name="modified", type={DateTimeType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="When last updated", formalDefinition="Identifies the most recent date on which the plan has been revised." )
     protected DateTimeType modified;
 
     /**
      * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
      */
-    @Child(name="concern", type={Condition.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="concern", type={Condition.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Health issues this plan addresses", formalDefinition="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan." )
     protected List<Reference> concern;
     /**
@@ -1907,28 +1907,28 @@ public class CarePlan extends DomainResource {
     /**
      * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
      */
-    @Child(name="participant", type={}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="participant", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who's involved in plan?", formalDefinition="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan." )
     protected List<CarePlanParticipantComponent> participant;
 
     /**
      * Describes the intended objective(s) of carrying out the Care Plan.
      */
-    @Child(name="goal", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="goal", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Desired outcome of plan", formalDefinition="Describes the intended objective(s) of carrying out the Care Plan." )
     protected List<CarePlanGoalComponent> goal;
 
     /**
      * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
      */
-    @Child(name="activity", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="activity", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Action to occur as part of plan", formalDefinition="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc." )
     protected List<CarePlanActivityComponent> activity;
 
     /**
      * General notes about the care plan not covered elsewhere.
      */
-    @Child(name="notes", type={StringType.class}, order=8, min=0, max=1)
+    @Child(name="notes", type={StringType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Comments about the plan", formalDefinition="General notes about the care plan not covered elsewhere." )
     protected StringType notes;
 
@@ -2416,20 +2416,20 @@ public class CarePlan extends DomainResource {
     return ResourceType.CarePlan;
    }
 
-  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="Detail type of activity", type="token" )
-  public static final String SP_ACTIVITYCODE = "activitycode";
-  @SearchParamDefinition(name="patient", path="CarePlan.patient", description="Who care plan is for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="condition", path="CarePlan.concern", description="Health issues this plan addresses", type="reference" )
-  public static final String SP_CONDITION = "condition";
-  @SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="Activity details defined in specific resource", type="reference" )
-  public static final String SP_ACTIVITYDETAIL = "activitydetail";
-  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.scheduled[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
-  public static final String SP_ACTIVITYDATE = "activitydate";
-  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
-  public static final String SP_PARTICIPANT = "participant";
   @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date" )
   public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="Detail type of activity", type="token" )
+  public static final String SP_ACTIVITYCODE = "activitycode";
+  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.scheduled[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
+  public static final String SP_ACTIVITYDATE = "activitydate";
+  @SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="Activity details defined in specific resource", type="reference" )
+  public static final String SP_ACTIVITYDETAIL = "activitydetail";
+  @SearchParamDefinition(name="condition", path="CarePlan.concern", description="Health issues this plan addresses", type="reference" )
+  public static final String SP_CONDITION = "condition";
+  @SearchParamDefinition(name="patient", path="CarePlan.patient", description="Who care plan is for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
+  public static final String SP_PARTICIPANT = "participant";
 
 }
 

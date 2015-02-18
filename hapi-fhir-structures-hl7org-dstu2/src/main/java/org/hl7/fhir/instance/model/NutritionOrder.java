@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -47,23 +47,31 @@ public class NutritionOrder extends DomainResource {
 
     public enum NutritionOrderStatus {
         /**
-         * TODO.
+         * The request has been proposed.
+         */
+        PROPOSED, 
+        /**
+         * The request has been planned.
+         */
+        PLANNED, 
+        /**
+         * The request has been placed.
          */
         REQUESTED, 
         /**
-         * TODO.
+         * The request is 'actionable', but not all actions that are implied by it have occurred yet.
          */
         ACTIVE, 
         /**
-         * TODO.
+         * ???.
          */
         INACTIVE, 
         /**
-         * TODO.
+         * Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called "suspended".
          */
         HELD, 
         /**
-         * TODO.
+         * ???.
          */
         CANCELLED, 
         /**
@@ -73,6 +81,10 @@ public class NutritionOrder extends DomainResource {
         public static NutritionOrderStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("proposed".equals(codeString))
+          return PROPOSED;
+        if ("planned".equals(codeString))
+          return PLANNED;
         if ("requested".equals(codeString))
           return REQUESTED;
         if ("active".equals(codeString))
@@ -87,6 +99,8 @@ public class NutritionOrder extends DomainResource {
         }
         public String toCode() {
           switch (this) {
+            case PROPOSED: return "proposed";
+            case PLANNED: return "planned";
             case REQUESTED: return "requested";
             case ACTIVE: return "active";
             case INACTIVE: return "inactive";
@@ -97,6 +111,8 @@ public class NutritionOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
+            case PROPOSED: return "";
+            case PLANNED: return "";
             case REQUESTED: return "";
             case ACTIVE: return "";
             case INACTIVE: return "";
@@ -107,21 +123,25 @@ public class NutritionOrder extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case REQUESTED: return "TODO.";
-            case ACTIVE: return "TODO.";
-            case INACTIVE: return "TODO.";
-            case HELD: return "TODO.";
-            case CANCELLED: return "TODO.";
+            case PROPOSED: return "The request has been proposed.";
+            case PLANNED: return "The request has been planned.";
+            case REQUESTED: return "The request has been placed.";
+            case ACTIVE: return "The request is 'actionable', but not all actions that are implied by it have occurred yet.";
+            case INACTIVE: return "???.";
+            case HELD: return "Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
+            case CANCELLED: return "???.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case REQUESTED: return "Requested";
-            case ACTIVE: return "Active";
-            case INACTIVE: return "Inactive";
-            case HELD: return "Held";
-            case CANCELLED: return "Cancelled";
+            case PROPOSED: return "proposed";
+            case PLANNED: return "planned";
+            case REQUESTED: return "requested";
+            case ACTIVE: return "active";
+            case INACTIVE: return "inactive";
+            case HELD: return "held";
+            case CANCELLED: return "cancelled";
             default: return "?";
           }
         }
@@ -132,6 +152,10 @@ public class NutritionOrder extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
+        if ("proposed".equals(codeString))
+          return NutritionOrderStatus.PROPOSED;
+        if ("planned".equals(codeString))
+          return NutritionOrderStatus.PLANNED;
         if ("requested".equals(codeString))
           return NutritionOrderStatus.REQUESTED;
         if ("active".equals(codeString))
@@ -145,6 +169,10 @@ public class NutritionOrder extends DomainResource {
         throw new IllegalArgumentException("Unknown NutritionOrderStatus code '"+codeString+"'");
         }
     public String toCode(NutritionOrderStatus code) {
+      if (code == NutritionOrderStatus.PROPOSED)
+        return "proposed";
+      if (code == NutritionOrderStatus.PLANNED)
+        return "planned";
       if (code == NutritionOrderStatus.REQUESTED)
         return "requested";
       if (code == NutritionOrderStatus.ACTIVE)
@@ -1426,7 +1454,7 @@ public class NutritionOrder extends DomainResource {
     /**
      * The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.
      */
-    @Child(name="patient", type={Patient.class}, order=-1, min=1, max=1)
+    @Child(name="patient", type={Patient.class}, order=0, min=1, max=1)
     @Description(shortDefinition="The person who requires the diet, formula or nutritional supplement", formalDefinition="The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding." )
     protected Reference patient;
 
@@ -1438,7 +1466,7 @@ public class NutritionOrder extends DomainResource {
     /**
      * The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.
      */
-    @Child(name="orderer", type={Practitioner.class}, order=0, min=0, max=1)
+    @Child(name="orderer", type={Practitioner.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Who ordered the diet, formula or nutritional supplement", formalDefinition="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings." )
     protected Reference orderer;
 
@@ -1450,14 +1478,14 @@ public class NutritionOrder extends DomainResource {
     /**
      * Identifiers assigned to this order by the order sender or by the order receiver.
      */
-    @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifiers assigned to this order", formalDefinition="Identifiers assigned to this order by the order sender or by the order receiver." )
     protected List<Identifier> identifier;
 
     /**
      * An encounter that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name="encounter", type={Encounter.class}, order=2, min=0, max=1)
+    @Child(name="encounter", type={Encounter.class}, order=3, min=0, max=1)
     @Description(shortDefinition="The encounter associated with that this nutrition order", formalDefinition="An encounter that provides additional information about the healthcare context in which this request is made." )
     protected Reference encounter;
 
@@ -1469,14 +1497,14 @@ public class NutritionOrder extends DomainResource {
     /**
      * The date and time that this nutrition order was requested.
      */
-    @Child(name="dateTime", type={DateTimeType.class}, order=3, min=1, max=1)
+    @Child(name="dateTime", type={DateTimeType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="Date and time the nutrition order was requested", formalDefinition="The date and time that this nutrition order was requested." )
     protected DateTimeType dateTime;
 
     /**
      * The ability to list substances that may cause allergies or intolerances which should be included in the nutrition order.
      */
-    @Child(name="allergyIntolerance", type={AllergyIntolerance.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="allergyIntolerance", type={AllergyIntolerance.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of the patient's food and nutrition-related allergies and intolerances", formalDefinition="The ability to list substances that may cause allergies or intolerances which should be included in the nutrition order." )
     protected List<Reference> allergyIntolerance;
     /**
@@ -1488,43 +1516,43 @@ public class NutritionOrder extends DomainResource {
     /**
      * This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.
      */
-    @Child(name="foodPreferenceModifier", type={CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="foodPreferenceModifier", type={CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Order-specific modifier about the type of food that should be given", formalDefinition="This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings." )
     protected List<CodeableConcept> foodPreferenceModifier;
 
     /**
      * This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings.
      */
-    @Child(name="excludeFoodModifier", type={CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="excludeFoodModifier", type={CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Order-specific modifier about the type of food that should not be given", formalDefinition="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings." )
     protected List<CodeableConcept> excludeFoodModifier;
 
     /**
      * Class that defines the components of an oral diet order for the patient.
      */
-    @Child(name="oralDiet", type={}, order=7, min=0, max=1)
+    @Child(name="oralDiet", type={}, order=8, min=0, max=1)
     @Description(shortDefinition="Oral diet components", formalDefinition="Class that defines the components of an oral diet order for the patient." )
     protected NutritionOrderOralDietComponent oralDiet;
 
     /**
      * Class that defines the components of a supplement order for the patient.
      */
-    @Child(name="supplement", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="supplement", type={}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supplement components", formalDefinition="Class that defines the components of a supplement order for the patient." )
     protected List<NutritionOrderSupplementComponent> supplement;
 
     /**
      * Class that defines the components of an enteral formula order for the patient.
      */
-    @Child(name="enteralFormula", type={}, order=9, min=0, max=1)
+    @Child(name="enteralFormula", type={}, order=10, min=0, max=1)
     @Description(shortDefinition="Enteral formula components", formalDefinition="Class that defines the components of an enteral formula order for the patient." )
     protected NutritionOrderEnteralFormulaComponent enteralFormula;
 
     /**
      * The workflow status of the nutrition order request, e.g., Active, Inactive, Pending, Held, Canceled, Suspended.
      */
-    @Child(name="status", type={CodeType.class}, order=10, min=0, max=1)
-    @Description(shortDefinition="requested | active | inactive | held | cancelled", formalDefinition="The workflow status of the nutrition order request, e.g., Active, Inactive, Pending, Held, Canceled, Suspended." )
+    @Child(name="status", type={CodeType.class}, order=11, min=0, max=1)
+    @Description(shortDefinition="proposed | planned | requested | active | inactive | held | cancelled", formalDefinition="The workflow status of the nutrition order request, e.g., Active, Inactive, Pending, Held, Canceled, Suspended." )
     protected Enumeration<NutritionOrderStatus> status;
 
     private static final long serialVersionUID = -966362649L;
@@ -2081,26 +2109,26 @@ public class NutritionOrder extends DomainResource {
     return ResourceType.NutritionOrder;
    }
 
-  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token" )
-  public static final String SP_SUPPLEMENT = "supplement";
-  @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token" )
-  public static final String SP_ORALDIET = "oraldiet";
-  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference" )
-  public static final String SP_PROVIDER = "provider";
-  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identity", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="datetime", path="NutritionOrder.dateTime", description="Return nutrition orders requested on this date", type="date" )
-  public static final String SP_DATETIME = "datetime";
-  @SearchParamDefinition(name="additive", path="NutritionOrder.enteralFormula.additiveType", description="Type of module component to add to the feeding", type="token" )
-  public static final String SP_ADDITIVE = "additive";
   @SearchParamDefinition(name="identifier", path="NutritionOrder.identifier", description="Return nutrition orders with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="datetime", path="NutritionOrder.dateTime", description="Return nutrition orders requested on this date", type="date" )
+  public static final String SP_DATETIME = "datetime";
+  @SearchParamDefinition(name="provider", path="NutritionOrder.orderer", description="The identify of the provider who placed the nutrition order", type="reference" )
+  public static final String SP_PROVIDER = "provider";
+  @SearchParamDefinition(name="patient", path="NutritionOrder.patient", description="The identity of the person who requires the diet, formula or nutritional supplement", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="supplement", path="NutritionOrder.supplement.type", description="Type of supplement product requested", type="token" )
+  public static final String SP_SUPPLEMENT = "supplement";
   @SearchParamDefinition(name="formula", path="NutritionOrder.enteralFormula.baseFormulaType", description="Type of enteral or infant formula", type="token" )
   public static final String SP_FORMULA = "formula";
+  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identity", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="oraldiet", path="NutritionOrder.oralDiet.type", description="Type of diet that can be consumed orally (i.e., take via the mouth).", type="token" )
+  public static final String SP_ORALDIET = "oraldiet";
+  @SearchParamDefinition(name="status", path="NutritionOrder.status", description="Status of the nutrition order.", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="additive", path="NutritionOrder.enteralFormula.additiveType", description="Type of module component to add to the feeding", type="token" )
+  public static final String SP_ADDITIVE = "additive";
 
 }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -47,42 +47,42 @@ public class Coding extends Type implements ICoding, ICompositeType {
     /**
      * The identification of the code system that defines the meaning of the symbol in the code.
      */
-    @Child(name="system", type={UriType.class}, order=-1, min=0, max=1)
+    @Child(name="system", type={UriType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Identity of the terminology system", formalDefinition="The identification of the code system that defines the meaning of the symbol in the code." )
     protected UriType system;
 
     /**
      * The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.
      */
-    @Child(name="version", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name="version", type={StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Version of the system - if relevant", formalDefinition="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged." )
     protected StringType version;
 
     /**
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).
      */
-    @Child(name="code", type={CodeType.class}, order=1, min=0, max=1)
+    @Child(name="code", type={CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Symbol in syntax defined by the system", formalDefinition="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)." )
     protected CodeType code;
 
     /**
      * A representation of the meaning of the code in the system, following the rules of the system.
      */
-    @Child(name="display", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name="display", type={StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Representation defined by the system", formalDefinition="A representation of the meaning of the code in the system, following the rules of the system." )
     protected StringType display;
 
     /**
      * Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays).
      */
-    @Child(name="primary", type={BooleanType.class}, order=3, min=0, max=1)
+    @Child(name="primary", type={BooleanType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="If this code was chosen directly by the user", formalDefinition="Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays)." )
     protected BooleanType primary;
 
     /**
      * The set of possible coded values this coding was chosen from or constrained by.
      */
-    @Child(name="valueSet", type={ValueSet.class}, order=4, min=0, max=1)
+    @Child(name="valueSet", type={ValueSet.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Set this coding was chosen from", formalDefinition="The set of possible coded values this coding was chosen from or constrained by." )
     protected Reference valueSet;
 

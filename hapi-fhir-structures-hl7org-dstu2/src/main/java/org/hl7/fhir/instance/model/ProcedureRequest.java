@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -332,14 +332,14 @@ public class ProcedureRequest extends DomainResource {
     /**
      * Identifiers assigned to this order by the order or by the receiver.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifier", formalDefinition="Identifiers assigned to this order by the order or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
      * The patient who will receive the procedure.
      */
-    @Child(name="subject", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name="subject", type={Patient.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Subject", formalDefinition="The patient who will receive the procedure." )
     protected Reference subject;
 
@@ -351,35 +351,35 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=1, min=1, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Procedure Type", formalDefinition="The specific procedure that is ordered. Use text if the exact nature of the procedure can't be coded." )
     protected CodeableConcept type;
 
     /**
      * The site where the procedure is to be performed.
      */
-    @Child(name="bodySite", type={CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="bodySite", type={CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Target Body Site", formalDefinition="The site where the procedure is to be performed." )
     protected List<CodeableConcept> bodySite;
 
     /**
      * The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance.
      */
-    @Child(name="indication", type={CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="indication", type={CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Indication", formalDefinition="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance." )
     protected List<CodeableConcept> indication;
 
     /**
      * The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
      */
-    @Child(name="timing", type={DateTimeType.class, Period.class, Timing.class}, order=4, min=0, max=1)
+    @Child(name="timing", type={DateTimeType.class, Period.class, Timing.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Timing", formalDefinition="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
     protected Type timing;
 
     /**
      * The encounter within which the procedure proposal or request was created.
      */
-    @Child(name="encounter", type={Encounter.class}, order=5, min=0, max=1)
+    @Child(name="encounter", type={Encounter.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Encounter", formalDefinition="The encounter within which the procedure proposal or request was created." )
     protected Reference encounter;
 
@@ -391,7 +391,7 @@ public class ProcedureRequest extends DomainResource {
     /**
      * E.g. surgeon, anaethetist, endoscopist.
      */
-    @Child(name="performer", type={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=6, min=0, max=1)
+    @Child(name="performer", type={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Performer", formalDefinition="E.g. surgeon, anaethetist, endoscopist." )
     protected Reference performer;
 
@@ -403,35 +403,35 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The status of the order.
      */
-    @Child(name="status", type={CodeType.class}, order=7, min=0, max=1)
+    @Child(name="status", type={CodeType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", formalDefinition="The status of the order." )
     protected Enumeration<ProcedureRequestStatus> status;
 
     /**
      * Any other notes associated with this proposal or order - e.g., provider instructions.
      */
-    @Child(name="notes", type={StringType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="notes", type={StringType.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Notes", formalDefinition="Any other notes associated with this proposal or order - e.g., provider instructions." )
     protected List<StringType> notes;
 
     /**
      * If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.
      */
-    @Child(name="asNeeded", type={BooleanType.class, CodeableConcept.class}, order=9, min=0, max=1)
+    @Child(name="asNeeded", type={BooleanType.class, CodeableConcept.class}, order=10, min=0, max=1)
     @Description(shortDefinition="PRN", formalDefinition="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure." )
     protected Type asNeeded;
 
     /**
      * The time when the request was made.
      */
-    @Child(name="orderedOn", type={DateTimeType.class}, order=10, min=0, max=1)
+    @Child(name="orderedOn", type={DateTimeType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="When Requested", formalDefinition="The time when the request was made." )
     protected DateTimeType orderedOn;
 
     /**
      * The healthcare professional responsible for proposing or ordering the procedure.
      */
-    @Child(name="orderer", type={Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=11, min=0, max=1)
+    @Child(name="orderer", type={Practitioner.class, Patient.class, RelatedPerson.class, Device.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Ordering Party", formalDefinition="The healthcare professional responsible for proposing or ordering the procedure." )
     protected Reference orderer;
 
@@ -443,7 +443,7 @@ public class ProcedureRequest extends DomainResource {
     /**
      * The clinical priority associated with this order.
      */
-    @Child(name="priority", type={CodeType.class}, order=12, min=0, max=1)
+    @Child(name="priority", type={CodeType.class}, order=13, min=0, max=1)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
     protected Enumeration<ProcedureRequestPriority> priority;
 
@@ -1120,10 +1120,10 @@ public class ProcedureRequest extends DomainResource {
     return ResourceType.ProcedureRequest;
    }
 
-  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="subject", path="ProcedureRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="ProcedureRequest.subject", description="Search by subject - a patient", type="reference" )
+  public static final String SP_PATIENT = "patient";
 
 }
 

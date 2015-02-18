@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -1159,98 +1159,98 @@ public class OperationDefinition extends DomainResource {
     /**
      * The identifier that is used to identify this operation definition when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI).
      */
-    @Child(name="identifier", type={UriType.class}, order=-1, min=0, max=1)
+    @Child(name="identifier", type={UriType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Logical id to reference this operation definition", formalDefinition="The identifier that is used to identify this operation definition when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)." )
     protected UriType identifier;
 
     /**
      * The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name="version", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name="version", type={StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Logical id for this version of the operation definition", formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name identifying the Profile.
      */
-    @Child(name="title", type={StringType.class}, order=1, min=1, max=1)
+    @Child(name="title", type={StringType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Informal name for this profile", formalDefinition="A free text natural language name identifying the Profile." )
     protected StringType title;
 
     /**
      * Details of the individual or organization who accepts responsibility for publishing the profile.
      */
-    @Child(name="publisher", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name="publisher", type={StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile." )
     protected StringType publisher;
 
     /**
      * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="telecom", type={ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * A free text natural language description of the profile and its use.
      */
-    @Child(name="description", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Natural language description of the operation", formalDefinition="A free text natural language description of the profile and its use." )
     protected StringType description;
 
     /**
      * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
      */
-    @Child(name="code", type={Coding.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="code", type={Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Assist with indexing and finding", formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates." )
     protected List<Coding> code;
 
     /**
      * The status of the profile.
      */
-    @Child(name="status", type={CodeType.class}, order=6, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the profile." )
     protected Enumeration<ResourceProfileStatus> status;
 
     /**
      * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name="experimental", type={BooleanType.class}, order=7, min=0, max=1)
+    @Child(name="experimental", type={BooleanType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The date that this version of the profile was published.
      */
-    @Child(name="date", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name="date", type={DateTimeType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Date for this version of the operation definition", formalDefinition="The date that this version of the profile was published." )
     protected DateTimeType date;
 
     /**
      * Whether this is operation or named query.
      */
-    @Child(name="kind", type={CodeType.class}, order=9, min=1, max=1)
+    @Child(name="kind", type={CodeType.class}, order=10, min=1, max=1)
     @Description(shortDefinition="operation | query", formalDefinition="Whether this is operation or named query." )
     protected Enumeration<OperationKind> kind;
 
     /**
      * The name used to invoke the operation.
      */
-    @Child(name="name", type={CodeType.class}, order=10, min=1, max=1)
+    @Child(name="name", type={CodeType.class}, order=11, min=1, max=1)
     @Description(shortDefinition="Name used to invoke the operation", formalDefinition="The name used to invoke the operation." )
     protected CodeType name;
 
     /**
      * Additional information about how to use this operation or named query.
      */
-    @Child(name="notes", type={StringType.class}, order=11, min=0, max=1)
+    @Child(name="notes", type={StringType.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Additional information about use", formalDefinition="Additional information about how to use this operation or named query." )
     protected StringType notes;
 
     /**
      * Indicates that this operation definition is a constraining profile on the base.
      */
-    @Child(name="base", type={OperationDefinition.class}, order=12, min=0, max=1)
+    @Child(name="base", type={OperationDefinition.class}, order=13, min=0, max=1)
     @Description(shortDefinition="Marks this as a profile of the base", formalDefinition="Indicates that this operation definition is a constraining profile on the base." )
     protected Reference base;
 
@@ -1262,28 +1262,28 @@ public class OperationDefinition extends DomainResource {
     /**
      * Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context).
      */
-    @Child(name="system", type={BooleanType.class}, order=13, min=1, max=1)
+    @Child(name="system", type={BooleanType.class}, order=14, min=1, max=1)
     @Description(shortDefinition="Invoke at the system level?", formalDefinition="Indicates whether this operation or named query can be invoked at the system level (e.g. without needing to choose a resource type for the context)." )
     protected BooleanType system;
 
     /**
      * Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context).
      */
-    @Child(name="type", type={CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="type", type={CodeType.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Invoke at resource level for these type", formalDefinition="Indicates whether this operation or named query can be invoked at the resource type level for any given resource type level (e.g. without needing to choose a resource type for the context)." )
     protected List<CodeType> type;
 
     /**
      * Indicates whether this operation can be invoked on a particular instance of one of the given types.
      */
-    @Child(name="instance", type={BooleanType.class}, order=15, min=1, max=1)
+    @Child(name="instance", type={BooleanType.class}, order=16, min=1, max=1)
     @Description(shortDefinition="Invoke on an instance?", formalDefinition="Indicates whether this operation can be invoked on a particular instance of one of the given types." )
     protected BooleanType instance;
 
     /**
      * The parameters for the operation/query.
      */
-    @Child(name="parameter", type={}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="parameter", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Parameters for the operation/query", formalDefinition="The parameters for the operation/query." )
     protected List<OperationDefinitionParameterComponent> parameter;
 
@@ -2211,34 +2211,34 @@ public class OperationDefinition extends DomainResource {
     return ResourceType.OperationDefinition;
    }
 
-  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Assist with indexing and finding", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="identifier", path="OperationDefinition.identifier", description="Logical id to reference this operation definition", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Assist with indexing and finding", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
+  public static final String SP_INSTANCE = "instance";
   @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token" )
   public static final String SP_KIND = "kind";
-  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
-  public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
+  public static final String SP_PROFILE = "profile";
   @SearchParamDefinition(name="title", path="OperationDefinition.title", description="Informal name for this profile", type="string" )
   public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
+  public static final String SP_VERSION = "version";
   @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
   public static final String SP_SYSTEM = "system";
   @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Name used to invoke the operation", type="token" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
+  public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
   public static final String SP_BASE = "base";
-  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
-  public static final String SP_INSTANCE = "instance";
-  @SearchParamDefinition(name="identifier", path="OperationDefinition.identifier", description="Logical id to reference this operation definition", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
-  public static final String SP_PROFILE = "profile";
 
 }
 
