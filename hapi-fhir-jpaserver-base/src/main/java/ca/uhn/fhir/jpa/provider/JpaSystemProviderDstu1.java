@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.provider;
 
 /*
  * #%L
@@ -20,25 +20,24 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 
-/**
- *  @param <T> The bundle type
- */
-public interface IFhirSystemDao<T> extends IDao {
+public class JpaSystemProviderDstu1 extends BaseJpaSystemProvider<List<IResource>> {
 
-	T transaction(T theResources);
-
-	IBundleProvider history(Date theDate);
-
-	TagList getAllTags();
-
-	Map<String, Long> getResourceCounts();
+	@Transaction
+	public List<IResource> transaction(HttpServletRequest theRequest, @TransactionParam List<IResource> theResources) {
+		startRequest(theRequest);
+		try {
+			return getDao().transaction(theResources);
+		} finally {
+			endRequest(theRequest);
+		}
+	}
 
 }

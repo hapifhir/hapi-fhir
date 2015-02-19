@@ -13,13 +13,12 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.SupportingDocumentation;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
+import ca.uhn.fhir.model.dstu2.resource.SupportingDocumentation;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -145,7 +144,7 @@ public class ResourceProviderMultiVersionTest {
 		List<IResourceProvider> rpsDstu2 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		restServerDstu2.setResourceProviders(rpsDstu2);
 
-		JpaSystemProvider systemProvDstu2 = (JpaSystemProvider) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProvider.class);
+		JpaSystemProviderDstu2 systemProvDstu2 = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 		restServerDstu2.setPlainProviders(systemProvDstu2);
 
 		ServletHolder servletHolder = new ServletHolder();
@@ -161,7 +160,7 @@ public class ResourceProviderMultiVersionTest {
 		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServerDstu1.setResourceProviders(rpsDstu1);
 
-		JpaSystemProvider systemProvDstu1 = (JpaSystemProvider) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProvider.class);
+		JpaSystemProviderDstu1 systemProvDstu1 = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
 		restServerDstu1.setPlainProviders(systemProvDstu1);
 
 		servletHolder = new ServletHolder();

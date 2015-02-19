@@ -1652,15 +1652,15 @@ public class FhirResourceDaoTest {
 
 	@SuppressWarnings("unchecked")
 	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml");
-		ourPatientDao = ourCtx.getBean("myPatientDao", IFhirResourceDao.class);
-		ourObservationDao = ourCtx.getBean("myObservationDao", IFhirResourceDao.class);
-		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDao", IFhirResourceDao.class);
-		ourDeviceDao = ourCtx.getBean("myDeviceDao", IFhirResourceDao.class);
-		ourOrganizationDao = ourCtx.getBean("myOrganizationDao", IFhirResourceDao.class);
-		ourLocationDao = ourCtx.getBean("myLocationDao", IFhirResourceDao.class);
-		ourEncounterDao = ourCtx.getBean("myEncounterDao", IFhirResourceDao.class);
+	public static void beforeClass() {                                                           
+		ourCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
+		ourPatientDao = ourCtx.getBean("myPatientDaoDstu2", IFhirResourceDao.class);
+		ourObservationDao = ourCtx.getBean("myObservationDaoDstu2", IFhirResourceDao.class);
+		ourDiagnosticReportDao = ourCtx.getBean("myDiagnosticReportDaoDstu2", IFhirResourceDao.class);
+		ourDeviceDao = ourCtx.getBean("myDeviceDaoDstu2", IFhirResourceDao.class);
+		ourOrganizationDao = ourCtx.getBean("myOrganizationDaoDstu2", IFhirResourceDao.class);
+		ourLocationDao = ourCtx.getBean("myLocationDaoDstu2", IFhirResourceDao.class);
+		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu2", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
 	}
 
