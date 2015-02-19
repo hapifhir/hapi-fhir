@@ -19,12 +19,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu.resource.DocumentReference;
@@ -36,7 +36,6 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -510,8 +509,7 @@ public class ResourceProviderDstu1Test {
 
 		restServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-		IFhirSystemDao systemDao = (IFhirSystemDao) ourAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
-		JpaSystemProvider systemProv = new JpaSystemProvider(systemDao);
+		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");
 		restServer.setPlainProviders(systemProv);
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));

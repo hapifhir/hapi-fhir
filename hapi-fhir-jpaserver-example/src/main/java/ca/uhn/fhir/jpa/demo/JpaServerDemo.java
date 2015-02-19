@@ -8,7 +8,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
@@ -48,7 +48,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
-		JpaSystemProvider systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProvider.class);
+		JpaSystemProviderDstu1 systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu1.class);
 		setPlainProviders(systemProvider);
 		
 		/*

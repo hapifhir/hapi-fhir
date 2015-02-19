@@ -13,46 +13,7 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
-	<bean id="myFhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2"></bean>
-
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
-	</bean>
-
-	<bean id="mySystemDao" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-
-	<bean id="myDiagnosticReportDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.DiagnosticReport"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myDeviceDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Device"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myPatientDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Patient"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myObservationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Observation"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myOrganizationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Organization"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myLocationDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Location"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myQuestionnaireDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Questionnaire"/>
-		<property name="context" ref="myFhirContext"/>
-	</bean>
-	<bean id="myEncounterDao" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
-		<property name="resourceType" value="ca.uhn.fhir.model.dstu2.resource.Encounter"/>
-		<property name="context" ref="myFhirContext"/>
 	</bean>
 
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
