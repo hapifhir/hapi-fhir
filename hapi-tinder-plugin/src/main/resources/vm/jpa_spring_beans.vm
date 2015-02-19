@@ -13,10 +13,10 @@
 
 	<bean id="myFhirContext${versionCapitalized}" class="ca.uhn.fhir.context.FhirContext" factory-method="for${versionCapitalized}"/>
 	
-	<bean id="mySystemDao${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.FhirSystemDao">
+	<bean id="mySystemDao${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.FhirSystemDao${versionCapitalized}">
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>
-	<bean id="mySystemProvider${versionCapitalized}" class="ca.uhn.fhir.jpa.provider.JpaSystemProvider">
+	<bean id="mySystemProvider${versionCapitalized}" class="ca.uhn.fhir.jpa.provider.JpaSystemProvider${versionCapitalized}">
 		<property name="dao" ref="mySystemDao${versionCapitalized}"/>
 	</bean>
 

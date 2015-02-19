@@ -11,7 +11,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -73,7 +73,7 @@ public class OverlayTestApp {
 		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDev", List.class);
 		restServerDev.setResourceProviders(rpsDev);
 
-		JpaSystemProvider systemProvDev = (JpaSystemProvider) ourAppCtx.getBean("mySystemProviderDev", JpaSystemProvider.class);
+		JpaSystemProviderDstu1 systemProvDev = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDev", JpaSystemProviderDstu1.class);
 		restServerDev.setPlainProviders(systemProvDev);
 
 		ServletHolder servletHolder = new ServletHolder();
@@ -91,7 +91,7 @@ public class OverlayTestApp {
 		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServerDstu1.setResourceProviders(rpsDstu1);
 
-		JpaSystemProvider systemProvDstu1 = (JpaSystemProvider) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProvider.class);
+		JpaSystemProviderDstu1 systemProvDstu1 = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
 		restServerDstu1.setPlainProviders(systemProvDstu1);
 
 		servletHolder = new ServletHolder();
