@@ -30,13 +30,13 @@ import java.util.Map;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IReference;
 
@@ -48,29 +48,24 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
-import ca.uhn.fhir.context.RuntimeElemContainedResources;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
@@ -1641,6 +1636,75 @@ class ParserState<T> {
 
 	}
 
+
+	private class CodingSubElementState extends BaseState {
+		BaseCodingDt myCoding;
+
+		String thePartWeAreAt;
+
+		public CodingSubElementState(PreResourceState thePreResourceState, BaseCodingDt codingDt, String whichPartAreWeAt) {
+			super(thePreResourceState);
+			myCoding = codingDt;
+			thePartWeAreAt = whichPartAreWeAt;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("value".equals(theName)) {
+				if ("system".equals(thePartWeAreAt))
+					myCoding.setSystem(theValue);
+				else if ("code".equals(thePartWeAreAt))
+					myCoding.setCode(theValue);
+				else if ("display".equals(thePartWeAreAt))
+					myCoding.setDisplay(theValue);
+				else if ("version".equals(thePartWeAreAt)) {
+					/*
+					todo: handle version properly when BaseCodingDt is fixed to support version. For now, we just swallow version in order to avoid throwing a DataFormat exception.
+
+					myCoding.setVersion(theValue);
+					 */
+				} else
+					throw new DataFormatException("Unexpected element '" + theValue + "' found in 'security' element");
+			} else {
+				throw new DataFormatException("Unexpected attribute '" + theName + "' found in '" + thePartWeAreAt + "' element");
+			}
+		}
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			throw new DataFormatException("Unexpected element '" + theLocalPart + "' found in 'system' element");
+
+		}
+	}
+
+
+	private class CodingElementState extends BaseState {
+		BaseCodingDt myCoding;
+
+
+		public CodingElementState(ParserState<T>.PreResourceState thePreResourceState, BaseCodingDt codingDt) {
+			super(thePreResourceState);
+			myCoding = codingDt;
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+
+		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			push(new CodingSubElementState(getPreResourceState(), myCoding, theLocalPart));
+		}
+
+	}
+
 	private class MetaElementState extends BaseState {
 		private ResourceMetadataMap myMap;
 
@@ -1664,6 +1728,22 @@ class ParserState<T> {
 				InstantDt updated = new InstantDt();
 				push(new PrimitiveState(getPreResourceState(), updated));
 				myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
+			} else if (theLocalPart.equals("security")) {
+				List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				if (securityLabels == null) {
+					securityLabels = new ArrayList<BaseCodingDt>();
+					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
+				}
+				BaseCodingDt securityLabel;
+				try {
+					securityLabel = myContext.getCodingDtImplementation().newInstance();
+				} catch (InstantiationException e) {
+					throw new DataFormatException("Error parsing element 'security' ", e);
+				} catch (IllegalAccessException e) {
+					throw new DataFormatException("Error parsing element 'security' ", e);
+				}
+				push(new CodingElementState(getPreResourceState(), securityLabel));
+				securityLabels.add(securityLabel);
 			} else {
 				throw new DataFormatException("Unexpected element '" + theLocalPart + "' found in 'meta' element");
 			}

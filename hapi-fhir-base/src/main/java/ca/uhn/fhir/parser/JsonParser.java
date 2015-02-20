@@ -47,6 +47,8 @@ import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 import javax.json.stream.JsonParsingException;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
@@ -85,12 +87,6 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseBinary;
-import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -652,7 +648,41 @@ public class JsonParser extends BaseParser implements IParser {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", ResourceMetadataKeyEnum.UPDATED.get(resource));
-				theEventWriter.writeEnd();
+
+				Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				if (securityLabelRawObj != null) {
+					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) securityLabelRawObj;
+					if (!securityLabels.isEmpty()) {
+						theEventWriter.writeStartArray("security");
+
+						for (BaseCodingDt securityLabel : securityLabels) {
+							theEventWriter.writeStartObject();
+
+							UriDt system = securityLabel.getSystemElement();
+							if (system != null && !system.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "system", system.getValueAsString());
+
+							CodeDt code = securityLabel.getCodeElement();
+
+							if (code != null && !code.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "code", code.getValueAsString());
+
+							StringDt display = securityLabel.getDisplayElement();
+							if (display != null && !display.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "display", display.getValueAsString());
+
+							/*todo: handle version
+							StringDt version = securityLabel.getVersion();
+							if (version != null && ! version.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "version", version.getValueAsString());
+                            */
+							theEventWriter.writeEnd(); //end the individual security label
+						}
+						theEventWriter.writeEnd(); //end security labels array
+					}
+				}
+
+				theEventWriter.writeEnd(); //end meta
 			}
 		}
 

@@ -44,6 +44,8 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -76,10 +78,6 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseBinary;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
@@ -719,6 +717,38 @@ public class XmlParser extends BaseParser implements IParser {
 				if (updated != null) {
 					writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 				}
+
+				Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				if (securityLabelRawObj != null) {
+					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) securityLabelRawObj;
+					if (!securityLabels.isEmpty()) {
+
+						for (BaseCodingDt securityLabel : securityLabels) {
+							theEventWriter.writeStartElement("security");
+
+							UriDt system = securityLabel.getSystemElement();
+							if (system != null && !system.isEmpty())
+								writeOptionalTagWithValue(theEventWriter, "system", system.getValueAsString());
+
+							CodeDt code = securityLabel.getCodeElement();
+							if (code != null && !code.isEmpty())
+								writeOptionalTagWithValue(theEventWriter, "code", code.getValueAsString());
+
+							StringDt display = securityLabel.getDisplayElement();
+							if (display != null && !display.isEmpty())
+								writeOptionalTagWithValue(theEventWriter, "display", display.getValueAsString());
+
+							/*todo: handle version
+							StringDt version = securityLabel.getVersion();
+							if (version != null && ! version.isEmpty())
+								writeOptionalTagWithValue(theEventWriter, "version", version.getValueAsString());
+                            */
+							theEventWriter.writeEndElement();
+						}
+
+					}
+				}
+
 				theEventWriter.writeEndElement();
 			}
 
