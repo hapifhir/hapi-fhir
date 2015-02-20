@@ -1,7 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 
@@ -13,8 +19,10 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
@@ -22,7 +30,11 @@ import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 
 public class XmlParserTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
@@ -89,7 +101,8 @@ public class XmlParserTest {
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
 		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example.xml"));
 
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		IParser newXmlParser = ourCtx.newXmlParser();
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
@@ -274,5 +287,94 @@ public class XmlParserTest {
 		parsed = parser.parseResource(Composition.class, string);
 		assertEquals(2, parsed.getContained().getContainedResources().size());
 	}
+	
+	@Test
+	public void testEncodeAndParseExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		ExtensionDt ext = new ExtensionDt();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
+		patient.addUndeclaredExtension(ext);
+
+		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
+		ExtensionDt child1 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
+		ExtensionDt child2 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value2"));
+		parent.addUndeclaredExtension(child2);
+		
+		ExtensionDt modExt = new ExtensionDt();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateDt("1995-01-02"));
+		modExt.setModifier(true);
+		patient.addUndeclaredExtension(modExt);
+
+		HumanNameDt name = patient.addName();
+		name.addFamily("Blah");
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
+		ExtensionDt ext2 = new ExtensionDt().setUrl("http://examples.com#givenext").setValue(new StringDt("given"));
+		given.addUndeclaredExtension(ext2);
+
+		StringDt given2 = name.addGiven();
+		given2.setValue("Shmoe");
+		ExtensionDt given2ext = new ExtensionDt().setUrl("http://examples.com#givenext_parent");
+		given2.addUndeclaredExtension(given2ext);
+		given2ext.addUndeclaredExtension(new ExtensionDt().setUrl("http://examples.com#givenext_child").setValue(new StringDt("CHILD")));
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
+		assertThat(
+				enc,
+				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
+		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+		
+		/*
+		 * Now parse this back
+		 */
+		
+		Patient parsed =ourCtx.newXmlParser().parseResource(Patient.class, enc); 
+		ext = parsed.getUndeclaredExtensions().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeDt)ext.getValue()).getValueAsString());
+
+		parent = patient.getUndeclaredExtensions().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals( "http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringDt)child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals( "http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringDt)child2.getValue()).getValueAsString());
+
+		modExt = parsed.getUndeclaredModifierExtensions().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateDt)modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringDt)ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		ExtensionDt given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringDt)given2ext2.getValue()).getValue());
+
+	}
+
+	
 	
 }

@@ -1,19 +1,24 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Base;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DecimalType;
+import org.hl7.fhir.instance.model.DomainResource;
+import org.hl7.fhir.instance.model.Element;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.Meta;
 import org.hl7.fhir.instance.model.Narrative;
@@ -22,7 +27,9 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUseEnumFactory;
 import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
@@ -30,6 +37,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.ICoding;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
@@ -56,6 +65,9 @@ public class ModelInheritanceTest {
 	 *  
 	 * ElementDefinition
 	 *  * Backbone elements (eg .ElementDefinitionSlicingComponent) do not extend BackboneElement or have a @Block annotation for some reason
+	 *  
+	 * Extension
+	 *  * Should URL not be StringType since it can't take extensions?
 	 * </pre>
 	 */
 
@@ -76,13 +88,20 @@ public class ModelInheritanceTest {
 	public void testBase() {
 		assertTrue(IBase.class.isAssignableFrom(Base.class));
 	}
+	
+	public void testIdentifierUse() throws Exception {
+		Child child = Identifier.class.getField("use").getAnnotation(Child.class);
+		assertEquals(IdentifierUseEnumFactory.class, child.enumFactory());
+	}
 
+	
 	/**
 	 * Should be "implements IBaseExtension<Extension>"
 	 */
 	@Test
 	public void testExtension() {
 		assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
 	}
 
 	@Test
@@ -108,6 +127,7 @@ public class ModelInheritanceTest {
 	@Test
 	public void testPrimitiveType() {
 		assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
 	}
 
 	@Test
@@ -136,7 +156,20 @@ public class ModelInheritanceTest {
 
 	@Test
 	public void testBackboneElement() {
-		assertTrue(IBackboneElement.class.isAssignableFrom(IBackboneElement.class));
+		assertTrue(IBackboneElement.class.isAssignableFrom(BackboneElement.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(BackboneElement.class));
+		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(BackboneElement.class));
+	}
+
+	@Test
+	public void testElement() {
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
+	}
+
+	@Test
+	public void testDomainResource() {
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class));
+		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class));
 	}
 
 	@Test

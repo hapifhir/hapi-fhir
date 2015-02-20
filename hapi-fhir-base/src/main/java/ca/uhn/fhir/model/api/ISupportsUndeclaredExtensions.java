@@ -22,6 +22,8 @@ package ca.uhn.fhir.model.api;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
 public interface ISupportsUndeclaredExtensions extends IElement {
 	
 	/**
@@ -52,7 +54,7 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	 * <li>{@link ExtensionDt#setUrl(String) URL}</li>
 	 * <li>And one of:
 	 * <ul>
-	 * <li>{@link ExtensionDt#setValue(IElement) A datatype value}</li>
+	 * <li>{@link ExtensionDt#setValue(IBaseDatatype) A datatype value}</li>
 	 * <li>{@link #addUndeclaredExtension(ExtensionDt) Further sub-extensions}</li>
 	 * </ul>
 	 * </ul> 
@@ -64,7 +66,7 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	/**
 	 * Adds an extension to this object
 	 */
-	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue);
+	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue);
 
 	/**
 	 * Adds an extension to this object. This method is intended for use when

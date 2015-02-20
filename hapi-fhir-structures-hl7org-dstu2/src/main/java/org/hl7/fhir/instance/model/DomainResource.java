@@ -38,11 +38,13 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 /**
  * A resource that includes narrative, extensions, and contained resources.
  */
 @ResourceDef(name="DomainResource", profile="http://hl7.org/fhir/Profile/DomainResource")
-public abstract class DomainResource extends Resource {
+public abstract class DomainResource extends Resource implements IBaseHasExtensions, IBaseHasModifierExtensions {
 
     /**
      * A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.

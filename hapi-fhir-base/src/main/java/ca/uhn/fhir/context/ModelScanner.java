@@ -55,6 +55,7 @@ import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -555,7 +556,7 @@ class ModelScanner {
 				RuntimeChildResourceBlockDefinition def = new RuntimeChildResourceBlockDefinition(next, childAnnotation, descriptionAnnotation, elementName, blockDef);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "org.hl7.fhir.instance.model.Type".equals(nextElementType.getName())) {
+			} else if (IDatatype.class.equals(nextElementType) || IElement.class.equals(nextElementType) || "org.hl7.fhir.instance.model.Type".equals(nextElementType.getName()) || IBaseDatatype.class.equals(nextElementType)) {
 
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
@@ -565,10 +566,13 @@ class ModelScanner {
 
 				addScanAlso(nextDatatype);
 				BaseRuntimeChildDatatypeDefinition def;
-				if (IPrimitiveDatatype.class.isAssignableFrom(nextElementType)) {
+				if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {
 					if (nextElementType.equals(BoundCodeDt.class)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+					} else if (childAnnotation.enumFactory().getSimpleName().equals("NoEnumFactory") == false) {
+						Class<? extends IBaseEnumFactory<?>> enumFactory = childAnnotation.enumFactory();
+						def = new RuntimeChildEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, enumFactory);
 					} else {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}

@@ -37,10 +37,11 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 /**
  * Base definition for all elements in a resource.
  */
-public abstract class Element extends Base {
+public abstract class Element extends Base implements IBaseHasExtensions {
 
     /**
      * unique id for the element within a resource (for internal references).

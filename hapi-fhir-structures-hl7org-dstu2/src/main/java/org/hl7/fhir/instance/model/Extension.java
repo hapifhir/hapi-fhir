@@ -36,12 +36,14 @@ import java.util.List;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 /**
  * Optional Extensions Element - found in all resources.
  */
 @DatatypeDef(name="Extension")
-public class Extension extends Element implements IBaseExtension<Extension> {
+public class Extension extends Element implements IBaseExtension<Extension>, IBaseHasExtensions {
 
     /**
      * Source of the definition for the extension code - a logical name or a URL.
@@ -174,6 +176,11 @@ public class Extension extends Element implements IBaseExtension<Extension> {
         return super.isEmpty() && (url == null || url.isEmpty()) && (value == null || value.isEmpty())
           ;
       }
+
+	@Override
+	public Extension setValue(IBaseDatatype theValue) {
+		return setValue((Type)theValue);
+	}
 
 
 }

@@ -28,6 +28,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.IBase;
+
 /**
  * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of added tags will be consistent, but duplicates will not be preserved.
  * 
@@ -35,7 +37,7 @@ import java.util.Set;
  * <b>Thread safety:</b> This class is not thread safe
  * </p>
  */
-public class TagList implements Set<Tag>, Serializable {
+public class TagList implements Set<Tag>, Serializable, IBase {
 
 	public static final String ATTR_CATEGORY = "category";
 	public static final String ELEMENT_NAME = "TagList";

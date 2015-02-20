@@ -37,7 +37,11 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseElement;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -61,6 +65,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -819,11 +824,29 @@ class ParserState<T> {
 				ExtensionState newState = new ExtensionState(myPreResourceState, newExtension);
 				push(newState);
 			} else {
-				throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
+				if (theIsModifier == false) {
+					if (getCurrentElement() instanceof IBaseHasExtensions) {
+						IBaseExtension<?> ext = ((IBaseHasExtensions)getCurrentElement()).addExtension();
+						ext.setUrl(theUrlAttr);
+						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
+						push(newState);
+					} else {
+						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
+					}
+				}else {
+					if (getCurrentElement() instanceof IBaseHasModifierExtensions) {
+						IBaseExtension<?> ext = ((IBaseHasModifierExtensions)getCurrentElement()).addModifierExtension();
+						ext.setUrl(theUrlAttr);
+						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
+						push(newState);
+					} else {
+						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
+					}
+				}
 			}
 		}
 
-		protected Object getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return null;
 		}
 
@@ -879,7 +902,7 @@ class ParserState<T> {
 			if ("id".equals(theName)) {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
-				} else if (myInstance instanceof IBaseResource) {
+				} else {
 					(myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
@@ -1578,16 +1601,16 @@ class ParserState<T> {
 
 	private class ExtensionState extends BaseState {
 
-		private ExtensionDt myExtension;
+		private IBaseExtension<?> myExtension;
 
-		public ExtensionState(PreResourceState thePreResourceState, ExtensionDt theExtension) {
+		public ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?> theExtension) {
 			super(thePreResourceState);
 			myExtension = theExtension;
 		}
 
 		@Override
 		public void endingElement() throws DataFormatException {
-			if (myExtension.getValue() != null && myExtension.getUndeclaredExtensions().size() > 0) {
+			if (myExtension.getValue() != null && myExtension.getExtension().size() > 0) {
 				throw new DataFormatException("Extension must not have both a value and other contained extensions");
 			}
 			pop();
@@ -1612,7 +1635,7 @@ class ParserState<T> {
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
-				myExtension.setValue((IElement) newChildInstance);
+				myExtension.setValue(newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
 				return;
@@ -1635,7 +1658,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IElement getCurrentElement() {
+		protected IBaseExtension<?> getCurrentElement() {
 			return myExtension;
 		}
 
@@ -1805,6 +1828,15 @@ class ParserState<T> {
 			super(theResourceType);
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public void wereBack() {
+			super.wereBack();
+			if (myTarget == null) {
+				myObject = (T) getCurrentElement();
+			}
+		}
+
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			super.enteringNewElement(theNamespaceURI, theLocalPart);
@@ -1953,7 +1985,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected TagList getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return myTagList;
 		}
 
@@ -2235,6 +2267,11 @@ class ParserState<T> {
 		@Override
 		public void endingElement() throws DataFormatException {
 			pop();
+		}
+
+		@Override
+		protected IBase getCurrentElement() {
+			return myTagList;
 		}
 
 		@Override

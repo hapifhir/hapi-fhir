@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.DateTimeType;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.DocumentManifest;
@@ -876,7 +877,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testMoreExtensions() throws Exception {
+	public void testEncodeAndParseExtensions() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -884,14 +885,22 @@ public class XmlParserTest {
 		Extension ext = new Extension();
 		ext.setUrl("http://example.com/extensions#someext");
 		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
-
-		// Add the extension to the resource
 		patient.getExtension().add(ext);
-		// END SNIPPET: resourceExtension
 
-		// START SNIPPET: resourceStringExtension
+		Extension parent = new Extension().setUrl("http://example.com#parent");
+		patient.getExtension().add(parent);
+		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		parent.getExtension().add(child1);
+		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value2"));
+		parent.getExtension().add(child2);
+		
+		Extension modExt = new Extension();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateType("1995-01-02"));
+		patient.getModifierExtension().add(modExt);
+
 		HumanName name = patient.addName();
-		name.addFamily("Shmoe");
+		name.addFamily("Blah");
 		StringType given = name.addGivenElement();
 		given.setValue("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
@@ -902,28 +911,55 @@ public class XmlParserTest {
 		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
 		given2.getExtension().add(given2ext);
 		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
-		// END SNIPPET: resourceStringExtension
-
-		// START SNIPPET: subExtension
-		Extension parent = new Extension().setUrl("http://example.com#parent");
-		patient.getExtension().add(parent);
-
-		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
-		parent.getExtension().add(child1);
-
-		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
-		parent.getExtension().add(child2);
-		// END SNIPPET: subExtension
 
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
 
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
-		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension><url value=\"http://example.com/extensions#someext\"/><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
 		assertThat(
 				enc,
-				containsString("<extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><url value=\"http://example.com#parent\"/></extension>"));
-		assertThat(enc, containsString("<given value=\"Joe\"><extension><url value=\"http://examples.com#givenext\"/><valueString value=\"given\"/></extension></given>"));
+				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
+		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+		
+		/*
+		 * Now parse this back
+		 */
+		
+		Patient parsed =ourCtx.newXmlParser().parseResource(Patient.class, enc); 
+		ext = parsed.getExtension().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType)ext.getValue()).getValueAsString());
+
+		parent = patient.getExtension().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals( "http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType)child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals( "http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType)child2.getValue()).getValueAsString());
+
+		modExt = parsed.getModifierExtension().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType)modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getExtension().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType)ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getExtension().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		Extension given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType)given2ext2.getValue()).getValue());
+
 	}
 
 	@Test

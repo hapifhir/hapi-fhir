@@ -11,5 +11,9 @@ public interface IBaseExtension<T> extends ICompositeType {
 	String getUrl();
 	
 	IBaseDatatype getValue();
+
+	T setUrl(String theUrl);
 	
+	T setValue(IBaseDatatype theValue);
+
 }

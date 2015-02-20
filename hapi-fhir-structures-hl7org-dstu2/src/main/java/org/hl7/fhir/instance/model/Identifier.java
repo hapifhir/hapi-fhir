@@ -146,7 +146,7 @@ public class Identifier extends Type  implements ICompositeType {
     /**
      * The purpose of this identifier.
      */
-    @Child(name="use", type={CodeType.class}, order=0, min=0, max=1)
+    @Child(name="use", type={CodeType.class}, order=0, min=0, max=1, enumFactory=IdentifierUseEnumFactory.class)
     @Description(shortDefinition="usual | official | temp | secondary (If known)", formalDefinition="The purpose of this identifier." )
     protected Enumeration<IdentifierUse> use;
 

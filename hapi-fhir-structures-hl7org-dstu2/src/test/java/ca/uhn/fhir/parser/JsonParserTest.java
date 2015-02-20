@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -25,15 +34,16 @@ import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.DateTimeType;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.List_;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
@@ -82,6 +92,119 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+	
+	
+	@Test
+	public void testEncodeAndParseExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		Extension ext = new Extension();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
+		patient.getExtension().add(ext);
+
+		Extension parent = new Extension().setUrl("http://example.com#parent");
+		patient.getExtension().add(parent);
+		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		parent.getExtension().add(child1);
+		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value2"));
+		parent.getExtension().add(child2);
+		
+		Extension modExt = new Extension();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateType("1995-01-02"));
+		patient.getModifierExtension().add(modExt);
+
+		HumanName name = patient.addName();
+		name.addFamily("Blah");
+		StringType given = name.addGivenElement();
+		given.setValue("Joe");
+		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
+		given.getExtension().add(ext2);
+
+		StringType given2 = name.addGivenElement();
+		given2.setValue("Shmoe");
+		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
+		given2.getExtension().add(given2ext);
+		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", 
+				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}", 
+				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"
+				));
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + 
+				"{" + 
+				"\"url\":\"http://example.com/extensions#modext\"," + 
+				"\"valueDate\":\"1995-01-02\"" + 
+				"}" + 
+				"],"));
+		assertThat(enc, containsString("\"_given\":[" + 
+				"{" + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext\"," + 
+				"\"valueString\":\"given\"" + 
+				"}" + 
+				"]" + 
+				"}," + 
+				"{" + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext_parent\"," + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext_child\"," + 
+				"\"valueString\":\"CHILD\"" + 
+				"}" + 
+				"]" + 
+				"}" + 
+				"]" + 
+				"}"));
+		
+		/*
+		 * Now parse this back
+		 */
+		
+		Patient parsed =ourCtx.newJsonParser().parseResource(Patient.class, enc); 
+		ext = parsed.getExtension().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType)ext.getValue()).getValueAsString());
+
+		parent = patient.getExtension().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals( "http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType)child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals( "http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType)child2.getValue()).getValueAsString());
+
+		modExt = parsed.getModifierExtension().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType)modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getExtension().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType)ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getExtension().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		Extension given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType)given2ext2.getValue()).getValue());
+
+	}
+
 	
 	@Test
 	public void testEncodeNonContained() {
@@ -740,6 +863,7 @@ public class JsonParserTest {
 				enc,
 				containsString("<extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><extension><url value=\"http://example.com#child\"/><valueString value=\"value1\"/></extension><url value=\"http://example.com#parent\"/></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension><url value=\"http://examples.com#givenext\"/><valueString value=\"given\"/></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension><extension><url value=\"http://examples.com#givenext\"/><valueString value=\"given\"/></extension><url value=\"http://examples.com#givenext_child\"/></extension></given>"));
 	}
 
 	
