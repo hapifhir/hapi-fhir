@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -385,7 +385,7 @@ public class Parameters extends Resource {
     /**
      * A parameter passed to or received from the operation.
      */
-    @Child(name="parameter", type={}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="parameter", type={}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Operation Parameter", formalDefinition="A parameter passed to or received from the operation." )
     protected List<ParametersParameterComponent> parameter;
 

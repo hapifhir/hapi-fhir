@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -33,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /**
  * Helper class to help manage generic enumerated types
  */
-public interface EnumFactory<T extends Enum<?>> {
+public interface EnumFactory<T extends Enum<?>> extends IBaseEnumFactory<T> {
 
 	/**
 	 * Read an enumeration value from the string that represents it on the XML or JSON

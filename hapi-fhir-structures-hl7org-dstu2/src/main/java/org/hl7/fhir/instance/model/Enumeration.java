@@ -1,6 +1,7 @@
 package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -50,6 +51,16 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> {
 		myEnumFactory = theEnumFactory;
 	}
 
+	/**
+	 * Constructor
+	 */
+	public Enumeration(IBaseEnumFactory<T> theEnumFactory) {
+		if (theEnumFactory == null)
+			throw new IllegalArgumentException("An enumeration factory must be provided");
+		myEnumFactory = (EnumFactory<T>) theEnumFactory;
+	}
+
+	
 	/**
 	 * Constructor
 	 */

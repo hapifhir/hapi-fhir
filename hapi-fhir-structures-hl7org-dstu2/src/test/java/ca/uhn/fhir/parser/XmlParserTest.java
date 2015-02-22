@@ -10,9 +10,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,6 +37,7 @@ import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.DateTimeType;
+import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.DocumentManifest;
@@ -51,11 +49,9 @@ import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.instance.model.Organization.AdministrativeGender;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.Profile;
 import org.hl7.fhir.instance.model.Reference;
@@ -147,13 +143,13 @@ public class XmlParserTest {
 		// Create an organization, note that the organization does not have an ID
 		Organization org = new Organization();
 		org.getNameElement().setValue("Contained Test Organization");
-		org.getText().setDiv("<div>FOOBAR</div>");
+		org.getText().setDivAsString("<div>FOOBAR</div>");
 
 		// Create a patient
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue( "253345");
-		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getText().setDivAsString("<div>BARFOO</div>");
 		patient.getManagingOrganization().setResource(org);
 		
 		String encoded = parser.encodeResourceToString(patient);
@@ -412,7 +408,7 @@ public class XmlParserTest {
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
 		spm.addIdentifier().setSystem("urn").setValue( "123");
-		rpt.getText().setDiv("AAA");
+		rpt.getText().setDivAsString("AAA");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -508,7 +504,7 @@ public class XmlParserTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("foo").setValue("bar");
 		p.getText().setStatus(NarrativeStatus.GENERATED);
-		p.getText().setDiv("<div>hello</div>");
+		p.getText().setDivAsString("<div>hello</div>");
 
 		Bundle b = new Bundle();
 		b.setTotal(123);
@@ -518,7 +514,7 @@ public class XmlParserTest {
 		ourLog.info(out);
 		assertThat(out, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>"));
 
-		p.getText().setDiv("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
+		p.getText().setDivAsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>");
 		out = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(out);
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">hello</xhtml:div>"));
@@ -529,7 +525,7 @@ public class XmlParserTest {
 	public void testEncodePrettyPrint() throws Exception {
 
 		Patient patient = new Patient();
-		patient.getText().setDiv("<div>\n  <i>  hello     <pre>\n  LINE1\n  LINE2</pre></i>\n\n\n\n</div>");
+		patient.getText().setDivAsString("<div>\n  <i>  hello     <pre>\n  LINE1\n  LINE2</pre></i>\n\n\n\n</div>");
 		patient.addName().addFamily("Family").addGiven("Given");
 
 		//@formatter:off
@@ -881,7 +877,7 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testMoreExtensions() throws Exception {
+	public void testEncodeAndParseExtensions() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
@@ -889,40 +885,81 @@ public class XmlParserTest {
 		Extension ext = new Extension();
 		ext.setUrl("http://example.com/extensions#someext");
 		ext.setValue(new DateTimeType("2011-01-02T11:13:15"));
-
-		// Add the extension to the resource
 		patient.getExtension().add(ext);
-		// END SNIPPET: resourceExtension
 
-		// START SNIPPET: resourceStringExtension
+		Extension parent = new Extension().setUrl("http://example.com#parent");
+		patient.getExtension().add(parent);
+		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		parent.getExtension().add(child1);
+		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value2"));
+		parent.getExtension().add(child2);
+		
+		Extension modExt = new Extension();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateType("1995-01-02"));
+		patient.getModifierExtension().add(modExt);
+
 		HumanName name = patient.addName();
-		name.addFamily("Shmoe");
+		name.addFamily("Blah");
 		StringType given = name.addGivenElement();
 		given.setValue("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("given"));
 		given.getExtension().add(ext2);
-		// END SNIPPET: resourceStringExtension
 
-		// START SNIPPET: subExtension
-		Extension parent = new Extension().setUrl("http://example.com#parent");
-		patient.getExtension().add(parent);
-
-		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
-		parent.getExtension().add(child1);
-
-		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
-		parent.getExtension().add(child2);
-		// END SNIPPET: subExtension
+		StringType given2 = name.addGivenElement();
+		given2.setValue("Shmoe");
+		Extension given2ext = new Extension().setUrl("http://examples.com#givenext_parent");
+		given2.getExtension().add(given2ext);
+		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new StringType("CHILD"));
 
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
 
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
 		assertThat(
 				enc,
-				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+		
+		/*
+		 * Now parse this back
+		 */
+		
+		Patient parsed =ourCtx.newXmlParser().parseResource(Patient.class, enc); 
+		ext = parsed.getExtension().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType)ext.getValue()).getValueAsString());
+
+		parent = patient.getExtension().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals( "http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType)child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals( "http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType)child2.getValue()).getValueAsString());
+
+		modExt = parsed.getModifierExtension().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType)modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getExtension().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType)ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getExtension().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		Extension given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType)given2ext2.getValue()).getValue());
+
 	}
 
 	@Test
@@ -975,10 +1012,10 @@ public class XmlParserTest {
 	public void testDuplicateContainedResources() {
 
 		Observation resA = new Observation();
-		resA.getName().setText("A");
+		resA.getCode().setText("A");
 
 		Observation resB = new Observation();
-		resB.getName().setText("B");
+		resB.getCode().setText("B");
 		resB.addRelated().setTarget(new Reference(resA));
 		resB.addRelated().setTarget(new Reference(resA));
 
@@ -994,14 +1031,14 @@ public class XmlParserTest {
 	public void testNestedContainedResources() {
 
 		Observation A = new Observation();
-		A.getName().setText("A");
+		A.getCode().setText("A");
 
 		Observation B = new Observation();
-		B.getName().setText("B");
+		B.getCode().setText("B");
 		A.addRelated().setTarget(new Reference(B));
 
 		Observation C = new Observation();
-		C.getName().setText("C");
+		C.getCode().setText("C");
 		B.addRelated().setTarget(new Reference(C));
 
 		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(A);
@@ -1017,13 +1054,13 @@ public class XmlParserTest {
 		assertEquals(-1, idx1);
 
 		Observation obs = ourCtx.newXmlParser().parseResource(Observation.class, str);
-		assertEquals("A", obs.getName().getText());
+		assertEquals("A", obs.getCode().getText());
 
 		Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
-		assertEquals("B", obsB.getName().getText());
+		assertEquals("B", obsB.getCode().getText());
 
 		Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
-		assertEquals("C", obsC.getName().getText());
+		assertEquals("C", obsC.getCode().getText());
 
 	}
 
@@ -1057,7 +1094,7 @@ public class XmlParserTest {
 		Observation obs = (Observation) result0.getResource();
 
 		assertNotNull(obs);
-		assertEquals("718-7", obs.getName().getCoding().get(0).getCode());
+		assertEquals("718-7", obs.getCode().getCoding().get(0).getCode());
 
 	}
 

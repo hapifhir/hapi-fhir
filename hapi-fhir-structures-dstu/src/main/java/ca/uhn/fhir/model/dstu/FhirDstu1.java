@@ -57,7 +57,6 @@ import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -377,7 +376,5 @@ public class FhirDstu1 implements IFhirVersion {
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
 	}
-
-
 
 }

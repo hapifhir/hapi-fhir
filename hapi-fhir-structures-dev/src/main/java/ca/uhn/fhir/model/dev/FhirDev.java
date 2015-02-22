@@ -23,10 +23,12 @@ package ca.uhn.fhir.model.dev;
 import java.io.InputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
@@ -101,7 +103,5 @@ public class FhirDev implements IFhirVersion {
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
 	}
-
-
 
 }

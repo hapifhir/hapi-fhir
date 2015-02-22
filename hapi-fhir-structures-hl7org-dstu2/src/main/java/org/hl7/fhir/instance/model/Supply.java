@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -786,28 +786,28 @@ public class Supply extends DomainResource {
     /**
      * Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.
      */
-    @Child(name="kind", type={CodeableConcept.class}, order=-1, min=0, max=1)
+    @Child(name="kind", type={CodeableConcept.class}, order=0, min=0, max=1)
     @Description(shortDefinition="The kind of supply (central, non-stock, etc)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
     protected CodeableConcept kind;
 
     /**
      * Unique identifier for this supply request.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=1)
+    @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for this supply request." )
     protected Identifier identifier;
 
     /**
      * Status of the supply request.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=0, max=1)
+    @Child(name="status", type={CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="requested | dispensed | received | failed | cancelled", formalDefinition="Status of the supply request." )
     protected Enumeration<ValuesetSupplyStatus> status;
 
     /**
      * The item that is requested to be supplied.
      */
-    @Child(name="orderedItem", type={Medication.class, Substance.class, Device.class}, order=2, min=0, max=1)
+    @Child(name="orderedItem", type={Medication.class, Substance.class, Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied." )
     protected Reference orderedItem;
 
@@ -819,7 +819,7 @@ public class Supply extends DomainResource {
     /**
      * A link to a resource representing the person whom the ordered item is for.
      */
-    @Child(name="patient", type={Patient.class}, order=3, min=0, max=1)
+    @Child(name="patient", type={Patient.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Patient for whom the item is supplied", formalDefinition="A link to a resource representing the person whom the ordered item is for." )
     protected Reference patient;
 
@@ -831,7 +831,7 @@ public class Supply extends DomainResource {
     /**
      * Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed.
      */
-    @Child(name="dispense", type={}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="dispense", type={}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supply details", formalDefinition="Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed." )
     protected List<SupplyDispenseComponent> dispense;
 
@@ -1114,20 +1114,20 @@ public class Supply extends DomainResource {
     return ResourceType.Supply;
    }
 
-  @SearchParamDefinition(name="patient", path="Supply.patient", description="Patient for whom the item is supplied", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="Supply.status", description="requested | dispensed | received | failed | cancelled", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="External identifier", type="token" )
-  public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="identifier", path="Supply.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="Dispenser", type="reference" )
-  public static final String SP_SUPPLIER = "supplier";
   @SearchParamDefinition(name="kind", path="Supply.kind", description="The kind of supply (central, non-stock, etc)", type="token" )
   public static final String SP_KIND = "kind";
+  @SearchParamDefinition(name="patient", path="Supply.patient", description="Patient for whom the item is supplied", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="Dispenser", type="reference" )
+  public static final String SP_SUPPLIER = "supplier";
+  @SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="External identifier", type="token" )
+  public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="in-progress | dispensed | abandoned", type="token" )
   public static final String SP_DISPENSESTATUS = "dispensestatus";
+  @SearchParamDefinition(name="status", path="Supply.status", description="requested | dispensed | received | failed | cancelled", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

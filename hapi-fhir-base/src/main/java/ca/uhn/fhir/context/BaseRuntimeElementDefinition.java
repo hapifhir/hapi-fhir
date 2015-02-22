@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
@@ -102,8 +103,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 		try {
 			if (theArgument == null) {
 				return getImplementingClass().newInstance();
-			} else {
+			} else if (theArgument instanceof IValueSetEnumBinder) {
 				return getImplementingClass().getConstructor(IValueSetEnumBinder.class).newInstance(theArgument);
+			}else {
+				return getImplementingClass().getConstructor(IBaseEnumFactory.class).newInstance(theArgument);
 			}
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);

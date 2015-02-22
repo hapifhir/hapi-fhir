@@ -32,5 +32,7 @@ public class RuntimeChildPrimitiveDatatypeDefinition extends BaseRuntimeChildDat
 	public RuntimeChildPrimitiveDatatypeDefinition(Field theField, String theElementName, Description theDescriptionAnnotation, Child theChildAnnotation,  Class<? extends IBase> theDatatype) {
 		super(theField, theElementName, theChildAnnotation, theDescriptionAnnotation, theDatatype);
 	}
+	
+	
 
 }

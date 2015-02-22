@@ -22,14 +22,12 @@ package ca.uhn.fhir.model.base.composite;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
-
-import javax.json.JsonValue;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -40,7 +38,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
-public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
+public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IResource myResource;

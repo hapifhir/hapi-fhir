@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -176,14 +176,14 @@ public class AppointmentResponse extends DomainResource {
     /**
      * This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Parent appointment that this response is replying to.
      */
-    @Child(name="appointment", type={Appointment.class}, order=0, min=1, max=1)
+    @Child(name="appointment", type={Appointment.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Parent appointment that this response is replying to", formalDefinition="Parent appointment that this response is replying to." )
     protected Reference appointment;
 
@@ -195,14 +195,14 @@ public class AppointmentResponse extends DomainResource {
     /**
      * Role of participant in the appointment.
      */
-    @Child(name="participantType", type={CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="participantType", type={CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Role of participant in the appointment", formalDefinition="Role of participant in the appointment." )
     protected List<CodeableConcept> participantType;
 
     /**
      * A Person of device that is participating in the appointment, usually Practitioner, Patient, RelatedPerson or Device.
      */
-    @Child(name="individual", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="individual", type={}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Person of device that is participating in the appointment, usually Practitioner, Patient, RelatedPerson or Device", formalDefinition="A Person of device that is participating in the appointment, usually Practitioner, Patient, RelatedPerson or Device." )
     protected List<Reference> individual;
     /**
@@ -214,35 +214,35 @@ public class AppointmentResponse extends DomainResource {
     /**
      * Participation status of the Patient.
      */
-    @Child(name="participantStatus", type={CodeType.class}, order=3, min=1, max=1)
+    @Child(name="participantStatus", type={CodeType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="accepted | declined | tentative | in-process | completed | needs-action", formalDefinition="Participation status of the Patient." )
     protected Enumeration<Participantstatus> participantStatus;
 
     /**
      * Additional comments about the appointment.
      */
-    @Child(name="comment", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name="comment", type={StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Additional comments about the appointment", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
      * Date/Time that the appointment is to take place.
      */
-    @Child(name="start", type={InstantType.class}, order=5, min=0, max=1)
+    @Child(name="start", type={InstantType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Date/Time that the appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
-    @Child(name="end", type={InstantType.class}, order=6, min=0, max=1)
+    @Child(name="end", type={InstantType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Date/Time that the appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
      * Who recorded the appointment response.
      */
-    @Child(name="lastModifiedBy", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=7, min=0, max=1)
+    @Child(name="lastModifiedBy", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Who recorded the appointment response", formalDefinition="Who recorded the appointment response." )
     protected Reference lastModifiedBy;
 
@@ -254,7 +254,7 @@ public class AppointmentResponse extends DomainResource {
     /**
      * Date when the response was recorded or last updated.
      */
-    @Child(name="lastModified", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name="lastModified", type={DateTimeType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Date when the response was recorded or last updated", formalDefinition="Date when the response was recorded or last updated." )
     protected DateTimeType lastModified;
 

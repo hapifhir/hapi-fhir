@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -412,7 +412,7 @@ public class OperationOutcome extends DomainResource {
     /**
      * An error, warning or information message that results from a system action.
      */
-    @Child(name="issue", type={}, order=-1, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name="issue", type={}, order=0, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning or information message that results from a system action." )
     protected List<OperationOutcomeIssueComponent> issue;
 

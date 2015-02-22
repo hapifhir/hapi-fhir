@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -758,56 +758,56 @@ public class Subscription extends DomainResource {
     /**
      * Todo.
      */
-    @Child(name="criteria", type={StringType.class}, order=-1, min=1, max=1)
+    @Child(name="criteria", type={StringType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="Rule for server push criteria", formalDefinition="Todo." )
     protected StringType criteria;
 
     /**
      * Todo.
      */
-    @Child(name="contact", type={ContactPoint.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="contact", type={ContactPoint.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact details for source (e.g. troubleshooting)", formalDefinition="Todo." )
     protected List<ContactPoint> contact;
 
     /**
      * Todo.
      */
-    @Child(name="reason", type={StringType.class}, order=1, min=1, max=1)
+    @Child(name="reason", type={StringType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Description of why this subscription was created", formalDefinition="Todo." )
     protected StringType reason;
 
     /**
      * Todo.
      */
-    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=3, min=1, max=1)
     @Description(shortDefinition="requested | active | error | off", formalDefinition="Todo." )
     protected Enumeration<SubscriptionStatus> status;
 
     /**
      * Todo.
      */
-    @Child(name="error", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name="error", type={StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Latest error note", formalDefinition="Todo." )
     protected StringType error;
 
     /**
      * Todo.
      */
-    @Child(name="channel", type={}, order=4, min=1, max=1)
+    @Child(name="channel", type={}, order=5, min=1, max=1)
     @Description(shortDefinition="The channel on which to report matches to the criteria", formalDefinition="Todo." )
     protected SubscriptionChannelComponent channel;
 
     /**
      * Todo.
      */
-    @Child(name="end", type={InstantType.class}, order=5, min=0, max=1)
+    @Child(name="end", type={InstantType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="When to automatically delete the subscription", formalDefinition="Todo." )
     protected InstantType end;
 
     /**
      * Todo.
      */
-    @Child(name="tag", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="tag", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A tag to add to matching resources", formalDefinition="Todo." )
     protected List<SubscriptionTagComponent> tag;
 
@@ -1215,20 +1215,20 @@ public class Subscription extends DomainResource {
     return ResourceType.Subscription;
    }
 
-  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
-  public static final String SP_CRITERIA = "criteria";
-  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="tag", path="Subscription.tag.term", description="The term that identifies the tag", type="string" )
-  public static final String SP_TAG = "tag";
   @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
   public static final String SP_PAYLOAD = "payload";
-  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
+  public static final String SP_CRITERIA = "criteria";
   @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
   public static final String SP_CONTACT = "contact";
+  @SearchParamDefinition(name="tag", path="Subscription.tag.term", description="The term that identifies the tag", type="string" )
+  public static final String SP_TAG = "tag";
+  @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="url", path="Subscription.channel.url", description="Where the channel points to", type="string" )
   public static final String SP_URL = "url";
+  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

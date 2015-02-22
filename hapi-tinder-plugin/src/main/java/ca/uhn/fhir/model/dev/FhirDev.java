@@ -24,6 +24,7 @@ import java.io.InputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -104,6 +105,12 @@ public class FhirDev implements IFhirVersion {
 	@Override
 	public IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer) {
 		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public IBaseExtension<?> newExtension() {
+		return null;
 	}
 
 

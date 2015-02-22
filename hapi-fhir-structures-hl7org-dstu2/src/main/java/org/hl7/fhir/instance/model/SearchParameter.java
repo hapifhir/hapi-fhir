@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -190,70 +190,70 @@ public class SearchParameter extends DomainResource {
     /**
      * The URL at which this search parameter is (or will be) published, and which is used to reference this profile in conformance statements.
      */
-    @Child(name="url", type={UriType.class}, order=-1, min=1, max=1)
+    @Child(name="url", type={UriType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="Literal URL used to reference this search parameter", formalDefinition="The URL at which this search parameter is (or will be) published, and which is used to reference this profile in conformance statements." )
     protected UriType url;
 
     /**
      * The name of the standard or custom search parameter.
      */
-    @Child(name="name", type={StringType.class}, order=0, min=1, max=1)
+    @Child(name="name", type={StringType.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Name of search parameter", formalDefinition="The name of the standard or custom search parameter." )
     protected StringType name;
 
     /**
      * Details of the individual or organization who accepts responsibility for publishing the search parameter.
      */
-    @Child(name="publisher", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name="publisher", type={StringType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="Details of the individual or organization who accepts responsibility for publishing the search parameter." )
     protected StringType publisher;
 
     /**
      * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * The Scope and Usage that this search parameter was created to meet.
      */
-    @Child(name="requirements", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name="requirements", type={StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Why this search parameter is defined", formalDefinition="The Scope and Usage that this search parameter was created to meet." )
     protected StringType requirements;
 
     /**
      * The base resource type that this search parameter refers to.
      */
-    @Child(name="base", type={CodeType.class}, order=4, min=1, max=1)
+    @Child(name="base", type={CodeType.class}, order=5, min=1, max=1)
     @Description(shortDefinition="The resource type this search parameter applies to", formalDefinition="The base resource type that this search parameter refers to." )
     protected CodeType base;
 
     /**
      * The type of value a search parameter refers to, and how the content is interpreted.
      */
-    @Child(name="type", type={CodeType.class}, order=5, min=1, max=1)
+    @Child(name="type", type={CodeType.class}, order=6, min=1, max=1)
     @Description(shortDefinition="number | date | string | token | reference | composite | quantity", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
     protected Enumeration<SearchParamType> type;
 
     /**
      * A description of the search parameters and how it used.
      */
-    @Child(name="description", type={StringType.class}, order=6, min=1, max=1)
+    @Child(name="description", type={StringType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="Documentation for  search parameter", formalDefinition="A description of the search parameters and how it used." )
     protected StringType description;
 
     /**
      * An XPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name="xpath", type={StringType.class}, order=7, min=0, max=1)
+    @Child(name="xpath", type={StringType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="XPath that extracts the values", formalDefinition="An XPath expression that returns a set of elements for the search parameter." )
     protected StringType xpath;
 
     /**
      * Types of resource (if a resource is referenced).
      */
-    @Child(name="target", type={CodeType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="target", type={CodeType.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
     protected List<CodeType> target;
 
@@ -808,18 +808,18 @@ public class SearchParameter extends DomainResource {
     return ResourceType.SearchParameter;
    }
 
-  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
-  public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="name", path="SearchParameter.name", description="Name of search parameter", type="string" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
-  public static final String SP_TARGET = "target";
-  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
-  public static final String SP_BASE = "base";
+  @SearchParamDefinition(name="description", path="SearchParameter.description", description="Documentation for  search parameter", type="string" )
+  public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity", type="token" )
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="url", path="SearchParameter.url", description="Literal URL used to reference this search parameter", type="token" )
   public static final String SP_URL = "url";
+  @SearchParamDefinition(name="base", path="SearchParameter.base", description="The resource type this search parameter applies to", type="token" )
+  public static final String SP_BASE = "base";
+  @SearchParamDefinition(name="target", path="SearchParameter.target", description="Types of resource (if a resource reference)", type="token" )
+  public static final String SP_TARGET = "target";
 
 }
 

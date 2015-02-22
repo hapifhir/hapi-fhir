@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -649,63 +649,63 @@ public class Appointment extends DomainResource {
     /**
      * This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority) (Need to change back to CodeableConcept).
      */
-    @Child(name="priority", type={IntegerType.class}, order=0, min=0, max=1)
+    @Child(name="priority", type={IntegerType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority) (Need to change back to CodeableConcept)", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority) (Need to change back to CodeableConcept)." )
     protected IntegerType priority;
 
     /**
      * The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="pending | booked | arrived | fulfilled | cancelled | noshow", formalDefinition="The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status." )
     protected Enumeration<Appointmentstatus> status;
 
     /**
      * The type of appointments that is being booked (ideally this would be an identifiable service - which is at a location, rather than the location itself).
      */
-    @Child(name="type", type={CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="The type of appointments that is being booked (ideally this would be an identifiable service - which is at a location, rather than the location itself)", formalDefinition="The type of appointments that is being booked (ideally this would be an identifiable service - which is at a location, rather than the location itself)." )
     protected CodeableConcept type;
 
     /**
      * The reason that this appointment is being scheduled, this is more clinical than administrative.
      */
-    @Child(name="reason", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name="reason", type={CodeableConcept.class}, order=4, min=0, max=1)
     @Description(shortDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative", formalDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative." )
     protected CodeableConcept reason;
 
     /**
      * The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.
      */
-    @Child(name="description", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
     protected StringType description;
 
     /**
      * Date/Time that the appointment is to take place.
      */
-    @Child(name="start", type={InstantType.class}, order=5, min=1, max=1)
+    @Child(name="start", type={InstantType.class}, order=6, min=1, max=1)
     @Description(shortDefinition="Date/Time that the appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
-    @Child(name="end", type={InstantType.class}, order=6, min=1, max=1)
+    @Child(name="end", type={InstantType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="Date/Time that the appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
      * The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.
      */
-    @Child(name="slot", type={Slot.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="slot", type={Slot.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
     protected List<Reference> slot;
     /**
@@ -717,7 +717,7 @@ public class Appointment extends DomainResource {
     /**
      * The primary location that this appointment is to take place.
      */
-    @Child(name="location", type={Location.class}, order=8, min=0, max=1)
+    @Child(name="location", type={Location.class}, order=9, min=0, max=1)
     @Description(shortDefinition="The primary location that this appointment is to take place", formalDefinition="The primary location that this appointment is to take place." )
     protected Reference location;
 
@@ -729,14 +729,14 @@ public class Appointment extends DomainResource {
     /**
      * Additional comments about the appointment.
      */
-    @Child(name="comment", type={StringType.class}, order=9, min=0, max=1)
+    @Child(name="comment", type={StringType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Additional comments about the appointment", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
      * An Order that lead to the creation of this appointment.
      */
-    @Child(name="order", type={Order.class}, order=10, min=0, max=1)
+    @Child(name="order", type={Order.class}, order=11, min=0, max=1)
     @Description(shortDefinition="An Order that lead to the creation of this appointment", formalDefinition="An Order that lead to the creation of this appointment." )
     protected Reference order;
 
@@ -748,14 +748,14 @@ public class Appointment extends DomainResource {
     /**
      * List of participants involved in the appointment.
      */
-    @Child(name="participant", type={}, order=11, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name="participant", type={}, order=12, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of participants involved in the appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 
     /**
      * Who recorded the appointment.
      */
-    @Child(name="lastModifiedBy", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=12, min=0, max=1)
+    @Child(name="lastModifiedBy", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=13, min=0, max=1)
     @Description(shortDefinition="Who recorded the appointment", formalDefinition="Who recorded the appointment." )
     protected Reference lastModifiedBy;
 
@@ -767,7 +767,7 @@ public class Appointment extends DomainResource {
     /**
      * Date when the appointment was recorded.
      */
-    @Child(name="lastModified", type={DateTimeType.class}, order=13, min=0, max=1)
+    @Child(name="lastModified", type={DateTimeType.class}, order=14, min=0, max=1)
     @Description(shortDefinition="Date when the appointment was recorded", formalDefinition="Date when the appointment was recorded." )
     protected DateTimeType lastModified;
 
@@ -1494,16 +1494,16 @@ public class Appointment extends DomainResource {
     return ResourceType.Appointment;
    }
 
+  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date" )
+  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
+  public static final String SP_ACTOR = "actor";
   @SearchParamDefinition(name="partstatus", path="Appointment.participant.status", description="The Participation status of the subject, or other participant on the appointment", type="token" )
   public static final String SP_PARTSTATUS = "partstatus";
   @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="status", path="Appointment.status", description="The overall status of the appointment", type="token" )
   public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="actor", path="Appointment.participant.actor", description="Any one of the individuals participating in the appointment", type="reference" )
-  public static final String SP_ACTOR = "actor";
-  @SearchParamDefinition(name="date", path="Appointment.start", description="Appointment date/time.", type="date" )
-  public static final String SP_DATE = "date";
 
 }
 

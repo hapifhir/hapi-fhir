@@ -23,6 +23,7 @@ package ca.uhn.fhir.model.dstu2;
 import java.io.InputStream;
 
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -90,6 +91,11 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IBaseExtension<?> newExtension() {
+		return null;
 	}
 
 }

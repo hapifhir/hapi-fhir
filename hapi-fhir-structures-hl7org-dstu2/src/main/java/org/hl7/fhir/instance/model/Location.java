@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -426,63 +426,63 @@ public class Location extends DomainResource {
     /**
      * Unique code or number identifying the location to its users.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Unique code or number identifying the location to its users", formalDefinition="Unique code or number identifying the location to its users." )
     protected List<Identifier> identifier;
 
     /**
      * Name of the location as used by humans. Does not need to be unique.
      */
-    @Child(name="name", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name="name", type={StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Name of the location as used by humans", formalDefinition="Name of the location as used by humans. Does not need to be unique." )
     protected StringType name;
 
     /**
      * Description of the Location, which helps in finding or referencing the place.
      */
-    @Child(name="description", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name="description", type={StringType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Description of the Location, which helps in finding or referencing the place", formalDefinition="Description of the Location, which helps in finding or referencing the place." )
     protected StringType description;
 
     /**
      * Indicates the type of function performed at the location.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Indicates the type of function performed at the location", formalDefinition="Indicates the type of function performed at the location." )
     protected CodeableConcept type;
 
     /**
      * The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name="telecom", type={ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact details of the location", formalDefinition="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites." )
     protected List<ContactPoint> telecom;
 
     /**
      * Physical location.
      */
-    @Child(name="address", type={Address.class}, order=4, min=0, max=1)
+    @Child(name="address", type={Address.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Physical location", formalDefinition="Physical location." )
     protected Address address;
 
     /**
      * Physical form of the location, e.g. building, room, vehicle, road.
      */
-    @Child(name="physicalType", type={CodeableConcept.class}, order=5, min=0, max=1)
+    @Child(name="physicalType", type={CodeableConcept.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Physical form of the location", formalDefinition="Physical form of the location, e.g. building, room, vehicle, road." )
     protected CodeableConcept physicalType;
 
     /**
      * The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML).
      */
-    @Child(name="position", type={}, order=6, min=0, max=1)
+    @Child(name="position", type={}, order=7, min=0, max=1)
     @Description(shortDefinition="The absolute geographic location", formalDefinition="The absolute geographic location of the Location, expressed in a KML compatible manner (see notes below for KML)." )
     protected LocationPositionComponent position;
 
     /**
      * The organization that is responsible for the provisioning and upkeep of the location.
      */
-    @Child(name="managingOrganization", type={Organization.class}, order=7, min=0, max=1)
+    @Child(name="managingOrganization", type={Organization.class}, order=8, min=0, max=1)
     @Description(shortDefinition="The organization that is responsible for the provisioning and upkeep of the location", formalDefinition="The organization that is responsible for the provisioning and upkeep of the location." )
     protected Reference managingOrganization;
 
@@ -494,14 +494,14 @@ public class Location extends DomainResource {
     /**
      * active | suspended | inactive.
      */
-    @Child(name="status", type={CodeType.class}, order=8, min=0, max=1)
+    @Child(name="status", type={CodeType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="active | suspended | inactive", formalDefinition="active | suspended | inactive." )
     protected Enumeration<LocationStatus> status;
 
     /**
      * Another Location which this Location is physically part of.
      */
-    @Child(name="partOf", type={Location.class}, order=9, min=0, max=1)
+    @Child(name="partOf", type={Location.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Another Location which this Location is physically part of", formalDefinition="Another Location which this Location is physically part of." )
     protected Reference partOf;
 
@@ -513,7 +513,7 @@ public class Location extends DomainResource {
     /**
      * Indicates whether a resource instance represents a specific location or a class of locations.
      */
-    @Child(name="mode", type={CodeType.class}, order=10, min=0, max=1)
+    @Child(name="mode", type={CodeType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="instance | kind", formalDefinition="Indicates whether a resource instance represents a specific location or a class of locations." )
     protected Enumeration<LocationMode> mode;
 
@@ -1048,24 +1048,24 @@ public class Location extends DomainResource {
     return ResourceType.Location;
    }
 
-  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
-  public static final String SP_ORGANIZATION = "organization";
-  @SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
-  public static final String SP_NEAR = "near";
-  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
-  public static final String SP_PARTOF = "partof";
-  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
-  public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
-  public static final String SP_NEARDISTANCE = "near-distance";
-  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
+  public static final String SP_PARTOF = "partof";
+  @SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
+  public static final String SP_NEARDISTANCE = "near-distance";
+  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
+  public static final String SP_ADDRESS = "address";
+  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using KML, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
+  public static final String SP_NEAR = "near";
+  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

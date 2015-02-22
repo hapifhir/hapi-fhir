@@ -141,6 +141,29 @@
 			
 			</subsection>
 			
+			<subsection name="Configure the Server's Identity/Web Address">
+				<p>
+					The server will return data in a number of places that includes the
+					complete "identity" of a resource. Identity in this case refers to the
+					web address that a user can use to access the resource. 
+				</p>
+				<p>
+					For instance, if your server is hosted at <code>http://foo.com/fhir</code> 
+					and your resource provider returns a Patient resource with the ID "123",
+					the server should translate that ID to "http://foo.com/fhir/Patient/123".
+				</p>
+				<p>
+					The server will attempt to determine what the base URL should be based on 
+					what the request it receives looks like, but if it is not getting 
+					the right address you may wish to hardcode the base URL, as shown 
+					in the following example:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="addressStrategy" />
+					<param name="file" value="examples/src/main/java/example/ExampleProviders.java" />
+				</macro>
+			</subsection>
+			
 			<subsection name="Deploy">
 				
 				<p>
