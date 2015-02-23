@@ -47,6 +47,7 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -289,6 +290,10 @@ public class MethodUtil {
 		return MethodUtil.findParamAnnotationIndex(theMethod, TagListParam.class);
 	}
 
+	public static Integer findConditionalOperationParameterIndex(Method theMethod) {
+		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalOperationParam.class);
+	}
+
 	@SuppressWarnings("deprecation")
 	public static Integer findVersionIdParameterIndex(Method theMethod) {
 		return MethodUtil.findParamAnnotationIndex(theMethod, VersionIdParam.class);
@@ -390,6 +395,8 @@ public class MethodUtil {
 						param = new SortParameter();
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParamBinder(theContext);
+					} else if (nextAnnotation instanceof ConditionalOperationParam) {
+						param = new ConditionalParamBinder();
 					} else {
 						continue;
 					}

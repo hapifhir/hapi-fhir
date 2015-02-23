@@ -20,19 +20,17 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
@@ -43,16 +41,11 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
-	private Integer myVersionIdParameterIndex;
 
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Update.class, theProvider);
 
 		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
-		if (myIdParameterIndex == null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type '" + theMethod.getDeclaringClass().getCanonicalName() + "' has no parameter annotated with the @" + IdParam.class.getSimpleName() + " annotation");
-		}
-		myVersionIdParameterIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 	}
 
 	@Override
@@ -92,7 +85,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 		
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
-				theRequest.setId(id);
+				theRequest.getId().setValue(id.getValue());
 			}
 		}
 
@@ -104,9 +97,8 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 			}
 		}
 
-		theParams[myIdParameterIndex] = theRequest.getId();
-		if (myVersionIdParameterIndex != null) {
-			theParams[myVersionIdParameterIndex] = theRequest.getId();
+		if (myIdParameterIndex != null) {
+			theParams[myIdParameterIndex] = theRequest.getId();
 		}
 	}
 
@@ -117,12 +109,6 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 			throw new NullPointerException("ID can not be null");
 		}
 
-		if (myVersionIdParameterIndex != null) {
-			IdDt versionIdDt = (IdDt) theArgs[myVersionIdParameterIndex];
-			if (idDt.hasVersionIdPart() == false) {
-				idDt = idDt.withVersion(versionIdDt.getIdPart());
-			}
-		}
 		FhirContext context = getContext();
 
 		HttpPutClientInvocation retVal = MethodUtil.createUpdateInvocation(theResource, null, idDt, context);

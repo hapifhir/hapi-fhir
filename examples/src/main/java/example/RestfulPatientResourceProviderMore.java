@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.DeleteTags;
@@ -323,6 +324,23 @@ public void deletePatient(@IdParam IdDt theId) {
 }
 //END SNIPPET: delete
 
+
+//START SNIPPET: deleteConditional
+@Read()
+public void deletePatientConditional(@IdParam IdDt theId, @ConditionalOperationParam String theConditionalUrl) {
+   // Only one of theId or theConditionalUrl will have a value depending
+   // on whether the URL receieved was a logical ID, or a conditional
+   // search string
+   if (theId != null) {
+      // do a normal delete
+   } else {
+      // do a conditional delete
+   }
+   
+   // otherwise, delete was successful
+   return; // can also return MethodOutcome
+}
+//END SNIPPET: deleteConditional
 
 //START SNIPPET: history
 @History()
@@ -680,6 +698,25 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 @Create
 public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient);
 //END SNIPPET: createClient
+
+//START SNIPPET: updateConditional
+@Update
+public MethodOutcome updatePatientConditional(
+      @ResourceParam Patient thePatient, 
+      @IdParam IdDt theId, 
+      @ConditionalOperationParam String theConditional) {
+
+   // Only one of theId or theConditional will have a value and the other will be null,
+   // depending on the URL passed into the server. 
+   if (theConditional != null) {
+      // Do a conditional update. theConditional will have a value like "Patient?identifier=system%7C00001"
+   } else {
+      // Do a normal update. theId will have the identity of the resource to update
+   }
+   
+   return new MethodOutcome(); // populate this
+}
+//END SNIPPET: updateConditional
 
 //START SNIPPET: update
 @Update

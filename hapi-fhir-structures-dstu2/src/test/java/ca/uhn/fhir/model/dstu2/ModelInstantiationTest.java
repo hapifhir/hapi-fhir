@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.dev;
+package ca.uhn.fhir.model.dstu2;
 
 import java.util.Properties;
 
