@@ -34,11 +34,11 @@ import javax.persistence.UniqueConstraint;
 
 //@formatter:off
 @Entity()
-@Table(name = "HFJ_FORCED_ID", uniqueConstraints = { 
-	@UniqueConstraint(name = "IDX_FORCEDID", columnNames = { "FORCED_ID" }) 
+@Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
+		@UniqueConstraint(name = "IDX_FORCEDID", columnNames = {"FORCED_ID"})
 })
-@NamedQueries(value= {
-	@NamedQuery(name = "Q_GET_FORCED_ID", query = "SELECT f FROM ForcedId f WHERE myForcedId = :ID")
+@NamedQueries(value = {
+		@NamedQuery(name = "Q_GET_FORCED_ID", query = "SELECT f FROM ForcedId f WHERE myForcedId = :ID")
 })
 //@formatter:on
 public class ForcedId {

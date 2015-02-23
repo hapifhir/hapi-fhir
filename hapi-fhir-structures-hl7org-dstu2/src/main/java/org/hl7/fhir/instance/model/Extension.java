@@ -48,14 +48,14 @@ public class Extension extends Element implements IBaseExtension<Extension>, IBa
     /**
      * Source of the definition for the extension code - a logical name or a URL.
      */
-    @Child(name="url", type={UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="identifies the meaning of the extension", formalDefinition="Source of the definition for the extension code - a logical name or a URL." )
     protected UriType url;
 
     /**
      * Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).
      */
-    @Child(name="value", type={}, order=1, min=0, max=1)
+    @Child(name = "value", type = {}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Value of extension", formalDefinition="Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list)." )
     protected org.hl7.fhir.instance.model.Type value;
 
@@ -177,10 +177,10 @@ public class Extension extends Element implements IBaseExtension<Extension>, IBa
           ;
       }
 
-	@Override
-	public Extension setValue(IBaseDatatype theValue) {
-		return setValue((Type)theValue);
-	}
+    @Override
+    public Extension setValue(IBaseDatatype theValue) {
+        return setValue((Type) theValue);
+    }
 
 
 }

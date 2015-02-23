@@ -37,7 +37,9 @@ public class PlainProvider {
 //START SNIPPET: plainProviderServer
 public class ExampleServlet extends RestfulServer {
 
-  /** Constructor */
+    /**
+     * Constructor
+     */
   public ExampleServlet() {
     /*
      * Plain providers are passed to the server in the same way
@@ -56,21 +58,23 @@ public class ExampleServlet extends RestfulServer {
 }
 //END SNIPPET: plainProviderServer
 
-//START SNIPPET: addressStrategy
-public class MyServlet extends RestfulServer {
+    //START SNIPPET: addressStrategy
+    public class MyServlet extends RestfulServer {
 
-   /** Constructor */
-   public MyServlet() {
-      
-      String serverBaseUrl = "http://foo.com/fhir";
-      setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
-      
-      // ...add some resource providers, etc...
-     List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
-     setResourceProviders(resourceProviders);
-   }
-    
- }
+        /**
+         * Constructor
+         */
+        public MyServlet() {
+
+            String serverBaseUrl = "http://foo.com/fhir";
+            setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
+
+            // ...add some resource providers, etc...
+            List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+            setResourceProviders(resourceProviders);
+        }
+
+    }
 //END SNIPPET: addressStrategy
 
 

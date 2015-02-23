@@ -552,11 +552,11 @@ public class JsonParser extends BaseParser implements IParser {
 					if (primitive) {
 						if (nextValue instanceof ISupportsUndeclaredExtensions) {
 							List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
-							addToHeldExtensions(valueIdx, ext, extensions,false);
+							addToHeldExtensions(valueIdx, ext, extensions, false);
 
 							ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
-							addToHeldExtensions(valueIdx, ext, modifierExtensions,true);
-						}else {
+							addToHeldExtensions(valueIdx, ext, modifierExtensions, true);
+						} else {
 							if (nextValue instanceof IBaseHasExtensions) {
 								IBaseHasExtensions element = (IBaseHasExtensions) nextValue;
 								List<? extends IBaseExtension<?>> ext = element.getExtension();
@@ -1378,7 +1378,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 				if (myModifier) {
 					theEventWriter.writeStartArray("modifierExtension");
-				}else {
+				} else {
 					theEventWriter.writeStartArray("extension");
 				}
 

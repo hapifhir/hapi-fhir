@@ -822,16 +822,16 @@ class ParserState<T> {
 			} else {
 				if (theIsModifier == false) {
 					if (getCurrentElement() instanceof IBaseHasExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasExtensions)getCurrentElement()).addExtension();
+						IBaseExtension<?> ext = ((IBaseHasExtensions) getCurrentElement()).addExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
 					} else {
 						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
 					}
-				}else {
+				} else {
 					if (getCurrentElement() instanceof IBaseHasModifierExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasModifierExtensions)getCurrentElement()).addModifierExtension();
+						IBaseExtension<?> ext = ((IBaseHasModifierExtensions) getCurrentElement()).addModifierExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);

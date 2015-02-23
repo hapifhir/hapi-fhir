@@ -171,7 +171,7 @@ public class Questionnaire extends DomainResource {
         /**
          * Answer is a url (website, FTP site, etc.).
          */
-        URL, 
+        URL,
         /**
          * Answer is a choice from a list of options.
          */
@@ -217,8 +217,8 @@ public class Questionnaire extends DomainResource {
           return STRING;
         if ("text".equals(codeString))
           return TEXT;
-        if ("url".equals(codeString))
-          return URL;
+            if ("url".equals(codeString))
+                return URL;
         if ("choice".equals(codeString))
           return CHOICE;
         if ("open-choice".equals(codeString))
@@ -242,7 +242,8 @@ public class Questionnaire extends DomainResource {
             case TIME: return "time";
             case STRING: return "string";
             case TEXT: return "text";
-            case URL: return "url";
+              case URL:
+                  return "url";
             case CHOICE: return "choice";
             case OPENCHOICE: return "open-choice";
             case ATTACHMENT: return "attachment";
@@ -262,7 +263,8 @@ public class Questionnaire extends DomainResource {
             case TIME: return "";
             case STRING: return "";
             case TEXT: return "";
-            case URL: return "";
+              case URL:
+                  return "";
             case CHOICE: return "";
             case OPENCHOICE: return "";
             case ATTACHMENT: return "";
@@ -282,7 +284,8 @@ public class Questionnaire extends DomainResource {
             case TIME: return "Answer is a time independent of date.";
             case STRING: return "Answer is a short (few words to short sentence) free-text entry.";
             case TEXT: return "Answer is a long (potentially multi-paragram) free-text entry.";
-            case URL: return "Answer is a url (website, FTP site, etc.).";
+              case URL:
+                  return "Answer is a url (website, FTP site, etc.).";
             case CHOICE: return "Answer is a choice from a list of options.";
             case OPENCHOICE: return "Answer is a choice from a list of options or a free-text entry.";
             case ATTACHMENT: return "Answer is binary content such as a image, PDF, etc.";
@@ -302,7 +305,8 @@ public class Questionnaire extends DomainResource {
             case TIME: return "time";
             case STRING: return "string";
             case TEXT: return "text";
-            case URL: return "url";
+              case URL:
+                  return "url";
             case CHOICE: return "choice";
             case OPENCHOICE: return "open-choice";
             case ATTACHMENT: return "attachment";
@@ -337,7 +341,7 @@ public class Questionnaire extends DomainResource {
         if ("text".equals(codeString))
           return AnswerFormat.TEXT;
         if ("url".equals(codeString))
-          return AnswerFormat.URL;
+            return AnswerFormat.URL;
         if ("choice".equals(codeString))
           return AnswerFormat.CHOICE;
         if ("open-choice".equals(codeString))
@@ -369,8 +373,8 @@ public class Questionnaire extends DomainResource {
         return "string";
       if (code == AnswerFormat.TEXT)
         return "text";
-      if (code == AnswerFormat.URL)
-        return "url";
+        if (code == AnswerFormat.URL)
+            return "url";
       if (code == AnswerFormat.CHOICE)
         return "choice";
       if (code == AnswerFormat.OPENCHOICE)
@@ -866,7 +870,7 @@ public class Questionnaire extends DomainResource {
          * The actual question as shown to the user to prompt them for an answer.
          */
         @Child(name="text", type={StringType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Text of the question as it is shown to the user", formalDefinition="The actual question as shown to the user to prompt them for an answer." )
+        @Description(shortDefinition = "Text of the question as it is shown to the user", formalDefinition = "The actual question as shown to the user to prompt them for an answer.")
         protected StringType text;
 
         /**
@@ -880,14 +884,14 @@ public class Questionnaire extends DomainResource {
          * If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.
          */
         @Child(name="required", type={BooleanType.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="Must question be answered in data results?", formalDefinition="If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire." )
+        @Description(shortDefinition = "Must question be answered in data results?", formalDefinition = "If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.")
         protected BooleanType required;
 
         /**
          * If true, the question may have more than one answer.
          */
         @Child(name="repeats", type={BooleanType.class}, order=6, min=0, max=1)
-        @Description(shortDefinition="Can question  have multiple answers?", formalDefinition="If true, the question may have more than one answer." )
+        @Description(shortDefinition = "Can question  have multiple answers?", formalDefinition = "If true, the question may have more than one answer.")
         protected BooleanType repeats;
 
         /**
@@ -1260,10 +1264,10 @@ public class Questionnaire extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("linkId", "string", "An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireAnswers]]] resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
           childrenList.add(new Property("concept", "Coding", "Identifies a how this question is known in a particular terminology such as LOINC.", 0, java.lang.Integer.MAX_VALUE, concept));
-          childrenList.add(new Property("text", "string", "The actual question as shown to the user to prompt them for an answer.", 0, java.lang.Integer.MAX_VALUE, text));
+            childrenList.add(new Property("text", "string", "The actual question as shown to the user to prompt them for an answer.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("type", "code", "The expected format of the answer, e.g. the type of input (string, integer) or whether a (multiple) choice is expected.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("required", "boolean", "If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.", 0, java.lang.Integer.MAX_VALUE, required));
-          childrenList.add(new Property("repeats", "boolean", "If true, the question may have more than one answer.", 0, java.lang.Integer.MAX_VALUE, repeats));
+            childrenList.add(new Property("required", "boolean", "If true, indicates that the question must be answered and have required groups within it also present.  If false, the question and any contained groups may be skipped when answering the questionnaire.", 0, java.lang.Integer.MAX_VALUE, required));
+            childrenList.add(new Property("repeats", "boolean", "If true, the question may have more than one answer.", 0, java.lang.Integer.MAX_VALUE, repeats));
           childrenList.add(new Property("options", "Reference(ValueSet)", "Reference to a valueset containing the possible options.", 0, java.lang.Integer.MAX_VALUE, options));
           childrenList.add(new Property("group", "@Questionnaire.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
@@ -1325,49 +1329,49 @@ public class Questionnaire extends DomainResource {
     /**
      * This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this questionnaire", formalDefinition="This records identifiers associated with this question set that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated.
      */
-    @Child(name="version", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Logical id for this version of Questionnaire", formalDefinition="The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated." )
     protected StringType version;
 
     /**
      * The lifecycle status of the questionnaire as a whole.
      */
-    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="draft | published | retired", formalDefinition="The lifecycle status of the questionnaire as a whole." )
     protected Enumeration<QuestionnaireStatus> status;
 
     /**
      * The date that this questionnaire was last changed.
      */
-    @Child(name="date", type={DateTimeType.class}, order=3, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Date this version was authored", formalDefinition="The date that this questionnaire was last changed." )
     protected DateTimeType date;
 
     /**
      * Organization or person responsible for developing and maintaining the questionnaire.
      */
-    @Child(name="publisher", type={StringType.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="Organization/individual who designed the questionnaire", formalDefinition="Organization or person responsible for developing and maintaining the questionnaire." )
+    @Child(name = "publisher", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Description(shortDefinition = "Organization/individual who designed the questionnaire", formalDefinition = "Organization or person responsible for developing and maintaining the questionnaire.")
     protected StringType publisher;
 
     /**
      * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Description(shortDefinition = "Contact information of the publisher", formalDefinition = "Contact details to assist a user in finding and communicating with the publisher.")
     protected List<ContactPoint> telecom;
 
     /**
      * A collection of related questions (or further groupings of questions).
      */
-    @Child(name="group", type={}, order=6, min=1, max=1)
+    @Child(name = "group", type = {}, order = 6, min = 1, max = 1)
     @Description(shortDefinition="Grouped questions", formalDefinition="A collection of related questions (or further groupings of questions)." )
     protected GroupComponent group;
 
@@ -1608,19 +1612,19 @@ public class Questionnaire extends DomainResource {
     /**
      * @return {@link #telecom} (Contact details to assist a user in finding and communicating with the publisher.)
      */
-    public List<ContactPoint> getTelecom() { 
-      if (this.telecom == null)
-        this.telecom = new ArrayList<ContactPoint>();
-      return this.telecom;
+    public List<ContactPoint> getTelecom() {
+        if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+        return this.telecom;
     }
 
-    public boolean hasTelecom() { 
-      if (this.telecom == null)
+    public boolean hasTelecom() {
+        if (this.telecom == null)
+            return false;
+        for (ContactPoint item : this.telecom)
+            if (!item.isEmpty())
+                return true;
         return false;
-      for (ContactPoint item : this.telecom)
-        if (!item.isEmpty())
-          return true;
-      return false;
     }
 
     /**
@@ -1628,11 +1632,11 @@ public class Questionnaire extends DomainResource {
      */
     // syntactic sugar
     public ContactPoint addTelecom() { //3
-      ContactPoint t = new ContactPoint();
-      if (this.telecom == null)
-        this.telecom = new ArrayList<ContactPoint>();
-      this.telecom.add(t);
-      return t;
+        ContactPoint t = new ContactPoint();
+        if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+        this.telecom.add(t);
+        return t;
     }
 
     /**
@@ -1665,8 +1669,8 @@ public class Questionnaire extends DomainResource {
         childrenList.add(new Property("version", "string", "The version number assigned by the publisher for business reasons.  It may remain the same when the resource is updated.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The date that this questionnaire was last changed.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("publisher", "string", "Organization or person responsible for developing and maintaining the questionnaire.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("telecom", "ContactPoint", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
+          childrenList.add(new Property("publisher", "string", "Organization or person responsible for developing and maintaining the questionnaire.", 0, java.lang.Integer.MAX_VALUE, publisher));
+          childrenList.add(new Property("telecom", "ContactPoint", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("group", "", "A collection of related questions (or further groupings of questions).", 0, java.lang.Integer.MAX_VALUE, group));
       }
 
@@ -1682,11 +1686,12 @@ public class Questionnaire extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.date = date == null ? null : date.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
-        };
+          if (telecom != null) {
+              dst.telecom = new ArrayList<ContactPoint>();
+              for (ContactPoint i : telecom)
+                  dst.telecom.add(i.copy());
+          }
+          ;
         dst.group = group == null ? null : group.copy();
         return dst;
       }
@@ -1703,8 +1708,8 @@ public class Questionnaire extends DomainResource {
           return false;
         Questionnaire o = (Questionnaire) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true) && compareDeep(status, o.status, true)
-           && compareDeep(date, o.date, true) && compareDeep(publisher, o.publisher, true) && compareDeep(telecom, o.telecom, true)
-           && compareDeep(group, o.group, true);
+                && compareDeep(date, o.date, true) && compareDeep(publisher, o.publisher, true) && compareDeep(telecom, o.telecom, true)
+                && compareDeep(group, o.group, true);
       }
 
       @Override
@@ -1721,7 +1726,7 @@ public class Questionnaire extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (version == null || version.isEmpty())
            && (status == null || status.isEmpty()) && (date == null || date.isEmpty()) && (publisher == null || publisher.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (group == null || group.isEmpty());
+                && (telecom == null || telecom.isEmpty()) && (group == null || group.isEmpty());
       }
 
   @Override
@@ -1733,16 +1738,16 @@ public class Questionnaire extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="code", path="Questionnaire.group.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
-  public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "code", path = "Questionnaire.group.concept", description = "A code that corresponds to the questionnaire or one of its groups", type = "token")
+    public static final String SP_CODE = "code";
   @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
   public static final String SP_PUBLISHER = "publisher";
-  @SearchParamDefinition(name="title", path="", description="All or part of the name of the questionnaire (title for the root group of the questionnaire)", type="string" )
-  public static final String SP_TITLE = "title";
-  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
-  public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
-  public static final String SP_STATUS = "status";
+    @SearchParamDefinition(name = "title", path = "", description = "All or part of the name of the questionnaire (title for the root group of the questionnaire)", type = "string")
+    public static final String SP_TITLE = "title";
+    @SearchParamDefinition(name = "version", path = "Questionnaire.version", description = "The business version of the questionnaire", type = "string")
+    public static final String SP_VERSION = "version";
+    @SearchParamDefinition(name = "status", path = "Questionnaire.status", description = "The status of the questionnaire", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

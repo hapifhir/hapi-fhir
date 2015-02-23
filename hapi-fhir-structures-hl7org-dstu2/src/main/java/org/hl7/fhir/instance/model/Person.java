@@ -409,56 +409,56 @@ public class Person extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the person.
      */
-    @Child(name="name", type={HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "name", type = {HumanName.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected List<HumanName> name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender.
      */
-    @Child(name="gender", type={CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The birth date for the person.
      */
-    @Child(name="birthDate", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "birthDate", type = {DateTimeType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="The birth date for the person", formalDefinition="The birth date for the person." )
     protected DateTimeType birthDate;
 
     /**
      * One or more addresses for the person.
      */
-    @Child(name="address", type={Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="One or more addresses for the person", formalDefinition="One or more addresses for the person." )
     protected List<Address> address;
 
     /**
      * An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.
      */
-    @Child(name="photo", type={Attachment.class}, order=6, min=0, max=1)
+    @Child(name = "photo", type = {Attachment.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Image of the Person", formalDefinition="An image that can be displayed as a thumbnail of the person to enhance the identification of the individual." )
     protected Attachment photo;
 
     /**
      * The Organization that is the custodian of the person record.
      */
-    @Child(name="managingOrganization", type={Organization.class}, order=7, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="The Organization that is the custodian of the person record", formalDefinition="The Organization that is the custodian of the person record." )
     protected Reference managingOrganization;
 
@@ -470,14 +470,14 @@ public class Person extends DomainResource {
     /**
      * Whether this person's record is in active use.
      */
-    @Child(name="active", type={BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "active", type = {BooleanType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="This person's record is in active use", formalDefinition="Whether this person's record is in active use." )
     protected BooleanType active;
 
     /**
      * Link to a resource that converns the same actual person.
      */
-    @Child(name="link", type={}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Link to a resource that converns the same actual person", formalDefinition="Link to a resource that converns the same actual person." )
     protected List<PersonLinkComponent> link;
 
@@ -938,8 +938,8 @@ public class Person extends DomainResource {
     return ResourceType.Person;
    }
 
-  @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "identifier", path = "Person.identifier", description = "A person Identifier", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
@@ -948,12 +948,12 @@ public class Person extends DomainResource {
   public static final String SP_BIRTHDATE = "birthdate";
   @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
   public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
-  public static final String SP_ORGANIZATION = "organization";
-  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="string" )
-  public static final String SP_TELECOM = "telecom";
+    @SearchParamDefinition(name = "organization", path = "Person.managingOrganization", description = "The organization at which this person record is being managed", type = "reference")
+    public static final String SP_ORGANIZATION = "organization";
+    @SearchParamDefinition(name = "name", path = "Person.name", description = "A portion of name in any name part", type = "string")
+    public static final String SP_NAME = "name";
+    @SearchParamDefinition(name = "telecom", path = "Person.telecom", description = "The value in any kind of contact", type = "string")
+    public static final String SP_TELECOM = "telecom";
 
 }
 

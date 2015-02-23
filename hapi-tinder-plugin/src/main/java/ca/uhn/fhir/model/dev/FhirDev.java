@@ -108,11 +108,4 @@ public class FhirDev implements IFhirVersion {
 	}
 
 
-	//@Override
-	public IBaseExtension<?> newExtension() {
-		return null;
-	}
-
-
-
 }

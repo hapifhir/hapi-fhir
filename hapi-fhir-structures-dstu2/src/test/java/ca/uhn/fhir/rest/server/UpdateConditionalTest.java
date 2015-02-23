@@ -41,93 +41,92 @@ import ca.uhn.fhir.util.PortUtil;
  * Created by dsotnikov on 2/25/2014.
  */
 public class UpdateConditionalTest {
-	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
-	private static int ourPort;
-	private static Server ourServer;
+    private static CloseableHttpClient ourClient;
+    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
+    private static int ourPort;
+    private static Server ourServer;
 
-	@Test
-	public void testUpdate() throws Exception {
+    @Test
+    public void testUpdate() throws Exception {
 
-		Patient patient = new Patient();
-		patient.addIdentifier().setValue("002");
+        Patient patient = new Patient();
+        patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+        HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/001");
+        httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
-		HttpResponse status = ourClient.execute(httpPost);
+        HttpResponse status = ourClient.execute(httpPost);
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+        String responseContent = IOUtils.toString(status.getEntity().getContent());
+        IOUtils.closeQuietly(status.getEntity().getContent());
 
-		ourLog.info("Response was:\n{}", responseContent);
+        ourLog.info("Response was:\n{}", responseContent);
 
-		OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails());
+        OperationOutcome oo = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, responseContent);
+        assertEquals("OODETAILS", oo.getIssueFirstRep().getDetails());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+        assertEquals(200, status.getStatusLine().getStatusCode());
+        assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
+        assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
-	}
-	
-	
-	
-	@AfterClass
-	public static void afterClass() throws Exception {
-		ourServer.stop();
-	}
+    }
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
 
-		PatientProvider patientProvider = new PatientProvider();
+    @AfterClass
+    public static void afterClass() throws Exception {
+        ourServer.stop();
+    }
 
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		servlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        ourPort = PortUtil.findFreePort();
+        ourServer = new Server(ourPort);
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+        PatientProvider patientProvider = new PatientProvider();
 
-	}
+        ServletHandler proxyHandler = new ServletHandler();
+        RestfulServer servlet = new RestfulServer();
+        servlet.setResourceProviders(patientProvider);
+        ServletHolder servletHolder = new ServletHolder(servlet);
+        proxyHandler.addServletWithMapping(servletHolder, "/*");
+        ourServer.setHandler(proxyHandler);
+        ourServer.start();
 
-	private static String ourLastConditionalUrl;
-		
-	
-	@Before
-	public void before() {
-		ourLastConditionalUrl=null;
-	}
-	
-	public static class PatientProvider implements IResourceProvider {
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+        HttpClientBuilder builder = HttpClientBuilder.create();
+        builder.setConnectionManager(connectionManager);
+        ourClient = builder.build();
 
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
+    }
 
-		
-		@Update()
-		public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
-			IdDt id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue());
-			OperationOutcome oo = new OperationOutcome();
-			oo.addIssue().setDetails("OODETAILS");
-			if (theId.getValueAsString().contains("CREATE")) {
-				return new MethodOutcome(id,oo, true);
-			}
-			
-			return new MethodOutcome(id,oo);
-		}
+    private static String ourLastConditionalUrl;
 
-	}
+
+    @Before
+    public void before() {
+        ourLastConditionalUrl = null;
+    }
+
+    public static class PatientProvider implements IResourceProvider {
+
+        @Override
+        public Class<? extends IResource> getResourceType() {
+            return Patient.class;
+        }
+
+
+        @Update()
+        public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+            IdDt id = theId.withVersion(thePatient.getIdentifierFirstRep().getValue());
+            OperationOutcome oo = new OperationOutcome();
+            oo.addIssue().setDetails("OODETAILS");
+            if (theId.getValueAsString().contains("CREATE")) {
+                return new MethodOutcome(id, oo, true);
+            }
+
+            return new MethodOutcome(id, oo);
+        }
+
+    }
 
 }
