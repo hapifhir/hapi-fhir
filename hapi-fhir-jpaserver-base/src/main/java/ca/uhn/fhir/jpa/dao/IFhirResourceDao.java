@@ -29,7 +29,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
@@ -37,9 +36,20 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
 
-	MethodOutcome create(T theResource);
+	DaoMethodOutcome create(T theResource);
 
-	MethodOutcome delete(IdDt theResource);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist);
+
+	/**
+	 * @param thePerformIndexing
+	 *            Use with caution! If you set this to false, you need to manually perform indexing or your resources
+	 *            won't be indexed and searches won't work.
+	 */
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing);
+
+	DaoMethodOutcome delete(IdDt theResource);
+
+	DaoMethodOutcome deleteByUrl(String theString);
 
 	TagList getAllResourceTags();
 
@@ -49,19 +59,27 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	IBundleProvider history(Date theSince);
 
-	IBundleProvider history(IdDt theId,Date theSince);
+	IBundleProvider history(IdDt theId, Date theSince);
 
 	IBundleProvider history(Long theId, Date theSince);
-	
+
 	/**
 	 * 
 	 * @param theId
 	 * @return
-	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceNotFoundException
+	 *             If the ID is not known to the server
 	 */
 	T read(IdDt theId);
 
 	BaseHasResource readEntity(IdDt theId);
+
+	/**
+	 * @param theCheckForForcedId
+	 *            If true, this method should fail if the requested ID contains a numeric PID which exists, but is
+	 *            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
+	 */
+	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
 
 	void removeTag(IdDt theId, String theScheme, String theTerm);
 
@@ -75,15 +93,17 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	Set<Long> searchForIds(String theParameterName, IQueryParameterType theValue);
 
-	MethodOutcome update(T theResource, IdDt theId);
-
 	Set<Long> searchForIdsWithAndOr(SearchParameterMap theParams);
 
+	DaoMethodOutcome update(T theResource);
+
+	DaoMethodOutcome update(T theResource, String theMatchUrl);
+
 	/**
-	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains
-	 * a numeric PID which exists, but is obscured by a "forced ID" so should not exist as
-	 * far as the outside world is concerned. 
+	 * @param thePerformIndexing
+	 *            Use with caution! If you set this to false, you need to manually perform indexing or your resources
+	 *            won't be indexed and searches won't work.
 	 */
-	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
-	
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing);
+
 }

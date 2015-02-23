@@ -143,29 +143,55 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = StringUtils.join(theUrlPath, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = theContents;
+		myContentsIsBundle = false;
+		myParams = theParams;
+		myBundleType = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
+		myContext = theContext;
+		myResource = theResource;
+		myTagList = null;
+		myUrlPath = StringUtils.join(theUrlPath, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = null;
+		myContentsIsBundle = false;
+		myParams = theParams;
+		myBundleType = null;
+	}
+	
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
-		StringBuilder b = new StringBuilder();
+		StringBuilder url = new StringBuilder();
 
 		if (myUrlPath == null) {
-			b.append(theUrlBase);
+			url.append(theUrlBase);
 		} else {
 			if (!myUrlPath.contains("://")) {
-				b.append(theUrlBase);
+				url.append(theUrlBase);
 				if (!theUrlBase.endsWith("/")) {
-					b.append('/');
+					url.append('/');
 				}
 			}
-			b.append(myUrlPath);
+			url.append(myUrlPath);
 		}
 
-		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
-		String url = b.toString();
+		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
 
 		if (myResource != null && BaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			BaseBinary binary = (BaseBinary) myResource;
 			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent(), ContentType.parse(binary.getContentType()));
 			HttpRequestBase retVal = createRequest(url, entity);
+			addMatchHeaders(retVal, url);
 			return retVal;
 		}
 
@@ -177,7 +203,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myContents != null) {
 			encoding = MethodUtil.detectEncoding(myContents);
 		}
-		
+
 		if (encoding == EncodingEnum.JSON) {
 			parser = myContext.newJsonParser();
 		} else {
@@ -187,12 +213,12 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		AbstractHttpEntity entity;
 		if (myParams != null) {
-			contentType= null;
+			contentType = null;
 			List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 			for (Entry<String, List<String>> nextParam : myParams.entrySet()) {
 				List<String> value = nextParam.getValue();
-				for(String s: value){
-					parameters.add(new BasicNameValuePair(nextParam.getKey(), s));	
+				for (String s : value) {
+					parameters.add(new BasicNameValuePair(nextParam.getKey(), s));
 				}
 			}
 			try {
@@ -228,6 +254,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		HttpRequestBase retVal = createRequest(url, entity);
 		super.addHeadersToRequest(retVal);
+		addMatchHeaders(retVal, url);
 
 		if (contentType != null) {
 			retVal.addHeader(Constants.HEADER_CONTENT_TYPE, contentType + Constants.HEADER_SUFFIX_CT_UTF_8);
@@ -236,6 +263,41 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		return retVal;
 	}
 
-	protected abstract HttpRequestBase createRequest(String url, AbstractHttpEntity theEntity);
+	private void addMatchHeaders(HttpRequestBase theHttpRequest, StringBuilder theUrlBase) {
+		if (myIfNoneExistParams != null) {
+			StringBuilder b = newHeaderBuilder(theUrlBase);
+			appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
+			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+		}
+
+		if (myIfNoneExistString != null) {
+			StringBuilder b = newHeaderBuilder(theUrlBase);
+			b.append(b.indexOf("?") == -1 ? '?' : '&');
+			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
+			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+		}
+	}
+
+	private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
+		StringBuilder b = new StringBuilder();
+		b.append(theUrlBase);
+		if (theUrlBase.length() > 0 && theUrlBase.charAt(theUrlBase.length() - 1) == '/') {
+			b.deleteCharAt(b.length() - 1);
+		}
+		return b;
+	}
+
+	protected abstract HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity);
+
+	private Map<String, List<String>> myIfNoneExistParams;
+	private String myIfNoneExistString;
+
+	public void setIfNoneExistParams(Map<String, List<String>> theIfNoneExist) {
+		myIfNoneExistParams = theIfNoneExist;
+	}
+
+	public void setIfNoneExistString(String theIfNoneExistString) {
+		myIfNoneExistString = theIfNoneExistString;
+	}
 
 }

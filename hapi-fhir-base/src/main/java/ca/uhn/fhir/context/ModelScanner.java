@@ -216,7 +216,7 @@ class ModelScanner {
 
 		long time = System.currentTimeMillis() - start;
 		int size = myClassToElementDefinitions.size() - startSize;
-		ourLog.info("Done scanning FHIR library, found {} model entries in {}ms", size, time);
+		ourLog.debug("Done scanning FHIR library, found {} model entries in {}ms", size, time);
 	}
 
 	/**

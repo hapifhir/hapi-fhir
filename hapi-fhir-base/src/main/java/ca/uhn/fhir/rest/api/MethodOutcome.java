@@ -146,8 +146,9 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
-	public void setCreated(Boolean theCreated) {
+	public MethodOutcome setCreated(Boolean theCreated) {
 		myCreated = theCreated;
+		return this;
 	}
 
 	/**

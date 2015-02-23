@@ -30,5 +30,21 @@ public interface IDelete {
 	IDeleteTyped resourceById(IdDt theId);
 	
 	IDeleteTyped resourceById(String theResourceType, String theLogicalId);
-	
+
+	/**
+	 * Specifies that the delete should be performed as a conditional delete 
+	 * against a given search URL. 
+	 * 
+	 * @param theSearchUrl The search URL to use. The format of this URL should be of the form <code>[ResourceType]?[Parameters]</code>,
+	 * for example: <code>Patient?name=Smith&amp;identifier=13.2.4.11.4%7C847366</code>
+	 * 
+	 * @since HAPI 0.9 / FHIR DSTU 2
+	 */
+	IDeleteTyped resourceConditionalByUrl(String theSearchUrl);
+
+	/**
+	 * @since HAPI 0.9 / FHIR DSTU 2
+	 */
+	IDeleteWithQuery resourceConditionalByType(String theResourceType);
+
 }

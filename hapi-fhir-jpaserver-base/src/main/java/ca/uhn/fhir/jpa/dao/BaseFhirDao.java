@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +50,8 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -77,6 +81,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.util.StopWatch;
+import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -87,6 +92,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -95,15 +102,16 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 public abstract class BaseFhirDao implements IDao {
 
-	public static final String UCUM_NS = "http://unitsofmeasure.org";
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirDao.class);
+
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
+	public static final String UCUM_NS = "http://unitsofmeasure.org";
 
 	@Autowired(required = true)
 	private DaoConfig myConfig;
@@ -114,8 +122,6 @@ public abstract class BaseFhirDao implements IDao {
 	private EntityManager myEntityManager;
 
 	private List<IDaoListener> myListeners = new ArrayList<IDaoListener>();
-	private ISearchParamExtractor mySearchParamExtractor;
-
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 
@@ -123,6 +129,8 @@ public abstract class BaseFhirDao implements IDao {
 	private List<IFhirResourceDao<?>> myResourceDaos;
 
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	protected void createForcedIdIfNeeded(ResourceTable entity, IdDt id) {
 		if (id.isEmpty() == false && id.hasIdPart()) {
@@ -196,7 +204,7 @@ public abstract class BaseFhirDao implements IDao {
 						b.append(nextValue.getReference().getResourceType());
 						b.append("] - Valid resource types for this server: ");
 						b.append(myResourceTypeToDao.keySet().toString());
-						
+
 						throw new InvalidRequestException(b.toString());
 					}
 					Long valueOf;
@@ -508,19 +516,6 @@ public abstract class BaseFhirDao implements IDao {
 		return retVal;
 	}
 
-	protected static String normalizeString(String theString) {
-		char[] out = new char[theString.length()];
-		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
-		int j = 0;
-		for (int i = 0, n = theString.length(); i < n; ++i) {
-			char c = theString.charAt(i);
-			if (c <= '\u007F') {
-				out[j++] = c;
-			}
-		}
-		return new String(out).toUpperCase();
-	}
-
 	protected void notifyWriteCompleted() {
 		for (IDaoListener next : myListeners) {
 			next.writeCompleted();
@@ -577,6 +572,58 @@ public abstract class BaseFhirDao implements IDao {
 		}
 		theEntity.setTitle(title);
 
+	}
+
+	protected Set<Long> processMatchUrl(String theMatchUrl, Class<? extends IBaseResource> theResourceType) {
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
+
+		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
+
+		IFhirResourceDao<? extends IResource> dao = getDao(theResourceType);
+		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
+
+		return ids;
+	}
+
+	protected SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
+		SearchParameterMap paramMap = new SearchParameterMap();
+		List<NameValuePair> parameters;
+		try {
+			parameters = URLEncodedUtils.parse(new URI(theMatchUrl), "UTF-8");
+		} catch (URISyntaxException e) {
+			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: " + e.toString());
+		}
+
+		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
+		for (NameValuePair next : parameters) {
+			String paramName = next.getName();
+			String qualifier = null;
+			for (int i = 0; i < paramMap.size(); i++) {
+				switch (paramName.charAt(i)) {
+				case '.':
+				case ':':
+					qualifier = paramName.substring(i);
+					paramName = paramName.substring(0, i);
+					i = Integer.MAX_VALUE;
+					break;
+				}
+			}
+
+			QualifiedParamList paramList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, next.getValue());
+			nameToParamLists.put(paramName, paramList);
+		}
+
+		for (String nextParamName : nameToParamLists.keySet()) {
+			RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
+			if (paramDef == null) {
+				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
+			}
+
+			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
+			IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(paramDef, nextParamName, paramList);
+			paramMap.add(nextParamName, param);
+		}
+		return paramMap;
 	}
 
 	@Override
@@ -832,7 +879,20 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
+	protected String translatePidIdToForcedId(Long theId) {
+		ForcedId forcedId = myEntityManager.find(ForcedId.class, theId);
+		if (forcedId != null) {
+			return forcedId.getForcedId();
+		} else {
+			return theId.toString();
+		}
+	}
+
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull) {
+		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true,true);
+	}
+
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
@@ -849,8 +909,10 @@ public abstract class BaseFhirDao implements IDao {
 			myEntityManager.persist(historyEntry);
 		}
 
-		entity.setVersion(entity.getVersion() + 1);
-
+		if (theUpdateVersion) {
+			entity.setVersion(entity.getVersion() + 1);
+		}
+		
 		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(entity.getParamsString());
 		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(entity.getParamsToken());
 		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(entity.getParamsNumber());
@@ -858,12 +920,13 @@ public abstract class BaseFhirDao implements IDao {
 		Collection<ResourceIndexedSearchParamDate> paramsDate = new ArrayList<ResourceIndexedSearchParamDate>(entity.getParamsDate());
 		Collection<ResourceLink> resourceLinks = new ArrayList<ResourceLink>(entity.getResourceLinks());
 
-		final List<ResourceIndexedSearchParamString> stringParams;
-		final List<ResourceIndexedSearchParamToken> tokenParams;
-		final List<ResourceIndexedSearchParamNumber> numberParams;
-		final List<ResourceIndexedSearchParamQuantity> quantityParams;
-		final List<ResourceIndexedSearchParamDate> dateParams;
-		final List<ResourceLink> links;
+		List<ResourceIndexedSearchParamString> stringParams = null;
+		List<ResourceIndexedSearchParamToken> tokenParams = null;
+		List<ResourceIndexedSearchParamNumber> numberParams = null;
+		List<ResourceIndexedSearchParamQuantity> quantityParams = null;
+		List<ResourceIndexedSearchParamDate> dateParams = null;
+		List<ResourceLink> links = null;
+
 		if (theDeletedTimestampOrNull != null) {
 
 			stringParams = Collections.emptyList();
@@ -875,7 +938,7 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setDeleted(theDeletedTimestampOrNull);
 			entity.setUpdated(theDeletedTimestampOrNull);
 
-		} else {
+		} else if (thePerformIndexing) {
 
 			stringParams = extractSearchParamStrings(entity, theResource);
 			numberParams = extractSearchParamNumber(entity, theResource);
@@ -893,7 +956,6 @@ public abstract class BaseFhirDao implements IDao {
 
 			links = extractResourceLinks(entity, theResource);
 			populateResourceIntoEntity(theResource, entity);
-
 			entity.setUpdated(new Date());
 			entity.setLanguage(theResource.getLanguage().getValue());
 			entity.setParamsString(stringParams);
@@ -909,6 +971,12 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setResourceLinks(links);
 			entity.setHasLinks(links.isEmpty() == false);
 
+		} else {
+			
+			populateResourceIntoEntity(theResource, entity);
+			entity.setUpdated(new Date());
+			entity.setLanguage(theResource.getLanguage().getValue());
+			
 		}
 
 		if (entity.getId() == null) {
@@ -922,59 +990,63 @@ public abstract class BaseFhirDao implements IDao {
 			entity = myEntityManager.merge(entity);
 		}
 
-		if (entity.isParamsStringPopulated()) {
-			for (ResourceIndexedSearchParamString next : paramsString) {
-				myEntityManager.remove(next);
-			}
-		}
-		for (ResourceIndexedSearchParamString next : stringParams) {
-			myEntityManager.persist(next);
-		}
+		if (thePerformIndexing) {
 
-		if (entity.isParamsTokenPopulated()) {
-			for (ResourceIndexedSearchParamToken next : paramsToken) {
-				myEntityManager.remove(next);
+			if (entity.isParamsStringPopulated()) {
+				for (ResourceIndexedSearchParamString next : paramsString) {
+					myEntityManager.remove(next);
+				}
 			}
-		}
-		for (ResourceIndexedSearchParamToken next : tokenParams) {
-			myEntityManager.persist(next);
-		}
+			for (ResourceIndexedSearchParamString next : stringParams) {
+				myEntityManager.persist(next);
+			}
 
-		if (entity.isParamsNumberPopulated()) {
-			for (ResourceIndexedSearchParamNumber next : paramsNumber) {
-				myEntityManager.remove(next);
+			if (entity.isParamsTokenPopulated()) {
+				for (ResourceIndexedSearchParamToken next : paramsToken) {
+					myEntityManager.remove(next);
+				}
 			}
-		}
-		for (ResourceIndexedSearchParamNumber next : numberParams) {
-			myEntityManager.persist(next);
-		}
+			for (ResourceIndexedSearchParamToken next : tokenParams) {
+				myEntityManager.persist(next);
+			}
 
-		if (entity.isParamsQuantityPopulated()) {
-			for (ResourceIndexedSearchParamQuantity next : paramsQuantity) {
-				myEntityManager.remove(next);
+			if (entity.isParamsNumberPopulated()) {
+				for (ResourceIndexedSearchParamNumber next : paramsNumber) {
+					myEntityManager.remove(next);
+				}
 			}
-		}
-		for (ResourceIndexedSearchParamQuantity next : quantityParams) {
-			myEntityManager.persist(next);
-		}
+			for (ResourceIndexedSearchParamNumber next : numberParams) {
+				myEntityManager.persist(next);
+			}
 
-		if (entity.isParamsDatePopulated()) {
-			for (ResourceIndexedSearchParamDate next : paramsDate) {
-				myEntityManager.remove(next);
+			if (entity.isParamsQuantityPopulated()) {
+				for (ResourceIndexedSearchParamQuantity next : paramsQuantity) {
+					myEntityManager.remove(next);
+				}
 			}
-		}
-		for (ResourceIndexedSearchParamDate next : dateParams) {
-			myEntityManager.persist(next);
-		}
+			for (ResourceIndexedSearchParamQuantity next : quantityParams) {
+				myEntityManager.persist(next);
+			}
 
-		if (entity.isHasLinks()) {
-			for (ResourceLink next : resourceLinks) {
-				myEntityManager.remove(next);
+			if (entity.isParamsDatePopulated()) {
+				for (ResourceIndexedSearchParamDate next : paramsDate) {
+					myEntityManager.remove(next);
+				}
 			}
-		}
-		for (ResourceLink next : links) {
-			myEntityManager.persist(next);
-		}
+			for (ResourceIndexedSearchParamDate next : dateParams) {
+				myEntityManager.persist(next);
+			}
+
+			if (entity.isHasLinks()) {
+				for (ResourceLink next : resourceLinks) {
+					myEntityManager.remove(next);
+				}
+			}
+			for (ResourceLink next : links) {
+				myEntityManager.persist(next);
+			}
+
+		} // if thePerformIndexing
 
 		myEntityManager.flush();
 
@@ -983,6 +1055,19 @@ public abstract class BaseFhirDao implements IDao {
 		}
 
 		return entity;
+	}
+
+	protected static String normalizeString(String theString) {
+		char[] out = new char[theString.length()];
+		theString = Normalizer.normalize(theString, Normalizer.Form.NFD);
+		int j = 0;
+		for (int i = 0, n = theString.length(); i < n; ++i) {
+			char c = theString.charAt(i);
+			if (c <= '\u007F') {
+				out[j++] = c;
+			}
+		}
+		return new String(out).toUpperCase();
 	}
 
 }
