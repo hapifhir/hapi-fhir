@@ -93,9 +93,5 @@ public class FhirDstu2 implements IFhirVersion {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public IBaseExtension<?> newExtension() {
-		return null;
-	}
-
+	
 }
