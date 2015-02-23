@@ -380,7 +380,7 @@ public class FhirDstu1 implements IFhirVersion {
 		return ContainedDt.class;
 	}
 
-	@Override
+	//@Override
 	public IBaseExtension<?> newExtension() {
 		return null;
 	}
