@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 
-public interface IQuery extends IClientExecutable<IQuery,Bundle>, IBaseQuery<IQuery> {
+public interface IQuery extends IClientExecutable<IQuery, Bundle>, IBaseQuery<IQuery> {
 
 	IQuery include(Include theIncludeManagingorganization);
 

@@ -114,7 +114,7 @@ public class FhirResourceDaoTest {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
-		
+
 		ourPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		p = ourPatientDao.read(id.toVersionless());
@@ -125,7 +125,7 @@ public class FhirResourceDaoTest {
 
 	}
 
-	
+
 	@Test
 	public void testCreateNumericIdFails() {
 		Patient p = new Patient();
@@ -140,7 +140,7 @@ public class FhirResourceDaoTest {
 		}
 	}
 
-	
+
 	@Test
 	public void testDeleteWithMatchUrl() {
 		String methodName = "testDeleteWithMatchUrl";
@@ -171,14 +171,14 @@ public class FhirResourceDaoTest {
 
 		IBundleProvider history = ourPatientDao.history(id, null);
 		assertEquals(2, history.size());
-		
+
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1,1).get(0)));
-		
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 1).get(0)));
+
 	}
 
-	
+
 	@Test
 	public void testCreateWithIfNoneExist() {
 		String methodName = "testCreateWithIfNoneExist";

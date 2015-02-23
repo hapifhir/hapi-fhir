@@ -21,8 +21,8 @@ public class MultiVersionJsonParserTest {
 		
 		String str = FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
 		ourLog.info(str);
-		
-		assertThat(str,StringContains.containsString("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}],\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]}"));
+
+		assertThat(str, StringContains.containsString("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}],\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]}"));
 	}
 
 }

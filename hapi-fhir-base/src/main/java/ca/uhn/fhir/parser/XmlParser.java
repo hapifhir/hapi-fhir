@@ -46,6 +46,8 @@ import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -83,10 +85,6 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseBinary;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
@@ -439,7 +437,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, IBase nextValue, String childName, BaseRuntimeElementDefinition<?> childDef,
-			String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+												  String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		if (nextValue.isEmpty()) {
 			if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && getContainedResources().isEmpty() == false && theIncludedResource == false) {
 				// We still want to go in..
@@ -518,7 +516,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeCompositeElementChildrenToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children,
-			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+															  boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			if (nextChild.getElementName().equals("extension") || nextChild.getElementName().equals("modifierExtension")) {
 				continue;
@@ -600,7 +598,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> theElementDefinition,
-			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+													  boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getExtensions(), theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getChildren(), theIncludedResource);
@@ -648,7 +646,7 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter,
-			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+														   BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		/*
 		 * DSTU2 requires extensions to come in a specific spot within the encoded content - This is a bit of a messy way to make that happen, but hopefully this won't matter as much once we use the
 		 * HL7 structures
@@ -736,13 +734,17 @@ public class XmlParser extends BaseParser implements IParser {
 			// HL7.org Structures
 			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, resDef, theContainedResource);
 
+
 		} else {
 
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 
 				// DSTU2+
+
+
 				IResource resource = (IResource) theResource;
 				writeOptionalTagWithValue(theEventWriter, "id", theResourceId);
+
 
 				InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 				IdDt resourceId = resource.getId();
@@ -755,6 +757,36 @@ public class XmlParser extends BaseParser implements IParser {
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 					if (updated != null) {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+					}
+					Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+					if (securityLabelRawObj != null) {
+						List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) securityLabelRawObj;
+						if (!securityLabels.isEmpty()) {
+
+							for (BaseCodingDt securityLabel : securityLabels) {
+								theEventWriter.writeStartElement("security");
+
+								UriDt system = securityLabel.getSystemElement();
+								if (system != null && !system.isEmpty())
+									writeOptionalTagWithValue(theEventWriter, "system", system.getValueAsString());
+
+								CodeDt code = securityLabel.getCodeElement();
+								if (code != null && !code.isEmpty())
+									writeOptionalTagWithValue(theEventWriter, "code", code.getValueAsString());
+
+								StringDt display = securityLabel.getDisplayElement();
+								if (display != null && !display.isEmpty())
+									writeOptionalTagWithValue(theEventWriter, "display", display.getValueAsString());
+
+							/*todo: handle version
+							StringDt version = securityLabel.getVersion();
+							if (version != null && ! version.isEmpty())
+								writeOptionalTagWithValue(theEventWriter, "version", version.getValueAsString());
+                            */
+								theEventWriter.writeEndElement();
+							}
+
+						}
 					}
 					theEventWriter.writeEndElement();
 				}

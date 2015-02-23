@@ -196,11 +196,11 @@ public class MethodUtil {
 
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
 		StringBuilder b = new StringBuilder();
-		
+
 		String resourceType = theContext.getResourceDefinition(theResource).getName();
 		b.append(resourceType);
-		
-		boolean haveQuestionMark=false;
+
+		boolean haveQuestionMark = false;
 		for (Entry<String, List<String>> nextEntry : theMatchParams.entrySet()) {
 			for (String nextValue : nextEntry.getValue()) {
 				b.append(haveQuestionMark ? '&' : '?');
@@ -215,7 +215,7 @@ public class MethodUtil {
 			}
 		}
 
-		
+
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPutClientInvocation(theContext, theResource, b.toString());
@@ -231,9 +231,9 @@ public class MethodUtil {
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IResource theResource, String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
-			retVal = new HttpPutClientInvocation(theContext, theResource,  theMatchUrl);
+			retVal = new HttpPutClientInvocation(theContext, theResource, theMatchUrl);
 		} else {
-			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false,theMatchUrl);
+			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, theMatchUrl);
 		}
 
 		addTagsToPostOrPut(theResource, retVal);
@@ -244,10 +244,10 @@ public class MethodUtil {
 	public static EncodingEnum detectEncoding(String theBody) {
 		for (int i = 0; i < theBody.length(); i++) {
 			switch (theBody.charAt(i)) {
-			case '<':
-				return EncodingEnum.XML;
-			case '{':
-				return EncodingEnum.JSON;
+				case '<':
+					return EncodingEnum.XML;
+				case '{':
+					return EncodingEnum.JSON;
 			}
 		}
 		return EncodingEnum.XML;
@@ -502,26 +502,26 @@ public class MethodUtil {
 	public static IQueryParameterAnd<?> parseQueryParams(RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
 		switch (theParamDef.getParamType()) {
-		case COMPOSITE:
-			throw new UnsupportedOperationException();
-		case DATE:
-			binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case NUMBER:
-			binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case QUANTITY:
-			binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case REFERENCE:
-			binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case STRING:
-			binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case TOKEN:
-			binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
+			case COMPOSITE:
+				throw new UnsupportedOperationException();
+			case DATE:
+				binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case NUMBER:
+				binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case QUANTITY:
+				binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case REFERENCE:
+				binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case STRING:
+				binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case TOKEN:
+				binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
 		}
 
 		return binder.parse(theUnqualifiedParamName, theParameters);

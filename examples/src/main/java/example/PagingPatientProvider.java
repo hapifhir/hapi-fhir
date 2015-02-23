@@ -37,7 +37,7 @@ public class PagingPatientProvider implements IResourceProvider {
 		 */
 		return new IBundleProvider() {
 
-         @Override
+			@Override
 			public int size() {
 				return matchingResourceIds.size();
 			}

@@ -151,7 +151,7 @@ public class Narrative extends Element implements INarrative {
     /**
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
      */
-    @Child(name="status", type={CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="generated | extensions | additional", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
     protected Enumeration<NarrativeStatus> status;
 
@@ -285,26 +285,27 @@ public class Narrative extends Element implements INarrative {
           ;
       }
 
-    /**
-     * Sets the value of 
-     * @param theString
-     * @throws Exception
-     */
-	public void setDivAsString(String theString) throws Exception {
-		if (StringUtils.isNotBlank(theString)) {
-			div = new XhtmlParser().parseFragment(theString);
-		} else {
-			div = null;
-		}
-	}
+  /**
+   * Sets the value of
+   *
+   * @param theString
+   * @throws Exception
+   */
+  public void setDivAsString(String theString) throws Exception {
+    if (StringUtils.isNotBlank(theString)) {
+      div = new XhtmlParser().parseFragment(theString);
+    } else {
+      div = null;
+    }
+  }
 
-	public String getDivAsString() throws Exception {
-		if (div != null && !div.isEmpty()) {
-			return new XhtmlComposer().compose(div);
-		} else {
-			return null;
-		}
-	}
+  public String getDivAsString() throws Exception {
+    if (div != null && !div.isEmpty()) {
+      return new XhtmlComposer().compose(div);
+    } else {
+      return null;
+    }
+  }
 
 
 }

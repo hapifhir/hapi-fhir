@@ -204,14 +204,14 @@ public class Goal extends DomainResource {
     /**
      * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this goal", formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the patient/subject whose intended care is described by the plan.
      */
-    @Child(name="patient", type={Patient.class}, order=1, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="The patient for whom this goal is intended for", formalDefinition="Identifies the patient/subject whose intended care is described by the plan." )
     protected Reference patient;
 
@@ -223,28 +223,28 @@ public class Goal extends DomainResource {
     /**
      * Human-readable description of a specific desired objective of care.
      */
-    @Child(name="description", type={StringType.class}, order=2, min=1, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="What's the desired outcome?", formalDefinition="Human-readable description of a specific desired objective of care." )
     protected StringType description;
 
     /**
      * Indicates whether the goal has been reached and is still considered relevant.
      */
-    @Child(name="status", type={CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="proposed | planned | in-progress | achieved | sustaining | cancelled | accepted | rejected", formalDefinition="Indicates whether the goal has been reached and is still considered relevant." )
     protected Enumeration<GoalStatus> status;
 
     /**
      * Any comments related to the goal.
      */
-    @Child(name="notes", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "notes", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Comments about the goal", formalDefinition="Any comments related to the goal." )
     protected StringType notes;
 
     /**
      * The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.
      */
-    @Child(name="concern", type={Condition.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "concern", type = {Condition.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Health issues this goal addresses", formalDefinition="The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address." )
     protected List<Reference> concern;
     /**

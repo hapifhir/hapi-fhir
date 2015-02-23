@@ -377,4 +377,5 @@ public class FhirDstu1 implements IFhirVersion {
 		return ContainedDt.class;
 	}
 
+
 }

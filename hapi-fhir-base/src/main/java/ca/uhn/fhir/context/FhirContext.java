@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
@@ -133,6 +134,23 @@ public class FhirContext {
 
 	private String createUnknownResourceNameError(String theResourceName, FhirVersionEnum theVersion) {
 		return getLocalizer().getMessage(FhirContext.class, "unknownResourceName", theResourceName, theVersion);
+	}
+
+	public Class<? extends BaseCodingDt> getCodingDtImplementation() {
+		FhirVersionEnum myVersionEnum = myVersion.getVersion();
+		try {
+
+			if (myVersionEnum.isEquivalentTo(FhirVersionEnum.DSTU2)) {
+				return (Class<? extends BaseCodingDt>) Class.forName("ca.uhn.fhir.model.dstu2.composite.CodingDt");
+			} else if (myVersionEnum.isEquivalentTo(FhirVersionEnum.DSTU1)) {
+				return (Class<? extends BaseCodingDt>) Class.forName("ca.uhn.fhir.model.dstu.composite.CodingDt");
+
+			} else {
+				throw new IllegalStateException("No implementation found for BaseCodingDt in this FHIR Version." + myVersionEnum.toString());
+			}
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("No implementation found for BaseCodingDt.", e);
+		}
 	}
 
 	/**

@@ -65,9 +65,16 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
      * A representation of the meaning of the code in the system, following the rules of the system.
      * </p> 
 	 */
-	public abstract StringDt getDisplayElement();  
-	
+	public abstract StringDt getDisplayElement();
+
 	public abstract BaseCodingDt setDisplay( String theString);
+
+	/*
+	todo: handle version
+	public abstract StringDt getVersion();
+
+	public abstract BaseCodingDt setVersion ( String theString);
+	*/
 
 	/**
 	 * {@inheritDoc}

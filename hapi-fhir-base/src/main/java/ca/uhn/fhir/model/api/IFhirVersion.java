@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 public interface IFhirVersion {
 
@@ -48,5 +49,6 @@ public interface IFhirVersion {
 	Class<? extends IBase> getResourceReferenceType();
 
 	Class<?> getContainedType();
+
 
 }
