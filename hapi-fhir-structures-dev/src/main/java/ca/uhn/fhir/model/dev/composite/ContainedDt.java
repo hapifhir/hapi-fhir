@@ -2,7 +2,7 @@ package ca.uhn.fhir.model.dev.composite;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DEV (FHIR Latest)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%

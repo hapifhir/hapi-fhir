@@ -18,7 +18,7 @@ package ca.uhn.fhir.model.dstu2.composite;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - DSTU2 (FHIR v0.4.0)
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
