@@ -118,6 +118,18 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 	 * 
 	 * @param theResourceType
 	 *            The resource type (e.g. "Patient")
+	 * @param theIdPart
+	 *            The ID (e.g. "123")
+	 */
+	public IdDt(String theResourceType, Long theIdPart) {
+		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theResourceType
+	 *            The resource type (e.g. "Patient")
 	 * @param theId
 	 *            The ID (e.g. "123")
 	 */
@@ -513,6 +525,13 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 			throw new NullPointerException("BigDecimal ID can not be null");
 		}
 		return theIdPart.toPlainString();
+	}
+
+	private static String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
+		if (theIdPart == null) {
+			throw new NullPointerException("Long ID can not be null");
+		}
+		return theIdPart.toString();
 	}
 
 	@Override

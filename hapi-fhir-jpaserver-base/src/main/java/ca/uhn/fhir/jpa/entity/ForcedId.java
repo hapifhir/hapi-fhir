@@ -32,9 +32,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+//@formatter:off
 @Entity()
-@Table(name = "HFJ_FORCED_ID", uniqueConstraints = { @UniqueConstraint(name = "IDX_FORCEDID", columnNames = { "FORCED_ID" }) })
-@NamedQueries(@NamedQuery(name = "Q_GET_FORCED_ID", query = "SELECT f FROM ForcedId f WHERE myForcedId = :ID"))
+@Table(name = "HFJ_FORCED_ID", uniqueConstraints = { 
+	@UniqueConstraint(name = "IDX_FORCEDID", columnNames = { "FORCED_ID" }) 
+})
+@NamedQueries(value= {
+	@NamedQuery(name = "Q_GET_FORCED_ID", query = "SELECT f FROM ForcedId f WHERE myForcedId = :ID")
+})
+//@formatter:on
 public class ForcedId {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;

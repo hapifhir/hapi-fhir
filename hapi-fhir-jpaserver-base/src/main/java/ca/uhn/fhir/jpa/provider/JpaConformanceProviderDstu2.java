@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
@@ -44,11 +45,11 @@ import ca.uhn.fhir.util.ExtensionConstants;
 public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 	private String myImplementationDescription;
-	private IFhirSystemDao mySystemDao;
+	private IFhirSystemDao<Bundle> mySystemDao;
 	private volatile Conformance myCachedValue;
 	private RestfulServer myRestfulServer;
 
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao theSystemDao) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle> theSystemDao) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;

@@ -72,6 +72,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 public class FhirContext {
 
 	private static final List<Class<? extends IBaseResource>> EMPTY_LIST = Collections.emptyList();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContext.class);
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
@@ -81,6 +82,7 @@ public class FhirContext {
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private final IFhirVersion myVersion;
+
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
 
 	/**
@@ -123,7 +125,9 @@ public class FhirContext {
 		} else {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
-		
+
+		ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+
 		scanResourceTypes(toElementList(theResourceTypes));
 	}
 
@@ -176,7 +180,7 @@ public class FhirContext {
 		if (Modifier.isAbstract(theResourceType.getModifiers())) {
 			throw new IllegalArgumentException("Can not scan abstract or interface class (resource definitions must be concrete classes): " + theResourceType.getName());
 		}
-		
+
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
 			retVal = scanResourceType((Class<? extends IResource>) theResourceType);
@@ -186,7 +190,7 @@ public class FhirContext {
 
 	public RuntimeResourceDefinition getResourceDefinition(FhirVersionEnum theVersion, String theResourceName) {
 		Validate.notNull(theVersion, "theVersion can not be null");
-		
+
 		if (theVersion.equals(myVersion.getVersion())) {
 			return getResourceDefinition(theResourceName);
 		}
@@ -195,18 +199,18 @@ public class FhirContext {
 		if (nameToType == null) {
 			nameToType = new HashMap<String, Class<? extends IBaseResource>>();
 			ModelScanner.scanVersionPropertyFile(null, nameToType, theVersion);
-			
-			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String,Class<? extends IBaseResource>>>();
+
+			Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> newVersionToNameToResourceType = new HashMap<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>>();
 			newVersionToNameToResourceType.putAll(myVersionToNameToResourceType);
 			newVersionToNameToResourceType.put(theVersion, nameToType);
 			myVersionToNameToResourceType = newVersionToNameToResourceType;
 		}
-		
+
 		Class<? extends IBaseResource> resourceType = nameToType.get(theResourceName.toLowerCase());
-		if (resourceType==null) {
+		if (resourceType == null) {
 			throw new DataFormatException(createUnknownResourceNameError(theResourceName, theVersion));
 		}
-		
+
 		return getResourceDefinition(resourceType);
 	}
 
@@ -457,6 +461,10 @@ public class FhirContext {
 		return new FhirContext(FhirVersionEnum.DSTU2);
 	}
 
+	public static FhirContext forDstu2Hl7Org() {
+		return new FhirContext(FhirVersionEnum.DSTU2_HL7ORG);
+	}
+
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
 		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
 		retVal.add(theResourceType);
@@ -473,10 +481,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	public static FhirContext forDstu2Hl7Org() {
-		return new FhirContext(FhirVersionEnum.DSTU2_HL7ORG);
 	}
 
 }

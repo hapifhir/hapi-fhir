@@ -33,10 +33,20 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 
 	private String myUrlPath;
+	private Map<String, List<String>> myParams;
 
 	public HttpDeleteClientInvocation(IdDt theId) {
 		super();
 		myUrlPath = theId.toUnqualifiedVersionless().getValue();
+	}
+
+	public HttpDeleteClientInvocation(String theSearchUrl) {
+		myUrlPath = theSearchUrl;
+	}
+
+	public HttpDeleteClientInvocation(String theResourceType, Map<String, List<String>> theParams) {
+		myUrlPath = theResourceType;
+		myParams = theParams;
 	}
 
 	@Override
@@ -48,12 +58,12 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 		}
 		b.append(myUrlPath);
 
-		appendExtraParamsWithQuestionMark(theExtraParams, b,b.indexOf("?") == -1);
+		appendExtraParamsWithQuestionMark(myParams, b, b.indexOf("?") == -1);
+		appendExtraParamsWithQuestionMark(theExtraParams, b, b.indexOf("?") == -1);
 
 		HttpDelete retVal = new HttpDelete(b.toString());
 		super.addHeadersToRequest(retVal);
 		return retVal;
 	}
-
 
 }
