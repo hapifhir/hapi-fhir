@@ -747,8 +747,12 @@ public class XmlParser extends BaseParser implements IParser {
 
 
 				InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+				//Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
 				IdDt resourceId = resource.getId();
-				if (resourceId != null && isNotBlank(resourceId.getVersionIdPart()) || (updated != null && !updated.isEmpty())) {
+				if (resourceId != null && isNotBlank(resourceId.getVersionIdPart())
+						|| (updated != null && !updated.isEmpty())
+						|| (securityLabels != null && !securityLabels.isEmpty())) {
 					theEventWriter.writeStartElement("meta");
 					String versionIdPart = resourceId.getVersionIdPart();
 					if (isBlank(versionIdPart)) {
@@ -758,9 +762,9 @@ public class XmlParser extends BaseParser implements IParser {
 					if (updated != null) {
 						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
 					}
-					Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
-					if (securityLabelRawObj != null) {
-						List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) securityLabelRawObj;
+
+					if (securityLabels != null) {
+
 						if (!securityLabels.isEmpty()) {
 
 							for (BaseCodingDt securityLabel : securityLabels) {

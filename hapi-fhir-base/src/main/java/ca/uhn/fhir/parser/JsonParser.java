@@ -670,14 +670,15 @@ public class JsonParser extends BaseParser implements IParser {
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource))) {
+			//Object securityLabelRawObj =
+			List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource))
+					|| (securityLabels != null && !securityLabels.isEmpty())) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", ResourceMetadataKeyEnum.UPDATED.get(resource));
 
-				Object securityLabelRawObj = resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
-				if (securityLabelRawObj != null) {
-					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) securityLabelRawObj;
+				if (securityLabels != null) {
 					if (!securityLabels.isEmpty()) {
 						theEventWriter.writeStartArray("security");
 
