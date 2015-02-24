@@ -895,14 +895,14 @@ public class ImmunizationRecommendation extends DomainResource {
     /**
      * A unique identifier assigned to this particular recommendation record.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="A unique identifier assigned to this particular recommendation record." )
     protected List<Identifier> identifier;
 
     /**
      * The patient for whom the recommendations are for.
      */
-    @Child(name="patient", type={Patient.class}, order=1, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Who this profile is for", formalDefinition="The patient for whom the recommendations are for." )
     protected Reference patient;
 
@@ -914,7 +914,7 @@ public class ImmunizationRecommendation extends DomainResource {
     /**
      * Vaccine administration recommendations.
      */
-    @Child(name="recommendation", type={}, order=2, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "recommendation", type = {}, order = 2, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Vaccine administration recommendations", formalDefinition="Vaccine administration recommendations." )
     protected List<ImmunizationRecommendationRecommendationComponent> recommendation;
 
@@ -1092,13 +1092,13 @@ public class ImmunizationRecommendation extends DomainResource {
     return ResourceType.ImmunizationRecommendation;
    }
 
-  @SearchParamDefinition(name="date", path="ImmunizationRecommendation.recommendation.date", description="Date recommendation created", type="date" )
+  @SearchParamDefinition(name = "date", path = "ImmunizationRecommendation.recommendation.date", description = "Date recommendation created", type = "date")
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="identifier", path="ImmunizationRecommendation.identifier", description="Business identifier", type="token" )
+  @SearchParamDefinition(name = "identifier", path = "ImmunizationRecommendation.identifier", description = "Business identifier", type = "token")
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.protocol.doseSequence", description="Number of dose within sequence", type="token" )
   public static final String SP_DOSESEQUENCE = "dose-sequence";
-  @SearchParamDefinition(name="subject", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
+  @SearchParamDefinition(name = "subject", path = "ImmunizationRecommendation.patient", description = "Who this profile is for", type = "reference")
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="ImmunizationRecommendation.patient", description="Who this profile is for", type="reference" )
   public static final String SP_PATIENT = "patient";
@@ -1106,11 +1106,11 @@ public class ImmunizationRecommendation extends DomainResource {
   public static final String SP_VACCINETYPE = "vaccine-type";
   @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number", type="number" )
   public static final String SP_DOSENUMBER = "dose-number";
-  @SearchParamDefinition(name="information", path="ImmunizationRecommendation.recommendation.supportingPatientInformation", description="Patient observations supporting recommendation", type="reference" )
+  @SearchParamDefinition(name = "information", path = "ImmunizationRecommendation.recommendation.supportingPatientInformation", description = "Patient observations supporting recommendation", type = "reference")
   public static final String SP_INFORMATION = "information";
-  @SearchParamDefinition(name="support", path="ImmunizationRecommendation.recommendation.supportingImmunization", description="Past immunizations supporting recommendation", type="reference" )
+  @SearchParamDefinition(name = "support", path = "ImmunizationRecommendation.recommendation.supportingImmunization", description = "Past immunizations supporting recommendation", type = "reference")
   public static final String SP_SUPPORT = "support";
-  @SearchParamDefinition(name="status", path="ImmunizationRecommendation.recommendation.forecastStatus", description="Vaccine administration status", type="token" )
+  @SearchParamDefinition(name = "status", path = "ImmunizationRecommendation.recommendation.forecastStatus", description = "Vaccine administration status", type = "token")
   public static final String SP_STATUS = "status";
 
 }

@@ -600,12 +600,12 @@ public abstract class BaseFhirDao implements IDao {
 			String qualifier = null;
 			for (int i = 0; i < paramMap.size(); i++) {
 				switch (paramName.charAt(i)) {
-				case '.':
-				case ':':
-					qualifier = paramName.substring(i);
-					paramName = paramName.substring(0, i);
-					i = Integer.MAX_VALUE;
-					break;
+					case '.':
+					case ':':
+						qualifier = paramName.substring(i);
+						paramName = paramName.substring(0, i);
+						i = Integer.MAX_VALUE;
+						break;
 				}
 			}
 
@@ -889,7 +889,7 @@ public abstract class BaseFhirDao implements IDao {
 	}
 
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull) {
-		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true,true);
+		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true);
 	}
 
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
@@ -972,7 +972,7 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setHasLinks(links.isEmpty() == false);
 
 		} else {
-			
+
 			populateResourceIntoEntity(theResource, entity);
 			entity.setUpdated(new Date());
 			entity.setLanguage(theResource.getLanguage().getValue());

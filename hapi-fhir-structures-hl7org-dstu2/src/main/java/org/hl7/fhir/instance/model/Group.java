@@ -380,56 +380,56 @@ public class Group extends DomainResource {
     /**
      * A unique business identifier for this group.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Unique id", formalDefinition="A unique business identifier for this group." )
     protected Identifier identifier;
 
     /**
      * Identifies the broad classification of the kind of resources the group includes.
      */
-    @Child(name="type", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="person | animal | practitioner | device | medication | substance", formalDefinition="Identifies the broad classification of the kind of resources the group includes." )
     protected Enumeration<GroupType> type;
 
     /**
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.
      */
-    @Child(name="actual", type={BooleanType.class}, order=2, min=1, max=1)
+    @Child(name = "actual", type = {BooleanType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="Descriptive or actual", formalDefinition="If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals." )
     protected BooleanType actual;
 
     /**
      * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
      */
-    @Child(name="code", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes.  E.g. 'cow', 'syringe', etc." )
     protected CodeableConcept code;
 
     /**
      * A label assigned to the group for human identification and communication.
      */
-    @Child(name="name", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Label for Group", formalDefinition="A label assigned to the group for human identification and communication." )
     protected StringType name;
 
     /**
      * A count of the number of resource instances that are part of the group.
      */
-    @Child(name="quantity", type={IntegerType.class}, order=5, min=0, max=1)
+    @Child(name = "quantity", type = {IntegerType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Number of members", formalDefinition="A count of the number of resource instances that are part of the group." )
     protected IntegerType quantity;
 
     /**
      * Identifies the traits shared by members of the group.
      */
-    @Child(name="characteristic", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "characteristic", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Trait of group members", formalDefinition="Identifies the traits shared by members of the group." )
     protected List<GroupCharacteristicComponent> characteristic;
 
     /**
      * Identifies the resource instances that are members of the group.
      */
-    @Child(name="member", type={Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "member", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who is in group", formalDefinition="Identifies the resource instances that are members of the group." )
     protected List<Reference> member;
     /**
@@ -826,21 +826,21 @@ public class Group extends DomainResource {
 
   @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token" )
   public static final String SP_ACTUAL = "actual";
-  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
+  @SearchParamDefinition(name = "identifier", path = "Group.identifier", description = "Unique id", type = "token")
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite" )
+  @SearchParamDefinition(name = "characteristic-value", path = "", description = "A composite of both characteristic and value", type = "composite")
   public static final String SP_CHARACTERISTICVALUE = "characteristic-value";
   @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="member", path="Group.member", description="Who is in group", type="reference" )
+  @SearchParamDefinition(name = "member", path = "Group.member", description = "Who is in group", type = "reference")
   public static final String SP_MEMBER = "member";
-  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token" )
+  @SearchParamDefinition(name = "exclude", path = "Group.characteristic.exclude", description = "Group includes or excludes", type = "token")
   public static final String SP_EXCLUDE = "exclude";
   @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="Value held by characteristic", type="token" )
+  @SearchParamDefinition(name = "value", path = "Group.characteristic.value[x]", description = "Value held by characteristic", type = "token")
   public static final String SP_VALUE = "value";
-  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token" )
+  @SearchParamDefinition(name = "characteristic", path = "Group.characteristic.code", description = "Kind of characteristic", type = "token")
   public static final String SP_CHARACTERISTIC = "characteristic";
 
 }

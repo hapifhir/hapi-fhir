@@ -1439,42 +1439,42 @@ public class Encounter extends DomainResource {
     /**
      * Identifier(s) by which this encounter is known.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifier(s) by which this encounter is known", formalDefinition="Identifier(s) by which this encounter is known." )
     protected List<Identifier> identifier;
 
     /**
      * planned | arrived | in-progress | onleave | finished | cancelled.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="planned | arrived | in-progress | onleave | finished | cancelled", formalDefinition="planned | arrived | in-progress | onleave | finished | cancelled." )
     protected Enumeration<EncounterState> status;
 
     /**
      * The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them.
      */
-    @Child(name="statusHistory", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "statusHistory", type = {}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of Encounter statuses", formalDefinition="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them." )
     protected List<EncounterStatusHistoryComponent> statusHistory;
 
     /**
      * inpatient | outpatient | ambulatory | emergency +.
      */
-    @Child(name="class_", type={CodeType.class}, order=3, min=1, max=1)
+    @Child(name = "class_", type = {CodeType.class}, order = 3, min = 1, max = 1)
     @Description(shortDefinition="inpatient | outpatient | ambulatory | emergency +", formalDefinition="inpatient | outpatient | ambulatory | emergency +." )
     protected Enumeration<EncounterClass> class_;
 
     /**
      * Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).
      */
-    @Child(name="type", type={CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Specific type of encounter", formalDefinition="Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)." )
     protected List<CodeableConcept> type;
 
     /**
      * The patient present at the encounter.
      */
-    @Child(name="patient", type={Patient.class}, order=5, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="The patient present at the encounter", formalDefinition="The patient present at the encounter." )
     protected Reference patient;
 
@@ -1486,7 +1486,7 @@ public class Encounter extends DomainResource {
     /**
      * Where a specific encounter should be classified as a part of a specific episode of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, or issue tracking.
      */
-    @Child(name="episodeOfCare", type={EpisodeOfCare.class}, order=6, min=0, max=1)
+    @Child(name = "episodeOfCare", type = {EpisodeOfCare.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="An episode of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, or issue tracking." )
     protected Reference episodeOfCare;
 
@@ -1498,14 +1498,14 @@ public class Encounter extends DomainResource {
     /**
      * The main practitioner responsible for providing the service.
      */
-    @Child(name="participant", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "participant", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of participants involved in the encounter", formalDefinition="The main practitioner responsible for providing the service." )
     protected List<EncounterParticipantComponent> participant;
 
     /**
      * The appointment that scheduled this encounter.
      */
-    @Child(name="fulfills", type={Appointment.class}, order=8, min=0, max=1)
+    @Child(name = "fulfills", type = {Appointment.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="The appointment that scheduled this encounter", formalDefinition="The appointment that scheduled this encounter." )
     protected Reference fulfills;
 
@@ -1517,28 +1517,28 @@ public class Encounter extends DomainResource {
     /**
      * The start and end time of the encounter.
      */
-    @Child(name="period", type={Period.class}, order=9, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="The start and end time of the encounter", formalDefinition="The start and end time of the encounter." )
     protected Period period;
 
     /**
      * Quantity of time the encounter lasted. This excludes the time during leaves of absence.
      */
-    @Child(name="length", type={Duration.class}, order=10, min=0, max=1)
+    @Child(name = "length", type = {Duration.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Quantity of time the encounter lasted", formalDefinition="Quantity of time the encounter lasted. This excludes the time during leaves of absence." )
     protected Duration length;
 
     /**
      * Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.
      */
-    @Child(name="reason", type={CodeableConcept.class}, order=11, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Reason the encounter takes place (code)", formalDefinition="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis." )
     protected CodeableConcept reason;
 
     /**
      * Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
      */
-    @Child(name="indication", type={}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "indication", type = {}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reason the encounter takes place (resource)", formalDefinition="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis." )
     protected List<Reference> indication;
     /**
@@ -1550,28 +1550,28 @@ public class Encounter extends DomainResource {
     /**
      * Indicates the urgency of the encounter.
      */
-    @Child(name="priority", type={CodeableConcept.class}, order=13, min=0, max=1)
+    @Child(name = "priority", type = {CodeableConcept.class}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Indicates the urgency of the encounter", formalDefinition="Indicates the urgency of the encounter." )
     protected CodeableConcept priority;
 
     /**
      * Details about an admission to a clinic.
      */
-    @Child(name="hospitalization", type={}, order=14, min=0, max=1)
+    @Child(name = "hospitalization", type = {}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Details about an admission to a clinic", formalDefinition="Details about an admission to a clinic." )
     protected EncounterHospitalizationComponent hospitalization;
 
     /**
      * List of locations at which the patient has been.
      */
-    @Child(name="location", type={}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "location", type = {}, order = 15, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of locations the patient has been at", formalDefinition="List of locations at which the patient has been." )
     protected List<EncounterLocationComponent> location;
 
     /**
      * Department or team providing care.
      */
-    @Child(name="serviceProvider", type={Organization.class}, order=16, min=0, max=1)
+    @Child(name = "serviceProvider", type = {Organization.class}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="Department or team providing care", formalDefinition="Department or team providing care." )
     protected Reference serviceProvider;
 
@@ -1583,7 +1583,7 @@ public class Encounter extends DomainResource {
     /**
      * Another Encounter of which this encounter is a part of (administratively or in time).
      */
-    @Child(name="partOf", type={Encounter.class}, order=17, min=0, max=1)
+    @Child(name = "partOf", type = {Encounter.class}, order = 17, min = 0, max = 1)
     @Description(shortDefinition="Another Encounter this encounter is part of", formalDefinition="Another Encounter of which this encounter is a part of (administratively or in time)." )
     protected Reference partOf;
 
@@ -2341,32 +2341,32 @@ public class Encounter extends DomainResource {
     return ResourceType.Encounter;
    }
 
-  @SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="An episode of care that this encounter should be recorded against", type="reference" )
-  public static final String SP_EPISODEOFCARE = "episodeofcare";
+    @SearchParamDefinition(name = "date", path = "Encounter.period", description = "A date within the period the Encounter lasted", type = "date")
+    public static final String SP_DATE = "date";
+    @SearchParamDefinition(name = "identifier", path = "Encounter.identifier", description = "Identifier(s) by which this encounter is known", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "episodeofcare", path = "Encounter.episodeOfCare", description = "An episode of care that this encounter should be recorded against", type = "reference")
+    public static final String SP_EPISODEOFCARE = "episodeofcare";
   @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
   public static final String SP_PARTICIPANTTYPE = "participant-type";
-  @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number" )
-  public static final String SP_LENGTH = "length";
-  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference" )
-  public static final String SP_PARTOF = "part-of";
-  @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token" )
-  public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "length", path = "Encounter.length", description = "Length of encounter in days", type = "number")
+    public static final String SP_LENGTH = "length";
+    @SearchParamDefinition(name = "part-of", path = "Encounter.partOf", description = "Another Encounter this encounter is part of", type = "reference")
+    public static final String SP_PARTOF = "part-of";
+    @SearchParamDefinition(name = "type", path = "Encounter.type", description = "Specific type of encounter", type = "token")
+    public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date" )
-  public static final String SP_LOCATIONPERIOD = "location-period";
+    @SearchParamDefinition(name = "location-period", path = "Encounter.location.period", description = "Time period during which the patient was present at the location", type = "date")
+    public static final String SP_LOCATIONPERIOD = "location-period";
   @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference" )
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
   public static final String SP_INDICATION = "indication";
   @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc", type="token" )
   public static final String SP_SPECIALARRANGEMENT = "special-arrangement";
-  @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
-  public static final String SP_STATUS = "status";
+    @SearchParamDefinition(name = "status", path = "Encounter.status", description = "planned | arrived | in-progress | onleave | finished | cancelled", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

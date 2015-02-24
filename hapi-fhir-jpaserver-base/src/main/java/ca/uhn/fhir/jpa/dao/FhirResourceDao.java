@@ -668,7 +668,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		myEntityManager.persist(newEntity);
 		myEntityManager.merge(entity);
 		notifyWriteCompleted();
-		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
+		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId, w.getMillisAndRestart()});
 	}
 
 	@Override
@@ -911,7 +911,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		Long pid = resource.iterator().next();
-		
+
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 
 		ResourceTable savedEntity = updateEntity(null, entity, true, new Date());
@@ -1190,7 +1190,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		myEntityManager.merge(entity);
 
-		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
+		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId.getValue(), w.getMillisAndRestart()});
 	}
 
 	@Override
@@ -1331,7 +1331,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 									}
 									retVal.addAll(resources);
 								}
-							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
+							}
+							while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
@@ -1351,7 +1352,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		};
 
-		ourLog.info("Processed search for {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
+		ourLog.info("Processed search for {} on {} in {}ms", new Object[]{myResourceName, theParams, w.getMillisAndRestart()});
 
 		return retVal;
 	}
@@ -1436,62 +1437,62 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
 				if (nextParamDef != null) {
 					switch (nextParamDef.getParamType()) {
-					case DATE:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateDate(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+						case DATE:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateDate(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case QUANTITY:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateQuantity(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case QUANTITY:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateQuantity(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case REFERENCE:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateReference(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case REFERENCE:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateReference(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case STRING:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateString(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case STRING:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateString(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case TOKEN:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateToken(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case TOKEN:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateToken(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case NUMBER:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateNumber(nextParamName, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case NUMBER:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateNumber(nextParamName, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
-					case COMPOSITE:
-						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-							pids = addPredicateComposite(nextParamDef, pids, nextAnd);
-							if (pids.isEmpty()) {
-								return new HashSet<Long>();
+							break;
+						case COMPOSITE:
+							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+								pids = addPredicateComposite(nextParamDef, pids, nextAnd);
+								if (pids.isEmpty()) {
+									return new HashSet<Long>();
+								}
 							}
-						}
-						break;
+							break;
 					}
 				}
 			}
@@ -1568,14 +1569,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public DaoMethodOutcome update(T theResource) {
-		return update(theResource,null);
+		return update(theResource, null);
 	}
-	
+
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl) {
 		return update(theResource, theMatchUrl, true);
 	}
-	
+
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing) {
 		StopWatch w = new StopWatch();
@@ -1599,7 +1600,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			resourceId = theResource.getId();
 			entity = readEntityLatestVersion(resourceId);
 		}
-		
+
 		if (resourceId.hasVersionIdPart() && resourceId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + resourceId + " but this is not the current version");
 		}

@@ -494,35 +494,35 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * Identifier(s) by which this EpisodeOfCare is known.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifier(s) by which this EpisodeOfCare is known", formalDefinition="Identifier(s) by which this EpisodeOfCare is known." )
     protected List<Identifier> identifier;
 
     /**
      * planned | active | onhold | finished | withdrawn | other.
      */
-    @Child(name="currentStatus", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "currentStatus", type = {CodeType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="planned | active | onhold | finished | withdrawn | other", formalDefinition="planned | active | onhold | finished | withdrawn | other." )
     protected Enumeration<EpisodeOfCareStatus> currentStatus;
 
     /**
      * The status history for the EpisodeOfCare.
      */
-    @Child(name="statusHistory", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "statusHistory", type = {}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="The status history for the EpisodeOfCare", formalDefinition="The status history for the EpisodeOfCare." )
     protected List<EpisodeOfCareStatusHistoryComponent> statusHistory;
 
     /**
      * The type can be very important in processing as this could be used in determining if the episodeofcare is relevant to specific government reporting, or other types of classifications.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Specific type of EpisodeOfcare", formalDefinition="The type can be very important in processing as this could be used in determining if the episodeofcare is relevant to specific government reporting, or other types of classifications." )
     protected List<CodeableConcept> type;
 
     /**
      * The patient that this episodeofcare applies to.
      */
-    @Child(name="patient", type={Patient.class}, order=4, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 4, min = 1, max = 1)
     @Description(shortDefinition="The patient that this episodeofcare applies to", formalDefinition="The patient that this episodeofcare applies to." )
     protected Reference patient;
 
@@ -534,7 +534,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The organization that has assumed the specific responsibilities for the specified duration.
      */
-    @Child(name="managingOrganization", type={Organization.class}, order=5, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="The organization that has assumed the specific responsibilities for the specified duration", formalDefinition="The organization that has assumed the specific responsibilities for the specified duration." )
     protected Reference managingOrganization;
 
@@ -546,14 +546,14 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The interval during which the managing organization assumes the defined responsibility.
      */
-    @Child(name="period", type={Period.class}, order=6, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="The interval during which the managing organization assumes the defined responsibility", formalDefinition="The interval during which the managing organization assumes the defined responsibility." )
     protected Period period;
 
     /**
      * A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for.
      */
-    @Child(name="condition", type={Condition.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "condition", type = {Condition.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for", formalDefinition="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for." )
     protected List<Reference> condition;
     /**
@@ -565,7 +565,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * A Referral Request that this EpisodeOfCare manages activities within.
      */
-    @Child(name="referralRequest", type={ReferralRequest.class}, order=8, min=0, max=1)
+    @Child(name = "referralRequest", type = {ReferralRequest.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="A Referral Request that this EpisodeOfCare manages activities within", formalDefinition="A Referral Request that this EpisodeOfCare manages activities within." )
     protected Reference referralRequest;
 
@@ -577,7 +577,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The practitioner that is the care manager/care co-ordinator for this patient.
      */
-    @Child(name="careManager", type={Practitioner.class}, order=9, min=0, max=1)
+    @Child(name = "careManager", type = {Practitioner.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="The practitioner that is the care manager/care co-ordinator for this patient", formalDefinition="The practitioner that is the care manager/care co-ordinator for this patient." )
     protected Reference careManager;
 
@@ -589,7 +589,7 @@ public class EpisodeOfCare extends DomainResource {
     /**
      * The list of practitioners that may be facilitating this episode of care for specific purposes.
      */
-    @Child(name="careTeam", type={}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "careTeam", type = {}, order = 10, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="The list of practitioners that may be facilitating this episode of care for specific purposes", formalDefinition="The list of practitioners that may be facilitating this episode of care for specific purposes." )
     protected List<EpisodeOfCareCareTeamComponent> careTeam;
 
@@ -1115,23 +1115,23 @@ public class EpisodeOfCare extends DomainResource {
     return ResourceType.EpisodeOfCare;
    }
 
-  @SearchParamDefinition(name="date", path="EpisodeOfCare.period", description="The interval during which the managing organization assumes the defined responsibility", type="date" )
+  @SearchParamDefinition(name = "date", path = "EpisodeOfCare.period", description = "The interval during which the managing organization assumes the defined responsibility", type = "date")
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="identifier", path="EpisodeOfCare.identifier", description="Identifier(s) by which this EpisodeOfCare is known", type="token" )
+  @SearchParamDefinition(name = "identifier", path = "EpisodeOfCare.identifier", description = "Identifier(s) by which this EpisodeOfCare is known", type = "token")
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="condition", path="EpisodeOfCare.condition", description="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for", type="reference" )
   public static final String SP_CONDITION = "condition";
   @SearchParamDefinition(name="referral", path="EpisodeOfCare.referralRequest", description="A Referral Request that this EpisodeOfCare manages activities within", type="reference" )
   public static final String SP_REFERRAL = "referral";
-  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="The patient that this episodeofcare applies to", type="reference" )
+  @SearchParamDefinition(name = "patient", path = "EpisodeOfCare.patient", description = "The patient that this episodeofcare applies to", type = "reference")
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities for the specified duration", type="reference" )
+  @SearchParamDefinition(name = "organization", path = "EpisodeOfCare.managingOrganization", description = "The organization that has assumed the specific responsibilities for the specified duration", type = "reference")
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="type", path="EpisodeOfCare.type", description="Specific type of EpisodeOfcare", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="The practitioner that is the care manager/care co-ordinator for this patient", type="reference" )
+  @SearchParamDefinition(name = "care-manager", path = "EpisodeOfCare.careManager", description = "The practitioner that is the care manager/care co-ordinator for this patient", type = "reference")
   public static final String SP_CAREMANAGER = "care-manager";
-  @SearchParamDefinition(name="status", path="EpisodeOfCare.currentStatus", description="planned | active | onhold | finished | withdrawn | other", type="token" )
+  @SearchParamDefinition(name = "status", path = "EpisodeOfCare.currentStatus", description = "planned | active | onhold | finished | withdrawn | other", type = "token")
   public static final String SP_STATUS = "status";
 
 }

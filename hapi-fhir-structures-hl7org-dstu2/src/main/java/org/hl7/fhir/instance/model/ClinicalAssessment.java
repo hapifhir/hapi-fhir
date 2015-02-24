@@ -470,7 +470,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * The patient being asssesed.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="The patient being asssesed", formalDefinition="The patient being asssesed." )
     protected Reference patient;
 
@@ -482,7 +482,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * The clinicial performing the assessment.
      */
-    @Child(name="assessor", type={Practitioner.class}, order=1, min=1, max=1)
+    @Child(name = "assessor", type = {Practitioner.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="The clinicial performing the assessment", formalDefinition="The clinicial performing the assessment." )
     protected Reference assessor;
 
@@ -494,21 +494,21 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * The point in time at which the assessment was concluded (not when it was recorded).
      */
-    @Child(name="date", type={DateTimeType.class}, order=2, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="When the assessment occurred", formalDefinition="The point in time at which the assessment was concluded (not when it was recorded)." )
     protected DateTimeType date;
 
     /**
      * A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.
      */
-    @Child(name="description", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it." )
     protected StringType description;
 
     /**
      * A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.
      */
-    @Child(name="previous", type={ClinicalAssessment.class}, order=4, min=0, max=1)
+    @Child(name = "previous", type = {ClinicalAssessment.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Reference to last assessment", formalDefinition="A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes." )
     protected Reference previous;
 
@@ -520,7 +520,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * This a list of the general problems/conditions for a patient.
      */
-    @Child(name="problem", type={Condition.class, AllergyIntolerance.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "problem", type = {Condition.class, AllergyIntolerance.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="General assessment of patient state", formalDefinition="This a list of the general problems/conditions for a patient." )
     protected List<Reference> problem;
     /**
@@ -532,7 +532,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * A reference to a specific care plan that prompted this assessment. The care plan provides further context for the assessment.
      */
-    @Child(name="careplan", type={CarePlan.class}, order=6, min=0, max=1)
+    @Child(name = "careplan", type = {CarePlan.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="A specific careplan that prompted this assessment", formalDefinition="A reference to a specific care plan that prompted this assessment. The care plan provides further context for the assessment." )
     protected Reference careplan;
 
@@ -544,7 +544,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * A reference to a specific care plan that prompted this assessment. The referral request may provide further context for the assessment.
      */
-    @Child(name="referral", type={ReferralRequest.class}, order=7, min=0, max=1)
+    @Child(name = "referral", type = {ReferralRequest.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="A specific referral that lead to this assessment", formalDefinition="A reference to a specific care plan that prompted this assessment. The referral request may provide further context for the assessment." )
     protected Reference referral;
 
@@ -556,56 +556,56 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * One or more sets of investigations (signs, symptions, etc). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.
      */
-    @Child(name="investigations", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "investigations", type = {}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="One or more sets of investigations (signs, symptions, etc)", formalDefinition="One or more sets of investigations (signs, symptions, etc). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes." )
     protected List<ClinicalAssessmentInvestigationsComponent> investigations;
 
     /**
      * Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.
      */
-    @Child(name="protocol", type={UriType.class}, order=9, min=0, max=1)
+    @Child(name = "protocol", type = {UriType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Clinical Protocol followed", formalDefinition="Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis." )
     protected UriType protocol;
 
     /**
      * A text summary of the investigations and the diagnosis.
      */
-    @Child(name="summary", type={StringType.class}, order=10, min=0, max=1)
+    @Child(name = "summary", type = {StringType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Summary of the assessment", formalDefinition="A text summary of the investigations and the diagnosis." )
     protected StringType summary;
 
     /**
      * An specific diagnosis that was considered likely or relevant to ongoing treatment.
      */
-    @Child(name="diagnosis", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "diagnosis", type = {}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Possible or likely diagnosis", formalDefinition="An specific diagnosis that was considered likely or relevant to ongoing treatment." )
     protected List<ClinicalAssessmentDiagnosisComponent> diagnosis;
 
     /**
      * Diagnoses/conditions resolved since the last assessment.
      */
-    @Child(name="resolved", type={CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "resolved", type = {CodeableConcept.class}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Diagnosies/conditions resolved since previous assessment", formalDefinition="Diagnoses/conditions resolved since the last assessment." )
     protected List<CodeableConcept> resolved;
 
     /**
      * Diagnosis considered not possible.
      */
-    @Child(name="ruledOut", type={}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "ruledOut", type = {}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Diagnosis considered not possible", formalDefinition="Diagnosis considered not possible." )
     protected List<ClinicalAssessmentRuledOutComponent> ruledOut;
 
     /**
      * Estimate of likely outcome.
      */
-    @Child(name="prognosis", type={StringType.class}, order=14, min=0, max=1)
+    @Child(name = "prognosis", type = {StringType.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Estimate of likely outcome", formalDefinition="Estimate of likely outcome." )
     protected StringType prognosis;
 
     /**
      * Plan of action after assessment.
      */
-    @Child(name="plan", type={CarePlan.class}, order=15, min=0, max=1)
+    @Child(name = "plan", type = {CarePlan.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Plan of action after assessment", formalDefinition="Plan of action after assessment." )
     protected Reference plan;
 
@@ -617,7 +617,7 @@ public class ClinicalAssessment extends DomainResource {
     /**
      * Actions taken during assessment.
      */
-    @Child(name="action", type={ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationPrescription.class, DiagnosticOrder.class, NutritionOrder.class, Supply.class, Appointment.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationPrescription.class, DiagnosticOrder.class, NutritionOrder.class, Supply.class, Appointment.class}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Actions taken during assessment", formalDefinition="Actions taken during assessment." )
     protected List<Reference> action;
     /**
@@ -1457,29 +1457,29 @@ public class ClinicalAssessment extends DomainResource {
 
   @SearchParamDefinition(name="date", path="ClinicalAssessment.date", description="When the assessment occurred", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="previous", path="ClinicalAssessment.previous", description="Reference to last assessment", type="reference" )
+  @SearchParamDefinition(name = "previous", path = "ClinicalAssessment.previous", description = "Reference to last assessment", type = "reference")
   public static final String SP_PREVIOUS = "previous";
-  @SearchParamDefinition(name="assessor", path="ClinicalAssessment.assessor", description="The clinicial performing the assessment", type="reference" )
+  @SearchParamDefinition(name = "assessor", path = "ClinicalAssessment.assessor", description = "The clinicial performing the assessment", type = "reference")
   public static final String SP_ASSESSOR = "assessor";
   @SearchParamDefinition(name="careplan", path="ClinicalAssessment.careplan", description="A specific careplan that prompted this assessment", type="reference" )
   public static final String SP_CAREPLAN = "careplan";
-  @SearchParamDefinition(name="diagnosis", path="ClinicalAssessment.diagnosis.item", description="Specific text or code for diagnosis", type="token" )
+  @SearchParamDefinition(name = "diagnosis", path = "ClinicalAssessment.diagnosis.item", description = "Specific text or code for diagnosis", type = "token")
   public static final String SP_DIAGNOSIS = "diagnosis";
   @SearchParamDefinition(name="ruledout", path="ClinicalAssessment.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
   public static final String SP_RULEDOUT = "ruledout";
-  @SearchParamDefinition(name="problem", path="ClinicalAssessment.problem", description="General assessment of patient state", type="reference" )
+  @SearchParamDefinition(name = "problem", path = "ClinicalAssessment.problem", description = "General assessment of patient state", type = "reference")
   public static final String SP_PROBLEM = "problem";
-  @SearchParamDefinition(name="referral", path="ClinicalAssessment.referral", description="A specific referral that lead to this assessment", type="reference" )
+  @SearchParamDefinition(name = "referral", path = "ClinicalAssessment.referral", description = "A specific referral that lead to this assessment", type = "reference")
   public static final String SP_REFERRAL = "referral";
   @SearchParamDefinition(name="patient", path="ClinicalAssessment.patient", description="The patient being asssesed", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="investigation", path="ClinicalAssessment.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";
-  @SearchParamDefinition(name="action", path="ClinicalAssessment.action", description="Actions taken during assessment", type="reference" )
+  @SearchParamDefinition(name = "action", path = "ClinicalAssessment.action", description = "Actions taken during assessment", type = "reference")
   public static final String SP_ACTION = "action";
-  @SearchParamDefinition(name="plan", path="ClinicalAssessment.plan", description="Plan of action after assessment", type="reference" )
+  @SearchParamDefinition(name = "plan", path = "ClinicalAssessment.plan", description = "Plan of action after assessment", type = "reference")
   public static final String SP_PLAN = "plan";
-  @SearchParamDefinition(name="resolved", path="ClinicalAssessment.resolved", description="Diagnosies/conditions resolved since previous assessment", type="token" )
+  @SearchParamDefinition(name = "resolved", path = "ClinicalAssessment.resolved", description = "Diagnosies/conditions resolved since previous assessment", type = "token")
   public static final String SP_RESOLVED = "resolved";
 
 }

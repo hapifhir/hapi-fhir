@@ -35,6 +35,6 @@ package org.hl7.fhir.instance.model;
 public class Constants {
 
   public final static String VERSION = "0.4.0";
-  public final static String REVISION = "4117";
-  public final static String DATE = "Wed Feb 18 12:09:23 EST 2015";
+    public final static String REVISION = "4117";
+    public final static String DATE = "Wed Feb 18 12:09:23 EST 2015";
 }

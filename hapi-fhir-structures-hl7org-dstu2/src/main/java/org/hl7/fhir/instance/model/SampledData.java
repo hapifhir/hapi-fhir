@@ -42,54 +42,54 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
  */
 @DatatypeDef(name="SampledData")
-public class SampledData extends Type  implements ICompositeType {
+public class SampledData extends Type implements ICompositeType {
 
     /**
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.
      */
-    @Child(name="origin", type={Quantity.class}, order=0, min=1, max=1)
+    @Child(name = "origin", type = {Quantity.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Zero value and units", formalDefinition="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series." )
     protected Quantity origin;
 
     /**
      * The length of time between sampling times, measured in milliseconds.
      */
-    @Child(name="period", type={DecimalType.class}, order=1, min=1, max=1)
+    @Child(name = "period", type = {DecimalType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Number of milliseconds between samples", formalDefinition="The length of time between sampling times, measured in milliseconds." )
     protected DecimalType period;
 
     /**
      * A correction factor that is applied to the sampled data points before they are added to the origin.
      */
-    @Child(name="factor", type={DecimalType.class}, order=2, min=0, max=1)
+    @Child(name = "factor", type = {DecimalType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Multiply data by this before adding to origin", formalDefinition="A correction factor that is applied to the sampled data points before they are added to the origin." )
     protected DecimalType factor;
 
     /**
      * The lower limit of detection of the measured points. This is needed if any of the data points have the value "L" (lower than detection limit).
      */
-    @Child(name="lowerLimit", type={DecimalType.class}, order=3, min=0, max=1)
+    @Child(name = "lowerLimit", type = {DecimalType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Lower limit of detection", formalDefinition="The lower limit of detection of the measured points. This is needed if any of the data points have the value 'L' (lower than detection limit)." )
     protected DecimalType lowerLimit;
 
     /**
      * The upper limit of detection of the measured points. This is needed if any of the data points have the value "U" (higher than detection limit).
      */
-    @Child(name="upperLimit", type={DecimalType.class}, order=4, min=0, max=1)
+    @Child(name = "upperLimit", type = {DecimalType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Upper limit of detection", formalDefinition="The upper limit of detection of the measured points. This is needed if any of the data points have the value 'U' (higher than detection limit)." )
     protected DecimalType upperLimit;
 
     /**
      * The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once.
      */
-    @Child(name="dimensions", type={IntegerType.class}, order=5, min=1, max=1)
+    @Child(name = "dimensions", type = {IntegerType.class}, order = 5, min = 1, max = 1)
     @Description(shortDefinition="Number of sample points at each time point", formalDefinition="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once." )
     protected IntegerType dimensions;
 
     /**
      * A series of data points which are decimal values separated by a single space (character u20). The special values "E" (error), "L" (below detection limit) and "U" (above detection limit) can also be used in place of a decimal value.
      */
-    @Child(name="data", type={StringType.class}, order=6, min=1, max=1)
+    @Child(name = "data", type = {StringType.class}, order = 6, min = 1, max = 1)
     @Description(shortDefinition="Decimal values with spaces, or 'E' | 'U' | 'L'", formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values 'E' (error), 'L' (below detection limit) and 'U' (above detection limit) can also be used in place of a decimal value." )
     protected StringType data;
 

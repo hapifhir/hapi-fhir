@@ -30,6 +30,8 @@ import java.util.Map;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
@@ -52,30 +54,25 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
-import ca.uhn.fhir.context.RuntimeElemContainedResources;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeResourceReferenceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
@@ -826,16 +823,16 @@ class ParserState<T> {
 			} else {
 				if (theIsModifier == false) {
 					if (getCurrentElement() instanceof IBaseHasExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasExtensions)getCurrentElement()).addExtension();
+						IBaseExtension<?> ext = ((IBaseHasExtensions) getCurrentElement()).addExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
 					} else {
 						throw new DataFormatException("Type " + getCurrentElement() + " does not support undeclared extentions, and found an extension with URL: " + theUrlAttr);
 					}
-				}else {
+				} else {
 					if (getCurrentElement() instanceof IBaseHasModifierExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasModifierExtensions)getCurrentElement()).addModifierExtension();
+						IBaseExtension<?> ext = ((IBaseHasModifierExtensions) getCurrentElement()).addModifierExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
@@ -1664,6 +1661,21 @@ class ParserState<T> {
 
 	}
 
+
+	private class SecurityLabelElementStateHapi extends ElementCompositeState<BaseCodingDt> {
+
+		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState,BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
+			super(thePreResourceState, theDef, codingDt);
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+
+	}
+
 	private class MetaElementState extends BaseState {
 		private ResourceMetadataMap myMap;
 
@@ -1687,6 +1699,17 @@ class ParserState<T> {
 				InstantDt updated = new InstantDt();
 				push(new PrimitiveState(getPreResourceState(), updated));
 				myMap.put(ResourceMetadataKeyEnum.UPDATED, updated);
+			} else if (theLocalPart.equals("security")) {
+				@SuppressWarnings("unchecked")
+				List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) myMap.get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+				if (securityLabels == null) {
+					securityLabels = new ArrayList<BaseCodingDt>();
+					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
+				}
+				BaseCodingDt securityLabel= myContext.getVersion().newCodingDt();
+				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
+				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
+				securityLabels.add(securityLabel);
 			} else {
 				throw new DataFormatException("Unexpected element '" + theLocalPart + "' found in 'meta' element");
 			}
@@ -1928,7 +1951,6 @@ class ParserState<T> {
 			return true;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void wereBack() {
 			myContext.newTerser().visit(myInstance, new IModelVisitor() {

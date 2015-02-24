@@ -50,137 +50,137 @@ import org.junit.Test;
 
 public class ModelInheritanceTest {
 
-	/**
-	 * <pre>
-	 * Other changes:
-	 * 
-	 * Reference:
-	 *  * Add "resource" field, plus constructors and getter/setters for that field
-	 *  
-	 * Narrative:
-	 *  * Add getValueAsDiv and setValueAsDiv
-	 *  
-	 * XhtmlParser and XhtmlEncoder:
-	 *  * Do we need a better exception declaration?
-	 *  
-	 * ElementDefinition
-	 *  * Backbone elements (eg .ElementDefinitionSlicingComponent) do not extend BackboneElement or have a @Block annotation for some reason
-	 *  
-	 * Extension
-	 *  * Should URL not be StringType since it can't take extensions?
-	 * </pre>
-	 */
+    /**
+     * <pre>
+     * Other changes:
+     *
+     * Reference:
+     *  * Add "resource" field, plus constructors and getter/setters for that field
+     *
+     * Narrative:
+     *  * Add getValueAsDiv and setValueAsDiv
+     *
+     * XhtmlParser and XhtmlEncoder:
+     *  * Do we need a better exception declaration?
+     *
+     * ElementDefinition
+     *  * Backbone elements (eg .ElementDefinitionSlicingComponent) do not extend BackboneElement or have a @Block annotation for some reason
+     *
+     * Extension
+     *  * Should URL not be StringType since it can't take extensions?
+     * </pre>
+     */
 
-	@Test
-	public void testType() {
-		assertTrue(IBaseDatatype.class.isAssignableFrom(Type.class));
-	}
+    @Test
+    public void testType() {
+        assertTrue(IBaseDatatype.class.isAssignableFrom(Type.class));
+    }
 
-	/**
-	 * This one should apply to all composite types
-	 */
-	@Test
-	public void testAddress() {
-		assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
-	}
+    /**
+     * This one should apply to all composite types
+     */
+    @Test
+    public void testAddress() {
+        assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
+    }
 
-	@Test
-	public void testBase() {
-		assertTrue(IBase.class.isAssignableFrom(Base.class));
-	}
-	
-	public void testIdentifierUse() throws Exception {
-		Child child = Identifier.class.getField("use").getAnnotation(Child.class);
-		assertEquals(IdentifierUseEnumFactory.class, child.enumFactory());
-	}
+    @Test
+    public void testBase() {
+        assertTrue(IBase.class.isAssignableFrom(Base.class));
+    }
 
-	
-	/**
-	 * Should be "implements IBaseExtension<Extension>"
-	 */
-	@Test
-	public void testExtension() {
-		assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
-		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
-	}
+    public void testIdentifierUse() throws Exception {
+        Child child = Identifier.class.getField("use").getAnnotation(Child.class);
+        assertEquals(IdentifierUseEnumFactory.class, child.enumFactory());
+    }
 
-	@Test
-	public void testNarrative() {
-		assertTrue(INarrative.class.isAssignableFrom(Narrative.class));
-	}
 
-	@Test
-	public void testBooleanType() {
-		assertTrue(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class));
-	}
+    /**
+     * Should be "implements IBaseExtension<Extension>"
+     */
+    @Test
+    public void testExtension() {
+        assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
+    }
 
-	@Test
-	public void testDecimalType() {
-		assertTrue(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class));
-	}
+    @Test
+    public void testNarrative() {
+        assertTrue(INarrative.class.isAssignableFrom(Narrative.class));
+    }
 
-	@Test
-	public void testIntegerType() {
-		assertTrue(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class));
-	}
+    @Test
+    public void testBooleanType() {
+        assertTrue(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class));
+    }
 
-	@Test
-	public void testPrimitiveType() {
-		assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
-		assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
-	}
+    @Test
+    public void testDecimalType() {
+        assertTrue(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class));
+    }
 
-	@Test
-	public void testResource() {
-		assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
-	}
+    @Test
+    public void testIntegerType() {
+        assertTrue(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class));
+    }
 
-	@Test
-	public void testBundle() {
-		assertTrue(IBaseBundle.class.isAssignableFrom(Bundle.class));
-	}
+    @Test
+    public void testPrimitiveType() {
+        assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
+    }
 
-	public void testIdType() {
-		assertTrue(IIdType.class.isAssignableFrom(IdType.class));
-	}
+    @Test
+    public void testResource() {
+        assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
+    }
 
-	@Test
-	public void testReference() {
-		assertTrue(IReference.class.isAssignableFrom(Reference.class));
-	}
+    @Test
+    public void testBundle() {
+        assertTrue(IBaseBundle.class.isAssignableFrom(Bundle.class));
+    }
 
-	@Test
-	public void testMeta() {
-		assertTrue(IMetaType.class.isAssignableFrom(Meta.class));
-	}
+    public void testIdType() {
+        assertTrue(IIdType.class.isAssignableFrom(IdType.class));
+    }
 
-	@Test
-	public void testBackboneElement() {
-		assertTrue(IBackboneElement.class.isAssignableFrom(BackboneElement.class));
-		assertTrue(IBaseHasExtensions.class.isAssignableFrom(BackboneElement.class));
-		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(BackboneElement.class));
-	}
+    @Test
+    public void testReference() {
+        assertTrue(IReference.class.isAssignableFrom(Reference.class));
+    }
 
-	@Test
-	public void testElement() {
-		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
-	}
+    @Test
+    public void testMeta() {
+        assertTrue(IMetaType.class.isAssignableFrom(Meta.class));
+    }
 
-	@Test
-	public void testDomainResource() {
-		assertTrue(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class));
-		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class));
-	}
+    @Test
+    public void testBackboneElement() {
+        assertTrue(IBackboneElement.class.isAssignableFrom(BackboneElement.class));
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(BackboneElement.class));
+        assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(BackboneElement.class));
+    }
 
-	@Test
-	public void testCoding() {
-		assertTrue(ICoding.class.isAssignableFrom(Coding.class));
-	}
-	
-	@Test
-	public void testTiming_TimingRepeatComponent() {
-		assertTrue(IDatatypeElement.class.isAssignableFrom(Timing.TimingRepeatComponent.class));
-		assertNotNull(Timing.TimingRepeatComponent.class.getAnnotation(Block.class));
-	}
+    @Test
+    public void testElement() {
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
+    }
+
+    @Test
+    public void testDomainResource() {
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class));
+        assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class));
+    }
+
+    @Test
+    public void testCoding() {
+        assertTrue(ICoding.class.isAssignableFrom(Coding.class));
+    }
+
+    @Test
+    public void testTiming_TimingRepeatComponent() {
+        assertTrue(IDatatypeElement.class.isAssignableFrom(Timing.TimingRepeatComponent.class));
+        assertNotNull(Timing.TimingRepeatComponent.class.getAnnotation(Block.class));
+    }
 
 }

@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * Captures constraints on each element within the resource, profile, or extension.
  */
 @DatatypeDef(name="ElementDefinition")
-public class ElementDefinition extends Type  implements ICompositeType {
+public class ElementDefinition extends Type implements ICompositeType {
 
     public enum PropertyRepresentation {
         /**
@@ -1764,182 +1764,182 @@ public class ElementDefinition extends Type  implements ICompositeType {
     /**
      * The path identifies the element and is expressed as a "."-separated list of ancestor elements, beginning with the name of the resource or extension.
      */
-    @Child(name="path", type={StringType.class}, order=0, min=1, max=1)
+    @Child(name = "path", type = {StringType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="The path of the element (see the Detailed Descriptions)", formalDefinition="The path identifies the element and is expressed as a '.'-separated list of ancestor elements, beginning with the name of the resource or extension." )
     protected StringType path;
 
     /**
      * Codes that define how this element is represented in instances, when the deviation varies from the normal case.
      */
-    @Child(name="representation", type={CodeType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "representation", type = {CodeType.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="How this element is represented in instances", formalDefinition="Codes that define how this element is represented in instances, when the deviation varies from the normal case." )
     protected List<Enumeration<PropertyRepresentation>> representation;
 
     /**
      * The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.
      */
-    @Child(name="name", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Name for this particular element definition (reference target)", formalDefinition="The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element." )
     protected StringType name;
 
     /**
      * Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set).
      */
-    @Child(name="slicing", type={}, order=3, min=0, max=1)
+    @Child(name = "slicing", type = {}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="This element is sliced - slices follow", formalDefinition="Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set)." )
     protected ElementDefinitionSlicingComponent slicing;
 
     /**
      * A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).
      */
-    @Child(name="short_", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "short_", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Concise definition for xml presentation", formalDefinition="A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)." )
     protected StringType short_;
 
     /**
      * The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource.
      */
-    @Child(name="formal", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "formal", type = {StringType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Full formal definition in human language", formalDefinition="The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource." )
     protected StringType formal;
 
     /**
      * Comments about the use of the element, including notes about how to use the data properly, exceptions to proper use, etc.
      */
-    @Child(name="comments", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "comments", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Comments about the use of this element", formalDefinition="Comments about the use of the element, including notes about how to use the data properly, exceptions to proper use, etc." )
     protected StringType comments;
 
     /**
      * Explains why this element is needed and why it's been constrained as it has.
      */
-    @Child(name="requirements", type={StringType.class}, order=7, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Why is this needed?", formalDefinition="Explains why this element is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * Identifies additional names by which this element might also be known.
      */
-    @Child(name="synonym", type={StringType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "synonym", type = {StringType.class}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Other names", formalDefinition="Identifies additional names by which this element might also be known." )
     protected List<StringType> synonym;
 
     /**
      * The minimum number of times this element SHALL appear in the instance.
      */
-    @Child(name="min", type={IntegerType.class}, order=9, min=0, max=1)
+    @Child(name = "min", type = {IntegerType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Minimum Cardinality", formalDefinition="The minimum number of times this element SHALL appear in the instance." )
     protected IntegerType min;
 
     /**
      * The maximum number of times this element is permitted to appear in the instance.
      */
-    @Child(name="max", type={StringType.class}, order=10, min=0, max=1)
+    @Child(name = "max", type = {StringType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Maximum Cardinality (a number or *)", formalDefinition="The maximum number of times this element is permitted to appear in the instance." )
     protected StringType max;
 
     /**
      * The data type or resource that the value of this element is permitted to be.
      */
-    @Child(name="type", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Data type and Profile for this element", formalDefinition="The data type or resource that the value of this element is permitted to be." )
     protected List<TypeRefComponent> type;
 
     /**
      * Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element.
      */
-    @Child(name="nameReference", type={StringType.class}, order=12, min=0, max=1)
+    @Child(name = "nameReference", type = {StringType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="To another element constraint (by element.name)", formalDefinition="Identifies the name of a slice defined elsewhere in the profile whose constraints should be applied to the current element." )
     protected StringType nameReference;
 
     /**
      * The value that should be used if there is no value stated in the instance.
      */
-    @Child(name="defaultValue", type={}, order=13, min=0, max=1)
+    @Child(name = "defaultValue", type = {}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Specified value it missing from instance", formalDefinition="The value that should be used if there is no value stated in the instance." )
     protected org.hl7.fhir.instance.model.Type defaultValue;
 
     /**
      * The Implicit meaning that is to be understood when this element is missing.
      */
-    @Child(name="meaningWhenMissing", type={StringType.class}, order=14, min=0, max=1)
+    @Child(name = "meaningWhenMissing", type = {StringType.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Implicit meaning when this element is missing", formalDefinition="The Implicit meaning that is to be understood when this element is missing." )
     protected StringType meaningWhenMissing;
 
     /**
      * Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-signficant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing.
      */
-    @Child(name="fixed", type={}, order=15, min=0, max=1)
+    @Child(name = "fixed", type = {}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Value must be exactly this", formalDefinition="Specifies a value that SHALL be exactly the value  for this element in the instance. For purposes of comparison, non-signficant whitespace is ignored, and all values must be an exact match (case and accent sensitive). Missing elements/attributes must also be missing." )
     protected org.hl7.fhir.instance.model.Type fixed;
 
     /**
      * Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-senstive, accent-sensitive, etc.).
      */
-    @Child(name="pattern", type={}, order=16, min=0, max=1)
+    @Child(name = "pattern", type = {}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="Value must have at least these property values", formalDefinition="Specifies a value that the value in the instance SHALL follow - that is, any value in the pattern must be found in the instance. Other additional values may be found too. This is effectively constraint by example.  The values of elements present in the pattern must match exactly (case-senstive, accent-sensitive, etc.)." )
     protected org.hl7.fhir.instance.model.Type pattern;
 
     /**
      * An example value for this element.
      */
-    @Child(name="example", type={}, order=17, min=0, max=1)
+    @Child(name = "example", type = {}, order = 17, min = 0, max = 1)
     @Description(shortDefinition="Example value: [as defined for type]", formalDefinition="An example value for this element." )
     protected org.hl7.fhir.instance.model.Type example;
 
     /**
      * Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element.
      */
-    @Child(name="maxLength", type={IntegerType.class}, order=18, min=0, max=1)
+    @Child(name = "maxLength", type = {IntegerType.class}, order = 18, min = 0, max = 1)
     @Description(shortDefinition="Max length for strings", formalDefinition="Indicates the maximum length in characters that is permitted to be present in conformant instances and which is expected to be supported by conformant consumers that support the element." )
     protected IntegerType maxLength;
 
     /**
      * A reference to an invariant that may make additional statements about the cardinality or value in the instance.
      */
-    @Child(name="condition", type={IdType.class}, order=19, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "condition", type = {IdType.class}, order = 19, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reference to invariant about presence", formalDefinition="A reference to an invariant that may make additional statements about the cardinality or value in the instance." )
     protected List<IdType> condition;
 
     /**
      * Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance.
      */
-    @Child(name="constraint", type={}, order=20, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "constraint", type = {}, order = 20, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Condition that must evaluate to true", formalDefinition="Formal constraints such as co-occurrence and other constraints that can be computationally evaluated within the context of the instance." )
     protected List<ElementDefinitionConstraintComponent> constraint;
 
     /**
      * If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported.
      */
-    @Child(name="mustSupport", type={BooleanType.class}, order=21, min=0, max=1)
+    @Child(name = "mustSupport", type = {BooleanType.class}, order = 21, min = 0, max = 1)
     @Description(shortDefinition="If the element must supported", formalDefinition="If true, conformant resource authors SHALL be capable of providing a value for the element and resource consumers SHALL be capable of extracting and doing something useful with the data element.  If false, the element may be ignored and not supported." )
     protected BooleanType mustSupport;
 
     /**
      * If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system.
      */
-    @Child(name="isModifier", type={BooleanType.class}, order=22, min=0, max=1)
+    @Child(name = "isModifier", type = {BooleanType.class}, order = 22, min = 0, max = 1)
     @Description(shortDefinition="If this modifies the meaning of other elements", formalDefinition="If true, the value of this element affects the interpretation of the element or resource that contains it, and the value of the element cannot be ignored. Typically, this is used for status, negation and qualification codes. The effect of this is that the element cannot be ignored by systems: they SHALL either recognize the element and process it, and/or a pre-determination has been made that it is not relevant to their particular system." )
     protected BooleanType isModifier;
 
     /**
      * Whether the element should be included if a client requests a search with the parameter _summary=true.
      */
-    @Child(name="isSummary", type={BooleanType.class}, order=23, min=0, max=1)
+    @Child(name = "isSummary", type = {BooleanType.class}, order = 23, min = 0, max = 1)
     @Description(shortDefinition="Include when _summary = true?", formalDefinition="Whether the element should be included if a client requests a search with the parameter _summary=true." )
     protected BooleanType isSummary;
 
     /**
      * Binds to a value set if this element is coded (code, Coding, CodeableConcept).
      */
-    @Child(name="binding", type={}, order=24, min=0, max=1)
+    @Child(name = "binding", type = {}, order = 24, min = 0, max = 1)
     @Description(shortDefinition="ValueSet details if this is coded", formalDefinition="Binds to a value set if this element is coded (code, Coding, CodeableConcept)." )
     protected ElementDefinitionBindingComponent binding;
 
     /**
      * Identifies a concept from an external specification that roughly corresponds to this element.
      */
-    @Child(name="mapping", type={}, order=25, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "mapping", type = {}, order = 25, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Map element to another set of definitions", formalDefinition="Identifies a concept from an external specification that roughly corresponds to this element." )
     protected List<ElementDefinitionMappingComponent> mapping;
 
