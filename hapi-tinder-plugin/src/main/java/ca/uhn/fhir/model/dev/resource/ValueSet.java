@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -51,7 +50,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * HAPI/FHIR <b>ValueSet</b> Resource
- * ()
+ * (infrastructure)
  *
  * <p>
  * <b>Definition:</b>
@@ -69,16 +68,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet")
+@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/profiles/ValueSet", id="valueset")
 public class ValueSet 
     extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.identifier</b><br/>
+	 * Description: <b>The identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token"  )
@@ -87,9 +86,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.identifier</b><br/>
+	 * Description: <b>The identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -97,9 +96,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.version</b><br/>
+	 * Description: <b>The version identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token"  )
@@ -108,9 +107,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.version</b><br/>
+	 * Description: <b>The version identifier of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -118,9 +117,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.name</b><br/>
+	 * Description: <b>The name of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string"  )
@@ -129,9 +128,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.name</b><br/>
+	 * Description: <b>The name of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -139,9 +138,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string"  )
@@ -150,9 +149,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -160,9 +159,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.description</b><br/>
+	 * Description: <b>Text search in the description of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string"  )
@@ -171,9 +170,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the value set</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>ValueSet.description</b><br/>
+	 * Description: <b>Text search in the description of the value set</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>ValueSet.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -181,9 +180,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.status</b><br/>
+	 * Description: <b>The status of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token"  )
@@ -192,9 +191,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.status</b><br/>
+	 * Description: <b>The status of the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -202,9 +201,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The value set publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ValueSet.date</b><br/>
+	 * Description: <b>The value set publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ValueSet.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date"  )
@@ -213,9 +212,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The value set publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>ValueSet.date</b><br/>
+	 * Description: <b>The value set publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>ValueSet.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -223,9 +222,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any codes defined by this value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.system</b><br/>
+	 * Description: <b>The system for any codes defined by this value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token"  )
@@ -234,9 +233,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>system</b>
 	 * <p>
-	 * Description: <b>The system for any codes defined by this value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.system</b><br/>
+	 * Description: <b>The system for any codes defined by this value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SYSTEM = new TokenClientParam(SP_SYSTEM);
@@ -244,9 +243,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code defined in the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * Description: <b>A code defined in the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.concept.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token"  )
@@ -255,9 +254,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code defined in the value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.define.concept.code</b><br/>
+	 * Description: <b>A code defined in the value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.define.concept.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -265,9 +264,9 @@ public class ValueSet
 	/**
 	 * Search parameter constant for <b>reference</b>
 	 * <p>
-	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.compose.include.system</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token"  )
@@ -276,9 +275,9 @@ public class ValueSet
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>reference</b>
 	 * <p>
-	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>ValueSet.compose.include.system</b><br/>
+	 * Description: <b>A code system included or excluded in the value set or an imported value set</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>ValueSet.compose.include.system</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam REFERENCE = new TokenClientParam(SP_REFERENCE);
@@ -347,14 +346,14 @@ public class ValueSet
 
 	@Child(name="identifier", type=UriDt.class, order=0, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id",
 		formalDefinition="The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)"
 	)
 	private UriDt myIdentifier;
 	
 	@Child(name="version", type=StringDt.class, order=1, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id.version",
 		formalDefinition="The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp"
 	)
 	private StringDt myVersion;
@@ -368,21 +367,21 @@ public class ValueSet
 	
 	@Child(name="purpose", type=StringDt.class, order=3, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="why",
 		formalDefinition="This should describe \"the semantic space\" to be included in the value set. This can also describe the approach taken to build the value set."
 	)
 	private StringDt myPurpose;
 	
 	@Child(name="immutable", type=BooleanDt.class, order=4, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="class",
 		formalDefinition="If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change"
 	)
 	private BooleanDt myImmutable;
 	
 	@Child(name="publisher", type=StringDt.class, order=5, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="who.witness",
 		formalDefinition="The name of the individual or organization that published the value set"
 	)
 	private StringDt myPublisher;
@@ -410,35 +409,35 @@ public class ValueSet
 	
 	@Child(name="status", type=CodeDt.class, order=9, min=1, max=1)	
 	@Description(
-		shortDefinition="ValueSetStatus",
+		shortDefinition="status",
 		formalDefinition="The status of the value set"
 	)
 	private BoundCodeDt<ValueSetStatusEnum> myStatus;
 	
 	@Child(name="experimental", type=BooleanDt.class, order=10, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="class",
 		formalDefinition="This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage"
 	)
 	private BooleanDt myExperimental;
 	
 	@Child(name="extensible", type=BooleanDt.class, order=11, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="class",
 		formalDefinition="Whether this is intended to be used with an extensible binding or not"
 	)
 	private BooleanDt myExtensible;
 	
 	@Child(name="date", type=DateTimeDt.class, order=12, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="when.recorded",
 		formalDefinition="The date that the value set status was last changed"
 	)
 	private DateTimeDt myDate;
 	
 	@Child(name="stableDate", type=DateDt.class, order=13, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="when.init",
 		formalDefinition="If a Stability Date is expanded by evaluating the Content Logical Definition using the current version of all referenced code system(s) and value sets as of the Stability Date."
 	)
 	private DateDt myStableDate;
@@ -476,7 +475,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -494,7 +493,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -503,12 +502,12 @@ public class ValueSet
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)
      * </p> 
 	 */
-	public URI getIdentifier() {  
+	public String getIdentifier() {  
 		return getIdentifierElement().getValue();
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> ()
+	 * Sets the value(s) for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -523,7 +522,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>identifier</b> ()
+	 * Sets the value for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -537,7 +536,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -555,7 +554,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -569,7 +568,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>version</b> ()
+	 * Sets the value(s) for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -584,7 +583,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>version</b> ()
+	 * Sets the value for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -659,13 +658,13 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>purpose</b> ().
+	 * Gets the value(s) for <b>purpose</b> (why).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * This should describe \"the semantic space\" to be included in the value set. This can also describe the approach taken to build the value set.
+     * This should describe \&quot;the semantic space\&quot; to be included in the value set. This can also describe the approach taken to build the value set.
      * </p> 
 	 */
 	public StringDt getPurposeElement() {  
@@ -677,13 +676,13 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>purpose</b> ().
+	 * Gets the value(s) for <b>purpose</b> (why).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
      * <p>
      * <b>Definition:</b>
-     * This should describe \"the semantic space\" to be included in the value set. This can also describe the approach taken to build the value set.
+     * This should describe \&quot;the semantic space\&quot; to be included in the value set. This can also describe the approach taken to build the value set.
      * </p> 
 	 */
 	public String getPurpose() {  
@@ -691,11 +690,11 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>purpose</b> ()
+	 * Sets the value(s) for <b>purpose</b> (why)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This should describe \"the semantic space\" to be included in the value set. This can also describe the approach taken to build the value set.
+     * This should describe \&quot;the semantic space\&quot; to be included in the value set. This can also describe the approach taken to build the value set.
      * </p> 
 	 */
 	public ValueSet setPurpose(StringDt theValue) {
@@ -706,11 +705,11 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>purpose</b> ()
+	 * Sets the value for <b>purpose</b> (why)
 	 *
      * <p>
      * <b>Definition:</b>
-     * This should describe \"the semantic space\" to be included in the value set. This can also describe the approach taken to build the value set.
+     * This should describe \&quot;the semantic space\&quot; to be included in the value set. This can also describe the approach taken to build the value set.
      * </p> 
 	 */
 	public ValueSet setPurpose( String theString) {
@@ -720,7 +719,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>immutable</b> ().
+	 * Gets the value(s) for <b>immutable</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -738,7 +737,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>immutable</b> ().
+	 * Gets the value(s) for <b>immutable</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -752,7 +751,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>immutable</b> ()
+	 * Sets the value(s) for <b>immutable</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -767,7 +766,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>immutable</b> ()
+	 * Sets the value for <b>immutable</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -781,7 +780,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -799,7 +798,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -813,7 +812,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>publisher</b> ()
+	 * Sets the value(s) for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -828,7 +827,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>publisher</b> ()
+	 * Sets the value for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1026,7 +1025,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>status</b> (ValueSetStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1044,7 +1043,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>status</b> (ValueSetStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1058,7 +1057,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ValueSetStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1073,7 +1072,7 @@ public class ValueSet
 	
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ValueSetStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1087,7 +1086,7 @@ public class ValueSet
 
   
 	/**
-	 * Gets the value(s) for <b>experimental</b> ().
+	 * Gets the value(s) for <b>experimental</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1105,7 +1104,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>experimental</b> ().
+	 * Gets the value(s) for <b>experimental</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1119,7 +1118,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>experimental</b> ()
+	 * Sets the value(s) for <b>experimental</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1134,7 +1133,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>experimental</b> ()
+	 * Sets the value for <b>experimental</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1148,7 +1147,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>extensible</b> ().
+	 * Gets the value(s) for <b>extensible</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1166,7 +1165,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>extensible</b> ().
+	 * Gets the value(s) for <b>extensible</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1180,7 +1179,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>extensible</b> ()
+	 * Sets the value(s) for <b>extensible</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1195,7 +1194,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>extensible</b> ()
+	 * Sets the value for <b>extensible</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1209,7 +1208,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1227,7 +1226,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1241,7 +1240,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>date</b> ()
+	 * Sets the value(s) for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1256,7 +1255,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1269,7 +1268,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1283,7 +1282,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>stableDate</b> ().
+	 * Gets the value(s) for <b>stableDate</b> (when.init).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1301,7 +1300,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>stableDate</b> ().
+	 * Gets the value(s) for <b>stableDate</b> (when.init).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1315,7 +1314,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>stableDate</b> ()
+	 * Sets the value(s) for <b>stableDate</b> (when.init)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1330,7 +1329,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>stableDate</b> ()
+	 * Sets the value for <b>stableDate</b> (when.init)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1343,7 +1342,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value for <b>stableDate</b> ()
+	 * Sets the value for <b>stableDate</b> (when.init)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1429,7 +1428,7 @@ public class ValueSet
 	 *
      * <p>
      * <b>Definition:</b>
-     * A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed
+     * A value set can also be \&quot;expanded\&quot;, where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed
      * </p> 
 	 */
 	public Expansion getExpansion() {  
@@ -1444,7 +1443,7 @@ public class ValueSet
 	 *
      * <p>
      * <b>Definition:</b>
-     * A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed
+     * A value set can also be \&quot;expanded\&quot;, where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed
      * </p> 
 	 */
 	public ValueSet setExpansion(Expansion theValue) {
@@ -1534,7 +1533,7 @@ public class ValueSet
      * 
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 
@@ -1768,7 +1767,7 @@ public class ValueSet
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition=""
 	)
 	private CodeDt myCode;
@@ -1820,7 +1819,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1838,7 +1837,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1852,7 +1851,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>code</b> (!)
+	 * Sets the value(s) for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1867,7 +1866,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>code</b> (!)
+	 * Sets the value for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2204,14 +2203,14 @@ public class ValueSet
 	
 	@Child(name="language", type=CodeDt.class, order=0, min=0, max=1)	
 	@Description(
-		shortDefinition="Language",
+		shortDefinition="",
 		formalDefinition="The language this designation is defined for"
 	)
 	private CodeDt myLanguage;
 	
 	@Child(name="use", type=CodingDt.class, order=1, min=0, max=1)	
 	@Description(
-		shortDefinition="ConceptDesignationUse",
+		shortDefinition="",
 		formalDefinition="A code that details how this designation would be used"
 	)
 	private CodingDt myUse;
@@ -2235,7 +2234,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Gets the value(s) for <b>language</b> (Language).
+	 * Gets the value(s) for <b>language</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2253,7 +2252,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>language</b> (Language).
+	 * Gets the value(s) for <b>language</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2267,7 +2266,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>language</b> (Language)
+	 * Sets the value(s) for <b>language</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2282,7 +2281,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>language</b> (Language)
+	 * Sets the value for <b>language</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2296,7 +2295,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>use</b> (ConceptDesignationUse).
+	 * Gets the value(s) for <b>use</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -2313,7 +2312,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>use</b> (ConceptDesignationUse)
+	 * Sets the value(s) for <b>use</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -2725,7 +2724,7 @@ public class ValueSet
      * The code system from which the selected codes come from
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 
@@ -2960,7 +2959,7 @@ public class ValueSet
 	
 	@Child(name="code", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="Specifies a code for the concept to be included or excluded"
 	)
 	private CodeDt myCode;
@@ -2991,7 +2990,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3009,7 +3008,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3023,7 +3022,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>code</b> (!)
+	 * Sets the value(s) for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3038,7 +3037,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>code</b> (!)
+	 * Sets the value for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3192,21 +3191,21 @@ public class ValueSet
 	
 	@Child(name="property", type=CodeDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="A code that identifies a property defined in the code system"
 	)
 	private CodeDt myProperty;
 	
 	@Child(name="op", type=CodeDt.class, order=1, min=1, max=1)	
 	@Description(
-		shortDefinition="FilterOperator",
+		shortDefinition="",
 		formalDefinition="The kind of operation to perform as a part of the filter criteria"
 	)
 	private BoundCodeDt<FilterOperatorEnum> myOp;
 	
 	@Child(name="value", type=CodeDt.class, order=2, min=1, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition="The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value"
 	)
 	private CodeDt myValue;
@@ -3223,7 +3222,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Gets the value(s) for <b>property</b> (!).
+	 * Gets the value(s) for <b>property</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3241,7 +3240,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>property</b> (!).
+	 * Gets the value(s) for <b>property</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3255,7 +3254,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>property</b> (!)
+	 * Sets the value(s) for <b>property</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3270,7 +3269,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>property</b> (!)
+	 * Sets the value for <b>property</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3284,7 +3283,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>op</b> (FilterOperator).
+	 * Gets the value(s) for <b>op</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3302,7 +3301,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>op</b> (FilterOperator).
+	 * Gets the value(s) for <b>op</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3316,7 +3315,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>op</b> (FilterOperator)
+	 * Sets the value(s) for <b>op</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3331,7 +3330,7 @@ public class ValueSet
 	
 
 	/**
-	 * Sets the value(s) for <b>op</b> (FilterOperator)
+	 * Sets the value(s) for <b>op</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3345,7 +3344,7 @@ public class ValueSet
 
   
 	/**
-	 * Gets the value(s) for <b>value</b> (!).
+	 * Gets the value(s) for <b>value</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3363,7 +3362,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>value</b> (!).
+	 * Gets the value(s) for <b>value</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3377,7 +3376,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>value</b> (!)
+	 * Sets the value(s) for <b>value</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3392,7 +3391,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>value</b> (!)
+	 * Sets the value for <b>value</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3662,7 +3661,7 @@ public class ValueSet
 	
 	@Child(name="code", type=CodeDt.class, order=3, min=0, max=1)	
 	@Description(
-		shortDefinition="!",
+		shortDefinition="",
 		formalDefinition=""
 	)
 	private CodeDt myCode;
@@ -3720,7 +3719,7 @@ public class ValueSet
      * The system in which the code for this item in the expansion is defined
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 
@@ -3876,7 +3875,7 @@ public class ValueSet
 
  
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3894,7 +3893,7 @@ public class ValueSet
 
 	
 	/**
-	 * Gets the value(s) for <b>code</b> (!).
+	 * Gets the value(s) for <b>code</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -3908,7 +3907,7 @@ public class ValueSet
 	}
 
 	/**
-	 * Sets the value(s) for <b>code</b> (!)
+	 * Sets the value(s) for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -3923,7 +3922,7 @@ public class ValueSet
 	
 
  	/**
-	 * Sets the value for <b>code</b> (!)
+	 * Sets the value for <b>code</b> ()
 	 *
      * <p>
      * <b>Definition:</b>

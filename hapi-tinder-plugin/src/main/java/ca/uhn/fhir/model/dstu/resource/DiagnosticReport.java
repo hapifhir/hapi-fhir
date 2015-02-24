@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.status</b><br/>
+	 * Description: <b>The status of the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="DiagnosticReport.status", description="The status of the report", type="token"  )
@@ -247,9 +247,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.status</b><br/>
+	 * Description: <b>The status of the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -257,9 +257,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>issued</b>
 	 * <p>
-	 * Description: <b>When the report was issued</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticReport.issued</b><br/>
+	 * Description: <b>When the report was issued</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticReport.issued</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="issued", path="DiagnosticReport.issued", description="When the report was issued", type="date"  )
@@ -268,9 +268,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>issued</b>
 	 * <p>
-	 * Description: <b>When the report was issued</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticReport.issued</b><br/>
+	 * Description: <b>When the report was issued</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticReport.issued</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam ISSUED = new DateClientParam(SP_ISSUED);
@@ -278,9 +278,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject of the report</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.subject</b><br/>
+	 * Description: <b>The subject of the report</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="DiagnosticReport.subject", description="The subject of the report", type="reference"  )
@@ -289,9 +289,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject of the report</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.subject</b><br/>
+	 * Description: <b>The subject of the report</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -305,9 +305,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>performer</b>
 	 * <p>
-	 * Description: <b>Who was the source of the report (organization)</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.performer</b><br/>
+	 * Description: <b>Who was the source of the report (organization)</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.performer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference"  )
@@ -316,9 +316,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>performer</b>
 	 * <p>
-	 * Description: <b>Who was the source of the report (organization)</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.performer</b><br/>
+	 * Description: <b>Who was the source of the report (organization)</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.performer</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PERFORMER = new ReferenceClientParam(SP_PERFORMER);
@@ -332,9 +332,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>An identifier for the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.identifier</b><br/>
+	 * Description: <b>An identifier for the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token"  )
@@ -343,9 +343,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>An identifier for the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.identifier</b><br/>
+	 * Description: <b>An identifier for the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -353,9 +353,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>service</b>
 	 * <p>
-	 * Description: <b>Which diagnostic discipline/department created the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
+	 * Description: <b>Which diagnostic discipline/department created the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.serviceCategory</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="service", path="DiagnosticReport.serviceCategory", description="Which diagnostic discipline/department created the report", type="token"  )
@@ -364,9 +364,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>service</b>
 	 * <p>
-	 * Description: <b>Which diagnostic discipline/department created the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.serviceCategory</b><br/>
+	 * Description: <b>Which diagnostic discipline/department created the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.serviceCategory</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SERVICE = new TokenClientParam(SP_SERVICE);
@@ -374,9 +374,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The clinically relevant time of the report</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
+	 * Description: <b>The clinically relevant time of the report</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="DiagnosticReport.diagnostic[x]", description="The clinically relevant time of the report", type="date"  )
@@ -385,9 +385,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The clinically relevant time of the report</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br/>
+	 * Description: <b>The clinically relevant time of the report</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DiagnosticReport.diagnostic[x]</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -395,9 +395,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b>The specimen details</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.specimen</b><br/>
+	 * Description: <b>The specimen details</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.specimen</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="specimen", path="DiagnosticReport.specimen", description="The specimen details", type="reference"  )
@@ -406,9 +406,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>specimen</b>
 	 * <p>
-	 * Description: <b>The specimen details</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.specimen</b><br/>
+	 * Description: <b>The specimen details</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.specimen</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SPECIMEN = new ReferenceClientParam(SP_SPECIMEN);
@@ -422,9 +422,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.name</b><br/>
+	 * Description: <b>The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="DiagnosticReport.name", description="The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)", type="token"  )
@@ -433,9 +433,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.name</b><br/>
+	 * Description: <b>The name of the report (e.g. the code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.name</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
@@ -443,9 +443,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>result</b>
 	 * <p>
-	 * Description: <b>Link to an atomic result (observation resource)</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.result</b><br/>
+	 * Description: <b>Link to an atomic result (observation resource)</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.result</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="result", path="DiagnosticReport.result", description="Link to an atomic result (observation resource)", type="reference"  )
@@ -454,9 +454,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>result</b>
 	 * <p>
-	 * Description: <b>Link to an atomic result (observation resource)</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.result</b><br/>
+	 * Description: <b>Link to an atomic result (observation resource)</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.result</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RESULT = new ReferenceClientParam(SP_RESULT);
@@ -470,9 +470,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>diagnosis</b>
 	 * <p>
-	 * Description: <b>A coded diagnosis on the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
+	 * Description: <b>A coded diagnosis on the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="diagnosis", path="DiagnosticReport.codedDiagnosis", description="A coded diagnosis on the report", type="token"  )
@@ -481,9 +481,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
 	 * <p>
-	 * Description: <b>A coded diagnosis on the report</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br/>
+	 * Description: <b>A coded diagnosis on the report</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DiagnosticReport.codedDiagnosis</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam DIAGNOSIS = new TokenClientParam(SP_DIAGNOSIS);
@@ -491,9 +491,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>image</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.image.link</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.image.link</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="", type="reference"  )
@@ -502,9 +502,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>image</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.image.link</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.image.link</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam IMAGE = new ReferenceClientParam(SP_IMAGE);
@@ -518,9 +518,9 @@ public class DiagnosticReport
 	/**
 	 * Search parameter constant for <b>request</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.requestDetail</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="", type="reference"  )
@@ -529,9 +529,9 @@ public class DiagnosticReport
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>request</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>DiagnosticReport.requestDetail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>DiagnosticReport.requestDetail</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam REQUEST = new ReferenceClientParam(SP_REQUEST);
@@ -1265,7 +1265,7 @@ public class DiagnosticReport
 	 *
      * <p>
      * <b>Definition:</b>
-     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
+     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \&quot;atomic\&quot; results), or they can be grouping observations that include references to other members of the group (e.g. \&quot;panels\&quot;)
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getResult() {  
@@ -1283,7 +1283,7 @@ public class DiagnosticReport
 	 *
      * <p>
      * <b>Definition:</b>
-     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
+     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \&quot;atomic\&quot; results), or they can be grouping observations that include references to other members of the group (e.g. \&quot;panels\&quot;)
      * </p> 
 	 */
 	public java.util.List<ResourceReferenceDt> getResultElement() {  
@@ -1299,7 +1299,7 @@ public class DiagnosticReport
 	 *
      * <p>
      * <b>Definition:</b>
-     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
+     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \&quot;atomic\&quot; results), or they can be grouping observations that include references to other members of the group (e.g. \&quot;panels\&quot;)
      * </p> 
 	 */
 	public DiagnosticReport setResult(java.util.List<ResourceReferenceDt> theValue) {
@@ -1312,7 +1312,7 @@ public class DiagnosticReport
 	 *
      * <p>
      * <b>Definition:</b>
-     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \"atomic\" results), or they can be grouping observations that include references to other members of the group (e.g. \"panels\")
+     * Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. \&quot;atomic\&quot; results), or they can be grouping observations that include references to other members of the group (e.g. \&quot;panels\&quot;)
      * </p> 
 	 */
 	public ResourceReferenceDt addResult() {

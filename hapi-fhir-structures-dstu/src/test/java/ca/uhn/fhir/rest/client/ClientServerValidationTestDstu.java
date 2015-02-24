@@ -36,14 +36,14 @@ public class ClientServerValidationTestDstu {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 
-		myCtx = FhirContext.forDev();
+		myCtx = FhirContext.forDstu1();
 		myCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
 	}
 
 	@Test
 	public void testServerReturnsAppropriateVersionDstu() throws Exception {
 		Conformance conf = new Conformance();
-		conf.setFhirVersion("0.4.0");
+		conf.setFhirVersion("0.0.8");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -64,7 +64,7 @@ public class ClientServerValidationTestDstu {
 	@Test
 	public void testServerReturnsWrongVersionDstu() throws Exception {
 		Conformance conf = new Conformance();
-		conf.setFhirVersion("0.0.8");
+		conf.setFhirVersion("0.4.0");
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -80,7 +80,7 @@ public class ClientServerValidationTestDstu {
 			myCtx.newRestfulGenericClient("http://foo");
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4\" which corresponds to DSTU2, but this client is configured to use DSTU1 (at FhirContext creation time)"));
+			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4.0\" which corresponds to DSTU2, but this client is configured to use DSTU1 (via the FhirContext)"));
 		}
 	}
 }

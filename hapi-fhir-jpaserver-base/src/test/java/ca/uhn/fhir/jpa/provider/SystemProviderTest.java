@@ -15,7 +15,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.rp.dstu.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.PatientResourceProvider;
@@ -42,7 +42,7 @@ public class SystemProviderTest {
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/test-server-seed-bundle.json");
-		Bundle bundle = new FhirContext().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
+		Bundle bundle = FhirContext.forDstu1().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
 		List<IResource> res = bundle.toListOfResources();
 		
 		ourClient.transaction().withResources(res).execute();
@@ -73,15 +73,15 @@ public class SystemProviderTest {
 		ObservationResourceProvider observationRp = new ObservationResourceProvider();
 		observationRp.setDao(observationDao);
 
-		IFhirSystemDao systemDao = ourAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
-
 		IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
 		OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 		organizationRp.setDao(organizationDao);
 
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
-		restServer.setPlainProviders(new JpaSystemProvider(systemDao));
+
+		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");
+		restServer.setPlainProviders(systemProv);
 
 		int myPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(myPort);
@@ -100,6 +100,7 @@ public class SystemProviderTest {
 
 		ourCtx = restServer.getFhirContext();
 
+		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);
 		ourClient.setLogRequestAndResponse(true);
 	}

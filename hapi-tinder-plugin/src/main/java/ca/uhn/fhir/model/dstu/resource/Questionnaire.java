@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.status</b><br/>
+	 * Description: <b>The status of the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token"  )
@@ -247,9 +247,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.status</b><br/>
+	 * Description: <b>The status of the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -257,9 +257,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>authored</b>
 	 * <p>
-	 * Description: <b>When the questionnaire was authored</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Questionnaire.authored</b><br/>
+	 * Description: <b>When the questionnaire was authored</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Questionnaire.authored</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="authored", path="Questionnaire.authored", description="When the questionnaire was authored", type="date"  )
@@ -268,9 +268,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>authored</b>
 	 * <p>
-	 * Description: <b>When the questionnaire was authored</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Questionnaire.authored</b><br/>
+	 * Description: <b>When the questionnaire was authored</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Questionnaire.authored</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam AUTHORED = new DateClientParam(SP_AUTHORED);
@@ -278,9 +278,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject of the questionnaire</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.subject</b><br/>
+	 * Description: <b>The subject of the questionnaire</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Questionnaire.subject", description="The subject of the questionnaire", type="reference"  )
@@ -289,9 +289,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>The subject of the questionnaire</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.subject</b><br/>
+	 * Description: <b>The subject of the questionnaire</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -305,9 +305,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b>The author of the questionnaire</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.author</b><br/>
+	 * Description: <b>The author of the questionnaire</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.author</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="author", path="Questionnaire.author", description="The author of the questionnaire", type="reference"  )
@@ -316,9 +316,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b>The author of the questionnaire</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.author</b><br/>
+	 * Description: <b>The author of the questionnaire</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.author</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
@@ -332,9 +332,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>An identifier for the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.identifier</b><br/>
+	 * Description: <b>An identifier for the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token"  )
@@ -343,9 +343,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>An identifier for the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.identifier</b><br/>
+	 * Description: <b>An identifier for the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -353,9 +353,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.name</b><br/>
+	 * Description: <b>Name of the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Questionnaire.name", description="Name of the questionnaire", type="token"  )
@@ -364,9 +364,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the questionnaire</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Questionnaire.name</b><br/>
+	 * Description: <b>Name of the questionnaire</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Questionnaire.name</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NAME = new TokenClientParam(SP_NAME);
@@ -374,9 +374,9 @@ public class Questionnaire
 	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Encounter during which questionnaire was authored</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.encounter</b><br/>
+	 * Description: <b>Encounter during which questionnaire was authored</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.encounter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="encounter", path="Questionnaire.encounter", description="Encounter during which questionnaire was authored", type="reference"  )
@@ -385,9 +385,9 @@ public class Questionnaire
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Encounter during which questionnaire was authored</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Questionnaire.encounter</b><br/>
+	 * Description: <b>Encounter during which questionnaire was authored</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Questionnaire.encounter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);

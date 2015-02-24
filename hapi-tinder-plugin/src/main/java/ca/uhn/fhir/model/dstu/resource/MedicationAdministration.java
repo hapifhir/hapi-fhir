@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>device</b>
 	 * <p>
-	 * Description: <b>Return administrations with this administration device identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.device</b><br/>
+	 * Description: <b>Return administrations with this administration device identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.device</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="device", path="MedicationAdministration.device", description="Return administrations with this administration device identity", type="reference"  )
@@ -247,9 +247,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>device</b>
 	 * <p>
-	 * Description: <b>Return administrations with this administration device identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.device</b><br/>
+	 * Description: <b>Return administrations with this administration device identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.device</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam DEVICE = new ReferenceClientParam(SP_DEVICE);
@@ -263,9 +263,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Return administrations that share this encounter</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.encounter</b><br/>
+	 * Description: <b>Return administrations that share this encounter</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.encounter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="encounter", path="MedicationAdministration.encounter", description="Return administrations that share this encounter", type="reference"  )
@@ -274,9 +274,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b>Return administrations that share this encounter</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.encounter</b><br/>
+	 * Description: <b>Return administrations that share this encounter</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.encounter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
@@ -290,9 +290,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return administrations with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.identifier</b><br/>
+	 * Description: <b>Return administrations with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="MedicationAdministration.identifier", description="Return administrations with this external identity", type="token"  )
@@ -301,9 +301,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return administrations with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.identifier</b><br/>
+	 * Description: <b>Return administrations with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -311,9 +311,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Return administrations of this medication</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.medication</b><br/>
+	 * Description: <b>Return administrations of this medication</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.medication</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationAdministration.medication", description="Return administrations of this medication", type="reference"  )
@@ -322,9 +322,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Return administrations of this medication</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.medication</b><br/>
+	 * Description: <b>Return administrations of this medication</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.medication</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
@@ -338,9 +338,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>notgiven</b>
 	 * <p>
-	 * Description: <b>Administrations that were not made</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.wasNotGiven</b><br/>
+	 * Description: <b>Administrations that were not made</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.wasNotGiven</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="notgiven", path="MedicationAdministration.wasNotGiven", description="Administrations that were not made", type="token"  )
@@ -349,9 +349,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>notgiven</b>
 	 * <p>
-	 * Description: <b>Administrations that were not made</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.wasNotGiven</b><br/>
+	 * Description: <b>Administrations that were not made</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.wasNotGiven</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam NOTGIVEN = new TokenClientParam(SP_NOTGIVEN);
@@ -359,9 +359,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.patient</b><br/>
+	 * Description: <b>The identity of a patient to list administrations  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="MedicationAdministration.patient", description="The identity of a patient to list administrations  for", type="reference"  )
@@ -370,9 +370,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.patient</b><br/>
+	 * Description: <b>The identity of a patient to list administrations  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -386,9 +386,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>prescription</b>
 	 * <p>
-	 * Description: <b>The identity of a prescription to list administrations from</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.prescription</b><br/>
+	 * Description: <b>The identity of a prescription to list administrations from</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.prescription</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="prescription", path="MedicationAdministration.prescription", description="The identity of a prescription to list administrations from", type="reference"  )
@@ -397,9 +397,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>prescription</b>
 	 * <p>
-	 * Description: <b>The identity of a prescription to list administrations from</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationAdministration.prescription</b><br/>
+	 * Description: <b>The identity of a prescription to list administrations from</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationAdministration.prescription</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PRESCRIPTION = new ReferenceClientParam(SP_PRESCRIPTION);
@@ -413,9 +413,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.status</b><br/>
+	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="MedicationAdministration.status", description="MedicationAdministration event status (for example one of active/paused/completed/nullified)", type="token"  )
@@ -424,9 +424,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationAdministration.status</b><br/>
+	 * Description: <b>MedicationAdministration event status (for example one of active/paused/completed/nullified)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationAdministration.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -434,9 +434,9 @@ public class MedicationAdministration
 	/**
 	 * Search parameter constant for <b>whengiven</b>
 	 * <p>
-	 * Description: <b>Date of administration</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationAdministration.whenGiven</b><br/>
+	 * Description: <b>Date of administration</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationAdministration.whenGiven</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="whengiven", path="MedicationAdministration.whenGiven", description="Date of administration", type="date"  )
@@ -445,9 +445,9 @@ public class MedicationAdministration
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>whengiven</b>
 	 * <p>
-	 * Description: <b>Date of administration</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationAdministration.whenGiven</b><br/>
+	 * Description: <b>Date of administration</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationAdministration.whenGiven</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam WHENGIVEN = new DateClientParam(SP_WHENGIVEN);
@@ -1442,7 +1442,7 @@ public class MedicationAdministration
 
   
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1457,7 +1457,7 @@ public class MedicationAdministration
 
 
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1472,7 +1472,7 @@ public class MedicationAdministration
 
 
 	/**
-	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x))
+	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1492,7 +1492,7 @@ public class MedicationAdministration
 	 *
      * <p>
      * <b>Definition:</b>
-     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\"
+     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \&quot;left arm\&quot;
      * </p> 
 	 */
 	public CodeableConceptDt getSite() {  
@@ -1510,7 +1510,7 @@ public class MedicationAdministration
 	 *
      * <p>
      * <b>Definition:</b>
-     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\"
+     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \&quot;left arm\&quot;
      * </p> 
 	 */
 	public CodeableConceptDt getSiteElement() {  
@@ -1526,7 +1526,7 @@ public class MedicationAdministration
 	 *
      * <p>
      * <b>Definition:</b>
-     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \"left arm\"
+     * A coded specification of the anatomic site where the medication first entered the body.  E.g. \&quot;left arm\&quot;
      * </p> 
 	 */
 	public Dosage setSite(CodeableConceptDt theValue) {

@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class GVFMeta
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient being described in the file</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GVFMeta.subject.patient</b><br/>
+	 * Description: <b>Patient being described in the file</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GVFMeta.subject.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="GVFMeta.subject.patient", description="Patient being described in the file", type="reference"  )
@@ -247,9 +247,9 @@ public class GVFMeta
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>Patient being described in the file</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GVFMeta.subject.patient</b><br/>
+	 * Description: <b>Patient being described in the file</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GVFMeta.subject.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -263,9 +263,9 @@ public class GVFMeta
 	/**
 	 * Search parameter constant for <b>file</b>
 	 * <p>
-	 * Description: <b>URL to source file of the resource</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GVFMeta.sourceFile</b><br/>
+	 * Description: <b>URL to source file of the resource</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GVFMeta.sourceFile</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="file", path="GVFMeta.sourceFile", description="URL to source file of the resource", type="string"  )
@@ -274,9 +274,9 @@ public class GVFMeta
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>file</b>
 	 * <p>
-	 * Description: <b>URL to source file of the resource</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GVFMeta.sourceFile</b><br/>
+	 * Description: <b>URL to source file of the resource</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GVFMeta.sourceFile</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam FILE = new StringClientParam(SP_FILE);

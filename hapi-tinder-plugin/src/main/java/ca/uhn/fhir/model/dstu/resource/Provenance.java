@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Provenance.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Provenance.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="target", path="Provenance.target", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>target</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Provenance.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Provenance.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam TARGET = new ReferenceClientParam(SP_TARGET);
@@ -263,9 +263,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>start</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Provenance.period.start</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Provenance.period.start</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="start", path="Provenance.period.start", description="", type="date"  )
@@ -274,9 +274,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>start</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Provenance.period.start</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Provenance.period.start</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam START = new DateClientParam(SP_START);
@@ -284,9 +284,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>end</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Provenance.period.end</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Provenance.period.end</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="end", path="Provenance.period.end", description="", type="date"  )
@@ -295,9 +295,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>end</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Provenance.period.end</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Provenance.period.end</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam END = new DateClientParam(SP_END);
@@ -305,9 +305,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Provenance.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Provenance.location</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location", path="Provenance.location", description="", type="reference"  )
@@ -316,9 +316,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Provenance.location</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Provenance.location</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam LOCATION = new ReferenceClientParam(SP_LOCATION);
@@ -332,9 +332,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>party</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Provenance.agent.reference</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Provenance.agent.reference</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="party", path="Provenance.agent.reference", description="", type="token"  )
@@ -343,9 +343,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>party</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Provenance.agent.reference</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Provenance.agent.reference</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PARTY = new TokenClientParam(SP_PARTY);
@@ -353,9 +353,9 @@ public class Provenance
 	/**
 	 * Search parameter constant for <b>partytype</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Provenance.agent.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Provenance.agent.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="", type="token"  )
@@ -364,9 +364,9 @@ public class Provenance
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partytype</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Provenance.agent.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Provenance.agent.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam PARTYTYPE = new TokenClientParam(SP_PARTYTYPE);

@@ -84,7 +84,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				base_version: 7,
 				proxy_port: 80,
 				# ssl_port: 443,
-				authbind: 'yes'
+				authbind: 'yes',
+				java_options: '-Dfhir.logdir=/var/log/fhir -Dfhir.db.location=/var/fhirdb'
 			},
 			mysql: {
 				version: '5.6',
@@ -106,6 +107,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	Dir.glob(File.join('..', '**', 'target', '*.war')).each do |f|
 		FileUtils.cp(f, 'build')
 	end
+
+	config.vm.provision 'shell', inline: 'mkdir /var/log/fhir'
+	config.vm.provision 'shell', inline: 'chmod 777 /var/log/fhir'
+	config.vm.provision 'shell', inline: 'mkdir /var/fhirdb'
+	config.vm.provision 'shell', inline: 'chmod 777 /var/fhirdb'
 
 	# puts "Deploying any/all built .war files.""
 	config.vm.provision 'shell', inline: 'cp /build/*.war /var/lib/tomcat7/webapps'

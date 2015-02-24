@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
@@ -53,7 +52,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * HAPI/FHIR <b>Profile</b> Resource
- * ()
+ * (infrastructure)
  *
  * <p>
  * <b>Definition:</b>
@@ -71,16 +70,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile")
+@ResourceDef(name="Profile", profile="http://hl7.org/fhir/profiles/Profile", id="profile")
 public class Profile 
     extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.identifier</b><br/>
+	 * Description: <b>The identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile", type="token"  )
@@ -89,9 +88,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.identifier</b><br/>
+	 * Description: <b>The identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -99,9 +98,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.version</b><br/>
+	 * Description: <b>The version identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile", type="token"  )
@@ -110,9 +109,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.version</b><br/>
+	 * Description: <b>The version identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -120,9 +119,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.name</b><br/>
+	 * Description: <b>Name of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile", type="string"  )
@@ -131,9 +130,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.name</b><br/>
+	 * Description: <b>Name of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -141,9 +140,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile", type="string"  )
@@ -152,9 +151,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -162,9 +161,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.description</b><br/>
+	 * Description: <b>Text search in the description of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile", type="string"  )
@@ -173,9 +172,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.description</b><br/>
+	 * Description: <b>Text search in the description of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -183,9 +182,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.status</b><br/>
+	 * Description: <b>The current status of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile", type="token"  )
@@ -194,9 +193,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.status</b><br/>
+	 * Description: <b>The current status of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -204,9 +203,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The profile publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Profile.date</b><br/>
+	 * Description: <b>The profile publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Profile.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date", type="date"  )
@@ -215,9 +214,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The profile publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Profile.date</b><br/>
+	 * Description: <b>The profile publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Profile.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -225,9 +224,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.code</b><br/>
+	 * Description: <b>A code for the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile", type="token"  )
@@ -236,9 +235,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.code</b><br/>
+	 * Description: <b>A code for the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -246,9 +245,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>valueset</b>
 	 * <p>
-	 * Description: <b>A vocabulary binding code</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Profile.snapshot.element.binding.reference[x]</b><br/>
+	 * Description: <b>A vocabulary binding code</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Profile.snapshot.element.binding.reference[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="valueset", path="Profile.snapshot.element.binding.reference[x]", description="A vocabulary binding code", type="reference"  )
@@ -257,9 +256,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>valueset</b>
 	 * <p>
-	 * Description: <b>A vocabulary binding code</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Profile.snapshot.element.binding.reference[x]</b><br/>
+	 * Description: <b>A vocabulary binding code</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Profile.snapshot.element.binding.reference[x]</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam VALUESET = new ReferenceClientParam(SP_VALUESET);
@@ -267,9 +266,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.type</b><br/>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Profile.type", description="Type of resource that is constrained in the profile", type="token"  )
@@ -278,9 +277,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.type</b><br/>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -288,9 +287,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>url</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.url</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.url</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="url", path="Profile.url", description="", type="token"  )
@@ -299,9 +298,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>url</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.url</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.url</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam URL = new TokenClientParam(SP_URL);
@@ -376,21 +375,21 @@ public class Profile
 
 	@Child(name="url", type=UriDt.class, order=0, min=1, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id",
 		formalDefinition="The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems"
 	)
 	private UriDt myUrl;
 	
 	@Child(name="identifier", type=IdentifierDt.class, order=1, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id",
 		formalDefinition="Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)"
 	)
 	private java.util.List<IdentifierDt> myIdentifier;
 	
 	@Child(name="version", type=StringDt.class, order=2, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="id.version",
 		formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually"
 	)
 	private StringDt myVersion;
@@ -404,7 +403,7 @@ public class Profile
 	
 	@Child(name="publisher", type=StringDt.class, order=4, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="who.witness",
 		formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile"
 	)
 	private StringDt myPublisher;
@@ -425,35 +424,35 @@ public class Profile
 	
 	@Child(name="code", type=CodingDt.class, order=7, min=0, max=Child.MAX_UNLIMITED)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="class",
 		formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates."
 	)
 	private java.util.List<CodingDt> myCode;
 	
 	@Child(name="status", type=CodeDt.class, order=8, min=1, max=1)	
 	@Description(
-		shortDefinition="ResourceProfileStatus",
+		shortDefinition="status",
 		formalDefinition="The status of the profile"
 	)
 	private BoundCodeDt<ResourceProfileStatusEnum> myStatus;
 	
 	@Child(name="experimental", type=BooleanDt.class, order=9, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="class",
 		formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage"
 	)
 	private BooleanDt myExperimental;
 	
 	@Child(name="date", type=DateTimeDt.class, order=10, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="when.recorded",
 		formalDefinition="The date that this version of the profile was published"
 	)
 	private DateTimeDt myDate;
 	
 	@Child(name="requirements", type=StringDt.class, order=11, min=0, max=1)	
 	@Description(
-		shortDefinition="",
+		shortDefinition="why",
 		formalDefinition="The Scope and Usage that this profile was created to meet"
 	)
 	private StringDt myRequirements;
@@ -474,7 +473,7 @@ public class Profile
 	
 	@Child(name="type", type=CodeDt.class, order=14, min=1, max=1)	
 	@Description(
-		shortDefinition="FHIRDefinedType",
+		shortDefinition="",
 		formalDefinition="The Resource or Data type being described"
 	)
 	private BoundCodeDt<FHIRDefinedTypeEnum> myType;
@@ -512,7 +511,7 @@ public class Profile
 	}
 
 	/**
-	 * Gets the value(s) for <b>url</b> ().
+	 * Gets the value(s) for <b>url</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -530,7 +529,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>url</b> ().
+	 * Gets the value(s) for <b>url</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -539,12 +538,12 @@ public class Profile
      * The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems
      * </p> 
 	 */
-	public URI getUrl() {  
+	public String getUrl() {  
 		return getUrlElement().getValue();
 	}
 
 	/**
-	 * Sets the value(s) for <b>url</b> ()
+	 * Sets the value(s) for <b>url</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -559,7 +558,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>url</b> ()
+	 * Sets the value for <b>url</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -573,7 +572,7 @@ public class Profile
 
  
 	/**
-	 * Gets the value(s) for <b>identifier</b> ().
+	 * Gets the value(s) for <b>identifier</b> (id).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -590,7 +589,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>identifier</b> ()
+	 * Sets the value(s) for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -605,7 +604,7 @@ public class Profile
 	
 
 	/**
-	 * Adds and returns a new value for <b>identifier</b> ()
+	 * Adds and returns a new value for <b>identifier</b> (id)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -619,7 +618,7 @@ public class Profile
 	}
 
 	/**
-	 * Gets the first repetition for <b>identifier</b> (),
+	 * Gets the first repetition for <b>identifier</b> (id),
 	 * creating it if it does not already exist.
 	 *
      * <p>
@@ -635,7 +634,7 @@ public class Profile
 	}
   
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -653,7 +652,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>version</b> ().
+	 * Gets the value(s) for <b>version</b> (id.version).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -667,7 +666,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>version</b> ()
+	 * Sets the value(s) for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -682,7 +681,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>version</b> ()
+	 * Sets the value for <b>version</b> (id.version)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -757,7 +756,7 @@ public class Profile
 
  
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -775,7 +774,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>publisher</b> ().
+	 * Gets the value(s) for <b>publisher</b> (who.witness).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -789,7 +788,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>publisher</b> ()
+	 * Sets the value(s) for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -804,7 +803,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>publisher</b> ()
+	 * Sets the value for <b>publisher</b> (who.witness)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -941,7 +940,7 @@ public class Profile
 
  
 	/**
-	 * Gets the value(s) for <b>code</b> ().
+	 * Gets the value(s) for <b>code</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -958,7 +957,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>code</b> ()
+	 * Sets the value(s) for <b>code</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -973,7 +972,7 @@ public class Profile
 	
 
 	/**
-	 * Adds and returns a new value for <b>code</b> ()
+	 * Adds and returns a new value for <b>code</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -987,7 +986,7 @@ public class Profile
 	}
 
 	/**
-	 * Gets the first repetition for <b>code</b> (),
+	 * Gets the first repetition for <b>code</b> (class),
 	 * creating it if it does not already exist.
 	 *
      * <p>
@@ -1003,7 +1002,7 @@ public class Profile
 	}
   
 	/**
-	 * Gets the value(s) for <b>status</b> (ResourceProfileStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1021,7 +1020,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>status</b> (ResourceProfileStatus).
+	 * Gets the value(s) for <b>status</b> (status).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1035,7 +1034,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ResourceProfileStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1050,7 +1049,7 @@ public class Profile
 	
 
 	/**
-	 * Sets the value(s) for <b>status</b> (ResourceProfileStatus)
+	 * Sets the value(s) for <b>status</b> (status)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1064,7 +1063,7 @@ public class Profile
 
   
 	/**
-	 * Gets the value(s) for <b>experimental</b> ().
+	 * Gets the value(s) for <b>experimental</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1082,7 +1081,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>experimental</b> ().
+	 * Gets the value(s) for <b>experimental</b> (class).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1096,7 +1095,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>experimental</b> ()
+	 * Sets the value(s) for <b>experimental</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1111,7 +1110,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>experimental</b> ()
+	 * Sets the value for <b>experimental</b> (class)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1125,7 +1124,7 @@ public class Profile
 
  
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1143,7 +1142,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>date</b> ().
+	 * Gets the value(s) for <b>date</b> (when.recorded).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1157,7 +1156,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>date</b> ()
+	 * Sets the value(s) for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1172,7 +1171,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1185,7 +1184,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value for <b>date</b> ()
+	 * Sets the value for <b>date</b> (when.recorded)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1199,7 +1198,7 @@ public class Profile
 
  
 	/**
-	 * Gets the value(s) for <b>requirements</b> ().
+	 * Gets the value(s) for <b>requirements</b> (why).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1217,7 +1216,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>requirements</b> ().
+	 * Gets the value(s) for <b>requirements</b> (why).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1231,7 +1230,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>requirements</b> ()
+	 * Sets the value(s) for <b>requirements</b> (why)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1246,7 +1245,7 @@ public class Profile
 	
 
  	/**
-	 * Sets the value for <b>requirements</b> ()
+	 * Sets the value for <b>requirements</b> (why)
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1383,7 +1382,7 @@ public class Profile
 	}
   
 	/**
-	 * Gets the value(s) for <b>type</b> (FHIRDefinedType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1401,7 +1400,7 @@ public class Profile
 
 	
 	/**
-	 * Gets the value(s) for <b>type</b> (FHIRDefinedType).
+	 * Gets the value(s) for <b>type</b> ().
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1415,7 +1414,7 @@ public class Profile
 	}
 
 	/**
-	 * Sets the value(s) for <b>type</b> (FHIRDefinedType)
+	 * Sets the value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1430,7 +1429,7 @@ public class Profile
 	
 
 	/**
-	 * Sets the value(s) for <b>type</b> (FHIRDefinedType)
+	 * Sets the value(s) for <b>type</b> ()
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1471,7 +1470,7 @@ public class Profile
      * The structure that is the base on which this set of constraints is derived from.
      * </p> 
 	 */
-	public URI getBase() {  
+	public String getBase() {  
 		return getBaseElement().getValue();
 	}
 
@@ -1710,7 +1709,7 @@ public class Profile
      * A URI that identifies the specification that this mapping is expressed to
      * </p> 
 	 */
-	public URI getUri() {  
+	public String getUri() {  
 		return getUriElement().getValue();
 	}
 

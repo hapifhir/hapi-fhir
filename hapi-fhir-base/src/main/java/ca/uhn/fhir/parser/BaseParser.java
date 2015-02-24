@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -36,22 +36,27 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
@@ -62,28 +67,6 @@ public abstract class BaseParser implements IParser {
 
 	public BaseParser(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	protected String fixContainedResourceId(String theValue) {
-		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
-			return theValue.substring(1);
-		}
-		return theValue;
-	}
-
-	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
-		IResource resource = theEntry.getResource();
-		if (resource == null) {
-			return null;
-		}
-		
-		String resourceBaseUrl = null;
-		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
-			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
-				resourceBaseUrl = resource.getId().getBaseUrl();
-			}
-		}
-		return resourceBaseUrl;
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
@@ -103,9 +86,9 @@ public abstract class BaseParser implements IParser {
 					existingIdToContainedResource.put(nextId, next);
 				}
 			}
-		} else if (theTarget instanceof DomainResource) {
-			List<Resource> containedResources = ((DomainResource) theTarget).getContained();
-			for (Resource next : containedResources) {
+		} else if (theTarget instanceof IDomainResource) {
+			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
+			for (IAnyResource next : containedResources) {
 				String nextId = next.getId();
 				if (StringUtils.isNotBlank(nextId)) {
 					allIds.add(nextId);
@@ -120,8 +103,8 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<ResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, ResourceReferenceDt.class);
-			for (ResourceReferenceDt next : allElements) {
+			List<BaseResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
+			for (BaseResourceReferenceDt next : allElements) {
 				IResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
@@ -144,9 +127,9 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<Reference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, Reference.class);
-			for (Reference next : allElements) {
-				Resource resource = next.getResource();
+			List<IReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IReference.class);
+			for (IReference next : allElements) {
+				IAnyResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getIdElement().isEmpty() || resource.getId().startsWith("#")) {
 						theContained.addContained(resource);
@@ -173,6 +156,40 @@ public abstract class BaseParser implements IParser {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
 		myContainedResources = contained;
+	}
+
+	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
+		String reference = theRef.getReference().getValue();
+		if (isBlank(reference)) {
+			if (theRef.getResource() != null) {
+				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
+				if (containedId != null && !containedId.isEmpty()) {
+					if (containedId.isLocal()) {
+						reference = containedId.getValue();
+					} else {
+						reference = "#" + containedId.getValue();
+					}
+				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
+					reference = theRef.getResource().getId().getValue();
+				}
+			}
+		}
+		return reference;
+	}
+
+	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
+		IResource resource = theEntry.getResource();
+		if (resource == null) {
+			return null;
+		}
+		
+		String resourceBaseUrl = null;
+		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
+			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
+				resourceBaseUrl = resource.getId().getBaseUrl();
+			}
+		}
+		return resourceBaseUrl;
 	}
 
 	@Override
@@ -212,6 +229,13 @@ public abstract class BaseParser implements IParser {
 		return stringWriter.toString();
 	}
 
+	protected String fixContainedResourceId(String theValue) {
+		if (StringUtils.isNotBlank(theValue) && theValue.charAt(0) == '#') {
+			return theValue.substring(1);
+		}
+		return theValue;
+	}
+
 	ContainedResources getContainedResources() {
 		return myContainedResources;
 	}
@@ -247,6 +271,57 @@ public abstract class BaseParser implements IParser {
 		return parseResource(null, theReader);
 	}
 
+	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
+	
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+		T retVal = doParseResource(theResourceType, theReader);
+		
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
+		if ("Bundle".equals(def.getName())) {
+			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
+			if (base != null && base.size() > 0) {
+				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
+				IResource res = ((IResource)retVal);
+				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
+			}
+			
+			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
+			if (entries != null) {
+				for (IBase nextEntry : entries) {
+					List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
+					
+					if (entryBase == null || entryBase.isEmpty()) {
+						entryBase = base;
+					}
+					
+					if (entryBase != null && entryBase.size() > 0) {
+						IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
+						
+						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+						if (entryResources != null && entryResources.size() > 0) {
+							IResource res = (IResource) entryResources.get(0);
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
+							String versionIdPart = res.getId().getVersionIdPart();
+							if (isBlank(versionIdPart)) {
+								versionIdPart = ResourceMetadataKeyEnum.VERSION.get(res);
+							}
+							
+							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
+						}
+						
+					}
+					
+					
+				}
+			}
+			
+		}
+		
+		return retVal;
+	}
+	
 	@Override
 	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theMessageString);
@@ -279,30 +354,11 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
-	protected String determineReferenceText(ResourceReferenceDt theRef) {
-		String reference = theRef.getReference().getValue();
-		if (isBlank(reference)) {
-			if (theRef.getResource() != null) {
-				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
-				if (containedId != null && !containedId.isEmpty()) {
-					if (containedId.isLocal()) {
-						reference = containedId.getValue();
-					} else {
-						reference = "#" + containedId.getValue();
-					}
-				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
-					reference = theRef.getResource().getId().getValue();
-				}
-			}
-		}
-		return reference;
-	}
-
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
-		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
 		private List<IBaseResource> myResources = new ArrayList<IBaseResource>();
+		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
 
 		public void addContained(IBaseResource theResource) {
 			if (myResourceToId.containsKey(theResource)) {
@@ -312,8 +368,8 @@ public abstract class BaseParser implements IParser {
 			IdDt newId;
 			if (theResource instanceof IResource && ((IResource) theResource).getId().isLocal()) {
 				newId = ((IResource) theResource).getId();
-			} else if (theResource instanceof Resource && ((Resource)theResource).getId() != null && ((Resource)theResource).getId().startsWith("#")) {
-				newId = new IdDt(((Resource)theResource).getId());
+			} else if (theResource instanceof IAnyResource && ((IAnyResource)theResource).getId() != null && ((IAnyResource)theResource).getId().startsWith("#")) {
+				newId = new IdDt(((IAnyResource)theResource).getId());
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());

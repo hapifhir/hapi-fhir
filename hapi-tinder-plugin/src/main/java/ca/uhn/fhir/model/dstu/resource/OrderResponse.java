@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class OrderResponse
 	/**
 	 * Search parameter constant for <b>request</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.request</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.request</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="request", path="OrderResponse.request", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class OrderResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>request</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.request</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.request</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam REQUEST = new ReferenceClientParam(SP_REQUEST);
@@ -263,9 +263,9 @@ public class OrderResponse
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>OrderResponse.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>OrderResponse.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="OrderResponse.date", description="", type="date"  )
@@ -274,9 +274,9 @@ public class OrderResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>OrderResponse.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>OrderResponse.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -284,9 +284,9 @@ public class OrderResponse
 	/**
 	 * Search parameter constant for <b>who</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.who</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.who</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="who", path="OrderResponse.who", description="", type="reference"  )
@@ -295,9 +295,9 @@ public class OrderResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>who</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.who</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.who</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam WHO = new ReferenceClientParam(SP_WHO);
@@ -311,9 +311,9 @@ public class OrderResponse
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OrderResponse.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OrderResponse.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="OrderResponse.code", description="", type="token"  )
@@ -322,9 +322,9 @@ public class OrderResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>OrderResponse.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>OrderResponse.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -332,9 +332,9 @@ public class OrderResponse
 	/**
 	 * Search parameter constant for <b>fulfillment</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.fulfillment</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.fulfillment</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="", type="reference"  )
@@ -343,9 +343,9 @@ public class OrderResponse
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>fulfillment</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>OrderResponse.fulfillment</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>OrderResponse.fulfillment</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam FULFILLMENT = new ReferenceClientParam(SP_FULFILLMENT);

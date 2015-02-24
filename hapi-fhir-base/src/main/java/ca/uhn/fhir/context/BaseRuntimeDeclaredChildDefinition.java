@@ -32,7 +32,6 @@ import java.util.List;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
 
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.util.BeanUtils;
@@ -199,13 +198,13 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 	private final class FieldPlainAccessor implements IAccessor {
 		@Override
-		public List<? extends IElement> getValues(Object theTarget) {
+		public List<IBase> getValues(Object theTarget) {
 			try {
 				Object values = myField.get(theTarget);
 				if (values == null) {
 					return Collections.emptyList();
 				}
-				List<? extends IElement> retVal = (List<? extends IElement>) Collections.singletonList((IElement)values);
+				List<IBase> retVal = Collections.singletonList((IBase)values);
 				return retVal;
 			} catch (IllegalArgumentException e) {
 				throw new ConfigurationException("Failed to get value", e);
@@ -237,10 +236,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final class FieldListAccessor implements IAccessor {
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<? extends IElement> getValues(Object theTarget) {
-			List<? extends IElement> retVal;
+		public List<IBase> getValues(Object theTarget) {
+			List<IBase> retVal;
 			try {
-				retVal = (List<? extends IElement>) myField.get(theTarget);
+				retVal = (List<IBase>) myField.get(theTarget);
 			} catch (IllegalArgumentException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalAccessException e) {
@@ -262,9 +261,9 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IElement> getValues(Object theTarget) {
+		public List<IBase> getValues(Object theTarget) {
 			try {
-				return (List<IElement>) myAccessorMethod.invoke(theTarget);
+				return (List<IBase>) myAccessorMethod.invoke(theTarget);
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {
@@ -284,8 +283,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
-			@SuppressWarnings("unchecked")
-			List<IBase> existingList = (List<IBase>) myAccessor.getValues(theTarget);
+			List<IBase> existingList = myAccessor.getValues(theTarget);
 			if (existingList == null) {
 				existingList = new ArrayList<IBase>();
 				try {
@@ -310,9 +308,9 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 
 		@Override
-		public List<IElement> getValues(Object theTarget) {
+		public List<IBase> getValues(Object theTarget) {
 			try {
-				return Collections.singletonList((IElement) myAccessorMethod.invoke(theTarget));
+				return Collections.singletonList((IBase)myAccessorMethod.invoke(theTarget));
 			} catch (IllegalAccessException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			} catch (IllegalArgumentException e) {

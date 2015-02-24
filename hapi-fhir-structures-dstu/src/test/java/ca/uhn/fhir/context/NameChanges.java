@@ -24,6 +24,9 @@ public class NameChanges {
 		List<String> changes = new ArrayList<String>();
 		
 		for (ClassInfo classInfo : names) {
+			if (classInfo.getName().endsWith(".BaseResource")) {
+				continue;
+			}
 			
 			RuntimeResourceDefinition def = ctx.getResourceDefinition((Class<? extends IResource>) Class.forName(classInfo.getName()));
 			for (RuntimeSearchParam nextParam : def.getSearchParams()) {

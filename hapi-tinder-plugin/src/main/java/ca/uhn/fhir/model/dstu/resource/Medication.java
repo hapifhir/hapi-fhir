@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Medication.code", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -257,9 +257,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Medication.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Medication.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Medication.name", description="", type="string"  )
@@ -268,9 +268,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Medication.name</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Medication.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -278,9 +278,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>manufacturer</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.manufacturer</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.manufacturer</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="manufacturer", path="Medication.manufacturer", description="", type="reference"  )
@@ -289,9 +289,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>manufacturer</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.manufacturer</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.manufacturer</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MANUFACTURER = new ReferenceClientParam(SP_MANUFACTURER);
@@ -305,9 +305,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>form</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.product.form</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.product.form</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="form", path="Medication.product.form", description="", type="token"  )
@@ -316,9 +316,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>form</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.product.form</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.product.form</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam FORM = new TokenClientParam(SP_FORM);
@@ -326,9 +326,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>ingredient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.product.ingredient.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.product.ingredient.item</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="ingredient", path="Medication.product.ingredient.item", description="", type="reference"  )
@@ -337,9 +337,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.product.ingredient.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.product.ingredient.item</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam INGREDIENT = new ReferenceClientParam(SP_INGREDIENT);
@@ -353,9 +353,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>container</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.package.container</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.package.container</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="container", path="Medication.package.container", description="", type="token"  )
@@ -364,9 +364,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>container</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Medication.package.container</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Medication.package.container</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CONTAINER = new TokenClientParam(SP_CONTAINER);
@@ -374,9 +374,9 @@ public class Medication
 	/**
 	 * Search parameter constant for <b>content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.package.content.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.package.content.item</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="content", path="Medication.package.content.item", description="", type="reference"  )
@@ -385,9 +385,9 @@ public class Medication
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Medication.package.content.item</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Medication.package.content.item</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam CONTENT = new ReferenceClientParam(SP_CONTENT);

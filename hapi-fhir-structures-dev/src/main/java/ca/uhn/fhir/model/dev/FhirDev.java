@@ -29,6 +29,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dev.composite.ContainedDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -85,6 +89,17 @@ public class FhirDev implements IFhirVersion {
 	@Override
 	public String getPathToSchemaDefinitions() {
 		return "ca/uhn/fhir/model/dev/schema";
+	}
+	
+	
+	@Override
+	public Class<? extends BaseResourceReferenceDt> getResourceReferenceType() {
+		return ResourceReferenceDt.class;
+	}
+
+	@Override
+	public Class<? extends BaseContainedDt> getContainedType() {
+		return ContainedDt.class;
 	}
 
 }

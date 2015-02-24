@@ -13,6 +13,7 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -20,13 +21,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu.resource.Binary;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -65,6 +69,120 @@ public class JsonParserTest {
 		//@formatter:on
 	}
 
+	@Test
+	public void testEncodeAndParseExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		ExtensionDt ext = new ExtensionDt();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
+		patient.addUndeclaredExtension(ext);
+
+		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
+		ExtensionDt child1 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
+		ExtensionDt child2 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value2"));
+		parent.addUndeclaredExtension(child2);
+		
+		ExtensionDt modExt = new ExtensionDt();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateDt("1995-01-02"));
+		modExt.setModifier(true);
+		patient.addUndeclaredExtension(modExt);
+
+		HumanNameDt name = patient.addName();
+		name.addFamily("Blah");
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
+		ExtensionDt ext2 = new ExtensionDt().setUrl("http://examples.com#givenext").setValue(new StringDt("given"));
+		given.addUndeclaredExtension(ext2);
+
+		StringDt given2 = name.addGiven();
+		given2.setValue("Shmoe");
+		ExtensionDt given2ext = new ExtensionDt().setUrl("http://examples.com#givenext_parent");
+		given2.addUndeclaredExtension(given2ext);
+		given2ext.addUndeclaredExtension(new ExtensionDt().setUrl("http://examples.com#givenext_child").setValue(new StringDt("CHILD")));
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(enc, Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", 
+				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}", 
+				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"
+				));
+		assertThat(enc, Matchers.stringContainsInOrder("\"modifierExtension\":[" + 
+				"{" + 
+				"\"url\":\"http://example.com/extensions#modext\"," + 
+				"\"valueDate\":\"1995-01-02\"" + 
+				"}" + 
+				"],"));
+		assertThat(enc, containsString("\"_given\":[" + 
+				"{" + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext\"," + 
+				"\"valueString\":\"given\"" + 
+				"}" + 
+				"]" + 
+				"}," + 
+				"{" + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext_parent\"," + 
+				"\"extension\":[" + 
+				"{" + 
+				"\"url\":\"http://examples.com#givenext_child\"," + 
+				"\"valueString\":\"CHILD\"" + 
+				"}" + 
+				"]" + 
+				"}" + 
+				"]" + 
+				"}"));
+		
+		/*
+		 * Now parse this back
+		 */
+		
+		Patient parsed =ourCtx.newJsonParser().parseResource(Patient.class, enc); 
+		ext = parsed.getUndeclaredExtensions().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeDt)ext.getValue()).getValueAsString());
+
+		parent = patient.getUndeclaredExtensions().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals( "http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringDt)child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals( "http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringDt)child2.getValue()).getValueAsString());
+
+		modExt = parsed.getUndeclaredModifierExtensions().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateDt)modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringDt)ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		ExtensionDt given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringDt)given2ext2.getValue()).getValue());
+
+	}
+
+	
+	
 	/**
 	 * #65
 	 */
@@ -77,7 +195,7 @@ public class JsonParserTest {
 	
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"http://123\":[{\"valueString\":\"HELLO\"}]}}"));
+		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
 		
 	}
 
@@ -94,14 +212,6 @@ public class JsonParserTest {
 			"   }],\n" + 
 			"   \"entry\" : [{\n" + 
 			"      \"base\" : \"http://foo/fhirBase2\",\n" +
-			"      \"search\" : {\n" +
-			"         \"mode\" : \"match\",\n" +
-			"         \"score\" : 0.123\n" +
-			"      },\n" +
-			"      \"transaction\" : {\n" +
-			"         \"operation\" : \"create\",\n" +
-			"         \"match\" : \"http://foo/Patient?identifier=value\"\n" +
-			"      },\n" +
 			"      \"resource\" : {\n" + 
 			"         \"resourceType\" : \"Patient\",\n" + 
 			"         \"id\" : \"1\",\n" + 
@@ -110,7 +220,15 @@ public class JsonParserTest {
 			"            \"lastUpdated\" : \"2001-02-22T11:22:33-05:00\"\n" +
 			"         },\n" + 
 			"         \"birthDate\" : \"2012-01-02\"\n" + 
-			"      }\n" + 
+			"      },\n" + 
+			"      \"search\" : {\n" +
+			"         \"mode\" : \"match\",\n" +
+			"         \"score\" : 0.123\n" +
+			"      },\n" +
+			"      \"transaction\" : {\n" +
+			"         \"operation\" : \"create\",\n" +
+			"         \"url\" : \"http://foo/Patient?identifier=value\"\n" +
+			"      }\n" +
 			"   }]\n" + 
 			"}";
 		//@formatter:on
@@ -201,93 +319,37 @@ public class JsonParserTest {
 		assertEquals(exp, act);
 
 	}
+
 	
 	@Test
-	public void testParseAndEncodeNewExtensionFormat() {
-		
-		//@formatter:off
-		String resource = "{\n" + 
-			"  \"resourceType\" : \"Patient\",\n" + 
-			"  \"http://acme.org/fhir/ExtensionDefinition/trial-status\" : [{\n" + 
-			"    \"code\" : [{ \"valueCode\" : \"unsure\" }],\n" + 
-			"    \"date\" : [{ \"valueDate\" : \"2009-03-14\" }], \n" + 
-			"    \"registrar\" : [{ \"valueReference\" : {\n" + 
-			"      \"reference\" : \"Practitioner/example\"\n" + 
-			"      }\n" + 
-			"    }]\n" + 
-			"  }],\n" +
-			"  \"modifier\" : { \n" + 
-			"    \"http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier\" : [{\n" + 
-			"      \"valueBoolean\" : true\n" + 
-			"      }]\n" + 
-			"  }," +
-			"  \"name\" : [{\n" + 
-			"      \"family\": [\n" + 
-			"        \"du\",\n" + 
-			"        \"Marché\"\n" + 
-			"      ],\n" + 
-			"      \"_family\": [\n" + 
-			"        {\n" + 
-			"          \"http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier\": [\n" + 
-			"            {\n" + 
-			"               \"valueCode\": \"VV\"\n" + 
-			"            }\n" + 
-			"          ]\n" + 
-			"        },\n" + 
-			"        null\n" + 
-			"      ],\n" + 
-			"      \"given\": [\n" + 
-			"        \"Bénédicte\"\n" + 
-			"      ]\n" + 
-			"    }],\n" +
-			"  \"gender\" : \"M\"\n" +
-			"}";
-		//@formatter:on
-		
-//		ourLog.info(resource);
-		
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, resource);
-		
-		// Modifier extension
-		assertEquals(1, parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").size());
-		assertTrue( parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).isModifier());
-		assertEquals(BooleanDt.class, parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).getValueAsPrimitive().getClass());
-		assertEquals("true", parsed.getUndeclaredExtensionsByUrl("http://example.org/fhir/ExtensionDefinition/some-kind-of-modifier").get(0).getValueAsPrimitive().getValueAsString());
-		
-		// Gender
-		assertEquals("M",parsed.getGender());
-		assertEquals(1, parsed.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/trial-status").size());
-		
-		// Trial status
-		ExtensionDt ext = parsed.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/trial-status").get(0);
-		assertNull(ext.getValue());
-		assertEquals(1, ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/code").size());
-		assertEquals(CodeDt.class, ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/code").get(0).getValue().getClass());
-		assertEquals("unsure", ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/code").get(0).getValueAsPrimitive().getValueAsString());
-		assertEquals(1, ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/date").size());
-		assertEquals(DateDt.class, ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/date").get(0).getValue().getClass());
-		assertEquals("2009-03-14", ext.getUndeclaredExtensionsByUrl("http://acme.org/fhir/ExtensionDefinition/date").get(0).getValueAsPrimitive().getValueAsString());
+	public void testParseAndEncodeBundleNewStyle() throws Exception {
+		String content = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/bundle-example.json"));
 
-		// Name
-		assertEquals(1, parsed.getName().size());
-		assertEquals(2, parsed.getName().get(0).getFamily().size());
-		assertEquals("du Marché", parsed.getName().get(0).getFamilyAsSingleString());
-		assertEquals(1, parsed.getName().get(0).getGiven().size());
-		assertEquals("Bénédicte", parsed.getName().get(0).getGivenAsSingleString());
-		
-		// Patient.name[0].family extensions
-		assertEquals(1, parsed.getNameFirstRep().getFamily().get(0).getUndeclaredExtensionsByUrl("http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier").size());
-		assertEquals(CodeDt.class, parsed.getNameFirstRep().getFamily().get(0).getUndeclaredExtensionsByUrl("http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier").get(0).getValueAsPrimitive().getClass());
-		assertEquals("VV", parsed.getNameFirstRep().getFamily().get(0).getUndeclaredExtensionsByUrl("http://hl7.org/fhir/ExtensionDefinition/iso21090-EN-qualifier").get(0).getValueAsPrimitive().getValueAsString());
-		
-		/*
-		 * Now re-encode
-		 */
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
-		ourLog.info(encoded);
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
+		assertEquals("1", parsed.getId().getVersionIdPart());
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType());
+		assertEquals(3, parsed.getTotal().intValue());
+		assertEquals("http://example.com/base", parsed.getBaseElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
-		JSON expected = JSONSerializer.toJSON(resource.trim());
-		JSON actual = JSONSerializer.toJSON(encoded.trim());
+		assertEquals(2, parsed.getEntry().size());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
 
 		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
 		String act = actual.toString().replace("\\r\\n", "\\n");
@@ -298,6 +360,8 @@ public class JsonParserTest {
 		assertEquals(exp, act);
 
 	}
+
+	
 	
 	@Test
 	public void testParseAndEncodeBundleWithDeletedEntry() {

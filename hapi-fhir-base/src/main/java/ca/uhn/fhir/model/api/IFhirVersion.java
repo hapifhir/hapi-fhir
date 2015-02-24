@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import java.io.InputStream;
 
+import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -38,10 +39,14 @@ public interface IFhirVersion {
 	
 	InputStream getFhirVersionPropertiesFile();
 	
-	IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
+	IBaseResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase);
 
 	IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer);
 
 	String getPathToSchemaDefinitions();
+
+	Class<? extends IBase> getResourceReferenceType();
+
+	Class<?> getContainedType();
 
 }

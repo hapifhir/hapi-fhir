@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 
+import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -20,10 +21,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.net.UrlEscapers;
+
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -50,7 +53,7 @@ public class ReadTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
 
@@ -60,7 +63,7 @@ public class ReadTest {
 		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 		assertNotNull(cl);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
-		
+
 		assertThat(responseContent, stringContainsInOrder("1", "\""));
 		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
 	}
@@ -72,7 +75,7 @@ public class ReadTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		IdentifierDt dt = ourCtx.newJsonParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
 
@@ -82,7 +85,7 @@ public class ReadTest {
 		Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 		assertNotNull(cl);
 		assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
-		
+
 		assertThat(responseContent, stringContainsInOrder("1", "\""));
 		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
 	}
@@ -156,6 +159,25 @@ public class ReadTest {
 		}
 	}
 
+	@Test
+	public void testReadWithEscapedCharsInId() throws Exception {
+		String id = "ABC!@#$%DEF";
+		String idEscaped = URLEncoder.encode(id, "UTF-8");
+
+		String vid = "GHI:/:/JKL";
+		String vidEscaped = URLEncoder.encode(vid, "UTF-8");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/" + idEscaped + "/_history/" + vidEscaped);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+		assertEquals(id, dt.getSystem().getValueAsString());
+		assertEquals(vid, dt.getValue().getValueAsString());
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -166,12 +188,12 @@ public class ReadTest {
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
-		DummyProvider patientProvider = new DummyProvider();
+		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
 		ourCtx = servlet.getFhirContext();
-		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider(), new OrganizationProviderWithAbstractReturnType());
+		servlet.setResourceProviders(patientProvider, new BinaryProvider(), new OrganizationProviderWithAbstractReturnType());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -187,7 +209,7 @@ public class ReadTest {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	public static class DummyProvider implements IResourceProvider {
+	public static class PatientProvider implements IResourceProvider {
 
 		@Read(version = true)
 		public Patient read(@IdParam IdDt theId) {
@@ -210,7 +232,7 @@ public class ReadTest {
 	public static class OrganizationProviderWithAbstractReturnType implements IResourceProvider {
 
 		@Read(version = true)
-		public BaseResource findPatient(@IdParam IdDt theId) {
+		public BaseResource findOrganization(@IdParam IdDt theId) {
 			Organization org = new Organization();
 			org.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
 			org.setId("Organization/1/_history/1");
@@ -227,7 +249,7 @@ public class ReadTest {
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
-	public static class DummyBinaryProvider implements IResourceProvider {
+	public static class BinaryProvider implements IResourceProvider {
 
 		@Read(version = true)
 		public Binary findPatient(@IdParam IdDt theId) {

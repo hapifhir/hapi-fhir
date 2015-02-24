@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -42,7 +43,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 	}
 
 	@Override
-	void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
 		
 		for (Class<? extends IBase> next : theClassToElementDefinitions.keySet()) {
@@ -61,7 +62,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 				}
 			}
 			
-			if (IResource.class.isAssignableFrom(next) || IDatatype.class.isAssignableFrom(next)) {
+			if (IResource.class.isAssignableFrom(next) || IDatatype.class.isAssignableFrom(next) || IBaseDatatype.class.isAssignableFrom(next)) {
 				choiceTypes.add(next);
 			}
 		}
@@ -83,7 +84,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 		
 		setChoiceTypes(choiceTypes);
 		
-		super.sealAndInitialize(theClassToElementDefinitions);
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 	}
 
 	

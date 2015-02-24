@@ -28,9 +28,12 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
-public interface IFhirSystemDao extends IDao {
+/**
+ *  @param <T> The bundle type
+ */
+public interface IFhirSystemDao<T> extends IDao {
 
-	List<IResource> transaction(List<IResource> theResources);
+	T transaction(T theResources);
 
 	IBundleProvider history(Date theDate);
 

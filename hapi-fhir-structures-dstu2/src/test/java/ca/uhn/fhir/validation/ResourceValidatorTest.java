@@ -27,7 +27,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 public class ResourceValidatorTest {
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorTest.class);
 
 	@SuppressWarnings("deprecation")

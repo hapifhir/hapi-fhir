@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Other
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Other.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Other.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Other.subject", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class Other
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Other.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Other.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class Other
 	/**
 	 * Search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Other.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Other.created</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="created", path="Other.created", description="", type="date"  )
@@ -274,9 +274,9 @@ public class Other
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>created</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Other.created</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Other.created</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam CREATED = new DateClientParam(SP_CREATED);
@@ -284,9 +284,9 @@ public class Other
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Other.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Other.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Other.code", description="", type="token"  )
@@ -295,9 +295,9 @@ public class Other
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Other.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Other.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -523,7 +523,7 @@ public class Other
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce.
+     * Identifies the patient, practitioner, device or any other resource that is the \&quot;focus\&quot; of this resoruce.
      * </p> 
 	 */
 	public ResourceReferenceDt getSubject() {  
@@ -541,7 +541,7 @@ public class Other
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce.
+     * Identifies the patient, practitioner, device or any other resource that is the \&quot;focus\&quot; of this resoruce.
      * </p> 
 	 */
 	public ResourceReferenceDt getSubjectElement() {  
@@ -557,7 +557,7 @@ public class Other
 	 *
      * <p>
      * <b>Definition:</b>
-     * Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resoruce.
+     * Identifies the patient, practitioner, device or any other resource that is the \&quot;focus\&quot; of this resoruce.
      * </p> 
 	 */
 	public Other setSubject(ResourceReferenceDt theValue) {

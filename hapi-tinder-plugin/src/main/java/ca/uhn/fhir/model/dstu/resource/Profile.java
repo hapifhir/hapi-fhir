@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.identifier</b><br/>
+	 * Description: <b>The identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Profile.identifier", description="The identifier of the profile", type="token"  )
@@ -247,9 +247,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.identifier</b><br/>
+	 * Description: <b>The identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.version</b><br/>
+	 * Description: <b>The version identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="Profile.version", description="The version identifier of the profile", type="token"  )
@@ -268,9 +268,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.version</b><br/>
+	 * Description: <b>The version identifier of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.version</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VERSION = new TokenClientParam(SP_VERSION);
@@ -278,9 +278,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.name</b><br/>
+	 * Description: <b>Name of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Profile.name", description="Name of the profile", type="string"  )
@@ -289,9 +289,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.name</b><br/>
+	 * Description: <b>Name of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -299,9 +299,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="Profile.publisher", description="Name of the publisher of the profile", type="string"  )
@@ -310,9 +310,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -320,9 +320,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.description</b><br/>
+	 * Description: <b>Text search in the description of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.description</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="Profile.description", description="Text search in the description of the profile", type="string"  )
@@ -331,9 +331,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the profile</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Profile.description</b><br/>
+	 * Description: <b>Text search in the description of the profile</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Profile.description</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -341,9 +341,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.status</b><br/>
+	 * Description: <b>The current status of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Profile.status", description="The current status of the profile", type="token"  )
@@ -352,9 +352,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.status</b><br/>
+	 * Description: <b>The current status of the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -362,9 +362,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The profile publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Profile.date</b><br/>
+	 * Description: <b>The profile publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Profile.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Profile.date", description="The profile publication date", type="date"  )
@@ -373,9 +373,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The profile publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Profile.date</b><br/>
+	 * Description: <b>The profile publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Profile.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -383,9 +383,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.code</b><br/>
+	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Profile.code", description="A code for the profile in the format uri::code (server may choose to do subsumption)", type="token"  )
@@ -394,9 +394,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.code</b><br/>
+	 * Description: <b>A code for the profile in the format uri::code (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -404,9 +404,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>extension</b>
 	 * <p>
-	 * Description: <b>An extension code (use or definition)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.extensionDefn.code</b><br/>
+	 * Description: <b>An extension code (use or definition)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.extensionDefn.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="extension", path="Profile.extensionDefn.code", description="An extension code (use or definition)", type="token"  )
@@ -415,9 +415,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>extension</b>
 	 * <p>
-	 * Description: <b>An extension code (use or definition)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.extensionDefn.code</b><br/>
+	 * Description: <b>An extension code (use or definition)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.extensionDefn.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EXTENSION = new TokenClientParam(SP_EXTENSION);
@@ -425,9 +425,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>valueset</b>
 	 * <p>
-	 * Description: <b>A vocabulary binding code</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
+	 * Description: <b>A vocabulary binding code</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="valueset", path="Profile.structure.element.definition.binding.reference[x]", description="A vocabulary binding code", type="reference"  )
@@ -436,9 +436,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>valueset</b>
 	 * <p>
-	 * Description: <b>A vocabulary binding code</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br/>
+	 * Description: <b>A vocabulary binding code</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Profile.structure.element.definition.binding.reference[x]</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam VALUESET = new ReferenceClientParam(SP_VALUESET);
@@ -452,9 +452,9 @@ public class Profile
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.structure.type</b><br/>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.structure.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Profile.structure.type", description="Type of resource that is constrained in the profile", type="token"  )
@@ -463,9 +463,9 @@ public class Profile
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>Type of resource that is constrained in the profile</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Profile.structure.type</b><br/>
+	 * Description: <b>Type of resource that is constrained in the profile</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Profile.structure.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -2597,7 +2597,7 @@ public class Profile
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \&quot;.\&quot;-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public StringDt getPath() {  
@@ -2615,7 +2615,7 @@ public class Profile
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \&quot;.\&quot;-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public StringDt getPathElement() {  
@@ -2631,7 +2631,7 @@ public class Profile
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \&quot;.\&quot;-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public StructureElement setPath(StringDt theValue) {
@@ -2644,7 +2644,7 @@ public class Profile
 	 *
      * <p>
      * <b>Definition:</b>
-     * The path identifies the element and is expressed as a \".\"-separated list of ancestor elements, beginning with the name of the resource
+     * The path identifies the element and is expressed as a \&quot;.\&quot;-separated list of ancestor elements, beginning with the name of the resource
      * </p> 
 	 */
 	public StructureElement setPath( String theString) {
@@ -2706,7 +2706,7 @@ public class Profile
 	 * Add a value for <b>representation</b> (How this element is represented in instances) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addRepresentation()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -4741,7 +4741,7 @@ public class Profile
 	 * Add a value for <b>aggregation</b> (contained | referenced | bundled - how aggregated) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addAggregation()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -6071,7 +6071,7 @@ public class Profile
 	 * Add a value for <b>target</b> (Types of resource (if a resource reference)) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addTarget()} method.
 	 *
      * <p>
      * <b>Definition:</b>

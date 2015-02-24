@@ -1,9 +1,6 @@
 package ca.uhn.fhir.to;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -94,8 +91,8 @@ public class Controller {
 	private TemplateEngine myTemplateEngine;
 
 	@RequestMapping(value = { "/about" })
-	public String actionAbout(final HomeRequest theRequest, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+	public String actionAbout(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		theModel.put("notHome", true);
 		theModel.put("extraBreadcrumb", "About");
@@ -106,11 +103,11 @@ public class Controller {
 	}
 
 	@RequestMapping(value = { "/conformance" })
-	public String actionConformance(final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+	public String actionConformance(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 		ResultType returnsResource = ResultType.RESOURCE;
 
 		long start = System.currentTimeMillis();
@@ -137,10 +134,10 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/delete" })
 	public String actionDelete(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -175,10 +172,10 @@ public class Controller {
 
 	@RequestMapping(value = { "/get-tags" })
 	public String actionGetTags(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		Class<? extends IResource> resType = null;
 		ResultType returnsResource = ResultType.TAGLIST;
@@ -238,17 +235,17 @@ public class Controller {
 
 	@RequestMapping(value = { "/", "/home" })
 	public String actionHome(HttpServletRequest theServletRequest, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theServletRequest, theRequest, theModel);
 		ourLog.info(theServletRequest.toString());
 		return "home";
 	}
 
 	@RequestMapping(value = { "/page" })
 	public String actionPage(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		String url = defaultString(theReq.getParameter("page-url"));
 		if (!url.startsWith(theModel.get("base").toString())) {
@@ -279,10 +276,10 @@ public class Controller {
 
 	@RequestMapping(value = { "/read" })
 	public String actionRead(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		RuntimeResourceDefinition def;
 		try {
@@ -323,11 +320,11 @@ public class Controller {
 	}
 
 	@RequestMapping({ "/resource" })
-	public String actionResource(final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		IResource conformance = addCommonParams(theRequest, theModel);
+	public String actionResource(HttpServletRequest theServletRequest, final ResourceRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		IResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(null, getContext(theRequest), myConfig, interceptor);
 
 		String resourceName = theRequest.getResource();
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
@@ -447,7 +444,7 @@ public class Controller {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = { "/search" })
 	public String actionSearch(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
 		JsonGenerator clientCodeJsonWriter = Json.createGenerator(clientCodeJsonStringWriter);
@@ -456,7 +453,7 @@ public class Controller {
 		clientCodeJsonWriter.write("base", (String) theModel.get("base"));
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		IUntypedQuery search = client.search();
 		IQuery query;
@@ -548,11 +545,11 @@ public class Controller {
 	}
 
 	@RequestMapping(value = { "/transaction" })
-	public String actionTransaction(final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
-		addCommonParams(theRequest, theModel);
+	public String actionTransaction(HttpServletRequest theServletRequest, final TransactionRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		String body = preProcessMessageBody(theRequest.getTransactionBody());
 
@@ -599,13 +596,13 @@ public class Controller {
 		return "result";
 	}
 
-	private IResource addCommonParams(final HomeRequest theRequest, final ModelMap theModel) {
+	private IResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		if (myConfig.getDebugTemplatesMode()) {
 			myTemplateEngine.getCacheManager().clearAllCaches();
 		}
 
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
-		final String serverBase = theRequest.getServerBase(myConfig);
+		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);
 		theModel.put("serverId", serverId);
 		theModel.put("base", serverBase);
@@ -615,7 +612,7 @@ public class Controller {
 		theModel.put("pretty", theRequest.getPretty());
 		theModel.put("serverEntries", myConfig.getIdToServerName());
 
-		return loadAndAddConf(theRequest, theModel);
+		return loadAndAddConf(theServletRequest, theRequest, theModel);
 	}
 
 	private Header[] applyHeaderFilters(Header[] theAllHeaders) {
@@ -634,10 +631,10 @@ public class Controller {
 	private void doActionCreateOrValidate(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod) {
 		boolean validate = "validate".equals(theMethod);
 
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
@@ -716,10 +713,10 @@ public class Controller {
 	}
 
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
-		addCommonParams(theRequest, theModel);
+		addCommonParams(theReq, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
 
 		String id = null;
 		Class<? extends IResource> type = null; // def.getImplementingClass();
@@ -1009,20 +1006,20 @@ public class Controller {
 		return true;
 	}
 
-	private IResource loadAndAddConf(final HomeRequest theRequest, final ModelMap theModel) {
+	private IResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		switch (theRequest.getFhirVersion(myConfig)) {
 		case DEV:
-			return loadAndAddConfDev(theRequest, theModel);
+			return loadAndAddConfDev(theServletRequest, theRequest, theModel);
 		case DSTU1:
-			return loadAndAddConfDstu1(theRequest, theModel);
+			return loadAndAddConfDstu1(theServletRequest, theRequest, theModel);
 		case DSTU2:
-			return loadAndAddConfDev(theRequest, theModel);
+			return loadAndAddConfDev(theServletRequest, theRequest, theModel);
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
 
-	private Conformance loadAndAddConfDstu1(final HomeRequest theRequest, final ModelMap theModel) {
-		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(myConfig));
+	private Conformance loadAndAddConfDstu1(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(theServletRequest, myConfig));
 
 		Conformance conformance;
 		try {
@@ -1080,8 +1077,8 @@ public class Controller {
 		return conformance;
 	}
 
-	private IResource loadAndAddConfDev(final HomeRequest theRequest, final ModelMap theModel) {
-		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(myConfig));
+	private IResource loadAndAddConfDev(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(theServletRequest, myConfig));
 
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {

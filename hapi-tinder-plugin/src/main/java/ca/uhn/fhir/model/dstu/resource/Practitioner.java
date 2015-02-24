@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>A practitioner's Identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Practitioner.identifier</b><br/>
+	 * Description: <b>A practitioner's Identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Practitioner.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token"  )
@@ -247,9 +247,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>A practitioner's Identifier</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Practitioner.identifier</b><br/>
+	 * Description: <b>A practitioner's Identifier</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Practitioner.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -257,9 +257,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of either family or given name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of either family or given name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string"  )
@@ -268,9 +268,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of either family or given name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of either family or given name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -278,9 +278,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>family</b>
 	 * <p>
-	 * Description: <b>A portion of the family name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of the family name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string"  )
@@ -289,9 +289,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>family</b>
 	 * <p>
-	 * Description: <b>A portion of the family name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of the family name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam FAMILY = new StringClientParam(SP_FAMILY);
@@ -299,9 +299,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>given</b>
 	 * <p>
-	 * Description: <b>A portion of the given name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of the given name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name", type="string"  )
@@ -310,9 +310,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>given</b>
 	 * <p>
-	 * Description: <b>A portion of the given name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of the given name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam GIVEN = new StringClientParam(SP_GIVEN);
@@ -320,9 +320,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string"  )
@@ -331,9 +331,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.name</b><br/>
+	 * Description: <b>A portion of either family or given name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
@@ -341,9 +341,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>telecom</b>
 	 * <p>
-	 * Description: <b>The value in any kind of contact</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.telecom</b><br/>
+	 * Description: <b>The value in any kind of contact</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.telecom</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="string"  )
@@ -352,9 +352,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>telecom</b>
 	 * <p>
-	 * Description: <b>The value in any kind of contact</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.telecom</b><br/>
+	 * Description: <b>The value in any kind of contact</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.telecom</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam TELECOM = new StringClientParam(SP_TELECOM);
@@ -362,9 +362,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>An address in any kind of address/part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.address</b><br/>
+	 * Description: <b>An address in any kind of address/part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.address</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string"  )
@@ -373,9 +373,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>address</b>
 	 * <p>
-	 * Description: <b>An address in any kind of address/part</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Practitioner.address</b><br/>
+	 * Description: <b>An address in any kind of address/part</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Practitioner.address</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam ADDRESS = new StringClientParam(SP_ADDRESS);
@@ -383,9 +383,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>gender</b>
 	 * <p>
-	 * Description: <b>Gender of the practitioner</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Practitioner.gender</b><br/>
+	 * Description: <b>Gender of the practitioner</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Practitioner.gender</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token"  )
@@ -394,9 +394,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>gender</b>
 	 * <p>
-	 * Description: <b>Gender of the practitioner</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Practitioner.gender</b><br/>
+	 * Description: <b>Gender of the practitioner</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Practitioner.gender</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam GENDER = new TokenClientParam(SP_GENDER);
@@ -404,9 +404,9 @@ public class Practitioner
 	/**
 	 * Search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Practitioner.organization</b><br/>
+	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Practitioner.organization</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="organization", path="Practitioner.organization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference"  )
@@ -415,9 +415,9 @@ public class Practitioner
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>organization</b>
 	 * <p>
-	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Practitioner.organization</b><br/>
+	 * Description: <b>The identity of the organization the practitioner represents / acts on behalf of</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Practitioner.organization</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ORGANIZATION = new ReferenceClientParam(SP_ORGANIZATION);
@@ -1191,7 +1191,7 @@ public class Practitioner
 	 * Add a value for <b>role</b> (Roles which this practitioner may perform) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addRole()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1302,7 +1302,7 @@ public class Practitioner
 	 * Add a value for <b>specialty</b> (Specific specialty of the practitioner) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addSpecialty()} method.
 	 *
      * <p>
      * <b>Definition:</b>

@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -55,6 +55,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -66,10 +67,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -91,6 +92,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
@@ -385,8 +387,8 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement if one has been explicitly defined.
 	 * <p>
-	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
-	 * to use the appropriate one for the given FHIR version.
+	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or
+	 * set to <code>null</code> to use the appropriate one for the given FHIR version.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -539,7 +541,7 @@ public class RestfulServer extends HttpServlet {
 				if (nextString.startsWith("_")) {
 					operation = nextString;
 				} else {
-					id = new IdDt(resourceName, nextString);
+					id = new IdDt(resourceName, UrlUtil.unescape(nextString));
 				}
 			}
 
@@ -551,7 +553,7 @@ public class RestfulServer extends HttpServlet {
 						if (id == null) {
 							throw new InvalidRequestException("Don't know how to handle request path: " + requestPath);
 						}
-						id = new IdDt(resourceName + "/" + id.getIdPart() + "/_history/" + versionString);
+						id = new IdDt(resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 					} else {
 						operation = Constants.PARAM_HISTORY;
 					}
@@ -769,7 +771,7 @@ public class RestfulServer extends HttpServlet {
 				Map<String, IResourceProvider> typeToProvider = new HashMap<String, IResourceProvider>();
 				for (IResourceProvider nextProvider : resourceProvider) {
 
-					Class<? extends IResource> resourceType = nextProvider.getResourceType();
+					Class<? extends IBaseResource> resourceType = nextProvider.getResourceType();
 					if (resourceType == null) {
 						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
 					}
@@ -797,7 +799,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			findResourceMethods(getServerProfilesProvider());
-			
+
 			Object confProvider = getServerConformanceProvider();
 			if (confProvider == null) {
 				confProvider = myFhirContext.getVersion().createServerConformanceProvider(this);
@@ -984,8 +986,8 @@ public class RestfulServer extends HttpServlet {
 	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
 	 * (metadata) statement.
 	 * <p>
-	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be changed, or set to <code>null</code>
-	 * if you do not wish to export a conformance statement.
+	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can
+	 * be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
 	 *
@@ -1148,13 +1150,13 @@ public class RestfulServer extends HttpServlet {
 
 		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
-		
+
 		for (IResource next : theResult) {
 			if (next.getId().isEmpty() == false) {
 				addedResourceIds.add(next.getId());
 			}
 		}
-			
+
 		for (IResource next : theResult) {
 
 			Set<String> containedIds = new HashSet<String>();
@@ -1174,11 +1176,11 @@ public class RestfulServer extends HttpServlet {
 				ourLog.trace("No narrative generator specified");
 			}
 
-			List<ResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, ResourceReferenceDt.class);
+			List<BaseResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
-				for (ResourceReferenceDt nextRef : references) {
+				for (BaseResourceReferenceDt nextRef : references) {
 					IResource nextRes = nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
@@ -1203,9 +1205,9 @@ public class RestfulServer extends HttpServlet {
 				}
 
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<ResourceReferenceDt>();
+				references = new ArrayList<BaseResourceReferenceDt>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<ResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, ResourceReferenceDt.class);
+					List<BaseResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
 					references.addAll(newReferences);
 				}
 
@@ -1214,7 +1216,7 @@ public class RestfulServer extends HttpServlet {
 			} while (references.isEmpty() == false);
 
 			bundle.addResource(next, theContext, theServerBase);
-			
+
 		}
 
 		/*
@@ -1446,8 +1448,8 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		if (theResource instanceof Binary) {
-			Binary bin = (Binary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			if (isNotBlank(bin.getContentType())) {
 				theHttpResponse.setContentType(bin.getContentType());
 			} else {
@@ -1534,9 +1536,12 @@ public class RestfulServer extends HttpServlet {
 	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path
 	 * implementation
 	 *
-	 * @param requestFullPath the full request path
-	 * @param servletContextPath the servelet context path
-	 * @param servletPath the servelet path
+	 * @param requestFullPath
+	 *            the full request path
+	 * @param servletContextPath
+	 *            the servelet context path
+	 * @param servletPath
+	 *            the servelet path
 	 * @return created resource path
 	 */
 	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {

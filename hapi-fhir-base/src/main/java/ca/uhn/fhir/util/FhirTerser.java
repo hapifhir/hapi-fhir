@@ -40,8 +40,8 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.dstu.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -73,7 +73,7 @@ public class FhirTerser {
 	 * </p>
 	 * <p>
 	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not decend into linked resources (e.g.
-	 * {@link ResourceReferenceDt#getResource()})
+	 * {@link BaseResourceReferenceDt#getResource()})
 	 * </p>
 	 * 
 	 * @param theResource
@@ -196,7 +196,7 @@ public class FhirTerser {
 			// These are primitive types
 			break;
 		case RESOURCE_REF:
-			ResourceReferenceDt resRefDt = (ResourceReferenceDt) theElement;
+			BaseResourceReferenceDt resRefDt = (BaseResourceReferenceDt) theElement;
 			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
 				IResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
@@ -232,7 +232,8 @@ public class FhirTerser {
 							b.append(childDef.getName());
 							b.append(" - Valid types: ");
 							for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext();) {
-								b.append(nextChild.getChildByName(iter.next()).getImplementingClass().getSimpleName());
+								BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
+								b.append(childByName.getImplementingClass().getSimpleName());
 								if (iter.hasNext()) {
 									b.append(", ");
 								}
@@ -246,7 +247,7 @@ public class FhirTerser {
 			break;
 		}
 		case CONTAINED_RESOURCES: {
-			ContainedDt value = (ContainedDt) theElement;
+			BaseContainedDt value = (BaseContainedDt) theElement;
 			for (IResource next : value.getContainedResources()) {
 				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
 				visit(next, null, def, theCallback);
@@ -268,7 +269,7 @@ public class FhirTerser {
 	 * @param theVisitor
 	 *            The visitor
 	 */
-	public void visit(IResource theResource, IModelVisitor theVisitor) {
+	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 		visit(theResource, null, def, theVisitor);
 	}

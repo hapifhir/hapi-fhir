@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -38,7 +39,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 	private RuntimeResourceDefinition myBaseDefinition;
 	private Map<String, RuntimeSearchParam> myNameToSearchParam = new LinkedHashMap<String, RuntimeSearchParam>();
-	private IResource myProfileDef;
+	private IBaseResource myProfileDef;
 	private String myResourceProfile;
 	private List<RuntimeSearchParam> mySearchParams;
 	private FhirContext myContext;
@@ -57,7 +58,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		
 		try {
 			IBaseResource instance = theClass.newInstance();
-			myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();
+			if (instance instanceof IAnyResource) {
+				myStructureVersion = FhirVersionEnum.DSTU2_HL7ORG;
+			} else {
+				myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();
+			}
 		} catch (Exception e) {
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}
@@ -127,8 +132,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Override
-	public void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		super.sealAndInitialize(theClassToElementDefinitions);
+	public void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		super.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myNameToSearchParam = Collections.unmodifiableMap(myNameToSearchParam);
 
@@ -152,25 +157,29 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	@Deprecated
-	public synchronized IResource toProfile() {
+	public synchronized IBaseResource toProfile() {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this, null);
+		IBaseResource retVal = myContext.getVersion().generateProfile(this, null);
 		myProfileDef = retVal;
 
 		return retVal;
 	}
 
-	public synchronized IResource toProfile(String theServerBase) {
+	public synchronized IBaseResource toProfile(String theServerBase) {
 		if (myProfileDef != null) {
 			return myProfileDef;
 		}
 
-		IResource retVal = myContext.getVersion().generateProfile(this, theServerBase);
+		IBaseResource retVal = myContext.getVersion().generateProfile(this, theServerBase);
 		myProfileDef = retVal;
 
 		return retVal;
+	}
+
+	public boolean isBundle() {
+		return "Bundle".equals(getName());
 	}
 }

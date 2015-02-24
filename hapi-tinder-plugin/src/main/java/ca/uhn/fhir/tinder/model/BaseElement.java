@@ -91,7 +91,7 @@ public abstract class BaseElement {
 		return toStringConstant(myDefinition);
 	}
 
-	private String toStringConstant(String theDefinition) {
+	static String toStringConstant(String theDefinition) {
 		if (theDefinition == null) {
 			return "";
 		}

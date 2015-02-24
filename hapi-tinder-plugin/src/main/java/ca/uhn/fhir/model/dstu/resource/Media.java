@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Media.type", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>subtype</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.subtype</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.subtype</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subtype", path="Media.subtype", description="", type="token"  )
@@ -268,9 +268,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subtype</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.subtype</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.subtype</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SUBTYPE = new TokenClientParam(SP_SUBTYPE);
@@ -278,9 +278,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Media.identifier", description="", type="token"  )
@@ -289,9 +289,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -299,9 +299,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Media.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Media.dateTime</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Media.dateTime", description="", type="date"  )
@@ -310,9 +310,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Media.dateTime</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Media.dateTime</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -320,9 +320,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Media.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Media.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Media.subject", description="", type="reference"  )
@@ -331,9 +331,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Media.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Media.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -347,9 +347,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>operator</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Media.operator</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Media.operator</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="operator", path="Media.operator", description="", type="reference"  )
@@ -358,9 +358,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>operator</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Media.operator</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Media.operator</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam OPERATOR = new ReferenceClientParam(SP_OPERATOR);
@@ -374,9 +374,9 @@ public class Media
 	/**
 	 * Search parameter constant for <b>view</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.view</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.view</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="view", path="Media.view", description="", type="token"  )
@@ -385,9 +385,9 @@ public class Media
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>view</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Media.view</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Media.view</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VIEW = new TokenClientParam(SP_VIEW);
@@ -1141,7 +1141,7 @@ public class Media
 
  
 	/**
-	 * Gets the value(s) for <b>frames</b> (Number of frames if > 1 (photo)).
+	 * Gets the value(s) for <b>frames</b> (Number of frames if &gt; 1 (photo)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1159,7 +1159,7 @@ public class Media
 
 
 	/**
-	 * Gets the value(s) for <b>frames</b> (Number of frames if > 1 (photo)).
+	 * Gets the value(s) for <b>frames</b> (Number of frames if &gt; 1 (photo)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1177,7 +1177,7 @@ public class Media
 
 
 	/**
-	 * Sets the value(s) for <b>frames</b> (Number of frames if > 1 (photo))
+	 * Sets the value(s) for <b>frames</b> (Number of frames if &gt; 1 (photo))
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1190,7 +1190,7 @@ public class Media
 	}
 
  	/**
-	 * Sets the value for <b>frames</b> (Number of frames if > 1 (photo))
+	 * Sets the value for <b>frames</b> (Number of frames if &gt; 1 (photo))
 	 *
      * <p>
      * <b>Definition:</b>

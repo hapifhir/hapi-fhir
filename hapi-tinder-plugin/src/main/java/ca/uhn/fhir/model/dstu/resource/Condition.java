@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>Code for the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.code</b><br/>
+	 * Description: <b>Code for the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token"  )
@@ -247,9 +247,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>Code for the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.code</b><br/>
+	 * Description: <b>Code for the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -257,9 +257,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.status</b><br/>
+	 * Description: <b>The status of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition", type="token"  )
@@ -268,9 +268,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The status of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.status</b><br/>
+	 * Description: <b>The status of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -278,9 +278,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>severity</b>
 	 * <p>
-	 * Description: <b>The severity of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.severity</b><br/>
+	 * Description: <b>The severity of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.severity</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token"  )
@@ -289,9 +289,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>severity</b>
 	 * <p>
-	 * Description: <b>The severity of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.severity</b><br/>
+	 * Description: <b>The severity of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.severity</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SEVERITY = new TokenClientParam(SP_SEVERITY);
@@ -299,9 +299,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>category</b>
 	 * <p>
-	 * Description: <b>The category of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.category</b><br/>
+	 * Description: <b>The category of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.category</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token"  )
@@ -310,9 +310,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>category</b>
 	 * <p>
-	 * Description: <b>The category of the condition</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.category</b><br/>
+	 * Description: <b>The category of the condition</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.category</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CATEGORY = new TokenClientParam(SP_CATEGORY);
@@ -320,9 +320,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>onset</b>
 	 * <p>
-	 * Description: <b>When the Condition started (if started on a date)</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Condition.onset[x]</b><br/>
+	 * Description: <b>When the Condition started (if started on a date)</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Condition.onset[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="onset", path="Condition.onset[x]", description="When the Condition started (if started on a date)", type="date"  )
@@ -331,9 +331,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>onset</b>
 	 * <p>
-	 * Description: <b>When the Condition started (if started on a date)</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Condition.onset[x]</b><br/>
+	 * Description: <b>When the Condition started (if started on a date)</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Condition.onset[x]</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam ONSET = new DateClientParam(SP_ONSET);
@@ -341,9 +341,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Condition.subject", description="", type="reference"  )
@@ -352,9 +352,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -368,9 +368,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.encounter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.encounter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="encounter", path="Condition.encounter", description="", type="reference"  )
@@ -379,9 +379,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.encounter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.encounter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ENCOUNTER = new ReferenceClientParam(SP_ENCOUNTER);
@@ -395,9 +395,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>asserter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.asserter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.asserter</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="asserter", path="Condition.asserter", description="", type="reference"  )
@@ -406,9 +406,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>asserter</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.asserter</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.asserter</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ASSERTER = new ReferenceClientParam(SP_ASSERTER);
@@ -422,9 +422,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>date-asserted</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Condition.dateAsserted</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Condition.dateAsserted</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="", type="date"  )
@@ -433,9 +433,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date-asserted</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Condition.dateAsserted</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Condition.dateAsserted</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE_ASSERTED = new DateClientParam(SP_DATE_ASSERTED);
@@ -443,9 +443,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>evidence</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.evidence.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.evidence.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="", type="token"  )
@@ -454,9 +454,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>evidence</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.evidence.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.evidence.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EVIDENCE = new TokenClientParam(SP_EVIDENCE);
@@ -464,9 +464,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.location.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.location.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="location", path="Condition.location.code", description="", type="token"  )
@@ -475,9 +475,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>location</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.location.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.location.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam LOCATION = new TokenClientParam(SP_LOCATION);
@@ -485,9 +485,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>related-item</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.relatedItem.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.relatedItem.target</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="related-item", path="Condition.relatedItem.target", description="", type="reference"  )
@@ -496,9 +496,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>related-item</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Condition.relatedItem.target</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Condition.relatedItem.target</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam RELATED_ITEM = new ReferenceClientParam(SP_RELATED_ITEM);
@@ -512,9 +512,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>stage</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.stage.summary</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.stage.summary</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="stage", path="Condition.stage.summary", description="", type="token"  )
@@ -523,9 +523,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>stage</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.stage.summary</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.stage.summary</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STAGE = new TokenClientParam(SP_STAGE);
@@ -533,9 +533,9 @@ public class Condition
 	/**
 	 * Search parameter constant for <b>related-code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.relatedItem.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.relatedItem.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="related-code", path="Condition.relatedItem.code", description="", type="token"  )
@@ -544,9 +544,9 @@ public class Condition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>related-code</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Condition.relatedItem.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Condition.relatedItem.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam RELATED_CODE = new TokenClientParam(SP_RELATED_CODE);
@@ -1342,7 +1342,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.
+     * The date or estimated date that the condition resolved or went into remission. This is called \&quot;abatement\&quot; because of the many overloaded connotations associated with \&quot;remission\&quot; or \&quot;resolution\&quot; - Conditions are never really resolved, but they can abate.
      * </p> 
 	 */
 	public IDatatype getAbatement() {  
@@ -1357,7 +1357,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.
+     * The date or estimated date that the condition resolved or went into remission. This is called \&quot;abatement\&quot; because of the many overloaded connotations associated with \&quot;remission\&quot; or \&quot;resolution\&quot; - Conditions are never really resolved, but they can abate.
      * </p> 
 	 */
 	public IDatatype getAbatementElement() {  
@@ -1370,7 +1370,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.
+     * The date or estimated date that the condition resolved or went into remission. This is called \&quot;abatement\&quot; because of the many overloaded connotations associated with \&quot;remission\&quot; or \&quot;resolution\&quot; - Conditions are never really resolved, but they can abate.
      * </p> 
 	 */
 	public Condition setAbatement(IDatatype theValue) {
@@ -1774,7 +1774,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific
+     * A simple summary of the stage such as \&quot;Stage 3\&quot;. The determination of the stage is disease-specific
      * </p> 
 	 */
 	public CodeableConceptDt getSummary() {  
@@ -1792,7 +1792,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific
+     * A simple summary of the stage such as \&quot;Stage 3\&quot;. The determination of the stage is disease-specific
      * </p> 
 	 */
 	public CodeableConceptDt getSummaryElement() {  
@@ -1808,7 +1808,7 @@ public class Condition
 	 *
      * <p>
      * <b>Definition:</b>
-     * A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific
+     * A simple summary of the stage such as \&quot;Stage 3\&quot;. The determination of the stage is disease-specific
      * </p> 
 	 */
 	public Stage setSummary(CodeableConceptDt theValue) {

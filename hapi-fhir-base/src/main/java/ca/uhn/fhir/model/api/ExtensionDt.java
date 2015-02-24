@@ -24,13 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 @DatatypeDef(name="Extension") 
-public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype {
+public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt> {
 
 	private boolean myModifier;
 	
@@ -38,7 +40,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	private StringDt myUrl;
 
 	@Child(name="value", type=IDatatype.class, order=1, min=0, max=1)	
-	private IElement myValue;
+	private IBaseDatatype myValue;
 	
 	public ExtensionDt() {
 	}
@@ -54,7 +56,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		myUrl = new StringDt(theUrl);
 	}
 
-	public ExtensionDt(boolean theIsModifier, String theUrl, IDatatype theValue) {
+	public ExtensionDt(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
 		Validate.notEmpty(theUrl, "URL must be populated");
 		Validate.notNull(theValue, "Value must not be null");
 
@@ -63,15 +65,25 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		myValue=theValue;
 	}
 
-	public StringDt getUrl() {
-		if (myUrl==null) {
-			myUrl=new StringDt();
-		}
-		return myUrl;
+	/**
+	 * Returns the URL for this extension. 
+	 * <p>
+	 * Note that before HAPI 0.9 this method returned a {@link StringDt} but as of
+	 * HAPI 0.9 this method returns a plain string. This was changed because it does not make sense to use a StringDt here
+	 * since the URL itself can not contain extensions and it was therefore misleading.
+	 * </p> 
+	 */
+	public String getUrl() {
+		return myUrl != null ? myUrl.getValue() : null;
 	}
 
+	/**
+	 * Retained for backward compatibility
+	 * 
+	 * @see ExtensionDt#getUrl()
+	 */
 	public String getUrlAsString() {
-		return getUrl().getValue();
+		return getUrl();
 	}
 
 	/**
@@ -81,7 +93,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	 * {@link #getUndeclaredModifierExtensions()} to retrieve the child extensions.
 	 * </p>
 	 */
-	public IElement getValue() {
+	public IBaseDatatype getValue() {
 		return myValue;
 	}
 
@@ -117,7 +129,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	}
 
 	public ExtensionDt setUrl(String theUrl) {
-		myUrl = new StringDt(theUrl);
+		myUrl = theUrl != null ? new StringDt(theUrl) : myUrl;
 		return this;
 	}
 
@@ -126,13 +138,19 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 		return this;
 	}
 
-	public void setValue(IElement theValue) {
+	public ExtensionDt setValue(IBaseDatatype theValue) {
 		myValue = theValue;
+		return this;
 	}
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return new ArrayList<T>();
+	}
+
+	@Override
+	public List<ExtensionDt> getExtension() {
+		return getAllUndeclaredExtensions();
 	}
 
 }

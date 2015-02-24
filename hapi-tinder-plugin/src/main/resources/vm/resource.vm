@@ -39,9 +39,12 @@ import ${import};
 #end
  */
 @ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
-public class ${className} 
-    extends #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} BaseResource #{end} 
-    implements IResource {
+public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseResource
+    implements #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} IResource #{end}
+#if ( ${className} == "Bundle" )
+    , org.hl7.fhir.instance.model.api.IBaseBundle
+#end
+    {
 
 #foreach ( $param in $searchParams )
 	/**

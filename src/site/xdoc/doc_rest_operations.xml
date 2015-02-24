@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-
+	
 	<properties>
 		<title>RESTful Operations - HAPI FHIR</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
 	<body>
-
 		<section name="Implementing Resource Provider Operations">
 
+		    <!-- 
 			<p>
 				Jump To...
 			</p>
@@ -45,15 +45,17 @@
 				implementations, but client methods will follow the same patterns.
 			</p>
 
-			<a name="operations" />
+		-->
 		</section>
-
+		
 		<section name="Operations">
+			<a name="operations" />
 			<p>
 				The following table lists the operations supported by
 				HAPI FHIR RESTful Servers and Clients.
 			</p>
 
+<!-- 
 			<table>
 				<thead>
 					<tr style="font-weight: bold; font-size: 1.2em;">
@@ -181,6 +183,7 @@
 
 				</tbody>
 			</table>
+-->
 
 			<a name="instance_read" />
 		</section>
@@ -280,10 +283,10 @@
 				annotation. This parameter contains the resource instance to be created.
 			</p>
 			<p>
-				In addition, the method must have a parameter annotated with the
+				In addition, the method may optionally have a parameter annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/IdParam.html">@IdParam</a>
-				annotation, and optionally may have a parameter annotated with the
-				<a href="./apidocs/ca/uhn/fhir/rest/annotation/VersionIdParam.html">@VersionIdParam</a>
+				annotation, or they may obtain the ID of the resource being updated from
+				the resource itself. Either way, this ID comes from the URL passed in.
 			</p>
 			<p>
 				Update methods must return an object of type
@@ -316,6 +319,27 @@
 				<param name="id" value="updateClient" />
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
+			
+			<h4>Conditional Updates</h4>
+			<p>
+				If you wish to suport conditional updates, you can add a parameter
+				tagged with a 
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html">@ConditionalOperationParam</a>
+				annotation. If the request URL contains search parameters instead of a
+				resource ID, then this parameter will be populated. 
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="updateConditional" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to invoke this method (this would be invoked using an HTTP PUT,
+				with the resource in the PUT body):
+				<br />
+				<code>http://fhir.example.com/Patient?identifier=system%7C00001</code>
+			</p>
 
 			<a name="instance_delete" />
 		</section>
@@ -372,6 +396,26 @@
 				Example URL to invoke this method (HTTP DELETE):
 				<br />
 				<code>http://fhir.example.com/Patient/111</code>
+			</p>
+
+			<h4>Conditional Deletes</h4>
+			
+			<p>
+				The FHIR specification also allows "conditional deletes". A conditional
+				delete uses a search style URL instead of a read style URL, and
+				deletes a single resource if it matches the given search parameters.
+				The following example shows how to 
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="deleteConditional" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL to perform a conditional delete (HTTP DELETE):
+				<br />
+				<code>http://fhir.example.com/Patient?identifier=system%7C0001</code>
 			</p>
 
 			<a name="type_create" />
@@ -584,10 +628,7 @@
 				<p>
 					FHIR allows for multiple parameters with the same key, and interprets
 					these as being an "AND" set. So, for example, a range of
-					<br />
-					<code>DATE &gt;= 2011-01-01</code>
-					and
-					<code>DATE &lt; 2011-02-01</code>
+					<code>date=&gt;=2011-01-01&amp;date=&lt;2011-02-01</code>
 					<br />
 					can be interpreted as any date within January 2011.
 				</p>

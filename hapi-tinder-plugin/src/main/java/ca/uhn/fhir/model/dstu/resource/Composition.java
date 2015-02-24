@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Composition.type", description="", type="token"  )
@@ -247,9 +247,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.type</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.class</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.class</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="class", path="Composition.class", description="", type="token"  )
@@ -268,9 +268,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>class</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.class</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.class</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CLASS = new TokenClientParam(SP_CLASS);
@@ -278,9 +278,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Composition.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Composition.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="Composition.date", description="", type="date"  )
@@ -289,9 +289,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>Composition.date</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>Composition.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -299,9 +299,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="Composition.subject", description="", type="reference"  )
@@ -310,9 +310,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.subject</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -326,9 +326,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.author</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="author", path="Composition.author", description="", type="reference"  )
@@ -337,9 +337,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>author</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.author</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.author</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam AUTHOR = new ReferenceClientParam(SP_AUTHOR);
@@ -353,9 +353,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>attester</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.attester.party</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.attester.party</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="attester", path="Composition.attester.party", description="", type="reference"  )
@@ -364,9 +364,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>attester</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.attester.party</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.attester.party</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ATTESTER = new ReferenceClientParam(SP_ATTESTER);
@@ -380,9 +380,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>context</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.event.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.event.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="context", path="Composition.event.code", description="", type="token"  )
@@ -391,9 +391,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>context</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.event.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.event.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CONTEXT = new TokenClientParam(SP_CONTEXT);
@@ -401,9 +401,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>section-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.section.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.section.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="section-type", path="Composition.section.code", description="", type="token"  )
@@ -412,9 +412,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>section-type</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.section.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.section.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SECTION_TYPE = new TokenClientParam(SP_SECTION_TYPE);
@@ -422,9 +422,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>section-content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.section.content</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.section.content</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="section-content", path="Composition.section.content", description="", type="reference"  )
@@ -433,9 +433,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>section-content</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Composition.section.content</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Composition.section.content</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SECTION_CONTENT = new ReferenceClientParam(SP_SECTION_CONTENT);
@@ -449,9 +449,9 @@ public class Composition
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Composition.identifier", description="", type="token"  )
@@ -460,9 +460,9 @@ public class Composition
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Composition.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Composition.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -1528,7 +1528,7 @@ public class Composition
 	 * Add a value for <b>mode</b> (personal | professional | legal | official) using an enumerated type. This
 	 * is intended as a convenience method for situations where the FHIR defined ValueSets are mandatory
 	 * or contain the desirable codes. If you wish to use codes other than those which are built-in, 
-	 * you may also use the {@link #addType()} method.
+	 * you may also use the {@link #addMode()} method.
 	 *
      * <p>
      * <b>Definition:</b>
@@ -1768,7 +1768,7 @@ public class Composition
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act.
      * </p> 
 	 */
 	public java.util.List<CodeableConceptDt> getCode() {  
@@ -1786,7 +1786,7 @@ public class Composition
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act.
      * </p> 
 	 */
 	public java.util.List<CodeableConceptDt> getCodeElement() {  
@@ -1802,7 +1802,7 @@ public class Composition
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act.
      * </p> 
 	 */
 	public Event setCode(java.util.List<CodeableConceptDt> theValue) {
@@ -1815,7 +1815,7 @@ public class Composition
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act.
      * </p> 
 	 */
 	public CodeableConceptDt addCode() {
@@ -1830,7 +1830,7 @@ public class Composition
 	 *
      * <p>
      * <b>Definition:</b>
-     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \"History and Physical Report\" in which the procedure being documented is necessarily a \"History and Physical\" act.
+     * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a \&quot;History and Physical Report\&quot; in which the procedure being documented is necessarily a \&quot;History and Physical\&quot; act.
      * </p> 
 	 */
 	public CodeableConceptDt getCodeFirstRep() {

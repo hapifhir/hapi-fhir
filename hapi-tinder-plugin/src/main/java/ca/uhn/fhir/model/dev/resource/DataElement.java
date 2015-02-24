@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.BaseResource;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -37,11 +36,11 @@ import ca.uhn.fhir.model.dev.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dev.composite.CodingDt;
 import ca.uhn.fhir.model.dev.composite.ContactPointDt;
 import ca.uhn.fhir.model.dev.composite.IdentifierDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.valueset.BindingConformanceEnum;
 import ca.uhn.fhir.model.dev.valueset.DataElementGranularityEnum;
 import ca.uhn.fhir.model.dev.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dev.valueset.ResourceDataElementStatusEnum;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
@@ -74,16 +73,16 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * </p>
  *
  */
-@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/profiles/DataElement")
+@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/profiles/DataElement", id="dataelement")
 public class DataElement 
     extends  BaseResource     implements IResource {
 
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the data element</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.identifier</b><br/>
+	 * Description: <b>The identifier of the data element</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token"  )
@@ -92,9 +91,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>The identifier of the data element</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.identifier</b><br/>
+	 * Description: <b>The identifier of the data element</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -102,9 +101,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.version</b><br/>
+	 * Description: <b>The version identifier of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.version</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string"  )
@@ -113,9 +112,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>version</b>
 	 * <p>
-	 * Description: <b>The version identifier of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.version</b><br/>
+	 * Description: <b>The version identifier of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.version</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam VERSION = new StringClientParam(SP_VERSION);
@@ -123,9 +122,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.name</b><br/>
+	 * Description: <b>Name of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string"  )
@@ -134,9 +133,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>Name of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.name</b><br/>
+	 * Description: <b>Name of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -144,9 +143,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.publisher</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string"  )
@@ -155,9 +154,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
 	 * <p>
-	 * Description: <b>Name of the publisher of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.publisher</b><br/>
+	 * Description: <b>Name of the publisher of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.publisher</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PUBLISHER = new StringClientParam(SP_PUBLISHER);
@@ -165,9 +164,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.definition</b><br/>
+	 * Description: <b>Text search in the description of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.definition</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="description", path="DataElement.definition", description="Text search in the description of the data element", type="string"  )
@@ -176,9 +175,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>description</b>
 	 * <p>
-	 * Description: <b>Text search in the description of the data element</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>DataElement.definition</b><br/>
+	 * Description: <b>Text search in the description of the data element</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>DataElement.definition</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam DESCRIPTION = new StringClientParam(SP_DESCRIPTION);
@@ -186,9 +185,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the data element</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.status</b><br/>
+	 * Description: <b>The current status of the data element</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.status</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token"  )
@@ -197,9 +196,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>status</b>
 	 * <p>
-	 * Description: <b>The current status of the data element</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.status</b><br/>
+	 * Description: <b>The current status of the data element</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.status</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam STATUS = new TokenClientParam(SP_STATUS);
@@ -207,9 +206,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The data element publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DataElement.date</b><br/>
+	 * Description: <b>The data element publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DataElement.date</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date"  )
@@ -218,9 +217,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b>The data element publication date</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>DataElement.date</b><br/>
+	 * Description: <b>The data element publication date</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>DataElement.date</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -228,9 +227,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the data element (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.code</b><br/>
+	 * Description: <b>A code for the data element (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="DataElement.code", description="A code for the data element (server may choose to do subsumption)", type="token"  )
@@ -239,9 +238,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>A code for the data element (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.code</b><br/>
+	 * Description: <b>A code for the data element (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -249,9 +248,9 @@ public class DataElement
 	/**
 	 * Search parameter constant for <b>category</b>
 	 * <p>
-	 * Description: <b>A category assigned to the data element (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.category</b><br/>
+	 * Description: <b>A category assigned to the data element (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.category</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="category", path="DataElement.category", description="A category assigned to the data element (server may choose to do subsumption)", type="token"  )
@@ -260,9 +259,9 @@ public class DataElement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>category</b>
 	 * <p>
-	 * Description: <b>A category assigned to the data element (server may choose to do subsumption)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>DataElement.category</b><br/>
+	 * Description: <b>A category assigned to the data element (server may choose to do subsumption)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>DataElement.category</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CATEGORY = new TokenClientParam(SP_CATEGORY);
@@ -2107,7 +2106,7 @@ public class DataElement
      * A URI that identifies the specification that this mapping is expressed to
      * </p> 
 	 */
-	public URI getUri() {  
+	public String getUri() {  
 		return getUriElement().getValue();
 	}
 

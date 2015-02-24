@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Sat, Feb 7, 2015 18:18+0000 for FHIR v0.4.0 
+  Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.4.0">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
@@ -351,6 +351,7 @@
       <xs:element ref="Specimen"/>
       <xs:element ref="StatusRequest"/>
       <xs:element ref="StatusResponse"/>
+      <xs:element ref="StructureDefinition"/>
       <xs:element ref="Subscription"/>
       <xs:element ref="Substance"/>
       <xs:element ref="Supply"/>
@@ -358,6 +359,7 @@
       <xs:element ref="ValueSet"/>
       <xs:element ref="VisionClaim"/>
       <xs:element ref="VisionPrescription"/>
+      <xs:element ref="Parameters"/>
     </xs:choice>
   </xs:complexType>
   <xs:complexType name="Extension">
@@ -2301,7 +2303,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
   </xs:complexType>
   <xs:complexType name="DomainResource">
     <xs:annotation>
-      <xs:documentation></xs:documentation>
+      <xs:documentation>A resource that includes narrative, extensions, and contained resources.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="Resource">
@@ -2329,6 +2331,41 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ExtensionContext-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="resource">
+        <xs:annotation>
+          <xs:documentation>The context is all elements matching a particular resource element path.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="datatype">
+        <xs:annotation>
+          <xs:documentation>The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mapping">
+        <xs:annotation>
+          <xs:documentation>The context is all nodes whose mapping to a specified reference model corresponds to a particular mapping structure.  The context identifies the mapping target. The mapping should clearly identify where such an extension could be used.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extension">
+        <xs:annotation>
+          <xs:documentation>The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ExtensionContext">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="ExtensionContext-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
   </xs:complexType>
   <xs:simpleType name="DataAbsentReason-list">
     <xs:restriction base="xs:string">
@@ -2447,7 +2484,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The value is no longer available</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="nil known">
+      <xs:enumeration value="nil-known">
         <xs:annotation>
           <xs:documentation>The are no known applicable values in this context</xs:documentation>
         </xs:annotation>
@@ -2717,7 +2754,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The Patient is present for the encounter, however is not currently meeting with a practitioner.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="in progress">
+      <xs:enumeration value="in-progress">
         <xs:annotation>
           <xs:documentation>The Encounter has begun and the patient is present / the practitioner and the patient are meeting.</xs:documentation>
         </xs:annotation>
@@ -2912,7 +2949,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="not in">
+      <xs:enumeration value="not-in">
         <xs:annotation>
           <xs:documentation>The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
         </xs:annotation>
@@ -2942,7 +2979,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This reference has been superseded by another reference.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>This reference was created in error.</xs:documentation>
         </xs:annotation>
@@ -3727,6 +3764,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="StructureDefinition">
+        <xs:annotation>
+          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
           <xs:documentation>Todo.</xs:documentation>
@@ -4372,6 +4414,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="StructureDefinition">
+        <xs:annotation>
+          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
           <xs:documentation>Todo.</xs:documentation>
@@ -4442,7 +4489,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The composition or document has been modified subsequent to being released as &quot;final&quot;, and is complete and verified by an authorized person.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="entered in error">
+      <xs:enumeration value="entered-in-error">
         <xs:annotation>
           <xs:documentation>The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.</xs:documentation>
         </xs:annotation>

@@ -34,15 +34,14 @@ public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContent
 	}
 
 	public HttpPutClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
-		super(theContext,theContents, theIsBundle, theUrlExtension);
+		super(theContext, theContents, theIsBundle, theUrlExtension);
 	}
 
 	@Override
-	protected HttpRequestBase createRequest(String url, AbstractHttpEntity theEntity) {
-		HttpPut retVal = new HttpPut(url);
+	protected HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity) {
+		HttpPut retVal = new HttpPut(theUrl.toString());
 		retVal.setEntity(theEntity);
 		return retVal;
 	}
-
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.dev;
  * #%L
  * HAPI FHIR Structures - DEV (FHIR Latest)
  * %%
- * Copyright (C) 2014 University Health Network
+ * Copyright (C) 2014 - 2015 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,28 @@ package ca.uhn.fhir.model.dev;
 import java.io.InputStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dev.composite.ContainedDt;
+import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
-import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class FhirDev implements IFhirVersion {
 
 	private String myId;
 
-	@Override
-	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
-		return new ServerConformanceProvider(theServer);
-	}
 
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
@@ -62,10 +61,6 @@ public class FhirDev implements IFhirVersion {
 		return retVal;
 	}
 
-	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
-	}
 
 	@Override
 	public FhirVersionEnum getVersion() {
@@ -79,7 +74,7 @@ public class FhirDev implements IFhirVersion {
 			str = FhirDev.class.getResourceAsStream("ca/uhn/fhir/model/dev/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dev/fhirversion.properties");
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dev/model.properties");
 		}
 		return str;
 	}
@@ -88,6 +83,30 @@ public class FhirDev implements IFhirVersion {
 	public String getPathToSchemaDefinitions() {
 		return "ca/uhn/fhir/model/dev/schema";
 	}
+	
+	
+	@Override
+	public Class<? extends BaseResourceReferenceDt> getResourceReferenceType() {
+		return ResourceReferenceDt.class;
+	}
+
+	@Override
+	public Class<? extends BaseContainedDt> getContainedType() {
+		return ContainedDt.class;
+	}
+
+
+	@Override
+	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
+		throw new UnsupportedOperationException();
+	}
+
+
+	@Override
+	public IServerConformanceProvider<? extends IBaseResource> createServerConformanceProvider(RestfulServer theRestfulServer) {
+		throw new UnsupportedOperationException();
+	}
+
 
 
 }

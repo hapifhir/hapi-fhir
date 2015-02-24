@@ -9,22 +9,23 @@ import ca.uhn.fhir.validation.FhirValidator;
 
 public class ValidatorTest {
 
-   @Test
-   public void testValidator() {
-      
-      FhirContext ctx = new FhirContext();
-      FhirValidator val = ctx.newValidator();
-      
-      // Phloc is not onthe classpath
-      assertTrue(val.isValidateAgainstStandardSchema());
-      assertFalse(val.isValidateAgainstStandardSchematron());
+	@Test
+	public void testValidator() {
 
-      try { val.setValidateAgainstStandardSchematron(true);
-      fail();
-      } catch (IllegalArgumentException e) {
-         assertEquals("Phloc-schematron library not found on classpath, can not enable perform schematron validation", e.getMessage());
-      }
-      
-   }
-   
+		FhirContext ctx = new FhirContext();
+		FhirValidator val = ctx.newValidator();
+
+		// Phloc is not onthe classpath
+		assertTrue(val.isValidateAgainstStandardSchema());
+		assertFalse(val.isValidateAgainstStandardSchematron());
+
+		try {
+			val.setValidateAgainstStandardSchematron(true);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Phloc-schematron library not found on classpath, can not enable perform schematron validation", e.getMessage());
+		}
+
+	}
+
 }

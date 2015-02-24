@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="CarePlan.patient", description="", type="reference"  )
@@ -247,9 +247,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.patient</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -263,9 +263,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>condition</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.concern</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.concern</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="condition", path="CarePlan.concern", description="", type="reference"  )
@@ -274,9 +274,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>condition</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.concern</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.concern</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam CONDITION = new ReferenceClientParam(SP_CONDITION);
@@ -290,9 +290,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>CarePlan.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>CarePlan.period</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="date", path="CarePlan.period", description="", type="date"  )
@@ -301,9 +301,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>date</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>CarePlan.period</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>CarePlan.period</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam DATE = new DateClientParam(SP_DATE);
@@ -311,9 +311,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>participant</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.participant.member</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.participant.member</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="", type="reference"  )
@@ -322,9 +322,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>participant</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.participant.member</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.participant.member</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PARTICIPANT = new ReferenceClientParam(SP_PARTICIPANT);
@@ -338,9 +338,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>activitycode</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>CarePlan.activity.simple.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>CarePlan.activity.simple.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="activitycode", path="CarePlan.activity.simple.code", description="", type="token"  )
@@ -349,9 +349,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>activitycode</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>CarePlan.activity.simple.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>CarePlan.activity.simple.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ACTIVITYCODE = new TokenClientParam(SP_ACTIVITYCODE);
@@ -359,9 +359,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>activitydate</b>
 	 * <p>
-	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
+	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="activitydate", path="CarePlan.activity.simple.timing[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date"  )
@@ -370,9 +370,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>activitydate</b>
 	 * <p>
-	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br/>
+	 * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>CarePlan.activity.simple.timing[x]</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam ACTIVITYDATE = new DateClientParam(SP_ACTIVITYDATE);
@@ -380,9 +380,9 @@ public class CarePlan
 	/**
 	 * Search parameter constant for <b>activitydetail</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.activity.detail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.activity.detail</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="activitydetail", path="CarePlan.activity.detail", description="", type="reference"  )
@@ -391,9 +391,9 @@ public class CarePlan
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>activitydetail</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>CarePlan.activity.detail</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>CarePlan.activity.detail</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam ACTIVITYDETAIL = new ReferenceClientParam(SP_ACTIVITYDETAIL);
@@ -1250,7 +1250,7 @@ public class CarePlan
 	 *
      * <p>
      * <b>Definition:</b>
-     * Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.
+     * Indicates specific responsibility of an individual within the care plan.  E.g. \&quot;Primary physician\&quot;, \&quot;Team coordinator\&quot;, \&quot;Caregiver\&quot;, etc.
      * </p> 
 	 */
 	public CodeableConceptDt getRole() {  
@@ -1268,7 +1268,7 @@ public class CarePlan
 	 *
      * <p>
      * <b>Definition:</b>
-     * Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.
+     * Indicates specific responsibility of an individual within the care plan.  E.g. \&quot;Primary physician\&quot;, \&quot;Team coordinator\&quot;, \&quot;Caregiver\&quot;, etc.
      * </p> 
 	 */
 	public CodeableConceptDt getRoleElement() {  
@@ -1284,7 +1284,7 @@ public class CarePlan
 	 *
      * <p>
      * <b>Definition:</b>
-     * Indicates specific responsibility of an individual within the care plan.  E.g. \"Primary physician\", \"Team coordinator\", \"Caregiver\", etc.
+     * Indicates specific responsibility of an individual within the care plan.  E.g. \&quot;Primary physician\&quot;, \&quot;Team coordinator\&quot;, \&quot;Caregiver\&quot;, etc.
      * </p> 
 	 */
 	public Participant setRole(CodeableConceptDt theValue) {

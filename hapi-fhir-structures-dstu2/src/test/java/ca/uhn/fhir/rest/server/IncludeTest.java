@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
@@ -472,23 +472,6 @@ public class IncludeTest {
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
 		}
-
-	}
-
-	public static void main(String[] args) {
-
-		Organization org = new Organization();
-		org.setId("Organization/65546");
-		org.getNameElement().setValue("Contained Test Organization");
-
-		Patient patient = new Patient();
-		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-		patient.getManagingOrganization().setResource(patient);
-
-		System.out.println(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
-
-		patient.getManagingOrganization().getReference();
 
 	}
 

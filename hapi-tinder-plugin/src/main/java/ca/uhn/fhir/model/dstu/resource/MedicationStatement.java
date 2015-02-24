@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class MedicationStatement
 	/**
 	 * Search parameter constant for <b>device</b>
 	 * <p>
-	 * Description: <b>Return administrations with this administration device identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.device</b><br/>
+	 * Description: <b>Return administrations with this administration device identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.device</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="device", path="MedicationStatement.device", description="Return administrations with this administration device identity", type="reference"  )
@@ -247,9 +247,9 @@ public class MedicationStatement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>device</b>
 	 * <p>
-	 * Description: <b>Return administrations with this administration device identity</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.device</b><br/>
+	 * Description: <b>Return administrations with this administration device identity</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.device</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam DEVICE = new ReferenceClientParam(SP_DEVICE);
@@ -263,9 +263,9 @@ public class MedicationStatement
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return administrations with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationStatement.identifier</b><br/>
+	 * Description: <b>Return administrations with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationStatement.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return administrations with this external identity", type="token"  )
@@ -274,9 +274,9 @@ public class MedicationStatement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Return administrations with this external identity</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>MedicationStatement.identifier</b><br/>
+	 * Description: <b>Return administrations with this external identity</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>MedicationStatement.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -284,9 +284,9 @@ public class MedicationStatement
 	/**
 	 * Search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Code for medicine or text in medicine name</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.medication</b><br/>
+	 * Description: <b>Code for medicine or text in medicine name</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.medication</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference"  )
@@ -295,9 +295,9 @@ public class MedicationStatement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>medication</b>
 	 * <p>
-	 * Description: <b>Code for medicine or text in medicine name</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.medication</b><br/>
+	 * Description: <b>Code for medicine or text in medicine name</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.medication</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MEDICATION = new ReferenceClientParam(SP_MEDICATION);
@@ -311,9 +311,9 @@ public class MedicationStatement
 	/**
 	 * Search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.patient</b><br/>
+	 * Description: <b>The identity of a patient to list administrations  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.patient</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list administrations  for", type="reference"  )
@@ -322,9 +322,9 @@ public class MedicationStatement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>patient</b>
 	 * <p>
-	 * Description: <b>The identity of a patient to list administrations  for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>MedicationStatement.patient</b><br/>
+	 * Description: <b>The identity of a patient to list administrations  for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>MedicationStatement.patient</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PATIENT = new ReferenceClientParam(SP_PATIENT);
@@ -338,9 +338,9 @@ public class MedicationStatement
 	/**
 	 * Search parameter constant for <b>when-given</b>
 	 * <p>
-	 * Description: <b>Date of administration</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationStatement.whenGiven</b><br/>
+	 * Description: <b>Date of administration</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationStatement.whenGiven</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="when-given", path="MedicationStatement.whenGiven", description="Date of administration", type="date"  )
@@ -349,9 +349,9 @@ public class MedicationStatement
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>when-given</b>
 	 * <p>
-	 * Description: <b>Date of administration</b><br/>
-	 * Type: <b>date</b><br/>
-	 * Path: <b>MedicationStatement.whenGiven</b><br/>
+	 * Description: <b>Date of administration</b><br>
+	 * Type: <b>date</b><br>
+	 * Path: <b>MedicationStatement.whenGiven</b><br>
 	 * </p>
 	 */
 	public static final DateClientParam WHEN_GIVEN = new DateClientParam(SP_WHEN_GIVEN);
@@ -1063,7 +1063,7 @@ public class MedicationStatement
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public ScheduleDt getTiming() {  
@@ -1081,7 +1081,7 @@ public class MedicationStatement
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public ScheduleDt getTimingElement() {  
@@ -1097,7 +1097,7 @@ public class MedicationStatement
 	 *
      * <p>
      * <b>Definition:</b>
-     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \"Every  8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\";  \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"
+     * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  \&quot;Every  8 hours\&quot;; \&quot;Three times a day\&quot;; \&quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:\&quot;;  \&quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\&quot;
      * </p> 
 	 */
 	public Dosage setTiming(ScheduleDt theValue) {
@@ -1107,7 +1107,7 @@ public class MedicationStatement
 
   
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1122,7 +1122,7 @@ public class MedicationStatement
 
 
 	/**
-	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x)).
+	 * Gets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x)).
 	 * creating it if it does
 	 * not exist. Will not return <code>null</code>.
 	 *
@@ -1137,7 +1137,7 @@ public class MedicationStatement
 
 
 	/**
-	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \"as needed\" f(or x))
+	 * Sets the value(s) for <b>asNeeded[x]</b> (Take \&quot;as needed\&quot; f(or x))
 	 *
      * <p>
      * <b>Definition:</b>

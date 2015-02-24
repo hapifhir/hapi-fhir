@@ -308,9 +308,6 @@
 				<directory>${basedir}/src/main/resources</directory>
 			</resource>
 			<resource>
-				<directory>${basedir}/target/generated-sources/tinder</directory>
-			</resource>
-			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>
 			</resource>
 		</resources>

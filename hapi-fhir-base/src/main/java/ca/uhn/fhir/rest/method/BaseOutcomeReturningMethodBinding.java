@@ -273,11 +273,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		BufferedReader requestReader = theRequest.getServletRequest().getReader();
 		
 		Class<? extends IBaseResource> wantedResourceType = requestContainsResourceType();
+		IResource retVal;
 		if (wantedResourceType != null) {
-			return (IResource) parser.parseResource(wantedResourceType, requestReader);
+			retVal = (IResource) parser.parseResource(wantedResourceType, requestReader);
 		} else {
-			return parser.parseResource(requestReader);
+			retVal = parser.parseResource(requestReader);
 		}
+		
+		retVal.setId(theRequest.getId());
+		
+		return retVal;
 	}
 
 	protected abstract Set<RequestType> provideAllowableRequestTypes();

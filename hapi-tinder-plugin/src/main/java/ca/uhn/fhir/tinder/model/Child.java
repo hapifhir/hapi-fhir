@@ -129,6 +129,11 @@ public abstract class Child extends BaseElement {
 		// } else {
 		// retVal = (elemName + getTypeSuffix());
 		// }
+		
+		if (retVal.equals("ResourceDt")) {
+			retVal = "IResource";
+		}
+		
 		return retVal;
 	}
 

@@ -30,9 +30,7 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.resource.Binary;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
@@ -44,7 +42,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private int myResourceParameterIndex;
 	private String myResourceName;
 	private boolean myBinary;
-	private Class<? extends IResource> myResourceType;
+	private Class<? extends IBaseResource> myResourceType;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -59,13 +57,13 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 				}
 				
 				resourceParameter = (ResourceParameter) next;
-				Class<? extends IResource> providerResourceType = resourceParameter.getResourceType();
+				Class<? extends IBaseResource> providerResourceType = resourceParameter.getResourceType();
 
 				if (theProvider instanceof IResourceProvider) {
 					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (providerResourceType.isAssignableFrom(Binary.class)) {
+				if (BaseBinary.class.isAssignableFrom(providerResourceType)) {
 					myBinary = true;
 				}
 
@@ -97,7 +95,12 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		if (myBinary) {
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
-			return new Binary(ct, contents);
+			
+			BaseBinary binary = (BaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+			binary.setContentType(ct);
+			binary.setContent(contents);
+			
+			return binary;
 		} else {
 			return super.parseIncomingServerResource(theRequest);
 		}

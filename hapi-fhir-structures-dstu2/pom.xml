@@ -204,7 +204,7 @@
 						<!--<baseResourceName>assessmentdefinition</baseResourceName>-->
 						<baseResourceName>basic</baseResourceName>
 						<!--<baseResourceName>binary</baseResourceName>-->
-						<!--<baseResourceName>bundle</baseResourceName>-->
+						<baseResourceName>bundle</baseResourceName>
 						<!--<baseResourceName>careactivity</baseResourceName>-->
 						<baseResourceName>careplan</baseResourceName>
 						<baseResourceName>careplan2</baseResourceName>
@@ -371,9 +371,6 @@
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}/target/generated-sources/tinder</directory>
 			</resource>
 			<resource>
 				<directory>${basedir}/target/generated-resources/tinder</directory>

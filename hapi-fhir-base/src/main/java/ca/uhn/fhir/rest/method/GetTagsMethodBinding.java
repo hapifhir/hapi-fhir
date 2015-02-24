@@ -24,10 +24,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -51,7 +54,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 
-	private Class<? extends IResource> myType;
+	private Class<? extends IBaseResource> myType;
 	private Integer myIdParamIndex;
 	private Integer myVersionIdParamIndex;
 	private String myResourceName;
@@ -65,7 +68,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			myType = theAnnotation.type();
 		}
 		
-		if (!IResource.class.equals(myType)) {
+		if (!Modifier.isInterface(myType.getModifiers())) {
 			myResourceName = theConetxt.getResourceDefinition(myType).getName();
 		}
 

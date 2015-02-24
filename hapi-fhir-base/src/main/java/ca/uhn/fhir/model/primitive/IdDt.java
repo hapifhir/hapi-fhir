@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -51,7 +51,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * </p>
  */
 @DatatypeDef(name = "id")
-public class IdDt implements IPrimitiveDatatype<String> {
+public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -110,6 +110,18 @@ public class IdDt implements IPrimitiveDatatype<String> {
 	 *            The ID (e.g. "123")
 	 */
 	public IdDt(String theResourceType, BigDecimal theIdPart) {
+		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theResourceType
+	 *            The resource type (e.g. "Patient")
+	 * @param theIdPart
+	 *            The ID (e.g. "123")
+	 */
+	public IdDt(String theResourceType, Long theIdPart) {
 		this(theResourceType, toPlainStringWithNpeThrowIfNeeded(theIdPart));
 	}
 
@@ -515,6 +527,13 @@ public class IdDt implements IPrimitiveDatatype<String> {
 		return theIdPart.toPlainString();
 	}
 
+	private static String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
+		if (theIdPart == null) {
+			throw new NullPointerException("Long ID can not be null");
+		}
+		return theIdPart.toString();
+	}
+
 	@Override
 	public boolean isEmpty() {
 		return isBlank(getValue());
@@ -525,8 +544,8 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			((IResource) theResouce).setId(new IdDt(getValue()));
-		} else if (theResouce instanceof Resource) {
-			((Resource) theResouce).setId(getIdPart());
+		} else if (theResouce instanceof IAnyResource) {
+			((IAnyResource) theResouce).setId(getIdPart());
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
@@ -540,7 +559,7 @@ public class IdDt implements IPrimitiveDatatype<String> {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			return ((IResource) theResouce).getId();
-		} else if (theResouce instanceof Resource) {
+		} else if (theResouce instanceof IAnyResource) {
 			// TODO: implement
 			throw new UnsupportedOperationException();
 		} else {

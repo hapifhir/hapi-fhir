@@ -18,13 +18,15 @@ package ca.uhn.fhir.model.dev.composite;
 
 import java.net.URI;
 import java.math.BigDecimal;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.base.composite.*;
-
 import ca.uhn.fhir.model.dev.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dev.valueset.AggregationModeEnum;
 import ca.uhn.fhir.model.dev.valueset.BindingConformanceEnum;
@@ -45,7 +47,6 @@ import ca.uhn.fhir.model.dev.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dev.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.dev.resource.ValueSet;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
@@ -181,7 +182,7 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public URI getSystem() {  
+	public String getSystem() {  
 		return getSystemElement().getValue();
 	}
 

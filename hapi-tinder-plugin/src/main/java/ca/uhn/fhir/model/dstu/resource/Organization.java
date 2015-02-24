@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Organization.name</b><br/>
+	 * Description: <b>A portion of the organization's name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Organization.name</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string"  )
@@ -247,9 +247,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>name</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>Organization.name</b><br/>
+	 * Description: <b>A portion of the organization's name</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>Organization.name</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam NAME = new StringClientParam(SP_NAME);
@@ -257,9 +257,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string"  )
@@ -268,9 +268,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>phonetic</b>
 	 * <p>
-	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b></b><br/>
+	 * Description: <b>A portion of the organization's name using some kind of phonetic matching algorithm</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b></b><br>
 	 * </p>
 	 */
 	public static final StringClientParam PHONETIC = new StringClientParam(SP_PHONETIC);
@@ -278,9 +278,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of organization</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.type</b><br/>
+	 * Description: <b>A code for the type of organization</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token"  )
@@ -289,9 +289,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>A code for the type of organization</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.type</b><br/>
+	 * Description: <b>A code for the type of organization</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -299,9 +299,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.identifier</b><br/>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token"  )
@@ -310,9 +310,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.identifier</b><br/>
+	 * Description: <b>Any identifier for the organization (not the accreditation issuer's identifier)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -320,9 +320,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Organization.partOf</b><br/>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Organization.partOf</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference"  )
@@ -331,9 +331,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>partof</b>
 	 * <p>
-	 * Description: <b>Search all organizations that are part of the given organization</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Organization.partOf</b><br/>
+	 * Description: <b>Search all organizations that are part of the given organization</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Organization.partOf</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam PARTOF = new ReferenceClientParam(SP_PARTOF);
@@ -347,9 +347,9 @@ public class Organization
 	/**
 	 * Search parameter constant for <b>active</b>
 	 * <p>
-	 * Description: <b>Whether the organization's record is active</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.active</b><br/>
+	 * Description: <b>Whether the organization's record is active</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.active</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token"  )
@@ -358,9 +358,9 @@ public class Organization
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>active</b>
 	 * <p>
-	 * Description: <b>Whether the organization's record is active</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Organization.active</b><br/>
+	 * Description: <b>Whether the organization's record is active</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Organization.active</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ACTIVE = new TokenClientParam(SP_ACTIVE);

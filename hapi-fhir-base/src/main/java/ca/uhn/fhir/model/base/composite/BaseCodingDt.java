@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 
@@ -53,6 +54,20 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 * </p>
 	 */
 	public abstract UriDt getSystemElement();
+
+	/**
+	 * Gets the value(s) for <b>display</b> (Representation defined by the system).
+	 * creating it if it does
+	 * not exist. Will not return <code>null</code>.
+	 *
+     * <p>
+     * <b>Definition:</b>
+     * A representation of the meaning of the code in the system, following the rules of the system.
+     * </p> 
+	 */
+	public abstract StringDt getDisplayElement();  
+	
+	public abstract BaseCodingDt setDisplay( String theString);
 
 	/**
 	 * {@inheritDoc}

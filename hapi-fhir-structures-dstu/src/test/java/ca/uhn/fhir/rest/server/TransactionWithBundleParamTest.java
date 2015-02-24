@@ -62,17 +62,17 @@ public class TransactionWithBundleParamTest {
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntry entry = b.addEntry();
-		entry.getId().setValue("1");
+		p1.getId().setValue("1");
 		entry.setResource(p1);
 
 		Patient p2 = new Patient();
 		p2.addName().addFamily("Family2");
 		entry = b.addEntry();
-		entry.getId().setValue("2");
+		p2.getId().setValue("2");
 		entry.setResource(p2);
 		
 		BundleEntry deletedEntry = b.addEntry();
-		deletedEntry.setId(new IdDt("Patient/3"));
+		deletedEntry.setDeletedResourceId(new IdDt("Patient/3"));
 		deletedEntry.setDeleted(nowInstant);
 		
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
@@ -92,17 +92,17 @@ public class TransactionWithBundleParamTest {
 		assertEquals(3, bundle.size());
 
 		BundleEntry entry0 = bundle.getEntries().get(0);
-		assertEquals("http://localhost:" + ourPort + "/Patient/81", entry0.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/81/_history/91", entry0.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/81/_history/91", entry0.getLinkSelf().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkAlternate().getValue());
 		
 		BundleEntry entry1 = bundle.getEntries().get(1);
-		assertEquals("http://localhost:" + ourPort + "/Patient/82", entry1.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/82/_history/92", entry1.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/82/_history/92", entry1.getLinkSelf().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/2", entry1.getLinkAlternate().getValue());
 
 		BundleEntry entry2 = bundle.getEntries().get(2);
-		assertEquals("http://localhost:" + ourPort + "/Patient/3", entry2.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/3/_history/93", entry2.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/3/_history/93", entry2.getLinkSelf().getValue());
 		assertEquals(nowInstant.getValueAsString(), entry2.getDeletedAt().getValueAsString());
 }
@@ -118,17 +118,17 @@ public class TransactionWithBundleParamTest {
 		Patient p1 = new Patient();
 		p1.addName().addFamily("Family1");
 		BundleEntry entry = b.addEntry();
-		entry.getId().setValue("1");
+		p1.getId().setValue("1");
 		entry.setResource(p1);
 
 		Patient p2 = new Patient();
 		p2.addName().addFamily("Family2");
 		entry = b.addEntry();
-		entry.getId().setValue("2");
+		p2.getId().setValue("2");
 		entry.setResource(p2);
 		
 		BundleEntry deletedEntry = b.addEntry();
-		deletedEntry.setId(new IdDt("Patient/3"));
+		deletedEntry.setDeletedResourceId(new IdDt("Patient/3"));
 		deletedEntry.setDeleted(nowInstant);
 		
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
@@ -151,17 +151,17 @@ public class TransactionWithBundleParamTest {
 		assertEquals("OperationOutcome (no ID)", bundle.getEntries().get(0).getTitle().getValue());
 		
 		BundleEntry entry0 = bundle.getEntries().get(1);
-		assertEquals("http://localhost:" + ourPort + "/Patient/81", entry0.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/81/_history/91", entry0.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/81/_history/91", entry0.getLinkSelf().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/1", entry0.getLinkAlternate().getValue());
 		
 		BundleEntry entry1 = bundle.getEntries().get(2);
-		assertEquals("http://localhost:" + ourPort + "/Patient/82", entry1.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/82/_history/92", entry1.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/82/_history/92", entry1.getLinkSelf().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/2", entry1.getLinkAlternate().getValue());
 
 		BundleEntry entry2 = bundle.getEntries().get(3);
-		assertEquals("http://localhost:" + ourPort + "/Patient/3", entry2.getId().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/3/_history/93", entry2.getResource().getId().getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/3/_history/93", entry2.getLinkSelf().getValue());
 		assertEquals(nowInstant.getValueAsString(), entry2.getDeletedAt().getValueAsString());
 }

@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model;
 
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,7 +23,7 @@ package org.hl7.fhir.instance.model;
  */
 
 
-public interface IPrimitiveType<T> extends IBase {
+public interface IPrimitiveType<T> extends IBaseDatatype {
 
 	void setValueAsString(String theValue) throws IllegalArgumentException;
 

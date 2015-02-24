@@ -24,12 +24,14 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
+
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 
 @DatatypeDef(name = "decimal")
-public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<DecimalDt> {
+public class DecimalDt extends BasePrimitive<BigDecimal> implements Comparable<DecimalDt>, IBaseDecimalDatatype {
 
 	/**
 	 * Constructor

@@ -26,9 +26,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -47,7 +48,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	private HashSet<String> myParamNames;
 	private Integer myIdParamIndex;
 
-	public DynamicSearchMethodBinding(Class<? extends IResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, IDynamicSearchResourceProvider theProvider) {
+	public DynamicSearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theConetxt, IDynamicSearchResourceProvider theProvider) {
 		super(theReturnResourceType, theMethod, theConetxt, theProvider);
 
 		myProvider = theProvider;

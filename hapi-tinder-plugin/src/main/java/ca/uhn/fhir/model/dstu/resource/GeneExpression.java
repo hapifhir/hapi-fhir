@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class GeneExpression
 	/**
 	 * Search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>subject being described by the resource</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneExpression.subject</b><br/>
+	 * Description: <b>subject being described by the resource</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneExpression.subject</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="subject", path="GeneExpression.subject", description="subject being described by the resource", type="reference"  )
@@ -247,9 +247,9 @@ public class GeneExpression
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>subject</b>
 	 * <p>
-	 * Description: <b>subject being described by the resource</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>GeneExpression.subject</b><br/>
+	 * Description: <b>subject being described by the resource</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>GeneExpression.subject</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam SUBJECT = new ReferenceClientParam(SP_SUBJECT);
@@ -263,9 +263,9 @@ public class GeneExpression
 	/**
 	 * Search parameter constant for <b>gene</b>
 	 * <p>
-	 * Description: <b>Id of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GeneExpression.gene.identifier</b><br/>
+	 * Description: <b>Id of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GeneExpression.gene.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="gene", path="GeneExpression.gene.identifier", description="Id of the gene", type="string"  )
@@ -274,9 +274,9 @@ public class GeneExpression
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>gene</b>
 	 * <p>
-	 * Description: <b>Id of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GeneExpression.gene.identifier</b><br/>
+	 * Description: <b>Id of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GeneExpression.gene.identifier</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam GENE = new StringClientParam(SP_GENE);
@@ -284,9 +284,9 @@ public class GeneExpression
 	/**
 	 * Search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
+	 * Description: <b>Coordinate of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GeneExpression.gene.coordinate</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="coordinate", path="GeneExpression.gene.coordinate", description="Coordinate of the gene", type="string"  )
@@ -295,9 +295,9 @@ public class GeneExpression
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>coordinate</b>
 	 * <p>
-	 * Description: <b>Coordinate of the gene</b><br/>
-	 * Type: <b>string</b><br/>
-	 * Path: <b>GeneExpression.gene.coordinate</b><br/>
+	 * Description: <b>Coordinate of the gene</b><br>
+	 * Type: <b>string</b><br>
+	 * Path: <b>GeneExpression.gene.coordinate</b><br>
 	 * </p>
 	 */
 	public static final StringClientParam COORDINATE = new StringClientParam(SP_COORDINATE);

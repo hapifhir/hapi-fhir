@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.client;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,9 +33,15 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -100,18 +107,35 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 				    .setProxy(myProxy)
 				    .build();
 			
-			myHttpClient = HttpClients.custom()
+			HttpClientBuilder builder = HttpClients.custom()
 				.setConnectionManager(connectionManager)
 				.setDefaultRequestConfig(defaultRequestConfig)
-				.disableCookieManagement()
-				.build();
+				.disableCookieManagement();
+			
+			if (myProxy != null && StringUtils.isNotBlank(myProxyUsername) && StringUtils.isNotBlank(myProxyPassword)) {
+				CredentialsProvider credsProvider = new BasicCredentialsProvider();
+				credsProvider.setCredentials(new AuthScope(myProxy.getHostName(), myProxy.getPort()), new UsernamePasswordCredentials(myProxyUsername, myProxyPassword));
+				builder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+				builder.setDefaultCredentialsProvider(credsProvider);
+			}
+			
+			myHttpClient = builder.build();
 			//@formatter:on
 
 		}
 
 		return myHttpClient;
 	}
+	
+	private String myProxyUsername;
+	private String myProxyPassword;
 
+	@Override
+	public void setProxyCredentials(String theUsername, String thePassword) {
+		myProxyUsername=theUsername;
+		myProxyPassword=thePassword;
+	}
+	
 	@Override
 	public ServerValidationModeEnum getServerValidationModeEnum() {
 		return myServerValidationMode;

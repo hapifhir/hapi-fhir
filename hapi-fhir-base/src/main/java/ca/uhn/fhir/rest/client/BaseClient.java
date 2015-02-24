@@ -182,9 +182,14 @@ public abstract class BaseClient {
 		}
 
 		try {
-			ContentType ct = ContentType.get(response.getEntity());
-			String mimeType = ct != null ? ct.getMimeType() : null;
-
+			String mimeType;
+			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatusLine().getStatusCode()) {
+				mimeType = null;
+			} else {
+				ContentType ct = ContentType.get(response.getEntity());
+				mimeType = ct != null ? ct.getMimeType() : null;
+			}
+			
 			Map<String, List<String>> headers = new HashMap<String, List<String>>();
 			if (response.getAllHeaders() != null) {
 				for (Header next : response.getAllHeaders()) {
@@ -398,7 +403,9 @@ public abstract class BaseClient {
 			charset = ct.getCharset();
 		}
 		if (charset == null) {
-			ourLog.warn("Response did not specify a charset.");
+			if (Constants.STATUS_HTTP_204_NO_CONTENT != theResponse.getStatusLine().getStatusCode()) {
+				ourLog.warn("Response did not specify a charset.");
+			}
 			charset = Charset.forName("UTF-8");
 		}
 

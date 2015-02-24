@@ -45,10 +45,10 @@ public abstract class BaseRuntimeChildDefinition {
 
 	public abstract Set<String> getValidChildNames();
 
-	abstract void sealAndInitialize(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
+	abstract void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions);
 
 	public interface IAccessor {
-		List<? extends IBase> getValues(Object theTarget);
+		List<IBase> getValues(Object theTarget);
 	}
 
 	public abstract String getElementName();

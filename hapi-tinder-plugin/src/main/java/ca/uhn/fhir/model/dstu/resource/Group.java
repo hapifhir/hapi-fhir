@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of resources the group contains</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.type</b><br/>
+	 * Description: <b>The type of resources the group contains</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token"  )
@@ -247,9 +247,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>type</b>
 	 * <p>
-	 * Description: <b>The type of resources the group contains</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.type</b><br/>
+	 * Description: <b>The type of resources the group contains</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam TYPE = new TokenClientParam(SP_TYPE);
@@ -257,9 +257,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>The kind of resources contained</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.code</b><br/>
+	 * Description: <b>The kind of resources contained</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token"  )
@@ -268,9 +268,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>code</b>
 	 * <p>
-	 * Description: <b>The kind of resources contained</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.code</b><br/>
+	 * Description: <b>The kind of resources contained</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CODE = new TokenClientParam(SP_CODE);
@@ -278,9 +278,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>actual</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.actual</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.actual</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="actual", path="Group.actual", description="", type="token"  )
@@ -289,9 +289,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>actual</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.actual</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.actual</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam ACTUAL = new TokenClientParam(SP_ACTUAL);
@@ -299,9 +299,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.identifier</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="identifier", path="Group.identifier", description="", type="token"  )
@@ -310,9 +310,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.identifier</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.identifier</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam IDENTIFIER = new TokenClientParam(SP_IDENTIFIER);
@@ -320,9 +320,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>member</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Group.member</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Group.member</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="member", path="Group.member", description="", type="reference"  )
@@ -331,9 +331,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>member</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Group.member</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Group.member</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam MEMBER = new ReferenceClientParam(SP_MEMBER);
@@ -347,9 +347,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>characteristic</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.code</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="", type="token"  )
@@ -358,9 +358,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>characteristic</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.code</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.code</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam CHARACTERISTIC = new TokenClientParam(SP_CHARACTERISTIC);
@@ -368,9 +368,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>value</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.value[x]</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.value[x]</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="", type="token"  )
@@ -379,9 +379,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>value</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.value[x]</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.value[x]</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam VALUE = new TokenClientParam(SP_VALUE);
@@ -389,9 +389,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>exclude</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.exclude</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.exclude</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="", type="token"  )
@@ -400,9 +400,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>exclude</b>
 	 * <p>
-	 * Description: <b></b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Group.characteristic.exclude</b><br/>
+	 * Description: <b></b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Group.characteristic.exclude</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam EXCLUDE = new TokenClientParam(SP_EXCLUDE);
@@ -410,9 +410,9 @@ public class Group
 	/**
 	 * Search parameter constant for <b>characteristic-value</b>
 	 * <p>
-	 * Description: <b>A composite of both characteristic and value</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>characteristic & value</b><br/>
+	 * Description: <b>A composite of both characteristic and value</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>characteristic &amp; value</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="characteristic-value", path="characteristic & value", description="A composite of both characteristic and value", type="composite"  , compositeOf={  "characteristic",  "value" }  )
@@ -421,9 +421,9 @@ public class Group
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>characteristic-value</b>
 	 * <p>
-	 * Description: <b>A composite of both characteristic and value</b><br/>
-	 * Type: <b>composite</b><br/>
-	 * Path: <b>characteristic & value</b><br/>
+	 * Description: <b>A composite of both characteristic and value</b><br>
+	 * Type: <b>composite</b><br>
+	 * Path: <b>characteristic &amp; value</b><br>
 	 * </p>
 	 */
 	public static final CompositeClientParam<TokenClientParam, TokenClientParam> CHARACTERISTIC_VALUE = new CompositeClientParam<TokenClientParam, TokenClientParam>(SP_CHARACTERISTIC_VALUE);
@@ -706,7 +706,7 @@ public class Group
 	 *
      * <p>
      * <b>Definition:</b>
-     * Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.
+     * Provides a specific type of resource the group includes.  E.g. \&quot;cow\&quot;, \&quot;syringe\&quot;, etc.
      * </p> 
 	 */
 	public CodeableConceptDt getCode() {  
@@ -724,7 +724,7 @@ public class Group
 	 *
      * <p>
      * <b>Definition:</b>
-     * Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.
+     * Provides a specific type of resource the group includes.  E.g. \&quot;cow\&quot;, \&quot;syringe\&quot;, etc.
      * </p> 
 	 */
 	public CodeableConceptDt getCodeElement() {  
@@ -740,7 +740,7 @@ public class Group
 	 *
      * <p>
      * <b>Definition:</b>
-     * Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.
+     * Provides a specific type of resource the group includes.  E.g. \&quot;cow\&quot;, \&quot;syringe\&quot;, etc.
      * </p> 
 	 */
 	public Group setCode(CodeableConceptDt theValue) {

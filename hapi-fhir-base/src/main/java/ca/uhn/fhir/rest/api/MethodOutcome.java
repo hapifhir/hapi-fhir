@@ -131,6 +131,10 @@ public class MethodOutcome {
 		return myVersionId;
 	}
 
+	/**
+	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are 
+	 * returned to client instances, if the server has responded with an HTTP 201 Created.
+	 */
 	public Boolean getCreated() {
 		return myCreated;
 	}
@@ -146,8 +150,9 @@ public class MethodOutcome {
 	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called
 	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
-	public void setCreated(Boolean theCreated) {
+	public MethodOutcome setCreated(Boolean theCreated) {
 		myCreated = theCreated;
+		return this;
 	}
 
 	/**

@@ -27,16 +27,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
-public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
+public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IResource myResource;
@@ -59,14 +61,15 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement {
 		setReference(theResource.getId());
 	}
 
+	public abstract StringDt getDisplayElement();
+
 	public abstract IdDt getReference();
 
 	/**
 	 * Gets the actual loaded and parsed resource instance, <b>if it is already present</b>. This method will return the resource instance only if it has previously been loaded using
 	 * {@link #loadResource(IRestfulClient)} or it was contained within the resource containing this resource.
 	 *
-	 * See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id">contained resources</a>
-	 * for more information.
+	 * See the FHIR specification section on <a href="http://www.hl7.org/implement/standards/fhir/references.html#id">contained resources</a> for more information.
 	 * 
 	 * @see #loadResource(IRestfulClient)
 	 */

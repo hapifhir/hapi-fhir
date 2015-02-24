@@ -18,10 +18,10 @@ package ca.uhn.fhir.model.dstu.resource;
 
 
 import java.util.*;
+
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.rest.gclient.*;
-
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu.valueset.AdmitSourceEnum;
@@ -236,9 +236,9 @@ public class Availability
 	/**
 	 * Search parameter constant for <b>individual</b>
 	 * <p>
-	 * Description: <b>The individual to find an availability for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Availability.individual</b><br/>
+	 * Description: <b>The individual to find an availability for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Availability.individual</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="individual", path="Availability.individual", description="The individual to find an availability for", type="reference"  )
@@ -247,9 +247,9 @@ public class Availability
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>individual</b>
 	 * <p>
-	 * Description: <b>The individual to find an availability for</b><br/>
-	 * Type: <b>reference</b><br/>
-	 * Path: <b>Availability.individual</b><br/>
+	 * Description: <b>The individual to find an availability for</b><br>
+	 * Type: <b>reference</b><br>
+	 * Path: <b>Availability.individual</b><br>
 	 * </p>
 	 */
 	public static final ReferenceClientParam INDIVIDUAL = new ReferenceClientParam(SP_INDIVIDUAL);
@@ -263,9 +263,9 @@ public class Availability
 	/**
 	 * Search parameter constant for <b>slottype</b>
 	 * <p>
-	 * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Availability.type</b><br/>
+	 * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Availability.type</b><br>
 	 * </p>
 	 */
 	@SearchParamDefinition(name="slottype", path="Availability.type", description="The type of appointments that can be booked into associated slot(s)", type="token"  )
@@ -274,9 +274,9 @@ public class Availability
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>slottype</b>
 	 * <p>
-	 * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br/>
-	 * Type: <b>token</b><br/>
-	 * Path: <b>Availability.type</b><br/>
+	 * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+	 * Type: <b>token</b><br>
+	 * Path: <b>Availability.type</b><br>
 	 * </p>
 	 */
 	public static final TokenClientParam SLOTTYPE = new TokenClientParam(SP_SLOTTYPE);

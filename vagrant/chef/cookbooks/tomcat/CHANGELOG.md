@@ -43,7 +43,6 @@ v0.15.4 (2014-02-18)
 
 ### Bug
 - **[COOK-4257](https://tickets.opscode.com/browse/COOK-4257)** - tomcat: broken on SmartOS SmartMachine images 13.3.0+
-- **[COOK-4097](https://tickets.opscode.com/browse/COOK-4097)** - default["tomcat"]["keytool"] is set to non-existent file on Debian/Ubuntu
 
 
 v0.15.2

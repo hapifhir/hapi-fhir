@@ -23,9 +23,11 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -57,8 +59,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		History historyAnnotation = theMethod.getAnnotation(History.class);
-		Class<? extends IResource> type = historyAnnotation.type();
-		if (type == IResource.class) {
+		Class<? extends IBaseResource> type = historyAnnotation.type();
+		if (Modifier.isInterface(type.getModifiers())) {
 			if (theProvider instanceof IResourceProvider) {
 				type = ((IResourceProvider) theProvider).getResourceType();
 				if (myIdParamIndex != null) {
@@ -235,7 +237,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return true;
 	}
 
-	private static Class<? extends IResource> toReturnType(Method theMethod, Object theProvider) {
+	private static Class<? extends IBaseResource> toReturnType(Method theMethod, Object theProvider) {
 		if (theProvider instanceof IResourceProvider) {
 			return ((IResourceProvider) theProvider).getResourceType();
 		}

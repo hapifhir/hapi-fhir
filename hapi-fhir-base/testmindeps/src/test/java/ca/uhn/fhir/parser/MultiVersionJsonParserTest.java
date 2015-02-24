@@ -19,10 +19,10 @@ public class MultiVersionJsonParserTest {
 		p.addIdentifier("urn:sys", "001");
 		p.addUndeclaredExtension(false, "http://foo#ext", new QuantityDt(2.2));
 		
-		String str = FhirContext.forDev().newJsonParser().encodeResourceToString(p);
+		String str = FhirContext.forDstu2().newJsonParser().encodeResourceToString(p);
 		ourLog.info(str);
 		
-		assertThat(str,StringContains.containsString("{\"resourceType\":\"Patient\",\"http://foo#ext\":[{\"valueQuantity\":{\"value\":2.2}}],\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]}"));
+		assertThat(str,StringContains.containsString("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"http://foo#ext\",\"valueQuantity\":{\"value\":2.2}}],\"identifier\":[{\"system\":\"urn:sys\",\"value\":\"001\"}]}"));
 	}
 
 }
