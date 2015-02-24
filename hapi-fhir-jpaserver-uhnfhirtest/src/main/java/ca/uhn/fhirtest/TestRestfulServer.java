@@ -1,11 +1,13 @@
 package ca.uhn.fhirtest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
@@ -50,7 +52,8 @@ public class TestRestfulServer extends RestfulServer {
 		// retrieve all the appropriate resource providers and the
 		// conformance provider
 		List<IResourceProvider> beans;
-		JpaSystemProviderDstu1 systemProvider;
+		JpaSystemProviderDstu1 systemProviderDstu1 = null;
+		JpaSystemProviderDstu2 systemProviderDstu2 = null;
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
@@ -58,7 +61,7 @@ public class TestRestfulServer extends RestfulServer {
 		case "BASE": {
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.DISABLED;
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
@@ -70,7 +73,7 @@ public class TestRestfulServer extends RestfulServer {
 		case "DSTU1": {
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.DISABLED;
 			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
@@ -82,7 +85,7 @@ public class TestRestfulServer extends RestfulServer {
 		case "DSTU2": {
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu1.class);
+			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 			systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			etagSupport = ETagSupportEnum.ENABLED;
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao);
@@ -115,7 +118,13 @@ public class TestRestfulServer extends RestfulServer {
 			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
 		}
 		setResourceProviders(beans);
-		setPlainProviders(systemProvider);
+
+		List provList = new ArrayList();
+		if (systemProviderDstu1 != null)
+			provList.add(systemProviderDstu1);
+		if (systemProviderDstu2 != null)
+			provList.add(systemProviderDstu2);
+		setPlainProviders(provList);
 
 		/*
 		 * This tells the server to use "incorrect" MIME types if it detects that the

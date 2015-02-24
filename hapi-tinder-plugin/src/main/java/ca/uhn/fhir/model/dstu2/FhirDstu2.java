@@ -23,13 +23,13 @@ package ca.uhn.fhir.model.dstu2;
 import java.io.InputStream;
 
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
@@ -94,4 +94,10 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new ca.uhn.fhir.model.dstu2.composite.CodingDt();
+	}
+
+
 }

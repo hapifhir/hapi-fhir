@@ -47,42 +47,42 @@ public class Meta extends Type implements IMetaType {
     /**
      * The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted.
      */
-    @Child(name="versionId", type={IdType.class}, order=0, min=0, max=1)
+    @Child(name = "versionId", type = {IdType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Version specific identifier", formalDefinition="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted." )
     protected IdType versionId;
 
     /**
      * When the resource last changed - e.g. when the version changed.
      */
-    @Child(name="lastUpdated", type={InstantType.class}, order=1, min=0, max=1)
+    @Child(name = "lastUpdated", type = {InstantType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="When the resource version last changed", formalDefinition="When the resource last changed - e.g. when the version changed." )
     protected InstantType lastUpdated;
 
     /**
      * Set to 'true' if the resource is deleted. Deleted resources can not be fetched via the RESTful API, but may appear in bundles for various reasons.
      */
-    @Child(name="deleted", type={BooleanType.class}, order=2, min=0, max=1)
+    @Child(name = "deleted", type = {BooleanType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="True if the resource is deleted", formalDefinition="Set to 'true' if the resource is deleted. Deleted resources can not be fetched via the RESTful API, but may appear in bundles for various reasons." )
     protected BooleanType deleted;
 
     /**
      * A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url.
      */
-    @Child(name="profile", type={UriType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "profile", type = {UriType.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Profiles this resource claims to conform to", formalDefinition="A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url." )
     protected List<UriType> profile;
 
     /**
      * Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure.
      */
-    @Child(name="security", type={Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "security", type = {Coding.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Security Labels applied to this resource", formalDefinition="Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure." )
     protected List<Coding> security;
 
     /**
      * Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource.
      */
-    @Child(name="tag", type={Coding.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "tag", type = {Coding.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Tags applied", formalDefinition="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource." )
     protected List<Coding> tag;
 

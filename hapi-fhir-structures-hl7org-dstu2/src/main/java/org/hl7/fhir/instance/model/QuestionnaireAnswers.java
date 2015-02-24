@@ -506,7 +506,7 @@ public class QuestionnaireAnswers extends DomainResource {
          * The actual question as shown to the user to prompt them for an answer.
          */
         @Child(name="text", type={StringType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Text of the question as it is shown to the user", formalDefinition="The actual question as shown to the user to prompt them for an answer." )
+        @Description(shortDefinition = "Text of the question as it is shown to the user", formalDefinition = "The actual question as shown to the user to prompt them for an answer.")
         protected StringType text;
 
         /**
@@ -746,8 +746,8 @@ public class QuestionnaireAnswers extends DomainResource {
         /**
          * The answer (or one of the answers) provided by the respondant to the question.
          */
-        @Child(name="value", type={BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondant to the question." )
+        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order = 1, min = 0, max = 1)
+        @Description(shortDefinition = "Single-valued answer to the question", formalDefinition = "The answer (or one of the answers) provided by the respondant to the question.")
         protected Type value;
 
         private static final long serialVersionUID = -732981989L;
@@ -838,23 +838,23 @@ public class QuestionnaireAnswers extends DomainResource {
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
-        public UriType getValueUriType() throws Exception { 
+        public UriType getValueUriType() throws Exception {
           if (!(this.value instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
+            throw new Exception("Type mismatch: the type UriType was expected, but " + this.value.getClass().getName() + " was encountered");
           return (UriType) this.value;
         }
 
-        /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
-         */
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+       */
         public Attachment getValueAttachment() throws Exception { 
           if (!(this.value instanceof Attachment))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
-        /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Coding getValueCoding() throws Exception { 
           if (!(this.value instanceof Coding))
@@ -862,8 +862,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Coding) this.value;
         }
 
-        /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Quantity getValueQuantity() throws Exception { 
           if (!(this.value instanceof Quantity))
@@ -871,8 +871,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Quantity) this.value;
         }
 
-        /**
-         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Reference getValueReference() throws Exception { 
           if (!(this.value instanceof Reference))
@@ -884,8 +884,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return this.value != null && !this.value.isEmpty();
         }
 
-        /**
-         * @param value {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+      /**
+       * @param value {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public QuestionAnswerComponent setValue(Type value) { 
           this.value = value;
@@ -933,14 +933,14 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * A business identifier assigned to a particular completed (or partially completed) questionnaire.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Unique id for this set of answers", formalDefinition="A business identifier assigned to a particular completed (or partially completed) questionnaire." )
     protected Identifier identifier;
 
     /**
      * Indicates the Questionnaire resource that defines the form for which answers are being provided.
      */
-    @Child(name="questionnaire", type={Questionnaire.class}, order=1, min=0, max=1)
+    @Child(name = "questionnaire", type = {Questionnaire.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Form being answered", formalDefinition="Indicates the Questionnaire resource that defines the form for which answers are being provided." )
     protected Reference questionnaire;
 
@@ -952,14 +952,14 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * The lifecycle status of the questionnaire answers as a whole.
      */
-    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire answers as a whole." )
     protected Enumeration<QuestionnaireAnswersStatus> status;
 
     /**
      * The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
      */
-    @Child(name="subject", type={}, order=3, min=0, max=1)
+    @Child(name = "subject", type = {}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
     protected Reference subject;
 
@@ -971,7 +971,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.
      */
-    @Child(name="author", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system." )
     protected Reference author;
 
@@ -983,26 +983,26 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * The date and/or time that this version of the questionnaire answers was authored.
      */
-    @Child(name="authored", type={DateTimeType.class}, order=5, min=1, max=1)
+    @Child(name = "authored", type = {DateTimeType.class}, order = 5, min = 1, max = 1)
     @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire answers was authored." )
     protected DateTimeType authored;
 
-    /**
-     * The person who answered the questions about the subject.
-     */
-    @Child(name="source", type={Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1)
-    @Description(shortDefinition="The person who answered the questions", formalDefinition="The person who answered the questions about the subject." )
+  /**
+   * The person who answered the questions about the subject.
+   */
+  @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order = 6, min = 0, max = 1)
+  @Description(shortDefinition = "The person who answered the questions", formalDefinition = "The person who answered the questions about the subject.")
     protected Reference source;
 
-    /**
-     * The actual object that is the target of the reference (The person who answered the questions about the subject.)
+  /**
+   * The actual object that is the target of the reference (The person who answered the questions about the subject.)
      */
     protected Resource sourceTarget;
 
     /**
      * Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
      */
-    @Child(name="encounter", type={Encounter.class}, order=7, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
     protected Reference encounter;
 
@@ -1014,7 +1014,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.
      */
-    @Child(name="group", type={}, order=8, min=0, max=1)
+    @Child(name = "group", type = {}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Grouped questions", formalDefinition="A group of questions to a possibly similarly grouped set of questions in the questionnaire answers." )
     protected GroupComponent group;
 
@@ -1266,8 +1266,8 @@ public class QuestionnaireAnswers extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #source} (The person who answered the questions about the subject.)
+  /**
+   * @return {@link #source} (The person who answered the questions about the subject.)
      */
     public Reference getSource() { 
       if (this.source == null)
@@ -1282,23 +1282,23 @@ public class QuestionnaireAnswers extends DomainResource {
       return this.source != null && !this.source.isEmpty();
     }
 
-    /**
-     * @param value {@link #source} (The person who answered the questions about the subject.)
+  /**
+   * @param value {@link #source} (The person who answered the questions about the subject.)
      */
     public QuestionnaireAnswers setSource(Reference value) { 
       this.source = value;
       return this;
     }
 
-    /**
-     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
+  /**
+   * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
      */
     public Resource getSourceTarget() { 
       return this.sourceTarget;
     }
 
-    /**
-     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
+  /**
+   * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
      */
     public QuestionnaireAnswers setSourceTarget(Resource value) { 
       this.sourceTarget = value;
@@ -1442,17 +1442,17 @@ public class QuestionnaireAnswers extends DomainResource {
 
   @SearchParamDefinition(name="authored", path="QuestionnaireAnswers.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireAnswers.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
+  @SearchParamDefinition(name = "questionnaire", path = "QuestionnaireAnswers.questionnaire", description = "The questionnaire the answers are provided for", type = "reference")
   public static final String SP_QUESTIONNAIRE = "questionnaire";
   @SearchParamDefinition(name="subject", path="QuestionnaireAnswers.subject", description="The subject of the questionnaire", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="author", path="QuestionnaireAnswers.author", description="The author of the questionnaire", type="reference" )
+  @SearchParamDefinition(name = "author", path = "QuestionnaireAnswers.author", description = "The author of the questionnaire", type = "reference")
   public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="patient", path="QuestionnaireAnswers.subject", description="The patient that is the subject of the questionnaire", type="reference" )
+  @SearchParamDefinition(name = "patient", path = "QuestionnaireAnswers.subject", description = "The patient that is the subject of the questionnaire", type = "reference")
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="encounter", path="QuestionnaireAnswers.encounter", description="Encounter during which questionnaire was authored", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="status", path="QuestionnaireAnswers.status", description="The status of the questionnaire answers", type="token" )
+  @SearchParamDefinition(name = "status", path = "QuestionnaireAnswers.status", description = "The status of the questionnaire answers", type = "token")
   public static final String SP_STATUS = "status";
 
 }

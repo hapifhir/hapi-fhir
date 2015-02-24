@@ -160,91 +160,91 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			}
 
 			switch (verb) {
-			case POST: {
-				// CREATE
-				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = getDao(res.getClass());
-				res.setId(null);
-				DaoMethodOutcome outcome;
-				Entry newEntry = response.addEntry();
-				outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
-				break;
-			}
-			case DELETE: {
-				// DELETE
-				Entry newEntry = response.addEntry();
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				UrlParts parts = parseUrl(verb.getCode(), url);
-				if (parts.getResourceId() != null) {
-					parts.getDao().delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
-				} else {
-					parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
-				}
-
-				newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
-				break;
-			}
-			case PUT: {
-				// UPDATE
-				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = getDao(res.getClass());
-
-				DaoMethodOutcome outcome;
-				Entry newEntry = response.addEntry();
-
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-
-				UrlParts parts = parseUrl(verb.getCode(), url);
-				if (parts.getResourceId() != null) {
-					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
-					outcome = resourceDao.update(res, null, false);
-				} else {
+				case POST: {
+					// CREATE
+					@SuppressWarnings("rawtypes")
+					IFhirResourceDao resourceDao = getDao(res.getClass());
 					res.setId(null);
-					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+					DaoMethodOutcome outcome;
+					Entry newEntry = response.addEntry();
+					outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
+					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+					break;
 				}
-
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
-				break;
-			}
-			case GET: {
-				// SEARCH/READ/VREAD
-				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-				UrlParts parts = parseUrl(verb.getCode(), url);
-
-				@SuppressWarnings("rawtypes")
-				IFhirResourceDao resourceDao = parts.getDao();
-
-				if (parts.getResourceId() != null && parts.getParams() == null) {
-					IResource found;
-					if (parts.getVersionId() != null) {
-						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
+				case DELETE: {
+					// DELETE
+					Entry newEntry = response.addEntry();
+					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+					UrlParts parts = parseUrl(verb.getCode(), url);
+					if (parts.getResourceId() != null) {
+						parts.getDao().delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
 					} else {
-						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
 					}
-					EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
-					resp.setLocation(found.getId().toUnqualified().getValue());
-					resp.addEtag(found.getId().getVersionIdPart());
-				} else if (parts.getParams() != null) {
-					RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
-					SearchParameterMap params = translateMatchUrl(url, def);
-					IBundleProvider bundle = parts.getDao().search(params);
-					
-					Bundle searchBundle = new Bundle();
-					searchBundle.setTotal(bundle.size());
-					
-					int configuredMax = 100; // this should probably be configurable or something
-					if (bundle.size() > configuredMax) {
-						oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
-					}
-					List<IResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
-					for (IResource next : resourcesToAdd) {
-						searchBundle.addEntry().setResource(next);
-					}
-					
-					response.addEntry().setResource(searchBundle);
+
+					newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
+					break;
 				}
-			}
+				case PUT: {
+					// UPDATE
+					@SuppressWarnings("rawtypes")
+					IFhirResourceDao resourceDao = getDao(res.getClass());
+
+					DaoMethodOutcome outcome;
+					Entry newEntry = response.addEntry();
+
+					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+
+					UrlParts parts = parseUrl(verb.getCode(), url);
+					if (parts.getResourceId() != null) {
+						res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						outcome = resourceDao.update(res, null, false);
+					} else {
+						res.setId(null);
+						outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+					}
+
+					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+					break;
+				}
+				case GET: {
+					// SEARCH/READ/VREAD
+					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+					UrlParts parts = parseUrl(verb.getCode(), url);
+
+					@SuppressWarnings("rawtypes")
+					IFhirResourceDao resourceDao = parts.getDao();
+
+					if (parts.getResourceId() != null && parts.getParams() == null) {
+						IResource found;
+						if (parts.getVersionId() != null) {
+							found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
+						} else {
+							found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						}
+						EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
+						resp.setLocation(found.getId().toUnqualified().getValue());
+						resp.addEtag(found.getId().getVersionIdPart());
+					} else if (parts.getParams() != null) {
+						RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
+						SearchParameterMap params = translateMatchUrl(url, def);
+						IBundleProvider bundle = parts.getDao().search(params);
+
+						Bundle searchBundle = new Bundle();
+						searchBundle.setTotal(bundle.size());
+
+						int configuredMax = 100; // this should probably be configurable or something
+						if (bundle.size() > configuredMax) {
+							oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
+						}
+						List<IResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
+						for (IResource next : resourcesToAdd) {
+							searchBundle.addEntry().setResource(next);
+						}
+
+						response.addEntry().setResource(searchBundle);
+					}
+				}
 			}
 
 		}
@@ -452,7 +452,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		// }
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Transaction completed in {}ms", new Object[] { delay });
+		ourLog.info("Transaction completed in {}ms", new Object[]{delay});
 
 		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Transaction completed in " + delay + "ms");
 

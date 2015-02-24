@@ -270,14 +270,14 @@ public class CarePlan2 extends DomainResource {
     /**
      * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this plan", formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the patient/subject whose intended care is described by the plan.
      */
-    @Child(name="patient", type={Patient.class}, order=1, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Who care plan is for", formalDefinition="Identifies the patient/subject whose intended care is described by the plan." )
     protected Reference patient;
 
@@ -289,28 +289,28 @@ public class CarePlan2 extends DomainResource {
     /**
      * Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record.
      */
-    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="planned | active | completed", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record." )
     protected Enumeration<CarePlan2Status> status;
 
     /**
      * Indicates when the plan did (or is intended to) come into effect and end.
      */
-    @Child(name="period", type={Period.class}, order=3, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Time period plan covers", formalDefinition="Indicates when the plan did (or is intended to) come into effect and end." )
     protected Period period;
 
     /**
      * Identifies the most recent date on which the plan has been revised.
      */
-    @Child(name="modified", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "modified", type = {DateTimeType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="When last updated", formalDefinition="Identifies the most recent date on which the plan has been revised." )
     protected DateTimeType modified;
 
     /**
      * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
      */
-    @Child(name="concern", type={Condition.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "concern", type = {Condition.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Health issues this plan addresses", formalDefinition="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan." )
     protected List<Reference> concern;
     /**
@@ -322,21 +322,21 @@ public class CarePlan2 extends DomainResource {
     /**
      * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
      */
-    @Child(name="participant", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "participant", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who's involved in plan?", formalDefinition="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan." )
     protected List<CarePlan2ParticipantComponent> participant;
 
     /**
      * General notes about the care plan not covered elsewhere.
      */
-    @Child(name="notes", type={StringType.class}, order=7, min=0, max=1)
+    @Child(name = "notes", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Comments about the plan", formalDefinition="General notes about the care plan not covered elsewhere." )
     protected StringType notes;
 
     /**
      * Describes the intended objective(s) of carrying out the Care Plan.
      */
-    @Child(name="goal", type={Goal.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "goal", type = {Goal.class}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="CarePlan Goal", formalDefinition="Describes the intended objective(s) of carrying out the Care Plan." )
     protected List<Reference> goal;
     /**
@@ -348,7 +348,7 @@ public class CarePlan2 extends DomainResource {
     /**
      * Identifies an action that is planned to happen as part of the careplan. For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
      */
-    @Child(name="activity", type={ProcedureRequest.class, MedicationPrescription.class, DiagnosticOrder.class, ReferralRequest.class, CommunicationRequest.class, NutritionOrder.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "activity", type = {ProcedureRequest.class, MedicationPrescription.class, DiagnosticOrder.class, ReferralRequest.class, CommunicationRequest.class, NutritionOrder.class}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="CarePlan Activity", formalDefinition="Identifies an action that is planned to happen as part of the careplan. For example, a medication to be used, lab tests to perform, self-monitoring, education, etc." )
     protected List<Reference> activity;
     /**
@@ -871,11 +871,11 @@ public class CarePlan2 extends DomainResource {
     return ResourceType.CarePlan2;
    }
 
-  @SearchParamDefinition(name="date", path="CarePlan2.period", description="Time period plan covers", type="date" )
+  @SearchParamDefinition(name = "date", path = "CarePlan2.period", description = "Time period plan covers", type = "date")
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="condition", path="CarePlan2.concern", description="Health issues this plan addresses", type="reference" )
   public static final String SP_CONDITION = "condition";
-  @SearchParamDefinition(name="patient", path="CarePlan2.patient", description="Who care plan is for", type="reference" )
+  @SearchParamDefinition(name = "patient", path = "CarePlan2.patient", description = "Who care plan is for", type = "reference")
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="participant", path="CarePlan2.participant.member", description="Who is involved", type="reference" )
   public static final String SP_PARTICIPANT = "participant";

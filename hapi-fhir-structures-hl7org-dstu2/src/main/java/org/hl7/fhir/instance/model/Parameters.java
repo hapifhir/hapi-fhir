@@ -385,7 +385,7 @@ public class Parameters extends Resource {
     /**
      * A parameter passed to or received from the operation.
      */
-    @Child(name="parameter", type={}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "parameter", type = {}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Operation Parameter", formalDefinition="A parameter passed to or received from the operation." )
     protected List<ParametersParameterComponent> parameter;
 

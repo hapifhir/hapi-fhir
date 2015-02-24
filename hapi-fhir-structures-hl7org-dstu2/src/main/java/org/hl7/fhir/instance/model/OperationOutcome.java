@@ -412,7 +412,7 @@ public class OperationOutcome extends DomainResource {
     /**
      * An error, warning or information message that results from a system action.
      */
-    @Child(name="issue", type={}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "issue", type = {}, order = 0, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning or information message that results from a system action." )
     protected List<OperationOutcomeIssueComponent> issue;
 

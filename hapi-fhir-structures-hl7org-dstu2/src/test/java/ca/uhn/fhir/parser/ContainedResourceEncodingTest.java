@@ -173,13 +173,13 @@ public class ContainedResourceEncodingTest {
 		 
         CodeableConcept obsName = new CodeableConcept();
         obsName.setText("name");
-        observation.setCode(obsName);
-        
-        Reference result = dr.addResult();
-        result.setResource(observation);
-        
-        ArrayList<Reference> performers = new ArrayList<Reference>();
-        Reference performer = new Reference();
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
         
         Practitioner p = new Practitioner();
 		p.setId((UUID.randomUUID().toString()));
@@ -212,13 +212,13 @@ public class ContainedResourceEncodingTest {
 		 
         CodeableConcept obsName = new CodeableConcept();
         obsName.setText("name");
-        observation.setCode(obsName);
-        
-        Reference result = dr.addResult();
-        result.setResource(observation);
-        
-        ArrayList<Reference> performers = new ArrayList<Reference>();
-        Reference performer = new Reference();
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
         
         Practitioner p = new Practitioner();
 		// no idDt on practitioner p

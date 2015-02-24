@@ -134,28 +134,28 @@ public class Alert extends DomainResource {
     /**
      * Identifier assigned to the alert for external use (outside the FHIR environment).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the alert for external use (outside the FHIR environment)." )
     protected List<Identifier> identifier;
 
     /**
      * Allows an alert to be divided into different categories like clinical, administrative etc.
      */
-    @Child(name="category", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an alert to be divided into different categories like clinical, administrative etc." )
     protected CodeableConcept category;
 
     /**
      * Supports basic workflow.
      */
-    @Child(name="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Supports basic workflow." )
     protected Enumeration<AlertStatus> status;
 
     /**
      * The person who this alert concerns.
      */
-    @Child(name="subject", type={Patient.class}, order=3, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class}, order = 3, min = 1, max = 1)
     @Description(shortDefinition="Who is alert about?", formalDefinition="The person who this alert concerns." )
     protected Reference subject;
 
@@ -167,7 +167,7 @@ public class Alert extends DomainResource {
     /**
      * The person or device that created the alert.
      */
-    @Child(name="author", type={Practitioner.class, Patient.class, Device.class}, order=4, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Alert creator", formalDefinition="The person or device that created the alert." )
     protected Reference author;
 
@@ -179,17 +179,17 @@ public class Alert extends DomainResource {
     /**
      * The coded value or textual component of the alert to display to the user.
      */
-    @Child(name="note", type={CodeableConcept.class}, order=5, min=1, max=1)
-    @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the alert to display to the user." )
+    @Child(name = "note", type = {CodeableConcept.class}, order = 5, min = 1, max = 1)
+    @Description(shortDefinition = "Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition = "The coded value or textual component of the alert to display to the user.")
     protected CodeableConcept note;
 
-    private static final long serialVersionUID = -1519932996L;
+  private static final long serialVersionUID = -1519932996L;
 
     public Alert() {
       super();
     }
 
-    public Alert(Enumeration<AlertStatus> status, Reference subject, CodeableConcept note) {
+  public Alert(Enumeration<AlertStatus> status, Reference subject, CodeableConcept note) {
       super();
       this.status = status;
       this.subject = subject;
@@ -467,7 +467,7 @@ public class Alert extends DomainResource {
 
   @SearchParamDefinition(name="subject", path="Alert.subject", description="The identity of a subject to list alerts for", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="patient", path="Alert.subject", description="The identity of a subject to list alerts for", type="reference" )
+  @SearchParamDefinition(name = "patient", path = "Alert.subject", description = "The identity of a subject to list alerts for", type = "reference")
   public static final String SP_PATIENT = "patient";
 
 }

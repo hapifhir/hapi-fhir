@@ -889,11 +889,11 @@ public class XmlParserTest {
 
 		Extension parent = new Extension().setUrl("http://example.com#parent");
 		patient.getExtension().add(parent);
-		Extension child1 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value1"));
+		Extension child1 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value1"));
 		parent.getExtension().add(child1);
-		Extension child2 = new Extension().setUrl( "http://example.com#child").setValue( new StringType("value2"));
+		Extension child2 = new Extension().setUrl("http://example.com#child").setValue(new StringType("value2"));
 		parent.getExtension().add(child2);
-		
+
 		Extension modExt = new Extension();
 		modExt.setUrl("http://example.com/extensions#modext");
 		modExt.setValue(new DateType("1995-01-02"));
@@ -927,38 +927,38 @@ public class XmlParserTest {
 		/*
 		 * Now parse this back
 		 */
-		
-		Patient parsed =ourCtx.newXmlParser().parseResource(Patient.class, enc); 
+
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
 		ext = parsed.getExtension().get(0);
 		assertEquals("http://example.com/extensions#someext", ext.getUrl());
-		assertEquals("2011-01-02T11:13:15", ((DateTimeType)ext.getValue()).getValueAsString());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
 
 		parent = patient.getExtension().get(1);
 		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
-		assertEquals( "http://example.com#child", child1.getUrl());
-		assertEquals("value1", ((StringType)child1.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
 		child2 = parent.getExtension().get(1);
-		assertEquals( "http://example.com#child", child2.getUrl());
-		assertEquals("value2", ((StringType)child2.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
 
 		modExt = parsed.getModifierExtension().get(0);
 		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-		assertEquals("1995-01-02", ((DateType)modExt.getValue()).getValueAsString());
+		assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
 
 		name = parsed.getName().get(0);
 
 		ext2 = name.getGiven().get(0).getExtension().get(0);
 		assertEquals("http://examples.com#givenext", ext2.getUrl());
-		assertEquals("given", ((StringType)ext2.getValue()).getValueAsString());
+		assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
 
 		given2ext = name.getGiven().get(1).getExtension().get(0);
 		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
 		Extension given2ext2 = given2ext.getExtension().get(0);
 		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-		assertEquals("CHILD", ((StringType)given2ext2.getValue()).getValue());
+		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
 	}
 

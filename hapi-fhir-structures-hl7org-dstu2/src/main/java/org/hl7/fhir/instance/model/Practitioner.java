@@ -147,302 +147,304 @@ public class Practitioner extends DomainResource {
 
     @Block()
     public static class PractitionerPractitionerRoleComponent extends BackboneElement {
-        /**
-         * The Organization where the Practitioner performs the roles associated.
-         */
-        @Child(name="managingOrganization", type={Organization.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="The Organization where the Practitioner performs the roles associated", formalDefinition="The Organization where the Practitioner performs the roles associated." )
-        protected Reference managingOrganization;
+      /**
+       * The Organization where the Practitioner performs the roles associated.
+       */
+      @Child(name = "managingOrganization", type = {Organization.class}, order = 1, min = 0, max = 1)
+      @Description(shortDefinition = "The Organization where the Practitioner performs the roles associated", formalDefinition = "The Organization where the Practitioner performs the roles associated.")
+      protected Reference managingOrganization;
 
-        /**
-         * The actual object that is the target of the reference (The Organization where the Practitioner performs the roles associated.)
-         */
-        protected Organization managingOrganizationTarget;
+      /**
+       * The actual object that is the target of the reference (The Organization where the Practitioner performs the roles associated.)
+       */
+      protected Organization managingOrganizationTarget;
 
-        /**
-         * Roles which this practitioner is authorized to perform for the organization.
-         */
-        @Child(name="role", type={CodeableConcept.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Roles which this practitioner may perform", formalDefinition="Roles which this practitioner is authorized to perform for the organization." )
-        protected CodeableConcept role;
+      /**
+       * Roles which this practitioner is authorized to perform for the organization.
+       */
+      @Child(name = "role", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
+      @Description(shortDefinition = "Roles which this practitioner may perform", formalDefinition = "Roles which this practitioner is authorized to perform for the organization.")
+      protected CodeableConcept role;
 
-        /**
-         * Specific specialty of the practitioner.
-         */
-        @Child(name="specialty", type={CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Specific specialty of the practitioner", formalDefinition="Specific specialty of the practitioner." )
-        protected List<CodeableConcept> specialty;
+      /**
+       * Specific specialty of the practitioner.
+       */
+      @Child(name = "specialty", type = {CodeableConcept.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+      @Description(shortDefinition = "Specific specialty of the practitioner", formalDefinition = "Specific specialty of the practitioner.")
+      protected List<CodeableConcept> specialty;
 
-        /**
-         * The period during which the person is authorized to act as a practitioner in these role(s) for the organization.
-         */
-        @Child(name="period", type={Period.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="The period during which the practitioner is authorized to perform in these role(s)", formalDefinition="The period during which the person is authorized to act as a practitioner in these role(s) for the organization." )
-        protected Period period;
+      /**
+       * The period during which the person is authorized to act as a practitioner in these role(s) for the organization.
+       */
+      @Child(name = "period", type = {Period.class}, order = 4, min = 0, max = 1)
+      @Description(shortDefinition = "The period during which the practitioner is authorized to perform in these role(s)", formalDefinition = "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.")
+      protected Period period;
 
-        /**
-         * The location(s) at which this practitioner provides care.
-         */
-        @Child(name="location", type={Location.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="The location(s) at which this practitioner provides care", formalDefinition="The location(s) at which this practitioner provides care." )
-        protected List<Reference> location;
-        /**
-         * The actual objects that are the target of the reference (The location(s) at which this practitioner provides care.)
-         */
-        protected List<Location> locationTarget;
-
-
-        /**
-         * The list of healthcare services that this worker offers at this location of this organization.
-         */
-        @Child(name="healthcareService", type={HealthcareService.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="The list of healthcare services that this worker offers at this location of this organization", formalDefinition="The list of healthcare services that this worker offers at this location of this organization." )
-        protected List<Reference> healthcareService;
-        /**
-         * The actual objects that are the target of the reference (The list of healthcare services that this worker offers at this location of this organization.)
-         */
-        protected List<HealthcareService> healthcareServiceTarget;
+      /**
+       * The location(s) at which this practitioner provides care.
+       */
+      @Child(name = "location", type = {Location.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+      @Description(shortDefinition = "The location(s) at which this practitioner provides care", formalDefinition = "The location(s) at which this practitioner provides care.")
+      protected List<Reference> location;
+      /**
+       * The actual objects that are the target of the reference (The location(s) at which this practitioner provides care.)
+       */
+      protected List<Location> locationTarget;
 
 
-        private static final long serialVersionUID = -2146177018L;
+      /**
+       * The list of healthcare services that this worker offers at this location of this organization.
+       */
+      @Child(name = "healthcareService", type = {HealthcareService.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+      @Description(shortDefinition = "The list of healthcare services that this worker offers at this location of this organization", formalDefinition = "The list of healthcare services that this worker offers at this location of this organization.")
+      protected List<Reference> healthcareService;
+      /**
+       * The actual objects that are the target of the reference (The list of healthcare services that this worker offers at this location of this organization.)
+       */
+      protected List<HealthcareService> healthcareServiceTarget;
+
+
+      private static final long serialVersionUID = -2146177018L;
 
       public PractitionerPractitionerRoleComponent() {
         super();
       }
 
-        /**
-         * @return {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
-         */
-        public Reference getManagingOrganization() { 
-          if (this.managingOrganization == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.managingOrganization");
-            else if (Configuration.doAutoCreate())
-              this.managingOrganization = new Reference(); // cc
-          return this.managingOrganization;
-        }
+      /**
+       * @return {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
+       */
+      public Reference getManagingOrganization() {
+        if (this.managingOrganization == null)
+          if (Configuration.errorOnAutoCreate())
+            throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.managingOrganization");
+          else if (Configuration.doAutoCreate())
+            this.managingOrganization = new Reference(); // cc
+        return this.managingOrganization;
+      }
 
-        public boolean hasManagingOrganization() { 
-          return this.managingOrganization != null && !this.managingOrganization.isEmpty();
-        }
+      public boolean hasManagingOrganization() {
+        return this.managingOrganization != null && !this.managingOrganization.isEmpty();
+      }
 
-        /**
-         * @param value {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
-         */
-        public PractitionerPractitionerRoleComponent setManagingOrganization(Reference value) { 
-          this.managingOrganization = value;
-          return this;
-        }
+      /**
+       * @param value {@link #managingOrganization} (The Organization where the Practitioner performs the roles associated.)
+       */
+      public PractitionerPractitionerRoleComponent setManagingOrganization(Reference value) {
+        this.managingOrganization = value;
+        return this;
+      }
 
-        /**
-         * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
-         */
-        public Organization getManagingOrganizationTarget() { 
-          if (this.managingOrganizationTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.managingOrganization");
-            else if (Configuration.doAutoCreate())
-              this.managingOrganizationTarget = new Organization(); // aa
-          return this.managingOrganizationTarget;
-        }
+      /**
+       * @return {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
+       */
+      public Organization getManagingOrganizationTarget() {
+        if (this.managingOrganizationTarget == null)
+          if (Configuration.errorOnAutoCreate())
+            throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.managingOrganization");
+          else if (Configuration.doAutoCreate())
+            this.managingOrganizationTarget = new Organization(); // aa
+        return this.managingOrganizationTarget;
+      }
 
-        /**
-         * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
-         */
-        public PractitionerPractitionerRoleComponent setManagingOrganizationTarget(Organization value) { 
-          this.managingOrganizationTarget = value;
-          return this;
-        }
+      /**
+       * @param value {@link #managingOrganization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization where the Practitioner performs the roles associated.)
+       */
+      public PractitionerPractitionerRoleComponent setManagingOrganizationTarget(Organization value) {
+        this.managingOrganizationTarget = value;
+        return this;
+      }
 
-        /**
-         * @return {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
-         */
-        public CodeableConcept getRole() { 
-          if (this.role == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.role");
-            else if (Configuration.doAutoCreate())
-              this.role = new CodeableConcept(); // cc
-          return this.role;
-        }
+      /**
+       * @return {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
+       */
+      public CodeableConcept getRole() {
+        if (this.role == null)
+          if (Configuration.errorOnAutoCreate())
+            throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.role");
+          else if (Configuration.doAutoCreate())
+            this.role = new CodeableConcept(); // cc
+        return this.role;
+      }
 
-        public boolean hasRole() { 
-          return this.role != null && !this.role.isEmpty();
-        }
+      public boolean hasRole() {
+        return this.role != null && !this.role.isEmpty();
+      }
 
-        /**
-         * @param value {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
-         */
-        public PractitionerPractitionerRoleComponent setRole(CodeableConcept value) { 
-          this.role = value;
-          return this;
-        }
+      /**
+       * @param value {@link #role} (Roles which this practitioner is authorized to perform for the organization.)
+       */
+      public PractitionerPractitionerRoleComponent setRole(CodeableConcept value) {
+        this.role = value;
+        return this;
+      }
 
-        /**
-         * @return {@link #specialty} (Specific specialty of the practitioner.)
-         */
-        public List<CodeableConcept> getSpecialty() { 
-          if (this.specialty == null)
-            this.specialty = new ArrayList<CodeableConcept>();
-          return this.specialty;
-        }
+      /**
+       * @return {@link #specialty} (Specific specialty of the practitioner.)
+       */
+      public List<CodeableConcept> getSpecialty() {
+        if (this.specialty == null)
+          this.specialty = new ArrayList<CodeableConcept>();
+        return this.specialty;
+      }
 
-        public boolean hasSpecialty() { 
-          if (this.specialty == null)
-            return false;
-          for (CodeableConcept item : this.specialty)
-            if (!item.isEmpty())
-              return true;
+      public boolean hasSpecialty() {
+        if (this.specialty == null)
           return false;
-        }
+        for (CodeableConcept item : this.specialty)
+          if (!item.isEmpty())
+            return true;
+        return false;
+      }
 
-        /**
-         * @return {@link #specialty} (Specific specialty of the practitioner.)
-         */
-    // syntactic sugar
-        public CodeableConcept addSpecialty() { //3
-          CodeableConcept t = new CodeableConcept();
-          if (this.specialty == null)
-            this.specialty = new ArrayList<CodeableConcept>();
-          this.specialty.add(t);
-          return t;
-        }
+      /**
+       * @return {@link #specialty} (Specific specialty of the practitioner.)
+       */
+      // syntactic sugar
+      public CodeableConcept addSpecialty() { //3
+        CodeableConcept t = new CodeableConcept();
+        if (this.specialty == null)
+          this.specialty = new ArrayList<CodeableConcept>();
+        this.specialty.add(t);
+        return t;
+      }
 
-        /**
-         * @return {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
-         */
-        public Period getPeriod() { 
-          if (this.period == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.period");
-            else if (Configuration.doAutoCreate())
-              this.period = new Period(); // cc
-          return this.period;
-        }
+      /**
+       * @return {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
+       */
+      public Period getPeriod() {
+        if (this.period == null)
+          if (Configuration.errorOnAutoCreate())
+            throw new Error("Attempt to auto-create PractitionerPractitionerRoleComponent.period");
+          else if (Configuration.doAutoCreate())
+            this.period = new Period(); // cc
+        return this.period;
+      }
 
-        public boolean hasPeriod() { 
-          return this.period != null && !this.period.isEmpty();
-        }
+      public boolean hasPeriod() {
+        return this.period != null && !this.period.isEmpty();
+      }
 
-        /**
-         * @param value {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
-         */
-        public PractitionerPractitionerRoleComponent setPeriod(Period value) { 
-          this.period = value;
-          return this;
-        }
+      /**
+       * @param value {@link #period} (The period during which the person is authorized to act as a practitioner in these role(s) for the organization.)
+       */
+      public PractitionerPractitionerRoleComponent setPeriod(Period value) {
+        this.period = value;
+        return this;
+      }
 
-        /**
-         * @return {@link #location} (The location(s) at which this practitioner provides care.)
-         */
-        public List<Reference> getLocation() { 
-          if (this.location == null)
-            this.location = new ArrayList<Reference>();
-          return this.location;
-        }
+      /**
+       * @return {@link #location} (The location(s) at which this practitioner provides care.)
+       */
+      public List<Reference> getLocation() {
+        if (this.location == null)
+          this.location = new ArrayList<Reference>();
+        return this.location;
+      }
 
-        public boolean hasLocation() { 
-          if (this.location == null)
-            return false;
-          for (Reference item : this.location)
-            if (!item.isEmpty())
-              return true;
+      public boolean hasLocation() {
+        if (this.location == null)
           return false;
-        }
+        for (Reference item : this.location)
+          if (!item.isEmpty())
+            return true;
+        return false;
+      }
 
-        /**
-         * @return {@link #location} (The location(s) at which this practitioner provides care.)
-         */
-    // syntactic sugar
-        public Reference addLocation() { //3
-          Reference t = new Reference();
-          if (this.location == null)
-            this.location = new ArrayList<Reference>();
-          this.location.add(t);
-          return t;
-        }
+      /**
+       * @return {@link #location} (The location(s) at which this practitioner provides care.)
+       */
+      // syntactic sugar
+      public Reference addLocation() { //3
+        Reference t = new Reference();
+        if (this.location == null)
+          this.location = new ArrayList<Reference>();
+        this.location.add(t);
+        return t;
+      }
 
-        /**
-         * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
-         */
-        public List<Location> getLocationTarget() { 
-          if (this.locationTarget == null)
-            this.locationTarget = new ArrayList<Location>();
-          return this.locationTarget;
-        }
+      /**
+       * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+       */
+      public List<Location> getLocationTarget() {
+        if (this.locationTarget == null)
+          this.locationTarget = new ArrayList<Location>();
+        return this.locationTarget;
+      }
 
-    // syntactic sugar
-        /**
-         * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
-         */
-        public Location addLocationTarget() { 
-          Location r = new Location();
-          if (this.locationTarget == null)
-            this.locationTarget = new ArrayList<Location>();
-          this.locationTarget.add(r);
-          return r;
-        }
+      // syntactic sugar
 
-        /**
-         * @return {@link #healthcareService} (The list of healthcare services that this worker offers at this location of this organization.)
-         */
-        public List<Reference> getHealthcareService() { 
-          if (this.healthcareService == null)
-            this.healthcareService = new ArrayList<Reference>();
-          return this.healthcareService;
-        }
+      /**
+       * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The location(s) at which this practitioner provides care.)
+       */
+      public Location addLocationTarget() {
+        Location r = new Location();
+        if (this.locationTarget == null)
+          this.locationTarget = new ArrayList<Location>();
+        this.locationTarget.add(r);
+        return r;
+      }
 
-        public boolean hasHealthcareService() { 
-          if (this.healthcareService == null)
-            return false;
-          for (Reference item : this.healthcareService)
-            if (!item.isEmpty())
-              return true;
+      /**
+       * @return {@link #healthcareService} (The list of healthcare services that this worker offers at this location of this organization.)
+       */
+      public List<Reference> getHealthcareService() {
+        if (this.healthcareService == null)
+          this.healthcareService = new ArrayList<Reference>();
+        return this.healthcareService;
+      }
+
+      public boolean hasHealthcareService() {
+        if (this.healthcareService == null)
           return false;
-        }
+        for (Reference item : this.healthcareService)
+          if (!item.isEmpty())
+            return true;
+        return false;
+      }
 
-        /**
-         * @return {@link #healthcareService} (The list of healthcare services that this worker offers at this location of this organization.)
-         */
-    // syntactic sugar
-        public Reference addHealthcareService() { //3
-          Reference t = new Reference();
-          if (this.healthcareService == null)
-            this.healthcareService = new ArrayList<Reference>();
-          this.healthcareService.add(t);
-          return t;
-        }
+      /**
+       * @return {@link #healthcareService} (The list of healthcare services that this worker offers at this location of this organization.)
+       */
+      // syntactic sugar
+      public Reference addHealthcareService() { //3
+        Reference t = new Reference();
+        if (this.healthcareService == null)
+          this.healthcareService = new ArrayList<Reference>();
+        this.healthcareService.add(t);
+        return t;
+      }
 
-        /**
-         * @return {@link #healthcareService} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker offers at this location of this organization.)
-         */
-        public List<HealthcareService> getHealthcareServiceTarget() { 
-          if (this.healthcareServiceTarget == null)
-            this.healthcareServiceTarget = new ArrayList<HealthcareService>();
-          return this.healthcareServiceTarget;
-        }
+      /**
+       * @return {@link #healthcareService} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker offers at this location of this organization.)
+       */
+      public List<HealthcareService> getHealthcareServiceTarget() {
+        if (this.healthcareServiceTarget == null)
+          this.healthcareServiceTarget = new ArrayList<HealthcareService>();
+        return this.healthcareServiceTarget;
+      }
 
-    // syntactic sugar
-        /**
-         * @return {@link #healthcareService} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker offers at this location of this organization.)
-         */
-        public HealthcareService addHealthcareServiceTarget() { 
-          HealthcareService r = new HealthcareService();
-          if (this.healthcareServiceTarget == null)
-            this.healthcareServiceTarget = new ArrayList<HealthcareService>();
-          this.healthcareServiceTarget.add(r);
-          return r;
-        }
+      // syntactic sugar
 
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The Organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
-          childrenList.add(new Property("role", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
-          childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
-          childrenList.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker offers at this location of this organization.", 0, java.lang.Integer.MAX_VALUE, healthcareService));
-        }
+      /**
+       * @return {@link #healthcareService} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The list of healthcare services that this worker offers at this location of this organization.)
+       */
+      public HealthcareService addHealthcareServiceTarget() {
+        HealthcareService r = new HealthcareService();
+        if (this.healthcareServiceTarget == null)
+          this.healthcareServiceTarget = new ArrayList<HealthcareService>();
+        this.healthcareServiceTarget.add(r);
+        return r;
+      }
+
+      protected void listChildren(List<Property> childrenList) {
+        super.listChildren(childrenList);
+        childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The Organization where the Practitioner performs the roles associated.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
+        childrenList.add(new Property("role", "CodeableConcept", "Roles which this practitioner is authorized to perform for the organization.", 0, java.lang.Integer.MAX_VALUE, role));
+        childrenList.add(new Property("specialty", "CodeableConcept", "Specific specialty of the practitioner.", 0, java.lang.Integer.MAX_VALUE, specialty));
+        childrenList.add(new Property("period", "Period", "The period during which the person is authorized to act as a practitioner in these role(s) for the organization.", 0, java.lang.Integer.MAX_VALUE, period));
+        childrenList.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
+        childrenList.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker offers at this location of this organization.", 0, java.lang.Integer.MAX_VALUE, healthcareService));
+      }
 
       public PractitionerPractitionerRoleComponent copy() {
         PractitionerPractitionerRoleComponent dst = new PractitionerPractitionerRoleComponent();
@@ -453,18 +455,21 @@ public class Practitioner extends DomainResource {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
+        ;
         dst.period = period == null ? null : period.copy();
         if (location != null) {
           dst.location = new ArrayList<Reference>();
           for (Reference i : location)
             dst.location.add(i.copy());
-        };
+        }
+        ;
         if (healthcareService != null) {
           dst.healthcareService = new ArrayList<Reference>();
           for (Reference i : healthcareService)
             dst.healthcareService.add(i.copy());
-        };
+        }
+        ;
         return dst;
       }
 
@@ -476,8 +481,8 @@ public class Practitioner extends DomainResource {
           return false;
         PractitionerPractitionerRoleComponent o = (PractitionerPractitionerRoleComponent) other;
         return compareDeep(managingOrganization, o.managingOrganization, true) && compareDeep(role, o.role, true)
-           && compareDeep(specialty, o.specialty, true) && compareDeep(period, o.period, true) && compareDeep(location, o.location, true)
-           && compareDeep(healthcareService, o.healthcareService, true);
+                && compareDeep(specialty, o.specialty, true) && compareDeep(period, o.period, true) && compareDeep(location, o.location, true)
+                && compareDeep(healthcareService, o.healthcareService, true);
       }
 
       @Override
@@ -492,13 +497,13 @@ public class Practitioner extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (managingOrganization == null || managingOrganization.isEmpty()) && (role == null || role.isEmpty())
-           && (specialty == null || specialty.isEmpty()) && (period == null || period.isEmpty()) && (location == null || location.isEmpty())
-           && (healthcareService == null || healthcareService.isEmpty());
+                && (specialty == null || specialty.isEmpty()) && (period == null || period.isEmpty()) && (location == null || location.isEmpty())
+                && (healthcareService == null || healthcareService.isEmpty());
       }
 
-  }
+    }
 
-    @Block()
+  @Block()
     public static class PractitionerQualificationComponent extends BackboneElement {
         /**
          * An identifier that applies to this person's qualification in this role.
@@ -711,82 +716,82 @@ public class Practitioner extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (code == null || code.isEmpty())
-           && (period == null || period.isEmpty()) && (issuer == null || issuer.isEmpty());
+                && (period == null || period.isEmpty()) && (issuer == null || issuer.isEmpty());
       }
 
   }
 
-    /**
-     * An identifier that applies to this person in this role.
-     */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="A identifier for the person as this agent", formalDefinition="An identifier that applies to this person in this role." )
-    protected List<Identifier> identifier;
+  /**
+   * An identifier that applies to this person in this role.
+   */
+  @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+  @Description(shortDefinition = "A identifier for the person as this agent", formalDefinition = "An identifier that applies to this person in this role.")
+  protected List<Identifier> identifier;
 
-    /**
-     * A name associated with the person.
-     */
-    @Child(name="name", type={HumanName.class}, order=1, min=0, max=1)
-    @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
-    protected HumanName name;
+  /**
+   * A name associated with the person.
+   */
+  @Child(name = "name", type = {HumanName.class}, order = 1, min = 0, max = 1)
+  @Description(shortDefinition = "A name associated with the person", formalDefinition = "A name associated with the person.")
+  protected HumanName name;
 
-    /**
-     * A contact detail for the practitioner, e.g. a telephone number or an email address.
-     */
-    @Child(name="telecom", type={ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+  /**
+   * A contact detail for the practitioner, e.g. a telephone number or an email address.
+   */
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the practitioner", formalDefinition="A contact detail for the practitioner, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * The postal address where the practitioner can be found or visited or to which mail can be delivered.
      */
-    @Child(name="address", type={Address.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where practitioner can be found/visited", formalDefinition="The postal address where the practitioner can be found or visited or to which mail can be delivered." )
     protected List<Address> address;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      */
-    @Child(name="gender", type={CodeType.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
+    @Child(name = "gender", type = {CodeType.class}, order = 4, min = 0, max = 1)
+    @Description(shortDefinition = "male | female | other | unknown", formalDefinition = "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.")
     protected Enumeration<AdministrativeGender> gender;
 
-    /**
-     * The date and time of birth for the practitioner.
-     */
-    @Child(name="birthDate", type={DateType.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="The date and time of birth for the practitioner", formalDefinition="The date and time of birth for the practitioner." )
-    protected DateType birthDate;
+  /**
+   * The date and time of birth for the practitioner.
+   */
+  @Child(name = "birthDate", type = {DateType.class}, order = 5, min = 0, max = 1)
+  @Description(shortDefinition = "The date and time of birth for the practitioner", formalDefinition = "The date and time of birth for the practitioner.")
+  protected DateType birthDate;
 
-    /**
-     * Image of the person.
-     */
-    @Child(name="photo", type={Attachment.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
-    protected List<Attachment> photo;
+  /**
+   * Image of the person.
+   */
+  @Child(name = "photo", type = {Attachment.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+  @Description(shortDefinition = "Image of the person", formalDefinition = "Image of the person.")
+  protected List<Attachment> photo;
 
-    /**
-     * The list of Roles/Organizations that the Practitioner is associated with.
-     */
-    @Child(name="practitionerRole", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="The list of Roles/Organizations that the Practitioner is associated with", formalDefinition="The list of Roles/Organizations that the Practitioner is associated with." )
-    protected List<PractitionerPractitionerRoleComponent> practitionerRole;
+  /**
+   * The list of Roles/Organizations that the Practitioner is associated with.
+   */
+  @Child(name = "practitionerRole", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+  @Description(shortDefinition = "The list of Roles/Organizations that the Practitioner is associated with", formalDefinition = "The list of Roles/Organizations that the Practitioner is associated with.")
+  protected List<PractitionerPractitionerRoleComponent> practitionerRole;
 
-    /**
-     * Qualifications obtained by training and certification.
-     */
-    @Child(name="qualification", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Qualifications obtained by training and certification", formalDefinition="Qualifications obtained by training and certification." )
-    protected List<PractitionerQualificationComponent> qualification;
+  /**
+   * Qualifications obtained by training and certification.
+   */
+  @Child(name = "qualification", type = {}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
+  @Description(shortDefinition = "Qualifications obtained by training and certification", formalDefinition = "Qualifications obtained by training and certification.")
+  protected List<PractitionerQualificationComponent> qualification;
 
-    /**
-     * A language the practitioner is able to use in patient communication.
-     */
-    @Child(name="communication", type={CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="A language the practitioner is able to use in patient communication", formalDefinition="A language the practitioner is able to use in patient communication." )
-    protected List<CodeableConcept> communication;
+  /**
+   * A language the practitioner is able to use in patient communication.
+   */
+  @Child(name = "communication", type = {CodeableConcept.class}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
+  @Description(shortDefinition = "A language the practitioner is able to use in patient communication", formalDefinition = "A language the practitioner is able to use in patient communication.")
+  protected List<CodeableConcept> communication;
 
-    private static final long serialVersionUID = 781100268L;
+  private static final long serialVersionUID = 781100268L;
 
     public Practitioner() {
       super();
@@ -978,7 +983,7 @@ public class Practitioner extends DomainResource {
     /**
      * @param value {@link #birthDate} (The date and time of birth for the practitioner.). This is the underlying object with id, value and extensions. The accessor "getBirthDate" gives direct access to the value
      */
-    public Practitioner setBirthDateElement(DateType value) { 
+    public Practitioner setBirthDateElement(DateType value) {
       this.birthDate = value;
       return this;
     }
@@ -986,14 +991,14 @@ public class Practitioner extends DomainResource {
     /**
      * @return The date and time of birth for the practitioner.
      */
-    public Date getBirthDate() { 
+    public Date getBirthDate() {
       return this.birthDate == null ? null : this.birthDate.getValue();
     }
 
-    /**
-     * @param value The date and time of birth for the practitioner.
+  /**
+   * @param value The date and time of birth for the practitioner.
      */
-    public Practitioner setBirthDate(Date value) { 
+    public Practitioner setBirthDate(Date value) {
       if (value == null)
         this.birthDate = null;
       else {
@@ -1034,32 +1039,32 @@ public class Practitioner extends DomainResource {
       return t;
     }
 
-    /**
-     * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
-     */
-    public List<PractitionerPractitionerRoleComponent> getPractitionerRole() { 
-      if (this.practitionerRole == null)
-        this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
-      return this.practitionerRole;
-    }
+  /**
+   * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
+   */
+  public List<PractitionerPractitionerRoleComponent> getPractitionerRole() {
+    if (this.practitionerRole == null)
+      this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
+    return this.practitionerRole;
+  }
 
-    public boolean hasPractitionerRole() { 
-      if (this.practitionerRole == null)
-        return false;
-      for (PractitionerPractitionerRoleComponent item : this.practitionerRole)
-        if (!item.isEmpty())
-          return true;
+  public boolean hasPractitionerRole() {
+    if (this.practitionerRole == null)
       return false;
-    }
+    for (PractitionerPractitionerRoleComponent item : this.practitionerRole)
+      if (!item.isEmpty())
+        return true;
+    return false;
+  }
 
-    /**
-     * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
-     */
-    // syntactic sugar
-    public PractitionerPractitionerRoleComponent addPractitionerRole() { //3
-      PractitionerPractitionerRoleComponent t = new PractitionerPractitionerRoleComponent();
-      if (this.practitionerRole == null)
-        this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
+  /**
+   * @return {@link #practitionerRole} (The list of Roles/Organizations that the Practitioner is associated with.)
+   */
+  // syntactic sugar
+  public PractitionerPractitionerRoleComponent addPractitionerRole() { //3
+    PractitionerPractitionerRoleComponent t = new PractitionerPractitionerRoleComponent();
+    if (this.practitionerRole == null)
+      this.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
       this.practitionerRole.add(t);
       return t;
     }
@@ -1163,7 +1168,8 @@ public class Practitioner extends DomainResource {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)
             dst.photo.add(i.copy());
-        };
+        }
+        ;
         if (practitionerRole != null) {
           dst.practitionerRole = new ArrayList<PractitionerPractitionerRoleComponent>();
           for (PractitionerPractitionerRoleComponent i : practitionerRole)
@@ -1194,8 +1200,8 @@ public class Practitioner extends DomainResource {
           return false;
         Practitioner o = (Practitioner) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
-           && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true)
-           && compareDeep(photo, o.photo, true) && compareDeep(practitionerRole, o.practitionerRole, true)
+                && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true) && compareDeep(birthDate, o.birthDate, true)
+                && compareDeep(photo, o.photo, true) && compareDeep(practitionerRole, o.practitionerRole, true)
            && compareDeep(qualification, o.qualification, true) && compareDeep(communication, o.communication, true)
           ;
       }
@@ -1210,44 +1216,44 @@ public class Practitioner extends DomainResource {
         return compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true);
       }
 
-      public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty()) && (gender == null || gender.isEmpty())
-           && (birthDate == null || birthDate.isEmpty()) && (photo == null || photo.isEmpty()) && (practitionerRole == null || practitionerRole.isEmpty())
-           && (qualification == null || qualification.isEmpty()) && (communication == null || communication.isEmpty())
-          ;
-      }
+  public boolean isEmpty() {
+    return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
+            && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty()) && (gender == null || gender.isEmpty())
+            && (birthDate == null || birthDate.isEmpty()) && (photo == null || photo.isEmpty()) && (practitionerRole == null || practitionerRole.isEmpty())
+                && (qualification == null || qualification.isEmpty()) && (communication == null || communication.isEmpty())
+            ;
+  }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.Practitioner;
-   }
+  }
 
-  @SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token" )
+  @SearchParamDefinition(name = "identifier", path = "Practitioner.identifier", description = "A practitioner's Identifier", type = "token")
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name", type="string" )
+  @SearchParamDefinition(name="given", path = "Practitioner.name", description = "A portion of the given name", type = "string")
   public static final String SP_GIVEN = "given";
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specailty at an organization", type="token" )
+  @SearchParamDefinition(name = "specialty", path = "Practitioner.practitionerRole.specialty", description = "The practitioner has this specailty at an organization", type = "token")
   public static final String SP_SPECIALTY = "specialty";
-  @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
+  @SearchParamDefinition(name="address", path="Practitioner.address", description = "An address in any kind of address/part", type = "string")
   public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
+  @SearchParamDefinition(name = "role", path = "Practitioner.practitionerRole.role", description = "The practitioner can perform this role at for the organization", type = "token")
   public static final String SP_ROLE = "role";
-  @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token" )
+  @SearchParamDefinition(name = "gender", path = "Practitioner.gender", description = "Gender of the practitioner", type = "token")
   public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name = "phonetic", path = "Practitioner.name", description = "A portion of either family or given name using some kind of phonetic matching algorithm", type = "string")
   public static final String SP_PHONETIC = "phonetic";
-  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.managingOrganization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
+  @SearchParamDefinition(name = "organization", path = "Practitioner.practitionerRole.managingOrganization", description = "The identity of the organization the practitioner represents / acts on behalf of", type = "reference")
   public static final String SP_ORGANIZATION = "organization";
-  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
+  @SearchParamDefinition(name="name", path = "Practitioner.name", description = "A portion of either family or given name", type = "string")
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="string" )
+  @SearchParamDefinition(name="telecom", path= "Practitioner.telecom", description = "The value in any kind of contact", type = "string")
   public static final String SP_TELECOM = "telecom";
-  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
+  @SearchParamDefinition(name = "location", path = "Practitioner.practitionerRole.location", description = "One of the locations at which this practitioner provides care", type = "reference")
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string" )
+  @SearchParamDefinition(name = "family", path = "Practitioner.name", description = "A portion of the family name", type = "string")
   public static final String SP_FAMILY = "family";
-  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
+  @SearchParamDefinition(name = "communication", path = "Practitioner.communication", description = "One of the languages that the practitioner can communicate with", type = "token")
   public static final String SP_COMMUNICATION = "communication";
 
 }
