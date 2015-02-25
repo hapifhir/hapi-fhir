@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +60,41 @@ public class BinaryTest {
 		ourLast = null;
 	}
 
+	@Test
+	public void testReadWithExplicitTypeXml() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_XML + ";"));
+		
+		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+	}
+
+	@Test
+	public void testReadWithExplicitTypeJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), "UTF-8");
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info(responseContent);
+		
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), startsWith(Constants.CT_FHIR_JSON + ";"));
+		
+		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
+		assertEquals("foo", bin.getContentType());
+		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+	}
+
+	
 	@Test
 	public void testCreate() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");

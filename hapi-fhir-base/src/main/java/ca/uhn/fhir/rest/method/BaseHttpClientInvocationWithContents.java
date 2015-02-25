@@ -47,7 +47,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
@@ -235,7 +235,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeBundleToString(myBundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myResources != null) {
-				Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
+				Bundle bundle = RestfulServerUtils.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
 				contents = parser.encodeBundleToString(bundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myContents != null) {

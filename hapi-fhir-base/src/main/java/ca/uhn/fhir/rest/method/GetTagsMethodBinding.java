@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -167,7 +168,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			}
 		}
 		
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
 
 		HttpServletResponse response = theRequest.getServletResponse();
 		response.setContentType(responseEncoding.getResourceContentType());
@@ -177,7 +178,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		theServer.addHeadersToResponse(response);
 
 		IParser parser = responseEncoding.newParser(getContext());
-		parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
+		parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
 		PrintWriter writer = response.getWriter();
 		try {
 			parser.encodeTagListToWriter(resp, writer);

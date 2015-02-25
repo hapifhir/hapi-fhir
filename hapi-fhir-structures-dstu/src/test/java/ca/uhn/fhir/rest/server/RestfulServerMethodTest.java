@@ -104,7 +104,7 @@ public class RestfulServerMethodTest {
 		
 		p.getManagingOrganization().setResource(o);
 		
-		Bundle bundle = RestfulServer.createBundleFromResourceList(ourCtx, "", resources, "http://foo", "http://foo", 2, null);
+		Bundle bundle = RestfulServerUtils.createBundleFromResourceList(ourCtx, "", resources, "http://foo", "http://foo", 2, null);
 		assertEquals(2, bundle.getEntries().size());
 	}
 	

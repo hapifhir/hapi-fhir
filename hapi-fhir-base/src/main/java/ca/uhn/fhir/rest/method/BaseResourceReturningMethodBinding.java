@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -212,13 +213,13 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
-		boolean prettyPrint = RestfulServer.prettyPrintResponse(theRequest);
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequest);
 
 		// Narrative mode
-		NarrativeModeEnum narrativeMode = RestfulServer.determineNarrativeMode(theRequest);
+		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -238,7 +239,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 		}
 
-		Integer count = RestfulServer.extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
 
 		boolean respondGzip = theRequest.isRespondGzip();
 
@@ -249,11 +250,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 				IResource resource = (IResource) resultObj;
-				RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
 				IBundleProvider result = (IBundleProvider) resultObj;
-				Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
+				Bundle bundle = RestfulServerUtils.createBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null, getResponseBundleType());
 	
 				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 					IServerInterceptor next = theServer.getInterceptors().get(i);
@@ -263,7 +264,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 					}
 				}
 	
-				RestfulServer.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
+				RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
 				break;
 			}
 		}
@@ -285,7 +286,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			}
 
-			RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 			break;
 		}
 		}

@@ -110,8 +110,8 @@ public class PagingTest {
 
 	}
 
-	@Test
-	public void testSearchSmallPages() throws Exception {
+	@Test()
+	public void testExplicitEncoding() throws Exception {
 		when(myPagingProvider.getDefaultPageSize()).thenReturn(5);
 		when(myPagingProvider.getMaximumPageSize()).thenReturn(9);
 		when(myPagingProvider.storeResultList(any(IBundleProvider.class))).thenReturn("ABCD");
@@ -120,7 +120,7 @@ public class PagingTest {
 		String link;
 		String base = "http://localhost:" + ourPort;
 		{
-			HttpGet httpGet = new HttpGet(base + "/Patient?_count=2");
+			HttpGet httpGet = new HttpGet(base + "/Patient?_count=2&_format=xml");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -145,9 +145,51 @@ public class PagingTest {
 			assertEquals(2, bundle.getEntries().size());
 			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
-			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkSelf().getValue());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkPrevious().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
+			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkSelf().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2", bundle.getLinkPrevious().getValue());
+		}
+	}
+	
+	
+	@Test
+	public void testSearchSmallPages() throws Exception {
+		when(myPagingProvider.getDefaultPageSize()).thenReturn(5);
+		when(myPagingProvider.getMaximumPageSize()).thenReturn(9);
+		when(myPagingProvider.storeResultList(any(IBundleProvider.class))).thenReturn("ABCD");
+		when(myPagingProvider.retrieveResultList(eq("ABCD"))).thenReturn(ourBundleProvider);
+
+		String link;
+		String base = "http://localhost:" + ourPort;
+		{
+			HttpGet httpGet = new HttpGet(base + "/Patient?_count=2");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
+			assertEquals(2, bundle.getEntries().size());
+			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
+			assertEquals("1", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
+			assertNull(bundle.getLinkPrevious().getValue());
+			link = bundle.getLinkNext().getValue();
+		}
+		{
+			HttpGet httpGet = new HttpGet(link);
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
+			assertEquals(2, bundle.getEntries().size());
+			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
+			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
+			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkSelf().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2", bundle.getLinkPrevious().getValue());
 		}
 
 	}

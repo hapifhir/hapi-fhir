@@ -23,30 +23,20 @@ package ca.uhn.fhir.rest.server;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,28 +44,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.client.utils.DateUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.Tag;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -101,10 +78,11 @@ public class RestfulServer extends HttpServlet {
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
+	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
 	private String myImplementationDescription;
@@ -120,6 +98,7 @@ public class RestfulServer extends HttpServlet {
 	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
+
 	private boolean myStarted;
 
 	private boolean myUseBrowserFriendlyContentTypes;
@@ -138,8 +117,7 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * This method is called prior to sending a response to incoming requests. It is used to add custom headers.
 	 * <p>
-	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid
-	 * inadvertantly disabling functionality.
+	 * Use caution if overriding this method: it is recommended to call <code>super.addHeadersToResponse</code> to avoid inadvertantly disabling functionality.
 	 * </p>
 	 */
 	public void addHeadersToResponse(HttpServletResponse theHttpResponse) {
@@ -316,6 +294,14 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
+	 * Returns the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with the <code>_format</code> URL parameter, or with an <code>Accept</code> header
+	 * in the request. The default is {@link EncodingEnum#XML}.
+	 */
+	public EncodingEnum getDefaultResponseEncoding() {
+		return myDefaultResponseEncoding;
+	}
+
+	/**
 	 * Returns the server support for ETags (will not be <code>null</code>). Default is {@link #DEFAULT_ETAG_SUPPORT}
 	 */
 	public ETagSupportEnum getETagSupport() {
@@ -323,8 +309,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
-	 * providers should generally use this context if one is needed, as opposed to creating their own.
+	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain providers should generally use this context if one is needed, as opposed to
+	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
 		return myFhirContext;
@@ -354,6 +340,21 @@ public class RestfulServer extends HttpServlet {
 		return myPlainProviders;
 	}
 
+	/**
+	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path implementation
+	 *
+	 * @param requestFullPath
+	 *            the full request path
+	 * @param servletContextPath
+	 *            the servelet context path
+	 * @param servletPath
+	 *            the servelet path
+	 * @return created resource path
+	 */
+	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
+		return requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
+	}
+
 	public Collection<ResourceBinding> getResourceBindings() {
 		return myResourceNameToProvider.values();
 	}
@@ -366,8 +367,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Get the server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public IServerAddressStrategy getServerAddressStrategy() {
 		return myServerAddressStrategy;
@@ -384,11 +384,9 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement if one has been explicitly defined.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement if one has been explicitly defined.
 	 * <p>
-	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or
-	 * set to <code>null</code> to use the appropriate one for the given FHIR version.
+	 * By default, the ServerConformanceProvider for the declared version of FHIR is used, but this can be changed, or set to <code>null</code> to use the appropriate one for the given FHIR version.
 	 * </p>
 	 */
 	public Object getServerConformanceProvider() {
@@ -396,8 +394,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Gets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 *
 	 * @see RestfulServer#setServerName(String)
 	 */
@@ -410,8 +407,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public String getServerVersion() {
 		return myServerVersion;
@@ -430,27 +426,28 @@ public class RestfulServer extends HttpServlet {
 			return;
 		}
 
-		Integer count = extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
 		if (count == null) {
 			count = getPagingProvider().getDefaultPageSize();
 		} else if (count > getPagingProvider().getMaximumPageSize()) {
 			count = getPagingProvider().getMaximumPageSize();
 		}
 
-		Integer offsetI = tryToExtractNamedParameter(theRequest.getServletRequest(), Constants.PARAM_PAGINGOFFSET);
+		Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest.getServletRequest(), Constants.PARAM_PAGINGOFFSET);
 		if (offsetI == null || offsetI < 0) {
 			offsetI = 0;
 		}
 
 		int start = Math.min(offsetI, resultList.size() - 1);
 
-		EncodingEnum responseEncoding = determineResponseEncoding(theRequest.getServletRequest());
-		boolean prettyPrint = prettyPrintResponse(theRequest);
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
-		NarrativeModeEnum narrativeMode = determineNarrativeMode(theRequest);
+		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		Bundle bundle = createBundleFromBundleProvider(this, theResponse, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, start, count, thePagingAction, null);
+		Bundle bundle = RestfulServerUtils.createBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint,
+				start, count, thePagingAction, null);
 
 		for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = getInterceptors().get(i);
@@ -461,7 +458,7 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
+		RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
 
 	}
 
@@ -509,7 +506,7 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			fhirServerBase = getServerBaseForRequest(theRequest);
-			
+
 			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
@@ -558,7 +555,7 @@ public class RestfulServer extends HttpServlet {
 						operation = Constants.PARAM_HISTORY;
 					}
 				} else if (nextString.startsWith("_")) {
-					//FIXME: this would be untrue for _meta/_delete
+					// FIXME: this would be untrue for _meta/_delete
 					if (operation != null) {
 						throw new InvalidRequestException("URL Path contains two operations (part beginning with _): " + requestPath);
 					}
@@ -684,8 +681,7 @@ public class RestfulServer extends HttpServlet {
 		} catch (Throwable e) {
 
 			/*
-			 * We have caught an exception while handling an incoming server request. Start by notifying the
-			 * interceptors..
+			 * We have caught an exception while handling an incoming server request. Start by notifying the interceptors..
 			 */
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
@@ -740,7 +736,8 @@ public class RestfulServer extends HttpServlet {
 				ourLog.error("Unknown error during processing", e);
 			}
 
-			streamResponseAsResource(this, theResponse, oo, determineResponseEncoding(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL,
+					statusCode, false, fhirServerBase);
 
 			theResponse.setStatus(statusCode);
 			addHeadersToResponse(theResponse);
@@ -753,9 +750,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
-	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
-	 * initialization of the restful server's internal init.
+	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations, but subclasses may put initialization code in {@link #initialize()}, which is
+	 * called immediately before beginning initialization of the restful server's internal init.
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -778,7 +774,8 @@ public class RestfulServer extends HttpServlet {
 
 					String resourceName = myFhirContext.getResourceDefinition(resourceType).getName();
 					if (typeToProvider.containsKey(resourceName)) {
-						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + typeToProvider.get(resourceName).getClass().getCanonicalName() + "] and Second[" + nextProvider.getClass().getCanonicalName() + "]");
+						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + typeToProvider.get(resourceName).getClass().getCanonicalName()
+								+ "] and Second[" + nextProvider.getClass().getCanonicalName() + "]");
 					}
 					typeToProvider.put(resourceName, nextProvider);
 					providedResourceScanner.scanForProvidedResources(nextProvider);
@@ -816,8 +813,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the
-	 * server being used.
+	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default
@@ -864,9 +860,8 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER}
-	 * (which is the default), the server will automatically add a profile tag based on the class of the resource(s)
-	 * being returned.
+	 * Sets the profile tagging behaviour for the server. When set to a value other than {@link AddProfileTagEnum#NEVER} (which is the default), the server will automatically add a profile tag based
+	 * on the class of the resource(s) being returned.
 	 *
 	 * @param theAddProfileTag
 	 *            The behaviour enum (must not be null)
@@ -877,8 +872,16 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is
-	 * {@link #DEFAULT_ETAG_SUPPORT}
+	 * Sets the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with the <code>_format</code> URL parameter, or with an <code>Accept</code> header in
+	 * the request. The default is {@link EncodingEnum#XML}.
+	 */
+	public void setDefaultResponseEncoding(EncodingEnum theDefaultResponseEncoding) {
+		Validate.notNull(theDefaultResponseEncoding, "theDefaultResponseEncoding can not be null");
+		myDefaultResponseEncoding = theDefaultResponseEncoding;
+	}
+
+	/**
+	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is {@link #DEFAULT_ETAG_SUPPORT}
 	 * 
 	 * @param theETagSupport
 	 *            The ETag support mode
@@ -974,8 +977,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this
-	 * server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
+	 * Provide a server address strategy, which is used to determine what base URL to provide clients to refer to this server. Defaults to an instance of {@link IncomingRequestAddressStrategy}
 	 */
 	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		Validate.notNull(theServerAddressStrategy, "Server address strategy can not be null");
@@ -983,17 +985,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance
-	 * (metadata) statement.
+	 * Returns the server conformance provider, which is the provider that is used to generate the server's conformance (metadata) statement.
 	 * <p>
-	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can
-	 * be changed, or set to <code>null</code> if you do not wish to export a conformance statement.
+	 * By default, the ServerConformanceProvider implementation for the declared version of FHIR is used, but this can be changed, or set to <code>null</code> if you do not wish to export a
+	 * conformance statement.
 	 * </p>
 	 * Note that this method can only be called before the server is initialized.
 	 *
 	 * @throws IllegalStateException
-	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an
-	 *             {@link IllegalStateException} if called after that.
+	 *             Note that this method can only be called prior to {@link #init() initialization} and will throw an {@link IllegalStateException} if called after that.
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
 		if (myStarted) {
@@ -1003,24 +1003,22 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
-	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only,
-	 * but can be helpful to set with something appropriate.
+	 * Sets the server's name, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerName(String theServerName) {
 		myServerName = theServerName;
 	}
 
 	/**
-	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational
-	 * only, but can be helpful to set with something appropriate.
+	 * Gets the server's version, as exported in conformance profiles exported by the server. This is informational only, but can be helpful to set with something appropriate.
 	 */
 	public void setServerVersion(String theServerVersion) {
 		myServerVersion = theServerVersion;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of
-	 * standard FHIR ones) when it detects that the request is coming from a browser instead of a FHIR
+	 * If set to <code>true</code> (default is false), the server will use browser friendly content-types (instead of standard FHIR ones) when it detects that the request is coming from a browser
+	 * instead of a FHIR
 	 */
 	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
 		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
@@ -1039,512 +1037,11 @@ public class RestfulServer extends HttpServlet {
 		theResponse.getWriter().write(theException.getMessage());
 	}
 
-	private static void addProfileToBundleEntry(FhirContext theContext, IResource theResource, String theServerBase) {
-
-		TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
-		if (tl == null) {
-			tl = new TagList();
-			ResourceMetadataKeyEnum.TAG_LIST.put(theResource, tl);
-		}
-
-		RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-		String profile = nextDef.getResourceProfile(theServerBase);
-		if (isNotBlank(profile)) {
-			tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
-		}
-	}
-
-	public static Bundle createBundleFromBundleProvider(RestfulServer theServer, HttpServletResponse theHttpResponse, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, boolean theRequestIsBrowser,
-			NarrativeModeEnum theNarrativeMode, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType) {
-		theHttpResponse.setStatus(200);
-
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getBundleContentType());
-		}
-
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
-
-		theServer.addHeadersToResponse(theHttpResponse);
-
-		int numToReturn;
-		String searchId = null;
-		List<IResource> resourceList;
-		if (theServer.getPagingProvider() == null) {
-			numToReturn = theResult.size();
-			resourceList = theResult.getResources(0, numToReturn);
-			validateResourceListNotNull(resourceList);
-
-		} else {
-			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null) {
-				numToReturn = pagingProvider.getDefaultPageSize();
-			} else {
-				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
-			}
-
-			numToReturn = Math.min(numToReturn, theResult.size() - theOffset);
-			resourceList = theResult.getResources(theOffset, numToReturn + theOffset);
-			validateResourceListNotNull(resourceList);
-
-			if (theSearchId != null) {
-				searchId = theSearchId;
-			} else {
-				if (theResult.size() > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResult);
-					Validate.notNull(searchId, "Paging provider returned null searchId");
-				}
-			}
-		}
-
-		for (IResource next : resourceList) {
-			if (next.getId() == null || next.getId().isEmpty()) {
-				if (!(next instanceof BaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
-				}
-			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (IResource nextRes : resourceList) {
-				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
-				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-					addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
-				}
-			}
-		}
-
-		Bundle bundle = createBundleFromResourceList(theServer.getFhirContext(), theServer.getServerName(), resourceList, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
-
-		bundle.setPublished(theResult.getPublished());
-
-		if (theServer.getPagingProvider() != null) {
-			int limit;
-			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-			if (searchId != null) {
-				if (theOffset + numToReturn < theResult.size()) {
-					bundle.getLinkNext().setValue(createPagingLink(theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
-				}
-				if (theOffset > 0) {
-					int start = Math.max(0, theOffset - limit);
-					bundle.getLinkPrevious().setValue(createPagingLink(theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
-				}
-			}
-		}
-		return bundle;
-	}
-
-	public static Bundle createBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
-		Bundle bundle = new Bundle();
-		bundle.getAuthorName().setValue(theAuthor);
-		bundle.getBundleId().setValue(UUID.randomUUID().toString());
-		bundle.getPublished().setToCurrentTimeInLocalTimeZone();
-		bundle.getLinkBase().setValue(theServerBase);
-		bundle.getLinkSelf().setValue(theCompleteUrl);
-		bundle.getType().setValueAsEnum(theBundleType);
-
-		List<IResource> includedResources = new ArrayList<IResource>();
-		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
-
-		for (IResource next : theResult) {
-			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add(next.getId());
-			}
-		}
-
-		for (IResource next : theResult) {
-
-			Set<String> containedIds = new HashSet<String>();
-			for (IResource nextContained : next.getContained().getContainedResources()) {
-				if (nextContained.getId().isEmpty() == false) {
-					containedIds.add(nextContained.getId().getValue());
-				}
-			}
-
-			if (theContext.getNarrativeGenerator() != null) {
-				String title = theContext.getNarrativeGenerator().generateTitle(next);
-				ourLog.trace("Narrative generator created title: {}", title);
-				if (StringUtils.isNotBlank(title)) {
-					ResourceMetadataKeyEnum.TITLE.put(next, title);
-				}
-			} else {
-				ourLog.trace("No narrative generator specified");
-			}
-
-			List<BaseResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
-			do {
-				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
-
-				for (BaseResourceReferenceDt nextRef : references) {
-					IResource nextRes = nextRef.getResource();
-					if (nextRes != null) {
-						if (nextRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRes.getId().getValue())) {
-								// Don't add contained IDs as top level resources
-								continue;
-							}
-
-							IdDt id = nextRes.getId();
-							if (id.hasResourceType() == false) {
-								String resName = theContext.getResourceDefinition(nextRes).getName();
-								id = id.withResourceType(resName);
-							}
-
-							if (!addedResourceIds.contains(id)) {
-								addedResourceIds.add(id);
-								addedResourcesThisPass.add(nextRes);
-							}
-
-						}
-					}
-				}
-
-				// Linked resources may themselves have linked resources
-				references = new ArrayList<BaseResourceReferenceDt>();
-				for (IResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
-					references.addAll(newReferences);
-				}
-
-				includedResources.addAll(addedResourcesThisPass);
-
-			} while (references.isEmpty() == false);
-
-			bundle.addResource(next, theContext, theServerBase);
-
-		}
-
-		/*
-		 * Actually add the resources to the bundle
-		 */
-		for (IResource next : includedResources) {
-			BundleEntry entry = bundle.addResource(next, theContext, theServerBase);
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				if (entry.getSearchMode().isEmpty()) {
-					entry.getSearchMode().setValueAsEnum(BundleEntrySearchModeEnum.INCLUDE);
-				}
-			}
-		}
-
-		bundle.getTotalResults().setValue(theTotalResults);
-		return bundle;
-	}
-
-	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
-		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
-		b.append('?');
-		b.append(Constants.PARAM_PAGINGACTION);
-		b.append('=');
-		try {
-			b.append(URLEncoder.encode(theSearchId, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new Error("UTF-8 not supported", e);// should not happen
-		}
-		b.append('&');
-		b.append(Constants.PARAM_PAGINGOFFSET);
-		b.append('=');
-		b.append(theOffset);
-		b.append('&');
-		b.append(Constants.PARAM_COUNT);
-		b.append('=');
-		b.append(theCount);
-		b.append('&');
-		b.append(Constants.PARAM_FORMAT);
-		b.append('=');
-		b.append(theResponseEncoding.getRequestContentType());
-		if (thePrettyPrint) {
-			b.append('&');
-			b.append(Constants.PARAM_PRETTY);
-			b.append('=');
-			b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
-		}
-		return b.toString();
-	}
-
-	public static NarrativeModeEnum determineNarrativeMode(RequestDetails theRequest) {
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
-		NarrativeModeEnum narrativeMode = null;
-		if (narrative != null && narrative.length > 0) {
-			narrativeMode = NarrativeModeEnum.valueOfCaseInsensitive(narrative[0]);
-		}
-		if (narrativeMode == null) {
-			narrativeMode = NarrativeModeEnum.NORMAL;
-		}
-		return narrativeMode;
-	}
-
-	public static EncodingEnum determineRequestEncoding(Request theReq) {
-		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				String nextAcceptHeaderValue = acceptValues.nextElement();
-				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-					for (String nextPart : nextAcceptHeaderValue.split(",")) {
-						int scIdx = nextPart.indexOf(';');
-						if (scIdx == 0) {
-							continue;
-						}
-						if (scIdx != -1) {
-							nextPart = nextPart.substring(0, scIdx);
-						}
-						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
-						if (retVal != null) {
-							return retVal;
-						}
-					}
-				}
-			}
-		}
-		return EncodingEnum.XML;
-	}
-
-	/**
-	 * Determine whether a response should be given in JSON or XML format based on the incoming HttpServletRequest's
-	 * <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
-	 */
-	public static EncodingEnum determineResponseEncoding(HttpServletRequest theReq) {
-		String[] format = theReq.getParameterValues(Constants.PARAM_FORMAT);
-		if (format != null) {
-			for (String nextFormat : format) {
-				EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextFormat);
-				if (retVal != null) {
-					return retVal;
-				}
-			}
-		}
-
-		Enumeration<String> acceptValues = theReq.getHeaders(Constants.HEADER_ACCEPT);
-		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
-				String nextAcceptHeaderValue = acceptValues.nextElement();
-				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-					for (String nextPart : nextAcceptHeaderValue.split(",")) {
-						int scIdx = nextPart.indexOf(';');
-						if (scIdx == 0) {
-							continue;
-						}
-						if (scIdx != -1) {
-							nextPart = nextPart.substring(0, scIdx);
-						}
-						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
-						if (retVal != null) {
-							return retVal;
-						}
-					}
-				}
-			}
-		}
-		return EncodingEnum.XML;
-	}
-
-	public static Integer extractCountParameter(HttpServletRequest theRequest) {
-		String name = Constants.PARAM_COUNT;
-		return tryToExtractNamedParameter(theRequest, name);
-	}
-
-	public static IParser getNewParser(FhirContext theContext, EncodingEnum theResponseEncoding, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode) {
-		IParser parser;
-		switch (theResponseEncoding) {
-		case JSON:
-			parser = theContext.newJsonParser();
-			break;
-		case XML:
-		default:
-			parser = theContext.newXmlParser();
-			break;
-		}
-		return parser.setPrettyPrint(thePrettyPrint).setSuppressNarratives(theNarrativeMode == NarrativeModeEnum.SUPPRESS);
-	}
-
-	private static Writer getWriter(HttpServletResponse theHttpResponse, boolean theRespondGzip) throws UnsupportedEncodingException, IOException {
-		Writer writer;
-		if (theRespondGzip) {
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			writer = new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), "UTF-8");
-		} else {
-			writer = theHttpResponse.getWriter();
-		}
-		return writer;
-	}
-
-	public static boolean prettyPrintResponse(Request theRequest) {
-		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
-		boolean prettyPrint;
-		if (pretty != null && pretty.length > 0) {
-			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
-				prettyPrint = true;
-			} else {
-				prettyPrint = false;
-			}
-		} else {
-			prettyPrint = false;
-			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
-			if (acceptValues != null) {
-				while (acceptValues.hasMoreElements()) {
-					String nextAcceptHeaderValue = acceptValues.nextElement();
-					if (nextAcceptHeaderValue.contains("pretty=true")) {
-						prettyPrint = true;
-					}
-				}
-			}
-		}
-		return prettyPrint;
-	}
-
-	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, Bundle bundle, EncodingEnum theResponseEncoding, String theServerBase, boolean thePrettyPrint, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip) throws IOException {
-		assert !theServerBase.endsWith("/");
-
-		Writer writer = getWriter(theHttpResponse, theRespondGzip);
-		try {
-			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				for (IResource next : bundle.toListOfResources()) {
-					writer.append(next.getText().getDiv().getValueAsString());
-					writer.append("<hr/>");
-				}
-			} else {
-				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
-			}
-		} finally {
-			writer.close();
-		}
-	}
-
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase)
-			throws IOException {
-		int stausCode = 200;
-		streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip, theServerBase);
-	}
-
-	private static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip,
-			String theServerBase) throws IOException {
-		theHttpResponse.setStatus(stausCode);
-
-		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
-			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IdDt fullId = theResource.getId().withServerBase(theServerBase, resName);
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
-		}
-
-		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (theResource.getId().hasVersionIdPart()) {
-				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getId().getVersionIdPart() + '"');
-			}
-		}
-
-		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(theResource);
-			if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-				addProfileToBundleEntry(theServer.getFhirContext(), theResource, theServerBase);
-			}
-		}
-
-		if (theResource instanceof BaseBinary) {
-			BaseBinary bin = (BaseBinary) theResource;
-			if (isNotBlank(bin.getContentType())) {
-				theHttpResponse.setContentType(bin.getContentType());
-			} else {
-				theHttpResponse.setContentType(Constants.CT_OCTET_STREAM);
-			}
-			if (bin.getContent() == null || bin.getContent().length == 0) {
-				return;
-			}
-
-			theHttpResponse.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
-
-			theHttpResponse.setContentLength(bin.getContent().length);
-			ServletOutputStream oos = theHttpResponse.getOutputStream();
-			oos.write(bin.getContent());
-			oos.close();
-			return;
-		}
-
-		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
-			theHttpResponse.setContentType(theResponseEncoding.getBrowserFriendlyBundleContentType());
-		} else if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-			theHttpResponse.setContentType(Constants.CT_HTML);
-		} else {
-			theHttpResponse.setContentType(theResponseEncoding.getResourceContentType());
-		}
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
-
-		theServer.addHeadersToResponse(theHttpResponse);
-
-		InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
-		if (lastUpdated != null && lastUpdated.isEmpty() == false) {
-			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
-		}
-
-		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					theHttpResponse.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
-				}
-			}
-		}
-
-		Writer writer = getWriter(theHttpResponse, theRespondGzip);
-		try {
-			if (theNarrativeMode == NarrativeModeEnum.ONLY) {
-				writer.append(theResource.getText().getDiv().getValueAsString());
-			} else {
-				RestfulServer.getNewParser(theServer.getFhirContext(), theResponseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
-			}
-		} finally {
-			writer.close();
-		}
-	}
-
-	private static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
-		String countString = theRequest.getParameter(name);
-		Integer count = null;
-		if (isNotBlank(countString)) {
-			try {
-				count = Integer.parseInt(countString);
-			} catch (NumberFormatException e) {
-				ourLog.debug("Failed to parse _count value '{}': {}", countString, e);
-			}
-		}
-		return count;
-	}
-
-	private static void validateResourceListNotNull(List<IResource> theResourceList) {
-		if (theResourceList == null) {
-			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
-		}
-	}
-
 	public enum NarrativeModeEnum {
 		NORMAL, ONLY, SUPPRESS;
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
-	}
-
-	/**
-	 * Allows users of RestfulServer to override the getRequestPath method to let them build their custom request path
-	 * implementation
-	 *
-	 * @param requestFullPath
-	 *            the full request path
-	 * @param servletContextPath
-	 *            the servelet context path
-	 * @param servletPath
-	 *            the servelet path
-	 * @return created resource path
-	 */
-	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
-		return requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
 	}
 }

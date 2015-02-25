@@ -92,6 +92,11 @@ public class ResourceProviderDstu2Test {
 		}
 	}
 
+	public void testTryToCreateResourceWithNumericId() {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1777\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-02-25T15:47:48Z\"/></meta></Patient>";
+		
+	}
+	
 	/**
 	 * Test for issue #60
 	 */
