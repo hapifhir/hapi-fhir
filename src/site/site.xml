@@ -76,17 +76,19 @@
 			<item name="Introduction" href="./doc_intro.html">
 				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
 			</item>
-			
 			<item name="The Data Model" href="./doc_fhirobjects.html">
-				<item name="Profiles &amp; Extensions" href="./doc_extensions.html" />
+				<item name="Working with Resources" href="./doc_fhirobjects.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />
+				<item name="Profiles &amp; Extensions" href="./doc_extensions.html" />
 				<item name="Tags" href="./doc_tags.html" />
 				<item name="Validation" href="./doc_validation.html" />
 			</item>
 			<item name="RESTful Client" href="./doc_rest_client.html" >
+				<item name="Using RESTful Client" href="./doc_rest_client.html" />
 				<item name="Interceptors (client)" href="./doc_rest_client_interceptor.html"/>
 			</item>
 			<item name="RESTful Server" href="./doc_rest_server.html" >
+				<item name="Using RESTful Server" href="./doc_rest_server.html" />
 				<item name="RESTful Operations" href="./doc_rest_operations.html" />
 				<item name="Narrative Generator" href="./doc_narrative.html" />
 				<item name="CORS Support" href="./doc_cors.html" />
