@@ -2,8 +2,9 @@ package org.hl7.fhir.instance.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 
-public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T> {
+public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>, IBaseHasExtensions {
 
   private static final long serialVersionUID = 3L;
 

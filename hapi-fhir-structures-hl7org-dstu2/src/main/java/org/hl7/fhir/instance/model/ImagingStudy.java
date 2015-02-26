@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -2511,14 +2511,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * Date and Time the study started.
      */
-    @Child(name="started", type={DateTimeType.class}, order=-1, min=0, max=1)
+    @Child(name = "started", type = {DateTimeType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="When the study was started (0008,0020)+(0008,0030)", formalDefinition="Date and Time the study started." )
     protected DateTimeType started;
 
     /**
      * The patient for whom the images are of.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Who the images are of", formalDefinition="The patient for whom the images are of." )
     protected Reference patient;
 
@@ -2530,28 +2530,28 @@ public class ImagingStudy extends DomainResource {
     /**
      * Formal identifier for the study.
      */
-    @Child(name="uid", type={OidType.class}, order=1, min=1, max=1)
+    @Child(name = "uid", type = {OidType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="Formal identifier for the study (0020,000D)", formalDefinition="Formal identifier for the study." )
     protected OidType uid;
 
     /**
      * Accession Number.
      */
-    @Child(name="accession", type={Identifier.class}, order=2, min=0, max=1)
+    @Child(name = "accession", type = {Identifier.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Accession Number (0008,0050)", formalDefinition="Accession Number." )
     protected Identifier accession;
 
     /**
      * Other identifiers for the study.
      */
-    @Child(name="identifier", type={Identifier.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Other identifiers for the study (0020,0010)", formalDefinition="Other identifiers for the study." )
     protected List<Identifier> identifier;
 
     /**
      * A list of the diagnostic orders that resulted in this imaging study being performed.
      */
-    @Child(name="order", type={DiagnosticOrder.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "order", type = {DiagnosticOrder.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Order(s) that caused this study to be performed", formalDefinition="A list of the diagnostic orders that resulted in this imaging study being performed." )
     protected List<Reference> order;
     /**
@@ -2563,14 +2563,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19).
      */
-    @Child(name="modalityList", type={CodeType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "modalityList", type = {CodeType.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="All series.modality if actual acquisition modalities", formalDefinition="A list of all the Series.ImageModality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)." )
     protected List<Enumeration<ImagingModality>> modalityList;
 
     /**
      * The requesting/referring physician.
      */
-    @Child(name="referrer", type={Practitioner.class}, order=6, min=0, max=1)
+    @Child(name = "referrer", type = {Practitioner.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Referring physician (0008,0090)", formalDefinition="The requesting/referring physician." )
     protected Reference referrer;
 
@@ -2582,49 +2582,49 @@ public class ImagingStudy extends DomainResource {
     /**
      * Availability of study (online, offline or nearline).
      */
-    @Child(name="availability", type={CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "availability", type = {CodeType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="ONLINE | OFFLINE | NEARLINE | UNAVAILABLE (0008,0056)", formalDefinition="Availability of study (online, offline or nearline)." )
     protected Enumeration<InstanceAvailability> availability;
 
     /**
      * WADO-RS URI where Study is available.
      */
-    @Child(name="url", type={UriType.class}, order=8, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Retrieve URI (0008,1190)", formalDefinition="WADO-RS URI where Study is available." )
     protected UriType url;
 
     /**
      * Number of Series in Study.
      */
-    @Child(name="numberOfSeries", type={IntegerType.class}, order=9, min=1, max=1)
+    @Child(name = "numberOfSeries", type = {IntegerType.class}, order = 10, min = 1, max = 1)
     @Description(shortDefinition="Number of Study Related Series (0020,1206)", formalDefinition="Number of Series in Study." )
     protected IntegerType numberOfSeries;
 
     /**
      * Number of SOP Instances in Study.
      */
-    @Child(name="numberOfInstances", type={IntegerType.class}, order=10, min=1, max=1)
+    @Child(name = "numberOfInstances", type = {IntegerType.class}, order = 11, min = 1, max = 1)
     @Description(shortDefinition="Number of Study Related Instances (0020,1208)", formalDefinition="Number of SOP Instances in Study." )
     protected IntegerType numberOfInstances;
 
     /**
      * Diagnoses etc provided with request.
      */
-    @Child(name="clinicalInformation", type={StringType.class}, order=11, min=0, max=1)
+    @Child(name = "clinicalInformation", type = {StringType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Diagnoses etc with request (0040,1002)", formalDefinition="Diagnoses etc provided with request." )
     protected StringType clinicalInformation;
 
     /**
      * Type of procedure performed.
      */
-    @Child(name="procedure", type={Coding.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "procedure", type = {Coding.class}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Type of procedure performed (0008,1032)", formalDefinition="Type of procedure performed." )
     protected List<Coding> procedure;
 
     /**
      * Who read study and interpreted the images.
      */
-    @Child(name="interpreter", type={Practitioner.class}, order=13, min=0, max=1)
+    @Child(name = "interpreter", type = {Practitioner.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Who interpreted images (0008,1060)", formalDefinition="Who read study and interpreted the images." )
     protected Reference interpreter;
 
@@ -2636,14 +2636,14 @@ public class ImagingStudy extends DomainResource {
     /**
      * Institution-generated description or classification of the Study (component) performed.
      */
-    @Child(name="description", type={StringType.class}, order=14, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Institution-generated description (0008,1030)", formalDefinition="Institution-generated description or classification of the Study (component) performed." )
     protected StringType description;
 
     /**
      * Each study has one or more series of image instances.
      */
-    @Child(name="series", type={}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "series", type = {}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Each study has one or more series of instances", formalDefinition="Each study has one or more series of image instances." )
     protected List<ImagingStudySeriesComponent> series;
 
@@ -3508,24 +3508,24 @@ public class ImagingStudy extends DomainResource {
 
   @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="Formal identifier for this instance (0008,0018)", type="token" )
   public static final String SP_UID = "uid";
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token" )
-  public static final String SP_SERIES = "series";
-  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="Body part examined (Map from 0018,0015)", type="token" )
-  public static final String SP_BODYSITE = "bodysite";
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession id for the image", type="token" )
-  public static final String SP_ACCESSION = "accession";
   @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token" )
   public static final String SP_STUDY = "study";
-  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token" )
-  public static final String SP_MODALITY = "modality";
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
-  public static final String SP_STARTED = "started";
   @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="DICOM class type (0008,0016)", type="token" )
   public static final String SP_DICOMCLASS = "dicom-class";
+    @SearchParamDefinition(name = "modality", path = "ImagingStudy.series.modality", description = "The modality of the image", type = "token")
+    public static final String SP_MODALITY = "modality";
+    @SearchParamDefinition(name = "bodysite", path = "ImagingStudy.series.bodySite", description = "Body part examined (Map from 0018,0015)", type = "token")
+    public static final String SP_BODYSITE = "bodysite";
   @SearchParamDefinition(name="size", path="", description="The size of the image in MB - may include > or < in the value", type="number" )
   public static final String SP_SIZE = "size";
+    @SearchParamDefinition(name = "patient", path = "ImagingStudy.patient", description = "Who the study is about", type = "reference")
+    public static final String SP_PATIENT = "patient";
+    @SearchParamDefinition(name = "series", path = "ImagingStudy.series.uid", description = "The series id for the image", type = "token")
+    public static final String SP_SERIES = "series";
+    @SearchParamDefinition(name = "started", path = "ImagingStudy.started", description = "When the study was started", type = "date")
+    public static final String SP_STARTED = "started";
+    @SearchParamDefinition(name = "accession", path = "ImagingStudy.accession", description = "The accession id for the image", type = "token")
+    public static final String SP_ACCESSION = "accession";
 
 }
 

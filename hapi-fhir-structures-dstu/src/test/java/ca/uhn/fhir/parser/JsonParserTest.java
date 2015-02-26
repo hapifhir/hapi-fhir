@@ -1,9 +1,15 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,8 +30,6 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -41,7 +45,6 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
@@ -59,7 +62,10 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu.valueset.AddressUseEnum;
+import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.NarrativeStatusEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -93,6 +99,120 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+
+	@Test
+	public void testEncodeAndParseExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		ExtensionDt ext = new ExtensionDt();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
+		patient.addUndeclaredExtension(ext);
+
+		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
+		ExtensionDt child1 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
+		ExtensionDt child2 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value2"));
+		parent.addUndeclaredExtension(child2);
+
+		ExtensionDt modExt = new ExtensionDt();
+		modExt.setUrl("http://example.com/extensions#modext");
+		modExt.setValue(new DateDt("1995-01-02"));
+		modExt.setModifier(true);
+		patient.addUndeclaredExtension(modExt);
+
+		HumanNameDt name = patient.addName();
+		name.addFamily("Blah");
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
+		ExtensionDt ext2 = new ExtensionDt().setUrl("http://examples.com#givenext").setValue(new StringDt("given"));
+		given.addUndeclaredExtension(ext2);
+
+		StringDt given2 = name.addGiven();
+		given2.setValue("Shmoe");
+		ExtensionDt given2ext = new ExtensionDt().setUrl("http://examples.com#givenext_parent");
+		given2.addUndeclaredExtension(given2ext);
+		given2ext.addUndeclaredExtension(new ExtensionDt().setUrl("http://examples.com#givenext_child").setValue(new StringDt("CHILD")));
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",",
+				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"
+		));
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" +
+				"{" +
+				"\"url\":\"http://example.com/extensions#modext\"," +
+				"\"valueDate\":\"1995-01-02\"" +
+				"}" +
+				"],"));
+		assertThat(enc, containsString("\"_given\":[" +
+				"{" +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext\"," +
+				"\"valueString\":\"given\"" +
+				"}" +
+				"]" +
+				"}," +
+				"{" +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext_parent\"," +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext_child\"," +
+				"\"valueString\":\"CHILD\"" +
+				"}" +
+				"]" +
+				"}" +
+				"]" +
+				"}"));
+		
+		/*
+		 * Now parse this back
+		 */
+
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
+		ext = parsed.getUndeclaredExtensions().get(0);
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeDt) ext.getValue()).getValueAsString());
+
+		parent = patient.getUndeclaredExtensions().get(1);
+		assertEquals("http://example.com#parent", parent.getUrl());
+		assertNull(parent.getValue());
+		child1 = parent.getExtension().get(0);
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringDt) child1.getValue()).getValueAsString());
+		child2 = parent.getExtension().get(1);
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringDt) child2.getValue()).getValueAsString());
+
+		modExt = parsed.getUndeclaredModifierExtensions().get(0);
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateDt) modExt.getValue()).getValueAsString());
+
+		name = parsed.getName().get(0);
+
+		ext2 = name.getGiven().get(0).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringDt) ext2.getValue()).getValueAsString());
+
+		given2ext = name.getGiven().get(1).getUndeclaredExtensions().get(0);
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
+		assertNull(given2ext.getValue());
+		ExtensionDt given2ext2 = given2ext.getExtension().get(0);
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringDt) given2ext2.getValue()).getValue());
+
+	}
+
+
 	
 	/**
 	 * #65
@@ -1136,7 +1256,7 @@ public class JsonParserTest {
 
 		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
 
@@ -1184,7 +1304,7 @@ public class JsonParserTest {
 
 		List<ExtensionDt> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getUndeclaredExtensions();
 		ExtensionDt undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl().getValue());
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = jsonParser.encodeResourceToString(obs);

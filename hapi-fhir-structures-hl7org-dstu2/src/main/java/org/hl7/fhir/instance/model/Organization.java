@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -395,42 +395,42 @@ public class Organization extends DomainResource {
     /**
      * Identifier for the organization that is used to identify the organization across multiple disparate systems.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifies this organization  across multiple systems", formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the organization.
      */
-    @Child(name="name", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Name used for the organization", formalDefinition="A name associated with the organization." )
     protected StringType name;
 
     /**
      * The kind of organization that this is.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Kind of organization", formalDefinition="The kind of organization that this is." )
     protected CodeableConcept type;
 
     /**
      * A contact detail for the organization.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the organization", formalDefinition="A contact detail for the organization." )
     protected List<ContactPoint> telecom;
 
     /**
      * An address for the organization.
      */
-    @Child(name="address", type={Address.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
     protected List<Address> address;
 
     /**
      * The organization of which this organization forms a part.
      */
-    @Child(name="partOf", type={Organization.class}, order=4, min=0, max=1)
+    @Child(name = "partOf", type = {Organization.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="The organization of which this organization forms a part", formalDefinition="The organization of which this organization forms a part." )
     protected Reference partOf;
 
@@ -442,14 +442,14 @@ public class Organization extends DomainResource {
     /**
      * Contact for the organization for a certain purpose.
      */
-    @Child(name="contact", type={}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact for the organization for a certain purpose", formalDefinition="Contact for the organization for a certain purpose." )
     protected List<OrganizationContactComponent> contact;
 
     /**
      * Location(s) the organization uses to provide services.
      */
-    @Child(name="location", type={Location.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "location", type = {Location.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Location(s) the organization uses to provide services", formalDefinition="Location(s) the organization uses to provide services." )
     protected List<Reference> location;
     /**
@@ -461,7 +461,7 @@ public class Organization extends DomainResource {
     /**
      * Whether the organization's record is still in active use.
      */
-    @Child(name="active", type={BooleanType.class}, order=7, min=0, max=1)
+    @Child(name = "active", type = {BooleanType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Whether the organization's record is still in active use", formalDefinition="Whether the organization's record is still in active use." )
     protected BooleanType active;
 
@@ -891,18 +891,18 @@ public class Organization extends DomainResource {
     return ResourceType.Organization;
    }
 
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
-  public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name = "identifier", path = "Organization.identifier", description = "Any identifier for the organization (not the accreditation issuer's identifier)", type = "token")
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
+  @SearchParamDefinition(name = "phonetic", path = "", description = "A portion of the organization's name using some kind of phonetic matching algorithm", type = "string")
+  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
   public static final String SP_ACTIVE = "active";
   @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

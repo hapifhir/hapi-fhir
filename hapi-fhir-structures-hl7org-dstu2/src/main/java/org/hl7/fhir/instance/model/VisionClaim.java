@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -2688,35 +2688,35 @@ public class VisionClaim extends DomainResource {
     /**
      * The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Claim number", formalDefinition="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number." )
     protected List<Identifier> identifier;
 
     /**
      * The version of the specification on which this instance relies.
      */
-    @Child(name="ruleset", type={Coding.class}, order=0, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Current specification followed", formalDefinition="The version of the specification on which this instance relies." )
     protected Coding ruleset;
 
     /**
      * The version of the specification from which the original instance was created.
      */
-    @Child(name="originalRuleset", type={Coding.class}, order=1, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Original specification followed", formalDefinition="The version of the specification from which the original instance was created." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * Insurer Identifier, typical BIN number (6 digit).
      */
-    @Child(name="target", type={Organization.class}, order=3, min=0, max=1)
+    @Child(name = "target", type = {Organization.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Insurer", formalDefinition="Insurer Identifier, typical BIN number (6 digit)." )
     protected Reference target;
 
@@ -2728,7 +2728,7 @@ public class VisionClaim extends DomainResource {
     /**
      * The provider which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name="provider", type={Practitioner.class}, order=4, min=0, max=1)
+    @Child(name = "provider", type = {Practitioner.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Responsible provider", formalDefinition="The provider which is responsible for the bill, claim pre-determination, pre-authorization." )
     protected Reference provider;
 
@@ -2740,7 +2740,7 @@ public class VisionClaim extends DomainResource {
     /**
      * The organization which is responsible for the bill, claim pre-determination, pre-authorization.
      */
-    @Child(name="organization", type={Organization.class}, order=5, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the bill, claim pre-determination, pre-authorization." )
     protected Reference organization;
 
@@ -2752,28 +2752,28 @@ public class VisionClaim extends DomainResource {
     /**
      * Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
      */
-    @Child(name="use", type={CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "use", type = {CodeType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="complete | proposed | exploratory | other", formalDefinition="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)." )
     protected Enumeration<UseLink> use;
 
     /**
      * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
      */
-    @Child(name="priority", type={Coding.class}, order=7, min=0, max=1)
+    @Child(name = "priority", type = {Coding.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Desired processing priority", formalDefinition="Immediate (STAT), best effort (NORMAL), deferred (DEFER)." )
     protected Coding priority;
 
     /**
      * In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested.
      */
-    @Child(name="fundsReserve", type={Coding.class}, order=8, min=0, max=1)
+    @Child(name = "fundsReserve", type = {Coding.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Funds requested to be reserved", formalDefinition="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved ('Patient' or 'Provider') to pay for the Benefits determined on the subsequent claim(s). 'None' explicitly indicates no funds reserving is requested." )
     protected Coding fundsReserve;
 
     /**
      * Person who created the invoice/claim/pre-determination or pre-authorization.
      */
-    @Child(name="enterer", type={Practitioner.class}, order=9, min=0, max=1)
+    @Child(name = "enterer", type = {Practitioner.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Author", formalDefinition="Person who created the invoice/claim/pre-determination or pre-authorization." )
     protected Reference enterer;
 
@@ -2785,7 +2785,7 @@ public class VisionClaim extends DomainResource {
     /**
      * Facility where the services were provided.
      */
-    @Child(name="facility", type={Location.class}, order=10, min=0, max=1)
+    @Child(name = "facility", type = {Location.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Servicing Facility", formalDefinition="Facility where the services were provided." )
     protected Reference facility;
 
@@ -2797,7 +2797,7 @@ public class VisionClaim extends DomainResource {
     /**
      * Prescription to support the dispensing of glasses or contact lenses.
      */
-    @Child(name="prescription", type={VisionPrescription.class}, order=11, min=0, max=1)
+    @Child(name = "prescription", type = {VisionPrescription.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Prescription", formalDefinition="Prescription to support the dispensing of glasses or contact lenses." )
     protected Reference prescription;
 
@@ -2809,14 +2809,14 @@ public class VisionClaim extends DomainResource {
     /**
      * The party to be reimbursed for the services.
      */
-    @Child(name="payee", type={}, order=12, min=0, max=1)
+    @Child(name = "payee", type = {}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Payee", formalDefinition="The party to be reimbursed for the services." )
     protected PayeeComponent payee;
 
     /**
      * The referral resource which lists the date, practitioner, reason and other supporting information.
      */
-    @Child(name="referral", type={ReferralRequest.class}, order=13, min=0, max=1)
+    @Child(name = "referral", type = {ReferralRequest.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Treatment Referral", formalDefinition="The referral resource which lists the date, practitioner, reason and other supporting information." )
     protected Reference referral;
 
@@ -2828,21 +2828,21 @@ public class VisionClaim extends DomainResource {
     /**
      * Ordered list of patient diagnosis for which care is sought.
      */
-    @Child(name="diagnosis", type={}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "diagnosis", type = {}, order = 15, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Diagnosis", formalDefinition="Ordered list of patient diagnosis for which care is sought." )
     protected List<DiagnosisComponent> diagnosis;
 
     /**
      * List of patient conditions for which care is sought.
      */
-    @Child(name="condition", type={Coding.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "condition", type = {Coding.class}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of presenting Conditions", formalDefinition="List of patient conditions for which care is sought." )
     protected List<Coding> condition;
 
     /**
      * Patient Resource.
      */
-    @Child(name="patient", type={Patient.class}, order=16, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 17, min = 1, max = 1)
     @Description(shortDefinition="The subject of the Products and Services", formalDefinition="Patient Resource." )
     protected Reference patient;
 
@@ -2854,56 +2854,56 @@ public class VisionClaim extends DomainResource {
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name="coverage", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "coverage", type = {}, order = 18, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<CoverageComponent> coverage;
 
     /**
      * Factors which may influence the applicability of coverage.
      */
-    @Child(name="exception", type={Coding.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "exception", type = {Coding.class}, order = 19, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Eligibility exceptions", formalDefinition="Factors which may influence the applicability of coverage." )
     protected List<Coding> exception;
 
     /**
      * Name of school for over-aged dependants.
      */
-    @Child(name="school", type={StringType.class}, order=19, min=0, max=1)
+    @Child(name = "school", type = {StringType.class}, order = 20, min = 0, max = 1)
     @Description(shortDefinition="Name of School", formalDefinition="Name of school for over-aged dependants." )
     protected StringType school;
 
     /**
      * Date of an accident which these services are addressing.
      */
-    @Child(name="accident", type={DateType.class}, order=20, min=0, max=1)
+    @Child(name = "accident", type = {DateType.class}, order = 21, min = 0, max = 1)
     @Description(shortDefinition="Accident Date", formalDefinition="Date of an accident which these services are addressing." )
     protected DateType accident;
 
     /**
      * Type of accident: work, auto, etc.
      */
-    @Child(name="accidentType", type={Coding.class}, order=21, min=0, max=1)
+    @Child(name = "accidentType", type = {Coding.class}, order = 22, min = 0, max = 1)
     @Description(shortDefinition="Accident Type", formalDefinition="Type of accident: work, auto, etc." )
     protected Coding accidentType;
 
     /**
      * A list of intervention and exception codes which may influence the adjudication of the claim.
      */
-    @Child(name="interventionException", type={Coding.class}, order=22, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "interventionException", type = {Coding.class}, order = 23, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Intervention and exception code (Pharma)", formalDefinition="A list of intervention and exception codes which may influence the adjudication of the claim." )
     protected List<Coding> interventionException;
 
     /**
      * First tier of goods and services.
      */
-    @Child(name="item", type={}, order=23, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "item", type = {}, order = 24, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Goods and Services", formalDefinition="First tier of goods and services." )
     protected List<ItemsComponent> item;
 
     /**
      * Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission.
      */
-    @Child(name="additionalMaterials", type={Coding.class}, order=24, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "additionalMaterials", type = {Coding.class}, order = 25, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Additional materials, documents, etc.", formalDefinition="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission." )
     protected List<Coding> additionalMaterials;
 
@@ -3997,14 +3997,14 @@ public class VisionClaim extends DomainResource {
     return ResourceType.VisionClaim;
    }
 
+    @SearchParamDefinition(name = "identifier", path = "VisionClaim.identifier", description = "The primary identifier of the financial resource", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "use", path = "VisionClaim.use", description = "The kind of financial resource", type = "token")
+    public static final String SP_USE = "use";
   @SearchParamDefinition(name="patient", path="VisionClaim.patient", description="Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="priority", path="VisionClaim.priority", description="Processing priority requested", type="token" )
   public static final String SP_PRIORITY = "priority";
-  @SearchParamDefinition(name="use", path="VisionClaim.use", description="The kind of financial resource", type="token" )
-  public static final String SP_USE = "use";
-  @SearchParamDefinition(name="identifier", path="VisionClaim.identifier", description="The primary identifier of the financial resource", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

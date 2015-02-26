@@ -132,6 +132,11 @@
 			<id>esteban-aliverti</id>
 			<name>Esteban Aliverti</name>
 		</developer>
+		<developer>
+			<id>mochaholic</id>
+			<name>Mohammad Jafari</name>
+			<organization>Edmond Scientific Company</organization>
+		</developer>
 	</developers>
 
 	<licenses>

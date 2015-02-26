@@ -34,38 +34,34 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 public class HttpPostClientInvocation extends BaseHttpClientInvocationWithContents {
 
+
 	public HttpPostClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
 	}
 
-	
 	public HttpPostClientInvocation(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
 		super(theContext, theTagList, theUrlExtension);
 	}
-
 
 	public HttpPostClientInvocation(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
 	}
 
-
 	public HttpPostClientInvocation(FhirContext theContext, Bundle theBundle) {
-		super(theContext,theBundle);
+		super(theContext, theBundle);
 	}
 
 	public HttpPostClientInvocation(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlExtension) {
-		super(theContext,theContents, theIsBundle, theUrlExtension);
+		super(theContext, theContents, theIsBundle, theUrlExtension);
 	}
-
 
 	public HttpPostClientInvocation(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlExtension) {
 		super(theContext, theParams, theUrlExtension);
 	}
 
-
 	@Override
-	protected HttpPost createRequest(String url, AbstractHttpEntity theEntity) {
-		HttpPost retVal = new HttpPost(url);
+	protected HttpPost createRequest(StringBuilder theUrlBase, AbstractHttpEntity theEntity) {
+		HttpPost retVal = new HttpPost(theUrlBase.toString());
 		retVal.setEntity(theEntity);
 		return retVal;
 	}

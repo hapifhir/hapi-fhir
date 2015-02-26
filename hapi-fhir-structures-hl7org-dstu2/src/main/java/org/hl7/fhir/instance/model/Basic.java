@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -47,21 +47,21 @@ public class Basic extends DomainResource {
     /**
      * Identifier assigned to the resource for business purposes, outside the context of FHIR.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the resource for business purposes, outside the context of FHIR." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the 'type' of resource - equivalent to the resource name for other resources.
      */
-    @Child(name="code", type={CodeableConcept.class}, order=0, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Kind of Resource", formalDefinition="Identifies the 'type' of resource - equivalent to the resource name for other resources." )
     protected CodeableConcept code;
 
     /**
      * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.
      */
-    @Child(name="subject", type={}, order=1, min=0, max=1)
+    @Child(name = "subject", type = {}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Identifies the", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the 'focus' of this resoruce." )
     protected Reference subject;
 
@@ -73,7 +73,7 @@ public class Basic extends DomainResource {
     /**
      * Indicates who was responsible for creating the resource instance.
      */
-    @Child(name="author", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=2, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Who created", formalDefinition="Indicates who was responsible for creating the resource instance." )
     protected Reference author;
 
@@ -85,7 +85,7 @@ public class Basic extends DomainResource {
     /**
      * Identifies when the resource was first created.
      */
-    @Child(name="created", type={DateType.class}, order=3, min=0, max=1)
+    @Child(name = "created", type = {DateType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="When created", formalDefinition="Identifies when the resource was first created." )
     protected DateType created;
 
@@ -341,14 +341,14 @@ public class Basic extends DomainResource {
     return ResourceType.Basic;
    }
 
-  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date" )
-  public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="subject", path="Basic.subject", description="Identifies the", type="reference" )
-  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token" )
   public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "subject", path = "Basic.subject", description = "Identifies the", type = "reference")
+    public static final String SP_SUBJECT = "subject";
+    @SearchParamDefinition(name = "created", path = "Basic.created", description = "When created", type = "date")
+    public static final String SP_CREATED = "created";
+    @SearchParamDefinition(name = "patient", path = "Basic.subject", description = "Identifies the", type = "reference")
+    public static final String SP_PATIENT = "patient";
 
 }
 

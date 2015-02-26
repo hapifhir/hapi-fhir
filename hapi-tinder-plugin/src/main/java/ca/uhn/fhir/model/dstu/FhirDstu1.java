@@ -20,8 +20,7 @@ package ca.uhn.fhir.model.dstu;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -61,6 +60,7 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -379,6 +379,9 @@ public class FhirDstu1 implements IFhirVersion {
 		return ContainedDt.class;
 	}
 
-
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new ca.uhn.fhir.model.dstu.composite.CodingDt();
+	}
 
 }

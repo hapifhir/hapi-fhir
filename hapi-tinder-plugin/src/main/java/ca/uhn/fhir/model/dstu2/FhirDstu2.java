@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
@@ -91,5 +92,12 @@ public class FhirDstu2 implements IFhirVersion {
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		throw new UnsupportedOperationException();
 	}
+
+	
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new ca.uhn.fhir.model.dstu2.composite.CodingDt();
+	}
+
 
 }

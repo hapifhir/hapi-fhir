@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -48,63 +48,63 @@ public class Device extends DomainResource {
     /**
      * Unique instance identifiers assigned to a device by organizations like manufacturers, owners or regulatory agencies.   If the identifier identifies the type of device, Device.type should be used.   An example is the FDA Mandated Unique Device Identifier (UDI) which identifies an instance of a device uniquely if the serial number is present, .  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Instance id from manufacturer, owner, regulatory agencies and others", formalDefinition="Unique instance identifiers assigned to a device by organizations like manufacturers, owners or regulatory agencies.   If the identifier identifies the type of device, Device.type should be used.   An example is the FDA Mandated Unique Device Identifier (UDI) which identifies an instance of a device uniquely if the serial number is present, .  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
     protected List<Identifier> identifier;
 
     /**
      * Code or identifier to identify a kind of device   An example is the FDA Mandated Unique Device Identifier (UDI) which identifies a type of a device when the serial number is absent, otherwise it uniquely identifies the device instance and Device.identifier should be used instead of Device.type.  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=0, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="What kind of device this is", formalDefinition="Code or identifier to identify a kind of device   An example is the FDA Mandated Unique Device Identifier (UDI) which identifies a type of a device when the serial number is absent, otherwise it uniquely identifies the device instance and Device.identifier should be used instead of Device.type.  - see http://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/UniqueDeviceIdentification/default.htm." )
     protected CodeableConcept type;
 
     /**
      * A name of the manufacturer.
      */
-    @Child(name="manufacturer", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name = "manufacturer", type = {StringType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Name of device manufacturer", formalDefinition="A name of the manufacturer." )
     protected StringType manufacturer;
 
     /**
      * The "model" - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type.
      */
-    @Child(name="model", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name = "model", type = {StringType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Model id assigned by the manufacturer", formalDefinition="The 'model' - an identifier assigned by the manufacturer to identify the product by its type. This number is shared by the all devices sold as the same type." )
     protected StringType model;
 
     /**
      * The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware.
      */
-    @Child(name="version", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Version number (i.e. software)", formalDefinition="The version of the device, if the device has multiple releases under the same model, or if the device is software or carries firmware." )
     protected StringType version;
 
     /**
      * The Date and time when the device was manufactured.
      */
-    @Child(name="manufactureDate", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "manufactureDate", type = {DateTimeType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Manufacture date", formalDefinition="The Date and time when the device was manufactured." )
     protected DateTimeType manufactureDate;
 
     /**
      * The date and time beyond which this device is no longer valid or should not be used (if applicable).
      */
-    @Child(name="expiry", type={DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name = "expiry", type = {DateTimeType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Date and time of expiry of this device (if applicable)", formalDefinition="The date and time beyond which this device is no longer valid or should not be used (if applicable)." )
     protected DateTimeType expiry;
 
     /**
      * Lot number assigned by the manufacturer.
      */
-    @Child(name="lotNumber", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "lotNumber", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Lot number of manufacture", formalDefinition="Lot number assigned by the manufacturer." )
     protected StringType lotNumber;
 
     /**
      * An organization that is responsible for the provision and ongoing maintenance of the device.
      */
-    @Child(name="owner", type={Organization.class}, order=7, min=0, max=1)
+    @Child(name = "owner", type = {Organization.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Organization responsible for device", formalDefinition="An organization that is responsible for the provision and ongoing maintenance of the device." )
     protected Reference owner;
 
@@ -116,7 +116,7 @@ public class Device extends DomainResource {
     /**
      * The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. "in/with the patient"), or a coded location.
      */
-    @Child(name="location", type={Location.class}, order=8, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Where the resource is found", formalDefinition="The resource may be found in a literal location (i.e. GPS coordinates), a logical place (i.e. 'in/with the patient'), or a coded location." )
     protected Reference location;
 
@@ -128,7 +128,7 @@ public class Device extends DomainResource {
     /**
      * Patient information, if the resource is affixed to a person.
      */
-    @Child(name="patient", type={Patient.class}, order=9, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="If the resource is affixed to a person", formalDefinition="Patient information, if the resource is affixed to a person." )
     protected Reference patient;
 
@@ -140,14 +140,14 @@ public class Device extends DomainResource {
     /**
      * Contact details for an organization or a particular human that is responsible for the device.
      */
-    @Child(name="contact", type={ContactPoint.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {ContactPoint.class}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Details for human/organization for support", formalDefinition="Contact details for an organization or a particular human that is responsible for the device." )
     protected List<ContactPoint> contact;
 
     /**
      * A network address on which the device may be contacted directly.
      */
-    @Child(name="url", type={UriType.class}, order=11, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Network address to contact device", formalDefinition="A network address on which the device may be contacted directly." )
     protected UriType url;
 
@@ -809,20 +809,20 @@ public class Device extends DomainResource {
     return ResourceType.Device;
    }
 
+    @SearchParamDefinition(name = "identifier", path = "Device.identifier", description = "Instance id from manufacturer, owner, regulatory agencies and others", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "patient", path = "Device.patient", description = "Patient information, if the resource is affixed to a person", type = "reference")
+    public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="organization", path="Device.owner", description="The organization responsible for the device", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="model", path="Device.model", description="The model of the device", type="string" )
   public static final String SP_MODEL = "model";
-  @SearchParamDefinition(name="patient", path="Device.patient", description="Patient information, if the resource is affixed to a person", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="location", path="Device.location", description="A location, where the resource is found", type="reference" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="manufacturer", path="Device.manufacturer", description="The manufacturer of the device", type="string" )
-  public static final String SP_MANUFACTURER = "manufacturer";
   @SearchParamDefinition(name="type", path="Device.type", description="The type of the device", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Device.identifier", description="Instance id from manufacturer, owner, regulatory agencies and others", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "manufacturer", path = "Device.manufacturer", description = "The manufacturer of the device", type = "string")
+    public static final String SP_MANUFACTURER = "manufacturer";
 
 }
 

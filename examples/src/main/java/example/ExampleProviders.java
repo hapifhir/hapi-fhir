@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
@@ -36,6 +37,9 @@ public class PlainProvider {
 //START SNIPPET: plainProviderServer
 public class ExampleServlet extends RestfulServer {
 
+    /**
+     * Constructor
+     */
   public ExampleServlet() {
     /*
      * Plain providers are passed to the server in the same way
@@ -53,6 +57,26 @@ public class ExampleServlet extends RestfulServer {
 	
 }
 //END SNIPPET: plainProviderServer
+
+    //START SNIPPET: addressStrategy
+    public class MyServlet extends RestfulServer {
+
+        /**
+         * Constructor
+         */
+        public MyServlet() {
+
+            String serverBaseUrl = "http://foo.com/fhir";
+            setServerAddressStrategy(new HardcodedServerAddressStrategy(serverBaseUrl));
+
+            // ...add some resource providers, etc...
+            List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
+            setResourceProviders(resourceProviders);
+        }
+
+    }
+//END SNIPPET: addressStrategy
+
 
 
 }

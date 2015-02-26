@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -158,21 +158,21 @@ public class Order extends DomainResource {
     /**
      * Identifiers assigned to this order by the orderer or by the receiver.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifiers assigned to this order by the orderer or by the receiver", formalDefinition="Identifiers assigned to this order by the orderer or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
      * When the order was made.
      */
-    @Child(name="date", type={DateTimeType.class}, order=0, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="When the order was made", formalDefinition="When the order was made." )
     protected DateTimeType date;
 
     /**
      * Patient this order is about.
      */
-    @Child(name="subject", type={Patient.class, Group.class, Device.class, Substance.class}, order=1, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Patient this order is about", formalDefinition="Patient this order is about." )
     protected Reference subject;
 
@@ -184,7 +184,7 @@ public class Order extends DomainResource {
     /**
      * Who initiated the order.
      */
-    @Child(name="source", type={Practitioner.class}, order=2, min=0, max=1)
+    @Child(name = "source", type = {Practitioner.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Who initiated the order", formalDefinition="Who initiated the order." )
     protected Reference source;
 
@@ -196,7 +196,7 @@ public class Order extends DomainResource {
     /**
      * Who is intended to fulfill the order.
      */
-    @Child(name="target", type={Organization.class, Device.class, Practitioner.class}, order=3, min=0, max=1)
+    @Child(name = "target", type = {Organization.class, Device.class, Practitioner.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Who is intended to fulfill the order", formalDefinition="Who is intended to fulfill the order." )
     protected Reference target;
 
@@ -208,14 +208,14 @@ public class Order extends DomainResource {
     /**
      * Text - why the order was made.
      */
-    @Child(name="reason", type={CodeableConcept.class}, order=4, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Text - why the order was made", formalDefinition="Text - why the order was made." )
     protected Type reason;
 
     /**
      * If required by policy.
      */
-    @Child(name="authority", type={}, order=5, min=0, max=1)
+    @Child(name = "authority", type = {}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="If required by policy", formalDefinition="If required by policy." )
     protected Reference authority;
 
@@ -227,14 +227,14 @@ public class Order extends DomainResource {
     /**
      * When order should be fulfilled.
      */
-    @Child(name="when", type={}, order=6, min=0, max=1)
+    @Child(name = "when", type = {}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="When order should be fulfilled", formalDefinition="When order should be fulfilled." )
     protected OrderWhenComponent when;
 
     /**
      * What action is being ordered.
      */
-    @Child(name="detail", type={}, order=7, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "detail", type = {}, order = 8, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="What action is being ordered", formalDefinition="What action is being ordered." )
     protected List<Reference> detail;
     /**
@@ -664,24 +664,24 @@ public class Order extends DomainResource {
     return ResourceType.Order;
    }
 
-  @SearchParamDefinition(name="authority", path="Order.authority", description="If required by policy", type="reference" )
-  public static final String SP_AUTHORITY = "authority";
-  @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
-  public static final String SP_DETAIL = "detail";
+  @SearchParamDefinition(name = "date", path = "Order.date", description = "When the order was made", type = "date")
+  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name = "subject", path = "Order.subject", description = "Patient this order is about", type = "reference")
+  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name = "authority", path = "Order.authority", description = "If required by policy", type = "reference")
+  public static final String SP_AUTHORITY = "authority";
   @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
   public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
-  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name = "detail", path = "Order.detail", description = "What action is being ordered", type = "reference")
+  public static final String SP_DETAIL = "detail";
   @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
   public static final String SP_WHEN = "when";
   @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
   public static final String SP_TARGET = "target";
   @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
   public static final String SP_WHENCODE = "when_code";
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
-  public static final String SP_DATE = "date";
 
 }
 

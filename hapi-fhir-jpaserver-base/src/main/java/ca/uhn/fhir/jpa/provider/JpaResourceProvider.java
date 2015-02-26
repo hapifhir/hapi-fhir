@@ -162,13 +162,12 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId) {
 		startRequest(theRequest);
 		try {
-			return myDao.update(theResource, theId);
+			theResource.setId(theId);
+			return myDao.update(theResource);
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Can't update resource with ID[" + theId.getValue() + "] because it doesn't exist, going to create it instead");
 			theResource.setId(theId);
-			MethodOutcome retVal = myDao.create(theResource);
-			retVal.setCreated(true);
-			return retVal;
+			return myDao.create(theResource);
 		} finally {
 			endRequest(theRequest);
 		}

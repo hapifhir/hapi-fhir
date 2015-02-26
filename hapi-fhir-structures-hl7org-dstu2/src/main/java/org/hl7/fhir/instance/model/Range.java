@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -45,14 +45,14 @@ public class Range extends Type implements ICompositeType {
     /**
      * The low limit. The boundary is inclusive.
      */
-    @Child(name="low", type={Quantity.class}, order=-1, min=0, max=1)
+    @Child(name = "low", type = {Quantity.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Low limit", formalDefinition="The low limit. The boundary is inclusive." )
     protected Quantity low;
 
     /**
      * The high limit. The boundary is inclusive.
      */
-    @Child(name="high", type={Quantity.class}, order=0, min=0, max=1)
+    @Child(name = "high", type = {Quantity.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="High limit", formalDefinition="The high limit. The boundary is inclusive." )
     protected Quantity high;
 

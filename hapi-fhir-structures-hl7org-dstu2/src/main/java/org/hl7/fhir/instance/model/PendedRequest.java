@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -48,35 +48,35 @@ public class PendedRequest extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name="ruleset", type={Coding.class}, order=0, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name="originalRuleset", type={Coding.class}, order=1, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when this resource was created.
      */
-    @Child(name="created", type={DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
      * The Insurer who is target  of the request.
      */
-    @Child(name="target", type={Organization.class}, order=3, min=0, max=1)
+    @Child(name = "target", type = {Organization.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who is target  of the request." )
     protected Reference target;
 
@@ -88,7 +88,7 @@ public class PendedRequest extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name="provider", type={Practitioner.class}, order=4, min=0, max=1)
+    @Child(name = "provider", type = {Practitioner.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference provider;
 
@@ -100,7 +100,7 @@ public class PendedRequest extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name="organization", type={Organization.class}, order=5, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference organization;
 
@@ -112,7 +112,7 @@ public class PendedRequest extends DomainResource {
     /**
      * Reference of resource to reverse.
      */
-    @Child(name="request", type={}, order=6, min=0, max=1)
+    @Child(name = "request", type = {}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Request reference", formalDefinition="Reference of resource to reverse." )
     protected Reference request;
 
@@ -124,21 +124,21 @@ public class PendedRequest extends DomainResource {
     /**
      * Names of resource types to include.
      */
-    @Child(name="include", type={StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "include", type = {StringType.class}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Resource type(s) to include", formalDefinition="Names of resource types to include." )
     protected List<StringType> include;
 
     /**
      * Names of resource types to exclude.
      */
-    @Child(name="exclude", type={StringType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "exclude", type = {StringType.class}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Resource type(s) to exclude", formalDefinition="Names of resource types to exclude." )
     protected List<StringType> exclude;
 
     /**
      * A period of time during which the fulfilling resources would have been created.
      */
-    @Child(name="period", type={Period.class}, order=9, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
     protected Period period;
 

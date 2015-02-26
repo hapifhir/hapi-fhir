@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -48,7 +48,7 @@ public class Coverage extends DomainResource {
     /**
      * The program or plan underwriter or payor.
      */
-    @Child(name="issuer", type={Organization.class}, order=-1, min=0, max=1)
+    @Child(name = "issuer", type = {Organization.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="An identifier for the plan issuer", formalDefinition="The program or plan underwriter or payor." )
     protected Reference issuer;
 
@@ -60,63 +60,63 @@ public class Coverage extends DomainResource {
     /**
      * Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.
      */
-    @Child(name="period", type={Period.class}, order=0, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Coverage start and end dates", formalDefinition="Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force." )
     protected Period period;
 
     /**
      * The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.
      */
-    @Child(name="type", type={Coding.class}, order=1, min=0, max=1)
+    @Child(name = "type", type = {Coding.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Type of coverage", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health." )
     protected Coding type;
 
     /**
      * The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.
      */
-    @Child(name="identifier", type={Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name="group", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "group", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="An identifier for the group", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType group;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name="plan", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "plan", type = {StringType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="An identifier for the plan", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType plan;
 
     /**
      * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    @Child(name="subplan", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "subplan", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="An identifier for the subsection of the plan", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID." )
     protected StringType subplan;
 
     /**
      * A unique identifier for a dependent under the coverage.
      */
-    @Child(name="dependent", type={IntegerType.class}, order=6, min=0, max=1)
+    @Child(name = "dependent", type = {IntegerType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="The dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
     protected IntegerType dependent;
 
     /**
      * An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
-    @Child(name="sequence", type={IntegerType.class}, order=7, min=0, max=1)
+    @Child(name = "sequence", type = {IntegerType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="The plan instance or sequence counter", formalDefinition="An optional counter for a particular instance of the identified coverage which increments upon each renewal." )
     protected IntegerType sequence;
 
     /**
      * The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.
      */
-    @Child(name="subscriber", type={Patient.class}, order=8, min=0, max=1)
+    @Child(name = "subscriber", type = {Patient.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Plan holder information", formalDefinition="The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due." )
     protected Reference subscriber;
 
@@ -128,14 +128,14 @@ public class Coverage extends DomainResource {
     /**
      * The identifier for a community of providers.
      */
-    @Child(name="network", type={Identifier.class}, order=9, min=0, max=1)
+    @Child(name = "network", type = {Identifier.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Insurer network", formalDefinition="The identifier for a community of providers." )
     protected Identifier network;
 
     /**
      * The policy(s) which constitute this insurance coverage.
      */
-    @Child(name="contract", type={Contract.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contract", type = {Contract.class}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contract details", formalDefinition="The policy(s) which constitute this insurance coverage." )
     protected List<Reference> contract;
     /**
@@ -712,22 +712,22 @@ public class Coverage extends DomainResource {
     return ResourceType.Coverage;
    }
 
-  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
-  public static final String SP_PLAN = "plan";
-  @SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference" )
-  public static final String SP_ISSUER = "issuer";
+    @SearchParamDefinition(name = "identifier", path = "Coverage.identifier", description = "The primary identifier of the insured", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
   public static final String SP_SEQUENCE = "sequence";
+    @SearchParamDefinition(name = "subplan", path = "Coverage.subplan", description = "Sub-plan identifier", type = "token")
+    public static final String SP_SUBPLAN = "subplan";
+    @SearchParamDefinition(name = "type", path = "Coverage.type", description = "The kind of coverage", type = "token")
+    public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "plan", path = "Coverage.plan", description = "A plan or policy identifier", type = "token")
+    public static final String SP_PLAN = "plan";
   @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
   public static final String SP_DEPENDENT = "dependent";
+    @SearchParamDefinition(name = "issuer", path = "Coverage.issuer", description = "The identity of the insurer", type = "reference")
+    public static final String SP_ISSUER = "issuer";
   @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
   public static final String SP_GROUP = "group";
-  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token" )
-  public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="subplan", path="Coverage.subplan", description="Sub-plan identifier", type="token" )
-  public static final String SP_SUBPLAN = "subplan";
 
 }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -197,7 +197,9 @@ public class MedicationDispense extends DomainResource {
         protected CodeableConcept route;
 
         /**
-         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.
+         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration.
          */
         @Child(name="method", type={CodeableConcept.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Technique for administering medication", formalDefinition="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.\r\rTerminologies used often pre-coordinate this term with the route and or form of administration." )
@@ -386,7 +388,9 @@ public class MedicationDispense extends DomainResource {
         }
 
         /**
-         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
         public CodeableConcept getMethod() { 
           if (this.method == null)
@@ -402,7 +406,9 @@ public class MedicationDispense extends DomainResource {
         }
 
         /**
-         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
         public MedicationDispenseDosageInstructionComponent setMethod(CodeableConcept value) { 
           this.method = value;
@@ -754,21 +760,21 @@ public class MedicationDispense extends DomainResource {
     /**
      * Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="External identifier", formalDefinition="Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR." )
     protected Identifier identifier;
 
     /**
      * A code specifying the state of the set of dispense events.
      */
-    @Child(name="status", type={CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="in-progress | on-hold | completed | entered-in-error | stopped", formalDefinition="A code specifying the state of the set of dispense events." )
     protected Enumeration<MedicationDispenseStatus> status;
 
     /**
      * A link to a resource representing the person to whom the medication will be given.
      */
-    @Child(name="patient", type={Patient.class}, order=1, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Who the dispense is for", formalDefinition="A link to a resource representing the person to whom the medication will be given." )
     protected Reference patient;
 
@@ -780,7 +786,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * The individual responsible for dispensing the medication.
      */
-    @Child(name="dispenser", type={Practitioner.class}, order=2, min=0, max=1)
+    @Child(name = "dispenser", type = {Practitioner.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Practitioner responsible for dispensing medication", formalDefinition="The individual responsible for dispensing the medication." )
     protected Reference dispenser;
 
@@ -792,7 +798,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * Indicates the medication order that is being dispensed against.
      */
-    @Child(name="authorizingPrescription", type={MedicationPrescription.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "authorizingPrescription", type = {MedicationPrescription.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Medication order that authorizes the dispense", formalDefinition="Indicates the medication order that is being dispensed against." )
     protected List<Reference> authorizingPrescription;
     /**
@@ -804,28 +810,28 @@ public class MedicationDispense extends DomainResource {
     /**
      * Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=4, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Trial fill, partial fill, emergency fill, etc.", formalDefinition="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc." )
     protected CodeableConcept type;
 
     /**
      * The amount of medication that has been dispensed. Includes unit of measure.
      */
-    @Child(name="quantity", type={Quantity.class}, order=5, min=0, max=1)
+    @Child(name = "quantity", type = {Quantity.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of medication that has been dispensed. Includes unit of measure." )
     protected Quantity quantity;
 
     /**
      * The amount of medication expressed as a timing amount.
      */
-    @Child(name="daysSupply", type={Quantity.class}, order=6, min=0, max=1)
+    @Child(name = "daysSupply", type = {Quantity.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Days Supply", formalDefinition="The amount of medication expressed as a timing amount." )
     protected Quantity daysSupply;
 
     /**
      * Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
      */
-    @Child(name="medication", type={Medication.class}, order=7, min=0, max=1)
+    @Child(name = "medication", type = {Medication.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="What medication was supplied", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
     protected Reference medication;
 
@@ -837,21 +843,21 @@ public class MedicationDispense extends DomainResource {
     /**
      * The time when the dispensed product was packaged and reviewed.
      */
-    @Child(name="whenPrepared", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "whenPrepared", type = {DateTimeType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Dispense processing time", formalDefinition="The time when the dispensed product was packaged and reviewed." )
     protected DateTimeType whenPrepared;
 
     /**
      * The time the dispensed product was provided to the patient or their representative.
      */
-    @Child(name="whenHandedOver", type={DateTimeType.class}, order=9, min=0, max=1)
+    @Child(name = "whenHandedOver", type = {DateTimeType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Handover time", formalDefinition="The time the dispensed product was provided to the patient or their representative." )
     protected DateTimeType whenHandedOver;
 
     /**
      * Identification of the facility/location where the medication was shipped to, as part of the dispense event.
      */
-    @Child(name="destination", type={Location.class}, order=10, min=0, max=1)
+    @Child(name = "destination", type = {Location.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Where the medication was sent", formalDefinition="Identification of the facility/location where the medication was shipped to, as part of the dispense event." )
     protected Reference destination;
 
@@ -863,7 +869,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional.
      */
-    @Child(name="receiver", type={Patient.class, Practitioner.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "receiver", type = {Patient.class, Practitioner.class}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who collected the medication", formalDefinition="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional." )
     protected List<Reference> receiver;
     /**
@@ -875,21 +881,21 @@ public class MedicationDispense extends DomainResource {
     /**
      * Extra information about the dispense that could not be conveyed in the other attributes.
      */
-    @Child(name="note", type={StringType.class}, order=12, min=0, max=1)
+    @Child(name = "note", type = {StringType.class}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Information about the dispense", formalDefinition="Extra information about the dispense that could not be conveyed in the other attributes." )
     protected StringType note;
 
     /**
      * Indicates how the medication is to be used by the patient.
      */
-    @Child(name="dosageInstruction", type={}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "dosageInstruction", type = {}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Medicine administration instructions to the patient/carer", formalDefinition="Indicates how the medication is to be used by the patient." )
     protected List<MedicationDispenseDosageInstructionComponent> dosageInstruction;
 
     /**
      * Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn't happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why.
      */
-    @Child(name="substitution", type={}, order=14, min=0, max=1)
+    @Child(name = "substitution", type = {}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Deals with substitution of one medicine for another", formalDefinition="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn't happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why." )
     protected MedicationDispenseSubstitutionComponent substitution;
 
@@ -1611,28 +1617,28 @@ public class MedicationDispense extends DomainResource {
     return ResourceType.MedicationDispense;
    }
 
-  @SearchParamDefinition(name="medication", path="MedicationDispense.medication", description="Returns dispenses of this medicine", type="reference" )
-  public static final String SP_MEDICATION = "medication";
-  @SearchParamDefinition(name="patient", path="MedicationDispense.patient", description="The identity of a patient to list dispenses  for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="MedicationDispense.status", description="Status of the dispense", type="token" )
-  public static final String SP_STATUS = "status";
+    @SearchParamDefinition(name = "dispenser", path = "MedicationDispense.dispenser", description = "Return all dispenses performed by a specific indiividual", type = "reference")
+    public static final String SP_DISPENSER = "dispenser";
+    @SearchParamDefinition(name = "identifier", path = "MedicationDispense.identifier", description = "Return dispenses with this external identity", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="prescription", path="MedicationDispense.authorizingPrescription", description="The identity of a prescription to list dispenses from", type="reference" )
   public static final String SP_PRESCRIPTION = "prescription";
+    @SearchParamDefinition(name = "patient", path = "MedicationDispense.patient", description = "The identity of a patient to list dispenses  for", type = "reference")
+    public static final String SP_PATIENT = "patient";
+    @SearchParamDefinition(name = "destination", path = "MedicationDispense.destination", description = "Return dispenses that should be sent to a secific destination", type = "reference")
+    public static final String SP_DESTINATION = "destination";
+    @SearchParamDefinition(name = "medication", path = "MedicationDispense.medication", description = "Returns dispenses of this medicine", type = "reference")
+    public static final String SP_MEDICATION = "medication";
   @SearchParamDefinition(name="responsibleparty", path="MedicationDispense.substitution.responsibleParty", description="Return all dispenses with the specified responsible party", type="reference" )
   public static final String SP_RESPONSIBLEPARTY = "responsibleparty";
-  @SearchParamDefinition(name="dispenser", path="MedicationDispense.dispenser", description="Return all dispenses performed by a specific indiividual", type="reference" )
-  public static final String SP_DISPENSER = "dispenser";
   @SearchParamDefinition(name="type", path="MedicationDispense.type", description="Return all dispenses of a specific type", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="MedicationDispense.identifier", description="Return dispenses with this external identity", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="whenprepared", path="MedicationDispense.whenPrepared", description="Date when medication prepared", type="date" )
-  public static final String SP_WHENPREPARED = "whenprepared";
   @SearchParamDefinition(name="whenhandedover", path="MedicationDispense.whenHandedOver", description="Date when medication handed over to patient (outpatient setting), or supplied to ward or clinic (inpatient setting)", type="date" )
   public static final String SP_WHENHANDEDOVER = "whenhandedover";
-  @SearchParamDefinition(name="destination", path="MedicationDispense.destination", description="Return dispenses that should be sent to a secific destination", type="reference" )
-  public static final String SP_DESTINATION = "destination";
+    @SearchParamDefinition(name = "whenprepared", path = "MedicationDispense.whenPrepared", description = "Date when medication prepared", type = "date")
+    public static final String SP_WHENPREPARED = "whenprepared";
+    @SearchParamDefinition(name = "status", path = "MedicationDispense.status", description = "Status of the dispense", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

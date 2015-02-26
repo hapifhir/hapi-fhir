@@ -103,7 +103,7 @@ public class ContainedResourceEncodingTest {
 		this.author = new Practitioner();
 		this.author.setId((UUID.randomUUID().toString()));
 		this.author.addIdentifier().setSystem("DoctorID").setValue("4711");
-		this.author.addRole().addCoding().setCode("doctor");
+		this.author.addPractitionerRole().getRole().addCoding().setCode("doctor");
 		this.author.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
 
 	}
@@ -173,18 +173,18 @@ public class ContainedResourceEncodingTest {
 		 
         CodeableConcept obsName = new CodeableConcept();
         obsName.setText("name");
-        observation.setName(obsName);
-        
-        Reference result = dr.addResult();
-        result.setResource(observation);
-        
-        ArrayList<Reference> performers = new ArrayList<Reference>();
-        Reference performer = new Reference();
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
         
         Practitioner p = new Practitioner();
 		p.setId((UUID.randomUUID().toString()));
 		p.addIdentifier().setSystem("DoctorID").setValue("4711");
-		p.addRole().setText("Doctor");
+		p.addPractitionerRole().getRole().setText("Doctor");
 		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
         
         performer.setResource(p);
@@ -212,18 +212,18 @@ public class ContainedResourceEncodingTest {
 		 
         CodeableConcept obsName = new CodeableConcept();
         obsName.setText("name");
-        observation.setName(obsName);
-        
-        Reference result = dr.addResult();
-        result.setResource(observation);
-        
-        ArrayList<Reference> performers = new ArrayList<Reference>();
-        Reference performer = new Reference();
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
         
         Practitioner p = new Practitioner();
 		// no idDt on practitioner p
 		p.addIdentifier().setSystem("DoctorID").setValue("4711");
-		p.addRole().setText("Doctor");
+		p.addPractitionerRole().getRole().setText("Doctor");
 		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
         
         performer.setResource(p);

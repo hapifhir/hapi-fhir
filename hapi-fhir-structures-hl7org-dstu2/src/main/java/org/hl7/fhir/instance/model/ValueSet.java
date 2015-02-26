@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -2514,112 +2514,112 @@ public class ValueSet extends DomainResource {
     /**
      * The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI).
      */
-    @Child(name="identifier", type={UriType.class}, order=-1, min=0, max=1)
+    @Child(name = "identifier", type = {UriType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Globally unique logical id for  value set", formalDefinition="The identifier that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique OID, UUID, or URI)." )
     protected UriType identifier;
 
     /**
      * The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name="version", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Logical id for this version of the value set", formalDefinition="The identifier that is used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name describing the value set.
      */
-    @Child(name="name", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Informal name for this value set", formalDefinition="A free text natural language name describing the value set." )
     protected StringType name;
 
     /**
      * If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.
      */
-    @Child(name="immutable", type={BooleanType.class}, order=2, min=0, max=1)
+    @Child(name = "immutable", type = {BooleanType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Indicates whether or not any change to the content logical definition may occur", formalDefinition="If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change." )
     protected BooleanType immutable;
 
     /**
      * The name of the individual or organization that published the value set.
      */
-    @Child(name="publisher", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the value set." )
     protected StringType publisher;
 
     /**
      * Contacts of the publisher to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contacts of the publisher to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.
      */
-    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Human language description of the value set", formalDefinition="A free text natural language description of the use of the value set - reason for definition, 'the semantic space' to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set." )
     protected StringType description;
 
     /**
      * A copyright statement relating to the value set and/or its contents. These are generally legal restrictions on the use and publishing of the value set.
      */
-    @Child(name="copyright", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Publishing restrictions for the value set", formalDefinition="A copyright statement relating to the value set and/or its contents. These are generally legal restrictions on the use and publishing of the value set." )
     protected StringType copyright;
 
     /**
      * The status of the value set.
      */
-    @Child(name="status", type={CodeType.class}, order=7, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 8, min = 1, max = 1)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the value set." )
     protected Enumeration<ValuesetStatus> status;
 
     /**
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name="experimental", type={BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * Whether this is intended to be used with an extensible binding or not.
      */
-    @Child(name="extensible", type={BooleanType.class}, order=9, min=0, max=1)
+    @Child(name = "extensible", type = {BooleanType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Whether this is intended to be used with an extensible binding", formalDefinition="Whether this is intended to be used with an extensible binding or not." )
     protected BooleanType extensible;
 
     /**
      * The date that the value set status was last changed.
      */
-    @Child(name="date", type={DateTimeType.class}, order=10, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Date for given status", formalDefinition="The date that the value set status was last changed." )
     protected DateTimeType date;
 
     /**
      * If a Stability Date is expanded by evaluating the Content Logical Definition using the current version of all referenced code system(s) and value sets as of the Stability Date.
      */
-    @Child(name="stableDate", type={DateType.class}, order=11, min=0, max=1)
+    @Child(name = "stableDate", type = {DateType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Fixed date for the version of all referenced code systems and value sets", formalDefinition="If a Stability Date is expanded by evaluating the Content Logical Definition using the current version of all referenced code system(s) and value sets as of the Stability Date." )
     protected DateType stableDate;
 
     /**
      * When value set defines its own codes.
      */
-    @Child(name="define", type={}, order=12, min=0, max=1)
+    @Child(name = "define", type = {}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="When value set defines its own codes", formalDefinition="When value set defines its own codes." )
     protected ValueSetDefineComponent define;
 
     /**
      * When value set includes codes from elsewhere.
      */
-    @Child(name="compose", type={}, order=13, min=0, max=1)
+    @Child(name = "compose", type = {}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="When value set includes codes from elsewhere", formalDefinition="When value set includes codes from elsewhere." )
     protected ValueSetComposeComponent compose;
 
     /**
      * A value set can also be "expanded", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.
      */
-    @Child(name="expansion", type={}, order=14, min=0, max=1)
+    @Child(name = "expansion", type = {}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Used when the value set is 'expanded'", formalDefinition="A value set can also be 'expanded', where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
@@ -3402,26 +3402,26 @@ public class ValueSet extends DomainResource {
     return ResourceType.ValueSet;
    }
 
-  @SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="token" )
-  public static final String SP_SYSTEM = "system";
-  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier of the value set", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="token" )
   public static final String SP_REFERENCE = "reference";
+    @SearchParamDefinition(name = "identifier", path = "ValueSet.identifier", description = "The identifier of the value set", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "system", path = "ValueSet.define.system", description = "The system for any codes defined by this value set", type = "token")
+    public static final String SP_SYSTEM = "system";
+    @SearchParamDefinition(name = "code", path = "ValueSet.define.concept.code", description = "A code defined in the value set", type = "token")
+    public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "name", path = "ValueSet.name", description = "The name of the value set", type = "string")
+    public static final String SP_NAME = "name";
   @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+    @SearchParamDefinition(name = "description", path = "ValueSet.description", description = "Text search in the description of the value set", type = "string")
+    public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
   public static final String SP_VERSION = "version";
+    @SearchParamDefinition(name = "status", path = "ValueSet.status", description = "The status of the value set", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

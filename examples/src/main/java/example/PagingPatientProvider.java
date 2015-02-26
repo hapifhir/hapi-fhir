@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 
+@SuppressWarnings("null")
 //START SNIPPET: provider
 public class PagingPatientProvider implements IResourceProvider {
 
@@ -21,8 +22,19 @@ public class PagingPatientProvider implements IResourceProvider {
 	@Search
 	public IBundleProvider search(@RequiredParam(name = Patient.SP_FAMILY) StringParam theFamily) {
 		final InstantDt searchTime = InstantDt.withCurrentTime();
-		final List<String> matchingResourceIds = findIdsByFamily(theFamily);
 
+		/*
+		 * First, we'll search the database for a set of database row IDs that
+		 * match the given search criteria. That way we can keep just the
+		 * row IDs around, and load the actual resources on demand later 
+		 * as the client pages through them.
+		 */
+		final List<Long> matchingResourceIds = null; // <-- implement this
+
+		/*
+		 * Return a bundle provider which can page through the IDs and
+		 * return the resources that go with them.
+		 */
 		return new IBundleProvider() {
 
 			@Override
@@ -33,7 +45,7 @@ public class PagingPatientProvider implements IResourceProvider {
 			@Override
 			public List<IResource> getResources(int theFromIndex, int theToIndex) {
 				int end = Math.max(theToIndex, matchingResourceIds.size() - 1);
-				List<String> idsToReturn = matchingResourceIds.subList(theFromIndex, end);
+				List<Long> idsToReturn = matchingResourceIds.subList(theFromIndex, end);
 				return loadResourcesByIds(idsToReturn);
 			}
 
@@ -45,17 +57,9 @@ public class PagingPatientProvider implements IResourceProvider {
 	}
 
 	/**
-	 * Get a list of resource IDs which match a given family name
-	 */
-	private List<String> findIdsByFamily(StringParam theFamily) {
-		// .. implement this search against the database ..
-		return null;
-	}
-
-	/**
 	 * Load a list of patient resources given their IDs
 	 */
-	private List<IResource> loadResourcesByIds(List<String> theFamily) {
+	private List<IResource> loadResourcesByIds(List<Long> theIdsToReturn) {
 		// .. implement this search against the database ..
 		return null;
 	}

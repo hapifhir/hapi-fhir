@@ -34,7 +34,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 /**
  * Field annotation for fields within resource and datatype definitions, indicating 
@@ -96,6 +98,12 @@ public @interface Child {
 	 */
 	Class<? extends IBase>[] type() default {};
 
+	/**
+	 * For children which accept an {@link Enumeration} as the type, this
+	 * field indicates the type to use for the enum factory
+	 */
+	Class<? extends IBaseEnumFactory<?>> enumFactory() default NoEnumFactory.class;
+
 	// Not implemented
 //	/**
 //	 * This value is used when extending a built-in model class and defining a
@@ -105,5 +113,23 @@ public @interface Child {
 //	 * HumanNameDt which adds extensions of your choosing) you could do that using a replacement field. 
 //	 */
 //	String replaces() default "";
+
+	public static class NoEnumFactory implements IBaseEnumFactory<Enum<?>> {
+
+		private NoEnumFactory() {
+			// non instantiable
+		}
+
+		@Override
+		public Enum<?> fromCode(String theCodeString) throws IllegalArgumentException {
+			return null;
+		}
+
+		@Override
+		public String toCode(Enum<?> theCode) {
+			return null;
+		}
 		
+	}
+	
 }

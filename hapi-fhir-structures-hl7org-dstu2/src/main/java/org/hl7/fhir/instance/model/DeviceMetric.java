@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -655,7 +655,7 @@ public class DeviceMetric extends Resource {
     /**
      * Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=-1, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Type of metric", formalDefinition="Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc." )
     protected CodeableConcept type;
 
@@ -663,21 +663,21 @@ public class DeviceMetric extends Resource {
      * Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. 
 It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=1, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Unique identifier of this DeviceMetric", formalDefinition="Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. \nIt should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device." )
     protected Identifier identifier;
 
     /**
      * Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.
      */
-    @Child(name="unit", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "unit", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Unit of metric", formalDefinition="Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc." )
     protected CodeableConcept unit;
 
     /**
      * Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.
      */
-    @Child(name="source", type={Device.class}, order=2, min=0, max=1)
+    @Child(name = "source", type = {Device.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Describes the link to the source Device", formalDefinition="Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc." )
     protected Reference source;
 
@@ -690,7 +690,7 @@ It should be noted that in order to make the identifier unique, the system eleme
      * Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.
 An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.
      */
-    @Child(name="parent", type={DeviceComponent.class}, order=3, min=0, max=1)
+    @Child(name = "parent", type = {DeviceComponent.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Describes the link to the parent DeviceComponent", formalDefinition="Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.\nAn example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location." )
     protected Reference parent;
 
@@ -703,28 +703,28 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     /**
      * Indicates current operational state of the device. For example: On, Off, Standby, etc.
      */
-    @Child(name="operationalState", type={CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "operationalState", type = {CodeType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="on | off | standby", formalDefinition="Indicates current operational state of the device. For example: On, Off, Standby, etc." )
     protected Enumeration<MetricOperationalStatus> operationalState;
 
     /**
      * Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
      */
-    @Child(name="measurementMode", type={Identifier.class}, order=5, min=0, max=1)
+    @Child(name = "measurementMode", type = {Identifier.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Describes the physical principle of the measurement", formalDefinition="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
     protected Identifier measurementMode;
 
     /**
      * Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
      */
-    @Child(name="color", type={Identifier.class}, order=6, min=0, max=1)
+    @Child(name = "color", type = {Identifier.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Describes the typical color of representation", formalDefinition="Describes the typical color of the representation of observations that have been generated for this DeviceMetric." )
     protected Identifier color;
 
     /**
      * Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.
      */
-    @Child(name="category", type={CodeType.class}, order=7, min=1, max=1)
+    @Child(name = "category", type = {CodeType.class}, order = 8, min = 1, max = 1)
     @Description(shortDefinition="measurement | setting | calculation | unspecified", formalDefinition="Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation." )
     protected Enumeration<MetricCategory> category;
 
@@ -733,14 +733,14 @@ An example would be a DeviceComponent that represents a Channel. This reference 
 necessarily the same as the update
 period.
      */
-    @Child(name="measurementPeriod", type={Timing.class}, order=8, min=0, max=1)
+    @Child(name = "measurementPeriod", type = {Timing.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Describes the measurement repetition time", formalDefinition="Describes the measurement repetition time. This is not\nnecessarily the same as the update\nperiod." )
     protected Timing measurementPeriod;
 
     /**
      * Describes the calibrations that have been performed or that are required to be performed.
      */
-    @Child(name="calibrationInfo", type={}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "calibrationInfo", type = {}, order = 10, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Describes the calibrations that have been performed or that are required to be performed", formalDefinition="Describes the calibrations that have been performed or that are required to be performed." )
     protected List<DeviceMetricCalibrationInfoComponent> calibrationInfo;
 
@@ -1201,16 +1201,16 @@ period.)
     return ResourceType.DeviceMetric;
    }
 
-  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )
-  public static final String SP_CATEGORY = "category";
-  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference" )
-  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference" )
   public static final String SP_PARENT = "parent";
-  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "source", path = "DeviceMetric.source", description = "The device resource", type = "reference")
+    public static final String SP_SOURCE = "source";
+    @SearchParamDefinition(name = "type", path = "DeviceMetric.type", description = "The component type", type = "token")
+    public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "category", path = "DeviceMetric.category", description = "The category of the metric", type = "token")
+    public static final String SP_CATEGORY = "category";
 
 }
 

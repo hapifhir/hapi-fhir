@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -1049,21 +1049,21 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Date when the sensitivity was recorded.
      */
-    @Child(name="recordedDate", type={DateTimeType.class}, order=0, min=0, max=1)
+    @Child(name = "recordedDate", type = {DateTimeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="When recorded", formalDefinition="Date when the sensitivity was recorded." )
     protected DateTimeType recordedDate;
 
     /**
      * Indicates who has responsibility for the record.
      */
-    @Child(name="recorder", type={Practitioner.class, Patient.class}, order=1, min=0, max=1)
+    @Child(name = "recorder", type = {Practitioner.class, Patient.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Who recorded the sensitivity", formalDefinition="Indicates who has responsibility for the record." )
     protected Reference recorder;
 
@@ -1075,7 +1075,7 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * The patient who has the allergy or intolerance.
      */
-    @Child(name="subject", type={Patient.class}, order=2, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class}, order = 3, min = 1, max = 1)
     @Description(shortDefinition="Who the sensitivity is for", formalDefinition="The patient who has the allergy or intolerance." )
     protected Reference subject;
 
@@ -1087,56 +1087,56 @@ public class AllergyIntolerance extends DomainResource {
     /**
      * Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk.
      */
-    @Child(name="substance", type={CodeableConcept.class}, order=3, min=1, max=1)
+    @Child(name = "substance", type = {CodeableConcept.class}, order = 4, min = 1, max = 1)
     @Description(shortDefinition="Substance, (or class) considered to be responsible for risk", formalDefinition="Identification of a substance, or a class of substances, that is considered to be responsible for the Adverse reaction risk." )
     protected CodeableConcept substance;
 
     /**
      * Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance.
      */
-    @Child(name="status", type={CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="unconfirmed | confirmed | resolved | refuted", formalDefinition="Assertion about certainty associated with the propensity, or potential risk, of a reaction to the identified Substance." )
     protected Enumeration<AllergyIntoleranceStatus> status;
 
     /**
      * Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance.
      */
-    @Child(name="criticality", type={CodeType.class}, order=5, min=0, max=1)
+    @Child(name = "criticality", type = {CodeType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="low | high | unassessible - Estimated potential clinical harm", formalDefinition="Estimate of the potential clinical harm, or seriousness, of the reaction to the identified Substance." )
     protected Enumeration<AllergyIntoleranceCriticality> criticality;
 
     /**
      * Identification of the underlying physiological mechanism for the Reaction Risk.
      */
-    @Child(name="type", type={CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "type", type = {CodeType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="immune | non-immune - Underlying mechanism (if known)", formalDefinition="Identification of the underlying physiological mechanism for the Reaction Risk." )
     protected Enumeration<AllergyIntoleranceType> type;
 
     /**
      * Category of the identified Substance.
      */
-    @Child(name="category", type={CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "category", type = {CodeType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="food | medication | environment - Category of Substance", formalDefinition="Category of the identified Substance." )
     protected Enumeration<AllergyIntoleranceCategory> category;
 
     /**
      * Represents the date and/or time of the last known occurence of a reaction event.
      */
-    @Child(name="lastOccurence", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "lastOccurence", type = {DateTimeType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Date(/time) of last known occurence of a reaction", formalDefinition="Represents the date and/or time of the last known occurence of a reaction event." )
     protected DateTimeType lastOccurence;
 
     /**
      * Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.
      */
-    @Child(name="comment", type={StringType.class}, order=9, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Additional text not captured in other fields", formalDefinition="Additional narrative about the propensity for the Adverse Reaction, not captured in other fields." )
     protected StringType comment;
 
     /**
      * Details about each Adverse Reaction Event linked to exposure to the identified Substance.
      */
-    @Child(name="event", type={}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "event", type = {}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Details about each Adverse Reaction Event linked to exposure to the identified Substance." )
     protected List<AllergyIntoleranceEventComponent> event;
 
@@ -1747,38 +1747,38 @@ public class AllergyIntolerance extends DomainResource {
     return ResourceType.AllergyIntolerance;
    }
 
-  @SearchParamDefinition(name="status", path="AllergyIntolerance.status", description="unconfirmed | confirmed | resolved | refuted", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="subject", path="AllergyIntolerance.subject", description="Who the sensitivity is for", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="onset", path="AllergyIntolerance.event.onset", description="Date(/time) when manifestations showed", type="date" )
-  public static final String SP_ONSET = "onset";
-  @SearchParamDefinition(name="last-date", path="AllergyIntolerance.lastOccurence", description="Date(/time) of last known occurence of a reaction", type="date" )
-  public static final String SP_LASTDATE = "last-date";
   @SearchParamDefinition(name="severity", path="AllergyIntolerance.event.severity", description="mild | moderate | severe (of event as a whole)", type="token" )
   public static final String SP_SEVERITY = "severity";
   @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="When recorded", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="type", path="AllergyIntolerance.type", description="immune | non-immune - Underlying mechanism (if known)", type="token" )
-  public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "identifier", path = "AllergyIntolerance.identifier", description = "External Ids for this item", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "manifestation", path = "AllergyIntolerance.event.manifestation", description = "Clinical symptoms/signs associated with the Event", type = "token")
+    public static final String SP_MANIFESTATION = "manifestation";
+    @SearchParamDefinition(name = "recorder", path = "AllergyIntolerance.recorder", description = "Who recorded the sensitivity", type = "reference")
+    public static final String SP_RECORDER = "recorder";
+    @SearchParamDefinition(name = "subject", path = "AllergyIntolerance.subject", description = "Who the sensitivity is for", type = "reference")
+    public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="substance", path="AllergyIntolerance.substance|AllergyIntolerance.event.substance", description="Substance, (or class) considered to be responsible for risk", type="token" )
   public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="criticality", path="AllergyIntolerance.criticality", description="low | high | unassessible - Estimated potential clinical harm", type="token" )
   public static final String SP_CRITICALITY = "criticality";
-  @SearchParamDefinition(name="category", path="AllergyIntolerance.category", description="food | medication | environment - Category of Substance", type="token" )
-  public static final String SP_CATEGORY = "category";
+    @SearchParamDefinition(name = "type", path = "AllergyIntolerance.type", description = "immune | non-immune - Underlying mechanism (if known)", type = "token")
+    public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "onset", path = "AllergyIntolerance.event.onset", description = "Date(/time) when manifestations showed", type = "date")
+    public static final String SP_ONSET = "onset";
   @SearchParamDefinition(name="duration", path="AllergyIntolerance.event.duration", description="How long Manifestations persisted", type="quantity" )
   public static final String SP_DURATION = "duration";
-  @SearchParamDefinition(name="patient", path="AllergyIntolerance.subject", description="Who the sensitivity is for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="recorder", path="AllergyIntolerance.recorder", description="Who recorded the sensitivity", type="reference" )
-  public static final String SP_RECORDER = "recorder";
   @SearchParamDefinition(name="route", path="AllergyIntolerance.event.exposureRoute", description="How the subject was exposed to the substance", type="token" )
   public static final String SP_ROUTE = "route";
-  @SearchParamDefinition(name="identifier", path="AllergyIntolerance.identifier", description="External Ids for this item", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="manifestation", path="AllergyIntolerance.event.manifestation", description="Clinical symptoms/signs associated with the Event", type="token" )
-  public static final String SP_MANIFESTATION = "manifestation";
+    @SearchParamDefinition(name = "patient", path = "AllergyIntolerance.subject", description = "Who the sensitivity is for", type = "reference")
+    public static final String SP_PATIENT = "patient";
+    @SearchParamDefinition(name = "category", path = "AllergyIntolerance.category", description = "food | medication | environment - Category of Substance", type = "token")
+    public static final String SP_CATEGORY = "category";
+    @SearchParamDefinition(name = "last-date", path = "AllergyIntolerance.lastOccurence", description = "Date(/time) of last known occurence of a reaction", type = "date")
+    public static final String SP_LASTDATE = "last-date";
+    @SearchParamDefinition(name = "status", path = "AllergyIntolerance.status", description = "unconfirmed | confirmed | resolved | refuted", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

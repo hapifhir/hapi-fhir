@@ -45,9 +45,6 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		if (theNext == null) {
 			throw new NullPointerException();
 		}
-//		if (theNext.getValidChildNames().contains("performetPractitioner")) {
-//			throw new NullPointerException();
-//		}
 		if (theNext.getExtensionUrl() != null) {
 			throw new IllegalArgumentException("Shouldn't haven an extension URL, use addExtension instead");
 		}

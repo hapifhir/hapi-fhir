@@ -29,53 +29,94 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
-import java.util.*;
+import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * A reference from one resource to another.
  */
 @DatatypeDef(name="Reference")
 public class Reference extends Type implements IReference, ICompositeType {
 
+
+    /**
+     * Constructor
+     */
+    public Reference() {
+        super();
+    }
+
+    /**
+     * Constructor
+     */
+    public Reference(IAnyResource theResource) {
+        this.resource = theResource;
+    }
+
+    /**
+     * Constructor
+     */
+    public Reference(StringType theReference) {
+        this.reference = theReference;
+    }
+
+    /**
+     * Constructor
+     */
+    public Reference(String theReference) {
+        if (StringUtils.isNotBlank(theReference)) {
+            this.reference = new StringType(theReference);
+        }
+    }
+
+    /**
+     * This is not a part of the "wire format" resource, but can be changed/accessed by parsers
+     */
+    private transient IAnyResource resource;
+
+    /**
+     * Retrieves the actual resource referenced by this reference. Note that the resource itself is not
+     * a part of the FHIR "wire format" and is never transmitted or receieved inline, but this property
+     * may be changed/accessed by parsers.
+     */
+    public IAnyResource getResource() {
+        return resource;
+    }
+
+    /**
+     * Sets the actual resource referenced by this reference. Note that the resource itself is not
+     * a part of the FHIR "wire format" and is never transmitted or receieved inline, but this property
+     * may be changed/accessed by parsers.
+     */
+    public void setResource(IAnyResource theResource) {
+        resource = theResource;
+    }
+
     /**
      * A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
      */
-    @Child(name="reference", type={StringType.class}, order=-1, min=0, max=1)
+    @Child(name = "reference", type = {StringType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Relative, internal or absolute URL reference", formalDefinition="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources." )
     protected StringType reference;
 
     /**
      * Plain text narrative that identifies the resource in addition to the resource reference.
      */
-    @Child(name="display", type={StringType.class}, order=0, min=0, max=1)
+    @Child(name = "display", type = {StringType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Text alternative for the resource", formalDefinition="Plain text narrative that identifies the resource in addition to the resource reference." )
     protected StringType display;
 
-	private IAnyResource myResource;
-
     private static final long serialVersionUID = 22777321L;
 
-    public Reference() {
-      super();
-    }
-
-    public Reference(IAnyResource theResource) {
-      myResource = theResource;
-    }
-
-    public Reference(String theReference) {
-    	setReference(theReference);
-	}
-
-	/**
+    /**
      * @return {@link #reference} (A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
      */
     public StringType getReferenceElement() { 
@@ -215,16 +256,6 @@ public class Reference extends Type implements IReference, ICompositeType {
         return super.isEmpty() && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty())
           ;
       }
-
-	@Override
-	public IAnyResource getResource() {
-		return myResource;
-	}
-
-	@Override
-	public void setResource(IAnyResource theResource) {
-		myResource = theResource;
-	}
 
 
 }

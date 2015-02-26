@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -689,77 +689,77 @@ public class NamingSystem extends DomainResource {
     /**
      * Indicates the purpose for the namingsystem - what kinds of things does it make unique?.
      */
-    @Child(name="type", type={CodeType.class}, order=-1, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?." )
     protected Enumeration<NamingsystemType> type;
 
     /**
      * The descriptive name of this particular identifier type or code system.
      */
-    @Child(name="name", type={StringType.class}, order=0, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Human-readable label", formalDefinition="The descriptive name of this particular identifier type or code system." )
     protected StringType name;
 
     /**
      * Indicates whether the namingsystem is "ready for use" or not.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="proposed | active | retired", formalDefinition="Indicates whether the namingsystem is 'ready for use' or not." )
     protected Enumeration<NamingsystemStatus> status;
 
     /**
      * If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system.
      */
-    @Child(name="country", type={CodeType.class}, order=2, min=0, max=1)
+    @Child(name = "country", type = {CodeType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="ISO 3-char country code", formalDefinition="If present, indicates that the identifier or code system is principally intended for use or applies to entities within the specified country.  For example, the country associated with a national code system." )
     protected CodeType country;
 
     /**
      * Categorizes a namingsystem for easier search by grouping related namingsystems.
      */
-    @Child(name="category", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="driver | provider | patient | bank", formalDefinition="Categorizes a namingsystem for easier search by grouping related namingsystems." )
     protected CodeableConcept category;
 
     /**
      * The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
      */
-    @Child(name="responsible", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "responsible", type = {StringType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Who maintains system namespace?", formalDefinition="The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision." )
     protected StringType responsible;
 
     /**
      * Details about what the namespace identifies including scope, granularity, version labeling, etc.
      */
-    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="What does namingsystem identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
     protected StringType description;
 
     /**
      * Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
      */
-    @Child(name="usage", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "usage", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="How/where is it used", formalDefinition="Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc." )
     protected StringType usage;
 
     /**
      * Indicates how the system may be identified when referenced in electronic exchange.
      */
-    @Child(name="uniqueId", type={}, order=7, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "uniqueId", type = {}, order = 8, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
     protected List<NamingSystemUniqueIdComponent> uniqueId;
 
     /**
      * The person who can be contacted about this system registration entry.
      */
-    @Child(name="contact", type={}, order=8, min=0, max=1)
+    @Child(name = "contact", type = {}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Who should be contacted for questions about namingsystem", formalDefinition="The person who can be contacted about this system registration entry." )
     protected NamingSystemContactComponent contact;
 
     /**
      * For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).
      */
-    @Child(name="replacedBy", type={NamingSystem.class}, order=9, min=0, max=1)
+    @Child(name = "replacedBy", type = {NamingSystem.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Use this instead", formalDefinition="For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any)." )
     protected Reference replacedBy;
 

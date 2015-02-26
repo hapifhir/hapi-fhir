@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 @Target(value=ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SearchParamDefinition {
@@ -57,5 +59,11 @@ public @interface SearchParamDefinition {
 	 * </p>
 	 */
 	String[] compositeOf() default {};
+
+	/**
+	 * For search params of type "reference", this can optionally be used to
+	 * specify the resource type(s) that this parameter applies to.
+	 */
+	Class<? extends IBaseResource>[] target() default {};
 	
 }

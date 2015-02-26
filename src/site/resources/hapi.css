@@ -43,6 +43,25 @@
 
 */
 
+.well {
+	padding: 5px;
+}
+
+.nav-list {
+	padding-right: 0px;
+	font-size: 12px;
+}
+
+.nav-list LI {
+	line-height: 15px;
+}
+
+/*
+.nav-list .divider {
+	display: none;
+}
+*/
+
 body {
     padding-top: 40px;
     padding-bottom: 10px;
@@ -126,6 +145,7 @@ h4 {
 	font-size: 1.2em;
 	padding: 0px;
 	margin-bottom: 0px;
+	margin-top: 20px;
 }
 
 li.expanded ul {

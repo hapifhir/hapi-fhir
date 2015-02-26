@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -818,14 +818,14 @@ public class Condition extends DomainResource {
     /**
      * This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this condition", formalDefinition="This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Indicates the patient who the condition record is associated with.
      */
-    @Child(name="subject", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Who has the condition?", formalDefinition="Indicates the patient who the condition record is associated with." )
     protected Reference subject;
 
@@ -837,7 +837,7 @@ public class Condition extends DomainResource {
     /**
      * Encounter during which the condition was first asserted.
      */
-    @Child(name="encounter", type={Encounter.class}, order=1, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Encounter when condition first asserted", formalDefinition="Encounter during which the condition was first asserted." )
     protected Reference encounter;
 
@@ -849,7 +849,7 @@ public class Condition extends DomainResource {
     /**
      * Person who takes responsibility for asserting the existence of the condition as part of the electronic record.
      */
-    @Child(name="asserter", type={Practitioner.class, Patient.class}, order=2, min=0, max=1)
+    @Child(name = "asserter", type = {Practitioner.class, Patient.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Person who asserts this condition", formalDefinition="Person who takes responsibility for asserting the existence of the condition as part of the electronic record." )
     protected Reference asserter;
 
@@ -861,98 +861,98 @@ public class Condition extends DomainResource {
     /**
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected.
      */
-    @Child(name="dateAsserted", type={DateType.class}, order=3, min=0, max=1)
+    @Child(name = "dateAsserted", type = {DateType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="When first detected/suspected/entered", formalDefinition="Estimated or actual date the condition/problem/diagnosis was first detected/suspected." )
     protected DateType dateAsserted;
 
     /**
      * Identification of the condition, problem or diagnosis.
      */
-    @Child(name="code", type={CodeableConcept.class}, order=4, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order = 5, min = 1, max = 1)
     @Description(shortDefinition="Identification of the condition, problem or diagnosis", formalDefinition="Identification of the condition, problem or diagnosis." )
     protected CodeableConcept code;
 
     /**
      * A category assigned to the condition. E.g. complaint | symptom | finding | diagnosis.
      */
-    @Child(name="category", type={CodeableConcept.class}, order=5, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="E.g. complaint | symptom | finding | diagnosis", formalDefinition="A category assigned to the condition. E.g. complaint | symptom | finding | diagnosis." )
     protected CodeableConcept category;
 
     /**
      * The clinical status of the condition.
      */
-    @Child(name="status", type={CodeType.class}, order=6, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 7, min = 1, max = 1)
     @Description(shortDefinition="provisional | working | confirmed | refuted", formalDefinition="The clinical status of the condition." )
     protected Enumeration<ConditionStatus> status;
 
     /**
      * The degree of confidence that this condition is correct.
      */
-    @Child(name="certainty", type={CodeableConcept.class}, order=7, min=0, max=1)
+    @Child(name = "certainty", type = {CodeableConcept.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Degree of confidence", formalDefinition="The degree of confidence that this condition is correct." )
     protected CodeableConcept certainty;
 
     /**
      * A subjective assessment of the severity of the condition as evaluated by the clinician.
      */
-    @Child(name="severity", type={CodeableConcept.class}, order=8, min=0, max=1)
+    @Child(name = "severity", type = {CodeableConcept.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Subjective severity of condition", formalDefinition="A subjective assessment of the severity of the condition as evaluated by the clinician." )
     protected CodeableConcept severity;
 
     /**
      * Estimated or actual date or date-time  the condition began, in the opinion of the clinician.
      */
-    @Child(name="onset", type={DateTimeType.class, Age.class}, order=9, min=0, max=1)
+    @Child(name = "onset", type = {DateTimeType.class, Age.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Estimated or actual date,  date-time, or age", formalDefinition="Estimated or actual date or date-time  the condition began, in the opinion of the clinician." )
     protected Type onset;
 
     /**
      * The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.
      */
-    @Child(name="abatement", type={DateType.class, Age.class, BooleanType.class}, order=10, min=0, max=1)
+    @Child(name = "abatement", type = {DateType.class, Age.class, BooleanType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="If/when in resolution/remission", formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate." )
     protected Type abatement;
 
     /**
      * Clinical stage or grade of a condition. May include formal severity assessments.
      */
-    @Child(name="stage", type={}, order=11, min=0, max=1)
+    @Child(name = "stage", type = {}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Stage/grade, usually assessed formally", formalDefinition="Clinical stage or grade of a condition. May include formal severity assessments." )
     protected ConditionStageComponent stage;
 
     /**
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.
      */
-    @Child(name="evidence", type={}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "evidence", type = {}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supporting evidence", formalDefinition="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed." )
     protected List<ConditionEvidenceComponent> evidence;
 
     /**
      * The anatomical location where this condition manifests itself.
      */
-    @Child(name="location", type={}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "location", type = {}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Anatomical location, if relevant", formalDefinition="The anatomical location where this condition manifests itself." )
     protected List<ConditionLocationComponent> location;
 
     /**
      * Further conditions, problems, diagnoses, procedures or events or the substance that caused/triggered this Condition.
      */
-    @Child(name="dueTo", type={}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "dueTo", type = {}, order = 15, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Causes for this Condition", formalDefinition="Further conditions, problems, diagnoses, procedures or events or the substance that caused/triggered this Condition." )
     protected List<ConditionDueToComponent> dueTo;
 
     /**
      * Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition.
      */
-    @Child(name="occurredFollowing", type={}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "occurredFollowing", type = {}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Precedent for this Condition", formalDefinition="Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition." )
     protected List<ConditionOccurredFollowingComponent> occurredFollowing;
 
     /**
      * Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.
      */
-    @Child(name="notes", type={StringType.class}, order=16, min=0, max=1)
+    @Child(name = "notes", type = {StringType.class}, order = 17, min = 0, max = 1)
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected StringType notes;
 
@@ -1705,40 +1705,40 @@ public class Condition extends DomainResource {
     return ResourceType.Condition;
    }
 
-  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference" )
-  public static final String SP_ASSERTER = "asserter";
-  @SearchParamDefinition(name="following-code", path="Condition.occurredFollowing.codeableConcept", description="Relationship target by means of a predefined code", type="token" )
-  public static final String SP_FOLLOWINGCODE = "following-code";
-  @SearchParamDefinition(name="dueto-code", path="Condition.dueTo.codeableConcept", description="Relationship target by means of a predefined code", type="token" )
-  public static final String SP_DUETOCODE = "dueto-code";
-  @SearchParamDefinition(name="status", path="Condition.status", description="The status of the condition", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="location", path="Condition.location.code", description="Location - may include laterality", type="token" )
-  public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="subject", path="Condition.subject", description="Who has the condition?", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="onset", path="Condition.onset[x]", description="When the Condition started (if started on a date)", type="date" )
-  public static final String SP_ONSET = "onset";
-  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
-  public static final String SP_EVIDENCE = "evidence";
-  @SearchParamDefinition(name="following-item", path="Condition.occurredFollowing.target", description="Relationship target resource", type="reference" )
-  public static final String SP_FOLLOWINGITEM = "following-item";
   @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
   public static final String SP_SEVERITY = "severity";
   @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name = "evidence", path = "Condition.evidence.code", description = "Manifestation/symptom", type = "token")
+  public static final String SP_EVIDENCE = "evidence";
   @SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="When first detected/suspected/entered", type="date" )
   public static final String SP_DATEASSERTED = "date-asserted";
+  @SearchParamDefinition(name = "subject", path = "Condition.subject", description = "Who has the condition?", type = "reference")
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name = "dueto-item", path = "Condition.dueTo.target", description = "Relationship target resource", type = "reference")
+  public static final String SP_DUETOITEM = "dueto-item";
+  @SearchParamDefinition(name = "encounter", path = "Condition.encounter", description = "Encounter when condition first asserted", type = "reference")
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name = "onset", path = "Condition.onset[x]", description = "When the Condition started (if started on a date)", type = "date")
+  public static final String SP_ONSET = "onset";
+  @SearchParamDefinition(name = "asserter", path = "Condition.asserter", description = "Person who asserts this condition", type = "reference")
+  public static final String SP_ASSERTER = "asserter";
   @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
   public static final String SP_STAGE = "stage";
-  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
-  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name = "following-item", path = "Condition.occurredFollowing.target", description = "Relationship target resource", type = "reference")
+  public static final String SP_FOLLOWINGITEM = "following-item";
   @SearchParamDefinition(name="patient", path="Condition.subject", description="Who has the condition?", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="dueto-item", path="Condition.dueTo.target", description="Relationship target resource", type="reference" )
-  public static final String SP_DUETOITEM = "dueto-item";
+  @SearchParamDefinition(name = "dueto-code", path = "Condition.dueTo.codeableConcept", description = "Relationship target by means of a predefined code", type = "token")
+  public static final String SP_DUETOCODE = "dueto-code";
+  @SearchParamDefinition(name = "location", path = "Condition.location.code", description = "Location - may include laterality", type = "token")
+  public static final String SP_LOCATION = "location";
+  @SearchParamDefinition(name = "category", path = "Condition.category", description = "The category of the condition", type = "token")
+  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name = "following-code", path = "Condition.occurredFollowing.codeableConcept", description = "Relationship target by means of a predefined code", type = "token")
+  public static final String SP_FOLLOWINGCODE = "following-code";
+  @SearchParamDefinition(name = "status", path = "Condition.status", description = "The status of the condition", type = "token")
+  public static final String SP_STATUS = "status";
 
 }
 

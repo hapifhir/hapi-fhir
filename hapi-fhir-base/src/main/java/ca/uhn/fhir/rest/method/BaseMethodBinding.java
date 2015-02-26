@@ -26,14 +26,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import ca.uhn.fhir.rest.annotation.*;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -47,6 +44,18 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.annotation.AddTags;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.GetTags;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -61,9 +70,9 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionNotSpecifiedException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -217,7 +226,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
 			break;
 		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
-			ex = new ResourceVersionNotSpecifiedException("Server responded with HTTP 412");
+			ex = new PreconditionFailedException("Server responded with HTTP 412");
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
 			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode);

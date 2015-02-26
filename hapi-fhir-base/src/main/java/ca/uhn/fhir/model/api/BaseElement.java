@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public abstract class BaseElement implements IElement, ISupportsUndeclaredExtensions {
 
@@ -32,7 +33,7 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 	private List<ExtensionDt> myUndeclaredModifierExtensions;
 
 	@Override
-	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IDatatype theValue) {
+	public ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue) {
 		Validate.notEmpty(theUrl, "URL must be populated");
 		Validate.notNull(theValue, "Value must not be null");
 		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl, theValue);

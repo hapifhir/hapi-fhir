@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
  */
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,6 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.ICodeEnum;
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
@@ -41,7 +41,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-		assert theDatatype != IDatatype.class; // should use RuntimeChildAny
+		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here"; // should use RuntimeChildAny
 		myDatatype = theDatatype;
 	}
 

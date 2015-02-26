@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -514,112 +514,112 @@ public class ExtensionDefinition extends DomainResource {
     /**
      * The URL at which this definition is (or will be) published, and which is used to reference this profile in extension urls in operational FHIR systems.
      */
-    @Child(name="url", type={UriType.class}, order=-1, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Literal URL used to reference this extension", formalDefinition="The URL at which this definition is (or will be) published, and which is used to reference this profile in extension urls in operational FHIR systems." )
     protected UriType url;
 
     /**
      * Formal identifier that is used to identify this profile when it is represented in other formats (e.g. ISO 11179(, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Other identifiers for the extension", formalDefinition="Formal identifier that is used to identify this profile when it is represented in other formats (e.g. ISO 11179(, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
     protected List<Identifier> identifier;
 
     /**
      * A free text natural language name identifying the extension.
      */
-    @Child(name="name", type={StringType.class}, order=1, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="Descriptional name for this profile", formalDefinition="A free text natural language name identifying the extension." )
     protected StringType name;
 
     /**
      * Defined so that applications can use this name when displaying the value of the extension to the user.
      */
-    @Child(name="display", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name = "display", type = {StringType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Use this name when displaying the value", formalDefinition="Defined so that applications can use this name when displaying the value of the extension to the user." )
     protected StringType display;
 
     /**
      * Details of the individual or organization who accepts responsibility for publishing the extension definition.
      */
-    @Child(name="publisher", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="Details of the individual or organization who accepts responsibility for publishing the extension definition." )
     protected StringType publisher;
 
     /**
      * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * A free text natural language description of the extension and its use.
      */
-    @Child(name="description", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Natural language description of the extension", formalDefinition="A free text natural language description of the extension and its use." )
     protected StringType description;
 
     /**
      * A set of terms from external terminologies that may be used to assist with indexing and searching of extension definitions.
      */
-    @Child(name="code", type={Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "code", type = {Coding.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Assist with indexing and finding", formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of extension definitions." )
     protected List<Coding> code;
 
     /**
      * The status of the extension.
      */
-    @Child(name="status", type={CodeType.class}, order=7, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 8, min = 1, max = 1)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the extension." )
     protected Enumeration<ResourceProfileStatus> status;
 
     /**
      * This extension definition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name="experimental", type={BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This extension definition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The date that this version of the extension was published.
      */
-    @Child(name="date", type={DateTimeType.class}, order=9, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Date for this version of the extension", formalDefinition="The date that this version of the extension was published." )
     protected DateTimeType date;
 
     /**
      * The Scope and Usage that this extension was created to meet.
      */
-    @Child(name="requirements", type={StringType.class}, order=10, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Scope and Usage this extesion is for", formalDefinition="The Scope and Usage that this extension was created to meet." )
     protected StringType requirements;
 
     /**
      * An external specification that the content is mapped to.
      */
-    @Child(name="mapping", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "mapping", type = {}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External specification that the content is mapped to", formalDefinition="An external specification that the content is mapped to." )
     protected List<ExtensionDefinitionMappingComponent> mapping;
 
     /**
      * Identifies the type of context to which the extension applies.
      */
-    @Child(name="contextType", type={CodeType.class}, order=12, min=1, max=1)
+    @Child(name = "contextType", type = {CodeType.class}, order = 13, min = 1, max = 1)
     @Description(shortDefinition="resource | datatype | mapping | extension", formalDefinition="Identifies the type of context to which the extension applies." )
     protected Enumeration<ExtensionContext> contextType;
 
     /**
      * Identifies the types of resource or data type elements to which the extension can be applied.
      */
-    @Child(name="context", type={StringType.class}, order=13, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "context", type = {StringType.class}, order = 14, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where the extension can be used in instances", formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied." )
     protected List<StringType> context;
 
     /**
      * Definition of the elements that are defined to be in the extension.
      */
-    @Child(name="element", type={ElementDefinition.class}, order=14, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "element", type = {ElementDefinition.class}, order = 15, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Definition of the elements in the extension", formalDefinition="Definition of the elements that are defined to be in the extension." )
     protected List<ElementDefinition> element;
 
@@ -1424,24 +1424,24 @@ public class ExtensionDefinition extends DomainResource {
     return ResourceType.ExtensionDefinition;
    }
 
-  @SearchParamDefinition(name="valueset", path="ExtensionDefinition.element.binding.reference[x]", description="Source of value set", type="reference" )
-  public static final String SP_VALUESET = "valueset";
-  @SearchParamDefinition(name="status", path="ExtensionDefinition.status", description="draft | active | retired", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="description", path="ExtensionDefinition.description", description="Natural language description of the extension", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="name", path="ExtensionDefinition.name", description="Descriptional name for this profile", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="code", path="ExtensionDefinition.code", description="Assist with indexing and finding", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="ExtensionDefinition.date", description="Date for this version of the extension", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ExtensionDefinition.identifier", description="Other identifiers for the extension", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="url", path="ExtensionDefinition.url", description="Literal URL used to reference this extension", type="token" )
-  public static final String SP_URL = "url";
+    @SearchParamDefinition(name = "code", path = "ExtensionDefinition.code", description = "Assist with indexing and finding", type = "token")
+    public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "valueset", path = "ExtensionDefinition.element.binding.reference[x]", description = "Source of value set", type = "reference")
+    public static final String SP_VALUESET = "valueset";
+    @SearchParamDefinition(name = "name", path = "ExtensionDefinition.name", description = "Descriptional name for this profile", type = "string")
+    public static final String SP_NAME = "name";
   @SearchParamDefinition(name="publisher", path="ExtensionDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+    @SearchParamDefinition(name = "description", path = "ExtensionDefinition.description", description = "Natural language description of the extension", type = "string")
+    public static final String SP_DESCRIPTION = "description";
+    @SearchParamDefinition(name = "url", path = "ExtensionDefinition.url", description = "Literal URL used to reference this extension", type = "token")
+    public static final String SP_URL = "url";
+    @SearchParamDefinition(name = "status", path = "ExtensionDefinition.status", description = "draft | active | retired", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

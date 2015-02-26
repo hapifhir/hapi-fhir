@@ -27,12 +27,14 @@ import org.apache.commons.lang3.StringUtils;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.composite.CountDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -101,5 +103,11 @@ public class FhirDstu2 implements IFhirVersion {
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
 	}
+	
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
+
 
 }

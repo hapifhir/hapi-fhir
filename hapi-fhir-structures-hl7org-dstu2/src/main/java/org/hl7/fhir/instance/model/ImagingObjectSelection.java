@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -889,14 +889,14 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * Instance UID of the DICOM KOS SOP Instances represenetd in this resource.
      */
-    @Child(name="uid", type={OidType.class}, order=-1, min=1, max=1)
+    @Child(name = "uid", type = {OidType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Instance UID", formalDefinition="Instance UID of the DICOM KOS SOP Instances represenetd in this resource." )
     protected OidType uid;
 
     /**
      * A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Patient of the selected objects", formalDefinition="A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection." )
     protected Reference patient;
 
@@ -908,21 +908,21 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * The reason for, or significance of, the selection of objects referenced in the resource.
      */
-    @Child(name="title", type={CodeableConcept.class}, order=1, min=1, max=1)
+    @Child(name = "title", type = {CodeableConcept.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="Reason for selection", formalDefinition="The reason for, or significance of, the selection of objects referenced in the resource." )
     protected CodeableConcept title;
 
     /**
      * Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection.
      */
-    @Child(name="description", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Description text", formalDefinition="Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection." )
     protected StringType description;
 
     /**
      * Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion.
      */
-    @Child(name="author", type={Practitioner.class, Device.class, Organization.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Device.class, Organization.class, Patient.class, RelatedPerson.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Author (human or machine)", formalDefinition="Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion." )
     protected Reference author;
 
@@ -934,14 +934,14 @@ public class ImagingObjectSelection extends DomainResource {
     /**
      * Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource.
      */
-    @Child(name="authoringTime", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "authoringTime", type = {DateTimeType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Authoring time of the selection", formalDefinition="Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource." )
     protected DateTimeType authoringTime;
 
     /**
      * Study identity and locating information of the DICOM SOP instances in the selection.
      */
-    @Child(name="study", type={}, order=5, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "study", type = {}, order = 6, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Study identity of the selected instances", formalDefinition="Study identity and locating information of the DICOM SOP instances in the selection." )
     protected List<StudyComponent> study;
 
@@ -1305,18 +1305,18 @@ public class ImagingObjectSelection extends DomainResource {
     return ResourceType.ImagingObjectSelection;
    }
 
+  @SearchParamDefinition(name = "identifier", path = "ImagingObjectSelection.uid", description = "UID of key DICOM object selection", type = "token")
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name = "authoring-time", path = "ImagingObjectSelection.authoringTime", description = "Time of key DICOM object selection authoring", type = "date")
+  public static final String SP_AUTHORINGTIME = "authoring-time";
   @SearchParamDefinition(name="selected-study", path="ImagingObjectSelection.study.uid", description="Study selected in key DICOM object selection", type="token" )
   public static final String SP_SELECTEDSTUDY = "selected-study";
   @SearchParamDefinition(name="author", path="ImagingObjectSelection.author", description="Author of key DICOM object selection", type="reference" )
   public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="title", path="ImagingObjectSelection.title", description="Title of key DICOM object selection", type="token" )
-  public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="patient", path="ImagingObjectSelection.patient", description="Subject of key DICOM object selection", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="authoring-time", path="ImagingObjectSelection.authoringTime", description="Time of key DICOM object selection authoring", type="date" )
-  public static final String SP_AUTHORINGTIME = "authoring-time";
-  @SearchParamDefinition(name="identifier", path="ImagingObjectSelection.uid", description="UID of key DICOM object selection", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name = "title", path = "ImagingObjectSelection.title", description = "Title of key DICOM object selection", type = "token")
+  public static final String SP_TITLE = "title";
 
 }
 

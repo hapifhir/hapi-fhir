@@ -24,14 +24,17 @@ import java.io.InputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dev.composite.CodingDt;
 import ca.uhn.fhir.model.dev.composite.ContainedDt;
 import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Profile;
@@ -106,6 +109,11 @@ public class FhirDev implements IFhirVersion {
 		throw new UnsupportedOperationException();
 	}
 
+
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
 
 
 }

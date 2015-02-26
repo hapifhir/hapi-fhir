@@ -56,10 +56,14 @@ import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.ICreateWithQuery;
+import ca.uhn.fhir.rest.gclient.ICreateWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IDeleteWithQuery;
+import ca.uhn.fhir.rest.gclient.IDeleteWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
@@ -76,6 +80,8 @@ import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateWithQuery;
+import ca.uhn.fhir.rest.gclient.IUpdateWithQueryTyped;
 import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
@@ -237,10 +243,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return new LoadPageInternal();
 	}
 
-//	@Override
-//	public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
-//		return doReadOrVRead(theType, theId, false, null, null);
-//	}
+	// @Override
+	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
+	// return doReadOrVRead(theType, theId, false, null, null);
+	// }
 
 	@Override
 	public <T extends IBaseResource> T read(Class<T> theType, String theId) {
@@ -249,7 +255,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
-		IdDt id = theUrl instanceof IdDt ? ((IdDt)theUrl) : new IdDt(theUrl);
+		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
 		return doReadOrVRead(theType, id, false, null, null);
 	}
 
@@ -447,7 +453,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theIfVersionMatches != null) {
 			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
-		
+
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id);
 
 		if (theNotModifiedHandler == null) {
@@ -475,17 +481,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return vread(theType, resId);
 	}
 
+	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
+		if (!params.containsKey(parameterName)) {
+			params.put(parameterName, new ArrayList<String>());
+		}
+		params.get(parameterName).add(parameterValue);
+	}
+
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
 		private EncodingEnum myParamEncoding;
 		private Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
-
-		protected void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
-			if (!params.containsKey(parameterName)) {
-				params.put(parameterName, new ArrayList<String>());
-			}
-			params.get(parameterName).add(parameterValue);
-		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -575,11 +581,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private class CreateInternal extends BaseClientExecutable<ICreateTyped, MethodOutcome> implements ICreate, ICreateTyped {
+	private class CreateInternal extends BaseClientExecutable<ICreateTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
 
 		private String myId;
 		private IResource myResource;
 		private String myResourceBody;
+		private String mySearchUrl;
+		private CriterionList myCriterionList;
 
 		@Override
 		public MethodOutcome execute() {
@@ -593,7 +601,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myResourceBody = null;
 			}
 
-			BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
+			BaseHttpClientInvocation invocation;
+			if (mySearchUrl != null) {
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, mySearchUrl);
+			} else if (myCriterionList != null) {
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext, myCriterionList.toParamList());
+			} else {
+				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
+			}
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
@@ -631,15 +646,50 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public ICreateTyped conditionalByUrl(String theSearchUrl) {
+			mySearchUrl = theSearchUrl;
+			return this;
+		}
+
+		@Override
+		public ICreateWithQuery conditional() {
+			myCriterionList = new CriterionList();
+			return this;
+		}
+
+		@Override
+		public ICreateWithQueryTyped where(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public ICreateWithQueryTyped and(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
 	}
 
-	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped {
+	private class DeleteInternal extends BaseClientExecutable<IDeleteTyped, BaseOperationOutcome> implements IDelete, IDeleteTyped, IDeleteWithQuery, IDeleteWithQueryTyped {
 
 		private IdDt myId;
+		private String mySearchUrl;
+		private String myResourceType;
+		private CriterionList myCriterionList;
 
 		@Override
 		public BaseOperationOutcome execute() {
-			HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(myId);
+			HttpDeleteClientInvocation invocation;
+			if (myId != null) {
+				invocation = DeleteMethodBinding.createDeleteInvocation(myId);
+			} else if (myCriterionList != null) {
+				Map<String, List<String>> params = myCriterionList.toParamList();
+				invocation = DeleteMethodBinding.createDeleteInvocation(myResourceType, params);
+			} else {
+				invocation = DeleteMethodBinding.createDeleteInvocation(mySearchUrl);
+			}
 			OperationOutcomeResponseHandler binding = new OperationOutcomeResponseHandler();
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
@@ -680,6 +730,56 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myId = new IdDt(theResourceType, theLogicalId);
 			return this;
 		}
+
+		@Override
+		public IDeleteTyped resourceConditionalByUrl(String theSearchUrl) {
+			Validate.notBlank(theSearchUrl, "theSearchUrl can not be blank/null");
+			mySearchUrl = theSearchUrl;
+			return this;
+		}
+
+		@Override
+		public IDeleteWithQuery resourceConditionalByType(String theResourceType) {
+			Validate.notBlank(theResourceType, "theResourceType can not be blank/null");
+			if (myContext.getResourceDefinition(theResourceType) == null) {
+				throw new IllegalArgumentException("Unknown resource type: " + theResourceType);
+			}
+			myResourceType = theResourceType;
+			myCriterionList = new CriterionList();
+			return this;
+		}
+
+		@Override
+		public IDeleteWithQueryTyped where(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IDeleteWithQueryTyped and(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+	}
+
+	private static class CriterionList extends ArrayList<ICriterionInternal> {
+
+		private static final long serialVersionUID = 1L;
+
+		public void populateParamList(Map<String, List<String>> theParams) {
+			for (ICriterionInternal next : this) {
+				String parameterName = next.getParameterName();
+				String parameterValue = next.getParameterValue();
+				addParam(theParams, parameterName, parameterValue);
+			}
+		}
+
+		public Map<String, List<String>> toParamList() {
+			LinkedHashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
+			populateParamList(retVal);
+			return retVal;
+		}
+
 	}
 
 	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped, Bundle> implements IGetPageTyped {
@@ -996,7 +1096,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class SearchInternal extends BaseClientExecutable<IQuery, Bundle> implements IQuery, IUntypedQuery {
 
 		private String myCompartmentName;
-		private List<ICriterionInternal> myCriterion = new ArrayList<ICriterionInternal>();
+		private CriterionList myCriterion = new CriterionList();
 		private List<Include> myInclude = new ArrayList<Include>();
 		private Integer myParamLimit;
 		private String myResourceId;
@@ -1025,11 +1125,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			// params.putAll(initial);
 			// }
 
-			for (ICriterionInternal next : myCriterion) {
-				String parameterName = next.getParameterName();
-				String parameterValue = next.getParameterValue();
-				addParam(params, parameterName, parameterValue);
-			}
+			myCriterion.populateParamList(params);
 
 			for (Include next : myInclude) {
 				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
@@ -1224,22 +1320,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable {
+	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
 
 		private IdDt myId;
 		private IResource myResource;
 		private String myResourceBody;
+		private String mySearchUrl;
+		private CriterionList myCriterionList;
 
 		@Override
 		public MethodOutcome execute() {
 			if (myResource == null) {
 				myResource = parseResourceBody(myResourceBody);
-			}
-			if (myId == null) {
-				myId = myResource.getId();
-			}
-			if (myId == null || myId.hasIdPart() == false) {
-				throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
 			}
 
 			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
@@ -1247,7 +1339,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myResourceBody = null;
 			}
 
-			BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+			BaseHttpClientInvocation invocation;
+			if (mySearchUrl != null) {
+				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, mySearchUrl);
+			} else if (myCriterionList != null) {
+				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
+			} else {
+				if (myId == null) {
+					myId = myResource.getId();
+				}
+				if (myId == null || myId.hasIdPart() == false) {
+					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
+				}
+				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+			}
 
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
@@ -1294,6 +1399,30 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
+			return this;
+		}
+
+		@Override
+		public IUpdateTyped conditionalByUrl(String theSearchUrl) {
+			mySearchUrl = theSearchUrl;
+			return this;
+		}
+
+		@Override
+		public IUpdateWithQuery conditional() {
+			myCriterionList = new CriterionList();
+			return this;
+		}
+
+		@Override
+		public IUpdateWithQueryTyped where(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
+			return this;
+		}
+
+		@Override
+		public IUpdateWithQueryTyped and(ICriterion<?> theCriterion) {
+			myCriterionList.add((ICriterionInternal) theCriterion);
 			return this;
 		}
 

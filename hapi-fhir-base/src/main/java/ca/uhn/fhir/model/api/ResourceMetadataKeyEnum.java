@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.primitive.DecimalDt;
@@ -61,6 +62,36 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * </p>
  */
 public abstract class ResourceMetadataKeyEnum<T> {
+
+	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<List<BaseCodingDt>>("SECURITY_LABELS") {
+		@Override
+		public List<BaseCodingDt> get(IResource resource) {
+			Object obj = resource.getResourceMetadata().get(SECURITY_LABELS);
+			if (obj == null) {
+				return null;
+			} else {
+				try {
+					List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) obj;
+					if (securityLabels.isEmpty())
+						return null;
+					else
+						return securityLabels;
+				} catch (ClassCastException e) {
+					throw new InternalErrorException("Found an object of type '" + obj.getClass().getCanonicalName() + "' in resource metadata for key SECURITY_LABELS - Expected "
+							+ BaseCodingDt.class.getCanonicalName());
+
+				}
+
+			}
+		}
+
+		@Override
+		public void put(IResource iResource, List<BaseCodingDt> labels) {
+			iResource.getResourceMetadata().put(SECURITY_LABELS, labels);
+		}
+
+	};
+
 
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -2536,14 +2536,14 @@ public class ClaimResponse extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Response  number", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * Original request resource referrence.
      */
-    @Child(name="request", type={OralHealthClaim.class, PharmacyClaim.class, VisionClaim.class, ProfessionalClaim.class, InstitutionalClaim.class}, order=0, min=0, max=1)
+    @Child(name = "request", type = {OralHealthClaim.class, PharmacyClaim.class, VisionClaim.class, ProfessionalClaim.class, InstitutionalClaim.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource referrence." )
     protected Reference request;
 
@@ -2555,28 +2555,28 @@ public class ClaimResponse extends DomainResource {
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name="ruleset", type={Coding.class}, order=1, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name="originalRuleset", type={Coding.class}, order=2, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name="created", type={DateTimeType.class}, order=3, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name="organization", type={Organization.class}, order=4, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
     protected Reference organization;
 
@@ -2588,7 +2588,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name="requestProvider", type={Practitioner.class}, order=5, min=0, max=1)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
@@ -2600,7 +2600,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name="requestOrganization", type={Organization.class}, order=6, min=0, max=1)
+    @Child(name = "requestOrganization", type = {Organization.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference requestOrganization;
 
@@ -2612,119 +2612,119 @@ public class ClaimResponse extends DomainResource {
     /**
      * Transaction status: error, complete.
      */
-    @Child(name="outcome", type={CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "outcome", type = {CodeType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="complete | error", formalDefinition="Transaction status: error, complete." )
     protected Enumeration<RSLink> outcome;
 
     /**
      * A description of the status of the adjudication.
      */
-    @Child(name="disposition", type={StringType.class}, order=8, min=0, max=1)
+    @Child(name = "disposition", type = {StringType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
     protected StringType disposition;
 
     /**
      * Party to be reimbursed: Subscriber, provider, other.
      */
-    @Child(name="payeeType", type={Coding.class}, order=9, min=0, max=1)
+    @Child(name = "payeeType", type = {Coding.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Party to be paid any benefits payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
     protected Coding payeeType;
 
     /**
      * The first tier service adjudications for submitted services.
      */
-    @Child(name="item", type={}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "item", type = {}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Line items", formalDefinition="The first tier service adjudications for submitted services." )
     protected List<ItemsComponent> item;
 
     /**
      * The first tier service adjudications for payor added services.
      */
-    @Child(name="additem", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "additem", type = {}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Insurer added line items", formalDefinition="The first tier service adjudications for payor added services." )
     protected List<AddedItemComponent> additem;
 
     /**
      * Mutually exclusive with Services Provided (Item).
      */
-    @Child(name="error", type={}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "error", type = {}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Processing errors", formalDefinition="Mutually exclusive with Services Provided (Item)." )
     protected List<ErrorsComponent> error;
 
     /**
      * The total cost of the services reported.
      */
-    @Child(name="totalCost", type={Money.class}, order=13, min=0, max=1)
+    @Child(name = "totalCost", type = {Money.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="Total Cost of service from the Claim", formalDefinition="The total cost of the services reported." )
     protected Money totalCost;
 
     /**
      * The amount of deductable applied which was not allocated to any particular service line.
      */
-    @Child(name="unallocDeductable", type={Money.class}, order=14, min=0, max=1)
+    @Child(name = "unallocDeductable", type = {Money.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Unallocated deductable", formalDefinition="The amount of deductable applied which was not allocated to any particular service line." )
     protected Money unallocDeductable;
 
     /**
      * Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable).
      */
-    @Child(name="totalBenefit", type={Money.class}, order=15, min=0, max=1)
+    @Child(name = "totalBenefit", type = {Money.class}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="Total benefit payable for the Claim", formalDefinition="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)." )
     protected Money totalBenefit;
 
     /**
      * Adjustment to the payment of this transaction which is not related to adjudication of this transaction.
      */
-    @Child(name="paymentAdjustment", type={Money.class}, order=16, min=0, max=1)
+    @Child(name = "paymentAdjustment", type = {Money.class}, order = 17, min = 0, max = 1)
     @Description(shortDefinition="Payment adjustment for non-Claim issues", formalDefinition="Adjustment to the payment of this transaction which is not related to adjudication of this transaction." )
     protected Money paymentAdjustment;
 
     /**
      * Reason for the payment adjustment.
      */
-    @Child(name="paymentAdjustmentReason", type={Coding.class}, order=17, min=0, max=1)
+    @Child(name = "paymentAdjustmentReason", type = {Coding.class}, order = 18, min = 0, max = 1)
     @Description(shortDefinition="Reason for Payment adjustment", formalDefinition="Reason for the payment adjustment." )
     protected Coding paymentAdjustmentReason;
 
     /**
      * Estimated payment data.
      */
-    @Child(name="paymentDate", type={DateType.class}, order=18, min=0, max=1)
+    @Child(name = "paymentDate", type = {DateType.class}, order = 19, min = 0, max = 1)
     @Description(shortDefinition="Expected data of Payment", formalDefinition="Estimated payment data." )
     protected DateType paymentDate;
 
     /**
      * Payable less any payment adjustment.
      */
-    @Child(name="paymentAmount", type={Money.class}, order=19, min=0, max=1)
+    @Child(name = "paymentAmount", type = {Money.class}, order = 20, min = 0, max = 1)
     @Description(shortDefinition="Payment amount", formalDefinition="Payable less any payment adjustment." )
     protected Money paymentAmount;
 
     /**
      * Payment identifer.
      */
-    @Child(name="paymentRef", type={Identifier.class}, order=20, min=0, max=1)
+    @Child(name = "paymentRef", type = {Identifier.class}, order = 21, min = 0, max = 1)
     @Description(shortDefinition="Payment identifier", formalDefinition="Payment identifer." )
     protected Identifier paymentRef;
 
     /**
      * Status of funds reservation (For provider, for Patient, None).
      */
-    @Child(name="reserved", type={Coding.class}, order=21, min=0, max=1)
+    @Child(name = "reserved", type = {Coding.class}, order = 22, min = 0, max = 1)
     @Description(shortDefinition="Funds reserved status", formalDefinition="Status of funds reservation (For provider, for Patient, None)." )
     protected Coding reserved;
 
     /**
      * The form to be used for printing the content.
      */
-    @Child(name="form", type={Coding.class}, order=22, min=0, max=1)
+    @Child(name = "form", type = {Coding.class}, order = 23, min = 0, max = 1)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     protected Coding form;
 
     /**
      * Note text.
      */
-    @Child(name="note", type={}, order=23, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "note", type = {}, order = 24, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Processing notes", formalDefinition="Note text." )
     protected List<NotesComponent> note;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -616,17 +616,17 @@ public class Observation extends DomainResource {
     @Block()
     public static class ObservationReferenceRangeComponent extends BackboneElement {
         /**
-         * The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.
+         * The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.
          */
         @Child(name="low", type={Quantity.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3." )
+        @Description(shortDefinition = "Low Range, if relevant", formalDefinition = "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.")
         protected Quantity low;
 
         /**
-         * The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.
+         * The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.
          */
         @Child(name="high", type={Quantity.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5." )
+        @Description(shortDefinition = "High Range, if relevant", formalDefinition = "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.")
         protected Quantity high;
 
         /**
@@ -657,7 +657,7 @@ public class Observation extends DomainResource {
       }
 
         /**
-         * @return {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.)
+         * @return {@link #low} (The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.)
          */
         public Quantity getLow() { 
           if (this.low == null)
@@ -673,7 +673,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #low} (The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.)
+         * @param value {@link #low} (The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.)
          */
         public ObservationReferenceRangeComponent setLow(Quantity value) { 
           this.low = value;
@@ -681,7 +681,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.)
+         * @return {@link #high} (The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.)
          */
         public Quantity getHigh() { 
           if (this.high == null)
@@ -697,7 +697,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @param value {@link #high} (The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.)
+         * @param value {@link #high} (The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.)
          */
         public ObservationReferenceRangeComponent setHigh(Quantity value) { 
           this.high = value;
@@ -803,8 +803,8 @@ public class Observation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("low", "Quantity", "The value of the low bound of the reference range. If this is omitted, the low bound of the reference range is assumed to be meaningless. E.g. <2.3.", 0, java.lang.Integer.MAX_VALUE, low));
-          childrenList.add(new Property("high", "Quantity", "The value of the high bound of the reference range. If this is omitted, the high bound of the reference range is assumed to be meaningless. E.g. >5.", 0, java.lang.Integer.MAX_VALUE, high));
+            childrenList.add(new Property("low", "Quantity", "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.", 0, java.lang.Integer.MAX_VALUE, low));
+            childrenList.add(new Property("high", "Quantity", "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.", 0, java.lang.Integer.MAX_VALUE, high));
           childrenList.add(new Property("meaning", "CodeableConcept", "Code for the meaning of the reference range.", 0, java.lang.Integer.MAX_VALUE, meaning));
           childrenList.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, java.lang.Integer.MAX_VALUE, age));
           childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of 'Negative' or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));
@@ -1019,84 +1019,84 @@ public class Observation extends DomainResource {
     /**
      * Describes what was observed. Sometimes this is called the observation "code".
      */
-    @Child(name="name", type={CodeableConcept.class}, order=-1, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Type of observation (code / type)", formalDefinition="Describes what was observed. Sometimes this is called the observation 'code'." )
-    protected CodeableConcept name;
+    protected CodeableConcept code;
 
     /**
      * The information determined as a result of making the observation, if the information has a simple value.
      */
-    @Child(name="value", type={Quantity.class, CodeableConcept.class, Attachment.class, Ratio.class, DateTimeType.class, Period.class, SampledData.class, StringType.class, TimeType.class}, order=0, min=0, max=1)
+    @Child(name = "value", type = {Quantity.class, CodeableConcept.class, Attachment.class, Ratio.class, DateTimeType.class, Period.class, SampledData.class, StringType.class, TimeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Actual result", formalDefinition="The information determined as a result of making the observation, if the information has a simple value." )
     protected Type value;
 
     /**
      * Provides a reason why the expected value in the element Observation.value[x] is missing.
      */
-    @Child(name="dataAbsentReason", type={CodeType.class}, order=1, min=0, max=1)
+    @Child(name = "dataAbsentReason", type = {CodeType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="unknown | asked | temp | notasked +", formalDefinition="Provides a reason why the expected value in the element Observation.value[x] is missing." )
     protected Enumeration<DataAbsentReason> dataAbsentReason;
 
     /**
      * The assessment made based on the result of the observation.
      */
-    @Child(name="interpretation", type={CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "interpretation", type = {CodeableConcept.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="High, low, normal, etc.", formalDefinition="The assessment made based on the result of the observation." )
     protected CodeableConcept interpretation;
 
     /**
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      */
-    @Child(name="comments", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "comments", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Comments about result", formalDefinition="May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result." )
     protected StringType comments;
 
     /**
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.
      */
-    @Child(name="applies", type={DateTimeType.class, Period.class}, order=4, min=0, max=1)
+    @Child(name = "applies", type = {DateTimeType.class, Period.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Physiologically Relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
     protected Type applies;
 
     /**
      * The date and time this observation was made available.
      */
-    @Child(name="issued", type={InstantType.class}, order=5, min=0, max=1)
+    @Child(name = "issued", type = {InstantType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Date/Time this was made available", formalDefinition="The date and time this observation was made available." )
     protected InstantType issued;
 
     /**
      * The status of the result value.
      */
-    @Child(name="status", type={CodeType.class}, order=6, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 7, min = 1, max = 1)
     @Description(shortDefinition="registered | preliminary | final | amended +", formalDefinition="The status of the result value." )
     protected Enumeration<ObservationStatus> status;
 
     /**
      * An estimate of the degree to which quality issues have impacted on the value reported.
      */
-    @Child(name="reliability", type={CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "reliability", type = {CodeType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="ok | ongoing | early | questionable | calibrating | error +", formalDefinition="An estimate of the degree to which quality issues have impacted on the value reported." )
     protected Enumeration<ObservationReliability> reliability;
 
     /**
      * Indicates the site on the subject's body where the observation was made ( i.e. the target site).
      */
-    @Child(name="bodySite", type={CodeableConcept.class, BodySite.class}, order=8, min=0, max=1)
+    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Observed body part", formalDefinition="Indicates the site on the subject's body where the observation was made ( i.e. the target site)." )
     protected Type bodySite;
 
     /**
      * Indicates the mechanism used to perform the observation.
      */
-    @Child(name="method", type={CodeableConcept.class}, order=9, min=0, max=1)
+    @Child(name = "method", type = {CodeableConcept.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="How it was done", formalDefinition="Indicates the mechanism used to perform the observation." )
     protected CodeableConcept method;
 
     /**
      * A unique identifier for the simple observation.
      */
-    @Child(name="identifier", type={Identifier.class}, order=10, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Unique Id for this particular observation", formalDefinition="A unique identifier for the simple observation." )
     protected Identifier identifier;
 
@@ -1104,7 +1104,7 @@ public class Observation extends DomainResource {
      * The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
 other observer (for example a relative or EMT), or any observation made about the subject.
      */
-    @Child(name="subject", type={Patient.class, Group.class, Device.class, Location.class}, order=11, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,\nother observer (for example a relative or EMT), or any observation made about the subject." )
     protected Reference subject;
 
@@ -1117,7 +1117,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The specimen that was used when this observation was made.
      */
-    @Child(name="specimen", type={Specimen.class}, order=12, min=0, max=1)
+    @Child(name = "specimen", type = {Specimen.class}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Specimen used for this observation", formalDefinition="The specimen that was used when this observation was made." )
     protected Reference specimen;
 
@@ -1129,7 +1129,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * Who was responsible for asserting the observed value as "true".
      */
-    @Child(name="performer", type={Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "performer", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who did the observation", formalDefinition="Who was responsible for asserting the observed value as 'true'." )
     protected List<Reference> performer;
     /**
@@ -1141,7 +1141,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The device used to generate the observation data.
      */
-    @Child(name="device", type={Device.class, DeviceMetric.class}, order=14, min=0, max=1)
+    @Child(name = "device", type = {Device.class, DeviceMetric.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="(Measurement) Device", formalDefinition="The device used to generate the observation data." )
     protected Reference device;
 
@@ -1153,7 +1153,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.
      */
-    @Child(name="encounter", type={Encounter.class}, order=15, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="Healthcare event during which this observation is made", formalDefinition="The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made." )
     protected Reference encounter;
 
@@ -1165,50 +1165,50 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * Guidance on how to interpret the value by comparison to a normal or recommended range.
      */
-    @Child(name="referenceRange", type={}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "referenceRange", type = {}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Provides guide for interpretation", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range." )
     protected List<ObservationReferenceRangeComponent> referenceRange;
 
     /**
      * Related observations - either components, or previous observations, or statements of derivation.
      */
-    @Child(name="related", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "related", type = {}, order = 18, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Observations related to this observation", formalDefinition="Related observations - either components, or previous observations, or statements of derivation." )
     protected List<ObservationRelatedComponent> related;
 
-    private static final long serialVersionUID = 124119028L;
+    private static final long serialVersionUID = 1185478098L;
 
     public Observation() {
       super();
     }
 
-    public Observation(CodeableConcept name, Enumeration<ObservationStatus> status) {
+    public Observation(CodeableConcept code, Enumeration<ObservationStatus> status) {
       super();
-      this.name = name;
+        this.code = code;
       this.status = status;
     }
 
     /**
-     * @return {@link #name} (Describes what was observed. Sometimes this is called the observation "code".)
+     * @return {@link #code} (Describes what was observed. Sometimes this is called the observation "code".)
      */
-    public CodeableConcept getName() { 
-      if (this.name == null)
+    public CodeableConcept getCode() {
+        if (this.code == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Observation.name");
+            throw new Error("Attempt to auto-create Observation.code");
         else if (Configuration.doAutoCreate())
-          this.name = new CodeableConcept(); // cc
-      return this.name;
+            this.code = new CodeableConcept(); // cc
+        return this.code;
     }
 
-    public boolean hasName() { 
-      return this.name != null && !this.name.isEmpty();
+    public boolean hasCode() {
+        return this.code != null && !this.code.isEmpty();
     }
 
     /**
-     * @param value {@link #name} (Describes what was observed. Sometimes this is called the observation "code".)
+     * @param value {@link #code} (Describes what was observed. Sometimes this is called the observation "code".)
      */
-    public Observation setName(CodeableConcept value) { 
-      this.name = value;
+    public Observation setCode(CodeableConcept value) {
+        this.code = value;
       return this;
     }
 
@@ -1970,7 +1970,7 @@ other observer (for example a relative or EMT), or any observation made about th
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("name", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation 'code'.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation 'code'.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|Attachment|Ratio|dateTime|Period|SampledData|string|time", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("dataAbsentReason", "code", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
         childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.", 0, java.lang.Integer.MAX_VALUE, interpretation));
@@ -1994,7 +1994,7 @@ other observer (for example a relative or EMT), or any observation made about th
       public Observation copy() {
         Observation dst = new Observation();
         copyValues(dst);
-        dst.name = name == null ? null : name.copy();
+          dst.code = code == null ? null : code.copy();
         dst.value = value == null ? null : value.copy();
         dst.dataAbsentReason = dataAbsentReason == null ? null : dataAbsentReason.copy();
         dst.interpretation = interpretation == null ? null : interpretation.copy();
@@ -2039,7 +2039,7 @@ other observer (for example a relative or EMT), or any observation made about th
         if (!(other instanceof Observation))
           return false;
         Observation o = (Observation) other;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
+          return compareDeep(code, o.code, true) && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
            && compareDeep(interpretation, o.interpretation, true) && compareDeep(comments, o.comments, true)
            && compareDeep(applies, o.applies, true) && compareDeep(issued, o.issued, true) && compareDeep(status, o.status, true)
            && compareDeep(reliability, o.reliability, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(method, o.method, true)
@@ -2062,7 +2062,7 @@ other observer (for example a relative or EMT), or any observation made about th
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
+          return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
            && (dataAbsentReason == null || dataAbsentReason.isEmpty()) && (interpretation == null || interpretation.isEmpty())
            && (comments == null || comments.isEmpty()) && (applies == null || applies.isEmpty()) && (issued == null || issued.isEmpty())
            && (status == null || status.isEmpty()) && (reliability == null || reliability.isEmpty())
@@ -2077,46 +2077,46 @@ other observer (for example a relative or EMT), or any observation made about th
     return ResourceType.Observation;
    }
 
-  @SearchParamDefinition(name="value-string", path="Observation.valueString", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
-  public static final String SP_VALUESTRING = "value-string";
-  @SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token" )
-  public static final String SP_STATUS = "status";
+    @SearchParamDefinition(name = "date", path = "Observation.applies[x]", description = "Obtained date/time. If the obtained element is a period, a date that falls in the period", type = "date")
+    public static final String SP_DATE = "date";
+    @SearchParamDefinition(name = "identifier", path = "Observation.identifier", description = "The unique Id for a particular observation", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "code", path = "Observation.code", description = "The code of the observation type", type = "token")
+    public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "code-value-[x]", path = "", description = "Both code and one of the value parameters", type = "composite")
+    public static final String SP_CODEVALUEX = "code-value-[x]";
+    @SearchParamDefinition(name = "performer", path = "Observation.performer", description = "Who performed the observation", type = "reference")
+    public static final String SP_PERFORMER = "performer";
+    @SearchParamDefinition(name = "value-quantity", path = "Observation.valueQuantity", description = "The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type = "quantity")
+    public static final String SP_VALUEQUANTITY = "value-quantity";
   @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="value-concept", path="Observation.valueCodeableConcept", description="The value of the observation, if the value is a CodeableConcept", type="token" )
-  public static final String SP_VALUECONCEPT = "value-concept";
   @SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token" )
   public static final String SP_RELIABILITY = "reliability";
+    @SearchParamDefinition(name = "value-concept", path = "Observation.valueCodeableConcept", description = "The value of the observation, if the value is a CodeableConcept", type = "token")
+    public static final String SP_VALUECONCEPT = "value-concept";
+    @SearchParamDefinition(name = "value-date", path = "Observation.valueDateTime|Observation.valuePeriod", description = "The value of the observation, if the value is a Period", type = "date")
+    public static final String SP_VALUEDATE = "value-date";
+    @SearchParamDefinition(name = "data-absent-reason", path = "Observation.dataAbsentReason", description = "The reason why the expected value in the element Observation.value[x] is missing.", type = "token")
+    public static final String SP_DATAABSENTREASON = "data-absent-reason";
   @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="name-value-[x]", path="", description="Both name and one of the value parameters", type="composite" )
-  public static final String SP_NAMEVALUEX = "name-value-[x]";
+    @SearchParamDefinition(name = "related-type", path = "Observation.related.type", description = "has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type = "token")
+    public static final String SP_RELATEDTYPE = "related-type";
   @SearchParamDefinition(name="related-target", path="Observation.related.target", description="Observation that is related to this one", type="reference" )
   public static final String SP_RELATEDTARGET = "related-target";
-  @SearchParamDefinition(name="data-absent-reason", path="Observation.dataAbsentReason", description="The reason why the expected value in the element Observation.value[x] is missing.", type="token" )
-  public static final String SP_DATAABSENTREASON = "data-absent-reason";
   @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="name", path="Observation.name", description="The name of the observation type", type="token" )
-  public static final String SP_NAME = "name";
   @SearchParamDefinition(name="specimen", path="Observation.specimen", description="Specimen used for this observation", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
+    @SearchParamDefinition(name = "value-string", path = "Observation.valueString", description = "The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type = "string")
+    public static final String SP_VALUESTRING = "value-string";
   @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference" )
   public static final String SP_DEVICE = "device";
-  @SearchParamDefinition(name="related-type", path="Observation.related.type", description="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type="token" )
-  public static final String SP_RELATEDTYPE = "related-type";
-  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference" )
-  public static final String SP_PERFORMER = "performer";
-  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique Id for a particular observation", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="value-quantity", path="Observation.valueQuantity", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
-  public static final String SP_VALUEQUANTITY = "value-quantity";
-  @SearchParamDefinition(name="value-date", path="Observation.valueDateTime|Observation.valuePeriod", description="The value of the observation, if the value is a Period", type="date" )
-  public static final String SP_VALUEDATE = "value-date";
+    @SearchParamDefinition(name = "status", path = "Observation.status", description = "The status of the observation", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

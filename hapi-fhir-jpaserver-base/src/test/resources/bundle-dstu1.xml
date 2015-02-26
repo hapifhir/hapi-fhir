@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Search results for resource type Patient</title>
+    <id>urn:uuid:d05b8832-2ec2-4df1-9a8f-905ba57823</id>
+    <link href="http://fhir.healthintersections.com.au/open/" rel="fhir-base"/>
+    <link href="http://fhir.healthintersections.com.au/open/Patient/_search?_format=text/xml+fhir&amp;search-id=433c4ae6-9b99-4fee-ae1d-b8461a7d9c&amp;&amp;search-sort=_id"
+          rel="self"/>
+    <link href="http://fhir.healthintersections.com.au/open/Patient/_search?_format=text/xml+fhir&amp;search-id=433c4ae6-9b99-4fee-ae1d-b8461a7d9c&amp;&amp;search-sort=_id&amp;search-offset=0&amp;_count=50"
+          rel="first"/>
+    <link href="http://fhir.healthintersections.com.au/open/Patient/_search?_format=text/xml+fhir&amp;search-id=433c4ae6-9b99-4fee-ae1d-b8461a7d9c&amp;&amp;search-sort=_id&amp;search-offset=50&amp;_count=50"
+          rel="next"/>
+    <link href="http://fhir.healthintersections.com.au/open/Patient/_search?_format=text/xml+fhir&amp;search-id=433c4ae6-9b99-4fee-ae1d-b8461a7d9c&amp;&amp;search-sort=_id&amp;search-offset=300&amp;_count=50"
+          rel="last"/>
+    <updated>2015-02-21T17:08:03Z</updated>
+    <totalResults xmlns="http://a9.com/-/spec/opensearch/1.1/">303</totalResults>
+    <entry>
+        <title>Patient "74635" Version "2"</title>
+        <id>http://fhir.healthintersections.com.au/open/Patient/74635</id>
+        <link href="http://fhir.healthintersections.com.au/open/Patient/74635/_history/2" rel="self"/>
+        <updated>2015-01-29T13:54:03Z</updated>
+        <author>
+            <name>Anonymous (24.130.25.156)</name>
+        </author>
+        <published>2015-02-21T17:08:03Z</published>
+        <content type="text/xml">
+            <Patient xmlns="http://hl7.org/fhir">
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">
+                        <p>
+                            <b>Generated Narrative</b>
+                        </p>
+                        <p>
+                            <b>identifier</b>: ??
+                        </p>
+                        <p>
+                            <b>name</b>: Eve Everywoman
+                        </p>
+                        <p>
+                            <b>telecom</b>: ph: 555-555-2003(work)
+                        </p>
+                        <p>
+                            <b>gender</b>: Female
+                            <span style="background: LightGoldenRodYellow ">(Details :
+                                {http://hl7.org/fhir/v3/AdministrativeGender code "F" := "Female", given as "Female"})
+                            </span>
+                        </p>
+                        <p>
+                            <b>birthDate</b>: 1955-01-06
+                        </p>
+                        <p>
+                            <b>address</b>: 2222 Home Street, (home)
+                        </p>
+                        <p>
+                            <b>photo</b>:
+                        </p>
+                        <p>
+                            <b>active</b>: -1
+                        </p>
+                    </div>
+                </text>
+                <identifier>
+                    <system value="nhi"/>
+                </identifier>
+                <name>
+                    <text value="Eve Everywoman"/>
+                    <family value="Everywoman1"/>
+                    <given value="Eve"/>
+                </name>
+                <telecom>
+                    <system value="phone"/>
+                    <value value="555-555-2003"/>
+                    <use value="work"/>
+                </telecom>
+                <gender>
+                    <coding>
+                        <system value="http://hl7.org/fhir/v3/AdministrativeGender"/>
+                        <code value="F"/>
+                        <display value="Female"/>
+                    </coding>
+                </gender>
+                <birthDate value="1955-01-06"/>
+                <address>
+                    <use value="home"/>
+                    <text value="2222 Home Street, "/>
+                    <line value="2222 Home Street"/>
+                </address>
+                <photo>
+                    <contentType value="image/jpeg"/>
+                    <url value="data:image/jpeg;base64,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"/>
+                    <size value="6663"/>
+                </photo>
+                <active value="true"/>
+            </Patient>
+        </content>
+        <summary type="xhtml">
+            <div xmlns="http://www.w3.org/1999/xhtml">Generated Narrative&#xD;&#xA;identifier: ??&#xD;&#xA;name: Eve
+                Everywoman&#xD;&#xA;telecom: ph: 555-555-2003(work)&#xD;&#xA;gender: Female (Details :
+                {http://hl7.org/fhir/v3/AdministrativeGender code "F" := "Female", given as "Female"})&#xD;&#xA;birthDate:
+                1955-01-06&#xD;&#xA;address: 2222 Home Street&#x2026;</div>
+        </summary>
+    </entry>
+    <entry>
+        <title>Patient "8483548" Version "1"</title>
+        <id>http://fhir.healthintersections.com.au/open/Patient/8483548</id>
+        <link href="http://fhir.healthintersections.com.au/open/Patient/8483548/_history/1" rel="self"/>
+        <link href="http://fhir.healthintersections.com.au/open/Patient/8483548/$qa-edit" rel="edit-form"/>
+        <updated>2015-01-29T02:19:50Z</updated>
+        <author>
+            <name>Anonymous (service)</name>
+        </author>
+        <published>2015-02-21T17:08:03Z</published>
+        <content type="text/xml">
+            <Patient xmlns="http://hl7.org/fhir">
+                <extension url="http://hl7.org/fhir/Profile/us-core#race">
+                    <valueCodeableConcept>
+                        <coding>
+                            <system value="http://hl7.org/fhir/v3/Race"/>
+                            <code value="1096-7"/>
+                        </coding>
+                    </valueCodeableConcept>
+                </extension>
+                <extension url="http://hl7.org/fhir/Profile/us-core#ethnicity">
+                    <valueCodeableConcept>
+                        <coding>
+                            <system value="http://hl7.org/fhir/v3/Ethnicity"/>
+                            <code value="2162-6"/>
+                        </coding>
+                    </valueCodeableConcept>
+                </extension>
+                <text>
+                    <status value="generated"/>
+                    <div xmlns="http://www.w3.org/1999/xhtml">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>Peter James
+                                        <b>Chalmers</b>("Jim")
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Address</td>
+                                    <td>534 Erewhon, Pleasantville, Orange County, 3999</td>
+                                </tr>
+                                <tr>
+                                    <td>Contacts</td>
+                                    <td>Home: unknown. Work: (03) 5555 6473</td>
+                                </tr>
+                                <tr>
+                                    <td>Id</td>
+                                    <td>MRN: 12345 (Acme Healthcare)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </text>
+                <!--  Peter James Chalmers, but called "Jim"  -->
+                <name>
+                    <use value="official"/>
+                    <family value="Chalmers"/>
+                    <given value="Peter"/>
+                    <given value="James"/>
+                </name>
+                <address>
+                    <extension url="http://hl7.org/fhir/Profile/us-core#county">
+                        <valueString value="Orange County"/>
+                    </extension>
+                    <use value="home"/>
+                    <line value="534 Erewhon St"/>
+                    <city value="PleasantVille"/>
+                    <state value="Vic"/>
+                    <zip value="3999"/>
+                </address>
+                <active value="true"/>
+            </Patient>
+        </content>
+        <summary type="xhtml">
+            <div xmlns="http://www.w3.org/1999/xhtml">Name&#xA; Peter James Chalmers ("Jim")&#xA; &#xA; &#xA; Address&#xA;
+                534 Erewhon, Pleasantville, Orange County, 3999&#xA; &#xA; &#xA; Contacts&#xA; Home: unknown. Work: (03)
+                5555 6473&#xA; &#xA; &#x2026;</div>
+        </summary>
+    </entry>
+</feed>

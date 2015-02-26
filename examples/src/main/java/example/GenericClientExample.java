@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -69,6 +70,30 @@ public class GenericClientExample {
          // END SNIPPET: create
       }
       {
+         Patient patient = new Patient();
+         // START SNIPPET: createConditional
+         // One form
+         MethodOutcome outcome = client.create()
+            .resource(patient)
+            .conditionalByUrl("Patient?identifier=system%7C00001")
+            .execute();
+
+         // Another form
+         MethodOutcome outcome2 = client.create()
+            .resource(patient)
+            .conditional()
+            .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+            .execute();
+         
+         // This will return true if the server responded with an HTTP 201 created,
+         // otherwise it will return null.
+         Boolean created = outcome.getCreated();
+         
+         // The ID of the created, or the pre-existing resource
+         IdDt id = outcome.getId();
+         // END SNIPPET: createConditional
+      }
+      {
          // START SNIPPET: update
          Patient patient = new Patient();
          // ..populate the patient object..
@@ -94,6 +119,21 @@ public class GenericClientExample {
          IdDt id = outcome.getId();
          System.out.println("Got ID: " + id.getValue());
          // END SNIPPET: update
+      }
+      {
+         Patient patient = new Patient();
+         // START SNIPPET: updateConditional
+         client.update()
+            .resource(patient)
+            .conditionalByUrl("Patient?identifier=system%7C00001")
+            .execute();
+   
+         client.update()
+            .resource(patient)
+            .conditional()
+            .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+            .execute();
+         // END SNIPPET: updateConditional
       }
       {
          // START SNIPPET: etagupdate
@@ -132,15 +172,26 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: delete
-         // Retrieve the server's conformance statement and print its
-         // description
-         BaseOperationOutcome outcome = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+         BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
-         if (outcome != null) {
+         if (resp != null) {
+            OperationOutcome outcome = (OperationOutcome) resp;
             System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
          }
          // END SNIPPET: delete
+      }
+      {
+         // START SNIPPET: deleteConditional
+         client.delete()
+               .resourceConditionalByUrl("Patient?identifier=system%7C00001")
+               .execute();
+         
+         client.delete()
+               .resourceConditionalByType("Patient")
+               .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+               .execute();
+         // END SNIPPET: deleteConditional
       }
       {
          // START SNIPPET: search

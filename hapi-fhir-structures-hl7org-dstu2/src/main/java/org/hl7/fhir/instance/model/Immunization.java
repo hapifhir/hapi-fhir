@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -835,28 +835,28 @@ public class Immunization extends DomainResource {
     /**
      * A unique identifier assigned to this immunization record.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="A unique identifier assigned to this immunization record." )
     protected List<Identifier> identifier;
 
     /**
      * Date vaccine administered or was to be administered.
      */
-    @Child(name="date", type={DateTimeType.class}, order=0, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="Vaccination administration date", formalDefinition="Date vaccine administered or was to be administered." )
     protected DateTimeType date;
 
     /**
      * Vaccine that was administered or was to be administered.
      */
-    @Child(name="vaccineType", type={CodeableConcept.class}, order=1, min=1, max=1)
+    @Child(name = "vaccineType", type = {CodeableConcept.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="Vaccine product administered", formalDefinition="Vaccine that was administered or was to be administered." )
     protected CodeableConcept vaccineType;
 
     /**
      * The patient who either received or did not receive the immunization.
      */
-    @Child(name="patient", type={Patient.class}, order=2, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 3, min = 1, max = 1)
     @Description(shortDefinition="Who was immunized?", formalDefinition="The patient who either received or did not receive the immunization." )
     protected Reference patient;
 
@@ -868,21 +868,21 @@ public class Immunization extends DomainResource {
     /**
      * Indicates if the vaccination was or was not given.
      */
-    @Child(name="wasNotGiven", type={BooleanType.class}, order=3, min=1, max=1)
+    @Child(name = "wasNotGiven", type = {BooleanType.class}, order = 4, min = 1, max = 1)
     @Description(shortDefinition="Was immunization given?", formalDefinition="Indicates if the vaccination was or was not given." )
     protected BooleanType wasNotGiven;
 
     /**
      * True if this administration was reported rather than directly administered.
      */
-    @Child(name="reported", type={BooleanType.class}, order=4, min=1, max=1)
+    @Child(name = "reported", type = {BooleanType.class}, order = 5, min = 1, max = 1)
     @Description(shortDefinition="Is this a self-reported record?", formalDefinition="True if this administration was reported rather than directly administered." )
     protected BooleanType reported;
 
     /**
      * Clinician who administered the vaccine.
      */
-    @Child(name="performer", type={Practitioner.class}, order=5, min=0, max=1)
+    @Child(name = "performer", type = {Practitioner.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Who administered vaccine?", formalDefinition="Clinician who administered the vaccine." )
     protected Reference performer;
 
@@ -894,7 +894,7 @@ public class Immunization extends DomainResource {
     /**
      * Clinician who ordered the vaccination.
      */
-    @Child(name="requester", type={Practitioner.class}, order=6, min=0, max=1)
+    @Child(name = "requester", type = {Practitioner.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Who ordered vaccination?", formalDefinition="Clinician who ordered the vaccination." )
     protected Reference requester;
 
@@ -906,7 +906,7 @@ public class Immunization extends DomainResource {
     /**
      * The visit or admission or other contact between patient and health care provider the immunization was performed as part of.
      */
-    @Child(name="encounter", type={Encounter.class}, order=7, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Encounter administered as part of", formalDefinition="The visit or admission or other contact between patient and health care provider the immunization was performed as part of." )
     protected Reference encounter;
 
@@ -918,7 +918,7 @@ public class Immunization extends DomainResource {
     /**
      * Name of vaccine manufacturer.
      */
-    @Child(name="manufacturer", type={Organization.class}, order=8, min=0, max=1)
+    @Child(name = "manufacturer", type = {Organization.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Vaccine manufacturer", formalDefinition="Name of vaccine manufacturer." )
     protected Reference manufacturer;
 
@@ -930,7 +930,7 @@ public class Immunization extends DomainResource {
     /**
      * The service delivery location where the vaccine administration occurred.
      */
-    @Child(name="location", type={Location.class}, order=9, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Where did vaccination occur?", formalDefinition="The service delivery location where the vaccine administration occurred." )
     protected Reference location;
 
@@ -942,56 +942,56 @@ public class Immunization extends DomainResource {
     /**
      * Lot number of the  vaccine product.
      */
-    @Child(name="lotNumber", type={StringType.class}, order=10, min=0, max=1)
+    @Child(name = "lotNumber", type = {StringType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Vaccine lot number", formalDefinition="Lot number of the  vaccine product." )
     protected StringType lotNumber;
 
     /**
      * Date vaccine batch expires.
      */
-    @Child(name="expirationDate", type={DateType.class}, order=11, min=0, max=1)
+    @Child(name = "expirationDate", type = {DateType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Vaccine expiration date", formalDefinition="Date vaccine batch expires." )
     protected DateType expirationDate;
 
     /**
      * Body site where vaccine was administered.
      */
-    @Child(name="site", type={CodeableConcept.class}, order=12, min=0, max=1)
+    @Child(name = "site", type = {CodeableConcept.class}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="Body site vaccine  was administered", formalDefinition="Body site where vaccine was administered." )
     protected CodeableConcept site;
 
     /**
      * The path by which the vaccine product is taken into the body.
      */
-    @Child(name="route", type={CodeableConcept.class}, order=13, min=0, max=1)
+    @Child(name = "route", type = {CodeableConcept.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="How vaccine entered body", formalDefinition="The path by which the vaccine product is taken into the body." )
     protected CodeableConcept route;
 
     /**
      * The quantity of vaccine product that was administered.
      */
-    @Child(name="doseQuantity", type={Quantity.class}, order=14, min=0, max=1)
+    @Child(name = "doseQuantity", type = {Quantity.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="Amount of vaccine administered", formalDefinition="The quantity of vaccine product that was administered." )
     protected Quantity doseQuantity;
 
     /**
      * Reasons why a vaccine was or was not administered.
      */
-    @Child(name="explanation", type={}, order=15, min=0, max=1)
+    @Child(name = "explanation", type = {}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="Administration / non-administration reasons", formalDefinition="Reasons why a vaccine was or was not administered." )
     protected ImmunizationExplanationComponent explanation;
 
     /**
      * Categorical data indicating that an adverse event is associated in time to an immunization.
      */
-    @Child(name="reaction", type={}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reaction", type = {}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Details of a reaction that follows immunization", formalDefinition="Categorical data indicating that an adverse event is associated in time to an immunization." )
     protected List<ImmunizationReactionComponent> reaction;
 
     /**
      * Contains information about the protocol(s) under which the vaccine was administered.
      */
-    @Child(name="vaccinationProtocol", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "vaccinationProtocol", type = {}, order = 18, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="What protocol was followed", formalDefinition="Contains information about the protocol(s) under which the vaccine was administered." )
     protected List<ImmunizationVaccinationProtocolComponent> vaccinationProtocol;
 
@@ -1828,38 +1828,38 @@ public class Immunization extends DomainResource {
     return ResourceType.Immunization;
    }
 
-  @SearchParamDefinition(name="reaction", path="Immunization.reaction.detail", description="Additional information on reaction", type="reference" )
-  public static final String SP_REACTION = "reaction";
+    @SearchParamDefinition(name = "date", path = "Immunization.date", description = "Vaccination  (non)-Administration Date", type = "date")
+    public static final String SP_DATE = "date";
   @SearchParamDefinition(name="requester", path="Immunization.requester", description="The practitioner who ordered the vaccination", type="reference" )
   public static final String SP_REQUESTER = "requester";
-  @SearchParamDefinition(name="dose-sequence", path="Immunization.vaccinationProtocol.doseSequence", description="What dose number within series?", type="number" )
-  public static final String SP_DOSESEQUENCE = "dose-sequence";
-  @SearchParamDefinition(name="vaccine-type", path="Immunization.vaccineType", description="Vaccine Product Type Administered", type="token" )
-  public static final String SP_VACCINETYPE = "vaccine-type";
-  @SearchParamDefinition(name="location", path="Immunization.location", description="The service delivery location or facility in which the vaccine was / was to be administered", type="reference" )
-  public static final String SP_LOCATION = "location";
+    @SearchParamDefinition(name = "identifier", path = "Immunization.identifier", description = "Business identifier", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="reason", path="Immunization.explanation.reason", description="Why immunization occurred", type="token" )
   public static final String SP_REASON = "reason";
+    @SearchParamDefinition(name = "performer", path = "Immunization.performer", description = "The practitioner who administered the vaccination", type = "reference")
+    public static final String SP_PERFORMER = "performer";
+    @SearchParamDefinition(name = "reaction", path = "Immunization.reaction.detail", description = "Additional information on reaction", type = "reference")
+    public static final String SP_REACTION = "reaction";
+    @SearchParamDefinition(name = "lot-number", path = "Immunization.lotNumber", description = "Vaccine Lot Number", type = "string")
+    public static final String SP_LOTNUMBER = "lot-number";
   @SearchParamDefinition(name="subject", path="Immunization.patient", description="The patient for the vaccination record", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="reaction-date", path="Immunization.reaction.date", description="When did reaction start?", type="date" )
-  public static final String SP_REACTIONDATE = "reaction-date";
+    @SearchParamDefinition(name = "vaccine-type", path = "Immunization.vaccineType", description = "Vaccine Product Type Administered", type = "token")
+    public static final String SP_VACCINETYPE = "vaccine-type";
   @SearchParamDefinition(name="notgiven", path="Immunization.wasNotGiven", description="Administrations which were not given", type="token" )
   public static final String SP_NOTGIVEN = "notgiven";
-  @SearchParamDefinition(name="date", path="Immunization.date", description="Vaccination  (non)-Administration Date", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="reason-not-given", path="Immunization.explanation.reasonNotGiven", description="Explanation of reason vaccination was not administered", type="token" )
-  public static final String SP_REASONNOTGIVEN = "reason-not-given";
-  @SearchParamDefinition(name="patient", path="Immunization.patient", description="The patient for the vaccination record", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="lot-number", path="Immunization.lotNumber", description="Vaccine Lot Number", type="string" )
-  public static final String SP_LOTNUMBER = "lot-number";
   @SearchParamDefinition(name="manufacturer", path="Immunization.manufacturer", description="Vaccine Manufacturer", type="reference" )
   public static final String SP_MANUFACTURER = "manufacturer";
-  @SearchParamDefinition(name="performer", path="Immunization.performer", description="The practitioner who administered the vaccination", type="reference" )
-  public static final String SP_PERFORMER = "performer";
-  @SearchParamDefinition(name="identifier", path="Immunization.identifier", description="Business identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "dose-sequence", path = "Immunization.vaccinationProtocol.doseSequence", description = "What dose number within series?", type = "number")
+    public static final String SP_DOSESEQUENCE = "dose-sequence";
+    @SearchParamDefinition(name = "patient", path = "Immunization.patient", description = "The patient for the vaccination record", type = "reference")
+    public static final String SP_PATIENT = "patient";
+    @SearchParamDefinition(name = "reason-not-given", path = "Immunization.explanation.reasonNotGiven", description = "Explanation of reason vaccination was not administered", type = "token")
+    public static final String SP_REASONNOTGIVEN = "reason-not-given";
+    @SearchParamDefinition(name = "location", path = "Immunization.location", description = "The service delivery location or facility in which the vaccine was / was to be administered", type = "reference")
+    public static final String SP_LOCATION = "location";
+    @SearchParamDefinition(name = "reaction-date", path = "Immunization.reaction.date", description = "When did reaction start?", type = "date")
+    public static final String SP_REACTIONDATE = "reaction-date";
 
 }
 

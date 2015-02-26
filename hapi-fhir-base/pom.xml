@@ -195,69 +195,6 @@
 				</plugins>
 			</reporting>
 		</profile>
-		<profile>
-			<id>ANDROID</id>
-			<dependencies>
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-structures-dstu</artifactId>
-					<version>0.9-SNAPSHOT</version>
-				</dependency>
-				<dependency>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-android</artifactId>
-					<version>${slf4j_version}</version>
-				</dependency>
-			</dependencies>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-shade-plugin</artifactId>
-						<version>1.4</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>shade</goal>
-								</goals>
-								<configuration>
-									<shadedArtifactAttached>false</shadedArtifactAttached>
-									<createDependencyReducedPom>true</createDependencyReducedPom>
-									<artifactSet>
-										<includes>
-											<!-- 
-											<include>javax.json:javax.json-api</include>
-											-->
-											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-											<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-											<include>org.glassfish:javax.json</include>
-											<include>org.codehaus.woodstox:woodstox-core-asl</include>
-											<include>javax.xml.stream:stax-api</include>
-											<include>org.codehaus.woodstox:stax2-api</include>
-											<include>org.slf4j:slf4j*</include>
-											<include>org.apache.commons:*</include>
-											<include>org.apache.httpcomponents:*</include>
-										</includes>
-									</artifactSet>
-									<relocations>
-										<relocation>
-											<pattern>javax.xml.stream</pattern>
-											<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
-										</relocation>
-										<relocation>
-											<pattern>javax.json</pattern>
-											<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
-										</relocation>
-									</relocations>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-
 	</profiles>
 
 </project>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -148,14 +148,14 @@ public class RelatedPerson extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * The patient this person is related to.
      */
-    @Child(name="patient", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="The patient this person is related to", formalDefinition="The patient this person is related to." )
     protected Reference patient;
 
@@ -167,49 +167,49 @@ public class RelatedPerson extends DomainResource {
     /**
      * The nature of the relationship between a patient and the related person.
      */
-    @Child(name="relationship", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="The nature of the relationship", formalDefinition="The nature of the relationship between a patient and the related person." )
     protected CodeableConcept relationship;
 
     /**
      * A name associated with the person.
      */
-    @Child(name="name", type={HumanName.class}, order=2, min=0, max=1)
+    @Child(name = "name", type = {HumanName.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected HumanName name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      */
-    @Child(name="gender", type={CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name="address", type={Address.class}, order=5, min=0, max=1)
+    @Child(name = "address", type = {Address.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
     protected Address address;
 
     /**
      * Image of the person.
      */
-    @Child(name="photo", type={Attachment.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {Attachment.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
     protected List<Attachment> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
      */
-    @Child(name="period", type={Period.class}, order=7, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
@@ -582,20 +582,20 @@ public class RelatedPerson extends DomainResource {
     return ResourceType.RelatedPerson;
    }
 
-  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference" )
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name = "identifier", path = "RelatedPerson.identifier", description = "A patient Identifier", type = "token")
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
+  @SearchParamDefinition(name = "gender", path = "RelatedPerson.gender", description = "Gender of the person", type = "token")
+  public static final String SP_GENDER = "gender";
+  @SearchParamDefinition(name = "patient", path = "RelatedPerson.patient", description = "The patient this person is related to", type = "reference")
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string" )
   public static final String SP_TELECOM = "telecom";
-  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token" )
-  public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

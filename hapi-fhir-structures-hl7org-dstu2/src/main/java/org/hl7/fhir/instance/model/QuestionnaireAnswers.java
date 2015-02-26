@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -503,10 +503,10 @@ public class QuestionnaireAnswers extends DomainResource {
         protected StringType linkId;
 
         /**
-         * Text of the question as it is shown to the user.
+         * The actual question as shown to the user to prompt them for an answer.
          */
         @Child(name="text", type={StringType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Text of the question as it is shown to the user", formalDefinition="Text of the question as it is shown to the user." )
+        @Description(shortDefinition = "Text of the question as it is shown to the user", formalDefinition = "The actual question as shown to the user to prompt them for an answer.")
         protected StringType text;
 
         /**
@@ -579,7 +579,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #text} (Text of the question as it is shown to the user.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @return {@link #text} (The actual question as shown to the user to prompt them for an answer.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public StringType getTextElement() { 
           if (this.text == null)
@@ -599,7 +599,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @param value {@link #text} (Text of the question as it is shown to the user.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @param value {@link #text} (The actual question as shown to the user to prompt them for an answer.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public QuestionComponent setTextElement(StringType value) { 
           this.text = value;
@@ -607,14 +607,14 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return Text of the question as it is shown to the user.
+         * @return The actual question as shown to the user to prompt them for an answer.
          */
         public String getText() { 
           return this.text == null ? null : this.text.getValue();
         }
 
         /**
-         * @param value Text of the question as it is shown to the user.
+         * @param value The actual question as shown to the user to prompt them for an answer.
          */
         public QuestionComponent setText(String value) { 
           if (Utilities.noString(value))
@@ -690,7 +690,7 @@ public class QuestionnaireAnswers extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("linkId", "string", "Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
-          childrenList.add(new Property("text", "string", "Text of the question as it is shown to the user.", 0, java.lang.Integer.MAX_VALUE, text));
+          childrenList.add(new Property("text", "string", "The actual question as shown to the user to prompt them for an answer.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
           childrenList.add(new Property("group", "@QuestionnaireAnswers.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
@@ -744,10 +744,10 @@ public class QuestionnaireAnswers extends DomainResource {
     @Block()
     public static class QuestionAnswerComponent extends BackboneElement {
         /**
-         * Single-valued answer to the question.
+         * The answer (or one of the answers) provided by the respondant to the question.
          */
-        @Child(name="value", type={BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Single-valued answer to the question", formalDefinition="Single-valued answer to the question." )
+        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order = 1, min = 0, max = 1)
+        @Description(shortDefinition = "Single-valued answer to the question", formalDefinition = "The answer (or one of the answers) provided by the respondant to the question.")
         protected Type value;
 
         private static final long serialVersionUID = -732981989L;
@@ -757,14 +757,14 @@ public class QuestionnaireAnswers extends DomainResource {
       }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Type getValue() { 
           return this.value;
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public BooleanType getValueBooleanType() throws Exception { 
           if (!(this.value instanceof BooleanType))
@@ -773,7 +773,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public DecimalType getValueDecimalType() throws Exception { 
           if (!(this.value instanceof DecimalType))
@@ -782,7 +782,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public IntegerType getValueIntegerType() throws Exception { 
           if (!(this.value instanceof IntegerType))
@@ -791,7 +791,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public DateType getValueDateType() throws Exception { 
           if (!(this.value instanceof DateType))
@@ -800,7 +800,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public DateTimeType getValueDateTimeType() throws Exception { 
           if (!(this.value instanceof DateTimeType))
@@ -809,7 +809,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public InstantType getValueInstantType() throws Exception { 
           if (!(this.value instanceof InstantType))
@@ -818,7 +818,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public TimeType getValueTimeType() throws Exception { 
           if (!(this.value instanceof TimeType))
@@ -827,7 +827,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public StringType getValueStringType() throws Exception { 
           if (!(this.value instanceof StringType))
@@ -836,16 +836,25 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (Single-valued answer to the question.)
+         * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
+        public UriType getValueUriType() throws Exception {
+          if (!(this.value instanceof UriType))
+            throw new Exception("Type mismatch: the type UriType was expected, but " + this.value.getClass().getName() + " was encountered");
+          return (UriType) this.value;
+        }
+
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
+       */
         public Attachment getValueAttachment() throws Exception { 
           if (!(this.value instanceof Attachment))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
         }
 
-        /**
-         * @return {@link #value} (Single-valued answer to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Coding getValueCoding() throws Exception { 
           if (!(this.value instanceof Coding))
@@ -853,8 +862,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Coding) this.value;
         }
 
-        /**
-         * @return {@link #value} (Single-valued answer to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Quantity getValueQuantity() throws Exception { 
           if (!(this.value instanceof Quantity))
@@ -862,8 +871,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Quantity) this.value;
         }
 
-        /**
-         * @return {@link #value} (Single-valued answer to the question.)
+      /**
+       * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public Reference getValueReference() throws Exception { 
           if (!(this.value instanceof Reference))
@@ -875,8 +884,8 @@ public class QuestionnaireAnswers extends DomainResource {
           return this.value != null && !this.value.isEmpty();
         }
 
-        /**
-         * @param value {@link #value} (Single-valued answer to the question.)
+      /**
+       * @param value {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
         public QuestionAnswerComponent setValue(Type value) { 
           this.value = value;
@@ -885,7 +894,7 @@ public class QuestionnaireAnswers extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|Attachment|Coding|Quantity|Reference(Any)", "Single-valued answer to the question.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondant to the question.", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       public QuestionAnswerComponent copy() {
@@ -924,14 +933,14 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * A business identifier assigned to a particular completed (or partially completed) questionnaire.
      */
-    @Child(name="identifier", type={Identifier.class}, order=-1, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Unique id for this set of answers", formalDefinition="A business identifier assigned to a particular completed (or partially completed) questionnaire." )
     protected Identifier identifier;
 
     /**
      * Indicates the Questionnaire resource that defines the form for which answers are being provided.
      */
-    @Child(name="questionnaire", type={Questionnaire.class}, order=0, min=0, max=1)
+    @Child(name = "questionnaire", type = {Questionnaire.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Form being answered", formalDefinition="Indicates the Questionnaire resource that defines the form for which answers are being provided." )
     protected Reference questionnaire;
 
@@ -943,14 +952,14 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * The lifecycle status of the questionnaire answers as a whole.
      */
-    @Child(name="status", type={CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 2, min = 1, max = 1)
     @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire answers as a whole." )
     protected Enumeration<QuestionnaireAnswersStatus> status;
 
     /**
      * The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
      */
-    @Child(name="subject", type={}, order=2, min=0, max=1)
+    @Child(name = "subject", type = {}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
     protected Reference subject;
 
@@ -962,7 +971,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.
      */
-    @Child(name="author", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system." )
     protected Reference author;
 
@@ -974,26 +983,26 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * The date and/or time that this version of the questionnaire answers was authored.
      */
-    @Child(name="authored", type={DateTimeType.class}, order=4, min=1, max=1)
+    @Child(name = "authored", type = {DateTimeType.class}, order = 5, min = 1, max = 1)
     @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire answers was authored." )
     protected DateTimeType authored;
 
-    /**
-     * The person who answered the questions about the subject. Only used when this is not the subject him/herself.
-     */
-    @Child(name="source", type={Patient.class, Practitioner.class, RelatedPerson.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="The person who answered the questions", formalDefinition="The person who answered the questions about the subject. Only used when this is not the subject him/herself." )
+  /**
+   * The person who answered the questions about the subject.
+   */
+  @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order = 6, min = 0, max = 1)
+  @Description(shortDefinition = "The person who answered the questions", formalDefinition = "The person who answered the questions about the subject.")
     protected Reference source;
 
-    /**
-     * The actual object that is the target of the reference (The person who answered the questions about the subject. Only used when this is not the subject him/herself.)
+  /**
+   * The actual object that is the target of the reference (The person who answered the questions about the subject.)
      */
     protected Resource sourceTarget;
 
     /**
      * Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
      */
-    @Child(name="encounter", type={Encounter.class}, order=6, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
     protected Reference encounter;
 
@@ -1005,7 +1014,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.
      */
-    @Child(name="group", type={}, order=7, min=0, max=1)
+    @Child(name = "group", type = {}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Grouped questions", formalDefinition="A group of questions to a possibly similarly grouped set of questions in the questionnaire answers." )
     protected GroupComponent group;
 
@@ -1257,8 +1266,8 @@ public class QuestionnaireAnswers extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #source} (The person who answered the questions about the subject. Only used when this is not the subject him/herself.)
+  /**
+   * @return {@link #source} (The person who answered the questions about the subject.)
      */
     public Reference getSource() { 
       if (this.source == null)
@@ -1273,23 +1282,23 @@ public class QuestionnaireAnswers extends DomainResource {
       return this.source != null && !this.source.isEmpty();
     }
 
-    /**
-     * @param value {@link #source} (The person who answered the questions about the subject. Only used when this is not the subject him/herself.)
+  /**
+   * @param value {@link #source} (The person who answered the questions about the subject.)
      */
     public QuestionnaireAnswers setSource(Reference value) { 
       this.source = value;
       return this;
     }
 
-    /**
-     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject. Only used when this is not the subject him/herself.)
+  /**
+   * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
      */
     public Resource getSourceTarget() { 
       return this.sourceTarget;
     }
 
-    /**
-     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject. Only used when this is not the subject him/herself.)
+  /**
+   * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
      */
     public QuestionnaireAnswers setSourceTarget(Resource value) { 
       this.sourceTarget = value;
@@ -1372,7 +1381,7 @@ public class QuestionnaireAnswers extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("authored", "dateTime", "The date and/or time that this version of the questionnaire answers was authored.", 0, java.lang.Integer.MAX_VALUE, authored));
-        childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject. Only used when this is not the subject him/herself.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("group", "", "A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.", 0, java.lang.Integer.MAX_VALUE, group));
       }
@@ -1431,20 +1440,20 @@ public class QuestionnaireAnswers extends DomainResource {
     return ResourceType.QuestionnaireAnswers;
    }
 
-  @SearchParamDefinition(name="author", path="QuestionnaireAnswers.author", description="The author of the questionnaire", type="reference" )
-  public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireAnswers.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
-  public static final String SP_QUESTIONNAIRE = "questionnaire";
-  @SearchParamDefinition(name="patient", path="QuestionnaireAnswers.subject", description="The patient that is the subject of the questionnaire", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="authored", path="QuestionnaireAnswers.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
-  @SearchParamDefinition(name="status", path="QuestionnaireAnswers.status", description="The status of the questionnaire answers", type="token" )
-  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name = "questionnaire", path = "QuestionnaireAnswers.questionnaire", description = "The questionnaire the answers are provided for", type = "reference")
+  public static final String SP_QUESTIONNAIRE = "questionnaire";
   @SearchParamDefinition(name="subject", path="QuestionnaireAnswers.subject", description="The subject of the questionnaire", type="reference" )
   public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name = "author", path = "QuestionnaireAnswers.author", description = "The author of the questionnaire", type = "reference")
+  public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name = "patient", path = "QuestionnaireAnswers.subject", description = "The patient that is the subject of the questionnaire", type = "reference")
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="encounter", path="QuestionnaireAnswers.encounter", description="Encounter during which questionnaire was authored", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name = "status", path = "QuestionnaireAnswers.status", description = "The status of the questionnaire answers", type = "token")
+  public static final String SP_STATUS = "status";
 
 }
 

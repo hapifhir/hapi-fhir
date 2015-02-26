@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
 
@@ -134,21 +134,21 @@ public class DocumentManifest extends DomainResource {
     /**
      * A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts.
      */
-    @Child(name="masterIdentifier", type={Identifier.class}, order=-1, min=0, max=1)
+    @Child(name = "masterIdentifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Unique Identifier for the set of documents", formalDefinition="A single identifier that uniquely identifies this manifest. Principally used to refer to the manifest in non-FHIR contexts." )
     protected Identifier masterIdentifier;
 
     /**
      * Other identifiers associated with the document, including version independent, source record and workflow related identifiers.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Other identifiers for the manifest", formalDefinition="Other identifiers associated with the document, including version independent, source record and workflow related identifiers." )
     protected List<Identifier> identifier;
 
     /**
      * Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case).
      */
-    @Child(name="subject", type={Patient.class, Practitioner.class, Group.class, Device.class}, order=1, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Practitioner.class, Group.class, Device.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="The subject of the set of documents", formalDefinition="Who or what the set of documents is about. The documents can be about a person, (patient or healthcare practitioner), a device (i.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure). If the documents cross more than one subject, then more than one subject is allowed here (unusual use case)." )
     protected Reference subject;
 
@@ -160,7 +160,7 @@ public class DocumentManifest extends DomainResource {
     /**
      * A patient, practitioner, or organization for which this set of documents is intended.
      */
-    @Child(name="recipient", type={Patient.class, Practitioner.class, Organization.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "recipient", type = {Patient.class, Practitioner.class, Organization.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Intended to get notified about this set of documents", formalDefinition="A patient, practitioner, or organization for which this set of documents is intended." )
     protected List<Reference> recipient;
     /**
@@ -172,14 +172,14 @@ public class DocumentManifest extends DomainResource {
     /**
      * Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider.
      */
-    @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="What kind of document set this is", formalDefinition="Specifies the kind of this set of documents (e.g. Patient Summary, Discharge Summary, Prescription, etc.). The type of a set of documents may be the same as one of the documents in it - especially if there is only one - but it may be wider." )
     protected CodeableConcept type;
 
     /**
      * Identifies who is responsible for adding the information to the document.
      */
-    @Child(name="author", type={Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who and/or what authored the document", formalDefinition="Identifies who is responsible for adding the information to the document." )
     protected List<Reference> author;
     /**
@@ -191,28 +191,28 @@ public class DocumentManifest extends DomainResource {
     /**
      * When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc).
      */
-    @Child(name="created", type={DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="When this document manifest created", formalDefinition="When the document manifest was created for submission to the server (not necessarily the same thing as the actual resource last modified time, since it may be modified, replicated etc)." )
     protected DateTimeType created;
 
     /**
      * Identifies the source system, application, or software that produced the document manifest.
      */
-    @Child(name="source", type={UriType.class}, order=6, min=0, max=1)
+    @Child(name = "source", type = {UriType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="The source system/application/software", formalDefinition="Identifies the source system, application, or software that produced the document manifest." )
     protected UriType source;
 
     /**
      * The status of this document manifest.
      */
-    @Child(name="status", type={CodeType.class}, order=7, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 8, min = 1, max = 1)
     @Description(shortDefinition="current | superceded | entered-in-error", formalDefinition="The status of this document manifest." )
     protected Enumeration<DocumentReferenceStatus> status;
 
     /**
      * Whether this document manifest replaces another.
      */
-    @Child(name="supercedes", type={DocumentManifest.class}, order=8, min=0, max=1)
+    @Child(name = "supercedes", type = {DocumentManifest.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="If this document manifest replaces another", formalDefinition="Whether this document manifest replaces another." )
     protected Reference supercedes;
 
@@ -224,21 +224,21 @@ public class DocumentManifest extends DomainResource {
     /**
      * Human-readable description of the source document. This is sometimes known as the "title".
      */
-    @Child(name="description", type={StringType.class}, order=9, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Human-readable description (title)", formalDefinition="Human-readable description of the source document. This is sometimes known as the 'title'." )
     protected StringType description;
 
     /**
      * A code specifying the level of confidentiality of this set of Documents.
      */
-    @Child(name="confidentiality", type={CodeableConcept.class}, order=10, min=0, max=1)
+    @Child(name = "confidentiality", type = {CodeableConcept.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Sensitivity of set of documents", formalDefinition="A code specifying the level of confidentiality of this set of Documents." )
     protected CodeableConcept confidentiality;
 
     /**
      * The list of resources that describe the parts of this document reference. Usually, these would be document references, but direct references to binary attachments and images are also allowed.
      */
-    @Child(name="content", type={DocumentReference.class, Binary.class, Media.class}, order=11, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "content", type = {DocumentReference.class, Binary.class, Media.class}, order = 12, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contents of this set of documents", formalDefinition="The list of resources that describe the parts of this document reference. Usually, these would be document references, but direct references to binary attachments and images are also allowed." )
     protected List<Reference> content;
     /**
@@ -848,32 +848,32 @@ public class DocumentManifest extends DomainResource {
     return ResourceType.DocumentManifest;
    }
 
-  @SearchParamDefinition(name="supersedes", path="DocumentManifest.supercedes", description="If this document manifest replaces another", type="reference" )
-  public static final String SP_SUPERSEDES = "supersedes";
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superceded | entered-in-error", type="token" )
-  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name = "identifier", path = "DocumentManifest.masterIdentifier|DocumentManifest.identifier", description = "Unique Identifier for the set of documents", type = "token")
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="What kind of document set this is", type="token" )
-  public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
-  public static final String SP_RECIPIENT = "recipient";
-  @SearchParamDefinition(name="content", path="DocumentManifest.content", description="Contents of this set of documents", type="reference" )
-  public static final String SP_CONTENT = "content";
   @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the document", type="reference" )
   public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="string" )
-  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
   public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
-  public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="confidentiality", path="DocumentManifest.confidentiality", description="Sensitivity of set of documents", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
-  @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name = "description", path = "DocumentManifest.description", description = "Human-readable description (title)", type = "string")
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name = "source", path = "DocumentManifest.source", description = "The source system/application/software", type = "string")
+  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name = "type", path = "DocumentManifest.type", description = "What kind of document set this is", type = "token")
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name = "content", path = "DocumentManifest.content", description = "Contents of this set of documents", type = "reference")
+  public static final String SP_CONTENT = "content";
+  @SearchParamDefinition(name = "supersedes", path = "DocumentManifest.supercedes", description = "If this document manifest replaces another", type = "reference")
+  public static final String SP_SUPERSEDES = "supersedes";
+  @SearchParamDefinition(name = "patient", path = "DocumentManifest.subject", description = "The subject of the set of documents", type = "reference")
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name = "recipient", path = "DocumentManifest.recipient", description = "Intended to get notified about this set of documents", type = "reference")
+  public static final String SP_RECIPIENT = "recipient";
+  @SearchParamDefinition(name = "status", path = "DocumentManifest.status", description = "current | superceded | entered-in-error", type = "token")
+  public static final String SP_STATUS = "status";
 
 }
 

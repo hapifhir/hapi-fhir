@@ -29,11 +29,11 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0
+// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
 import java.util.*;
-
 import java.math.*;
+
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
@@ -147,35 +147,35 @@ public class Quantity extends Type implements ICompositeType {
     /**
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value.
      */
-    @Child(name="value", type={DecimalType.class}, order=-1, min=0, max=1)
+    @Child(name = "value", type = {DecimalType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Numerical value (with implicit precision)", formalDefinition="The value of the measured amount. The value includes an implicit precision in the presentation of the value." )
     protected DecimalType value;
 
     /**
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
      */
-    @Child(name="comparator", type={CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "comparator", type = {CodeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value." )
     protected Enumeration<QuantityComparator> comparator;
 
     /**
      * A human-readable form of the units.
      */
-    @Child(name="units", type={StringType.class}, order=1, min=0, max=1)
+    @Child(name = "units", type = {StringType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Unit representation", formalDefinition="A human-readable form of the units." )
     protected StringType units;
 
     /**
      * The identification of the system that provides the coded form of the unit.
      */
-    @Child(name="system", type={UriType.class}, order=2, min=0, max=1)
+    @Child(name = "system", type = {UriType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="System that defines coded unit form", formalDefinition="The identification of the system that provides the coded form of the unit." )
     protected UriType system;
 
     /**
      * A computer processable form of the units in some unit representation system.
      */
-    @Child(name="code", type={CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "code", type = {CodeType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Coded form of the unit", formalDefinition="A computer processable form of the units in some unit representation system." )
     protected CodeType code;
 

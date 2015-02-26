@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -152,6 +154,15 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	@Override
 	protected String getMatchingOperation() {
 		return null;
+	}
+
+	public static HttpDeleteClientInvocation createDeleteInvocation(String theSearchUrl) {
+		HttpDeleteClientInvocation retVal = new HttpDeleteClientInvocation(theSearchUrl);
+		return retVal;
+	}
+
+	public static HttpDeleteClientInvocation createDeleteInvocation(String theResourceType, Map<String, List<String>> theParams) {
+		return new HttpDeleteClientInvocation(theResourceType, theParams);
 	}
 
 	
