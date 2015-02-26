@@ -1,13 +1,29 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -45,6 +61,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -63,6 +80,8 @@ public class ResourceProviderDstu2Test {
 	private static Server ourServer;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static DaoConfig ourDaoConfig;
+	private static CloseableHttpClient ourHttpClient;
+	private static String ourServerBase;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -92,9 +111,24 @@ public class ResourceProviderDstu2Test {
 		}
 	}
 
-	public void testTryToCreateResourceWithNumericId() {
+	@Test
+	public void testCreateResourceWithNumericId() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1777\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-02-25T15:47:48Z\"/></meta></Patient>";
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), startsWith(ourServerBase + "/Patient/"));
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), endsWith("/_history/1"));
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), not(containsString("1777")));
+			
+		} finally {
+			response.close();
+		}
 	}
 	
 	/**
@@ -523,6 +557,7 @@ public class ResourceProviderDstu2Test {
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 		ourAppCtx.stop();
+		ourHttpClient.close();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -534,7 +569,7 @@ public class ResourceProviderDstu2Test {
 		ourFhirCtx = FhirContext.forDstu2();
 		restServer.setFhirContext(ourFhirCtx);
 		
-		String serverBase = "http://localhost:" + port + "/fhir/context";
+		ourServerBase = "http://localhost:" + port + "/fhir/context";
 
 		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
 
@@ -565,9 +600,13 @@ public class ResourceProviderDstu2Test {
 		ourServer.start();
 
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-		ourClient = ourFhirCtx.newRestfulGenericClient(serverBase);
+		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 		
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourHttpClient = builder.build();
 
 	}
 

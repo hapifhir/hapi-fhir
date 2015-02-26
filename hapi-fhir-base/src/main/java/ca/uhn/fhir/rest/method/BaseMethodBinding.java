@@ -92,7 +92,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider);
+		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getResourceOperationType());
 	}
 
 	public List<Class<?>> getAllowableParamAnnotations() {

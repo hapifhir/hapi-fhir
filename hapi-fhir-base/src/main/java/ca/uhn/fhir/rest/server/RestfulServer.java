@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -814,6 +815,10 @@ public class RestfulServer extends HttpServlet {
 
 	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
+	 * 
+	 * @throws ServletException If the initialization failed. Note that you should consider throwing
+	 * {@link UnavailableException} (which extends {@link ServletException}), as this is a flag
+	 * to the servlet container that the servlet is not usable.
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default

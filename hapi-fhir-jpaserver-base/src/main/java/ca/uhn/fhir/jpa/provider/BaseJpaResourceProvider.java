@@ -50,40 +50,20 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
+public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaResourceProvider.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
 
 	private FhirContext myContext;
 
 	private IFhirResourceDao<T> myDao;
 
-	public JpaResourceProvider() {
+	public BaseJpaResourceProvider() {
 		// nothing
 	}
 
-	public JpaResourceProvider(IFhirResourceDao<T> theDao) {
+	public BaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
-	}
-
-	@Create
-	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource) {
-		startRequest(theRequest);
-		try {
-			return myDao.create(theResource);
-		} finally {
-			endRequest(theRequest);
-		}
-	}
-
-	@Delete
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource) {
-		startRequest(theRequest);
-		try {
-			return myDao.delete(theResource);
-		} finally {
-			endRequest(theRequest);
-		}
 	}
 
 	public FhirContext getContext() {
@@ -156,21 +136,6 @@ public class JpaResourceProvider<T extends IResource> extends BaseJpaProvider im
 	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
-	}
-
-	@Update
-	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId) {
-		startRequest(theRequest);
-		try {
-			theResource.setId(theId);
-			return myDao.update(theResource);
-		} catch (ResourceNotFoundException e) {
-			ourLog.info("Can't update resource with ID[" + theId.getValue() + "] because it doesn't exist, going to create it instead");
-			theResource.setId(theId);
-			return myDao.create(theResource);
-		} finally {
-			endRequest(theRequest);
-		}
 	}
 
 	@Validate

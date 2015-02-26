@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -47,10 +49,10 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class UpdateConditionalTest {
+public class CreateConditionalTest {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateConditionalTest.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -69,12 +71,13 @@ public class UpdateConditionalTest {
 	}
 
 	@Test
-	public void testUpdateWithConditionalUrl() throws Exception {
+	public void testCreateWithConditionalUrl() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -84,7 +87,7 @@ public class UpdateConditionalTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
@@ -95,12 +98,12 @@ public class UpdateConditionalTest {
 	}
 
 	@Test
-	public void testUpdateWithoutConditionalUrl() throws Exception {
+	public void testCreateWithoutConditionalUrl() throws Exception {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/2?_format=true&_pretty=true");
 		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
@@ -110,7 +113,7 @@ public class UpdateConditionalTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 		
@@ -184,8 +187,8 @@ public class UpdateConditionalTest {
 			return new ArrayList<IResource>();
 		}
 		
-		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalOperationParam String theConditional, @IdParam IdDt theIdParam) {
+		@Create()
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalOperationParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;

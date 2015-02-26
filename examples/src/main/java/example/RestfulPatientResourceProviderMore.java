@@ -694,6 +694,29 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 //END SNIPPET: create
 
 
+//START SNIPPET: createConditional
+@Create
+public MethodOutcome createPatientConditional(
+      @ResourceParam Patient thePatient,
+      @ConditionalOperationParam String theConditionalUrl) {
+
+   if (theConditionalUrl != null) {
+      // We are doing a conditional create
+
+      // populate this with the ID of the existing resource which 
+      // matches the conditional URL
+      return new MethodOutcome();  
+   } else {
+      // We are doing a normal create
+      
+      // populate this with the ID of the newly created resource
+      return new MethodOutcome();  
+   }
+   
+}
+//END SNIPPET: createConditional
+
+
 //START SNIPPET: createClient
 @Create
 public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient);

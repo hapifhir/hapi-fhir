@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -300,7 +301,7 @@ public class MethodUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider) {
+	public static List<IParameter> getResourceParameters(FhirContext theContext, Method theMethod, Object theProvider, RestfulOperationTypeEnum theRestfulOperationTypeEnum) {
 		List<IParameter> parameters = new ArrayList<IParameter>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -396,7 +397,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParamBinder(theContext);
 					} else if (nextAnnotation instanceof ConditionalOperationParam) {
-						param = new ConditionalParamBinder();
+						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else {
 						continue;
 					}

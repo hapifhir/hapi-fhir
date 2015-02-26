@@ -474,6 +474,35 @@
 				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 			</macro>
 
+			<h4>Conditional Creates</h4>
+			
+			<p>
+				The FHIR specification also allows "conditional creates". A conditional
+				create has an additional header called <code>If-None-Exist</code>
+				which the client will supply on the HTTP request. The client will
+				populate this header with a search URL such as <code>Patient?identifier=foo</code>.
+				See the FHIR specification for details on the semantics for correctly
+				implementing conditional create.
+			</p>
+			<p>
+				When a conditional create is detected (i.e. when the create request contains
+				a populated <code>If-None-Exist</code> header), if a method parameter annotated
+				with the
+				<a href="./apidocs/ca/uhn/fhir/rest/annotation/ConditionalOperationParam.html">@ConditionalOperationParam</a>
+				is detected, it will be populated with the value of this header.
+			</p>
+			
+			<macro name="snippet">
+				<param name="id" value="createConditional" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
+			<p>
+				Example URL and HTTP header to perform a conditional create:
+				<br />
+				<code>http://fhir.example.com/Patient<br/>If-None-Exist: Patient?identifier=system%7C0001</code>
+			</p>
+			
 			<a name="type_search" />
 		</section>
 
@@ -535,9 +564,9 @@
 				
 				<p>
 					Parameters which take a string as their format should use the 
-					<a href="./apidocs/ca/uhn/fhir/rest/param/StringParam.html">StringParam</a>
-					type. They may also use normal java Strings, although it is
-					not possible to use the ":exact" qualifier in that case.
+					<code><a href="./apidocs/ca/uhn/fhir/rest/param/StringParam.html">StringParam</a></code>
+					type. They may also use normal java <code>String</code>, although it is
+					not possible to use the <code>:exact</code> qualifier in that case.
 				</p>
 
 				<macro name="snippet">
@@ -971,7 +1000,7 @@
 				<p>
 					To accept a composite parameter, use a parameter type which implements the
 					<a href="./apidocs/ca/uhn/fhir/model/api/IQueryParameterAnd.html">IQueryParameterAnd</a>
-					interface.
+					interface (which in turn encapsulates the corresponding IQueryParameterOr types).
 				</p>
 				<p>
 					An example follows which shows a search for Patients by address, where multiple string 
@@ -991,6 +1020,17 @@
 					<param name="id" value="searchMultipleAnd" />
 					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
 				</macro>
+
+				<p>
+					Note that AND parameters join multiple OR parameters together, but
+					the inverse is not true. In other words, it is possible in FHIR
+					to use AND search parameters to specify a search criteria of
+					<code>(A=1 OR A=2) AND (B=1 OR B=2)</code>
+					but it is not possible to specify
+					<code>(A=1 AND B=1) OR (A=2 AND B=2)</code> (aside from 
+					in very specific cases where a composite parameter has been 
+					specifically defined). 
+				</p>
 				
 				<h4>AND Relationship Query Parameters for Dates</h4>
 				

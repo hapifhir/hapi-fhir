@@ -20,19 +20,28 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class ConditionalParamBinder implements IParameter {
 
-	ConditionalParamBinder() {
-		super();
+	private RestfulOperationTypeEnum myOperationType;
+
+	ConditionalParamBinder(RestfulOperationTypeEnum theOperationType) {
+		Validate.notNull(theOperationType, "theOperationType can not be null");
+		myOperationType = theOperationType;
 	}
 
 	@Override
@@ -42,9 +51,34 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+
+		if (myOperationType == RestfulOperationTypeEnum.CREATE) {
+			String retVal = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_EXIST);
+			if (isBlank(retVal)) {
+				return null;
+			}
+			if (retVal.startsWith(theRequest.getFhirServerBase())) {
+				retVal = retVal.substring(theRequest.getFhirServerBase().length());
+			}
+			return retVal;
+		} else if (myOperationType != RestfulOperationTypeEnum.DELETE && myOperationType != RestfulOperationTypeEnum.UPDATE) {
+			return null;
+		}
+		
 		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
 			return null;
 		}
+		boolean haveParam = false;
+		for (String next : theRequest.getParameters().keySet()) {
+			if (!next.startsWith("_")) {
+				haveParam=true;
+				break;
+			}
+		}
+		if (!haveParam) {
+			return null;
+		}
+		
 		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
 		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
 	}

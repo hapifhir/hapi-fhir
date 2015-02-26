@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoFailureException;
@@ -444,6 +445,12 @@ public abstract class BaseStructureParser {
 		ctx.put("includes", (theResource.getIncludes()));
 		ctx.put("esc", new EscapeTool());
 
+		String capitalize = WordUtils.capitalize(myVersion);
+		if ("Dstu".equals(capitalize)) {
+			capitalize="Dstu1";
+		}
+		ctx.put("versionCapitalized", capitalize);
+
 		VelocityEngine v = new VelocityEngine();
 		v.setProperty("resource.loader", "cp");
 		v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
@@ -525,6 +532,13 @@ public abstract class BaseStructureParser {
 				ctx.put("version", myVersion);
 				ctx.put("versionEnumName", determineVersionEnum().name());
 				ctx.put("esc", new EscapeTool());
+				
+				String capitalize = WordUtils.capitalize(myVersion);
+				if ("Dstu".equals(capitalize)) {
+					capitalize="Dstu1";
+				}
+				ctx.put("versionCapitalized", capitalize);
+				
 
 				VelocityEngine v = new VelocityEngine();
 				v.setProperty("resource.loader", "cp");

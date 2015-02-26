@@ -145,9 +145,9 @@ public class PagingTest {
 			assertEquals(2, bundle.getEntries().size());
 			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
 			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
-			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkSelf().getValue());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2", bundle.getLinkPrevious().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
+			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkSelf().getValue());
+			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkPrevious().getValue());
 		}
 	}
 	
