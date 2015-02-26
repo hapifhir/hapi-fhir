@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Documentation - HAPI FHIR</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Documentation">
+
+			<p>
+				Welcome to HAPI FHIR! We hope that the documentation here will be
+				helpful to you. 
+			</p>
+
+			<ul>
+				<li><a href="./doc_intro.html">Introduction</a></li>
+				<li><a href="./doc_dstu2.html">DSTU2 Support (new)</a></li>
+			</ul>
+			
+			<h4>The Data Model</h4>
+			<ul>
+				<li><a href="./doc_fhirobjects.html">Working with Resources</a></li>
+				<li><a href="./doc_extensions.html">Profiles &amp; Extensions</a></li>
+				<li><a href="./doc_resource_references.html">Resource References</a></li>
+				<li><a href="./doc_tags.html">Tags</a></li>
+				<li><a href="./doc_validation.html">Validation</a></li>
+			</ul>
+			
+			<h4>RESTful Client</h4>
+			<ul>
+				<li><a href="./doc_rest_client.html">Using RESTful Client</a></li>
+				<li><a href="./doc_rest_client_interceptor.html">Interceptors (client)</a></li>
+			</ul>
+			
+			<h4>RESTful Server</h4>
+			<ul>
+				<li><a href="./doc_rest_server.html">Using RESTful Server</a></li>
+				<li><a href="./doc_rest_operations.html">RESTful Operations</a></li>
+				<li><a href="./doc_narrative.html">Narrative Generator</a></li>
+				<li><a href="./doc_cors.html">CORS Support</a></li>
+				<li><a href="./doc_rest_server_interceptor.html">Interceptors (server)</a></li>
+				<li><a href="./doc_server_tester.html">Web Testing UI</a></li>
+			</ul>
+			<!-- 
+			<li name="Logging" href="./doc_logging.html" />
+			<li name="ETags" href="./doc_rest_etag.html" />
+			<li name="Tinder Plugin" href="./doc_tinder.html" />
+			<li name="JPA/Database Server" href="./doc_jpa.html" />
+			</ul>
+ -->
+
+		</section>
+		
+	</body>
+
+</document>
