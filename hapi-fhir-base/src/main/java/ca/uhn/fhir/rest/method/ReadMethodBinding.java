@@ -73,6 +73,10 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
 
+		if (myIdIndex== null) {
+			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
+		}
+		
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		if (!IdDt.class.equals(parameterTypes[myIdIndex])) {
 			throw new ConfigurationException("ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myIdIndex]);

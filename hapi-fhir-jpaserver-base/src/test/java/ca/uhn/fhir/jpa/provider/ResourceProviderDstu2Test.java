@@ -5,10 +5,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +15,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -130,7 +130,117 @@ public class ResourceProviderDstu2Test {
 			response.close();
 		}
 	}
+
+	@Test
+	public void testCreateResourceConditional() throws IOException {
+		String methodName = "testCreateResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
+		response = ourHttpClient.execute(post);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertEquals(id.getValue(), newIdString);
+		} finally {
+			response.close();
+		}
+		
+	}
+
+	@Test
+	public void testUpdateResourceConditional() throws IOException {
+		String methodName = "testUpdateResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			IdDt newId = new IdDt(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
+			assertEquals(id.toVersionless(), newId.toVersionless());
+			assertNotEquals(id, newId);
+		} finally {
+			response.close();
+		}
+		
+	}
 	
+	@Test
+	public void testDeleteResourceConditional() throws IOException {
+		String methodName = "testDeleteResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
+		response = ourHttpClient.execute(delete);
+		try {
+			assertEquals(204, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+		
+		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		response = ourHttpClient.execute(read);
+		try {
+			ourLog.info(response.toString());
+			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+
+	}
+
 	/**
 	 * Test for issue #60
 	 */
