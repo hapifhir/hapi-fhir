@@ -162,7 +162,7 @@ public class BinaryTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_ATOM_XML + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
+		assertEquals(Constants.CT_FHIR_XML + "; charset=UTF-8", status.getFirstHeader("content-type").getValue());
 
 		ourLog.info(responseContent);
 

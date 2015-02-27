@@ -34,8 +34,10 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.rest.server.Dstu1BundleFactory;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class FhirDstu2 implements IFhirVersion {
@@ -97,6 +99,12 @@ public class FhirDstu2 implements IFhirVersion {
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new ca.uhn.fhir.model.dstu2.composite.CodingDt();
+	}
+
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		throw new UnsupportedOperationException();
 	}
 
 

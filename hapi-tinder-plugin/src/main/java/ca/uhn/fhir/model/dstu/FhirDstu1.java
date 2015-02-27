@@ -75,6 +75,7 @@ import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class FhirDstu1 implements IFhirVersion {
@@ -384,4 +385,10 @@ public class FhirDstu1 implements IFhirVersion {
 		return new ca.uhn.fhir.model.dstu.composite.CodingDt();
 	}
 
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		throw new UnsupportedOperationException();
+	}
+
+	
 }

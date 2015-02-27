@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 
 
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.model.dstu.valueset.ConditionStatusEnum;
 import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
@@ -197,7 +200,10 @@ public class ContainedResourceEncodingTest {
         
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
-		Bundle bundle = RestfulServerUtils.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0, null);
+		
+		IVersionSpecificBundleFactory factory = FhirVersionEnum.DSTU1.getVersionImplementation().newBundleFactory();
+		factory.initializeBundleFromResourceList(ctx, "", list, "http://foo", "http://foo", 2, null);
+		Bundle bundle = factory.getDstu1Bundle();
         
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
         String xml = parser.encodeBundleToString(bundle);
@@ -236,8 +242,11 @@ public class ContainedResourceEncodingTest {
         
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
-		Bundle bundle = RestfulServerUtils.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0, null);
-        
+
+		IVersionSpecificBundleFactory factory = FhirVersionEnum.DSTU1.getVersionImplementation().newBundleFactory();
+		factory.initializeBundleFromResourceList(ctx, "", list, "http://foo", "http://foo", 2, null);
+		Bundle bundle = factory.getDstu1Bundle();
+
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
         String xml = parser.encodeBundleToString(bundle);
         Assert.assertTrue(xml.contains("Mueller"));

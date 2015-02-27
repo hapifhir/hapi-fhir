@@ -85,6 +85,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
@@ -244,12 +245,12 @@ public class XmlParser extends BaseParser implements IParser {
 		writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
 		writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
 
-		writeAtomLink(eventWriter, "self", theBundle.getLinkSelf());
-		writeAtomLink(eventWriter, "first", theBundle.getLinkFirst());
-		writeAtomLink(eventWriter, "previous", theBundle.getLinkPrevious());
-		writeAtomLink(eventWriter, "next", theBundle.getLinkNext());
-		writeAtomLink(eventWriter, "last", theBundle.getLinkLast());
-		writeAtomLink(eventWriter, "fhir-base", theBundle.getLinkBase());
+		writeAtomLink(eventWriter, Constants.LINK_SELF, theBundle.getLinkSelf());
+		writeAtomLink(eventWriter, Constants.LINK_FIRST, theBundle.getLinkFirst());
+		writeAtomLink(eventWriter, Constants.LINK_PREVIOUS, theBundle.getLinkPrevious());
+		writeAtomLink(eventWriter, Constants.LINK_NEXT, theBundle.getLinkNext());
+		writeAtomLink(eventWriter, Constants.LINK_LAST, theBundle.getLinkLast());
+		writeAtomLink(eventWriter, Constants.LINK_FHIR_BASE, theBundle.getLinkBase());
 
 		if (theBundle.getTotalResults().getValue() != null) {
 			eventWriter.writeStartElement("os", "totalResults", OPENSEARCH_NS);

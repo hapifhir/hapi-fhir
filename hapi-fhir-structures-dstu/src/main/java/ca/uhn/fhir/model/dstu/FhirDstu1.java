@@ -75,7 +75,9 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Dstu1BundleFactory;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
@@ -382,6 +384,11 @@ public class FhirDstu1 implements IFhirVersion {
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new CodingDt();
+	}
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		return new Dstu1BundleFactory();
 	}
 
 

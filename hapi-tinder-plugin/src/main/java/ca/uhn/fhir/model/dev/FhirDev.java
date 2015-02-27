@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class FhirDev implements IFhirVersion {
@@ -115,5 +116,9 @@ public class FhirDev implements IFhirVersion {
 		return new CodingDt();
 	}
 
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		throw new UnsupportedOperationException();
+	}
 
 }

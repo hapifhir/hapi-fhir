@@ -1259,8 +1259,10 @@ class ParserState<T> {
 				push(new BundleLinkState(myInstance));
 			} else if ("entry".equals(theLocalPart)) {
 				push(new BundleEntryState(myInstance, myResourceType));
+			} else if ("text".equals(theLocalPart)) {
+				push(new SwallowChildrenWholeState(getPreResourceState()));
 			} else {
-				throw new DataFormatException("Unxpected element '" + theLocalPart + " in element 'Bundle'");
+				throw new DataFormatException("Unxpected element '" + theLocalPart + "' in element 'Bundle'");
 			}
 
 			// if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {

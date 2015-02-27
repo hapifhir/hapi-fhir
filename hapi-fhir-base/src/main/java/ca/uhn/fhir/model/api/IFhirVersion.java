@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public interface IFhirVersion {
@@ -52,5 +53,6 @@ public interface IFhirVersion {
 
 	BaseCodingDt newCodingDt();
 
+	IVersionSpecificBundleFactory newBundleFactory();
 
 }

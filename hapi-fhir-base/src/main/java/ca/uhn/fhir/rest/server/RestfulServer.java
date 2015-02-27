@@ -51,6 +51,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -79,7 +80,7 @@ public class RestfulServer extends HttpServlet {
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
-	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
@@ -447,20 +448,34 @@ public class RestfulServer extends HttpServlet {
 		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		Bundle bundle = RestfulServerUtils.createBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint,
-				start, count, thePagingAction, null);
+		IVersionSpecificBundleFactory bundleFactory = myFhirContext.getVersion().newBundleFactory();
+		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
+				null);
 
-		for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
-			if (!continueProcessing) {
-				ourLog.debug("Interceptor {} returned false, not continuing processing");
-				return;
+		Bundle bundle = bundleFactory.getDstu1Bundle();
+		if (bundle != null) {
+			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = getInterceptors().get(i);
+				boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
 			}
+			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
+		} else {
+			IBaseResource resBundle = bundleFactory.getResourceBundle();
+			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = getInterceptors().get(i);
+				boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+				if (!continueProcessing) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					return;
+				}
+			}
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK,
+					theRequest.isRespondGzip(), theRequest.getFhirServerBase());
 		}
-
-		RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
-
 	}
 
 	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
@@ -816,9 +831,9 @@ public class RestfulServer extends HttpServlet {
 	/**
 	 * This method may be overridden by subclasses to do perform initialization that needs to be performed prior to the server being used.
 	 * 
-	 * @throws ServletException If the initialization failed. Note that you should consider throwing
-	 * {@link UnavailableException} (which extends {@link ServletException}), as this is a flag
-	 * to the servlet container that the servlet is not usable.
+	 * @throws ServletException
+	 *             If the initialization failed. Note that you should consider throwing {@link UnavailableException} (which extends {@link ServletException}), as this is a flag to the servlet
+	 *             container that the servlet is not usable.
 	 */
 	protected void initialize() throws ServletException {
 		// nothing by default

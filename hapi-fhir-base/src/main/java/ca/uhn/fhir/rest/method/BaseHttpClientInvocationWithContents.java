@@ -35,6 +35,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -47,7 +48,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
@@ -168,7 +169,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myParams = theParams;
 		myBundleType = null;
 	}
-	
+
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder url = new StringBuilder();
@@ -235,9 +236,17 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeBundleToString(myBundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myResources != null) {
-				Bundle bundle = RestfulServerUtils.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
-				contents = parser.encodeBundleToString(bundle);
-				contentType = encoding.getBundleContentType();
+				IVersionSpecificBundleFactory bundleFactory = myContext.getVersion().newBundleFactory();
+				bundleFactory.initializeBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
+				Bundle bundle = bundleFactory.getDstu1Bundle();
+				if (bundle != null) {
+					contents = parser.encodeBundleToString(bundle);
+					contentType = encoding.getBundleContentType();
+				} else {
+					IBaseResource bundleRes = bundleFactory.getResourceBundle();
+					contents = parser.encodeResourceToString(bundleRes);
+					contentType = encoding.getResourceContentType();
+				}
 			} else if (myContents != null) {
 				contents = myContents;
 				if (myContentsIsBundle) {

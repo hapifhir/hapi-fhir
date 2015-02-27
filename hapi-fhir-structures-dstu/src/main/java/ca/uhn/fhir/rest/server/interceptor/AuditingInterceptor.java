@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -156,7 +157,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	 * Intercept the outgoing response to perform auditing of the request data if the resource is auditable.
 	 */
 	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException {
 		if(myClientParamsOptional && myDataStore == null){
 			//auditing is not required or configured, so do nothing here
@@ -180,7 +181,7 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			
 			byte[] query = getQueryFromRequestDetails(theRequestDetails);
 			SecurityEventObjectLifecycleEnum lifecycle = mapResourceTypeToSecurityLifecycle(theRequestDetails.getResourceOperationType());
-			ObjectElement auditableObject = getObjectElement(theResponseObject, lifecycle , query);
+			ObjectElement auditableObject = getObjectElement((IResource) theResponseObject, lifecycle , query);
 			if(auditableObject == null){
 				log.debug("No auditable resources to audit");
 				return true; 

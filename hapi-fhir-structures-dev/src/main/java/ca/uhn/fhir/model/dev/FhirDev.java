@@ -37,7 +37,9 @@ import ca.uhn.fhir.model.dev.composite.ContainedDt;
 import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Dstu1BundleFactory;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
@@ -107,6 +109,11 @@ public class FhirDev implements IFhirVersion {
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new CodingDt();
+	}
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		return new Dstu1BundleFactory();
 	}
 
 }

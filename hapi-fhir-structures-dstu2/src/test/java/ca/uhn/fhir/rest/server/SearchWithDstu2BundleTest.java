@@ -35,13 +35,14 @@ public class SearchWithDstu2BundleTest {
 	@Test
 	public void testSearch() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=xml&_pretty=true");
-//		HttpResponse status = ourClient.execute(httpGet);
-//		String responseContent = IOUtils.toString(status.getEntity().getContent());
-//		IOUtils.closeQuietly(status.getEntity().getContent());
-//
-//		assertEquals(200, status.getStatusLine().getStatusCode());
-//
-//		ourLog.info(responseContent);
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		ourLog.info(responseContent);
+		
 	}
 
 
@@ -68,7 +69,7 @@ public class SearchWithDstu2BundleTest {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
