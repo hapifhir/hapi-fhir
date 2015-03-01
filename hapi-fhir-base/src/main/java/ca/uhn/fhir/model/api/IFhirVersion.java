@@ -25,6 +25,7 @@ import java.io.InputStream;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -53,6 +54,6 @@ public interface IFhirVersion {
 
 	BaseCodingDt newCodingDt();
 
-	IVersionSpecificBundleFactory newBundleFactory();
+	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
 
 }

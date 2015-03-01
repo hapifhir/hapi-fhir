@@ -285,6 +285,7 @@ public class ResourceProviderDstu2Test {
 				.forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2","testSearchWithInclude02"))
 				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.prettyPrint()
 				.execute();
 		//@formatter:on
 		
@@ -298,7 +299,7 @@ public class ResourceProviderDstu2Test {
 	}
 
 	
-//	@Test TODO-reenable
+	@Test
 	public void testCountParam() throws Exception {
 		// NB this does not get used- The paging provider has its own limits built in
 		ourDaoConfig.setHardSearchLimit(100);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
@@ -42,7 +43,19 @@ public class SearchWithDstu2BundleTest {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ourLog.info(responseContent);
-		
+
+		//@formatter:off
+		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+				"<type value=\"searchset\"/>", 
+				"<base value=\"http://localhost:" + ourPort + "\"/>" , 
+				"<link>" ,
+				"<relation value=\"self\"/>", 
+				"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>", 
+				"</link>" ,
+				"<entry>" , 
+				"<resource>" , 
+				"<Patient xmlns=\"http://hl7.org/fhir\">"));
+		// @formatter:off
 	}
 
 

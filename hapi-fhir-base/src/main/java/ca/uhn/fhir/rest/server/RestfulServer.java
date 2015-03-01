@@ -448,7 +448,7 @@ public class RestfulServer extends HttpServlet {
 		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		IVersionSpecificBundleFactory bundleFactory = myFhirContext.getVersion().newBundleFactory();
+		IVersionSpecificBundleFactory bundleFactory = myFhirContext.newBundleFactory();
 		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
 				null);
 

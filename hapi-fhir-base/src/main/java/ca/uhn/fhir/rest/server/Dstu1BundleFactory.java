@@ -28,10 +28,15 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu1BundleFactory.class);
 	private Bundle myBundle;
+	private FhirContext myContext;
+	
+	public Dstu1BundleFactory(FhirContext theContext) {
+		myContext = theContext;
+	}
 	
 	
 	@Override
-	public void addResourcesToBundle(FhirContext theContext, List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase) {
+	public void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase) {
 		if (myBundle == null) {
 			myBundle = new Bundle();
 		}
@@ -54,8 +59,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 	
-			if (theContext.getNarrativeGenerator() != null) {
-				String title = theContext.getNarrativeGenerator().generateTitle(next);
+			if (myContext.getNarrativeGenerator() != null) {
+				String title = myContext.getNarrativeGenerator().generateTitle(next);
 				ourLog.trace("Narrative generator created title: {}", title);
 				if (StringUtils.isNotBlank(title)) {
 					ResourceMetadataKeyEnum.TITLE.put(next, title);
@@ -64,7 +69,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				ourLog.trace("No narrative generator specified");
 			}
 	
-			List<BaseResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 	
@@ -79,7 +84,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
-								String resName = theContext.getResourceDefinition(nextRes).getName();
+								String resName = myContext.getResourceDefinition(nextRes).getName();
 								id = id.withResourceType(resName);
 							}
 	
@@ -95,7 +100,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<BaseResourceReferenceDt>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
+					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
 					references.addAll(newReferences);
 				}
 	
@@ -103,7 +108,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 			} while (references.isEmpty() == false);
 	
-			myBundle.addResource(next, theContext, theServerBase);
+			myBundle.addResource(next, myContext, theServerBase);
 	
 		}
 	
@@ -111,8 +116,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		 * Actually add the resources to the bundle
 		 */
 		for (IResource next : includedResources) {
-			BundleEntry entry = myBundle.addResource(next, theContext, theServerBase);
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			BundleEntry entry = myBundle.addResource(next, myContext, theServerBase);
+			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				if (entry.getSearchMode().isEmpty()) {
 					entry.getSearchMode().setValueAsEnum(BundleEntrySearchModeEnum.INCLUDE);
 				}
@@ -170,7 +175,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 	
-		addResourcesToBundle(theServer.getFhirContext(), resourceList, theBundleType, theServerBase);
+		addResourcesToBundle(resourceList, theBundleType, theServerBase);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
 
 		myBundle.setPublished(theResult.getPublished());
@@ -193,7 +198,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 	
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType) {
 		if (myBundle.getAuthorName().isEmpty()) {
 			myBundle.getAuthorName().setValue(theAuthor);
 		}
@@ -218,7 +223,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			myBundle.getType().setValueAsString(theBundleType.getCode());
 		}
 
-		if (myBundle.getTotalResults().isEmpty()) {
+		if (myBundle.getTotalResults().isEmpty() && theTotalResults != null) {
 			myBundle.getTotalResults().setValue(theTotalResults);
 		}
 	}
@@ -234,7 +239,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(FhirContext theContext, String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 		
 		myBundle.getAuthorName().setValue(theAuthor);
@@ -262,8 +267,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 	
-			if (theContext.getNarrativeGenerator() != null) {
-				String title = theContext.getNarrativeGenerator().generateTitle(next);
+			if (myContext.getNarrativeGenerator() != null) {
+				String title = myContext.getNarrativeGenerator().generateTitle(next);
 				ourLog.trace("Narrative generator created title: {}", title);
 				if (StringUtils.isNotBlank(title)) {
 					ResourceMetadataKeyEnum.TITLE.put(next, title);
@@ -272,7 +277,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				ourLog.trace("No narrative generator specified");
 			}
 	
-			List<BaseResourceReferenceDt> references = theContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 	
@@ -287,7 +292,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 							IdDt id = nextRes.getId();
 							if (id.hasResourceType() == false) {
-								String resName = theContext.getResourceDefinition(nextRes).getName();
+								String resName = myContext.getResourceDefinition(nextRes).getName();
 								id = id.withResourceType(resName);
 							}
 	
@@ -303,7 +308,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				// Linked resources may themselves have linked resources
 				references = new ArrayList<BaseResourceReferenceDt>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = theContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
+					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
 					references.addAll(newReferences);
 				}
 	
@@ -311,7 +316,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 			} while (references.isEmpty() == false);
 	
-			myBundle.addResource(next, theContext, theServerBase);
+			myBundle.addResource(next, myContext, theServerBase);
 	
 		}
 	
@@ -319,8 +324,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		 * Actually add the resources to the bundle
 		 */
 		for (IResource next : includedResources) {
-			BundleEntry entry = myBundle.addResource(next, theContext, theServerBase);
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			BundleEntry entry = myBundle.addResource(next, myContext, theServerBase);
+			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				if (entry.getSearchMode().isEmpty()) {
 					entry.getSearchMode().setValueAsEnum(BundleEntrySearchModeEnum.INCLUDE);
 				}
@@ -328,6 +333,17 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		}
 	
 		myBundle.getTotalResults().setValue(theTotalResults);
+	}
+
+	@Override
+	public void initializeWithBundleResource(IResource theResource) {
+		throw new UnsupportedOperationException("DSTU1 server doesn't support resource style bundles");
+	}
+
+
+	@Override
+	public List<IResource> toListOfResources() {
+		return myBundle.toListOfResources();
 	}
 
 }

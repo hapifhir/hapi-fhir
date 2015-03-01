@@ -41,6 +41,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
@@ -386,7 +387,7 @@ public class FhirDstu1 implements IFhirVersion {
 	}
 
 	@Override
-	public IVersionSpecificBundleFactory newBundleFactory() {
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		throw new UnsupportedOperationException();
 	}
 

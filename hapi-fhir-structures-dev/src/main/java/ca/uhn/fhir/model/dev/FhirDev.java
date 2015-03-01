@@ -25,6 +25,7 @@ import java.io.InputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -112,8 +113,8 @@ public class FhirDev implements IFhirVersion {
 	}
 
 	@Override
-	public IVersionSpecificBundleFactory newBundleFactory() {
-		return new Dstu1BundleFactory();
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		return new Dstu1BundleFactory(theContext);
 	}
 
 }

@@ -1,13 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +38,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
@@ -113,8 +107,8 @@ public class RestfulServerMethodTest {
 		
 		p.getManagingOrganization().setResource(o);
 		
-		IVersionSpecificBundleFactory factory = FhirVersionEnum.DSTU1.getVersionImplementation().newBundleFactory();
-		factory.initializeBundleFromResourceList(ourCtx, "", resources, "http://foo", "http://foo", 2, null);
+		IVersionSpecificBundleFactory factory = ourCtx.newBundleFactory();
+		factory.initializeBundleFromResourceList("", resources, "http://foo", "http://foo", 2, null);
 		assertEquals(2, factory.getDstu1Bundle().getEntries().size());
 	}
 	

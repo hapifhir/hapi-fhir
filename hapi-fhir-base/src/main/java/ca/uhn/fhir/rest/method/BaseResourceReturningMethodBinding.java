@@ -259,12 +259,22 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				} else {
 					resource = (IResource) resultObj;
 				}
+				
+				/*
+				 * We assume that the bundle we got back from the handling method
+				 * may not have everything populated (e.g. self links, bundle type,
+				 * etc) so we do that here.
+				 */
+				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+				bundleFactory.initializeWithBundleResource(resource);
+				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), count, getResponseBundleType());
+				
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
 
 				IBundleProvider result = (IBundleProvider) resultObj;
-				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().getVersion().newBundleFactory();
+				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null,
 						getResponseBundleType());
 				Bundle bundle = bundleFactory.getDstu1Bundle();

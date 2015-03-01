@@ -12,16 +12,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Composition;
@@ -37,7 +31,6 @@ import ca.uhn.fhir.model.dstu.valueset.NameUseEnum;
 import ca.uhn.fhir.model.dstu.valueset.PractitionerRoleEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 
 /**
  * Initially contributed by Alexander Kley for bug #29
@@ -201,8 +194,8 @@ public class ContainedResourceEncodingTest {
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
 		
-		IVersionSpecificBundleFactory factory = FhirVersionEnum.DSTU1.getVersionImplementation().newBundleFactory();
-		factory.initializeBundleFromResourceList(ctx, "", list, "http://foo", "http://foo", 2, null);
+		IVersionSpecificBundleFactory factory = ctx.newBundleFactory();
+		factory.initializeBundleFromResourceList("", list, "http://foo", "http://foo", 2, null);
 		Bundle bundle = factory.getDstu1Bundle();
         
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
@@ -243,8 +236,8 @@ public class ContainedResourceEncodingTest {
         List<IResource> list = new ArrayList<IResource>();
 		list.add(dr);
 
-		IVersionSpecificBundleFactory factory = FhirVersionEnum.DSTU1.getVersionImplementation().newBundleFactory();
-		factory.initializeBundleFromResourceList(ctx, "", list, "http://foo", "http://foo", 2, null);
+		IVersionSpecificBundleFactory factory = ctx.newBundleFactory();
+		factory.initializeBundleFromResourceList("", list, "http://foo", "http://foo", 2, null);
 		Bundle bundle = factory.getDstu1Bundle();
 
         IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);

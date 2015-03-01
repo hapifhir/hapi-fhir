@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.Profile;
 import org.hl7.fhir.instance.model.Reference;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -107,7 +108,7 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	}
 
 	@Override
-	public IVersionSpecificBundleFactory newBundleFactory() {
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		throw new UnsupportedOperationException();
 	}
 
