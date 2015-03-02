@@ -379,6 +379,9 @@
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
+								<copy todir="target/site/xref-base">
+									<fileset dir="hapi-fhir-base/target/site/xref"/>
+								</copy>
 							</target>
 						</configuration>
 					</execution>
@@ -390,6 +393,40 @@
 						</goals>
 						<configuration>
 							<target>
+								<echo>Adding Fontawesome</echo>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
+									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
+									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
+									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
+									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
+									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
+								</replace>
+								<echo>Changing Breadcrumbs</echo>
+								<replace dir="target/site" summary="true">
+									<include name="doc_*.html"/>
+									<replacetoken><![CDATA[<li class="divider">/</li>]]></replacetoken>
+									<replacevalue><![CDATA[<li  class="divider">/</li>
+			<li><a href="docindex.html" title="Documentation">Documentation</a></li>
+			<li  class="divider">/</li>]]></replacevalue>
+								</replace>
 								<echo>Adding Syntax Highlighter</echo>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"></include>

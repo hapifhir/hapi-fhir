@@ -49,6 +49,8 @@
 			-->
 			<link rel="shortcut icon" href="https://github.com/jamesagnew/hapi-fhir/images/favicon.png" />
 			<link rel="stylesheet" type="text/css" href="hapi.css" />
+			
+			<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
 		</head>
 		
 		<breadcrumbs>
@@ -67,15 +69,16 @@
 			<item name="Changelog" href="./changes-report.html" />
 			<item name="License" href="license.html" />
 		</menu>
-		
-		<menu name="Test Server" inherit="bottom">
-			<item name="Test Server" href="http://fhirtest.uhn.ca"/>
+
+		<menu name="Test Servers">
+			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
+			<item name="Vagrant Private Test Server" href="./doc_vagrant.html"/>
 		</menu>
 		
 		<menu name="Documentation" inherit="top" >
-			<item name="Introduction" href="./doc_intro.html">
-				<item name="DSTU2 Support (new)" href="./doc_dstu2.html" />			
-			</item>
+			<item name="Documentation Index" href="./docindex.html"/>
+			<item name="Introduction" href="./doc_intro.html"/>
+			<item name="Note on DSTU2 Support / FHIR Versions" href="./doc_dstu2.html" />
 			<item name="The Data Model" href="./doc_fhirobjects.html">
 				<item name="Working with Resources" href="./doc_fhirobjects.html" />
 				<item name="Resource References" href="./doc_resource_references.html" />
@@ -99,19 +102,25 @@
 			<item name="ETags" href="./doc_rest_etag.html" />
 			<item name="Tinder Plugin" href="./doc_tinder.html" />
 			<item name="JPA/Database Server" href="./doc_jpa.html" />
-		</menu>
-
-		<menu name="JavaDocs" inherit="top">
-			<item name="Core API" href="./apidocs/index.html">
-				<item name="Source Code" href="https://github.com/jamesagnew/hapi-fhir" />
+			<item name="JavaDocs" href="./apidocs/index.html">
+				<item name="Core API" href="./apidocs/index.html" />
+				<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
+				<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
+				<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 			</item>
+		</menu>
+	
+		<!-- JavaDoc (with no "s") is for the bottom menu -->
+		<menu name="JavaDoc" inherit="top">
+			<item name="Core API" href="./apidocs/index.html" />
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
-			<item name="JPA Server API" href="./apidocs-jpaserver/index.html">
-				<item name="Source Code" href="./xref-jpaserver/index.html" />
-			</item>
 		</menu>
-
+		<menu name="JXR" inherit="top">
+			<item name="Core" href="./xref-base/index.html" />
+			<item name="JPA Server" href="./xref-jpaserver/index.html" />
+		</menu>
+		
 		<menu name="Get Help" inherit="top">
 			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
 			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
@@ -163,18 +172,30 @@
 				<doc_cors>
 					<shortTitle>CORS</shortTitle>
 				</doc_cors>
+				<docindex>
+					<toc>false</toc>
+				</docindex>
+				
 			</pages>
 			<theme>bootswatch-united</theme>
 			<toc>sidebar</toc>
-			<topNav>Test Server|Documentation|JavaDocs|Get Help</topNav>
+			<topNav>Documentation|Get Help|Test Servers</topNav>
 			<bottomNav maxSpan="9" >
 				<column>HAPI FHIR|Test Servers</column>
-				<column>Get Help|Reports</column>
-				<column>Maven Reports</column>
+				<column>JavaDoc|JXR</column>
+				<column>Get Help|Maven Reports</column>
 			</bottomNav>
 			<!-- 
 			<highlightJs>true</highlightJs>
 			-->
+			<bottomDescription>
+			<![CDATA[
+			HAPI FHIR is a Java implementation of the HL7 FHIR
+			(Fast Healthcare Interoperable Resources) specification.
+			This project is open source (licensed under the Apache Software
+			License 2.0) and 100% free to use.
+			]]>
+			</bottomDescription>
 		</reflowSkin>
 		
 		<fluidoSkin>

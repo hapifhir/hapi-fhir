@@ -2,17 +2,14 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>HAPI FHIR - Free/Open Source Implementation of HL7 FHIR for Java</title>
+		<title>Introduction</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
 	<body>
 
 		<!-- The body of the document contains a number of sections -->
-		<section name="Developing using HAPI FHIR">
-			
-			<macro name="toc">
-			</macro>
+		<section name="Introduction to HAPI FHIR">
 			
 			<p>
 				The HAPI FHIR library is an implementation of the 
@@ -61,6 +58,11 @@
 					latest version, but if you are looking to interact with an application which 
 					already exists, you will probably want to implement the same version implemented
 					by that application.
+				</p>
+				<p>
+					See the
+					<a href="doc_dstu2.html">note on DSTU2 support</a>
+					for more information on supporting multiple versions of FHIR.
 				</p>
 			
 			</subsection>

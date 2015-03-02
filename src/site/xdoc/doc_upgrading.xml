@@ -8,13 +8,6 @@
 
 	<body>
 
-		<section name="Upgrading to HAPI FHIR 0.8 - DRAFT">
-			
-			<macro name="toc">
-			</macro>
-			
-		</section>
-
 		<section name="Upgrading to HAPI FHIR 0.8">
 
 			

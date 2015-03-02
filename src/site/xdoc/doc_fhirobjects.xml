@@ -11,9 +11,6 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="Working with Resources">
 			
-			<macro name="toc">
-			</macro>
-			
 			<p>
 				Every resource type defined by FHIR has a corresponding 
 				class, which contains a number of getters and setters for 

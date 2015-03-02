@@ -10,9 +10,6 @@
 
 		<section name="Logging">
 
-			<macro name="toc">
-			</macro>
-			
 			<p>
 				Java has an abundance of logging frameworks, none of which are perfect. Many libraries
 				depend on one or more of these frameworks but also have dependencies who depend on a

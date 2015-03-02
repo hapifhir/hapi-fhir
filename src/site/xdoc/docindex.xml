@@ -2,7 +2,7 @@
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>Documentation - HAPI FHIR</title>
+		<title>Documentation</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -17,7 +17,7 @@
 
 			<ul>
 				<li><a href="./doc_intro.html">Introduction</a></li>
-				<li><a href="./doc_dstu2.html">DSTU2 Support (new)</a></li>
+				<li><a href="./doc_dstu2.html">Note on DSTU2 Support / FHIR Versions</a></li>
 			</ul>
 			
 			<h4>The Data Model</h4>
@@ -51,7 +51,20 @@
 			<li name="JPA/Database Server" href="./doc_jpa.html" />
 			</ul>
  -->
-
+ 			<h4>JavaDocs</h4>
+ 			<ul>
+				<li><a href="./apidocs/index.html">Core API</a></li>
+				<li><a href="./apidocs-dstu/index.html">Model API (DSTU1)</a></li>
+				<li><a href="./apidocs-dstu2/index.html" >Model API (DSTU2)</a></li>
+				<li><a href="./apidocs-jpaserver/index.html">JPA Server API</a></li>
+			</ul>
+			
+			<h4>Source Cross Reference</h4>
+			<ul>
+				<li><a href="./xref-base/index.html">Core</a></li>
+				<li><a href="./xref-jpaserver/index.html">JPA Server</a></li>
+			</ul>
+ 			
 		</section>
 		
 	</body>

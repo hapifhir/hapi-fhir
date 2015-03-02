@@ -115,7 +115,7 @@
 					<tr>
 						<td>
 							<a href="#type_search">Type - Search</a>
-							<macro name="toc">
+							<macro name="toc" >
 								<param name="section" value="8" />
 								<param name="fromDepth" value="2" />
 							</macro>
