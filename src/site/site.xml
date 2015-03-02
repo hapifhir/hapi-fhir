@@ -70,11 +70,6 @@
 			<item name="License" href="license.html" />
 		</menu>
 
-		<menu name="Test Servers">
-			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
-			<item name="Vagrant Private Test Server" href="./doc_vagrant.html"/>
-		</menu>
-		
 		<menu name="Documentation" inherit="top" >
 			<item name="Documentation Index" href="./docindex.html"/>
 			<item name="Introduction" href="./doc_intro.html"/>
@@ -110,8 +105,8 @@
 			</item>
 		</menu>
 	
-		<!-- JavaDoc (with no "s") is for the bottom menu -->
-		<menu name="JavaDoc" inherit="top">
+		<!-- Javadocs/JXR is for the bottom menu -->
+		<menu name="JavaDocs" inherit="top">
 			<item name="Core API" href="./apidocs/index.html" />
 			<item name="Model API (DSTU1)" href="./apidocs-dstu/index.html" />
 			<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
@@ -126,8 +121,14 @@
 			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 		</menu>
 
+		<menu name="Test Servers">
+			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
+			<item name="Vagrant Private Test Server" href="./doc_vagrant.html"/>
+		</menu>
+		
+		
 		<menu name="Maven Reports" inherit="bottom">
-			<item name="Developers" href="team-list.html" />
+			<item name="Project Developers" href="team-list.html" />
 			<item name="Unit Test Report" href="surefire-report.html" />
 			<item name="FindBugs" href="findbugs.html" />
 		</menu>
@@ -175,27 +176,38 @@
 				<docindex>
 					<toc>false</toc>
 				</docindex>
-				
+				<docindex>
+					<sections>
+					<columns>2</columns>
+					<body />
+					<sidebar />
+					</sections> 
+				</docindex>
 			</pages>
 			<theme>bootswatch-united</theme>
 			<toc>sidebar</toc>
 			<topNav>Documentation|Get Help|Test Servers</topNav>
 			<bottomNav maxSpan="9" >
 				<column>HAPI FHIR|Test Servers</column>
-				<column>JavaDoc|JXR</column>
+				<column>JavaDocs|JXR</column>
 				<column>Get Help|Maven Reports</column>
 			</bottomNav>
 			<!-- 
 			<highlightJs>true</highlightJs>
 			-->
-			<bottomDescription>
-			<![CDATA[
-			HAPI FHIR is a Java implementation of the HL7 FHIR
-			(Fast Healthcare Interoperable Resources) specification.
-			This project is open source (licensed under the Apache Software
-			License 2.0) and 100% free to use.
-			]]>
-			</bottomDescription>
+			<bottomDescription><![CDATA[
+				HAPI FHIR is a Java implementation of the HL7 FHIR
+				(Fast Healthcare Interoperable Resources) specification.
+				This project is open source (licensed under the Apache Software
+				License 2.0) and 100% free to use.<br/><br/>
+				<a href="https://github.com/jamesagnew/hapi-fhir"><img src="./images/github-logo-mini.png" alt="Hosted on GitHub" border="0"/></a>
+			]]></bottomDescription>
+			<brand>
+				<name><![CDATA[
+					<span class="color-highlight">HAPI</span> FHIR
+				]]></name>
+				<href>http://jamesagnew.github.io/hapi-fhir/</href>
+			</brand>
 		</reflowSkin>
 		
 		<fluidoSkin>
