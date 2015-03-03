@@ -16,8 +16,8 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>9084</WindowHeight>
-  <WindowWidth>20844</WindowWidth>
+  <WindowHeight>10848</WindowHeight>
+  <WindowWidth>23040</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
@@ -1373,7 +1373,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">in progress | achieved | sustaining | cancelled</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">in-progress | achieved | sustaining | cancelled</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Indicates whether the goal has been reached and is still considered relevant</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1381,7 +1381,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">.statusCode&#10;in progress = active (classCode = OBJ)&#10;achieved = complete&#10;sustaining = active (classCode=OBJC)&#10;cancelled = aborted</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">.statusCode&#10;in-progress = active (classCode = OBJ)&#10;achieved = complete&#10;sustaining = active (classCode=OBJC)&#10;cancelled = aborted</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">GOL-18-goal life cycle status</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1538,7 +1538,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">not started | scheduled | in progress | on hold | completed | cancelled</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">not-started | scheduled | in-progress | on-hold | completed | cancelled</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Identifies what progress is being made for the specific activity.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1547,7 +1547,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">Some aspects of Status can be inferred based on the resources linked in actionTaken.  Note that &quot;status&quot; is only as current as the plan was most recently updated.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">.statusCode&#10;not started = new&#10;scheduled = not started (and fulfillment relationship to appointent)&#10;in progress = active&#10;on hold = suspended&#10;completed = completed&#10;cancelled = aborted</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">.statusCode&#10;not-started = new&#10;scheduled = not-started (and fulfillment relationship to appointent)&#10;in-progress = active&#10;on-hold = suspended&#10;completed = completed&#10;cancelled = aborted</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ORC-5-order status?</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3786,7 +3786,6 @@
    <Value>&quot;*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData&quot;</Value>
    <ErrorHide/>
   </DataValidation>
-
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C3:R100C3</Range>
    <Type>List</Type>
@@ -5874,7 +5873,7 @@
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
   </Names>
-  <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="281.39999999999998"/>
@@ -5897,9 +5896,10 @@
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
         x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font> </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">IG Name</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s113"><Data ss:Type="String">cqf-careplan</Data><NamedCell
+    <Cell ss:StyleID="s113"><Data ss:Type="String">!cqf-careplan</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">cqf-careplan.xml</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -5907,6 +5907,7 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s115"><Data ss:Type="String">spreadsheet</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">cqf</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s116"/>
@@ -6164,7 +6165,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>33</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8037,7 +8038,7 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s138"><Data ss:Type="String">in progress</Data></Cell>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">in-progress</Data></Cell>
     <Cell ss:StyleID="s127"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s149"/>
@@ -9381,7 +9382,7 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s138"><Data ss:Type="String">not started</Data></Cell>
+    <Cell ss:StyleID="s138"><Data ss:Type="String">not-started</Data></Cell>
     <Cell ss:StyleID="s127"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s149"/>
@@ -9403,7 +9404,7 @@
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"><Data ss:Type="String">in progress</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">in-progress</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
@@ -9414,7 +9415,7 @@
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s140"><Data ss:Type="String">on hold</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">on-hold</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>

@@ -1,7 +1,19 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +50,6 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
@@ -58,7 +69,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -226,7 +236,7 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
-		o1.getName().addCoding().setSystem("foo").setCode("testChoiceParam01");
+		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
 		o1.setValue(new CodeableConceptDt("testChoiceParam01CCS", "testChoiceParam01CCV"));
 		IdDt id1 = ourObservationDao.create(o1).getId();
 
@@ -240,7 +250,7 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testChoiceParamDate() {
 		Observation o2 = new Observation();
-		o2.getName().addCoding().setSystem("foo").setCode("testChoiceParam02");
+		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParam02");
 		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01")).setEnd(new DateTimeDt("2001-01-03")));
 		IdDt id2 = ourObservationDao.create(o2).getId();
 
@@ -254,7 +264,7 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testChoiceParamQuantity() {
 		Observation o3 = new Observation();
-		o3.getName().addCoding().setSystem("foo").setCode("testChoiceParam03");
+		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATERTHAN, 123.0, "foo", "bar"));
 		IdDt id3 = ourObservationDao.create(o3).getId();
 
@@ -283,7 +293,7 @@ public class FhirResourceDaoTest {
 	public void testChoiceParamString() {
 
 		Observation o4 = new Observation();
-		o4.getName().addCoding().setSystem("foo").setCode("testChoiceParam04");
+		o4.getCode().addCoding().setSystem("foo").setCode("testChoiceParam04");
 		o4.setValue(new StringDt("testChoiceParam04Str"));
 		IdDt id4 = ourObservationDao.create(o4).getId();
 
@@ -680,7 +690,7 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testPersistSearchParamObservationString() {
 		Observation obs = new Observation();
-		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
+		obs.getCode().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
 		obs.setValue(new StringDt("AAAABBBB"));
 
 		ourObservationDao.create(obs);
@@ -696,7 +706,7 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testPersistSearchParamQuantity() {
 		Observation obs = new Observation();
-		obs.getName().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
+		obs.getCode().addCoding().setSystem("foo").setCode("testPersistSearchParamQuantity");
 		obs.setValue(new QuantityDt(111));
 
 		ourObservationDao.create(obs);
@@ -834,12 +844,12 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testSearchCompositeParam() {
 		Observation o1 = new Observation();
-		o1.getName().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
+		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
 		o1.setValue(new StringDt("testSearchCompositeParamS01"));
 		IdDt id1 = ourObservationDao.create(o1).getId();
 
 		Observation o2 = new Observation();
-		o2.getName().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
+		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
 		o2.setValue(new StringDt("testSearchCompositeParamS02"));
 		IdDt id2 = ourObservationDao.create(o2).getId();
 
@@ -847,7 +857,7 @@ public class FhirResourceDaoTest {
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
 			StringParam v1 = new StringParam("testSearchCompositeParamS01");
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
-			IBundleProvider result = ourObservationDao.search(Observation.SP_NAME_VALUE_STRING, val);
+			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_STRING, val);
 			assertEquals(1, result.size());
 			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
 		}
@@ -855,7 +865,7 @@ public class FhirResourceDaoTest {
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
 			StringParam v1 = new StringParam("testSearchCompositeParamS02");
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
-			IBundleProvider result = ourObservationDao.search(Observation.SP_NAME_VALUE_STRING, val);
+			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_STRING, val);
 			assertEquals(1, result.size());
 			assertEquals(id2.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
 		}
@@ -864,12 +874,12 @@ public class FhirResourceDaoTest {
 	@Test
 	public void testSearchCompositeParamDate() {
 		Observation o1 = new Observation();
-		o1.getName().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
+		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
 		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11")));
 		IdDt id1 = ourObservationDao.create(o1).getId().toUnqualifiedVersionless();
 
 		Observation o2 = new Observation();
-		o2.getName().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
+		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
 		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T12:12:12")));
 		IdDt id2 = ourObservationDao.create(o2).getId().toUnqualifiedVersionless();
 
@@ -877,7 +887,7 @@ public class FhirResourceDaoTest {
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
 			DateParam v1 = new DateParam("2001-01-01T11:11:11");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
-			IBundleProvider result = ourObservationDao.search(Observation.SP_NAME_VALUE_DATE, val);
+			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_DATE, val);
 			assertEquals(1, result.size());
 			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
 		}
@@ -886,7 +896,7 @@ public class FhirResourceDaoTest {
 			// TODO: this should also work with ">2001-01-01T15:12:12" since the two times only have a lower bound
 			DateParam v1 = new DateParam(">2001-01-01T10:12:12");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
-			IBundleProvider result = ourObservationDao.search(Observation.SP_NAME_VALUE_DATE, val);
+			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_DATE, val);
 			assertEquals(2, result.size());
 			assertThat(toUnqualifiedVersionlessIds(result), containsInAnyOrder(id1, id2));
 		}

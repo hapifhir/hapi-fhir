@@ -44,6 +44,9 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 #if ( ${className} == "Bundle" )
     , org.hl7.fhir.instance.model.api.IBaseBundle
 #end
+#if ( ${className}=="Binary" ) 
+    , ca.uhn.fhir.model.base.resource.Base${className}
+#end
     {
 
 #foreach ( $param in $searchParams )
@@ -98,5 +101,20 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
     public ca.uhn.fhir.context.FhirVersionEnum getStructureFhirVersionEnum() {
     	return ca.uhn.fhir.context.FhirVersionEnum.${versionEnumName};
     }
+
+#if ( ${className}=="Binary" ) 
+
+	@Override
+	public String getContentAsBase64() {
+		return getContentElement().getValueAsString();
+	}
+
+	@Override
+	public Binary setContentAsBase64(String theContent) {
+		getContentElement().setValueAsString(theContent);
+		return this;
+	}
+
+#end
 
 }

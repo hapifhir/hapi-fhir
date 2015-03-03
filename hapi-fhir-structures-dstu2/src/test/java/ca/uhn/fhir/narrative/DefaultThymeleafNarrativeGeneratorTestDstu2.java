@@ -32,9 +32,9 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
-public class DefaultThymeleafNarrativeGeneratorTest {
+public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 	private FhirContext myCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTestDstu2.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@Before
@@ -154,7 +154,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		value.getName().setText("Some & Diagnostic Report");
 		{
 			Observation obs = new Observation();
-			obs.getName().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
+			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
 			obs.setValue(new QuantityDt(null, 2.223, "mg/L"));
 			obs.addReferenceRange().setLow(new QuantityDt(2.20)).setHigh(new QuantityDt(2.99));
 			obs.setStatus(ObservationStatusEnum.FINAL);
@@ -170,7 +170,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		}
 		{
 			Observation obs = new Observation();
-			obs.setName(new CodeableConceptDt("AA", "BB"));
+			obs.setCode(new CodeableConceptDt("AA", "BB"));
 			value.addResult().setResource(obs);
 		}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.Assert.*;
+
 import java.util.Properties;
 
 import org.junit.Test;
@@ -7,10 +9,17 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
+import ca.uhn.fhir.model.dstu2.resource.Binary;
 
 public class ModelInstantiationTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelInstantiationTest.class);
+	
+	@Test
+	public void testBinaryIsBaseBinary() {
+		assertTrue(BaseBinary.class.isAssignableFrom(Binary.class));
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Test

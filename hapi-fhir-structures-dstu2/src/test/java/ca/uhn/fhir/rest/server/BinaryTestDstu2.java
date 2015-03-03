@@ -43,13 +43,13 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class BinaryTest {
+public class BinaryTestDstu2 {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = new FhirContext();
 	private static Binary ourLast;
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryTestDstu2.class);
 
 	private static int ourPort;
 

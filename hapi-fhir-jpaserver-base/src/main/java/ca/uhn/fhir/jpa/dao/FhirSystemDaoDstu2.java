@@ -224,7 +224,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 						}
 						EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
 						resp.setLocation(found.getId().toUnqualified().getValue());
-						resp.addEtag(found.getId().getVersionIdPart());
+						resp.setEtag(found.getId().getVersionIdPart());
 					} else if (parts.getParams() != null) {
 						RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
 						SearchParameterMap params = translateMatchUrl(url, def);
@@ -473,7 +473,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			newEntry.getTransactionResponse().setStatus(Long.toString(Constants.STATUS_HTTP_200_OK));
 		}
 		newEntry.getTransactionResponse().setLocation(outcome.getId().toUnqualified().getValue());
-		newEntry.getTransactionResponse().addEtag().setValue(outcome.getId().getVersionIdPart());
+		newEntry.getTransactionResponse().setEtag(outcome.getId().getVersionIdPart());
 	}
 
 	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {

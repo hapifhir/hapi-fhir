@@ -1,17 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,22 +18,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.Location;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -69,7 +59,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -79,13 +69,13 @@ public class FhirSystemDaoDstu2Test {
         Entry respEntry = resp.getEntry().get(1);
         assertEquals(Constants.STATUS_HTTP_200_OK + "", respEntry.getTransactionResponse().getStatus());
         assertThat(respEntry.getTransactionResponse().getLocation(), endsWith("Patient/" + id.getIdPart() + "/_history/1"));
-        assertEquals("1", respEntry.getTransactionResponse().getEtag().get(0).getValue());
+        assertEquals("1", respEntry.getTransactionResponse().getEtag());
 
         respEntry = resp.getEntry().get(2);
         assertEquals(Constants.STATUS_HTTP_201_CREATED + "", respEntry.getTransactionResponse().getStatus());
         assertThat(respEntry.getTransactionResponse().getLocation(), containsString("Observation/"));
         assertThat(respEntry.getTransactionResponse().getLocation(), endsWith("/_history/1"));
-        assertEquals("1", respEntry.getTransactionResponse().getEtag().get(0).getValue());
+        assertEquals("1", respEntry.getTransactionResponse().getEtag());
 
         o = (Observation) ourObservationDao.read(new IdDt(respEntry.getTransactionResponse().getLocationElement()));
         assertEquals(id.toVersionless(), o.getSubject().getReference());
@@ -160,7 +150,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -184,7 +174,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -197,13 +187,13 @@ public class FhirSystemDaoDstu2Test {
         assertThat(patientId, not(endsWith("Patient/" + methodName + "/_history/1")));
         assertThat(patientId, (endsWith("/_history/1")));
         assertThat(patientId, (containsString("Patient/")));
-        assertEquals("1", respEntry.getTransactionResponse().getEtag().get(0).getValue());
+        assertEquals("1", respEntry.getTransactionResponse().getEtag());
 
         respEntry = resp.getEntry().get(2);
         assertEquals(Constants.STATUS_HTTP_201_CREATED + "", respEntry.getTransactionResponse().getStatus());
         assertThat(respEntry.getTransactionResponse().getLocation(), containsString("Observation/"));
         assertThat(respEntry.getTransactionResponse().getLocation(), endsWith("/_history/1"));
-        assertEquals("1", respEntry.getTransactionResponse().getEtag().get(0).getValue());
+        assertEquals("1", respEntry.getTransactionResponse().getEtag());
 
         o = (Observation) ourObservationDao.read(new IdDt(respEntry.getTransactionResponse().getLocationElement()));
         assertEquals(new IdDt(patientId).toUnqualifiedVersionless(), o.getSubject().getReference());
@@ -419,7 +409,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -465,7 +455,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -493,7 +483,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference(id);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
@@ -536,7 +526,7 @@ public class FhirSystemDaoDstu2Test {
         request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient/" + id.getIdPart());
 
         Observation o = new Observation();
-        o.getName().setText("Some Observation");
+        o.getCode().setText("Some Observation");
         o.getSubject().setReference("Patient/" + methodName);
         request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 

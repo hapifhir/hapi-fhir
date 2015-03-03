@@ -35,9 +35,8 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
-import ca.uhn.fhir.model.dstu2.composite.CountDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.Profile;
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -57,7 +56,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
-		Profile retVal = new Profile();
+		StructureDefinition retVal = new StructureDefinition();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
 

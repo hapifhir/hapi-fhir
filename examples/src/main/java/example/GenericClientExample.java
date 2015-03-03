@@ -249,8 +249,8 @@ public class GenericClientExample {
          // START SNIPPET: searchComposite
          response = client.search()
                .forResource("Observation")
-               .where(Observation.NAME_VALUE_DATE
-                     .withLeft(Observation.NAME.exactly().code("FOO$BAR"))
+               .where(Observation.CODE_VALUE_DATE
+                     .withLeft(Observation.CODE.exactly().code("FOO$BAR"))
                      .withRight(Observation.VALUE_DATE.exactly().day("2001-01-01")))
                .execute();
          // END SNIPPET: searchComposite

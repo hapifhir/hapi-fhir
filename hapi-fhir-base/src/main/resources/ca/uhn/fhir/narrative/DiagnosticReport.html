@@ -50,9 +50,18 @@
 			<th:block th:each="result,rowStat : ${resource.result}">
 				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td>
-						<th:block th:if="${not result.resource.name.textElement.empty}" th:text="${result.resource.name.textElement.value}"/>
-						<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].displayElement.empty}" th:text="${result.resource.name.coding[0].display}"/>
-						<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].displayElement.empty}" th:text="'?'"/>
+						<th:block th:switch="${fhirVersion}">
+							<th:block th:case="'DSTU1'">
+								<th:block th:if="${not result.resource.name.textElement.empty}" th:text="${result.resource.name.textElement.value}"/>
+								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${not result.resource.name.coding[0].displayElement.empty}" th:text="${result.resource.name.coding[0].display}"/>
+								<th:block th:if="${result.resource.name.textElement.empty} and ${not #lists.isEmpty(result.resource.name.coding)} and ${not result.resource.name.coding[0].empty} and ${result.resource.name.coding[0].displayElement.empty}" th:text="'?'"/>
+							</th:block>
+							<th:block th:case="'*'">
+								<th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+								<th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+							</th:block>
+						</th:block>
 						<!--/*--> Hb <!--*/-->
 					</td>
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>
