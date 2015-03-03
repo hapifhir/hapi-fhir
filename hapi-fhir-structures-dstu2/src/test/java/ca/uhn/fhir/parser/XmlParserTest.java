@@ -1,8 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -10,6 +8,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
@@ -21,8 +21,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
@@ -47,6 +50,73 @@ public class XmlParserTest {
 		XMLUnit.setIgnoreWhitespace(true);
 	}
 
+	@Test
+	public void testEncodeAndParseSecurityLabels() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+		
+		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
+		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1").setValueSet(new ResourceReferenceDt("ValueSet1")));
+		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2").setValueSet(new ResourceReferenceDt("ValueSet2")));
+		
+		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
+
+		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+			"<meta>", 
+			"<security>", 
+			"<system value=\"SYSTEM1\"/>", 
+			"<version value=\"VERSION1\"/>", 
+			"<code value=\"CODE1\"/>", 
+			"<display value=\"DISPLAY1\"/>", 
+			"<primary value=\"true\"/>", 
+			"<valueSet>", 
+			"<reference value=\"ValueSet1\"/>", 
+			"</valueSet>", 
+			"</security>", 
+			"<security>", 
+			"<system value=\"SYSTEM2\"/>", 
+			"<version value=\"VERSION2\"/>", 
+			"<code value=\"CODE2\"/>", 
+			"<display value=\"DISPLAY2\"/>", 
+			"<primary value=\"false\"/>", 
+			"<valueSet>", 
+			"<reference value=\"ValueSet2\"/>", 
+			"</valueSet>", 
+			"</security>", 
+			"</meta>", 
+			"<name>", 
+			"<family value=\"FAMILY\"/>", 
+			"</name>", 
+			"</Patient>"));
+		//@formatter:on
+		
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
+		List<BaseCodingDt> gotLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(parsed);
+		
+		assertEquals(2,gotLabels.size());
+
+		CodingDt label = (CodingDt) gotLabels.get(0);
+		assertEquals("SYSTEM1", label.getSystem());
+		assertEquals("CODE1", label.getCode());
+		assertEquals("DISPLAY1", label.getDisplay());
+		assertEquals(true, label.getPrimary());
+		assertEquals("VERSION1", label.getVersion());
+		assertEquals("ValueSet1", label.getValueSet().getReference().getValue());
+
+		label = (CodingDt) gotLabels.get(1);
+		assertEquals("SYSTEM2", label.getSystem());
+		assertEquals("CODE2", label.getCode());
+		assertEquals("DISPLAY2", label.getDisplay());
+		assertEquals(false, label.getPrimary());
+		assertEquals("VERSION2", label.getVersion());
+		assertEquals("ValueSet2", label.getValueSet().getReference().getValue());
+	}
+
+	
 	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
@@ -287,7 +357,7 @@ public class XmlParserTest {
 		parsed = parser.parseResource(Composition.class, string);
 		assertEquals(2, parsed.getContained().getContainedResources().size());
 	}
-	
+
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -301,11 +371,11 @@ public class XmlParserTest {
 
 		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
 		patient.addUndeclaredExtension(parent);
-		ExtensionDt child1 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value1"));
+		ExtensionDt child1 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value1"));
 		parent.addUndeclaredExtension(child1);
-		ExtensionDt child2 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value2"));
+		ExtensionDt child2 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value2"));
 		parent.addUndeclaredExtension(child2);
-		
+
 		ExtensionDt modExt = new ExtensionDt();
 		modExt.setUrl("http://example.com/extensions#modext");
 		modExt.setValue(new DateDt("1995-01-02"));
@@ -340,38 +410,38 @@ public class XmlParserTest {
 		/*
 		 * Now parse this back
 		 */
-		
-		Patient parsed =ourCtx.newXmlParser().parseResource(Patient.class, enc); 
+
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
 		ext = parsed.getUndeclaredExtensions().get(0);
 		assertEquals("http://example.com/extensions#someext", ext.getUrl());
-		assertEquals("2011-01-02T11:13:15", ((DateTimeDt)ext.getValue()).getValueAsString());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeDt) ext.getValue()).getValueAsString());
 
 		parent = patient.getUndeclaredExtensions().get(1);
 		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
-		assertEquals( "http://example.com#child", child1.getUrl());
-		assertEquals("value1", ((StringDt)child1.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringDt) child1.getValue()).getValueAsString());
 		child2 = parent.getExtension().get(1);
-		assertEquals( "http://example.com#child", child2.getUrl());
-		assertEquals("value2", ((StringDt)child2.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringDt) child2.getValue()).getValueAsString());
 
 		modExt = parsed.getUndeclaredModifierExtensions().get(0);
 		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-		assertEquals("1995-01-02", ((DateDt)modExt.getValue()).getValueAsString());
+		assertEquals("1995-01-02", ((DateDt) modExt.getValue()).getValueAsString());
 
 		name = parsed.getName().get(0);
 
 		ext2 = name.getGiven().get(0).getUndeclaredExtensions().get(0);
 		assertEquals("http://examples.com#givenext", ext2.getUrl());
-		assertEquals("given", ((StringDt)ext2.getValue()).getValueAsString());
+		assertEquals("given", ((StringDt) ext2.getValue()).getValueAsString());
 
 		given2ext = name.getGiven().get(1).getUndeclaredExtensions().get(0);
 		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
 		ExtensionDt given2ext2 = given2ext.getExtension().get(0);
 		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-		assertEquals("CHILD", ((StringDt)given2ext2.getValue()).getValue());
+		assertEquals("CHILD", ((StringDt) given2ext2.getValue()).getValue());
 
 	}
 

@@ -41,54 +41,54 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * For referring to data content defined in other formats.
  */
 @DatatypeDef(name="Attachment")
-public class Attachment extends Type  implements ICompositeType {
+public class Attachment extends Type implements ICompositeType {
 
     /**
      * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
      */
-    @Child(name="contentType", type={CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "contentType", type = {CodeType.class}, order = 0, min = 0, max = 1)
     @Description(shortDefinition="Mime type of the content, with charset etc.", formalDefinition="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate." )
     protected CodeType contentType;
 
     /**
      * The human language of the content. The value can be any valid value according to BCP 47.
      */
-    @Child(name="language", type={CodeType.class}, order=1, min=0, max=1)
+    @Child(name = "language", type = {CodeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Human language of the content (BCP-47)", formalDefinition="The human language of the content. The value can be any valid value according to BCP 47." )
     protected CodeType language;
 
     /**
      * The actual data of the attachment - a sequence of bytes. In XML, represented using base64.
      */
-    @Child(name="data", type={Base64BinaryType.class}, order=2, min=0, max=1)
+    @Child(name = "data", type = {Base64BinaryType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Data inline, base64ed", formalDefinition="The actual data of the attachment - a sequence of bytes. In XML, represented using base64." )
     protected Base64BinaryType data;
 
     /**
      * An alternative location where the data can be accessed.
      */
-    @Child(name="url", type={UriType.class}, order=3, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Uri where the data can be found", formalDefinition="An alternative location where the data can be accessed." )
     protected UriType url;
 
     /**
      * The number of bytes of data that make up this attachment.
      */
-    @Child(name="size", type={IntegerType.class}, order=4, min=0, max=1)
+    @Child(name = "size", type = {IntegerType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Number of bytes of content (if url provided)", formalDefinition="The number of bytes of data that make up this attachment." )
     protected IntegerType size;
 
     /**
      * The calculated hash of the data using SHA-1. Represented using base64.
      */
-    @Child(name="hash", type={Base64BinaryType.class}, order=5, min=0, max=1)
+    @Child(name = "hash", type = {Base64BinaryType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Hash of the data (sha-1, base64ed )", formalDefinition="The calculated hash of the data using SHA-1. Represented using base64." )
     protected Base64BinaryType hash;
 
     /**
      * A label or set of text to display in place of the data.
      */
-    @Child(name="title", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "title", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Label to display in place of the data", formalDefinition="A label or set of text to display in place of the data." )
     protected StringType title;
 

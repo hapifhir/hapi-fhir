@@ -3,21 +3,19 @@ package ca.uhn.fhir.rest.server;
 import static org.junit.Assert.*;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -29,18 +27,14 @@ import ca.uhn.fhir.rest.param.StringParam;
 
 public class ServerInvalidDefinitionTest {
 
-	@Test
-	public void testPrivateResourceProvider() {
+	/**
+	 * Normal, should initialize properly
+	 */
+	@Test()
+	public void testBaseline() throws ServletException {
 		RestfulServer srv = new RestfulServer();
-		srv.setResourceProviders(new PrivateResourceProvider());
-
-		try {
-			srv.init();
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains.containsString("public"));
-		}
+		srv.setResourceProviders(new InstantiableTypeForResourceProvider());
+		srv.init();
 	}
 
 	@Test
@@ -54,19 +48,6 @@ public class ServerInvalidDefinitionTest {
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 			assertThat(e.getCause().toString(), StringContains.containsString("_pretty"));
-		}
-	}
-
-	@Test
-	public void testReadMethodWithSearchParameters() {
-		RestfulServer srv = new RestfulServer();
-		srv.setResourceProviders(new ReadMethodWithSearchParamProvider());
-
-		try {
-			srv.init();
-			fail();
-		} catch (ServletException e) {
-			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
 		}
 	}
 
@@ -86,16 +67,16 @@ public class ServerInvalidDefinitionTest {
 	}
 
 	@Test
-	public void testSearchWithId() {
+	public void testPrivateResourceProvider() {
 		RestfulServer srv = new RestfulServer();
-		srv.setResourceProviders(new SearchWithIdParamProvider());
+		srv.setResourceProviders(new PrivateResourceProvider());
 
 		try {
 			srv.init();
 			fail();
 		} catch (ServletException e) {
 			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
-			assertThat(e.getCause().toString(), StringContains.containsString("compartment"));
+			assertThat(e.getCause().toString(), StringContains.containsString("public"));
 		}
 	}
 
@@ -112,126 +93,56 @@ public class ServerInvalidDefinitionTest {
 			assertThat(e.getCause().toString(), StringContains.containsString("does not contain any valid HAPI-FHIR annotations"));
 		}
 	}
-	/**
-	 * Normal, should initialize properly
-	 */
-	@Test()
-	public void testBaseline() throws ServletException {
+
+	@Test
+	public void testReadMethodWithoutIdParamProvider() {
 		RestfulServer srv = new RestfulServer();
-		srv.setResourceProviders(new InstantiableTypeForResourceProvider());
-		srv.init();
+		srv.setResourceProviders(new ReadMethodWithoutIdParamProvider());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("does not have a parameter"));
+		}
 	}
 
-	private static class PrivateResourceProvider implements IResourceProvider {
+	@Test
+	public void testReadMethodWithSearchParameters() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new ReadMethodWithSearchParamProvider());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+		}
+	}
+
+	@Test
+	public void testSearchWithId() {
+		RestfulServer srv = new RestfulServer();
+		srv.setResourceProviders(new SearchWithIdParamProvider());
+
+		try {
+			srv.init();
+			fail();
+		} catch (ServletException e) {
+			assertThat(e.getCause().toString(), StringContains.containsString("ConfigurationException"));
+			assertThat(e.getCause().toString(), StringContains.containsString("compartment"));
+		}
+	}
+
+	public static class InstantiableTypeForResourceProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
 		@Read
 		public Patient read(@IdParam IdDt theId) {
-			return null;
-		}
-
-	}
-
-	public static class ReadMethodWithSearchParamProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Read
-		public Patient read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
-			return null;
-		}
-
-	}
-
-	public static class SearchWithIdParamProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Search
-		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
-			return null;
-		}
-
-	}
-	
-	
-	public static class ProviderWithNonResourceType implements IResourceProvider {
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return new IResource() {
-				
-				@Override
-				public boolean isEmpty() {
-					return false;
-				}
-				
-				@Override
-				public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-					return null;
-				}
-				
-				@Override
-				public void setResourceMetadata(ResourceMetadataMap theMap) {
-				}
-				
-				@Override
-				public void setLanguage(CodeDt theLanguage) {
-				}
-				
-				@Override
-				public void setId(IdDt theId) {
-				}
-				
-				@Override
-				public NarrativeDt getText() {
-					return null;
-				}
-				
-				@Override
-				public String getResourceName() {
-					return null;
-				}
-				
-				@Override
-				public ResourceMetadataMap getResourceMetadata() {
-					return null;
-				}
-				
-				@Override
-				public CodeDt getLanguage() {
-					return null;
-				}
-				
-				@Override
-				public IdDt getId() {
-					return null;
-				}
-				
-				@Override
-				public ContainedDt getContained() {
-					return null;
-				}
-
-				@Override
-				public FhirVersionEnum getStructureFhirVersionEnum() {
-					return FhirVersionEnum.DSTU1;
-				}
-			}.getClass();
-		}
-
-		@Search
-		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
 			return null;
 		}
 
@@ -246,20 +157,6 @@ public class ServerInvalidDefinitionTest {
 
 		@Search
 		public List<Patient> search(@RequiredParam(name = "_pretty") StringParam theParam) {
-			return null;
-		}
-
-	}
-
-	public static class InstantiableTypeForResourceProvider implements IResourceProvider {
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
-
-		@Read
-		public Patient read(@IdParam IdDt theId) {
 			return null;
 		}
 
@@ -288,6 +185,134 @@ public class ServerInvalidDefinitionTest {
 
 		@Read
 		public Patient read(@IdParam IdDt theId) {
+			return null;
+		}
+
+	}
+
+	private static class PrivateResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdDt theId) {
+			return null;
+		}
+
+	}
+
+	public static class ProviderWithNonResourceType implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return new IResource() {
+
+				@Override
+				public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
+					return null;
+				}
+
+				@Override
+				public ContainedDt getContained() {
+					return null;
+				}
+
+				@Override
+				public IdDt getId() {
+					return null;
+				}
+
+				@Override
+				public CodeDt getLanguage() {
+					return null;
+				}
+
+				@Override
+				public ResourceMetadataMap getResourceMetadata() {
+					return null;
+				}
+
+				@Override
+				public String getResourceName() {
+					return null;
+				}
+
+				@Override
+				public FhirVersionEnum getStructureFhirVersionEnum() {
+					return FhirVersionEnum.DSTU1;
+				}
+
+				@Override
+				public NarrativeDt getText() {
+					return null;
+				}
+
+				@Override
+				public boolean isEmpty() {
+					return false;
+				}
+
+				@Override
+				public void setId(IdDt theId) {
+				}
+
+				@Override
+				public void setLanguage(CodeDt theLanguage) {
+				}
+
+				@Override
+				public void setResourceMetadata(ResourceMetadataMap theMap) {
+				}
+			}.getClass();
+		}
+
+		@Search
+		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
+			return null;
+		}
+
+	}
+
+	public static class ReadMethodWithoutIdParamProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient read() {
+			return null;
+		}
+
+	}
+
+	public static class ReadMethodWithSearchParamProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
+			return null;
+		}
+
+	}
+
+	public static class SearchWithIdParamProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Search
+		public List<Patient> read(@IdParam IdDt theId, @RequiredParam(name = "aaa") StringParam theParam) {
 			return null;
 		}
 

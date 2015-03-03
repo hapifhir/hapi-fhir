@@ -87,16 +87,19 @@ public class Binary extends BaseResource implements BaseBinary {
 		return (myContent.isEmpty()) && ElementUtil.isEmpty(myContentType);
 	}
 
-	public void setContent(byte[] theContent) {
+	public Binary setContent(byte[] theContent) {
 		myContent.setValue(theContent);
+		return this;
 	}
 
-	public void setContentAsBase64(String theContent) {
+	public Binary setContentAsBase64(String theContent) {
 		myContent.setValueAsString(theContent);
+		return this;
 	}
 
-	public void setContentType(String theContentType) {
+	public Binary setContentType(String theContentType) {
 		myContentType = new StringDt(theContentType);
+		return this;
 	}
 
 	@Override

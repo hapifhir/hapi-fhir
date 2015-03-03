@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
+import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
@@ -341,5 +342,10 @@ public interface IGenericClient {
 	 * @return The resource
 	 */
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
+
+	/**
+	 * Implementation of the FHIR "extended operations" action
+	 */
+	IOperation operation();
 
 }

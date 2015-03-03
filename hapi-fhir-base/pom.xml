@@ -180,15 +180,40 @@
 			<id>SITE</id>
 			<reporting>
 				<plugins>
-					<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
-						<version>3.0.0</version> <configuration> </configuration> </plugin> <plugin> 
-						<groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jxr-plugin</artifactId> 
-						<version>2.4</version> <reportSets> <reportSet> <id>normal</id> <reports> 
-						<report>jxr</report> </reports> </reportSet> <reportSet> <id>restful-server-example</id> 
-						<reports> <report>jxr</report> </reports> <configuration> <sourcePath>../restful-server-example/src/main/java</sourcePath> 
-						<destDir>${project.reporting.outputDirectory}/rse-xref</destDir> <outputDirectory>tmp</outputDirectory> 
-						<reportOutputDirectory>rse-xref</reportOutputDirectory> </configuration> 
-						</reportSet> </reportSets> </plugin> -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>findbugs-maven-plugin</artifactId>
+						<version>3.0.0</version>
+						<configuration>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jxr-plugin</artifactId>
+						<version>2.4</version>
+						<reportSets>
+							<reportSet>
+								<id>normal</id>
+								<reports>
+									<report>jxr</report>
+								</reports>
+							</reportSet>
+							<!--
+							<reportSet>
+								<id>restful-server-example</id>
+								<reports>
+									<report>jxr</report>
+								</reports>
+								<configuration>
+									<sourcePath>../restful-server-example/src/main/java</sourcePath>
+									<destDir>${project.reporting.outputDirectory}/rse-xref</destDir>
+									<outputDirectory>tmp</outputDirectory>
+									<reportOutputDirectory>rse-xref</reportOutputDirectory>
+								</configuration>
+							</reportSet>
+							-->
+						</reportSets>
+					</plugin>
 					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
 						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
 						</plugin> -->

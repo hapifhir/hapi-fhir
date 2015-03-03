@@ -44,7 +44,7 @@ import org.hl7.fhir.instance.model.api.IDatatypeElement;
  * Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.
  */
 @DatatypeDef(name="Timing")
-public class Timing extends Type  implements ICompositeType {
+public class Timing extends Type implements ICompositeType {
 
     public enum EventTiming {
         /**
@@ -763,14 +763,14 @@ public class Timing extends Type  implements ICompositeType {
     /**
      * Identifies specific time periods when the event should occur.
      */
-    @Child(name="event", type={Period.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "event", type = {Period.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="When the event occurs", formalDefinition="Identifies specific time periods when the event should occur." )
     protected List<Period> event;
 
     /**
      * Identifies a repeating pattern to the intended time periods.
      */
-    @Child(name="repeat", type={}, order=1, min=0, max=1)
+    @Child(name = "repeat", type = {}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Only if there is none or one event", formalDefinition="Identifies a repeating pattern to the intended time periods." )
     protected TimingRepeatComponent repeat;
 

@@ -35,6 +35,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -47,7 +48,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
@@ -56,16 +57,42 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvocation {
 
-	private final FhirContext myContext;
-	private final IResource myResource;
-	private final String myUrlPath;
-	private final TagList myTagList;
-	private final List<IResource> myResources;
 	private final Bundle myBundle;
+	private final BundleTypeEnum myBundleType;
 	private final String myContents;
 	private boolean myContentsIsBundle;
+	private final FhirContext myContext;
+	private Map<String, List<String>> myIfNoneExistParams;
+	private String myIfNoneExistString;
 	private Map<String, List<String>> myParams;
-	private final BundleTypeEnum myBundleType;
+	private final IResource myResource;
+	private final List<IResource> myResources;
+	private final TagList myTagList;
+	private final String myUrlPath;
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = null;
+		myResources = null;
+		myBundle = theBundle;
+		myContents = null;
+		myBundleType = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
+		myContext = theContext;
+		myResource = theResource;
+		myTagList = null;
+		myUrlPath = StringUtils.join(theUrlPath, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = null;
+		myContentsIsBundle = false;
+		myParams = theParams;
+		myBundleType = null;
+	}
 
 	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlPath) {
 		super();
@@ -76,6 +103,55 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myResources = null;
 		myBundle = null;
 		myContents = null;
+		myBundleType = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = null;
+		myResources = theResources;
+		myBundle = null;
+		myContents = null;
+		myBundleType = theBundleType;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = StringUtils.join(theUrlPath, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = null;
+		myContentsIsBundle = false;
+		myParams = theParams;
+		myBundleType = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = theUrlPath;
+		myResources = null;
+		myBundle = null;
+		myContents = theContents;
+		myContentsIsBundle = theIsBundle;
+		myBundleType = null;
+	}
+
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
+		myContext = theContext;
+		myResource = null;
+		myTagList = null;
+		myUrlPath = StringUtils.join(theUrlPath, '/');
+		myResources = null;
+		myBundle = null;
+		myContents = theContents;
+		myContentsIsBundle = false;
+		myParams = theParams;
 		myBundleType = null;
 	}
 
@@ -96,79 +172,21 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myUrlPath = StringUtils.join(theUrlPath, '/');
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
-		myContext = theContext;
-		myResource = null;
-		myTagList = null;
-		myUrlPath = null;
-		myResources = theResources;
-		myBundle = null;
-		myContents = null;
-		myBundleType = theBundleType;
+	private void addMatchHeaders(HttpRequestBase theHttpRequest, StringBuilder theUrlBase) {
+		if (myIfNoneExistParams != null) {
+			StringBuilder b = newHeaderBuilder(theUrlBase);
+			appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
+			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+		}
+
+		if (myIfNoneExistString != null) {
+			StringBuilder b = newHeaderBuilder(theUrlBase);
+			b.append(b.indexOf("?") == -1 ? '?' : '&');
+			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
+			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
+		}
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Bundle theBundle) {
-		myContext = theContext;
-		myResource = null;
-		myTagList = null;
-		myUrlPath = null;
-		myResources = null;
-		myBundle = theBundle;
-		myContents = null;
-		myBundleType = null;
-	}
-
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, boolean theIsBundle, String theUrlPath) {
-		myContext = theContext;
-		myResource = null;
-		myTagList = null;
-		myUrlPath = theUrlPath;
-		myResources = null;
-		myBundle = null;
-		myContents = theContents;
-		myContentsIsBundle = theIsBundle;
-		myBundleType = null;
-	}
-
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
-		myResource = null;
-		myTagList = null;
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-		myResources = null;
-		myBundle = null;
-		myContents = null;
-		myContentsIsBundle = false;
-		myParams = theParams;
-		myBundleType = null;
-	}
-
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, String theContents, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
-		myResource = null;
-		myTagList = null;
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-		myResources = null;
-		myBundle = null;
-		myContents = theContents;
-		myContentsIsBundle = false;
-		myParams = theParams;
-		myBundleType = null;
-	}
-
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
-		myContext = theContext;
-		myResource = theResource;
-		myTagList = null;
-		myUrlPath = StringUtils.join(theUrlPath, '/');
-		myResources = null;
-		myBundle = null;
-		myContents = null;
-		myContentsIsBundle = false;
-		myParams = theParams;
-		myBundleType = null;
-	}
-	
 	@Override
 	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
 		StringBuilder url = new StringBuilder();
@@ -235,9 +253,17 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeBundleToString(myBundle);
 				contentType = encoding.getBundleContentType();
 			} else if (myResources != null) {
-				Bundle bundle = RestfulServer.createBundleFromResourceList(myContext, "", myResources, "", "", myResources.size(), myBundleType);
-				contents = parser.encodeBundleToString(bundle);
-				contentType = encoding.getBundleContentType();
+				IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
+				bundleFactory.initializeBundleFromResourceList("", myResources, "", "", myResources.size(), myBundleType);
+				Bundle bundle = bundleFactory.getDstu1Bundle();
+				if (bundle != null) {
+					contents = parser.encodeBundleToString(bundle);
+					contentType = encoding.getBundleContentType();
+				} else {
+					IBaseResource bundleRes = bundleFactory.getResourceBundle();
+					contents = parser.encodeResourceToString(bundleRes);
+					contentType = encoding.getResourceContentType();
+				}
 			} else if (myContents != null) {
 				contents = myContents;
 				if (myContentsIsBundle) {
@@ -263,21 +289,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		return retVal;
 	}
 
-	private void addMatchHeaders(HttpRequestBase theHttpRequest, StringBuilder theUrlBase) {
-		if (myIfNoneExistParams != null) {
-			StringBuilder b = newHeaderBuilder(theUrlBase);
-			appendExtraParamsWithQuestionMark(myIfNoneExistParams, b, b.indexOf("?") == -1);
-			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
-		}
-
-		if (myIfNoneExistString != null) {
-			StringBuilder b = newHeaderBuilder(theUrlBase);
-			b.append(b.indexOf("?") == -1 ? '?' : '&');
-			b.append(myIfNoneExistString.substring(myIfNoneExistString.indexOf('?') + 1));
-			theHttpRequest.addHeader(Constants.HEADER_IF_NONE_EXIST, b.toString());
-		}
-	}
-
+	protected abstract HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity);
 	private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
@@ -286,11 +298,6 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 		return b;
 	}
-
-	protected abstract HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity);
-
-	private Map<String, List<String>> myIfNoneExistParams;
-	private String myIfNoneExistString;
 
 	public void setIfNoneExistParams(Map<String, List<String>> theIfNoneExist) {
 		myIfNoneExistParams = theIfNoneExist;

@@ -49,6 +49,8 @@ import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 import javax.json.stream.JsonParsingException;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
@@ -550,11 +552,11 @@ public class JsonParser extends BaseParser implements IParser {
 					if (primitive) {
 						if (nextValue instanceof ISupportsUndeclaredExtensions) {
 							List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
-							addToHeldExtensions(valueIdx, ext, extensions,false);
+							addToHeldExtensions(valueIdx, ext, extensions, false);
 
 							ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
-							addToHeldExtensions(valueIdx, ext, modifierExtensions,true);
-						}else {
+							addToHeldExtensions(valueIdx, ext, modifierExtensions, true);
+						} else {
 							if (nextValue instanceof IBaseHasExtensions) {
 								IBaseHasExtensions element = (IBaseHasExtensions) nextValue;
 								List<? extends IBaseExtension<?>> ext = element.getExtension();
@@ -668,11 +670,26 @@ public class JsonParser extends BaseParser implements IParser {
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource))) {
+			List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(resource);
+			if (securityLabels == null) {
+				securityLabels = Collections.emptyList();
+			}
+			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource), securityLabels)) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", ResourceMetadataKeyEnum.UPDATED.get(resource));
-				theEventWriter.writeEnd();
+
+				if (securityLabels.isEmpty()==false) {
+					theEventWriter.writeStartArray("security");
+					for (BaseCodingDt securityLabel : securityLabels) {
+						theEventWriter.writeStartObject();
+						BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
+						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, def.getChildren(), theIsSubElementWithinResource);
+						theEventWriter.writeEnd();
+					}
+					theEventWriter.writeEnd();
+				}
+				theEventWriter.writeEnd(); //end meta
 			}
 		}
 
@@ -1342,7 +1359,7 @@ public class JsonParser extends BaseParser implements IParser {
 
 				if (myModifier) {
 					theEventWriter.writeStartArray("modifierExtension");
-				}else {
+				} else {
 					theEventWriter.writeStartArray("extension");
 				}
 

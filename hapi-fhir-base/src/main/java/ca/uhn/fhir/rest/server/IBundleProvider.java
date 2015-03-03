@@ -27,6 +27,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 
 public interface IBundleProvider {
 
+	/**
+	 * @param theFromIndex The low index (inclusive) to return
+	 * @param theToIndex The high index (exclusive) to return
+	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
+	 */
 	List<IResource> getResources(int theFromIndex, int theToIndex);
 	
 	int size();

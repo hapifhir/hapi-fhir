@@ -424,7 +424,7 @@ public List<Patient> searchByNamedQuery(@RequiredParam(name="someparam") StringP
 //START SNIPPET: searchComposite
 @Search()
 public List<Observation> searchByComposite(
-		@RequiredParam(name=Observation.SP_NAME_VALUE_DATE, compositeTypes= {TokenParam.class, DateParam.class}) 
+		@RequiredParam(name=Observation.SP_CODE_VALUE_DATE, compositeTypes= {TokenParam.class, DateParam.class}) 
 		CompositeParam<TokenParam, DateParam> theParam) {
   // Each of the two values in the composite param are accessible separately.
   // In the case of Observation's name-value-date, the left is a string and
@@ -484,7 +484,7 @@ public List<Patient> searchWithDocs(
 //START SNIPPET: searchMultiple
 @Search()
 public List<Observation> searchByObservationNames( 
-		@RequiredParam(name=Observation.SP_NAME) TokenOrListParam theCodings ) {
+		@RequiredParam(name=Observation.SP_CODE) TokenOrListParam theCodings ) {
 
    // The list here will contain 0..* codings, and any observations which match any of the 
    // given codings should be returned
@@ -692,6 +692,29 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   return retVal;
 }
 //END SNIPPET: create
+
+
+//START SNIPPET: createConditional
+@Create
+public MethodOutcome createPatientConditional(
+      @ResourceParam Patient thePatient,
+      @ConditionalOperationParam String theConditionalUrl) {
+
+   if (theConditionalUrl != null) {
+      // We are doing a conditional create
+
+      // populate this with the ID of the existing resource which 
+      // matches the conditional URL
+      return new MethodOutcome();  
+   } else {
+      // We are doing a normal create
+      
+      // populate this with the ID of the newly created resource
+      return new MethodOutcome();  
+   }
+   
+}
+//END SNIPPET: createConditional
 
 
 //START SNIPPET: createClient

@@ -60,13 +60,13 @@
 				
 				<p>
 					As of HAPI FHIR 0.9, support for DSTU2 has been added to the library. Although upgrading
-					existing applications from DSTU1 to DSTU2 will not be completely painless, we have
+					existing applications from DSTU1 to DSTU2 will not be painless, we have
 					tried as much as possible to make it easy.
 				</p>
 				
 				<p>
 					First, support for DSTU2 capabilities has been added in a second optional dependency JAR which
-					you must add to your classpath. This JAR is called <code>hapi-structures-dev-[version].jar</code>.
+					you must add to your classpath. This JAR is called <code>hapi-structures-dstu2-[version].jar</code>.
 					See the <a href="./download.html">download page</a> for information on adding this JAR.
 				</p>
 				
@@ -78,7 +78,7 @@
 				</p>
 
 				<p>
-					To create a DSTU2 context, simply use the "forDev" factory method on the FhirContext class:
+					To create a DSTU2 context, simply use the "forDstu2" factory method on the FhirContext class:
 				</p>
 				
 				<macro name="snippet">

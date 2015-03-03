@@ -42,6 +42,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
@@ -61,8 +62,10 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.composite.CodingDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Profile;
@@ -73,7 +76,9 @@ import ca.uhn.fhir.model.dstu.resource.Profile.StructureElementDefinitionType;
 import ca.uhn.fhir.model.dstu.valueset.DataTypeEnum;
 import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Dstu1BundleFactory;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
@@ -376,5 +381,16 @@ public class FhirDstu1 implements IFhirVersion {
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
 	}
+
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		return new Dstu1BundleFactory(theContext);
+	}
+
 
 }

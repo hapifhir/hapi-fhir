@@ -11,9 +11,6 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="Resource References">
 			
-			<macro name="toc">
-			</macro>
-			
 			<p>
 				Resource references are a key part of the HAPI FHIR model, 
 				since almost any resource will have references to other resources

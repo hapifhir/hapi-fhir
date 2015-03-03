@@ -657,14 +657,14 @@ public class HealthcareService extends DomainResource {
     /**
      * External Ids for this item.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this item", formalDefinition="External Ids for this item." )
     protected List<Identifier> identifier;
 
     /**
      * The location where this healthcare service may be provided.
      */
-    @Child(name="location", type={Location.class}, order=1, min=1, max=1)
+    @Child(name = "location", type = {Location.class}, order = 1, min = 1, max = 1)
     @Description(shortDefinition="The location where this healthcare service may be provided", formalDefinition="The location where this healthcare service may be provided." )
     protected Reference location;
 
@@ -676,161 +676,161 @@ public class HealthcareService extends DomainResource {
     /**
      * Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type.
      */
-    @Child(name="serviceCategory", type={CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "serviceCategory", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type", formalDefinition="Identifies the broad category of service being performed or delivered. Selecting a Service Category then determines the list of relevant service types that can be selected in the Primary Service Type." )
     protected CodeableConcept serviceCategory;
 
     /**
      * A specific type of service that may be delivered or performed.
      */
-    @Child(name="serviceType", type={}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "serviceType", type = {}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A specific type of service that may be delivered or performed", formalDefinition="A specific type of service that may be delivered or performed." )
     protected List<ServiceTypeComponent> serviceType;
 
     /**
      * Further description of the service as it would be presented to a consumer while searching.
      */
-    @Child(name="serviceName", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "serviceName", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Further description of the service as it would be presented to a consumer while searching", formalDefinition="Further description of the service as it would be presented to a consumer while searching." )
     protected StringType serviceName;
 
     /**
      * Additional description of the  or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.
      */
-    @Child(name="comment", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Additional description of the  or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName", formalDefinition="Additional description of the  or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName." )
     protected StringType comment;
 
     /**
      * Extra details about the service that can't be placed in the other fields.
      */
-    @Child(name="extraDetails", type={StringType.class}, order=6, min=0, max=1)
+    @Child(name = "extraDetails", type = {StringType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Extra details about the service that can't be placed in the other fields", formalDefinition="Extra details about the service that can't be placed in the other fields." )
     protected StringType extraDetails;
 
     /**
      * The free provision code provides a link to the Free Provision reference entity to enable the selection of one free provision type.
      */
-    @Child(name="freeProvisionCode", type={CodeableConcept.class}, order=7, min=0, max=1)
+    @Child(name = "freeProvisionCode", type = {CodeableConcept.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="The free provision code provides a link to the Free Provision reference entity to enable the selection of one free provision type", formalDefinition="The free provision code provides a link to the Free Provision reference entity to enable the selection of one free provision type." )
     protected CodeableConcept freeProvisionCode;
 
     /**
      * Does this service have specific eligibility requirements that need to be met in order to use the service.
      */
-    @Child(name="eligibility", type={CodeableConcept.class}, order=8, min=0, max=1)
+    @Child(name = "eligibility", type = {CodeableConcept.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service", formalDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service." )
     protected CodeableConcept eligibility;
 
     /**
      * The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page.
      */
-    @Child(name="eligibilityNote", type={StringType.class}, order=9, min=0, max=1)
+    @Child(name = "eligibilityNote", type = {StringType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="The description of service eligibility should, in general, not exceed one or two paragraphs. It should be sufficient for a prospective consumer to determine if they are likely to be eligible or not. Where eligibility requirements and conditions are complex, it may simply be noted that an eligibility assessment is required. Where eligibility is determined by an outside source, such as an Act of Parliament, this should be noted, preferably with a reference to a commonly available copy of the source document such as a web page." )
     protected StringType eligibilityNote;
 
     /**
      * Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service. If this flag is 'NotDefined', then this flag is overridden by the Site's availability flag. (ConditionalIndicator Enum).
      */
-    @Child(name="appointmentRequired", type={CodeableConcept.class}, order=10, min=0, max=1)
+    @Child(name = "appointmentRequired", type = {CodeableConcept.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service. If this flag is 'NotDefined', then this flag is overridden by the Site's availability flag. (ConditionalIndicator Enum)", formalDefinition="Indicates whether or not a prospective consumer will require an appointment for a particular service at a Site to be provided by the Organization. Indicates if an appointment is required for access to this service. If this flag is 'NotDefined', then this flag is overridden by the Site's availability flag. (ConditionalIndicator Enum)." )
     protected CodeableConcept appointmentRequired;
 
     /**
      * If there is an image associated with this Service Site, its URI can be included here.
      */
-    @Child(name="imageURI", type={UriType.class}, order=11, min=0, max=1)
+    @Child(name = "imageURI", type = {UriType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="If there is an image associated with this Service Site, its URI can be included here", formalDefinition="If there is an image associated with this Service Site, its URI can be included here." )
     protected UriType imageURI;
 
     /**
      * A Collection of times that the Service Site is available.
      */
-    @Child(name="availableTime", type={}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "availableTime", type = {}, order = 12, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Collection of times that the Service Site is available", formalDefinition="A Collection of times that the Service Site is available." )
     protected List<HealthcareServiceAvailableTimeComponent> availableTime;
 
     /**
      * Not avail times - need better description.
      */
-    @Child(name="notAvailableTime", type={}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "notAvailableTime", type = {}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Not avail times - need better description", formalDefinition="Not avail times - need better description." )
     protected List<HealthcareServiceNotAvailableTimeComponent> notAvailableTime;
 
     /**
      * A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times.
      */
-    @Child(name="availabilityExceptions", type={StringType.class}, order=14, min=0, max=1)
+    @Child(name = "availabilityExceptions", type = {StringType.class}, order = 14, min = 0, max = 1)
     @Description(shortDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times", formalDefinition="A description of Site availability exceptions, e.g., public holiday availability. Succinctly describing all possible exceptions to normal Site availability as details in the Available Times and Not Available Times." )
     protected StringType availabilityExceptions;
 
     /**
      * The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available.
      */
-    @Child(name="publicKey", type={StringType.class}, order=15, min=0, max=1)
+    @Child(name = "publicKey", type = {StringType.class}, order = 15, min = 0, max = 1)
     @Description(shortDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available", formalDefinition="The public part of the 'keys' allocated to an Organization by an accredited body to support secure exchange of data over the internet. To be provided by the Organization, where available." )
     protected StringType publicKey;
 
     /**
      * Program Names that can be used to categorize the service.
      */
-    @Child(name="programName", type={StringType.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "programName", type = {StringType.class}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Program Names that can be used to categorize the service", formalDefinition="Program Names that can be used to categorize the service." )
     protected List<StringType> programName;
 
     /**
      * List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts.
      */
-    @Child(name="contactPoint", type={ContactPoint.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contactPoint", type = {ContactPoint.class}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts", formalDefinition="List of contacts related to this specific healthcare service. If this is empty, then refer to the location's contacts." )
     protected List<ContactPoint> contactPoint;
 
     /**
      * Collection of Characteristics (attributes).
      */
-    @Child(name="characteristic", type={CodeableConcept.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "characteristic", type = {CodeableConcept.class}, order = 18, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Collection of Characteristics (attributes)", formalDefinition="Collection of Characteristics (attributes)." )
     protected List<CodeableConcept> characteristic;
 
     /**
      * Ways that the service accepts referrals.
      */
-    @Child(name="referralMethod", type={CodeableConcept.class}, order=19, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "referralMethod", type = {CodeableConcept.class}, order = 19, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Ways that the service accepts referrals", formalDefinition="Ways that the service accepts referrals." )
     protected List<CodeableConcept> referralMethod;
 
     /**
      * The setting where this service can be provided, such is in home, or at location in organisation.
      */
-    @Child(name="setting", type={CodeableConcept.class}, order=20, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "setting", type = {CodeableConcept.class}, order = 20, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="The setting where this service can be provided, such is in home, or at location in organisation", formalDefinition="The setting where this service can be provided, such is in home, or at location in organisation." )
     protected List<CodeableConcept> setting;
 
     /**
      * Collection of Target Groups for the Service Site (The target audience that this service is for).
      */
-    @Child(name="targetGroup", type={CodeableConcept.class}, order=21, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "targetGroup", type = {CodeableConcept.class}, order = 21, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Collection of Target Groups for the Service Site (The target audience that this service is for)", formalDefinition="Collection of Target Groups for the Service Site (The target audience that this service is for)." )
     protected List<CodeableConcept> targetGroup;
 
     /**
      * Need better description.
      */
-    @Child(name="coverageArea", type={CodeableConcept.class}, order=22, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "coverageArea", type = {CodeableConcept.class}, order = 22, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Need better description", formalDefinition="Need better description." )
     protected List<CodeableConcept> coverageArea;
 
     /**
      * Need better description.
      */
-    @Child(name="catchmentArea", type={CodeableConcept.class}, order=23, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "catchmentArea", type = {CodeableConcept.class}, order = 23, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Need better description", formalDefinition="Need better description." )
     protected List<CodeableConcept> catchmentArea;
 
     /**
      * List of the specific.
      */
-    @Child(name="serviceCode", type={CodeableConcept.class}, order=24, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "serviceCode", type = {CodeableConcept.class}, order = 24, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="List of the specific", formalDefinition="List of the specific." )
     protected List<CodeableConcept> serviceCode;
 
@@ -1919,7 +1919,7 @@ public class HealthcareService extends DomainResource {
   public static final String SP_SERVICETYPE = "servicetype";
   @SearchParamDefinition(name="name", path="HealthcareService.serviceName", description="A portion of the Healthcare service name", type="string" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="location", path="HealthcareService.location", description="The location of the Healthcare Service", type="reference" )
+  @SearchParamDefinition(name = "location", path = "HealthcareService.location", description = "The location of the Healthcare Service", type = "reference")
   public static final String SP_LOCATION = "location";
 
 }

@@ -802,147 +802,147 @@ public class StructureDefinition extends DomainResource {
     /**
      * The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.
      */
-    @Child(name="url", type={UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order = 0, min = 1, max = 1)
     @Description(shortDefinition="Literal URL used to reference this profile", formalDefinition="The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems." )
     protected UriType url;
 
     /**
      * Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
      */
-    @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Other identifiers for the profile", formalDefinition="Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
     protected List<Identifier> identifier;
 
     /**
      * The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.
      */
-    @Child(name="version", type={StringType.class}, order=2, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Logical id for this version of the profile", formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually." )
     protected StringType version;
 
     /**
      * A free text natural language name identifying the Profile.
      */
-    @Child(name="name", type={StringType.class}, order=3, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order = 3, min = 1, max = 1)
     @Description(shortDefinition="Informal name for this profile", formalDefinition="A free text natural language name identifying the Profile." )
     protected StringType name;
 
     /**
      * Defined so that applications can use this name when displaying the value of the extension to the user.
      */
-    @Child(name="display", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "display", type = {StringType.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Use this name when displaying the value", formalDefinition="Defined so that applications can use this name when displaying the value of the extension to the user." )
     protected StringType display;
 
     /**
      * Details of the individual or organization who accepts responsibility for publishing the profile.
      */
-    @Child(name="publisher", type={StringType.class}, order=5, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile." )
     protected StringType publisher;
 
     /**
      * Contact details to assist a user in finding and communicating with the publisher.
      */
-    @Child(name="telecom", type={ContactPoint.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
     protected List<ContactPoint> telecom;
 
     /**
      * A free text natural language description of the profile and its use.
      */
-    @Child(name="description", type={StringType.class}, order=7, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Natural language description of the profile", formalDefinition="A free text natural language description of the profile and its use." )
     protected StringType description;
 
     /**
      * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
      */
-    @Child(name="code", type={Coding.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "code", type = {Coding.class}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Assist with indexing and finding", formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates." )
     protected List<Coding> code;
 
     /**
      * The status of the profile.
      */
-    @Child(name="status", type={CodeType.class}, order=9, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 9, min = 1, max = 1)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the profile." )
     protected Enumeration<StructureDefinitionStatus> status;
 
     /**
      * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name="experimental", type={BooleanType.class}, order=10, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order = 10, min = 0, max = 1)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The date that this version of the profile was published.
      */
-    @Child(name="date", type={DateTimeType.class}, order=11, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Date for this version of the profile", formalDefinition="The date that this version of the profile was published." )
     protected DateTimeType date;
 
     /**
      * The Scope and Usage that this profile was created to meet.
      */
-    @Child(name="requirements", type={StringType.class}, order=12, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order = 12, min = 0, max = 1)
     @Description(shortDefinition="Scope and Usage this profile is for", formalDefinition="The Scope and Usage that this profile was created to meet." )
     protected StringType requirements;
 
     /**
      * The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.
      */
-    @Child(name="fhirVersion", type={IdType.class}, order=13, min=0, max=1)
+    @Child(name = "fhirVersion", type = {IdType.class}, order = 13, min = 0, max = 1)
     @Description(shortDefinition="FHIR Version this profile targets", formalDefinition="The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version." )
     protected IdType fhirVersion;
 
     /**
      * An external specification that the content is mapped to.
      */
-    @Child(name="mapping", type={}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "mapping", type = {}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="External specification that the content is mapped to", formalDefinition="An external specification that the content is mapped to." )
     protected List<StructureDefinitionMappingComponent> mapping;
 
     /**
      * Defines the type of structure that this definition is describing.
      */
-    @Child(name="type", type={CodeType.class}, order=15, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order = 15, min = 1, max = 1)
     @Description(shortDefinition="abstract | type | resource | constraint | extension", formalDefinition="Defines the type of structure that this definition is describing." )
     protected Enumeration<StructureDefinitionType> type;
 
     /**
      * Identifies the type of context to which the extension applies.
      */
-    @Child(name="contextType", type={CodeType.class}, order=16, min=0, max=1)
+    @Child(name = "contextType", type = {CodeType.class}, order = 16, min = 0, max = 1)
     @Description(shortDefinition="resource | datatype | mapping | extension", formalDefinition="Identifies the type of context to which the extension applies." )
     protected Enumeration<ExtensionContext> contextType;
 
     /**
      * Identifies the types of resource or data type elements to which the extension can be applied.
      */
-    @Child(name="context", type={StringType.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "context", type = {StringType.class}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where the extension can be used in instances", formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied." )
     protected List<StringType> context;
 
     /**
      * The structure that is the base on which this set of constraints is derived from.
      */
-    @Child(name="base", type={UriType.class}, order=18, min=0, max=1)
+    @Child(name = "base", type = {UriType.class}, order = 18, min = 0, max = 1)
     @Description(shortDefinition="Structure that this set of constraints applies to", formalDefinition="The structure that is the base on which this set of constraints is derived from." )
     protected UriType base;
 
     /**
      * A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.
      */
-    @Child(name="snapshot", type={}, order=19, min=0, max=1)
+    @Child(name = "snapshot", type = {}, order = 19, min = 0, max = 1)
     @Description(shortDefinition="Snapshot view of the structure", formalDefinition="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile." )
     protected StructureDefinitionSnapshotComponent snapshot;
 
     /**
      * A differential view is expressed relative to the base profile - a statement of differences that it applies.
      */
-    @Child(name="differential", type={}, order=20, min=0, max=1)
+    @Child(name = "differential", type = {}, order = 20, min = 0, max = 1)
     @Description(shortDefinition="Differential view of the structure", formalDefinition="A differential view is expressed relative to the base profile - a statement of differences that it applies." )
     protected StructureDefinitionDifferentialComponent differential;
 
@@ -1976,26 +1976,26 @@ public class StructureDefinition extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path|StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token" )
-  public static final String SP_PATH = "path";
-  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token" )
-  public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.reference[x]", description="A vocabulary binding code", type="reference" )
-  public static final String SP_VALUESET = "valueset";
-  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string" )
-  public static final String SP_NAME = "name";
+    @SearchParamDefinition(name = "path", path = "StructureDefinition.snapshot.element.path|StructureDefinition.differential.element.path", description = "A path that is constrained in the profile", type = "token")
+    public static final String SP_PATH = "path";
+    @SearchParamDefinition(name = "code", path = "StructureDefinition.code", description = "A code for the profile", type = "token")
+    public static final String SP_CODE = "code";
+    @SearchParamDefinition(name = "valueset", path = "StructureDefinition.snapshot.element.binding.reference[x]", description = "A vocabulary binding code", type = "reference")
+    public static final String SP_VALUESET = "valueset";
+    @SearchParamDefinition(name = "name", path = "StructureDefinition.name", description = "Name of the profile", type = "string")
+    public static final String SP_NAME = "name";
   @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
   public static final String SP_PUBLISHER = "publisher";
-  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="type", path="StructureDefinition.type", description="abstract | type | resource | constraint | extension", type="token" )
-  public static final String SP_TYPE = "type";
+    @SearchParamDefinition(name = "description", path = "StructureDefinition.description", description = "Text search in the description of the profile", type = "string")
+    public static final String SP_DESCRIPTION = "description";
+    @SearchParamDefinition(name = "type", path = "StructureDefinition.type", description = "abstract | type | resource | constraint | extension", type = "token")
+    public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token" )
   public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Literal URL used to reference this profile", type="token" )
-  public static final String SP_URL = "url";
-  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )
-  public static final String SP_STATUS = "status";
+    @SearchParamDefinition(name = "url", path = "StructureDefinition.url", description = "Literal URL used to reference this profile", type = "token")
+    public static final String SP_URL = "url";
+    @SearchParamDefinition(name = "status", path = "StructureDefinition.status", description = "The current status of the profile", type = "token")
+    public static final String SP_STATUS = "status";
 
 }
 

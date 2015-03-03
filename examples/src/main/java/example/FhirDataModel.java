@@ -1,9 +1,11 @@
 package example;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -44,17 +46,17 @@ public class FhirDataModel {
       // START SNIPPET: nonNull
       Observation observation = new Observation();
 
-      // None of these calls will return null, but instead create their
+      // None of these calls will not return null, but instead create their
       // respective
       // child elements.
-      IdentifierDt identifierDt = observation.getIdentifier();
-      PeriodDt periodDt = observation.getIdentifier().getPeriod();
-      DateTimeDt activeDt = observation.getIdentifier().getPeriod().getStartElement();
+      List<IdentifierDt> identifierList = observation.getIdentifier();
+      CodeableConceptDt code = observation.getCode();
+      StringDt textElement = observation.getCode().getTextElement();
 
       // DateTimeDt is a FHIR primitive however, so the following will return
       // null
       // unless a value has been placed there.
-      Date active = observation.getIdentifier().getPeriod().getStartElement().getValue();
+      Date active = observation.addIdentifier().getPeriod().getStartElement().getValue();
       // END SNIPPET: nonNull
 
    }

@@ -25,17 +25,22 @@ import java.io.InputStream;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dev.composite.CodingDt;
 import ca.uhn.fhir.model.dev.composite.ContainedDt;
 import ca.uhn.fhir.model.dev.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dev.resource.Profile;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.Dstu1BundleFactory;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dev.ServerConformanceProvider;
 import ca.uhn.fhir.rest.server.provider.dev.ServerProfileProvider;
@@ -100,6 +105,16 @@ public class FhirDev implements IFhirVersion {
 	@Override
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
+	}
+
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		return new Dstu1BundleFactory(theContext);
 	}
 
 }

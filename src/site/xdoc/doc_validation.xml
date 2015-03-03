@@ -12,9 +12,6 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="Resource Validation">
 
-			<macro name="toc">
-			</macro>
-
 			<p>
 				HAPI provides a built-in and configurable mechanism for validating resources.
 				This mechanism is called the <i>FHIR Validator</i>.

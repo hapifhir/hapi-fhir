@@ -1,10 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.model.dstu.resource.*;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -49,6 +47,13 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
+import ca.uhn.fhir.model.dstu.resource.Conformance;
+import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu.resource.Patient;
+import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -73,8 +78,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 import ca.uhn.fhir.util.PortUtil;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -104,8 +107,9 @@ public class RestfulServerMethodTest {
 		
 		p.getManagingOrganization().setResource(o);
 		
-		Bundle bundle = RestfulServer.createBundleFromResourceList(ourCtx, "", resources, "http://foo", "http://foo", 2, null);
-		assertEquals(2, bundle.getEntries().size());
+		IVersionSpecificBundleFactory factory = ourCtx.newBundleFactory();
+		factory.initializeBundleFromResourceList("", resources, "http://foo", "http://foo", 2, null);
+		assertEquals(2, factory.getDstu1Bundle().getEntries().size());
 	}
 	
 	@Test

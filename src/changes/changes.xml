@@ -112,6 +112,21 @@
 				for users who have parsed a resource with contained resources and want to remove some
 				before re-encoding. Thanks to Alexander Kley for reporting! 
 			</action>
+			<action type="fix" issue="110" due-to="mochaholic">
+				Add support for DSTU2 style security labels in the parser and encoder. Thanks to
+				Mohammad Jafari for the contribution!
+			</action>
+			<action type="fix">
+				Server requests for Binary resources where the client has explicitly requested XML or JSON responses
+				(either with a <![CDATA[<code>_format</code>]]> URL parameter, or an <![CDATA[<code>Accept</code>]]> request header)
+				will be responded to using the Binary FHIR resource type instead of as Binary blobs. This is
+				in accordance with the recommended behaviour in the FHIR specification.
+			</action>
+			<action type="add">
+				Add a new property to RestfulServer called "DefaultResponseEncoding", which allows
+				users to configure a default encoding (XML/JSON) to use if none is specified in the
+				client request. Currently defaults to XML.
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

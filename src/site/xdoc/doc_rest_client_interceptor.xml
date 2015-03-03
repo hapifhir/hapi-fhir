@@ -11,9 +11,6 @@
 
 		<section name="Client Interceptors">
 
-			<macro name="toc">
-			</macro>
-
 			<p>
 				Both generic clients and annotation-driven clients support
 				<a href="./apidocs/ca/uhn/fhir/rest/client/IClientInterceptor.html">Client Interceptors</a>,

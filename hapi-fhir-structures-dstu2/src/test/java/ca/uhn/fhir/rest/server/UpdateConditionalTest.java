@@ -2,10 +2,13 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -31,9 +34,12 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.PortUtil;
@@ -50,6 +56,7 @@ public class UpdateConditionalTest {
 	private static Server ourServer;
 	private static IdDt ourLastId;
 	private static IdDt ourLastIdParam;
+	private static boolean ourLastRequestWasSearch;
 	
 	
 	
@@ -58,6 +65,7 @@ public class UpdateConditionalTest {
 		ourLastId = null;
 		ourLastConditionalUrl = null;
 		ourLastIdParam = null;
+		ourLastRequestWasSearch = false;
 	}
 
 	@Test
@@ -112,6 +120,29 @@ public class UpdateConditionalTest {
 
 	}
 
+	@Test
+	public void testSearchStillWorks() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_pretty=true");
+
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertTrue(ourLastRequestWasSearch);
+		assertNull(ourLastId);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastConditionalUrl);
+
+	}
+
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -147,6 +178,11 @@ public class UpdateConditionalTest {
 			return Patient.class;
 		}
 
+		@Search
+		public List<IResource> search(@OptionalParam(name="foo") StringDt theString) {
+			ourLastRequestWasSearch = true;
+			return new ArrayList<IResource>();
+		}
 		
 		@Update()
 		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @ConditionalOperationParam String theConditional, @IdParam IdDt theIdParam) {

@@ -21,8 +21,8 @@ public class Dstu2Examples {
    @SuppressWarnings("unused")
    public void getResourceTags() {
       // START SNIPPET: context
-      // Create a "dev" context, which supports DSTU2
-      FhirContext ctx = FhirContext.forDev();
+      // Create a DSTU2 context, which will use DSTU2 semantics
+      FhirContext ctx = FhirContext.forDstu2();
       
       // This parser supports DSTU2
       IParser parser = ctx.newJsonParser();
@@ -40,10 +40,10 @@ public class Dstu2Examples {
       @Override
       protected void initialize() throws ServletException {
 
-         // In your initialize method, assign a DEV FhirContext. This
+         // In your initialize method, assign a DSTU2 FhirContext. This
          // is all that is required in order to put the server
          // into DSTU2 mode
-         setFhirContext(FhirContext.forDev());
+         setFhirContext(FhirContext.forDstu2());
          
          // Then set resource providers as normal, and do any other
          // configuration you need to do.

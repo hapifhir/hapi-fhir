@@ -341,15 +341,15 @@ public class IncludeTest {
 			pr3.getName().addFamily("Pract3");
 
 			Observation o1 = new Observation();
-			o1.getName().setText("Obs1");
+			o1.getCode().setText("Obs1");
 			o1.addPerformer().setResource(pr1);
 
 			Observation o2 = new Observation();
-			o2.getName().setText("Obs2");
+			o2.getCode().setText("Obs2");
 			o2.addPerformer().setResource(pr2);
 
 			Observation o3 = new Observation();
-			o3.getName().setText("Obs3");
+			o3.getCode().setText("Obs3");
 			o3.addPerformer().setResource(pr3);
 
 			DiagnosticReport rep = new DiagnosticReport();

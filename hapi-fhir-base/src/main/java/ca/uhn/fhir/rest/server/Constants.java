@@ -113,6 +113,12 @@ public class Constants {
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
 	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
+	public static final String LINK_SELF = "self";
+	public static final String LINK_FIRST = "first";
+	public static final String LINK_PREVIOUS = "previous";
+	public static final String LINK_NEXT = "next";
+	public static final String LINK_LAST = "last";
+	public static final String LINK_FHIR_BASE = "fhir-base";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

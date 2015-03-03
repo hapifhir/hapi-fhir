@@ -127,7 +127,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param theResourceType
 	 *            The resource type (e.g. "Patient")
 	 * @param theId

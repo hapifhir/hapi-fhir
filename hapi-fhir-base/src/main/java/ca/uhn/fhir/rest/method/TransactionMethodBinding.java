@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -37,15 +37,12 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.method.TransactionParamBinder.ParamStyle;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 

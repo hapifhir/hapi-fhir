@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-@DatatypeDef(name="Extension") 
+@DatatypeDef(name = "Extension")
 public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDatatype, IBaseExtension<ExtensionDt> {
 
 	private boolean myModifier;
@@ -39,7 +39,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	@Child(name="url", type=StringDt.class, order=0, min=1, max=1)	
 	private StringDt myUrl;
 
-	@Child(name="value", type=IDatatype.class, order=1, min=0, max=1)	
+	@Child(name = "value", type = IDatatype.class, order = 1, min = 0, max = 1)
 	private IBaseDatatype myValue;
 	
 	public ExtensionDt() {
@@ -66,12 +66,12 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 	}
 
 	/**
-	 * Returns the URL for this extension. 
+	 * Returns the URL for this extension.
 	 * <p>
 	 * Note that before HAPI 0.9 this method returned a {@link StringDt} but as of
 	 * HAPI 0.9 this method returns a plain string. This was changed because it does not make sense to use a StringDt here
 	 * since the URL itself can not contain extensions and it was therefore misleading.
-	 * </p> 
+	 * </p>
 	 */
 	public String getUrl() {
 		return myUrl != null ? myUrl.getValue() : null;
@@ -79,7 +79,7 @@ public class ExtensionDt extends BaseIdentifiableElement implements ICompositeDa
 
 	/**
 	 * Retained for backward compatibility
-	 * 
+	 *
 	 * @see ExtensionDt#getUrl()
 	 */
 	public String getUrlAsString() {

@@ -179,7 +179,7 @@ public class TransactionWithBundleResourceParamTest {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();

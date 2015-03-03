@@ -41,9 +41,8 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	DaoMethodOutcome create(T theResource, String theIfNoneExist);
 
 	/**
-	 * @param thePerformIndexing
-	 *            Use with caution! If you set this to false, you need to manually perform indexing or your resources
-	 *            won't be indexed and searches won't work.
+	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
+	 *                           won't be indexed and searches won't work.
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing);
 
@@ -75,9 +74,8 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	BaseHasResource readEntity(IdDt theId);
 
 	/**
-	 * @param theCheckForForcedId
-	 *            If true, this method should fail if the requested ID contains a numeric PID which exists, but is
-	 *            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
+	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
+	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
 	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
 

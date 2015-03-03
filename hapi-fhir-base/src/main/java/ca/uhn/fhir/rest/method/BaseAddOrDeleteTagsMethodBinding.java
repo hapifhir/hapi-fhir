@@ -45,7 +45,6 @@ import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -188,10 +187,8 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 			}
 		}
 
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-
 		HttpServletResponse response = theRequest.getServletResponse();
-		response.setContentType(responseEncoding.getResourceContentType());
+		response.setContentType(Constants.CT_TEXT);
 		response.setStatus(Constants.STATUS_HTTP_200_OK);
 		response.setCharacterEncoding(Constants.CHARSET_UTF_8);
 

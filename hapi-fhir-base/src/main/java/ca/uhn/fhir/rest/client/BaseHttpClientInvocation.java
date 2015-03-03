@@ -59,7 +59,7 @@ public abstract class BaseHttpClientInvocation {
 	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding);
 
 	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
-		if (theExtraParams==null) {
+		if (theExtraParams == null) {
 			return;
 		}
 		boolean first = theWithQuestionMark;

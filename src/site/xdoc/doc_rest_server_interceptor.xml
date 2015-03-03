@@ -11,9 +11,6 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="Server Interceptors">
 			
-			<macro name="toc">
-			</macro>
-			
 			<img src="svg/restful-server-interceptors.svg" alt="Interceptors" align="right"/>
 			
 			<p>

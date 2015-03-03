@@ -35,6 +35,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildDirectResource;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IElement;
@@ -72,8 +73,8 @@ public class FhirTerser {
 	 * well as any contained resources.
 	 * </p>
 	 * <p>
-	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not decend into linked resources (e.g.
-	 * {@link BaseResourceReferenceDt#getResource()})
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
+	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
 	 * </p>
 	 * 
 	 * @param theResource
@@ -191,6 +192,9 @@ public class FhirTerser {
 		// }
 
 		switch (theDefinition.getChildType()) {
+//		case RESOURCE:
+//			// Don't descend into embedded resources
+//			break;
 		case PRIMITIVE_XHTML:
 		case PRIMITIVE_DATATYPE:
 			// These are primitive types
@@ -205,9 +209,14 @@ public class FhirTerser {
 				}
 			}
 			break;
+		case RESOURCE:
 		case RESOURCE_BLOCK:
-		case COMPOSITE_DATATYPE:
-		case RESOURCE: {
+		case COMPOSITE_DATATYPE: {
+			if (theChildDefinition instanceof RuntimeChildDirectResource) {
+				// Don't descend into embedded resources
+				return;
+			}
+			
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
@@ -264,6 +273,10 @@ public class FhirTerser {
 	/**
 	 * Visit all elements in a given resource
 	 * 
+	 * <p>
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
+	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
+	 * </p>
 	 * @param theResource
 	 *            The resource to visit
 	 * @param theVisitor

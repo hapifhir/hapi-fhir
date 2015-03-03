@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -166,13 +167,13 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			response = (MethodOutcome) invokeServerMethod(params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encoding, servletResponse, theRequest);
+			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
+			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
 			return;
 		} catch (BaseServerResponseException e) {
 			ourLog.info("Exception during method invocation: " + e.getMessage());
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
-			streamOperationOutcome(e, theServer, encoding, servletResponse, theRequest);
+			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
+			streamOperationOutcome(e, theServer, encodingNotNull, servletResponse, theRequest);
 			return;
 		}
 
@@ -234,11 +235,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		theServer.addHeadersToResponse(servletResponse);
 
 		if (outcome != null) {
-			EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+			EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
 			servletResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = servletResponse.getWriter();
 			IParser parser = encoding.newParser(getContext());
-			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
 			try {
 				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
 			} finally {
@@ -268,7 +269,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * @throws IOException
 	 */
 	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServer.determineRequestEncoding(theRequest);
+		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
 		BufferedReader requestReader = theRequest.getServletRequest().getReader();
 		
@@ -302,15 +303,15 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		return null;
 	}
 
-	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncoding, HttpServletResponse theResponse, Request theRequest) throws IOException {
+	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, Request theRequest) throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 
 		theServer.addHeadersToResponse(theResponse);
-
+		
 		if (theE.getOperationOutcome() != null) {
-			theResponse.setContentType(theEncoding.getResourceContentType());
-			IParser parser = theEncoding.newParser(theServer.getFhirContext());
-			parser.setPrettyPrint(RestfulServer.prettyPrintResponse(theRequest));
+			theResponse.setContentType(theEncodingNotNull.getResourceContentType());
+			IParser parser = theEncodingNotNull.newParser(theServer.getFhirContext());
+			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
 			Writer writer = theResponse.getWriter();
 			try {
 				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);

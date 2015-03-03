@@ -10,9 +10,6 @@
 
 		<section name="Narrative Generation">
 			
-			<macro name="toc">
-			</macro>
-			
 			<p>
 				HAPI provides a several ways to add 
 				<a href="http://hl7.org/implement/standards/fhir/narrative.html">Narrative Text</a>

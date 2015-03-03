@@ -1,13 +1,29 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -45,6 +61,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -63,6 +80,8 @@ public class ResourceProviderDstu2Test {
 	private static Server ourServer;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static DaoConfig ourDaoConfig;
+	private static CloseableHttpClient ourHttpClient;
+	private static String ourServerBase;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -90,6 +109,136 @@ public class ResourceProviderDstu2Test {
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
+	}
+
+	@Test
+	public void testCreateResourceWithNumericId() throws IOException {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1777\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-02-25T15:47:48Z\"/></meta></Patient>";
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), startsWith(ourServerBase + "/Patient/"));
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), endsWith("/_history/1"));
+			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), not(containsString("1777")));
+			
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
+	public void testCreateResourceConditional() throws IOException {
+		String methodName = "testCreateResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
+		response = ourHttpClient.execute(post);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertEquals(id.getValue(), newIdString);
+		} finally {
+			response.close();
+		}
+		
+	}
+
+	@Test
+	public void testUpdateResourceConditional() throws IOException {
+		String methodName = "testUpdateResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		HttpPut put = new HttpPut(ourServerBase + "/Patient?name=" + methodName);
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			IdDt newId = new IdDt(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
+			assertEquals(id.toVersionless(), newId.toVersionless());
+			assertNotEquals(id, newId);
+		} finally {
+			response.close();
+		}
+		
+	}
+	
+	@Test
+	public void testDeleteResourceConditional() throws IOException {
+		String methodName = "testDeleteResourceConditional";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+		
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
+		response = ourHttpClient.execute(delete);
+		try {
+			assertEquals(204, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+		
+		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		response = ourHttpClient.execute(read);
+		try {
+			ourLog.info(response.toString());
+			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+
 	}
 
 	/**
@@ -136,6 +285,7 @@ public class ResourceProviderDstu2Test {
 				.forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2","testSearchWithInclude02"))
 				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.prettyPrint()
 				.execute();
 		//@formatter:on
 		
@@ -149,7 +299,7 @@ public class ResourceProviderDstu2Test {
 	}
 
 	
-//	@Test TODO-reenable
+	@Test
 	public void testCountParam() throws Exception {
 		// NB this does not get used- The paging provider has its own limits built in
 		ourDaoConfig.setHardSearchLimit(100);
@@ -365,7 +515,7 @@ public class ResourceProviderDstu2Test {
 		assertEquals(1, actual.getContained().getContainedResources().size());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
-		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01")).execute();
+		Bundle b = ourClient.search().forResource("Patient").where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01")).prettyPrint().execute();
 		assertEquals(1, b.size());
 
 	}
@@ -518,6 +668,7 @@ public class ResourceProviderDstu2Test {
 	public static void afterClass() throws Exception {
 		ourServer.stop();
 		ourAppCtx.stop();
+		ourHttpClient.close();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -529,7 +680,7 @@ public class ResourceProviderDstu2Test {
 		ourFhirCtx = FhirContext.forDstu2();
 		restServer.setFhirContext(ourFhirCtx);
 		
-		String serverBase = "http://localhost:" + port + "/fhir/context";
+		ourServerBase = "http://localhost:" + port + "/fhir/context";
 
 		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
 
@@ -560,9 +711,13 @@ public class ResourceProviderDstu2Test {
 		ourServer.start();
 
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
-		ourClient = ourFhirCtx.newRestfulGenericClient(serverBase);
+		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 		
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourHttpClient = builder.build();
 
 	}
 

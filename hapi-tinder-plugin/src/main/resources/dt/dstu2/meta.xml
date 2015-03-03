@@ -797,7 +797,7 @@
     <Cell ss:StyleID="s74"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s74"><Data ss:Type="String">Profiles this resource claims to conform to</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s75"><Data ss:Type="String">A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url</Data><NamedCell
+    <Cell ss:StyleID="s75"><Data ss:Type="String">A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s83"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">It is up to the server and/or other infrastructure of policy to determine whether/how these claims are verified and/or updated over tiem</Data><NamedCell
@@ -3132,8 +3132,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>4</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

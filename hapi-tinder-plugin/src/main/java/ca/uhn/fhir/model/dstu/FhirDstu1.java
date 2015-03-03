@@ -20,8 +20,7 @@ package ca.uhn.fhir.model.dstu;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.InputStream;
 import java.util.Collections;
@@ -35,7 +34,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -43,6 +41,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildCompositeDatatypeDefinition;
@@ -62,6 +61,7 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.composite.ContainedDt;
@@ -76,6 +76,7 @@ import ca.uhn.fhir.model.dstu.valueset.SlicingRulesEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class FhirDstu1 implements IFhirVersion {
@@ -380,6 +381,15 @@ public class FhirDstu1 implements IFhirVersion {
 		return ContainedDt.class;
 	}
 
-	
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new ca.uhn.fhir.model.dstu.composite.CodingDt();
+	}
 
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		throw new UnsupportedOperationException();
+	}
+
+	
 }

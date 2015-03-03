@@ -47,8 +47,10 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -71,7 +73,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		set.add(Constants.PARAM_COUNT);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
-	
+
 	private MethodReturnTypeEnum myMethodReturnType;
 	private Class<?> myResourceListCollectionType;
 	private String myResourceName;
@@ -88,13 +90,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
+							+ collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
 
 		} else if (IBaseResource.class.isAssignableFrom(methodReturnType)) {
-			if (Modifier.isAbstract(methodReturnType.getModifiers())==false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
+			if (Modifier.isAbstract(methodReturnType.getModifiers()) == false && theContext.getResourceDefinition((Class<? extends IBaseResource>) methodReturnType).isBundle()) {
 				myMethodReturnType = MethodReturnTypeEnum.BUNDLE_RESOURCE;
 			} else {
 				myMethodReturnType = MethodReturnTypeEnum.RESOURCE;
@@ -104,7 +107,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
+					+ theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -112,8 +116,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
 				if (resourceDefAnnotation == null) {
 					if (Modifier.isAbstract(theReturnResourceType.getModifiers())) {
-//						 If we're returning an abstract type, that's ok
-					}else {
+						// If we're returning an abstract type, that's ok
+					} else {
 						throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
 					}
 				} else {
@@ -212,13 +216,13 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
-		boolean prettyPrint = RestfulServer.prettyPrintResponse(theRequest);
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequest);
 
 		// Narrative mode
-		NarrativeModeEnum narrativeMode = RestfulServer.determineNarrativeMode(theRequest);
+		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 
 		// Determine response encoding
-		EncodingEnum responseEncoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
 
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
@@ -238,36 +242,70 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 		}
 
-		Integer count = RestfulServer.extractCountParameter(theRequest.getServletRequest());
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
 
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		HttpServletResponse response = theRequest.getServletResponse();
 		Object resultObj = invokeServer(theRequest, params);
 		switch (getReturnType()) {
-		case BUNDLE:{
+		case BUNDLE: {
 
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
-				IResource resource = (IResource) resultObj;
-				RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+				IResource resource;
+				if (resultObj instanceof IBundleProvider) {
+					IBundleProvider result = (IBundleProvider) resultObj;
+					resource = result.getResources(0, 1).get(0);
+				} else {
+					resource = (IResource) resultObj;
+				}
+				
+				/*
+				 * We assume that the bundle we got back from the handling method
+				 * may not have everything populated (e.g. self links, bundle type,
+				 * etc) so we do that here.
+				 */
+				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+				bundleFactory.initializeWithBundleResource(resource);
+				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), count, getResponseBundleType());
+				
+				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
+
 				IBundleProvider result = (IBundleProvider) resultObj;
-				Bundle bundle = RestfulServer.createBundleFromBundleProvider(theServer, response, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, requestIsBrowser, narrativeMode, 0, count, null, getResponseBundleType());
-	
-				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-					IServerInterceptor next = theServer.getInterceptors().get(i);
-					boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
-					if (!continueProcessing) {
-						return;
+				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null,
+						getResponseBundleType());
+				Bundle bundle = bundleFactory.getDstu1Bundle();
+				if (bundle != null) {
+					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+						IServerInterceptor next = theServer.getInterceptors().get(i);
+						boolean continueProcessing = next.outgoingResponse(theRequest, bundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+						if (!continueProcessing) {
+							ourLog.debug("Interceptor {} returned false, not continuing processing");
+							return;
+						}
 					}
+					RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
+				} else {
+					IBaseResource resBundle = bundleFactory.getResourceBundle();
+					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+						IServerInterceptor next = theServer.getInterceptors().get(i);
+						boolean continueProcessing = next.outgoingResponse(theRequest, resBundle, theRequest.getServletRequest(), theRequest.getServletResponse());
+						if (!continueProcessing) {
+							ourLog.debug("Interceptor {} returned false, not continuing processing");
+							return;
+						}
+					}
+					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
+							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase());
 				}
-	
-				RestfulServer.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip);
+
 				break;
 			}
 		}
-		case RESOURCE:{
+		case RESOURCE: {
 			IBundleProvider result = (IBundleProvider) resultObj;
 			if (result.size() == 0) {
 				throw new ResourceNotFoundException(theRequest.getId());
@@ -285,7 +323,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			}
 
-			RestfulServer.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 			break;
 		}
 		}

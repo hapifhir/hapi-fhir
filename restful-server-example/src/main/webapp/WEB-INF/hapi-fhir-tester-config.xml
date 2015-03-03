@@ -16,9 +16,9 @@
 		<property name="servers">
 			<list>
 				<!-- Each value is a reference to one FHIR server -->
-				<!-- Format is:    [id],[name],[base URL] -->
+				<!-- Format is:    [id],[FHIR version: DSTU1|DSTU2],[name],[base URL] -->
 				<!-- The URL should be customized to match the base URL for the FHIR endpoint -->
-				<value>example , Restful Server Example , http://localhost:8080/fhir</value>
+				<value>example , DSTU1 , Restful Server Example , http://localhost:8080/fhir</value>
 			</list>
 		</property>
 	</bean>

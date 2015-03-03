@@ -40,7 +40,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -98,7 +98,7 @@ class TransactionParamBinder implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 
-		EncodingEnum encoding = RestfulServer.determineResponseEncoding(theRequest.getServletRequest());
+		EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest.getServer(), theRequest.getServletRequest());
 		IParser parser = encoding.newParser(myContext);
 
 		BufferedReader reader;

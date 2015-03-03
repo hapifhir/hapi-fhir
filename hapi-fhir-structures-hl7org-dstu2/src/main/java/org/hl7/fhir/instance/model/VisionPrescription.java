@@ -1100,21 +1100,21 @@ public class VisionPrescription extends DomainResource {
     /**
      * Business identifier which may be used by other parties to reference or identify the prescription.
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="Business identifier which may be used by other parties to reference or identify the prescription." )
     protected List<Identifier> identifier;
 
     /**
      * The date (and perhaps time) when the prescription was written.
      */
-    @Child(name="dateWritten", type={DateTimeType.class}, order=1, min=0, max=1)
+    @Child(name = "dateWritten", type = {DateTimeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="When prescription was authorized", formalDefinition="The date (and perhaps time) when the prescription was written." )
     protected DateTimeType dateWritten;
 
     /**
      * A link to a resource representing the person to whom the Vision products will be supplied.
      */
-    @Child(name="patient", type={Patient.class}, order=2, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Who prescription is for", formalDefinition="A link to a resource representing the person to whom the Vision products will be supplied." )
     protected Reference patient;
 
@@ -1126,7 +1126,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * The healthcare professional responsible for authorizing the prescription.
      */
-    @Child(name="prescriber", type={Practitioner.class}, order=3, min=0, max=1)
+    @Child(name = "prescriber", type = {Practitioner.class}, order = 3, min = 0, max = 1)
     @Description(shortDefinition="Who authorizes the Vision product", formalDefinition="The healthcare professional responsible for authorizing the prescription." )
     protected Reference prescriber;
 
@@ -1138,7 +1138,7 @@ public class VisionPrescription extends DomainResource {
     /**
      * A link to a resource that identifies the particular occurrence of contact between patient and health care provider.
      */
-    @Child(name="encounter", type={Encounter.class}, order=4, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 4, min = 0, max = 1)
     @Description(shortDefinition="Created during encounter / admission / stay", formalDefinition="A link to a resource that identifies the particular occurrence of contact between patient and health care provider." )
     protected Reference encounter;
 
@@ -1150,14 +1150,14 @@ public class VisionPrescription extends DomainResource {
     /**
      * Can be the reason or the indication for writing the prescription.
      */
-    @Child(name="reason", type={CodeableConcept.class, Condition.class}, order=5, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Reason or indication for writing the prescription", formalDefinition="Can be the reason or the indication for writing the prescription." )
     protected Type reason;
 
     /**
      * Deals with details of the dispense part of the supply specification.
      */
-    @Child(name="dispense", type={}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "dispense", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Vision supply authorization", formalDefinition="Deals with details of the dispense part of the supply specification." )
     protected List<VisionPrescriptionDispenseComponent> dispense;
 
@@ -1515,12 +1515,12 @@ public class VisionPrescription extends DomainResource {
     return ResourceType.VisionPrescription;
    }
 
-  @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identity", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+    @SearchParamDefinition(name = "identifier", path = "VisionPrescription.identifier", description = "Return prescriptions with this external identity", type = "token")
+    public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
-  public static final String SP_DATEWRITTEN = "datewritten";
+    @SearchParamDefinition(name = "datewritten", path = "VisionPrescription.dateWritten", description = "Return prescriptions written on this date", type = "date")
+    public static final String SP_DATEWRITTEN = "datewritten";
   @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
 

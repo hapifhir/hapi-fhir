@@ -266,21 +266,21 @@ public class Communication extends DomainResource {
     /**
      * Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Unique identifier", formalDefinition="Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The type of message such as alert, notification, reminder, instruction, etc.
      */
-    @Child(name="category", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Message category", formalDefinition="The type of message such as alert, notification, reminder, instruction, etc." )
     protected CodeableConcept category;
 
     /**
      * The entity (e.g., person, organization, clinical information system, or device) which is the source of the communication.
      */
-    @Child(name="sender", type={Patient.class, Practitioner.class, Device.class, RelatedPerson.class, Organization.class}, order=2, min=0, max=1)
+    @Child(name = "sender", type = {Patient.class, Practitioner.class, Device.class, RelatedPerson.class, Organization.class}, order = 2, min = 0, max = 1)
     @Description(shortDefinition="Message sender", formalDefinition="The entity (e.g., person, organization, clinical information system, or device) which is the source of the communication." )
     protected Reference sender;
 
@@ -292,7 +292,7 @@ public class Communication extends DomainResource {
     /**
      * The entity (e.g., person, organization, clinical information system, or device) which is the target of the communication.
      */
-    @Child(name="recipient", type={Patient.class, Device.class, RelatedPerson.class, Practitioner.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "recipient", type = {Patient.class, Device.class, RelatedPerson.class, Practitioner.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Message recipient", formalDefinition="The entity (e.g., person, organization, clinical information system, or device) which is the target of the communication." )
     protected List<Reference> recipient;
     /**
@@ -304,28 +304,28 @@ public class Communication extends DomainResource {
     /**
      * Text, attachment(s), or resource(s) to be communicated to the recipient.
      */
-    @Child(name="payload", type={}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "payload", type = {}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Message payload", formalDefinition="Text, attachment(s), or resource(s) to be communicated to the recipient." )
     protected List<CommunicationPayloadComponent> payload;
 
     /**
      * The communication medium, e.g., email, fax.
      */
-    @Child(name="medium", type={CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "medium", type = {CodeableConcept.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Communication medium", formalDefinition="The communication medium, e.g., email, fax." )
     protected List<CodeableConcept> medium;
 
     /**
      * The status of the transmission.
      */
-    @Child(name="status", type={CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="in-progress | completed | suspended | rejected | failed", formalDefinition="The status of the transmission." )
     protected Enumeration<CommunicationStatus> status;
 
     /**
      * The encounter within which the communication was sent.
      */
-    @Child(name="encounter", type={Encounter.class}, order=7, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order = 7, min = 0, max = 1)
     @Description(shortDefinition="Encounter leading to message", formalDefinition="The encounter within which the communication was sent." )
     protected Reference encounter;
 
@@ -337,28 +337,28 @@ public class Communication extends DomainResource {
     /**
      * The time when this communication was sent.
      */
-    @Child(name="sent", type={DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "sent", type = {DateTimeType.class}, order = 8, min = 0, max = 1)
     @Description(shortDefinition="When sent", formalDefinition="The time when this communication was sent." )
     protected DateTimeType sent;
 
     /**
      * The time when this communication arrived at the destination.
      */
-    @Child(name="received", type={DateTimeType.class}, order=9, min=0, max=1)
+    @Child(name = "received", type = {DateTimeType.class}, order = 9, min = 0, max = 1)
     @Description(shortDefinition="When received", formalDefinition="The time when this communication arrived at the destination." )
     protected DateTimeType received;
 
     /**
      * The reason or justification for the communication.
      */
-    @Child(name="reason", type={CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reason", type = {CodeableConcept.class}, order = 10, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Indication for message", formalDefinition="The reason or justification for the communication." )
     protected List<CodeableConcept> reason;
 
     /**
      * The patient who is the focus of this communication.
      */
-    @Child(name="subject", type={Patient.class}, order=11, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class}, order = 11, min = 0, max = 1)
     @Description(shortDefinition="Focus of message", formalDefinition="The patient who is the focus of this communication." )
     protected Reference subject;
 
@@ -926,27 +926,27 @@ public class Communication extends DomainResource {
     return ResourceType.Communication;
    }
 
-  @SearchParamDefinition(name="identifier", path="Communication.identifier", description="Unique identifier", type="token" )
+  @SearchParamDefinition(name = "identifier", path = "Communication.identifier", description = "Unique identifier", type = "token")
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="sender", path="Communication.sender", description="Message sender", type="reference" )
   public static final String SP_SENDER = "sender";
   @SearchParamDefinition(name="subject", path="Communication.subject", description="Focus of message", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="patient", path="Communication.subject", description="Focus of message", type="reference" )
+  @SearchParamDefinition(name = "patient", path = "Communication.subject", description = "Focus of message", type = "reference")
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="recipient", path="Communication.recipient", description="Message recipient", type="reference" )
+  @SearchParamDefinition(name = "recipient", path = "Communication.recipient", description = "Message recipient", type = "reference")
   public static final String SP_RECIPIENT = "recipient";
   @SearchParamDefinition(name="received", path="Communication.received", description="When received", type="date" )
   public static final String SP_RECEIVED = "received";
   @SearchParamDefinition(name="medium", path="Communication.medium", description="Communication medium", type="token" )
   public static final String SP_MEDIUM = "medium";
-  @SearchParamDefinition(name="encounter", path="Communication.encounter", description="Encounter leading to message", type="reference" )
+  @SearchParamDefinition(name = "encounter", path = "Communication.encounter", description = "Encounter leading to message", type = "reference")
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="category", path="Communication.category", description="Message category", type="token" )
+  @SearchParamDefinition(name = "category", path = "Communication.category", description = "Message category", type = "token")
   public static final String SP_CATEGORY = "category";
-  @SearchParamDefinition(name="sent", path="Communication.sent", description="When sent", type="date" )
+  @SearchParamDefinition(name = "sent", path = "Communication.sent", description = "When sent", type = "date")
   public static final String SP_SENT = "sent";
-  @SearchParamDefinition(name="status", path="Communication.status", description="in-progress | completed | suspended | rejected | failed", type="token" )
+  @SearchParamDefinition(name = "status", path = "Communication.status", description = "in-progress | completed | suspended | rejected | failed", type = "token")
   public static final String SP_STATUS = "status";
 
 }

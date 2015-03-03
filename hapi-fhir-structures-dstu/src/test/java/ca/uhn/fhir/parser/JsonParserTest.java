@@ -99,7 +99,7 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
-	
+
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
@@ -113,11 +113,11 @@ public class JsonParserTest {
 
 		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
 		patient.addUndeclaredExtension(parent);
-		ExtensionDt child1 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value1"));
+		ExtensionDt child1 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value1"));
 		parent.addUndeclaredExtension(child1);
-		ExtensionDt child2 = new ExtensionDt().setUrl( "http://example.com#child").setValue( new StringDt("value2"));
+		ExtensionDt child2 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value2"));
 		parent.addUndeclaredExtension(child2);
-		
+
 		ExtensionDt modExt = new ExtensionDt();
 		modExt.setUrl("http://example.com/extensions#modext");
 		modExt.setValue(new DateDt("1995-01-02"));
@@ -141,74 +141,74 @@ public class JsonParserTest {
 		ourLog.info(output);
 
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",", 
-				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}", 
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("{\"resourceType\":\"Patient\",",
+				"\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
 				"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"
-				));
-		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" + 
-				"{" + 
-				"\"url\":\"http://example.com/extensions#modext\"," + 
-				"\"valueDate\":\"1995-01-02\"" + 
-				"}" + 
+		));
+		assertThat(enc, org.hamcrest.Matchers.stringContainsInOrder("\"modifierExtension\":[" +
+				"{" +
+				"\"url\":\"http://example.com/extensions#modext\"," +
+				"\"valueDate\":\"1995-01-02\"" +
+				"}" +
 				"],"));
-		assertThat(enc, containsString("\"_given\":[" + 
-				"{" + 
-				"\"extension\":[" + 
-				"{" + 
-				"\"url\":\"http://examples.com#givenext\"," + 
-				"\"valueString\":\"given\"" + 
-				"}" + 
-				"]" + 
-				"}," + 
-				"{" + 
-				"\"extension\":[" + 
-				"{" + 
-				"\"url\":\"http://examples.com#givenext_parent\"," + 
-				"\"extension\":[" + 
-				"{" + 
-				"\"url\":\"http://examples.com#givenext_child\"," + 
-				"\"valueString\":\"CHILD\"" + 
-				"}" + 
-				"]" + 
-				"}" + 
-				"]" + 
+		assertThat(enc, containsString("\"_given\":[" +
+				"{" +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext\"," +
+				"\"valueString\":\"given\"" +
+				"}" +
+				"]" +
+				"}," +
+				"{" +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext_parent\"," +
+				"\"extension\":[" +
+				"{" +
+				"\"url\":\"http://examples.com#givenext_child\"," +
+				"\"valueString\":\"CHILD\"" +
+				"}" +
+				"]" +
+				"}" +
+				"]" +
 				"}"));
 		
 		/*
 		 * Now parse this back
 		 */
-		
-		Patient parsed =ourCtx.newJsonParser().parseResource(Patient.class, enc); 
+
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
 		ext = parsed.getUndeclaredExtensions().get(0);
 		assertEquals("http://example.com/extensions#someext", ext.getUrl());
-		assertEquals("2011-01-02T11:13:15", ((DateTimeDt)ext.getValue()).getValueAsString());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeDt) ext.getValue()).getValueAsString());
 
 		parent = patient.getUndeclaredExtensions().get(1);
 		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
-		assertEquals( "http://example.com#child", child1.getUrl());
-		assertEquals("value1", ((StringDt)child1.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringDt) child1.getValue()).getValueAsString());
 		child2 = parent.getExtension().get(1);
-		assertEquals( "http://example.com#child", child2.getUrl());
-		assertEquals("value2", ((StringDt)child2.getValue()).getValueAsString());
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringDt) child2.getValue()).getValueAsString());
 
 		modExt = parsed.getUndeclaredModifierExtensions().get(0);
 		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-		assertEquals("1995-01-02", ((DateDt)modExt.getValue()).getValueAsString());
+		assertEquals("1995-01-02", ((DateDt) modExt.getValue()).getValueAsString());
 
 		name = parsed.getName().get(0);
 
 		ext2 = name.getGiven().get(0).getUndeclaredExtensions().get(0);
 		assertEquals("http://examples.com#givenext", ext2.getUrl());
-		assertEquals("given", ((StringDt)ext2.getValue()).getValueAsString());
+		assertEquals("given", ((StringDt) ext2.getValue()).getValueAsString());
 
 		given2ext = name.getGiven().get(1).getUndeclaredExtensions().get(0);
 		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
 		ExtensionDt given2ext2 = given2ext.getExtension().get(0);
 		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-		assertEquals("CHILD", ((StringDt)given2ext2.getValue()).getValue());
+		assertEquals("CHILD", ((StringDt) given2ext2.getValue()).getValue());
 
 	}
 

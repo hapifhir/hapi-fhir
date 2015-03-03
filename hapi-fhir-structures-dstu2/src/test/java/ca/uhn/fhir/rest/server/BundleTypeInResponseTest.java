@@ -48,6 +48,8 @@ public class BundleTypeInResponseTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		
+		ourLog.info(responseContent);
+		
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.getEntries().size());
 		assertEquals(BundleTypeEnum.SEARCHSET, bundle.getType().getValueAsEnum());

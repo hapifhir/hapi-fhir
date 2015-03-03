@@ -30,9 +30,9 @@ public interface BaseBinary extends IResource {
 
 	String getContentType();
 
-	void setContent(byte[] theContent);
+	BaseBinary setContent(byte[] theContent);
 
-	void setContentAsBase64(String theContent);
+	BaseBinary setContentAsBase64(String theContent);
 
-	void setContentType(String theContentType);
+	BaseBinary setContentType(String theContentType);
 }

@@ -43,6 +43,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private String myResourceName;
 	private boolean myBinary;
 	private Class<? extends IBaseResource> myResourceType;
+	private Integer myIdParamIndex;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -78,6 +79,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			}
 			index++;
 		}
+		
+		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		if (resourceParameter == null) {
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
@@ -106,12 +109,11 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 	}
 
-	/**
-	 * For subclasses to override
-	 */
 	@Override
 	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
-		// nothing
+		if (myIdParamIndex != null) {
+			theParams[myIdParamIndex] = theRequest.getId();
+		}
 	}
 
 	@Override

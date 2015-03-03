@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.client.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.validation.FhirValidator;
 
@@ -481,6 +482,10 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
+	}
+
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		return myVersion.newBundleFactory(this);
 	}
 
 }

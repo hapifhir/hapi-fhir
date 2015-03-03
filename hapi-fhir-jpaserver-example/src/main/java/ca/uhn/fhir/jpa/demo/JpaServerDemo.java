@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -31,9 +32,12 @@ public class JpaServerDemo extends RestfulServer {
 		/* 
 		 * We want to support FHIR DSTU2 format. This means that the server
 		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
+		 *
+		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
 		 */
-		setFhirContext(FhirContext.forDstu2());
-		
+        FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU2;
+        setFhirContext(new FhirContext(fhirVersion));
+
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
@@ -42,14 +46,20 @@ public class JpaServerDemo extends RestfulServer {
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */
-		List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
+        String resourceProviderBeanName = "myResourceProvidersDstu" + (fhirVersion == FhirVersionEnum.DSTU1 ? "1" : "2");
+        List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
-		JpaSystemProviderDstu2 systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+        Object systemProvider;
+        if (fhirVersion == FhirVersionEnum.DSTU1) {
+            systemProvider = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
+        } else {
+            systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+        }
 		setPlainProviders(systemProvider);
 		
 		/*

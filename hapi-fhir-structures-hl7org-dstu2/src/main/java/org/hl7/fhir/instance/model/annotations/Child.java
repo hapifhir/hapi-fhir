@@ -100,7 +100,7 @@ public @interface Child {
 
 	/**
 	 * For children which accept an {@link Enumeration} as the type, this
-	 * field indicates the type to use for the enum factory 
+	 * field indicates the type to use for the enum factory
 	 */
 	Class<? extends IBaseEnumFactory<?>> enumFactory() default NoEnumFactory.class;
 
@@ -119,7 +119,7 @@ public @interface Child {
 		private NoEnumFactory() {
 			// non instantiable
 		}
-		
+
 		@Override
 		public Enum<?> fromCode(String theCodeString) throws IllegalArgumentException {
 			return null;

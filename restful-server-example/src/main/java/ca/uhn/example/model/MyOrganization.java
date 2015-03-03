@@ -87,7 +87,7 @@ public class MyOrganization extends Organization {
 
 	@Override
 	public boolean isEmpty() {
-		return ElementUtil.isEmpty(super.isEmpty(), myBillingCode, myEmergencyContact);
+        return super.isEmpty() && ElementUtil.isEmpty(myBillingCode, myEmergencyContact);
 	}
 
 	/**

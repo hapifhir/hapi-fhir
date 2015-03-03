@@ -105,7 +105,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 				return getImplementingClass().newInstance();
 			} else if (theArgument instanceof IValueSetEnumBinder) {
 				return getImplementingClass().getConstructor(IValueSetEnumBinder.class).newInstance(theArgument);
-			}else {
+			} else {
 				return getImplementingClass().getConstructor(IBaseEnumFactory.class).newInstance(theArgument);
 			}
 		} catch (InstantiationException e) {

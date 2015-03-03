@@ -12,9 +12,6 @@
 		<!-- The body of the document contains a number of sections -->
 		<section name="ETags and Version Aware Operations">
 
-			<macro name="toc">
-			</macro>
-
 			<p>
 				HAPI provides support for 
 				<a href="http://en.wikipedia.org/wiki/HTTP_ETag">HTTP ETags</a>, which are
