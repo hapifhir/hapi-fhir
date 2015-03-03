@@ -68,6 +68,7 @@ import ca.uhn.fhir.rest.gclient.IDeleteWithQueryTyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetPageTyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
+import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IRead;
@@ -1438,6 +1439,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+	}
+
+	@Override
+	public IOperation operation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

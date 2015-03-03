@@ -12,11 +12,14 @@ import ca.uhn.fhir.model.dstu.resource.Practitioner;
 public class CustomThymeleafNarrativeGeneratorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorTest.class);
+
+	private static FhirContext ourCtx = FhirContext.forDstu1(); 
 	
 	@Test
 	public void testGenerator() {
 
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
+		gen.setFhirContext(ourCtx);
 
 		Practitioner p = new Practitioner();
 		p.addIdentifier("sys", "val1");

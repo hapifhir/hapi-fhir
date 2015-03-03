@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -31,9 +32,11 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -80,6 +83,32 @@ public class GenericClientTestDstu2 {
 	}
 
 	@Test
+	public void testOperationWithListOfParameters() throws Exception {
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setValue(new StringDt("STRINGVALIN1"));
+		inParams.addParameter().setValue(new StringDt("STRINGVALIN2"));
+		String reqString = ourCtx.newXmlParser().encodeResourceToString(inParams);
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT1"));
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
+		final String respString = ourCtx.newXmlParser().encodeResourceToString(outParams);
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+//		client.operation().onServer().withParameters(inParams);
+	}
+
+	@Test
 	public void testTransactionWithListOfResources() throws Exception {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
@@ -122,14 +151,14 @@ public class GenericClientTestDstu2 {
 		assertEquals("POST", requestBundle.getEntry().get(0).getTransaction().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getTransaction().getMethod());
 		assertEquals("Patient/2", requestBundle.getEntry().get(1).getTransaction().getUrl());
-		
+
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdDt("Patient/1/_history/1"), p1.getId().toUnqualified());
-//		assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
+		// assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
 
 		p2 = (Patient) response.get(1);
 		assertEquals(new IdDt("Patient/2/_history/2"), p2.getId().toUnqualified());
-//		assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
+		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
