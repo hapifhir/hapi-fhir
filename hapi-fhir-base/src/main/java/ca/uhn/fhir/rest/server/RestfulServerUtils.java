@@ -104,7 +104,7 @@ public class RestfulServerUtils {
 		} else {
 			theHttpResponse.setContentType(responseEncoding.getResourceContentType());
 		}
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		theHttpResponse.setCharacterEncoding(Constants.CHARSETNAME_UTF_8);
 	
 		theServer.addHeadersToResponse(theHttpResponse);
 	
@@ -340,7 +340,7 @@ public class RestfulServerUtils {
 			theHttpResponse.setContentType(responseEncoding.getBundleContentType());
 		}
 	
-		theHttpResponse.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		theHttpResponse.setCharacterEncoding(Constants.CHARSETNAME_UTF_8);
 	
 		theServer.addHeadersToResponse(theHttpResponse);
 		

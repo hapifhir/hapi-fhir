@@ -14,6 +14,7 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
@@ -320,6 +321,43 @@ public class GenericClientExample {
       
    }
 
+   @SuppressWarnings("unused")
+   public static void history() {
+      IGenericClient client = FhirContext.forDstu2().newRestfulGenericClient("");
+      {
+         Bundle response;
+         // START SNIPPET: historyDstu1
+         response = client
+            .history()
+            .ofServer()
+            .andReturnDstu1Bundle()
+            .execute();
+         // END SNIPPET: historyDstu1
+      }
+      {
+         ca.uhn.fhir.model.dstu2.resource.Bundle response;
+         // START SNIPPET: historyDstu2
+         response = client
+            .history()
+            .ofServer()
+            .andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+            .execute();
+         // END SNIPPET: historyDstu2
+      }
+      {
+         ca.uhn.fhir.model.dstu2.resource.Bundle response;
+         // START SNIPPET: historyFeatures
+         response = client
+            .history()
+            .ofServer()
+            .andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+            .since(new InstantDt("2012-01-01T12:22:32.038Z"))
+            .count(100)
+            .execute();
+         // END SNIPPET: historyFeatures
+      }
+   }
+   
    public static void main(String[] args) {
       fluentSearch();
    }

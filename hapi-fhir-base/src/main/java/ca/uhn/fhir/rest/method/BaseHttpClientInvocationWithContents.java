@@ -20,6 +20,10 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -207,7 +211,14 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		if (myResource != null && BaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			BaseBinary binary = (BaseBinary) myResource;
-			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent(), ContentType.parse(binary.getContentType()));
+			
+			/*
+			 * Note: Be careful about changing which constructor we use for ByteArrayEntity,
+			 * as Android's version of HTTPClient doesn't support the newer ones for
+			 * whatever reason.
+			 */
+			ByteArrayEntity entity = new ByteArrayEntity(binary.getContent());
+			entity.setContentType(binary.getContentType());
 			HttpRequestBase retVal = createRequest(url, entity);
 			addMatchHeaders(retVal, url);
 			return retVal;
@@ -275,7 +286,14 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				contents = parser.encodeResourceToString(myResource);
 				contentType = encoding.getResourceContentType();
 			}
-			entity = new StringEntity(contents, ContentType.create(contentType, Constants.CHARSET_UTF_8));
+			
+			/*
+			 * We aren't using a StringEntity here because the constructors supported by
+			 * Android aren't available in non-Android, and vice versa. Since we add the
+			 * content type header manually, it makes no difference which one
+			 * we use anyhow.
+			 */
+			entity = new ByteArrayEntity(contents.getBytes(Constants.CHARSET_UTF8));
 		}
 
 		HttpRequestBase retVal = createRequest(url, entity);

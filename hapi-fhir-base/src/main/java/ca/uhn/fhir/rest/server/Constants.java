@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,7 @@ import java.util.Set;
 
 public class Constants {
 
-	public static final String CHARSET_UTF_8 = "UTF-8";
+	public static final String CHARSETNAME_UTF_8 = "UTF-8";
 	public static final String CT_ATOM_XML = "application/atom+xml";
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 
@@ -119,6 +120,7 @@ public class Constants {
 	public static final String LINK_NEXT = "next";
 	public static final String LINK_LAST = "last";
 	public static final String LINK_FHIR_BASE = "fhir-base";
+	public static final Charset CHARSET_UTF8;
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
@@ -142,6 +144,8 @@ public class Constants {
 		}
 
 		FORMAT_VAL_TO_ENCODING = Collections.unmodifiableMap(valToEncoding);
+		
+		CHARSET_UTF8 = Charset.forName(CHARSETNAME_UTF_8);
 	}
 
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -30,6 +31,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -639,6 +642,61 @@ public class GenericClientTest {
 
 	}
 
+	@Test
+	public void testHistory() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+		Bundle response;
+
+		//@formatter:off
+		response = client
+				.history()
+				.ofServer()
+				.andReturnDstu1Bundle()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.size());
+		idx++;
+
+		//@formatter:off
+		response = client
+				.history()
+				.ofType(Patient.class)
+				.andReturnDstu1Bundle()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.size());
+		idx++;
+		
+		//@formatter:off
+		response = client
+				.history()
+				.ofInstance(new IdDt("Patient", "123"))
+				.andReturnDstu1Bundle()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.size());
+		idx++;
+	}
+
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchByNumberExact() throws Exception {
@@ -1069,7 +1127,7 @@ public class GenericClientTest {
 
 		HttpEntityEnclosingRequestBase value = (HttpEntityEnclosingRequestBase) capt.getValue();
 
-		Header ct = value.getEntity().getContentType();
+		Header ct = value.getFirstHeader(Constants.HEADER_CONTENT_TYPE);
 		assertNotNull(ct);
 		assertEquals(Constants.CT_FHIR_JSON + "; charset=UTF-8", ct.getValue());
 

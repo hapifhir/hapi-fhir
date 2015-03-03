@@ -28,6 +28,10 @@
 					<groupId>org.apache.httpcomponents</groupId>
 					<artifactId>httpcore</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -64,16 +68,20 @@
 			<version>3.1.4</version> </dependency> -->
 
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>${commons_codec_version}</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons_io_version}</version>
 		</dependency>
 
+		<!-- 
+		Android does not come with the Servlet API bundled, and MethodUtil requires it
+		-->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${servlet_api_version}</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -102,7 +110,7 @@
 				<configuration>
 					<classpathDependencyScopeExclude>compile+runtime</classpathDependencyScopeExclude>
 					<additionalClasspathElements>
-						<additionalClasspathElement>target/hapi-fhir-android-0.9-SNAPSHOT-shaded.jar</additionalClasspathElement>
+						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}.jar</additionalClasspathElement>
 					</additionalClasspathElements>
 				</configuration>
 				<executions>
@@ -125,7 +133,6 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
 							<!--<minimizeJar>true</minimizeJar>-->
 							<artifactSet>
@@ -158,13 +165,6 @@
 							<filters>
 								<filter>
 									<artifact>ca.uhn.hapi.fhir:hapi-fhir-base</artifact>
-									<!--
-									<includes>
-										<include>**/*.class</include>
-										<include>**/*.properties</include>
-										<include>**/*.html</include>
-									</includes>
-									-->
 									<excludes>
 										<exclude>ca/uhn/fhir/model/dstu/valueset/**</exclude>
 										<exclude>**/*.java</exclude>
@@ -177,34 +177,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>DIST</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${maven_assembly_plugin_version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<attach>false</attach>
-									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-jpaserver-example.xml</descriptor>
-									</descriptors>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>

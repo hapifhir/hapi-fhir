@@ -74,7 +74,7 @@
 				</p>
 			</subsection>
 						
-			<subsection name="Type - Search/Query">
+			<subsection name="Search/Query - Type">
 				
 				<p>
 					Searching for resources is probably the most common initial scenario for
@@ -186,7 +186,7 @@
 				
 			</subsection>			
 
-			<subsection name="Type - Create">
+			<subsection name="Create - Type">
 				<p>
 					The following example shows how to perform a create
 					operation using the generic client:
@@ -211,7 +211,7 @@
 				</macro>
 			</subsection>			
 
-			<subsection name="Instance - Read / VRead">
+			<subsection name="Read/VRead - Instance">
 				<p>
 					Given a resource name and ID, it is simple to retrieve
 					the latest version of that resource (a 'read')
@@ -249,7 +249,7 @@
 				
 			</subsection>			
 
-			<subsection name="Instance - Delete">
+			<subsection name="Delete - Instance">
 				<p>
 					The following example shows how to perform a delete
 					operation using the generic client:
@@ -275,7 +275,7 @@
 				</macro>
 			</subsection>
 
-			<subsection name="Instance - Update">
+			<subsection name="Update - Instance">
 				<p>
 					Updating a resource is similar to creating one, except that
 					an ID must be supplied since you are updating a previously
@@ -315,7 +315,54 @@
 				
 			</subsection>			
 
-			<subsection name="Server - Conformance">
+			<subsection name="History - Server/Type/Instance">
+				<p>
+					To retrieve the version history of all resources, or all resources of a given type, or
+					of a specific instance of a resource, you call the <code>history()</code>
+					method.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="historyDstu1" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<p>
+					If you are using a DSTU2 compliant server, you should instead use the
+					Bundle resource which is found in the DSTU2 structures JAR, as shown
+					in the syntax below. Note that in both cases, the class name is <code>Bundle</code>,
+					but the DSTU2 bundle is found in the <code>.resources.</code> package.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="historyDstu2" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				<p>
+					You can also optionally request that only resource versions
+					later than a given date, and/or only up to a given count (number)
+					of resource versions be returned.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="historyFeatures" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>
+			
+			<subsection name="Transaction - Server">
+				<p>
+					The following example shows how to execute a transaction using the generic client:
+				</p>
+				<macro name="snippet">
+					<param name="id" value="transaction" />
+					<param name="file"
+						value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>
+
+			<subsection name="Conformance - Server">
 				<p>
 					To retrieve the server's conformance statement, simply call the <code>conformance()</code>
 					method as shown below.
@@ -326,18 +373,7 @@
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
 			</subsection>			
-			
-			<subsection name="Server - Transaction">
-				<p>
-					The following example shows how to execute a transaction using the generic client:
-				</p>
-				<macro name="snippet">
-					<param name="id" value="transaction" />
-					<param name="file"
-						value="examples/src/main/java/example/GenericClientExample.java" />
-				</macro>
-			</subsection>			
-			
+
 		</section>
 		
 		<section name="The Annotation-Driven Client">

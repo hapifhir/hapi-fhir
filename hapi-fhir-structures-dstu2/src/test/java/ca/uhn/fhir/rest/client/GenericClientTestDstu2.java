@@ -1,11 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -34,7 +36,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.server.Constants;
@@ -58,6 +59,82 @@ public class GenericClientTestDstu2 {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+	private String getPatientFeedWithOneResult() {
+		//@formatter:off
+		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
+				"<entry>\n" + 
+				"<resource>" 
+				+ "<Patient>" 
+				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
+				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
+				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "</Patient>"
+				+ "</resource>\n"  
+				+ "   </entry>\n"  
+				+ "</feed>";
+		//@formatter:on
+		return msg;
+	}
+	
+	@Test
+	public void testHistory() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+		ca.uhn.fhir.model.dstu2.resource.Bundle response;
+
+		//@formatter:off
+		response = client
+				.history()
+				.ofServer()
+				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.getEntry().size());
+		idx++;
+
+		//@formatter:off
+		response = client
+				.history()
+				.ofType(Patient.class)
+				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.getEntry().size());
+		idx++;
+		
+		//@formatter:off
+		response = client
+				.history()
+				.ofInstance(new IdDt("Patient", "123"))
+				.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals(1, response.getEntry().size());
+		idx++;
+	}
+
+	
 	@Test
 	public void testSearchByString() throws Exception {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";

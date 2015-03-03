@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -34,7 +35,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -116,7 +117,8 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, id, null, null);
+		String historyId = id != null ? id.getIdPart() : null;
+		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -133,13 +135,13 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return BundleTypeEnum.HISTORY;
 	}
 	
-	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, IdDt theId, DateTimeDt theSince, Integer theLimit) {
+	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, String theId, BaseDateTimeDt theSince, Integer theLimit) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
-			if (theId != null && !theId.isEmpty()) {
+			if (isNotBlank(theId)) {
 				b.append('/');
-				b.append(theId.getValue());
+				b.append(theId);
 			}
 		}
 		if (b.length() > 0) {

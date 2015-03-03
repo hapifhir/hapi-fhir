@@ -173,7 +173,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		HttpServletResponse response = theRequest.getServletResponse();
 		response.setContentType(responseEncoding.getResourceContentType());
 		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		response.setCharacterEncoding(Constants.CHARSETNAME_UTF_8);
 
 		theServer.addHeadersToResponse(response);
 

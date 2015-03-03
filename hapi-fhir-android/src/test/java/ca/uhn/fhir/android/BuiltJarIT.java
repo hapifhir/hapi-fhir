@@ -57,9 +57,10 @@ public class BuiltJarIT {
 	 */
 	@Test
 	public void testJarForDuplicates() throws Exception {
-		Collection<File> files = FileUtils.listFiles(new File("target"), new WildcardFileFilter("*-shaded.jar"), null);
+		String wildcard = "hapi-fhir-android-*.jar";
+		Collection<File> files = FileUtils.listFiles(new File("target"), new WildcardFileFilter(wildcard), null);
 		if (files.isEmpty()) {
-			throw new Exception("No files matching target/*-shaded.jar");
+			throw new Exception("No files matching " + wildcard);
 		}
 
 		for (File file : files) {

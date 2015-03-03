@@ -25,6 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.rest.server.Constants;
 
 @DatatypeDef(name = "base64Binary")
 public class Base64BinaryDt extends BasePrimitive<byte[]> {
@@ -46,12 +47,12 @@ public class Base64BinaryDt extends BasePrimitive<byte[]> {
 
 	@Override
 	protected byte[] parse(String theValue) {
-		return Base64.decodeBase64(theValue);
+		return Base64.decodeBase64(theValue.getBytes(Constants.CHARSET_UTF8));
 	}
 
 	@Override
 	protected String encode(byte[] theValue) {
-		return Base64.encodeBase64String(theValue);
+		return new String(Base64.encodeBase64(theValue), Constants.CHARSET_UTF8);
 	}
 
 }

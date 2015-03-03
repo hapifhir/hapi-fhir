@@ -190,7 +190,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 		HttpServletResponse response = theRequest.getServletResponse();
 		response.setContentType(Constants.CT_TEXT);
 		response.setStatus(Constants.STATUS_HTTP_200_OK);
-		response.setCharacterEncoding(Constants.CHARSET_UTF_8);
+		response.setCharacterEncoding(Constants.CHARSETNAME_UTF_8);
 
 		theServer.addHeadersToResponse(response);
 

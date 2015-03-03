@@ -34,10 +34,13 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
+import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
@@ -102,6 +105,11 @@ public interface IGenericClient {
 	IGetTags getTags();
 
 	/**
+	 * Implementation of the "history" method
+	 */
+	IHistory history();
+
+	/**
 	 * Implementation of the "history instance" method.
 	 * 
 	 * @param theType
@@ -117,6 +125,7 @@ public interface IGenericClient {
 	 *            server may return less even if more are available, but should not return more according to the FHIR
 	 *            specification.
 	 * @return A bundle containing returned resources
+	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
 	<T extends IResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
 
@@ -136,6 +145,7 @@ public interface IGenericClient {
 	 *            server may return less even if more are available, but should not return more according to the FHIR
 	 *            specification.
 	 * @return A bundle containing returned resources
+	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
 	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
@@ -146,11 +156,6 @@ public interface IGenericClient {
 	 * @see Bundle#getLinkNext()
 	 */
 	IGetPage loadPage();
-
-	/**
-	 * Fluent method for "read" and "vread" methods.
-	 */
-	IRead read();
 
 //	/**
 //	 * Implementation of the "instance read" method. This method will only ever do a "read" for the latest version of a
@@ -169,6 +174,16 @@ public interface IGenericClient {
 //	 * @return The resource
 //	 */
 //	<T extends IBaseResource> T read(Class<T> theType, IdDt theId);
+
+	/**
+	 * Implementation of the FHIR "extended operations" action
+	 */
+	IOperation operation();
+
+	/**
+	 * Fluent method for "read" and "vread" methods.
+	 */
+	IRead read();
 
 	/**
 	 * Implementation of the "instance read" method.
@@ -342,10 +357,5 @@ public interface IGenericClient {
 	 * @return The resource
 	 */
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
-
-	/**
-	 * Implementation of the FHIR "extended operations" action
-	 */
-	IOperation operation();
 
 }
