@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import java.util.List;
+import java.util.Set;
 
+import ca.uhn.fhir.model.api.Include;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
@@ -10,12 +12,12 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 public interface IVersionSpecificBundleFactory {
 
-	void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase);
+	void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
 
 	void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType);
 
 	void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
-			int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType);
+			int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes);
 
 	Bundle getDstu1Bundle();
 
