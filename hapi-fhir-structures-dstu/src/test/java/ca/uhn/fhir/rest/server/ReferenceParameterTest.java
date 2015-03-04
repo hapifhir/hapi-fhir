@@ -299,6 +299,7 @@ public class ReferenceParameterTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
+        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);

@@ -9,7 +9,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
+			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
 			/WEB-INF/hapi-fhir-server-database-config.xml
 			/WEB-INF/hapi-fhir-server-config.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
@@ -41,7 +41,7 @@
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
-			<param-value>DSTU2</param-value>
+			<param-value>DSTU1</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
