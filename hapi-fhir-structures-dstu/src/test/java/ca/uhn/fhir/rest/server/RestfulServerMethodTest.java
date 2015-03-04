@@ -1059,7 +1059,9 @@ public class RestfulServerMethodTest {
 		dummyServer.addResourceProvider(profProvider);
 		ServletHolder servletHolder = new ServletHolder(ourRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
+        ourRestfulServer.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
+
+        ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
