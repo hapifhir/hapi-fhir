@@ -226,9 +226,16 @@ class ModelScanner {
 	 * all of the annotation processing code this method just creates an interface Proxy to simulate the HAPI
 	 * annotations if the HL7.org ones are found instead.
 	 */
-	@SuppressWarnings("unchecked")
 	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
+		
 		T retVal = theTarget.getAnnotation(theAnnotationType);
+		if (true) {
+			return retVal;
+		}
+
+		// Below disabled for now due to performance issues
+		
+		/*
 		if (retVal == null) {
 			String sourceClassName = theAnnotationType.getName();
 			String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
@@ -257,6 +264,8 @@ class ModelScanner {
 				}
 			}
 		}
+		*/
+		
 		return retVal;
 	}
 
