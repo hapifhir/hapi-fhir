@@ -27,6 +27,10 @@ import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This interface is the parent interface for all FHIR Resource definition
  * classes. Classes implementing this interface should be annotated
@@ -39,8 +43,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * </p>
  */
 public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
+    public static final Include INCLUDE_ALL = new Include("*");
+    public static final Set<Include> WILDCARD_ALL_SET = new HashSet<Include>(Arrays.asList(INCLUDE_ALL));
 
-	/**
+
+    /**
 	 * Returns the contained resource list for this resource.
 	 * <p>
 	 * Usage note: HAPI will generally populate and use the resources from this

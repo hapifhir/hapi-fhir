@@ -27,14 +27,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -80,7 +73,7 @@ public class RestfulServer extends HttpServlet {
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
@@ -100,12 +93,13 @@ public class RestfulServer extends HttpServlet {
 	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
+    private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 
 	private boolean myStarted;
 
 	private boolean myUseBrowserFriendlyContentTypes;
 
-	/**
+    /**
 	 * Constructor
 	 */
 	public RestfulServer() {
@@ -449,8 +443,8 @@ public class RestfulServer extends HttpServlet {
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		IVersionSpecificBundleFactory bundleFactory = myFhirContext.newBundleFactory();
-		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
-				null);
+        bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
+				null, IResource.WILDCARD_ALL_SET);
 
 		Bundle bundle = bundleFactory.getDstu1Bundle();
 		if (bundle != null) {
@@ -1064,4 +1058,17 @@ public class RestfulServer extends HttpServlet {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
 	}
+
+    public BundleInclusionRule getBundleInclusionRule() {
+        return myBundleInclusionRule;
+    }
+
+    /**
+     * set how bundle factory should decide whether referenced resources should be included in bundles
+     *
+     * @param theBundleInclusionRule - inclusion rule (@see BundleInclusionRule for behaviors)
+     */
+    public void setBundleInclusionRule(BundleInclusionRule theBundleInclusionRule) {
+        myBundleInclusionRule = theBundleInclusionRule;
+    }
 }
