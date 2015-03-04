@@ -3,6 +3,8 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.omg.Dynamic.Parameter;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -12,11 +14,17 @@ import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.primitive.CodeDt;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 
@@ -359,7 +367,28 @@ public class GenericClientExample {
    }
    
    public static void main(String[] args) {
-      fluentSearch();
+      operation();
+   }
+
+   @SuppressWarnings("unused")
+   private static void operation() {
+      // START SNIPPET: operation
+      // Create a client to talk to the HeathIntersections server
+      FhirContext ctx = FhirContext.forDstu2();
+      IGenericClient client = ctx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
+      client.registerInterceptor(new LoggingInterceptor(true));
+      
+      Parameters inParams = new Parameters();
+      inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
+      inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
+      
+      Parameters outParams = client
+         .operation()
+         .ofInstance(new IdDt("Patient", "1"))
+         .named("$everything")
+         .withParameters(inParams)
+         .execute();
+      // END SNIPPET: operation
    }
 
 }

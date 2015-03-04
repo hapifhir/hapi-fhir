@@ -26,11 +26,11 @@ import java.lang.reflect.Modifier;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
@@ -64,7 +64,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (BaseBinary.class.isAssignableFrom(providerResourceType)) {
+				if (IBaseBinary.class.isAssignableFrom(providerResourceType)) {
 					myBinary = true;
 				}
 
@@ -99,11 +99,11 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
 			
-			BaseBinary binary = (BaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+			IBaseBinary binary = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
 			binary.setContentType(ct);
 			binary.setContent(contents);
 			
-			return binary;
+			return (IResource) binary;
 		} else {
 			return super.parseIncomingServerResource(theRequest);
 		}

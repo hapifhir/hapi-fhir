@@ -39,11 +39,12 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
 @ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
-public class Binary extends Resource {
+public class Binary extends Resource implements IBaseBinary {
 
     /**
      * MimeType of the binary content represented as a standard MimeType (BCP 13).
@@ -211,6 +212,21 @@ public class Binary extends Resource {
 
   @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token" )
   public static final String SP_CONTENTTYPE = "contenttype";
+
+@Override
+public String getContentAsBase64() {
+	return getContentElement().getValueAsString();
+}
+
+@Override
+public Binary setContentAsBase64(String theContent) {
+	if (theContent != null) {
+		getContentElement().setValueAsString(theContent);
+	} else {
+		setContent(null);
+	}
+	return this;
+}
 
 }
 

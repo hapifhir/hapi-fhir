@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -39,6 +38,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -76,6 +76,9 @@ import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
 import ca.uhn.fhir.rest.gclient.IHistoryUntyped;
 import ca.uhn.fhir.rest.gclient.IOperation;
+import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
+import ca.uhn.fhir.rest.gclient.IOperationUntyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IRead;
@@ -95,9 +98,11 @@ import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
+import ca.uhn.fhir.rest.method.HttpPostClientInvocation;
 import ca.uhn.fhir.rest.method.HttpSimpleGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.MethodUtil;
+import ca.uhn.fhir.rest.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
@@ -116,6 +121,72 @@ import ca.uhn.fhir.util.ICallable;
  * @author Doug Martin (Regenstrief Center for Biomedical Informatics)
  */
 public class GenericClient extends BaseClient implements IGenericClient {
+
+	@SuppressWarnings("rawtypes")
+	public class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput {
+
+		private IdDt myId;
+		private Class<? extends IBaseResource> myType;
+		private IBaseParameters myParameters;
+		private String myOperationName;
+
+		@Override
+		public IOperationUnnamed ofServer() {
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed ofType(Class<? extends IBaseResource> theResourceType) {
+			myType = theResourceType;
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed ofInstance(IdDt theId) {
+			myId = theId;
+			return this;
+		}
+
+		@SuppressWarnings({ "unchecked" })
+		@Override
+		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
+			Validate.notNull(theParameters, "theParameters can not be null");
+			myParameters = theParameters;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object execute() {
+			String resourceName;
+			String id;
+			if (myType != null) {
+				resourceName = myContext.getResourceDefinition(myType).getName();
+				id = null;
+			} else if (myId != null) {
+				resourceName = myId.getResourceType();
+				id = myId.getIdPart();
+			} else {
+				resourceName = null;
+				id = null;
+			}
+
+			HttpPostClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters);
+
+			IClientResponseHandler handler;
+			handler = new ResourceResponseHandler(myParameters.getClass(), null);
+
+			return invoke(null, handler, invocation);
+		}
+
+		@Override
+		public IOperationUntyped named(String theName) {
+			Validate.notBlank(theName, "theName can not be null");
+			myOperationName =theName;
+			return this;
+		}
+
+	}
 
 	private static final String I18N_CANNOT_DETEMINE_RESOURCE_TYPE = "ca.uhn.fhir.rest.client.GenericClient.cannotDetermineResourceTypeFromUri";
 
@@ -340,8 +411,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IOperation operation() {
-		// TODO Auto-generated method stub
-		return null;
+		return new OperationInternal();
 	}
 
 	@Override

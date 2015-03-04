@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -26,7 +27,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
@@ -73,8 +73,8 @@ public class RestfulServerUtils {
 			}
 		}
 	
-		if (theResource instanceof BaseBinary && theResponseEncoding == null) {
-			BaseBinary bin = (BaseBinary) theResource;
+		if (theResource instanceof IBaseBinary && theResponseEncoding == null) {
+			IBaseBinary bin = (IBaseBinary) theResource;
 			if (isNotBlank(bin.getContentType())) {
 				theHttpResponse.setContentType(bin.getContentType());
 			} else {

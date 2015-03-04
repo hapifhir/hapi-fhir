@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseElement;
@@ -74,7 +75,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -886,10 +886,10 @@ class ParserState<T> {
 		private static final int SUBSTATE_CONTENT = 2;
 		private static final int SUBSTATE_CT = 1;
 		private String myData;
-		private BaseBinary myInstance;
+		private IBaseBinary myInstance;
 		private int mySubState = 0;
 
-		public BinaryResourceStateForDstu1(PreResourceState thePreResourceState, BaseBinary theInstance) {
+		public BinaryResourceStateForDstu1(PreResourceState thePreResourceState, IBaseBinary theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 		}
@@ -900,7 +900,7 @@ class ParserState<T> {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else {
-					(myInstance).setId(new IdDt(theValue));
+					((IResource)myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
@@ -1923,7 +1923,7 @@ class ParserState<T> {
 
 			String resourceName = def.getName();
 			if ("Binary".equals(resourceName) && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
-				push(new BinaryResourceStateForDstu1(getRootPreResourceState(), (BaseBinary) myInstance));
+				push(new BinaryResourceStateForDstu1(getRootPreResourceState(), (IBaseBinary) myInstance));
 			} else if (myInstance instanceof IResource) {
 				push(new ResourceStateHapi(getRootPreResourceState(), def, (IResource) myInstance));
 			} else {

@@ -20,10 +20,6 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +32,14 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -69,7 +63,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private Map<String, List<String>> myIfNoneExistParams;
 	private String myIfNoneExistString;
 	private Map<String, List<String>> myParams;
-	private final IResource myResource;
+	private final IBaseResource myResource;
 	private final List<IResource> myResources;
 	private final TagList myTagList;
 	private final String myUrlPath;
@@ -85,7 +79,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, Map<String, List<String>> theParams, String... theUrlPath) {
 		myContext = theContext;
 		myResource = theResource;
 		myTagList = null;
@@ -98,7 +92,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, IResource theResource, String theUrlPath) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, IBaseResource theResource, String theUrlPath) {
 		super();
 		myContext = theContext;
 		myResource = theResource;
@@ -209,8 +203,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 
 		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
 
-		if (myResource != null && BaseBinary.class.isAssignableFrom(myResource.getClass())) {
-			BaseBinary binary = (BaseBinary) myResource;
+		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
+			IBaseBinary binary = (IBaseBinary) myResource;
 			
 			/*
 			 * Note: Be careful about changing which constructor we use for ByteArrayEntity,

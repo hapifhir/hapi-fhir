@@ -41,11 +41,8 @@ import ${import};
 @ResourceDef(name="${elementName}", profile="${profile}", id="${id}")
 public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseResource
     implements #{if}( ${className}=="OperationOutcome" || ${className}=="Conformance" || ${className}=="SecurityEvent" ) ca.uhn.fhir.model.base.resource.Base${className} #{else} IResource #{end}
-#if ( ${className} == "Bundle" )
-    , org.hl7.fhir.instance.model.api.IBaseBundle
-#end
-#if ( ${className}=="Binary" ) 
-    , ca.uhn.fhir.model.base.resource.Base${className}
+#if ( ${className} == "Bundle" || ${className} == "Parameters" || ${className} == "Binary" )
+    , org.hl7.fhir.instance.model.api.IBase${className}
 #end
     {
 

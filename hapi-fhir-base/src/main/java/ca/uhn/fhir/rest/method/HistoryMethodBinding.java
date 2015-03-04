@@ -97,6 +97,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.HISTORY;
+	}
+
+	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
 	}
@@ -104,110 +109,6 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return mySystemOperationType;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		IdDt id = null;
-		String resourceName = myResourceName;
-		if (myIdParamIndex != null) {
-			id = (IdDt) theArgs[myIdParamIndex];
-			if (id == null || isBlank(id.getValue())) {
-				throw new NullPointerException("ID can not be null");
-			}
-		}
-
-		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, null, null);
-
-		if (theArgs != null) {
-			for (int idx = 0; idx < theArgs.length; idx++) {
-				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters());
-			}
-		}
-
-		return retVal;
-	}
-
-	@Override
-	protected BundleTypeEnum getResponseBundleType() {
-		return BundleTypeEnum.HISTORY;
-	}
-	
-	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, String theId, BaseDateTimeDt theSince, Integer theLimit) {
-		StringBuilder b = new StringBuilder();
-		if (theResourceName != null) {
-			b.append(theResourceName);
-			if (isNotBlank(theId)) {
-				b.append('/');
-				b.append(theId);
-			}
-		}
-		if (b.length() > 0) {
-			b.append('/');
-		}
-		b.append(Constants.PARAM_HISTORY);
-
-		boolean haveParam = false;
-		if (theSince != null && !theSince.isEmpty()) {
-			haveParam = true;
-			b.append('?').append(Constants.PARAM_SINCE).append('=').append(theSince.getValueAsString());
-		}
-		if (theLimit != null) {
-			b.append(haveParam ? '&' : '?');
-			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
-		}
-
-		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
-		return retVal;
-	}
-
-	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		if (myIdParamIndex != null) {
-			theMethodParams[myIdParamIndex] = theRequest.getId();
-		}
-
-		Object response = invokeServerMethod(theMethodParams);
-
-		final IBundleProvider resources = toResourceList(response);
-		
-		/*
-		 * We wrap the response so we can verify that it has the ID and version set,
-		 * as is the contract for history
-		 */
-		return new IBundleProvider() {
-			
-			@Override
-			public int size() {
-				return resources.size();
-			}
-			
-			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
-				List<IResource> retVal = resources.getResources(theFromIndex, theToIndex);
-				int index = theFromIndex;
-				for (IResource nextResource : retVal) {
-					if (nextResource.getId() == null || isBlank(nextResource.getId().getIdPart())) {
-						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
-					}
-					if (isBlank(nextResource.getId().getVersionIdPart())) {
-						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
-						if (versionId == null || versionId.isEmpty()) {
-							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
-						}
-					}
-					index++;
-				}
-				return retVal;
-			}
-			
-			@Override
-			public InstantDt getPublished() {
-				return resources.getPublished();
-			}
-		};
 	}
 
 	// ObjectUtils.equals is replaced by a JDK7 method..
@@ -237,6 +138,105 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return true;
+	}
+	
+	@Override
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		IdDt id = null;
+		String resourceName = myResourceName;
+		if (myIdParamIndex != null) {
+			id = (IdDt) theArgs[myIdParamIndex];
+			if (id == null || isBlank(id.getValue())) {
+				throw new NullPointerException("ID can not be null");
+			}
+		}
+
+		String historyId = id != null ? id.getIdPart() : null;
+		HttpGetClientInvocation retVal = createHistoryInvocation(resourceName, historyId, null, null);
+
+		if (theArgs != null) {
+			for (int idx = 0; idx < theArgs.length; idx++) {
+				IParameter nextParam = getParameters().get(idx);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters());
+			}
+		}
+
+		return retVal;
+	}
+
+	@Override
+	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+		if (myIdParamIndex != null) {
+			theMethodParams[myIdParamIndex] = theRequest.getId();
+		}
+
+		Object response = invokeServerMethod(theMethodParams);
+
+		final IBundleProvider resources = toResourceList(response);
+		
+		/*
+		 * We wrap the response so we can verify that it has the ID and version set,
+		 * as is the contract for history
+		 */
+		return new IBundleProvider() {
+			
+			@Override
+			public InstantDt getPublished() {
+				return resources.getPublished();
+			}
+			
+			@Override
+			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+				List<IResource> retVal = resources.getResources(theFromIndex, theToIndex);
+				int index = theFromIndex;
+				for (IResource nextResource : retVal) {
+					if (nextResource.getId() == null || isBlank(nextResource.getId().getIdPart())) {
+						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
+					}
+					if (isBlank(nextResource.getId().getVersionIdPart())) {
+						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
+						if (versionId == null || versionId.isEmpty()) {
+							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
+						}
+					}
+					index++;
+				}
+				return retVal;
+			}
+			
+			@Override
+			public int size() {
+				return resources.size();
+			}
+		};
+	}
+
+	public static HttpGetClientInvocation createHistoryInvocation(String theResourceName, String theId, BaseDateTimeDt theSince, Integer theLimit) {
+		StringBuilder b = new StringBuilder();
+		if (theResourceName != null) {
+			b.append(theResourceName);
+			if (isNotBlank(theId)) {
+				b.append('/');
+				b.append(theId);
+			}
+		}
+		if (b.length() > 0) {
+			b.append('/');
+		}
+		b.append(Constants.PARAM_HISTORY);
+
+		boolean haveParam = false;
+		if (theSince != null && !theSince.isEmpty()) {
+			haveParam = true;
+			b.append('?').append(Constants.PARAM_SINCE).append('=').append(theSince.getValueAsString());
+		}
+		if (theLimit != null) {
+			b.append(haveParam ? '&' : '?');
+			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
+		}
+
+		HttpGetClientInvocation retVal = new HttpGetClientInvocation(b.toString());
+		return retVal;
 	}
 
 	private static Class<? extends IBaseResource> toReturnType(Method theMethod, Object theProvider) {

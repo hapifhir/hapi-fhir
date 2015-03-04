@@ -1,12 +1,11 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Base;
+import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Coding;
@@ -19,6 +18,7 @@ import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Identifier;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUseEnumFactory;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.Meta;
 import org.hl7.fhir.instance.model.Narrative;
@@ -27,11 +27,11 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUseEnumFactory;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -49,8 +49,7 @@ import org.hl7.fhir.instance.model.api.IReference;
 import org.junit.Test;
 
 public class ModelInheritanceTest {
-
-    /**
+    /*
      * <pre>
      * Other changes:
      *
@@ -71,87 +70,12 @@ public class ModelInheritanceTest {
      * </pre>
      */
 
-    @Test
-    public void testType() {
-        assertTrue(IBaseDatatype.class.isAssignableFrom(Type.class));
-    }
-
     /**
      * This one should apply to all composite types
      */
     @Test
     public void testAddress() {
         assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
-    }
-
-    @Test
-    public void testBase() {
-        assertTrue(IBase.class.isAssignableFrom(Base.class));
-    }
-
-    public void testIdentifierUse() throws Exception {
-        Child child = Identifier.class.getField("use").getAnnotation(Child.class);
-        assertEquals(IdentifierUseEnumFactory.class, child.enumFactory());
-    }
-
-
-    /**
-     * Should be "implements IBaseExtension<Extension>"
-     */
-    @Test
-    public void testExtension() {
-        assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
-        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
-    }
-
-    @Test
-    public void testNarrative() {
-        assertTrue(INarrative.class.isAssignableFrom(Narrative.class));
-    }
-
-    @Test
-    public void testBooleanType() {
-        assertTrue(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class));
-    }
-
-    @Test
-    public void testDecimalType() {
-        assertTrue(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class));
-    }
-
-    @Test
-    public void testIntegerType() {
-        assertTrue(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class));
-    }
-
-    @Test
-    public void testPrimitiveType() {
-        assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
-        assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
-    }
-
-    @Test
-    public void testResource() {
-        assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
-    }
-
-    @Test
-    public void testBundle() {
-        assertTrue(IBaseBundle.class.isAssignableFrom(Bundle.class));
-    }
-
-    public void testIdType() {
-        assertTrue(IIdType.class.isAssignableFrom(IdType.class));
-    }
-
-    @Test
-    public void testReference() {
-        assertTrue(IReference.class.isAssignableFrom(Reference.class));
-    }
-
-    @Test
-    public void testMeta() {
-        assertTrue(IMetaType.class.isAssignableFrom(Meta.class));
     }
 
     @Test
@@ -162,8 +86,36 @@ public class ModelInheritanceTest {
     }
 
     @Test
-    public void testElement() {
-        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
+    public void testBase() {
+        assertTrue(IBase.class.isAssignableFrom(Base.class));
+    }
+
+
+    @Test
+    public void testBinary() {
+        assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
+    }
+
+    
+    @Test
+    public void testBooleanType() {
+        assertTrue(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class));
+    }
+
+
+    @Test
+    public void testBundle() {
+        assertTrue(IBaseBundle.class.isAssignableFrom(Bundle.class));
+    }
+
+    @Test
+    public void testCoding() {
+        assertTrue(ICoding.class.isAssignableFrom(Coding.class));
+    }
+
+    @Test
+    public void testDecimalType() {
+        assertTrue(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class));
     }
 
     @Test
@@ -173,14 +125,68 @@ public class ModelInheritanceTest {
     }
 
     @Test
-    public void testCoding() {
-        assertTrue(ICoding.class.isAssignableFrom(Coding.class));
+    public void testElement() {
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
+    }
+
+    /**
+     * Should be "implements IBaseExtension<Extension>"
+     */
+    @Test
+    public void testExtension() {
+        assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
+    }
+
+    public void testIdentifierUse() throws Exception {
+        Child child = Identifier.class.getField("use").getAnnotation(Child.class);
+        assertEquals(IdentifierUseEnumFactory.class, child.enumFactory());
+    }
+
+    public void testIdType() {
+        assertTrue(IIdType.class.isAssignableFrom(IdType.class));
+    }
+
+    @Test
+    public void testIntegerType() {
+        assertTrue(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class));
+    }
+
+    @Test
+    public void testMeta() {
+        assertTrue(IMetaType.class.isAssignableFrom(Meta.class));
+    }
+
+    @Test
+    public void testNarrative() {
+        assertTrue(INarrative.class.isAssignableFrom(Narrative.class));
+    }
+
+    @Test
+    public void testPrimitiveType() {
+        assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
+        assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
+    }
+
+    @Test
+    public void testReference() {
+        assertTrue(IReference.class.isAssignableFrom(Reference.class));
+    }
+
+    @Test
+    public void testResource() {
+        assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
     }
 
     @Test
     public void testTiming_TimingRepeatComponent() {
         assertTrue(IDatatypeElement.class.isAssignableFrom(Timing.TimingRepeatComponent.class));
         assertNotNull(Timing.TimingRepeatComponent.class.getAnnotation(Block.class));
+    }
+
+    @Test
+    public void testType() {
+        assertTrue(IBaseDatatype.class.isAssignableFrom(Type.class));
     }
 
 }

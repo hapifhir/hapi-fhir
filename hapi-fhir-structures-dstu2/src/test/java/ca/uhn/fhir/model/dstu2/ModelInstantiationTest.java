@@ -4,12 +4,12 @@ import static org.junit.Assert.*;
 
 import java.util.Properties;
 
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 
 public class ModelInstantiationTest {
@@ -18,7 +18,7 @@ public class ModelInstantiationTest {
 	
 	@Test
 	public void testBinaryIsBaseBinary() {
-		assertTrue(BaseBinary.class.isAssignableFrom(Binary.class));
+		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
 	}
 	
 	@SuppressWarnings("unchecked")

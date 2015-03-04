@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -79,7 +80,6 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -766,8 +766,8 @@ public class XmlParser extends BaseParser implements IParser {
 					theEventWriter.writeEndElement();
 				}
 
-				if (theResource instanceof BaseBinary) {
-					BaseBinary bin = (BaseBinary) theResource;
+				if (theResource instanceof IBaseBinary) {
+					IBaseBinary bin = (IBaseBinary) theResource;
 					writeOptionalTagWithValue(theEventWriter, "contentType", bin.getContentType());
 					writeOptionalTagWithValue(theEventWriter, "content", bin.getContentAsBase64());
 				} else {
@@ -781,8 +781,8 @@ public class XmlParser extends BaseParser implements IParser {
 					theEventWriter.writeAttribute("id", theResourceId);
 				}
 
-				if (theResource instanceof BaseBinary) {
-					BaseBinary bin = (BaseBinary) theResource;
+				if (theResource instanceof IBaseBinary) {
+					IBaseBinary bin = (IBaseBinary) theResource;
 					if (bin.getContentType() != null) {
 						theEventWriter.writeAttribute("contentType", bin.getContentType());
 					}

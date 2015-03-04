@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -79,7 +80,7 @@ public class GenericClientTestDstu2 {
 		//@formatter:on
 		return msg;
 	}
-	
+
 	@Test
 	public void testHistory() throws Exception {
 
@@ -93,7 +94,8 @@ public class GenericClientTestDstu2 {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
-			}});
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
@@ -121,7 +123,7 @@ public class GenericClientTestDstu2 {
 		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals(1, response.getEntry().size());
 		idx++;
-		
+
 		//@formatter:off
 		response = client
 				.history()
@@ -134,7 +136,6 @@ public class GenericClientTestDstu2 {
 		idx++;
 	}
 
-	
 	@Test
 	public void testSearchByString() throws Exception {
 		String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
@@ -160,29 +161,42 @@ public class GenericClientTestDstu2 {
 	}
 
 	@Test
-	public void testOperationWithListOfParameters() throws Exception {
+	public void testOperationWithListOfParameterResponse() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+		
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setValue(new StringDt("STRINGVALIN1"));
 		inParams.addParameter().setValue(new StringDt("STRINGVALIN2"));
-		String reqString = ourCtx.newXmlParser().encodeResourceToString(inParams);
+		String reqString = p.encodeResourceToString(inParams);
 
 		Parameters outParams = new Parameters();
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT1"));
 		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
-		final String respString = ourCtx.newXmlParser().encodeResourceToString(outParams);
-		
+		final String respString = p.encodeResourceToString(outParams);
+
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
 			@Override
 			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));			}});
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-//		client.operation().onServer().withParameters(inParams);
+		int idx = 0;
+		
+		Parameters resp = client.operation().ofServer().named("$SOMEOPERATION").withParameters(inParams).execute();
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(extractBody(capt, idx), reqString);
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+		
 	}
 
 	@Test

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -35,7 +36,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 public class HttpPostClientInvocation extends BaseHttpClientInvocationWithContents {
 
 
-	public HttpPostClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
+	public HttpPostClientInvocation(FhirContext theContext, IBaseResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
 	}
 

@@ -51,11 +51,13 @@ import javax.json.stream.JsonParsingException;
 
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -92,7 +94,6 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -693,8 +694,8 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		if (theResource instanceof BaseBinary) {
-			BaseBinary bin = (BaseBinary) theResource;
+		if (theResource instanceof IBaseBinary) {
+			IBaseBinary bin = (IBaseBinary) theResource;
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {

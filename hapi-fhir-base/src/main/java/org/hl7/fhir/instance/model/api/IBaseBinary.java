@@ -1,4 +1,4 @@
-package ca.uhn.fhir.model.base.resource;
+package org.hl7.fhir.instance.model.api;
 
 /*
  * #%L
@@ -20,9 +20,9 @@ package ca.uhn.fhir.model.base.resource;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
 
-public interface BaseBinary extends IResource {
+public interface IBaseBinary extends IBaseResource {
 
 	byte[] getContent();
 
@@ -30,9 +30,9 @@ public interface BaseBinary extends IResource {
 
 	String getContentType();
 
-	BaseBinary setContent(byte[] theContent);
+	IBaseBinary setContent(byte[] theContent);
 
-	BaseBinary setContentAsBase64(String theContent);
+	IBaseBinary setContentAsBase64(String theContent);
 
-	BaseBinary setContentType(String theContentType);
+	IBaseBinary setContentType(String theContentType);
 }

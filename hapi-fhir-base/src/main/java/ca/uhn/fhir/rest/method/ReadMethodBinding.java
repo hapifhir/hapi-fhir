@@ -32,12 +32,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -174,19 +174,19 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 		
-		BaseBinary resource = (BaseBinary) getContext().getResourceDefinition("Binary").newInstance();
+		IBaseBinary resource = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
 		resource.setContentType(theResponseMimeType);
 		resource.setContent(contents);
 
 		switch (getMethodReturnType()) {
 		case BUNDLE:
-			return Bundle.withSingleResource(resource);
+			return Bundle.withSingleResource((IResource) resource);
 		case LIST_OF_RESOURCES:
 			return Collections.singletonList(resource);
 		case RESOURCE:
 			return resource;
 		case BUNDLE_PROVIDER:
-			return new SimpleBundleProvider(resource);
+			return new SimpleBundleProvider((IResource) resource);
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
