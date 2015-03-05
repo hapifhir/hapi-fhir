@@ -443,6 +443,8 @@ public class FhirContext {
 
 	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DEV}
+	 * 
+	 * @deprecated Support for DEV resources will be removed, you should use DSTU2 resources instead 
 	 */
 	public static FhirContext forDev() {
 		return new FhirContext(FhirVersionEnum.DEV);
