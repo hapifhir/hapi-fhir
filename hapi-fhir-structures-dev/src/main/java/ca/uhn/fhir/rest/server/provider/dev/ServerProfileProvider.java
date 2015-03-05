@@ -25,18 +25,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dev.resource.Profile;
+import ca.uhn.fhir.model.dev.resource.StructureDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class ServerProfileProvider implements IResourceProvider {
 
@@ -50,21 +50,21 @@ public class ServerProfileProvider implements IResourceProvider {
 	
 	@Override
 	public Class<? extends IResource> getResourceType() {
-		return Profile.class;
+		return StructureDefinition.class;
 	}
 	
 	@Read()
-	public Profile getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
+	public StructureDefinition getProfileById(HttpServletRequest theRequest, @IdParam IdDt theId) {
 		RuntimeResourceDefinition retVal = myContext.getResourceDefinitionById(theId.getValue());
 		if (retVal==null) {
 			return null;
 		}
 		String serverBase = getServerBase(theRequest);
-		return (Profile) retVal.toProfile(serverBase);
+		return (StructureDefinition) retVal.toProfile(serverBase);
 	}
 
 	@Search()
-	public List<Profile> getAllProfiles(HttpServletRequest theRequest) {
+	public List<StructureDefinition> getAllProfiles(HttpServletRequest theRequest) {
 		final String serverBase = getServerBase(theRequest);
 		List<RuntimeResourceDefinition> defs = new ArrayList<RuntimeResourceDefinition>(myContext.getResourceDefinitions());
 		Collections.sort(defs, new Comparator<RuntimeResourceDefinition>() {
@@ -76,9 +76,9 @@ public class ServerProfileProvider implements IResourceProvider {
 				}
 				return cmp;
 			}});
-		ArrayList<Profile> retVal = new ArrayList<Profile>();
+		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
 		for (RuntimeResourceDefinition next : defs) {
-			retVal.add((Profile) next.toProfile(serverBase));
+			retVal.add((StructureDefinition) next.toProfile(serverBase));
 		}
 		return retVal;
 	}
