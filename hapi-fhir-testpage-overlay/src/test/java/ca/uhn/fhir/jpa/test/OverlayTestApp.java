@@ -12,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -63,22 +64,22 @@ public class OverlayTestApp {
 		proxyHandler.setContextPath("/");
 
 		/*
-		 * DEV resources
+		 * DSTU2 resources
 		 */
 
 		RestfulServer restServerDev = new RestfulServer();
 		restServerDev.setPagingProvider(new FifoMemoryPagingProvider(10));
 		restServerDev.setImplementationDescription("This is a great server!!!!");
-		restServerDev.setFhirContext(ourAppCtx.getBean("myFhirContextDev", FhirContext.class));
-		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDev", List.class);
+		restServerDev.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
+		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		restServerDev.setResourceProviders(rpsDev);
 
-		JpaSystemProviderDstu1 systemProvDev = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDev", JpaSystemProviderDstu1.class);
+		JpaSystemProviderDstu2 systemProvDev = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
 		restServerDev.setPlainProviders(systemProvDev);
 
 		ServletHolder servletHolder = new ServletHolder();
 		servletHolder.setServlet(restServerDev);
-		proxyHandler.addServlet(servletHolder, "/fhir/contextDev/*");
+		proxyHandler.addServlet(servletHolder, "/fhir/contextDstu2/*");
 
 		/*
 		 * DSTU resources

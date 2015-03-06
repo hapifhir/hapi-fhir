@@ -64,6 +64,9 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
+import ca.uhn.fhir.rest.gclient.QuantityClientParam;
+import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -961,12 +964,17 @@ public class Controller {
 		List<String> values;
 		boolean addToWhere = true;
 		if ("token".equals(nextType)) {
-			if (isBlank(parts.get(2))) {
+			if (isBlank(parts.get(1))) {
 				return true;
 			}
-			values = Collections.singletonList(StringUtils.join(parts, ""));
 			addToWhere = false;
-			theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(2)));
+			if (isBlank(parts.get(0))) {
+				values = Collections.singletonList(parts.get(1));
+				theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().code(parts.get(1)));
+			} else {
+				values = Collections.singletonList(parts.get(0) + "|" + parts.get(1));
+				theQuery.where(new TokenClientParam(nextName + nextQualifier).exactly().systemAndCode(parts.get(0), parts.get(1)));
+			}
 		} else if ("date".equals(nextType)) {
 			values = new ArrayList<String>();
 			if (isNotBlank(parts.get(1))) {
@@ -975,6 +983,42 @@ public class Controller {
 			if (isNotBlank(parts.get(3))) {
 				values.add(StringUtils.join(parts.get(2), parts.get(3)));
 			}
+			if (values.isEmpty()) {
+				return true;
+			}
+		} else if ("quantity".equals(nextType)) {
+			values = new ArrayList<String>();
+			addToWhere = false;
+
+			QuantityClientParam param = new QuantityClientParam(nextName);
+			IMatches<IAndUnits> matcher;
+			if ("~".equals(parts.get(0))) {
+				matcher = param.approximately();
+			} else if ("=".equals(parts.get(0))) {
+				matcher = param.exactly();
+			} else if (">=".equals(parts.get(0))) {
+				matcher = param.greaterThanOrEquals();
+			} else if ("<=".equals(parts.get(0))) {
+				matcher = param.lessThanOrEquals();
+			} else if (">".equals(parts.get(0))) {
+				matcher = param.greaterThan();
+			} else if ("<".equals(parts.get(0))) {
+				matcher = param.lessThan();
+			} else {
+				throw new Error("Unknown qualifier: " + parts.get(0));
+			}
+			IAndUnits number = matcher.number(parts.get(1));
+			
+			if (isBlank(parts.get(3))) {
+				theQuery.where(number.andNoUnits());
+			} else if (isBlank(parts.get(2))) {
+				theQuery.where(number.andUnits(parts.get(3)));
+			} else {
+				theQuery.where(number.andUnits(parts.get(2), parts.get(3)));
+			}
+			
+			values.add(parts.get(0) + parts.get(1) + "|" + parts.get(2) + "|" + parts.get(3));
+			
 			if (values.isEmpty()) {
 				return true;
 			}

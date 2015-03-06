@@ -12,7 +12,7 @@
 		<property name="servers">
 			<list>
 				<value>home     , DSTU1 , Localhost Server DSTU1          , http://localhost:8887/fhir/contextDstu1</value>
-				<value>home_dev , DEV   , Localhost Server DEV            , http://localhost:8887/fhir/contextDev</value>
+				<value>home_d2  , DSTU2 , Localhost Server DSTU2          , http://localhost:8887/fhir/contextDstu2</value>
 				<value>hi       , DSTU1 , Health Intersections            , http://fhir.healthintersections.com.au/open</value>
 				<value>furore   , DSTU1 , Spark - Furore Reference Server , http://spark.furore.com/fhir</value>
 				<value>blaze    , DSTU1 , Blaze (Orion Health)            , https://fhir.orionhealth.com/blaze/fhir</value>

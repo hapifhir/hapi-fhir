@@ -127,6 +127,9 @@
 				users to configure a default encoding (XML/JSON) to use if none is specified in the
 				client request. Currently defaults to XML.
 			</action>
+			<action type="add">
+				Add support for quantity search params in FHIR tester UI
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
@@ -156,10 +159,10 @@
 				<![CDATA[
 					<b>API Change</b>: The IResource#getResourceMetadata() method has been changed
 					from returning 
-					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code>
 					to returning a new type called
 					<code>ResourceMetadataMap</code>. This new type implements 
-					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;<code>
+					<code>Map&lt;ResourceMetadataKeyEnum&lt;?&gt;, Object&gt;</code>
 					itself, so this change should not break existing code, but may
 					require a clean build in order to run correctly.
 				]]> 

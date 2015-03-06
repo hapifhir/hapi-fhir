@@ -61,123 +61,120 @@ function updateSearchDateQualifier(qualifierBtn, qualifierInput, qualifier) {
 }
 
 function addSearchControls(theConformance, theSearchParamType, theSearchParamName, theSearchParamChain, theSearchParamTarget, theContainerRowNum, theRowNum) {
-    
+	
 	var addNameAndType = true;
-    if (theSearchParamType == 'id') {
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<div />', { 'class': 'col-sm-3' }).append(
+	if (theSearchParamType == 'id') {
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-3' }).append(
 		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'id', type: 'text', 'class': 'form-control' })
 		    )
-    	);
-    } else if (theSearchParamType == 'token') {
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
+		);
+	} else if (theSearchParamType == 'token') {
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-3' }).append(
+				$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'system/namespace', type: 'text', 'class': 'form-control' })
 		    ),
-    		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.1', type: 'hidden', value: '|' }),
-		    	$('<input />', { id: 'param.' + theRowNum + '.2', placeholder: 'value', type: 'text', 'class': 'form-control' })
+			$('<div />', { 'class': 'col-sm-3' }).append(
+				$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: 'value', type: 'text', 'class': 'form-control' })
 		    )
-    	);
-    } else if (theSearchParamType == 'string') {
-    	var placeholderText = 'value';
-    	var qualifiers = new Array();
-    	qualifiers.push(new Object());
-    	qualifiers[0].name='Matches';
-    	qualifiers[0].value='';
-    	qualifiers.push(new Object());
-    	qualifiers[1].name='Exactly';
-    	qualifiers[1].value=':exact';
-    	
-    	var qualifierInput = $('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden' });
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		qualifierInput
-    	);
-
-    	var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
-    	var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
-    	for (var i = 0; i < qualifiers.length; i++) {
-    		var nextLink = $('<a>' + qualifiers[i].name+'</a>');
-    		var qualName = qualifiers[i].name;
-    		var nextValue = qualifiers[i].value;
-    		qualifierDropdown.append($('<li />').append(nextLink));
-    		nextLink.click(function(){ 
-    			qualifierInput.val(nextValue);
-    			matchesLabel.text(qualName);
-    		});
-    	}
-
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<div />', { 'class': 'col-sm-5 input-group' }).append(
-    			$('<div />', {'class':'input-group-btn'}).append(
-    				$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
-    					matchesLabel,
-    					$('<span class="caret" style="margin-left: 5px;"></span>')
-    				),
-    				qualifierDropdown
-    			),
+		);
+	} else if (theSearchParamType == 'string') {
+		var placeholderText = 'value';
+		var qualifiers = new Array();
+		qualifiers.push(new Object());
+		qualifiers[0].name='Matches';
+		qualifiers[0].value='';
+		qualifiers.push(new Object());
+		qualifiers[1].name='Exactly';
+		qualifiers[1].value=':exact';
+		
+		var qualifierInput = $('<input />', { id: 'param.' + theRowNum + '.qualifier', type: 'hidden' });
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			qualifierInput
+		);
+	
+		var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
+		var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+		for (var i = 0; i < qualifiers.length; i++) {
+			var nextLink = $('<a>' + qualifiers[i].name+'</a>');
+			var qualName = qualifiers[i].name;
+			var nextValue = qualifiers[i].value;
+			qualifierDropdown.append($('<li />').append(nextLink));
+			nextLink.click(function(){ 
+				qualifierInput.val(nextValue);
+				matchesLabel.text(qualName);
+			});
+		}
+	
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-5 input-group' }).append(
+				$('<div />', {'class':'input-group-btn'}).append(
+					$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
+						matchesLabel,
+						$('<span class="caret" style="margin-left: 5px;"></span>')
+					),
+					qualifierDropdown
+				),
 		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
-    } else if (theSearchParamType == 'number') {
-    	var placeholderText = 'Number';
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    			$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
-    	);
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<div />', { 'class': 'col-sm-3' }).append(
+	} else if (theSearchParamType == 'number') {
+		var placeholderText = 'Number';
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+				$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
+		);
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-3' }).append(
 		    	$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 	    	)
 	    );
-    } else if (theSearchParamType == 'date') {
-    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
-    	addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
-    } else if (theSearchParamType == 'reference' && (!theSearchParamChain || theSearchParamChain.length == 0)) {
-    	/*
-    	 * This is a reference parameter with no chain options, so just display a simple 
-    	 * text box for the ID of the referenced resource
-    	 */
-    	var placeholderText = 'value';
-    	if (theSearchParamType == 'number') {
-    		placeholderText = 'Number';
-    	} else if (theSearchParamType == 'reference') {
-    		placeholderText = 'Resource ID';
-    	}
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    			$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
-    	);
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
-	    	)
-	    );
-    } else if (theSearchParamType == 'reference' && theSearchParamChain.length > 0) {
-    	/*
-    	 * This is a reference parameter with possible chain options, so we need
-    	 * to display a secondary combobox to let the user choose which chained
-    	 * parameter they are filling out
-    	 */
-    	var select = $('<select/>', {/*style:'margin-left:30px;'*/});
-
-    	var newContainerRowNum = theContainerRowNum + "-0";
+	} else if (theSearchParamType == 'date') {
+		addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, true);
+		addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, false);
+	} else if (theSearchParamType == 'quantity') {
+		addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRowNum);
+	} else if (theSearchParamType == 'reference' && (!theSearchParamChain || theSearchParamChain.length == 0)) {
+		/*
+		 * This is a reference parameter with no chain options, so just display a simple 
+		 * text box for the ID of the referenced resource
+		 */
+		var placeholderText = 'value';
+		if (theSearchParamType == 'number') {
+			placeholderText = 'Number';
+		} else if (theSearchParamType == 'reference') {
+			placeholderText = 'Resource ID';
+		}
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+				$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
+		);
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<div />', { 'class': 'col-sm-3' }).append(
+				$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
+			)
+		);
+	} else if (theSearchParamType == 'reference' && theSearchParamChain.length > 0) {
+		/*
+		 * This is a reference parameter with possible chain options, so we need
+		 * to display a secondary combobox to let the user choose which chained
+		 * parameter they are filling out
+		 */
+		var select = $('<select/>', {/*style:'margin-left:30px;'*/});
+	
+		var newContainerRowNum = theContainerRowNum + "-0";
 		var newContainer = $('<div />', { id: 'search-param-rowopts-' + newContainerRowNum })
-
-    	$('#search-param-rowopts-' + theContainerRowNum).append(
-    		$('<br clear="all" />'), 
-    		$('<div />', { 'class': 'col-sm-1' }),
-    		$('<div />', { 'class': 'col-sm-1' }).append(
-            	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"/>')
-        	),
-    		$('<div />', { 'class': 'col-sm-4' }).append(
-    			select
-    		),
-    		newContainer
-    	);
-
-//		select.append(
-//			$('<option />', { value: '' }).text('Resource ID')														
-//		);
-
+	
+		$('#search-param-rowopts-' + theContainerRowNum).append(
+			$('<br clear="all" />'), 
+			$('<div />', { 'class': 'col-sm-1' }),
+			$('<div />', { 'class': 'col-sm-1' }).append(
+	        	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"/>')
+	    	),
+			$('<div />', { 'class': 'col-sm-4' }).append(
+				select
+			),
+			newContainer
+		);
+	
 		var params = new Array();
 		{
 		var param = new Object();
@@ -192,45 +189,45 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		);
 		}
 		
-    	for (var chainIdx = 0; chainIdx < theSearchParamChain.length; chainIdx++) {
-    		var nextChain = theSearchParamChain[chainIdx];
-    		var found = false;
-    		for (var resIdx = 0; resIdx < theConformance.rest[0].resource.length && !found; resIdx++) {
-    			var nextRes = theConformance.rest[0].resource[resIdx];
-    			if (!(nextRes.searchParam)) {
-    				continue;
-    			}
-    			for (var paramIdx = 0; paramIdx < nextRes.searchParam.length && !found; paramIdx++) {
-    				var nextParam = nextRes.searchParam[paramIdx];
-    				if (nextParam.name == nextChain) {
-    					if (theSearchParamTarget.length == 0 || theSearchParamTarget.indexOf(nextRes.type) != -1) {
-    						var nextName = nextParam.name + '_' + i;
-    						nextParam = jQuery.extend({}, nextParam); // clone it so we can add the chain to the name
-    						nextParam.name = theSearchParamName + '.' + nextParam.name;
-    						params[nextName] = nextParam;
-    						select.append(
-    							$('<option />', { value: nextName }).text(nextParam.name + ' - ' + nextParam.documentation)														
-    						);
-    						found = true;
-    					}
-    				}
-    			}
-    		}
-    	}
+		for (var chainIdx = 0; chainIdx < theSearchParamChain.length; chainIdx++) {
+			var nextChain = theSearchParamChain[chainIdx];
+			var found = false;
+			for (var resIdx = 0; resIdx < theConformance.rest[0].resource.length && !found; resIdx++) {
+				var nextRes = theConformance.rest[0].resource[resIdx];
+				if (!(nextRes.searchParam)) {
+					continue;
+				}
+				for (var paramIdx = 0; paramIdx < nextRes.searchParam.length && !found; paramIdx++) {
+					var nextParam = nextRes.searchParam[paramIdx];
+					if (nextParam.name == nextChain) {
+						if (theSearchParamTarget.length == 0 || theSearchParamTarget.indexOf(nextRes.type) != -1) {
+							var nextName = nextParam.name + '_' + i;
+							nextParam = jQuery.extend({}, nextParam); // clone it so we can add the chain to the name
+							nextParam.name = theSearchParamName + '.' + nextParam.name;
+							params[nextName] = nextParam;
+							select.append(
+								$('<option />', { value: nextName }).text(nextParam.name + ' - ' + nextParam.documentation)														
+							);
+							found = true;
+						}
+					}
+				}
+			}
+		}
 		
 		select.select2();
 		handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum);
 		select.change(function(){ handleSearchParamTypeChange(select, params, newContainerRowNum, theRowNum); });
 		addNameAndType = false;
-    }
-    
-    if (addNameAndType) {
+	}
+	
+	if (addNameAndType) {
 		$('#search-param-rowopts-' + theContainerRowNum).append(
 			$('<input />', { id: 'param.' + theRowNum + '.name', type: 'hidden', value: theSearchParamName }),
 			$('<input />', { id: 'param.' + theRowNum + '.type', type: 'hidden', value: theSearchParamType })
 		);
-    }
-    
+	}
+	
 }
 
 function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum, theLower) {
@@ -289,6 +286,61 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 	    	input
     	)
     );
+}
+
+function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRowNum) {
+	var input = $('<div />', { 'class':'input-group'});
+	var qualifier = $('<input />', {type:'hidden', id:'param.' + theRowNum + '.0'});
+	var qualifierDiv = $('<div />', {'class':'input-group-btn'});
+	
+	input.append(
+		qualifierDiv,
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "value" }),
+		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
+			$('<span>System</span>')
+		),
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.2', placeholder: "(opt)" }),
+		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
+			$('<span>Code</span>')
+		),
+		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.3', placeholder: "(opt)" })
+	);
+
+    var qualifierTooltip = "Set a qualifier and a date to specify a boundary date. Set two qualifiers and dates to specify a range.";
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
+    qualifierBtn.tooltip({
+        'selector': '',
+        'placement': 'top',
+        'container':'body'
+      });
+    var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
+    var qualifierBtnAp = $('<a>~ (Approx)</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '~'); });
+    var qualifierBtnGt = $('<a>&gt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>');  });
+    var qualifierBtnGe = $('<a>&gt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>=');  });
+    var qualifierBtnLt = $('<a>&lt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<');  });
+    var qualifierBtnLe = $('<a>&lt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<=');  });
+    qualifierDiv.append(
+		qualifierBtn,
+		$('<ul class="dropdown-menu" role="menu">').append(
+			$('<li />').append(qualifierBtnEq),
+			$('<li />').append(qualifierBtnAp),
+			$('<li />').append(qualifierBtnGt),
+			$('<li />').append(qualifierBtnGe),
+			$('<li />').append(qualifierBtnLt),
+			$('<li />').append(qualifierBtnLe)
+		)
+	);
+
+	$('#search-param-rowopts-' + theContainerRowNum).append(
+		qualifier,
+		$('<div />', { 'class': 'col-sm-5' }).append(
+			input
+		)
+//		$('<div />', { 'class': 'col-sm-2' }).append(
+//			$('<div />', { 'class':'input-group'}).append(
+//			)
+//		)
+	);
 }
 
 function handleSearchParamTypeChange(select, params, theContainerRowNum, theParamRowNum) {
