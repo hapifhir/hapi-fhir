@@ -413,17 +413,13 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new IllegalArgumentException("Invalid quantity type: " + params.getClass());
 			}
 
-			Predicate system;
-			if (isBlank(systemValue)) {
-				system = builder.isNull(from.get("mySystem"));
-			} else {
+			Predicate system = null;
+			if (!isBlank(systemValue)) {
 				system = builder.equal(from.get("mySystem"), systemValue);
 			}
 
-			Predicate code;
-			if (isBlank(unitsValue)) {
-				code = builder.isNull(from.get("myUnits"));
-			} else {
+			Predicate code = null;
+			if (!isBlank(unitsValue)) {
 				code = builder.equal(from.get("myUnits"), unitsValue);
 			}
 
@@ -458,9 +454,18 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				}
 			}
 
-			Predicate singleCode = builder.and(system, code, num);
-			codePredicates.add(singleCode);
-
+			if (system == null && code == null) {
+				codePredicates.add(num);
+			} else if (system == null) {
+				Predicate singleCode = builder.and(code, num);
+				codePredicates.add(singleCode);
+			} else if (code == null) {
+				Predicate singleCode = builder.and(system, num);
+				codePredicates.add(singleCode);
+			} else {
+				Predicate singleCode = builder.and(system, code, num);
+				codePredicates.add(singleCode);
+			}
 		}
 
 		Predicate masterCodePredicate = builder.or(codePredicates.toArray(new Predicate[0]));
@@ -668,7 +673,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		myEntityManager.persist(newEntity);
 		myEntityManager.merge(entity);
 		notifyWriteCompleted();
-		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId, w.getMillisAndRestart()});
+		ourLog.info("Processed addTag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId, w.getMillisAndRestart() });
 	}
 
 	@Override
@@ -1190,7 +1195,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		myEntityManager.merge(entity);
 
-		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[]{theScheme, theTerm, theId.getValue(), w.getMillisAndRestart()});
+		ourLog.info("Processed remove tag {}/{} on {} in {}ms", new Object[] { theScheme, theTerm, theId.getValue(), w.getMillisAndRestart() });
 	}
 
 	@Override
@@ -1331,8 +1336,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 									}
 									retVal.addAll(resources);
 								}
-							}
-							while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
+							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
@@ -1352,7 +1356,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		};
 
-		ourLog.info("Processed search for {} on {} in {}ms", new Object[]{myResourceName, theParams, w.getMillisAndRestart()});
+		ourLog.info("Processed search for {} on {} in {}ms", new Object[] { myResourceName, theParams, w.getMillisAndRestart() });
 
 		return retVal;
 	}
@@ -1437,62 +1441,62 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				RuntimeSearchParam nextParamDef = resourceDef.getSearchParam(nextParamName);
 				if (nextParamDef != null) {
 					switch (nextParamDef.getParamType()) {
-						case DATE:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateDate(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+					case DATE:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateDate(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case QUANTITY:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateQuantity(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case QUANTITY:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateQuantity(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case REFERENCE:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateReference(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case REFERENCE:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateReference(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case STRING:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateString(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case STRING:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateString(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case TOKEN:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateToken(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case TOKEN:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateToken(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case NUMBER:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateNumber(nextParamName, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case NUMBER:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateNumber(nextParamName, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
-						case COMPOSITE:
-							for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
-								pids = addPredicateComposite(nextParamDef, pids, nextAnd);
-								if (pids.isEmpty()) {
-									return new HashSet<Long>();
-								}
+						}
+						break;
+					case COMPOSITE:
+						for (List<? extends IQueryParameterType> nextAnd : nextParamEntry.getValue()) {
+							pids = addPredicateComposite(nextParamDef, pids, nextAnd);
+							if (pids.isEmpty()) {
+								return new HashSet<Long>();
 							}
-							break;
+						}
+						break;
 					}
 				}
 			}
@@ -1598,6 +1602,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		} else {
 			resourceId = theResource.getId();
+			if (resourceId == null || isBlank(resourceId.getIdPart())) {
+				throw new InvalidRequestException("Can not update a resource with no ID");
+			}
 			entity = readEntityLatestVersion(resourceId);
 		}
 

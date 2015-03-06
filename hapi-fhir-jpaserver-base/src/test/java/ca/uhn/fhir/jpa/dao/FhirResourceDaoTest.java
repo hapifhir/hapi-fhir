@@ -15,6 +15,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -90,6 +91,41 @@ public class FhirResourceDaoTest {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 
 	@Test
+	public void testSearchValueQuantity() {
+		String methodName = "testSearchValueQuantity";
+
+		QuantityParam param;
+		Set<Long> found;
+		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
+		found = ourObservationDao.searchForIds("value-quantity", param);
+		int initialSize = found.size();
+
+		Observation o = new Observation();
+		o.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
+		QuantityDt q = new QuantityDt().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(100);
+		o.setValue(q);
+
+		ourObservationDao.create(o);
+
+		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
+		found = ourObservationDao.searchForIds("value-quantity", param);
+		assertEquals(1 + initialSize, found.size());
+
+		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, methodName + "units");
+		found = ourObservationDao.searchForIds("value-quantity", param);
+		assertEquals(1, found.size());
+
+		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, null);
+		found = ourObservationDao.searchForIds("value-quantity", param);
+		assertEquals(1, found.size());
+
+		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
+		found = ourObservationDao.searchForIds("value-quantity", param);
+		assertEquals(1, found.size());
+
+	}
+
+	@Test
 	public void testCreateDuplicateIdFails() {
 		String methodName = "testCreateDuplocateIdFailsText";
 
@@ -135,7 +171,6 @@ public class FhirResourceDaoTest {
 
 	}
 
-
 	@Test
 	public void testCreateNumericIdFails() {
 		Patient p = new Patient();
@@ -149,7 +184,6 @@ public class FhirResourceDaoTest {
 			assertThat(e.getMessage(), containsString("Can not create entity with ID[123], this server does not allow clients to assign numeric IDs"));
 		}
 	}
-
 
 	@Test
 	public void testDeleteWithMatchUrl() {
@@ -187,7 +221,6 @@ public class FhirResourceDaoTest {
 		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 1).get(0)));
 
 	}
-
 
 	@Test
 	public void testCreateWithIfNoneExist() {
@@ -265,7 +298,7 @@ public class FhirResourceDaoTest {
 	public void testChoiceParamQuantity() {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
-		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATERTHAN, 123.0, "foo", "bar"));
+		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATERTHAN, 123.0, "foo", "bar").setCode("bar"));
 		IdDt id3 = ourObservationDao.create(o3).getId();
 
 		{
