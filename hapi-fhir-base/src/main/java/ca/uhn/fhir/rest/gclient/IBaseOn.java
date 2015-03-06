@@ -9,12 +9,12 @@ public interface IBaseOn<T> {
 	/**
 	 * Perform the operation across all versions of all resources of all types on the server
 	 */
-	T ofServer();
+	T onServer();
 	
 	/**
 	 * Perform the operation across all versions of all resources of the given type on the server
 	 */
-	T ofType(Class<? extends IBaseResource> theResourceType);
+	T onType(Class<? extends IBaseResource> theResourceType);
 	
 	/**
 	 * Perform the operation across all versions of a specific resource (by ID and type) on the server.
@@ -23,6 +23,6 @@ public interface IBaseOn<T> {
 	 * 
 	 * @throws IllegalArgumentException If <code>theId</code> does not contain at least a resource type and ID 
 	 */
-	T ofInstance(IdDt theId);
+	T onInstance(IdDt theId);
 
 }
