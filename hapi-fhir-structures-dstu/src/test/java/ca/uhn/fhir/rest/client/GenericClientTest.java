@@ -665,7 +665,7 @@ public class GenericClientTest {
 		//@formatter:off
 		response = client
 				.history()
-				.ofServer()
+				.onServer()
 				.andReturnDstu1Bundle()
 				.execute();
 		//@formatter:on
@@ -676,7 +676,7 @@ public class GenericClientTest {
 		//@formatter:off
 		response = client
 				.history()
-				.ofType(Patient.class)
+				.onType(Patient.class)
 				.andReturnDstu1Bundle()
 				.execute();
 		//@formatter:on
@@ -687,7 +687,7 @@ public class GenericClientTest {
 		//@formatter:off
 		response = client
 				.history()
-				.ofInstance(new IdDt("Patient", "123"))
+				.onInstance(new IdDt("Patient", "123"))
 				.andReturnDstu1Bundle()
 				.execute();
 		//@formatter:on

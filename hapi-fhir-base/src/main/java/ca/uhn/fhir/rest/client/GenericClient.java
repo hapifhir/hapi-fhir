@@ -36,10 +36,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -57,6 +61,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -122,83 +127,17 @@ import ca.uhn.fhir.util.ICallable;
  */
 public class GenericClient extends BaseClient implements IGenericClient {
 
-	@SuppressWarnings("rawtypes")
-	public class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput {
-
-		private IdDt myId;
-		private Class<? extends IBaseResource> myType;
-		private IBaseParameters myParameters;
-		private String myOperationName;
-
-		@Override
-		public IOperationUnnamed ofServer() {
-			return this;
-		}
-
-		@Override
-		public IOperationUnnamed ofType(Class<? extends IBaseResource> theResourceType) {
-			myType = theResourceType;
-			return this;
-		}
-
-		@Override
-		public IOperationUnnamed ofInstance(IdDt theId) {
-			myId = theId;
-			return this;
-		}
-
-		@SuppressWarnings({ "unchecked" })
-		@Override
-		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
-			Validate.notNull(theParameters, "theParameters can not be null");
-			myParameters = theParameters;
-			return this;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object execute() {
-			String resourceName;
-			String id;
-			if (myType != null) {
-				resourceName = myContext.getResourceDefinition(myType).getName();
-				id = null;
-			} else if (myId != null) {
-				resourceName = myId.getResourceType();
-				id = myId.getIdPart();
-			} else {
-				resourceName = null;
-				id = null;
-			}
-
-			HttpPostClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters);
-
-			IClientResponseHandler handler;
-			handler = new ResourceResponseHandler(myParameters.getClass(), null);
-
-			return invoke(null, handler, invocation);
-		}
-
-		@Override
-		public IOperationUntyped named(String theName) {
-			Validate.notBlank(theName, "theName can not be null");
-			myOperationName =theName;
-			return this;
-		}
-
-	}
-
 	private static final String I18N_CANNOT_DETEMINE_RESOURCE_TYPE = "ca.uhn.fhir.rest.client.GenericClient.cannotDetermineResourceTypeFromUri";
 
 	private static final String I18N_INCOMPLETE_URI_FOR_READ = "ca.uhn.fhir.rest.client.GenericClient.incompleteUriForRead";
+
 	private static final String I18N_NO_VERSION_ID_FOR_VREAD = "ca.uhn.fhir.rest.client.GenericClient.noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
-
 	private FhirContext myContext;
 
 	private HttpRequestBase myLastRequest;
-	private boolean myLogRequestAndResponse;
 
+	private boolean myLogRequestAndResponse;
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
@@ -262,6 +201,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return resp;
 	}
 
+	@Override
+	public MethodOutcome delete(Class<? extends IResource> theType, String theId) {
+		return delete(theType, new IdDt(theId));
+	}
+
 	// public IResource read(UriDt url) {
 	// return read(inferResourceClass(url), url);
 	// }
@@ -274,11 +218,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	// public Bundle search(UriDt url) {
 	// return search(inferResourceClass(url), url);
 	// }
-
-	@Override
-	public MethodOutcome delete(Class<? extends IResource> theType, String theId) {
-		return delete(theType, new IdDt(theId));
-	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IdDt theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
 		String resName = toResourceName(theType);
@@ -395,14 +334,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+	public boolean isLogRequestAndResponse() {
+		return myLogRequestAndResponse;
+	}
+
 	// @Override
 	// public <T extends IBaseResource> T read(final Class<T> theType, IdDt theId) {
 	// return doReadOrVRead(theType, theId, false, null, null);
 	// }
-
-	public boolean isLogRequestAndResponse() {
-		return myLogRequestAndResponse;
-	}
 
 	@Override
 	public IGetPage loadPage() {
@@ -411,6 +350,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public IOperation operation() {
+		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) == false) {
+			throw new IllegalStateException("Operations are only supported in FHIR DSTU2 and later. This client was created using a context configured for " + myContext.getVersion().getVersion().name());
+		}
 		return new OperationInternal();
 	}
 
@@ -968,7 +910,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public class HistoryInternal extends BaseClientExecutable implements IHistory, IHistoryUntyped, IHistoryTyped {
+	private class HistoryInternal extends BaseClientExecutable implements IHistory, IHistoryUntyped, IHistoryTyped {
 
 		private Integer myCount;
 		private IdDt myId;
@@ -1024,7 +966,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IHistoryUntyped ofInstance(IdDt theId) {
+		public IHistoryUntyped onInstance(IdDt theId) {
 			if (theId.hasResourceType() == false) {
 				throw new IllegalArgumentException("Resource ID does not have a resource type: " + theId.getValue());
 			}
@@ -1033,12 +975,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IHistoryUntyped ofServer() {
+		public IHistoryUntyped onServer() {
 			return this;
 		}
 
 		@Override
-		public IHistoryUntyped ofType(Class<? extends IBaseResource> theResourceType) {
+		public IHistoryUntyped onType(Class<? extends IBaseResource> theResourceType) {
 			myType = theResourceType;
 			return this;
 		}
@@ -1076,6 +1018,88 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IGetPageTyped url(String thePageUrl) {
 			return new GetPageInternal(thePageUrl);
+		}
+
+	}
+
+	@SuppressWarnings("rawtypes")
+	private class OperationInternal extends BaseClientExecutable implements IOperation, IOperationUnnamed, IOperationUntyped, IOperationUntypedWithInput {
+
+		private IdDt myId;
+		private String myOperationName;
+		private IBaseParameters myParameters;
+		private Class<? extends IBaseResource> myType;
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object execute() {
+			String resourceName;
+			String id;
+			if (myType != null) {
+				resourceName = myContext.getResourceDefinition(myType).getName();
+				id = null;
+			} else if (myId != null) {
+				resourceName = myId.getResourceType();
+				id = myId.getIdPart();
+			} else {
+				resourceName = null;
+				id = null;
+			}
+
+			HttpPostClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters);
+
+			IClientResponseHandler handler;
+			handler = new ResourceResponseHandler(myParameters.getClass(), null);
+
+			Object retVal = invoke(null, handler, invocation);
+			if (myContext.getResourceDefinition((IBaseResource)retVal).getName().equals("Parameters")) {
+				return retVal;
+			} else {
+				RuntimeResourceDefinition def = myContext.getResourceDefinition("Parameters");
+				IBaseResource parameters = def.newInstance();
+				
+				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+				IBase parameter = paramChildElem.newInstance();
+				paramChild.getMutator().addValue(parameters, parameter);
+
+				BaseRuntimeChildDefinition resourceElem = paramChildElem.getChildByName("resource");
+				resourceElem.getMutator().addValue(parameter, (IBase) retVal);
+				
+				return parameters;
+			}
+		}
+
+		@Override
+		public IOperationUntyped named(String theName) {
+			Validate.notBlank(theName, "theName can not be null");
+			myOperationName =theName;
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onInstance(IdDt theId) {
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onServer() {
+			return this;
+		}
+
+		@Override
+		public IOperationUnnamed onType(Class<? extends IBaseResource> theResourceType) {
+			myType = theResourceType;
+			return this;
+		}
+
+		@SuppressWarnings({ "unchecked" })
+		@Override
+		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
+			Validate.notNull(theParameters, "theParameters can not be null");
+			myParameters = theParameters;
+			return this;
 		}
 
 	}

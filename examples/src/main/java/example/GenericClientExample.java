@@ -337,7 +337,7 @@ public class GenericClientExample {
          // START SNIPPET: historyDstu1
          response = client
             .history()
-            .ofServer()
+            .onServer()
             .andReturnDstu1Bundle()
             .execute();
          // END SNIPPET: historyDstu1
@@ -347,7 +347,7 @@ public class GenericClientExample {
          // START SNIPPET: historyDstu2
          response = client
             .history()
-            .ofServer()
+            .onServer()
             .andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
             .execute();
          // END SNIPPET: historyDstu2
@@ -357,7 +357,7 @@ public class GenericClientExample {
          // START SNIPPET: historyFeatures
          response = client
             .history()
-            .ofServer()
+            .onServer()
             .andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
             .since(new InstantDt("2012-01-01T12:22:32.038Z"))
             .count(100)
@@ -384,7 +384,7 @@ public class GenericClientExample {
       
       Parameters outParams = client
          .operation()
-         .ofInstance(new IdDt("Patient", "1"))
+         .onInstance(new IdDt("Patient", "1"))
          .named("$everything")
          .withParameters(inParams)
          .execute();
