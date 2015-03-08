@@ -180,8 +180,8 @@ public abstract class BaseFhirDao implements IDao {
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					if (nextValue.getReference().getValue().startsWith("#")) {
-						// This is a contained resource reference
+					if (nextValue.getReference().isEmpty() || nextValue.getReference().getValue().startsWith("#")) {
+						// This is a blank or contained resource reference
 						continue;
 					}
 

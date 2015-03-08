@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -64,14 +63,11 @@ import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.util.FhirTerser;
 
-class SearchParamExtractorDstu2 implements ISearchParamExtractor {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu2.class);
-	private FhirContext myContext;
+class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public SearchParamExtractorDstu2(FhirContext theContext) {
-		myContext = theContext;
+		super(theContext);
 	}
 
 	/*
@@ -84,7 +80,7 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 	public List<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamDate> retVal = new ArrayList<ResourceIndexedSearchParamDate>();
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.DATE) {
 				continue;
@@ -147,7 +143,7 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 	public ArrayList<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamNumber> retVal = new ArrayList<ResourceIndexedSearchParamNumber>();
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.NUMBER) {
 				continue;
@@ -250,7 +246,7 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 	public List<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamQuantity> retVal = new ArrayList<ResourceIndexedSearchParamQuantity>();
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.QUANTITY) {
 				continue;
@@ -306,7 +302,7 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 	public List<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IResource theResource) {
 		ArrayList<ResourceIndexedSearchParamString> retVal = new ArrayList<ResourceIndexedSearchParamString>();
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
 				continue;
@@ -400,7 +396,7 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 	public List<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IResource theResource) {
 		ArrayList<BaseResourceIndexedSearchParam> retVal = new ArrayList<BaseResourceIndexedSearchParam>();
 
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != SearchParamTypeEnum.TOKEN) {
 				continue;
@@ -504,22 +500,6 @@ class SearchParamExtractorDstu2 implements ISearchParamExtractor {
 		theEntity.setParamsTokenPopulated(retVal.size() > 0);
 
 		return retVal;
-	}
-
-	private List<Object> extractValues(String thePaths, IResource theResource) {
-		List<Object> values = new ArrayList<Object>();
-		String[] nextPathsSplit = thePaths.split("\\|");
-		FhirTerser t = myContext.newTerser();
-		for (String nextPath : nextPathsSplit) {
-			String nextPathTrimmed = nextPath.trim();
-			try {
-				values.addAll(t.getValues(theResource, nextPathTrimmed));
-			} catch (Exception e) {
-				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", nextPathTrimmed, def.getName(), e.toString());
-			}
-		}
-		return values;
 	}
 
 }

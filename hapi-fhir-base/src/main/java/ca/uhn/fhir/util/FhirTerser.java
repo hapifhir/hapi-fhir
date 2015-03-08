@@ -149,9 +149,13 @@ public class FhirTerser {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
 				for (IBase next : values) {
 					if (next != null) {
-						String childName = nextDef.getChildNameByDatatype(next.getClass());
-						if (theSubList.get(0).equals(childName)) {
+						if (name.endsWith("[x]")) {
 							retVal.add(next);
+						} else {
+							String childName = nextDef.getChildNameByDatatype(next.getClass());
+							if (theSubList.get(0).equals(childName)) {
+								retVal.add(next);
+							}
 						}
 					}
 				}

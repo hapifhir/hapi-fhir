@@ -295,6 +295,23 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
+	public void testChoiceParamDateAlt() {
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateAlt02");
+		o2.setApplies(new DateTimeDt("2015-03-08T11:11:11"));
+		IdDt id2 = ourObservationDao.create(o2).getId();
+
+		{
+			Set<Long> found = ourObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2001-01-02"));
+			assertThat(found, contains(id2.getIdPartAsLong()));
+		}
+		{
+			Set<Long> found = ourObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2016-01-02"));
+			assertThat(found, not(contains(id2.getIdPartAsLong())));
+		}
+	}
+
+	@Test
 	public void testChoiceParamQuantity() {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
