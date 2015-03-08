@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -43,7 +44,7 @@ public class CountParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		if (theSourceClientArgument != null) {
 			IntegerDt since = ParameterUtil.toInteger(theSourceClientArgument);
 			if (since.isEmpty() == false) {

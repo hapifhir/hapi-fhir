@@ -1,190 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-	
+
 	<properties>
 		<title>RESTful Operations - HAPI FHIR</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
 	<body>
-		<section name="Implementing Resource Provider Operations">
-
-		    <!-- 
-			<p>
-				Jump To...
-			</p>
-			<ul>
-				<li>
-					<a href="#operations">Operations</a>
-				</li>
-				<li>
-					<a href="#exceptions">Exceptions</a>
-				</li>
-				<li>
-					<a href="#tags">Tags</a>
-				</li>
-				<li>
-					<a href="#compartments">Compartments</a>
-				</li>
-			</ul>
-
-			<p>
-				RESTful Clients and Servers both share the same
-				method pattern, with one key difference: A client
-				is defined using annotated methods on an interface
-				which are used to retrieve
-				resources,
-				whereas a server requires concrete method
-				implementations
-				to actually provide those resources.
-			</p>
-
-			<p>
-				Unless otherwise specified, the examples below show
-				<b>server</b>
-				implementations, but client methods will follow the same patterns.
-			</p>
-
-		-->
-		</section>
-		
 		<section name="Operations">
+
 			<a name="operations" />
 			<p>
-				The following table lists the operations supported by
-				HAPI FHIR RESTful Servers and Clients.
+				This page shows the operations which can be implemented on 
+				HAPI
+				<a href="./doc_rest_server.html">RESTful Servers</a>, as well as
+				<a href="./doc_rest_client_annotation.html">Annotation Clients</a>.
+				Most of the examples shown here show how to implement a server
+				method, but to perform an equivalent call on an annotation
+				client you simply put a method with the same signature in your
+				client interface. 
 			</p>
-
-<!-- 
-			<table>
-				<thead>
-					<tr style="font-weight: bold; font-size: 1.2em;">
-						<td>Operation</td>
-						<td>Definition</td>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>
-							<a href="#instance_read">Instance - Read</a>
-						</td>
-						<td>
-							Read the current state of the resource
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#instance_vread">Instance - VRead</a>
-						</td>
-						<td>
-							Read the state of a specific version of the resource
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#instance_update">Instance - Update</a>
-						</td>
-						<td>
-							Updates the resource on the server
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#instance_delete">Instance - Delete</a>
-						</td>
-						<td>
-							Delete a resource
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#history">Instance - History</a>
-						</td>
-						<td>
-							Retrieve the update history for a particular resource
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#type_create">Type - Create</a>
-						</td>
-						<td>
-							Create a new resource with a server assigned id
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#type_search">Type - Search</a>
-							<macro name="toc" >
-								<param name="section" value="8" />
-								<param name="fromDepth" value="2" />
-							</macro>
-						</td>
-						<td>
-							Search the resource type based on some filter criteria
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#history">Type - History</a>
-						</td>
-						<td>
-							Retrieve the update history for a particular resource type
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#type_validate">Type - Validate</a>
-						</td>
-						<td>
-							Check that the content would be acceptable as an update
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#system_conformance">System - Conformance</a>
-						</td>
-						<td>
-							Get a conformance statement for the system
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#system_transaction">System - Transaction</a>
-						</td>
-						<td>
-							Update, create or delete a set of resources as a single transaction
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#history">System - History</a>
-						</td>
-						<td>
-							Retrieve the update history for all resources
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#system_search">System - Search</a>
-						</td>
-						<td>
-							Search across all resource types based on some filter criteria
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<a href="#tags">Tag Operations</a>
-						</td>
-						<td>
-							Search across all resource types based on some filter criteria
-						</td>
-					</tr>
-
-				</tbody>
-			</table>
--->
-
+			
 			<a name="instance_read" />
 		</section>
 
@@ -1632,7 +1468,114 @@
 			</p>
 			
 		</section>
+
+		<section name="Extended Operations">
 		
+			<p>
+				FHIR extended operations are a special type of RPC-style invocation you
+				can perform against a FHIR server, type, or resource instance. These invocations
+				take a 
+				<a href="./apidocs-dstu2/ca/uhn/fhir/model/dstu2/resource/Parameters.html">Parameters</a>
+				resource as input, and return either another Parameters resource or a different resource type.
+			</p>
+
+			<p>
+				To define an operation, a method should be placed in a 
+				<a href="./doc_rest_server.html#resource_providers">Resource Provider</a> 
+				class if the operation works against a resource type (e.g. <code>Patient</code>)
+				or a resource instance (e.g. <code>Patient/123</code>), or on a 
+				Plain Provider 
+				if the operation works against the server (i.e. it is global and not resource specific).
+			</p>
+
+			<subsection name="Type-Specific Operations">
+			
+				<p>
+					To implement a type-specific operation, 
+					the method should be annotated with the 
+					<code>@Operation</code> tag, and should have an
+					<code>@OperationParam</code> tag for each named parameter that
+					the input Parameters resource may be populated with. The following
+					example shows how to implement the <code>Patient/$everything</code>
+					method, defined in the FHIR specification.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="patientTypeOperation" />
+					<param name="file"
+						value="examples/src/main/java/example/ServerOperations.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this operation (HTTP request body is Parameters resource):
+					<br />
+					<code>POST http://fhir.example.com/Patient/$everything</code>
+				</p>
+				
+			</subsection>
+			
+			<subsection name="Instance-Specific Operations">
+			
+				<p>
+					To create an instance-specific operation (an operation which takes the
+					ID of a specific resource instance as a part of its request URL),
+					you can add a parameter annotated with the <code>@IdParam</code> annotation,
+					of type <code>IdDt</code>. The following example show how to implement the
+					<code>Patient/[id]/$everything</code> operation.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="patientInstanceOperation" />
+					<param name="file"
+						value="examples/src/main/java/example/ServerOperations.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this operation (HTTP request body is Parameters resource):
+					<br />
+					<code>http://fhir.example.com/Patient/123/$everything</code>
+				</p>
+				
+			</subsection>
+
+			<subsection name="Server Operations">
+			
+				<p>
+					Server operations do not operate on a specific resource type or
+					instance, but rather operate globally on the server itself. The following 
+					example show how to implement the
+					<code>$closure</code> operation. Note that the <code>concept</code> parameter
+					in the example has a cardinality of <code>0..*</code> according to the
+					FHIR specification, so a <code>List&lt;Coding&gt;</code>
+					is used as the parameter type.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="serverOperation" />
+					<param name="file"
+						value="examples/src/main/java/example/ServerOperations.java" />
+				</macro>
+				
+				<p>
+					Example URL to invoke this operation (HTTP request body is Parameters resource):
+					<br />
+					<code>http://fhir.example.com/$closure</code>
+				</p>
+				
+			</subsection>
+
+			<subsection name="Returning Multiple OUT Parameters">
+				
+				<p>
+					In all of the Extended Operation examples above, the return
+					type specified for the operation is a single Resource instance. This is
+					a common pattern in FHIR defined operations. However, it is also 
+					possible for an extended operation to be defined with multiple
+					and/or repeating OUT parameters. In this case, you can return
+					a <code>Parameters</code> resource directly.  
+				</p>
+			
+			</subsection>
+
+		</section>
+
 	</body>
 
 </document>

@@ -48,10 +48,11 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -292,7 +293,7 @@ public class MethodUtil {
 	}
 
 	public static Integer findConditionalOperationParameterIndex(Method theMethod) {
-		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalOperationParam.class);
+		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -396,8 +397,10 @@ public class MethodUtil {
 						param = new SortParameter();
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParamBinder(theContext);
-					} else if (nextAnnotation instanceof ConditionalOperationParam) {
+					} else if (nextAnnotation instanceof ConditionalUrlParam) {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
+					} else if (nextAnnotation instanceof OperationParam) {
+						param = new OperationParamBinder((OperationParam)nextAnnotation);
 					} else {
 						continue;
 					}

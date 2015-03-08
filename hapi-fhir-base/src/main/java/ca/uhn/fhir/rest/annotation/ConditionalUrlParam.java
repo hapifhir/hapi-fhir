@@ -25,8 +25,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * On the {@link Update}, {@link Create} and {@link Delete} operation methods, this annotation
+ * can be used to mark a {@link String} parameter which will be populated with the 
+ * conditional "search" URL for the operation, if an incoming client invocation is
+ * a conditional operation. For non-conditional invocations, the value will be set to
+ * <code>null</code> so it is important to handle <code>null</code>.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface ConditionalOperationParam {
+public @interface ConditionalUrlParam {
 	// just a marker
 }

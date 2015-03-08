@@ -71,6 +71,7 @@ public class BundleTypeTest {
 		assertTrue("Expected request of type POST on long params list", value instanceof HttpPost);
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent());
+		IOUtils.closeQuietly(post.getEntity().getContent());
 		ourLog.info(body);
 
 		assertThat(body, Matchers.containsString("<type value=\"" + BundleTypeEnum.TRANSACTION.getCode()));

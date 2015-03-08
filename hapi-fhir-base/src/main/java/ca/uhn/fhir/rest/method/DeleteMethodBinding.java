@@ -134,7 +134,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 
 		for (int idx = 0; idx < theArgs.length; idx++) {
 			IParameter nextParam = getParameters().get(idx);
-			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null);
+			nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], null, null);
 		}
 
 		return retVal;

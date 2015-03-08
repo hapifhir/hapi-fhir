@@ -21,7 +21,7 @@ import org.junit.Test;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -114,7 +114,7 @@ public class DeleteConditionalTest {
 
 		
 		@Delete()
-		public MethodOutcome updatePatient(@ConditionalOperationParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastIdParam = theIdParam;
 			return new MethodOutcome(new IdDt("Patient/001/_history/002"));

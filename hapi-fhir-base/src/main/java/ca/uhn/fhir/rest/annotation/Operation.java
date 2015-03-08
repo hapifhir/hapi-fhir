@@ -25,18 +25,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 
 /**
- * RESTful method annotation used for a method which provides
- * FHIR "operations".
+ * RESTful method annotation used for a method which provides FHIR "operations".
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value=ElementType.METHOD)
+@Target(value = ElementType.METHOD)
 public @interface Operation {
 
 	/**
 	 * The name of the operation
 	 */
 	String name();
+
+	/**
+	 * On a client, this value should be populated with the resource type that the operation applies to. If set to
+	 * {@link IBaseResource} (which is the default) than the operation applies to the server and not to a specific
+	 * resource type.
+	 * <p>
+	 * This value should not be populated on server implementations.
+	 * </p>
+	 */
+	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 }

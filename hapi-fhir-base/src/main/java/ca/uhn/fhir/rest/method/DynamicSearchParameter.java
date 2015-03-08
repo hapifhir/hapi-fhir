@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -58,7 +60,7 @@ public class DynamicSearchParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		throw new UnsupportedOperationException("Dynamic search is not supported in client mode (use fluent client for dynamic-like searches)");
 	}
 

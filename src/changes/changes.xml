@@ -130,6 +130,11 @@
 			<action type="add">
 				Add support for quantity search params in FHIR tester UI
 			</action>
+			<action type="add">
+				Add support for FHIR "extended operations" as defined in the FHIR DSTU2
+				specification, for the Generic Client, Annotation Client, and
+				Server.  
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

@@ -28,6 +28,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Sort;
@@ -40,7 +42,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class SortParameter implements IParameter {
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		SortSpec ss = (SortSpec) theSourceClientArgument;
 		while (ss != null) {
 			String name;

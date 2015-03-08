@@ -34,7 +34,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.AddTags;
-import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.DeleteTags;
@@ -327,7 +327,7 @@ public void deletePatient(@IdParam IdDt theId) {
 
 //START SNIPPET: deleteConditional
 @Read()
-public void deletePatientConditional(@IdParam IdDt theId, @ConditionalOperationParam String theConditionalUrl) {
+public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
    // Only one of theId or theConditionalUrl will have a value depending
    // on whether the URL receieved was a logical ID, or a conditional
    // search string
@@ -698,7 +698,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
 @Create
 public MethodOutcome createPatientConditional(
       @ResourceParam Patient thePatient,
-      @ConditionalOperationParam String theConditionalUrl) {
+      @ConditionalUrlParam String theConditionalUrl) {
 
    if (theConditionalUrl != null) {
       // We are doing a conditional create
@@ -727,7 +727,7 @@ public abstract MethodOutcome createNewPatient(@ResourceParam Patient thePatient
 public MethodOutcome updatePatientConditional(
       @ResourceParam Patient thePatient, 
       @IdParam IdDt theId, 
-      @ConditionalOperationParam String theConditional) {
+      @ConditionalUrlParam String theConditional) {
 
    // Only one of theId or theConditional will have a value and the other will be null,
    // depending on the URL passed into the server. 

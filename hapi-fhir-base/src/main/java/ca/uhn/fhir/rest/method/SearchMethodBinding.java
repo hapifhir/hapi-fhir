@@ -267,7 +267,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs);
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], queryStringArgs, null);
 			}
 		}
 

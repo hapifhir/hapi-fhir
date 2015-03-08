@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -47,7 +47,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Create
-	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource, @ConditionalOperationParam String theConditional) {
+	public MethodOutcome create(HttpServletRequest theRequest, @ResourceParam T theResource, @ConditionalUrlParam String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -61,7 +61,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Delete
-	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, @ConditionalOperationParam String theConditional) {
+	public MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdDt theResource, @ConditionalUrlParam String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {
@@ -75,7 +75,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Update
-	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId, @ConditionalOperationParam String theConditional) {
+	public MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdDt theId, @ConditionalUrlParam String theConditional) {
 		startRequest(theRequest);
 		try {
 			if (theConditional != null) {

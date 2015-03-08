@@ -90,8 +90,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
-							+ collectionType);
+					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -107,8 +106,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
-					+ theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -136,6 +134,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public String getResourceName() {
 		return myResourceName;
 	}
+
+	/**
+	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
+	 */
+	protected abstract BundleTypeEnum getResponseBundleType();
 
 	public abstract ReturnTypeEnum getReturnType();
 
@@ -259,24 +262,22 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				} else {
 					resource = (IResource) resultObj;
 				}
-				
+
 				/*
-				 * We assume that the bundle we got back from the handling method
-				 * may not have everything populated (e.g. self links, bundle type,
-				 * etc) so we do that here.
+				 * We assume that the bundle we got back from the handling method may not have everything populated
+				 * (e.g. self links, bundle type, etc) so we do that here.
 				 */
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 				bundleFactory.initializeWithBundleResource(resource);
 				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), count, getResponseBundleType());
-				
+
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
 
 				IBundleProvider result = (IBundleProvider) resultObj;
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null,
-						getResponseBundleType());
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null, getResponseBundleType());
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
@@ -298,8 +299,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
-							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase());
+					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase());
 				}
 
 				break;
@@ -330,11 +330,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	}
 
 	/**
-	 * If the response is a bundle, this type will be placed in the root of the bundle (can be null)
-	 */
-	protected abstract BundleTypeEnum getResponseBundleType();
-
-	/**
 	 * Subclasses may override
 	 * 
 	 * @param theRequest
@@ -346,8 +341,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		return null;
 	}
 
+	protected void setResourceName(String theResourceName) {
+		myResourceName = theResourceName;
+	}
+
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, LIST_OF_RESOURCES, RESOURCE, BUNDLE_RESOURCE
+		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, RESOURCE
 	}
 
 	public enum ReturnTypeEnum {

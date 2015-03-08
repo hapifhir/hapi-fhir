@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
@@ -98,7 +99,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		if (theSourceClientArgument == null) {
 			if (isRequired()) {
 				throw new NullPointerException("SearchParameter '" + getName() + "' is required and may not be null");

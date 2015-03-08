@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.annotation.DeleteTags;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -257,9 +258,10 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		AddTags addTags = theMethod.getAnnotation(AddTags.class);
 		DeleteTags deleteTags = theMethod.getAnnotation(DeleteTags.class);
 		Transaction transaction = theMethod.getAnnotation(Transaction.class);
+		Operation operation = theMethod.getAnnotation(Operation.class);
 
 		// ** if you add another annotation above, also add it to the next line:
-		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction)) {
+		if (!verifyMethodHasZeroOrOneOperationAnnotation(theMethod, read, search, conformance, create, update, delete, history, validate, getTags, addTags, deleteTags, transaction, operation)) {
 			return null;
 		}
 
@@ -343,8 +345,15 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 							+ " according to annotation - Must return a resource type");
 				}
 				returnType = returnTypeFromAnnotation;
-			} else {
+			} else { 
+				//if (IRestfulClient.class.isAssignableFrom(theMethod.getDeclaringClass())) {
+				// Clients don't define their methods in resource specific types, so they can
+				// infer their resource type from the method return type.
 				returnType = (Class<? extends IResource>) returnTypeFromMethod;
+//			} else {
+				// This is a plain provider method returning a resource, so it should be
+				// an operation or global search presumably
+	//			returnType = null;
 			}
 		}
 
@@ -377,6 +386,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return new DeleteTagsMethodBinding(theMethod, theContext, theProvider, deleteTags);
 		} else if (transaction != null) {
 			return new TransactionMethodBinding(theMethod, theContext, theProvider);
+		} else if (operation != null) {
+			return new OperationMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider, operation);
 		} else {
 			throw new ConfigurationException("Did not detect any FHIR annotations on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}

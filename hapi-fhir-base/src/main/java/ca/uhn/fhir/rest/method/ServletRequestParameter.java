@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -33,7 +35,7 @@ class ServletRequestParameter implements IParameter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletRequestParameter.class);
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments) throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		/*
 		 * Does nothing, since we just ignore HttpServletRequest arguments
 		 */

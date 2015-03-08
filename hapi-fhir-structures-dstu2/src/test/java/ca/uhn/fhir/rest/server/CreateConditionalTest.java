@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.ConditionalOperationParam;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -188,7 +188,7 @@ public class CreateConditionalTest {
 		}
 		
 		@Create()
-		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalOperationParam String theConditional, @IdParam IdDt theIdParam) {
+		public MethodOutcome createPatient(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
 			ourLastConditionalUrl = theConditional;
 			ourLastId = thePatient.getId();
 			ourLastIdParam = theIdParam;

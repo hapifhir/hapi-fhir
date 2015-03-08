@@ -157,7 +157,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
 				IParameter nextParam = getParameters().get(idx);
-				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters());
+				nextParam.translateClientArgumentIntoQueryArgument(getContext(), theArgs[idx], retVal.getParameters(), null);
 			}
 		}
 
