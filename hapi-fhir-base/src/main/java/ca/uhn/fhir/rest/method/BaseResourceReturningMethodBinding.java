@@ -271,6 +271,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				bundleFactory.initializeWithBundleResource(resource);
 				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), count, getResponseBundleType());
 
+				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+					IServerInterceptor next = theServer.getInterceptors().get(i);
+					boolean continueProcessing = next.outgoingResponse(theRequest, resource, theRequest.getServletRequest(), theRequest.getServletResponse());
+					if (!continueProcessing) {
+						ourLog.debug("Interceptor {} returned false, not continuing processing");
+						return;
+					}
+				}
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {

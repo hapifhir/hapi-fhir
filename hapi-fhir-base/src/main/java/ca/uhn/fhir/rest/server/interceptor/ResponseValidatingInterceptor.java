@@ -32,7 +32,12 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.validation.FhirValidator;
 
-public class ResponseValidatingInterceptor extends InterceptorAdapter {
+/**
+ * Not yet complete!
+ * 
+ * TODO: complete this
+ */
+class ResponseValidatingInterceptor extends InterceptorAdapter {
 
 	private FhirValidator myValidator;
 	

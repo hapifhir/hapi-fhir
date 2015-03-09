@@ -111,11 +111,10 @@
 													}	
 												}
 											});
+											window.onpageshow=function(event) {
+												$('#search-btn').button('reset'); // re-activate the button if the user comes back
+											};
 											$("#outerForm").attr("action", "search").submit();
-										});
-										$(document).ready(function() {
-											// If the user clicks "back", re-activate the button
-											$('#search-btn').prop('disabled', false);
 										});
 									</script>
 									<br clear="all"/>
