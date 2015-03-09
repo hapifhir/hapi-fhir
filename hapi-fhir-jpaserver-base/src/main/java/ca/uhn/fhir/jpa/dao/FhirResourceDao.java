@@ -889,7 +889,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new NotImplementedException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
 		
-		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
+		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.INNER);
 //		Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
 //		Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
 //		thePredicates.add(theBuilder.or(p, pn));
@@ -1247,7 +1247,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			}
 		}
 
-		final List<Long> pids = new ArrayList<Long>(loadPids);
+		final List<Long> pids;
 
 		// Handle sorting if any was provided
 		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
@@ -1256,9 +1256,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
-			predicates.add(from.get("myId").in(pids));
+			predicates.add(from.get("myId").in(loadPids));
 			createSort(builder, from, theParams.getSort(), orders, predicates);
 			if (orders.size() > 0) {
+				Set<Long> originalPids = loadPids;
 				loadPids = new LinkedHashSet<Long>();
 				cq.multiselect(from.get("myId").as(Long.class));
 				cq.where(predicates.toArray(new Predicate[0]));
@@ -1272,9 +1273,20 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 				ourLog.info("Sort PID order is now: {}", loadPids);
 
-				pids.clear();
-				pids.addAll(loadPids);
+				pids = new ArrayList<Long>(loadPids);
+				
+				// Any ressources which weren't matched by the sort get added to the bottom
+				for (Long next : originalPids) {
+					if (loadPids.contains(next)==false) {
+						pids.add(next);
+					}
+				}
+				
+			}else {
+				pids = new ArrayList<Long>(loadPids);
 			}
+		} else {
+			pids = new ArrayList<Long>(loadPids);
 		}
 
 		IBundleProvider retVal = new IBundleProvider() {
