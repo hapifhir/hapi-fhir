@@ -59,6 +59,7 @@ public enum EncodingEnum {
 		 */
 		ourContentTypeToEncoding.put("application/json", JSON);
 		ourContentTypeToEncoding.put("application/xml", XML);
+		ourContentTypeToEncoding.put("application/fhir+xml", XML);
 		ourContentTypeToEncoding.put("text/json", JSON);
 		ourContentTypeToEncoding.put("text/xml", XML);
 
