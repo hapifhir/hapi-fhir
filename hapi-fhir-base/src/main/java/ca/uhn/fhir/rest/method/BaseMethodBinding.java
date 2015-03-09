@@ -26,12 +26,9 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
+import ca.uhn.fhir.model.api.Include;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
@@ -126,7 +123,41 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return myParameters;
 	}
 
-	public Object getProvider() {
+    public Set<Include> getRequestIncludesFromParams(Object[] params) {
+        if (params == null || params.length == 0)
+            return null;
+        int index = 0;
+        boolean match = false;
+        for (IParameter parameter : myParameters) {
+            if (parameter instanceof IncludeParameter) {
+                match = true;
+                break;
+            }
+            index++;
+        }
+        if (!match)
+            return null;
+        if (index >= params.length) {
+            ourLog.warn("index out of parameter range (should never happen");
+            return null;
+        }
+        if (params[index] instanceof Set) {
+            return (Set<Include>)params[index];
+        }
+        if (params[index] instanceof Iterable) {
+            Set includes = new HashSet<Include>();
+            for (Object o : (Iterable)params[index]) {
+                if (o instanceof Include) {
+                    includes.add((Include) o);
+                }
+            }
+            return includes;
+        }
+        ourLog.warn("include params wasn't Set or Iterable, it was {}", params[index].getClass());
+        return null;
+    }
+
+    public Object getProvider() {
 		return myProvider;
 	}
 

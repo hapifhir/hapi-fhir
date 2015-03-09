@@ -34,6 +34,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import ca.uhn.fhir.model.api.Include;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -282,10 +283,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
+                Set<Include> includes = getRequestIncludesFromParams(params);
 
 				IBundleProvider result = (IBundleProvider) resultObj;
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null, getResponseBundleType());
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null,
+						getResponseBundleType(), includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {

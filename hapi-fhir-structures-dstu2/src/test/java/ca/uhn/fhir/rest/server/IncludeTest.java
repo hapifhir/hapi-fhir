@@ -280,6 +280,7 @@ public class IncludeTest {
 		RestfulServer servlet = new RestfulServer();
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
+        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

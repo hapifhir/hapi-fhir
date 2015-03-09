@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBaseResource;
@@ -33,10 +35,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -56,7 +54,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 	
 	@Override
-	public void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase) {
+	public void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
 		if (myBundle == null) {
 			myBundle = new Bundle();
 		}
@@ -88,13 +86,16 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			} else {
 				ourLog.trace("No narrative generator specified");
 			}
-	
-			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+
+            List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
 			do {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
-	
-				for (BaseResourceReferenceDt nextRef : references) {
-					IResource nextRes = nextRef.getResource();
+
+                for (ResourceReferenceInfo nextRefInfo : references) {
+                    if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
+                        continue;
+
+					IResource nextRes = nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
 							if (containedIds.contains(nextRes.getId().getValue())) {
@@ -116,20 +117,18 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 						}
 					}
 				}
-	
+
+                includedResources.addAll(addedResourcesThisPass);
+
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<BaseResourceReferenceDt>();
+				references = new ArrayList<ResourceReferenceInfo>();
 				for (IResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
+					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
 					references.addAll(newReferences);
 				}
-	
-				includedResources.addAll(addedResourcesThisPass);
-	
 			} while (references.isEmpty() == false);
 	
 			myBundle.addResource(next, myContext, theServerBase);
-	
 		}
 	
 		/*
@@ -146,8 +145,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	
 	}
 
-	@Override
-	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType) {
+    @Override
+	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
 		List<IResource> resourceList;
@@ -195,7 +194,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 	
-		addResourcesToBundle(resourceList, theBundleType, theServerBase);
+		addResourcesToBundle(resourceList, theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
 
 		myBundle.setPublished(theResult.getPublished());

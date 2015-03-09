@@ -114,7 +114,39 @@ public class FhirTerser {
 		return retVal;
 	}
 
-	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
+    public <T extends IBase> List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
+        final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
+        BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+        visit(theResource, null, def, new IModelVisitor() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+                if (theElement == null || theElement.isEmpty()) {
+                    return;
+                }
+                String name = null;
+                if (theChildDefinition != null) {
+                    name = theChildDefinition.getElementName();
+                }
+                if (BaseResourceReferenceDt.class.isAssignableFrom(theElement.getClass())) {
+                    retVal.add(new ResourceReferenceInfo(theResource, name, (BaseResourceReferenceDt)theElement));
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
+                                                  ExtensionDt theNextExt) {
+                String name = null;
+                if (theChildDefinition != null) {
+                    name = theChildDefinition.getElementName();
+                }
+                if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
+                    retVal.add(new ResourceReferenceInfo(theResource, name, (BaseResourceReferenceDt)theNextExt.getValue()));
+                }
+            }
+        });
+        return retVal;    }	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
 
 		if (theSubList.size() == 1) {
