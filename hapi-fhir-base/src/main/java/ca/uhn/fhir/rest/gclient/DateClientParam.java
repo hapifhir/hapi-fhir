@@ -50,7 +50,7 @@ public class DateClientParam implements IParam {
 	}
 
 	public IDateSpecifier before() {
-		return new DateWithPrefix("<=");
+		return new DateWithPrefix("<");
 	}
 
 	public IDateSpecifier beforeOrEquals() {

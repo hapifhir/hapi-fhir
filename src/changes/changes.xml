@@ -139,6 +139,10 @@
 				Observation.applies[x] and other similar search fields with multiple allowable 
 				value types were not being correctly indexed in the JPA server.    
 			</action>
+			<action type="fix" issue="122">
+				DateClientParam.before() incorrectly placed "&lt;=" instead of 
+				"&lt;" in the request URL. Thanks to Ryan for reporting!    
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
