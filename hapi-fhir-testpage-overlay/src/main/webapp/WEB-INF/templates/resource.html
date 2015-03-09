@@ -110,10 +110,13 @@
 														this.name = this.id;
 													}	
 												}
-											});					
+											});
 											$("#outerForm").attr("action", "search").submit();
 										});
-										$('#search-btn').prop('disabled', false);
+										$(document).ready(function() {
+											// If the user clicks "back", re-activate the button
+											$('#search-btn').prop('disabled', false);
+										});
 									</script>
 									<br clear="all"/>
 									

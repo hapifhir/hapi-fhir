@@ -107,18 +107,20 @@ public class SortSpec {
 	 * Sets the chained sort specification, or <code>null</code> if none. If multiple sort parameters are chained
 	 * (indicating a sub-sort), the second level sort is chained via this property.
 	 */
-	public void setChain(SortSpec theChain) {
+	public SortSpec setChain(SortSpec theChain) {
 		if (theChain == this) {
 			throw new IllegalArgumentException("Can not chain this to itself");
 		}
 		myChain = theChain;
+		return this;
 	}
 
 	/**
 	 * Sets the actual name of the search param to sort by
 	 */
-	public void setParamName(String theFieldName) {
+	public SortSpec setParamName(String theFieldName) {
 		myParamName = theFieldName;
+		return this;
 	}
 
 	/**
@@ -126,8 +128,9 @@ public class SortSpec {
 	 * means {@link SortOrderEnum#ASC} according to the <a
 	 * href="http://hl7.org/implement/standards/fhir/search.html#sort">FHIR specification</a>)
 	 */
-	public void setOrder(SortOrderEnum theOrder) {
+	public SortSpec setOrder(SortOrderEnum theOrder) {
 		myOrder = theOrder;
+		return this;
 	}
 
 }

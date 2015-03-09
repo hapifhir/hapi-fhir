@@ -51,6 +51,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,7 @@ import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -871,21 +873,34 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
 
-		String joinAttrName = "myParamsString";
-		String sortAttrName = "myValueExact";
+		String joinAttrName;
+		String sortAttrName;
 
 		switch (param.getParamType()) {
-		case STRING: {
-			From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
-			Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
-			Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
-			thePredicates.add(theBuilder.or(p, pn));
-			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
+		case STRING:
+			joinAttrName = "myParamsString";
+			sortAttrName = "myValueExact";
 			break;
+		case DATE:
+			joinAttrName = "myParamsDate";
+			sortAttrName = "myValueLow";
+			break;
+		default:
+			throw new NotImplementedException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
+		
+		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.LEFT);
+//		Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
+//		Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
+//		thePredicates.add(theBuilder.or(p, pn));
+		
+		if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
+			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
+		}else {
+			theOrders.add(theBuilder.desc(stringJoin.get(sortAttrName)));
 		}
 
-		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
+		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, null);
 	}
 
 	@Override

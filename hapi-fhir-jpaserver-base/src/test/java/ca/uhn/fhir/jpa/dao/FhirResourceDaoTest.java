@@ -1,11 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -60,6 +55,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -303,11 +299,11 @@ public class FhirResourceDaoTest {
 
 		{
 			Set<Long> found = ourObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2001-01-02"));
-			assertThat(found, contains(id2.getIdPartAsLong()));
+			assertThat(found, hasItem(id2.getIdPartAsLong()));
 		}
 		{
 			Set<Long> found = ourObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2016-01-02"));
-			assertThat(found, not(contains(id2.getIdPartAsLong())));
+			assertThat(found, not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
 
@@ -722,14 +718,23 @@ public class FhirResourceDaoTest {
 
 	@Test
 	public void testPersistSearchParamDate() {
+		List<Patient> found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+		int initialSize2000 = found.size();
+
+		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")));
+		int initialSize2002 = found.size();
+		
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.setBirthDate(new DateDt("2001-01-01"));
 
 		ourPatientDao.create(patient);
 
-		List<Patient> found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
-		assertEquals(1, found.size());
+		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
+		assertEquals(1 + initialSize2000, found.size());
+
+		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2002-01-01")));
+		assertEquals(initialSize2002, found.size());
 
 		// If this throws an exception, that would be an acceptable outcome as well..
 		found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE + "AAAA", new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
@@ -1487,33 +1492,84 @@ public class FhirResourceDaoTest {
 	}
 
 	@Test
-	public void testSort() {
+	public void testSortByString() {
 		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("testSort001");
+		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF1").addGiven("testSortG1");
 		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		// Create out of order
 		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("testSort001");
+		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF3").addGiven("testSortG3");
 		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("testSort001");
+		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF2").addGiven("testSortG2");
 		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue("testSort001");
+		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm = new SearchParameterMap();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testSort001"));
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testSortByString"));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
 		List<IdDt> actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
+	}
+
+	@Test
+	public void testSortByDate() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
+		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.setBirthDate(new DateDt("2001-01-01"));
+		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		// Create out of order
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
+		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.setBirthDate(new DateDt("2001-01-03"));
+		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
+		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.setBirthDate(new DateDt("2001-01-02"));
+		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
+		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		List<IdDt> actual;
+		SearchParameterMap pm;
+		
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
+		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
+		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+	
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
+		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1));
+	
 	}
 
 	@Test
