@@ -1053,11 +1053,11 @@ public class Controller {
 	private IResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		switch (theRequest.getFhirVersion(myConfig)) {
 		case DEV:
-			return loadAndAddConfDev(theServletRequest, theRequest, theModel);
+			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
 		case DSTU1:
 			return loadAndAddConfDstu1(theServletRequest, theRequest, theModel);
 		case DSTU2:
-			return loadAndAddConfDev(theServletRequest, theRequest, theModel);
+			return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
 		}
 		throw new IllegalStateException("Unknown version: " + theRequest.getFhirVersion(myConfig));
 	}
@@ -1121,7 +1121,7 @@ public class Controller {
 		return conformance;
 	}
 
-	private IResource loadAndAddConfDev(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private IResource loadAndAddConfDstu2(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(theServletRequest, myConfig));
 
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;

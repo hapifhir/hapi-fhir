@@ -372,7 +372,8 @@ public class RestfulServerUtils {
 					writer.append("<hr/>");
 				}
 			} else {
-				RestfulServerUtils.getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode).encodeBundleToWriter(bundle, writer);
+				IParser newParser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
+				newParser.encodeBundleToWriter(bundle, writer);
 			}
 		} finally {
 			writer.close();

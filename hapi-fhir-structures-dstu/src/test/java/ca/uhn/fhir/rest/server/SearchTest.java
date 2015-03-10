@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -111,6 +113,19 @@ public class SearchTest {
 		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
+	@Test
+	public void testSearchByIdUsingClient() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+
+		Bundle bundle = client.search().forResource("Patient").where(BaseResource.RES_ID.matches().value("aaa")).execute();
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("idaaa", p.getNameFirstRep().getFamilyAsSingleString());
+		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
+	}
+
+	
 	@Test
 	public void testSearchWithOrList() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?findPatientWithOrList=aaa,bbb");

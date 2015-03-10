@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu.resource.ListResource;
+import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -99,6 +100,22 @@ public class JsonParserTest {
 		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
+	
+	@Test
+	public void testDecimalPrecisionPreserved() {
+		String number = "52.3779939997090374535378485873776474764643249869328698436986235758587";
+		
+		Location loc = new Location();
+		// This is far more precision than is realistic, but let's see if we preserve it
+		loc.getPosition().setLatitude(new DecimalDt(number));
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(loc);
+		Location parsed = ourCtx.newJsonParser().parseResource(Location.class, encoded);
+		
+		assertEquals(number, parsed.getPosition().getLatitude().getValueAsString());
+	}
+	
+	
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {

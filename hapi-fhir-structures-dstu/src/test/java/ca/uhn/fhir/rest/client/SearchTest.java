@@ -111,7 +111,6 @@ public class SearchTest {
 
 		Encounter encounter = found.get(0);
 		assertNotNull(encounter.getSubject().getResource());
-
 	}
 
 	private interface ITestClient extends IBasicClient {

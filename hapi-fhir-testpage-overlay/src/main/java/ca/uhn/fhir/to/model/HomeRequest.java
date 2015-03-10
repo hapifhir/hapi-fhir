@@ -14,6 +14,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
 
@@ -48,9 +49,12 @@ public class HomeRequest {
 		}
 
 		if (retVal.contains("${serverBase}")) {
-			String base = theRequest.getRequestURL().toString();
+			String base = new IncomingRequestAddressStrategy().determineServerBase(theRequest.getServletContext(), theRequest);
 			if (base.endsWith("/")) {
 				base = base.substring(0, base.length() - 1);
+			}
+			if (base.endsWith("/resource")) {
+				base = base.substring(0, base.length() - "/resource".length());
 			}
 			retVal = retVal.replace("${serverBase}", base);
 		}
