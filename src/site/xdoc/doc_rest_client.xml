@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
-		<title>RESTful Client - HAPI FHIR</title>
+		<title>RESTful Client</title>
 		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
 	</properties>
 
@@ -11,7 +11,17 @@
 
 		<!-- The body of the document contains a number of sections -->
 		<section name="Creating a RESTful Client">
-
+			
+			<!--
+			<table class="pagenavlinks">
+				<tr>
+					<td>
+						<a class="pagenavlinks" href="./docindex.html"><span class="fa fa-caret-square-o-up"></span> Documentation Index</a>
+					</td>
+				</tr>
+			</table>
+			-->
+			
 			<p>
 				HAPI provides a built-in mechanism for connecting to FHIR RESTful
 				servers.

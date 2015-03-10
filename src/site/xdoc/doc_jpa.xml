@@ -10,6 +10,8 @@
 
 		<section name="JPA Server">
 
+			<img src="images/jpa_architecture.png" alt="Architecture"/>
+			
 			<p>
 				The HAPI FHIR 
 				<a href="./doc_rest_server.html">RestfulServer</a>

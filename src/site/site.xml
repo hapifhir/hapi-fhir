@@ -70,6 +70,10 @@
 			<item name="License" href="license.html" />
 		</menu>
 
+		<menu name="Using HAPI" inherit="bottom" >
+			<item name="Documentation Index" href="./docindex.html"/>
+		</menu>
+		
 		<menu name="Documentation" inherit="top" >
 			<item name="Documentation Index" href="./docindex.html"/>
 			<item name="Introduction" href="./doc_intro.html"/>
@@ -122,7 +126,7 @@
 			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 		</menu>
 
-		<menu name="Test Servers">
+		<menu name="Test Server">
 			<item name="Public Test Server" href="http://fhirtest.uhn.ca"/>
 			<item name="Vagrant Private Test Server" href="./doc_vagrant.html"/>
 		</menu>
@@ -187,9 +191,10 @@
 			</pages>
 			<theme>bootswatch-united</theme>
 			<toc>sidebar</toc>
-			<topNav>Documentation|Get Help|Test Servers</topNav>
+			<topNav>Documentation|Get Help|Test Server</topNav>
 			<bottomNav maxSpan="9" >
-				<column>HAPI FHIR|Test Servers</column>
+				<column>HAPI FHIR|Test Server</column>
+				<column>Using HAPI</column>
 				<column>JavaDocs|JXR</column>
 				<column>Get Help|Maven Reports</column>
 			</bottomNav>
@@ -209,6 +214,7 @@
 				]]></name>
 				<href>http://jamesagnew.github.io/hapi-fhir/</href>
 			</brand>
+			<titleTemplate>%2$s - HAPI FHIR</titleTemplate>
 		</reflowSkin>
 		
 		<fluidoSkin>

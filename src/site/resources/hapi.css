@@ -43,6 +43,22 @@
 
 */
 
+TABLE.pagenavlinks {
+	border: 0px;
+}
+A.pagenavlinks {
+	background: #CCC;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #888;
+	border-radius: 7px;
+	padding: 7px;
+}
+
+.navbar .brand {
+    color: #FF8;
+}
+
 .well {
 	padding: 5px;
 }
