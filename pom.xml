@@ -636,8 +636,20 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>${maven_surefire_plugin_version}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>failsafe-report-only</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 				<configuration>
-					<aggregate>true</aggregate>
+							<reportsDirectories>
+								<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
+								<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/</reportDirectory>
+								<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/</reportDirectory>
+								<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/</reportDirectory>
+							</reportsDirectories>
 				</configuration>
 			</plugin>
 			<plugin>

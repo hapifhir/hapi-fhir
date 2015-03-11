@@ -19,6 +19,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -109,6 +110,12 @@ public class JpaServerDemo extends RestfulServer {
 		 * you can look at FHIR URLs directly in a browser.  
 		 */
 		setUseBrowserFriendlyContentTypes(true);
+
+		/*
+		 * Default to XML and pretty printing
+		 */
+		setDefaultPrettyPrint(true);
+		setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		/*
 		 * This is a simple paging strategy that keeps the last 10 searches in memory

@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -134,6 +136,12 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		setUseBrowserFriendlyContentTypes(true);
 
+		/*
+		 * Default to XML and pretty printing
+		 */
+		setDefaultPrettyPrint(true);
+		setDefaultResponseEncoding(EncodingEnum.JSON);
+		
 		/*
 		 * The server's base URL (e.g. http://fhirtest.uhn.ca/baseDstu2) is 
 		 * pulled from a system property, which is helpful if you want to try

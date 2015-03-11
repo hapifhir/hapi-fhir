@@ -454,6 +454,9 @@ public class Controller {
 		String[] sort = theReq.getParameterValues("sort_by");
 		if (sort != null) {
 			for (String next : sort) {
+				if (isBlank(next)) {
+					continue;
+				}
 				String direction = theReq.getParameter("sort_direction");
 				if ("asc".equals(direction)) {
 					query.sort().ascending(new StringClientParam(next));
