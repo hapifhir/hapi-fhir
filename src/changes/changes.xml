@@ -158,6 +158,12 @@
 			<action type="add">
 				Sorting is now supported in the Web Testing UI (previously a button existed for sorting, but it didn't do anything)
 			</action>
+			<action type="add" issue="111">
+				Server will no longer include stack traces in the OperationOutcome returned to the client
+				when an exception is thrown. A new interceptor called ExceptionHandlingInterceptor has been
+				created which adds this functionality back if it is needed (e.g. for DEV setups). See the 
+				server interceptor documentation for more information. Thanks to Andy Huang for the suggestion!
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">

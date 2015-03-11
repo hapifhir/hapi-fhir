@@ -4,6 +4,8 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 
 @SuppressWarnings("serial")
@@ -34,4 +36,27 @@ public class ServletExamples {
       
    }
    // END SNIPPET: loggingInterceptor
+
+
+   // START SNIPPET: exceptionInterceptor
+   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+   public class RestfulServerWithExceptionHandling extends RestfulServer {
+
+      @Override
+      protected void initialize() throws ServletException {
+         
+         // ... define your resource providers here ...
+         
+         // Now register the logging interceptor
+         ExceptionHandlingInterceptor interceptor = new ExceptionHandlingInterceptor();
+         registerInterceptor(interceptor);
+
+         // Return the stack trace to the client for the following exception types
+         interceptor.setReturnStackTracesForExceptionTypes(InternalErrorException.class, NullPointerException.class);
+         
+      }
+      
+   }
+   // END SNIPPET: exceptionInterceptor
+
 }

@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -715,61 +716,8 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			BaseOperationOutcome oo = null;
-			int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-
-			if (e instanceof BaseServerResponseException) {
-				oo = ((BaseServerResponseException) e).getOperationOutcome();
-				statusCode = ((BaseServerResponseException) e).getStatusCode();
-			}
-
-			/*
-			 * Generate an OperationOutcome to return, unless the exception throw by the resource provider had one
-			 */
-			if (oo == null) {
-				try {
-					oo = (BaseOperationOutcome) myFhirContext.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
-				} catch (Exception e1) {
-					ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
-					throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
-				}
-
-				BaseIssue issue = oo.addIssue();
-				issue.getSeverityElement().setValue("error");
-				if (e instanceof InternalErrorException) {
-					ourLog.error("Failure during REST processing", e);
-					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
-				} else if (e instanceof BaseServerResponseException) {
-					ourLog.warn("Failure during REST processing: {}", e);
-					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) e;
-					statusCode = baseServerResponseException.getStatusCode();
-					issue.getDetailsElement().setValue(e.getMessage());
-					if (baseServerResponseException.getAdditionalMessages() != null) {
-						for (String next : baseServerResponseException.getAdditionalMessages()) {
-							BaseIssue issue2 = oo.addIssue();
-							issue2.getSeverityElement().setValue("error");
-							issue2.setDetails(next);
-						}
-					}
-				} else {
-					ourLog.error("Failure during REST processing: " + e.toString(), e);
-					issue.getDetailsElement().setValue(e.toString() + "\n\n" + ExceptionUtils.getStackTrace(e));
-					statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-				}
-			} else {
-				ourLog.error("Unknown error during processing", e);
-			}
-
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL,
-					statusCode, false, fhirServerBase);
-
-			theResponse.setStatus(statusCode);
-			addHeadersToResponse(theResponse);
-			theResponse.setContentType("text/plain");
-			theResponse.setCharacterEncoding("UTF-8");
-			theResponse.getWriter().append(e.getMessage());
-			theResponse.getWriter().close();
-
+			new ExceptionHandlingInterceptor().handleException(requestDetails, e, theRequest, theResponse);
+			
 		}
 	}
 
@@ -897,7 +845,7 @@ public class RestfulServer extends HttpServlet {
 		myInterceptors.add(theInterceptor);
 	}
 
-	private boolean requestIsBrowser(HttpServletRequest theRequest) {
+	public static boolean requestIsBrowser(HttpServletRequest theRequest) {
 		String userAgent = theRequest.getHeader("User-Agent");
 		return userAgent != null && userAgent.contains("Mozilla");
 	}

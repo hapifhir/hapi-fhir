@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -41,35 +42,24 @@ import ca.uhn.fhir.util.PortUtil;
  */
 public class ExceptionTest {
 
+	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	private static CloseableHttpClient ourClient;
+	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
+
 	private static int ourPort;
+
 	private static Server ourServer;
 
 	private static RestfulServer servlet;
-
+	
 	@Before
 	public void before() {
 		ourGenerateOperationOutcome = false;
 		ourExceptionType=null;
 	}
 
-	@Test
-	public void testThrowUnprocessableEntityWithMultipleMessages() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwUnprocessableEntityWithMultipleMessages=aaa");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(responseContent);
-			assertEquals(422, status.getStatusLine().getStatusCode());
-			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("message1"));
-			assertEquals(3, oo.getIssue().size());
-		}
-	}
-	
 	@Test
 	public void testInternalError() throws Exception {
 		{
@@ -80,8 +70,37 @@ public class ExceptionTest {
 			ourLog.info(responseContent);
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
 		}
+	}
+
+	@Test
+	public void testInternalErrorFormatted() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(500, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
+		}
+	}
+
+	@Test
+	public void testInternalErrorJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newJsonParser().parseResource(responseContent);
+		assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
+		assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
 	}
 
 	@Test
@@ -115,31 +134,36 @@ public class ExceptionTest {
 	}
 
 	@Test
-	public void testInternalErrorFormatted() throws Exception {
+	public void testThrowUnprocessableEntityWithMultipleMessages() throws Exception {
 		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=true");
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwUnprocessableEntityWithMultipleMessages=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(500, status.getStatusLine().getStatusCode());
+			assertEquals(422, status.getStatusLine().getStatusCode());
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("message1"));
+			assertEquals(3, oo.getIssue().size());
 		}
 	}
 
 	@Test
-	public void testInternalErrorJson() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(responseContent);
-		assertEquals(500, status.getStatusLine().getStatusCode());
-		OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newJsonParser().parseResource(responseContent);
-		assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("InternalErrorException: Exception Text"));
+	public void testUnprocessableEntityFormatted() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwUnprocessableEntity=aaa&_format=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(UnprocessableEntityException.STATUS_CODE, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("UnprocessableEntityException")));
+		}
 	}
-
+	
+	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -166,26 +190,11 @@ public class ExceptionTest {
 		ourClient = builder.build();
 
 	}
-	
-	
-	private static Class<? extends Exception> ourExceptionType;
-
-	private static final String OPERATION_OUTCOME_DETAILS = "OperationOutcomeDetails";
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-
-		@Search
-		public List<Patient> throwInternalError(@RequiredParam(name = "throwInternalError") StringParam theParam) {
-			throw new InternalErrorException("Exception Text");
-		}
-
-		@Search
-		public List<Patient> throwUnprocessableEntityWithMultipleMessages(@RequiredParam(name = "throwUnprocessableEntityWithMultipleMessages") StringParam theParam) {
-			throw new UnprocessableEntityException("message1", "message2", "message3");
-		}
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
@@ -206,6 +215,21 @@ public class ExceptionTest {
 				throw new AssertionFailedError("Unknown exception type: " + ourExceptionType);
 			}
 			
+		}
+
+		@Search
+		public List<Patient> throwInternalError(@RequiredParam(name = "throwInternalError") StringParam theParam) {
+			throw new InternalErrorException("Exception Text");
+		}
+
+		@Search()
+		public List<Patient> throwUnprocessableEntity(@RequiredParam(name = "throwUnprocessableEntity") StringParam theParam) {
+			throw new UnprocessableEntityException("Exception Text");
+		}
+
+		@Search
+		public List<Patient> throwUnprocessableEntityWithMultipleMessages(@RequiredParam(name = "throwUnprocessableEntityWithMultipleMessages") StringParam theParam) {
+			throw new UnprocessableEntityException("message1", "message2", "message3");
 		}
 
 	}
