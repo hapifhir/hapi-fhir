@@ -64,7 +64,8 @@ $ mvn install]]></source>
 						<b>Deploy to Tomcat/JBoss/Websphere/etc: </b> You will now have a file 
 						in your <code>target</code> directory called <code>hapi-fhir-jpaserver-example.war</code>.
 						This WAR file can be deployed to any Servlet container, at which point you could
-						access the server at a URL similar to the following (you may need to adjust the 
+						access the server by pointing your browser at a URL similar to the following 
+						(you may need to adjust the 
 						port depending on which port your container is configured to listen on):
 						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">http://localhost:8080/hapi-fhir-jpaserver-example/</a> 
 					</li>
@@ -72,7 +73,8 @@ $ mvn install]]></source>
 						<b>Run with Maven and Embedded Jetty: </b> To start the server
 						directly within Maven, you can execute the following command:<br/>
 						<source>$ mvn jetty:run</source>
-						You can then access the server 
+						You can then access the server by pointing your browser at the following URL: 
+						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">http://localhost:8080/hapi-fhir-jpaserver-example/</a> 
 					</li>
 				</ul>
 			</subsection>
@@ -90,14 +92,70 @@ $ mvn install]]></source>
 				<li>
 					<b>Resource Providers: </b>
 					A RESTful server <a href="./doc_rest_server.html#resource_providers">Resource Provider</a> is
-					provided for each resource type in a given release of FHIR, which 
+					provided for each resource type in a given release of FHIR. Each resource provider implements
+					a 
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/Search.html">@Search</a> 
+					method implementing the complete set of search parameters defined in the FHIR
+					specification for the given resource type.<br/><br/>
+					The resource providers also extend a superclass which implements all of the
+					other FHIR methods, such as Read, Create, Delete, etc.<br/><br/>
+					Note that these resource providers are generated as a part of the HAPI build process, 
+					so they are not checked into Git. You can see their source 
+					in the <a href="./xref-jpaserver/">JXR Report</a>,
+					for example the
+					<a href="./xref-jpaserver/ca/uhn/fhir/jpa/rp/dstu2/PatientResourceProvider.html">PatientResourceProvider</a>.
+					<br/><br/>
+					The resource providers do not actually implement any of the logic
+					in searching, updating, etc. They simply receive the incoming HTTP calls (via the RestfulServer)
+					and pass along the incoming requests to the DAOs.
+					<br/><br/>
 				</li>
-				<li><b>Database: </b></li> The 
+				<li>
+					<b>HAPI DAOs: </b>
+					The DAOs actually implement all of the database business logic relating to 
+					the storage, indexing, and retrieval of FHIR resources, using the underlying JPA
+					API.
+					<br/><br/>
+				</li> 
+				<li>
+					<b>Hibernate: </b>
+					The HAPI JPA Server uses the JPA library, implemented by Hibernate. No Hibernate
+					specific features are used, so the library should also work with other
+					providers (e.g. Eclipselink) but it is not tested regularly with them.
+					<br/><br/>
+				</li> 
+				<li>
+					<b>Database: </b>
+					The RESTful server uses an embedded Derby database, but can be configured to
+					talk to 
+					<a href="https://developer.jboss.org/wiki/SupportedDatabases2?_sscc=t">any database supported by Hibernate</a>.
+				</li> 
 			    
 			</ul>
 			
 		</section>
+		
+		<section name="Configuring The JPA Server">
 			
+			<p>
+				The JPA server is configured through a series of configuration files, most
+				of which are documented inline. 
+			</p>
+			<ul>
+				<li>
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/webapp/WEB-INF/hapi-fhir-server-database-config.xml"><b>hapi-fhir-server-database-config.xml</b></a>:
+					Configures the database connection settings 
+				</li>
+			</ul>
+		</section>
+		
+		<section name="Not yet complete">
+			<p>
+				The documentation for the JPA server is not yet complete. Please get in touch
+				if you are able to help us complete it!
+			</p>
+		</section>
+		
 	</body>
 
 </document>

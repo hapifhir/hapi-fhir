@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Client HTTP Configuration</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Configuring the HTTP Client">
+		
+			<p>
+				RESTful clients (both Generic and Annotation-Driven) use 
+				<a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HTTP Client</a>
+				as a provider. The Apache HTTP Client is very powerful and extremely flexible, 
+				but can be confusing at first to configure, because of the low-level approach that
+				the library uses. 
+			</p>
+
+			<p>
+				In many cases, the default configuration should suffice. However, if you require anything
+				more sophisticated (username/password, HTTP proxy settings, etc.) you will need
+				to configure the underlying client. 
+			</p>
+			
+			<p>
+				The underlying client configuration is provided by accessing the
+				<a href="./apidocs/ca/uhn/fhir/rest/client/IRestfulClientFactory.html">IRestfulClientFactory</a>
+				class from the FhirContext.
+			</p>
+		
+			<p>
+				Note that individual requests and responses
+				can be tweaked using <a href="./doc_rest_client_interceptor.html">Client Interceptors</a>.
+			</p>
+					
+			<subsection name="Configuring an HTTP Proxy">
+			
+				<p>
+					The following example shows how to configure the use of an HTTP
+					proxy in the client.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="proxy" />
+					<param name="file" value="examples/src/main/java/example/ClientExamples.java" />
+				</macro>
+			
+			</subsection>
+						
+		</section>
+
+	</body>
+
+</document>

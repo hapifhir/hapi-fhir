@@ -9,6 +9,16 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
 	<!-- 
+	This file configures the database connection for the HAPI JPA Server.
+	-->
+
+	<!--
+	The following bean configures the database connection. The 'url' property value
+	of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the
+	server should save resources in a directory called "jpaserver_derby_files".
+	
+	A URL to a remote database could also be placed here, along with login credentials
+	and other properties supported by BasicDataSource.
 	-->
 	<bean id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="url" value="jdbc:derby:directory:jpaserver_derby_files;create=true" />
@@ -17,6 +27,11 @@
 		<property name="password" value=""/>
 	</bean>
 	
+	<!--
+	Hibernate can be configured with other dialects if you wish to connect to another
+	database (e.g. Postgres). Consult the Hibernate documentation to see a list of
+	available dialects. 
+	-->
 	<bean id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />

@@ -3,16 +3,16 @@ package example;
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 //START SNIPPET: provider
@@ -60,18 +60,18 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 	 * this annotation, to support many different search criteria. This
 	 * example searches by family name.
 	 * 
-	 * @param theIdentifier
+	 * @param theFamilyName
 	 *    This operation takes one parameter which is the search criteria. It is
 	 *    annotated with the "@Required" annotation. This annotation takes one argument,
 	 *    a string containing the name of the search criteria. The datatype here
-	 *    is StringDt, but there are other possible parameter types depending on the
+	 *    is StringParam, but there are other possible parameter types depending on the
 	 *    specific search criteria.
 	 * @return
 	 *    This method returns a list of Patients. This list may contain multiple
 	 *    matching resources, or it may also be empty.
 	 */
 	@Search()
-	public List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringDt theFamilyName) {
+	public List<Patient> getPatient(@RequiredParam(name = Patient.SP_FAMILY) StringParam theFamilyName) {
 		Patient patient = new Patient();
 		patient.addIdentifier();
 		patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);

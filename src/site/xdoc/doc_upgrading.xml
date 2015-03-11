@@ -9,7 +9,7 @@
 	<body>
 
 		<section name="Upgrading to HAPI FHIR 0.8">
-
+<!-- 
 			
 			<p>
 				<b>This section is still incomplete: </b> Note that HAPI 0.8 has not 
@@ -123,6 +123,7 @@
 				
 			</subsection>
 					
+-->
 		</section>
 		
 	</body>
