@@ -239,7 +239,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			servletResponse.setContentType(encoding.getResourceContentType());
 			Writer writer = servletResponse.getWriter();
 			IParser parser = encoding.newParser(getContext());
-			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
 			try {
 				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
 			} finally {
@@ -311,7 +311,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncodingNotNull.getResourceContentType());
 			IParser parser = theEncodingNotNull.newParser(theServer.getFhirContext());
-			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
+			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
 			Writer writer = theResponse.getWriter();
 			try {
 				parser.encodeResourceToWriter(theE.getOperationOutcome(), writer);

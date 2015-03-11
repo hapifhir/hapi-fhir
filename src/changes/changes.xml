@@ -123,9 +123,11 @@
 				in accordance with the recommended behaviour in the FHIR specification.
 			</action>
 			<action type="add">
-				Add a new property to RestfulServer called "DefaultResponseEncoding", which allows
+				Add new properties to RestfulServer: "DefaultResponseEncoding", which allows
 				users to configure a default encoding (XML/JSON) to use if none is specified in the
-				client request. Currently defaults to XML.
+				client request. Currently defaults to XML. Also "DefaultPrettyPrint", which specifies
+				whether to pretty print responses by default. Both properties can be overridden
+				on individual requets using the appropriate Accept header or request URL parameters.
 			</action>
 			<action type="add">
 				Add support for quantity search params in FHIR tester UI

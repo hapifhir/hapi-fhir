@@ -154,7 +154,7 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static boolean prettyPrintResponse(Request theRequest) {
+	public static boolean prettyPrintResponse(RestfulServer theServer, Request theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
 		boolean prettyPrint;
@@ -165,7 +165,7 @@ public class RestfulServerUtils {
 				prettyPrint = false;
 			}
 		} else {
-			prettyPrint = false;
+			prettyPrint = theServer.isDefaultPrettyPrint();
 			Enumeration<String> acceptValues = theRequest.getServletRequest().getHeaders(Constants.HEADER_ACCEPT);
 			if (acceptValues != null) {
 				while (acceptValues.hasMoreElements()) {

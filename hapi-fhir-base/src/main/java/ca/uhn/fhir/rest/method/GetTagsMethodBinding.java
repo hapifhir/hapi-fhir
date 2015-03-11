@@ -178,7 +178,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 		theServer.addHeadersToResponse(response);
 
 		IParser parser = responseEncoding.newParser(getContext());
-		parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theRequest));
+		parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
 		PrintWriter writer = response.getWriter();
 		try {
 			parser.encodeTagListToWriter(resp, writer);

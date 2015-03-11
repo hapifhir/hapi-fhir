@@ -220,7 +220,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequest);
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
 		// Narrative mode
 		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);

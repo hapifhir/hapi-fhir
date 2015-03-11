@@ -73,11 +73,12 @@ public class RestfulServer extends HttpServlet {
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
-    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
 
 	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
+	private boolean myDefaultPrettyPrint = false;
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
@@ -91,14 +92,11 @@ public class RestfulServer extends HttpServlet {
 	private ResourceBinding myServerBinding = new ResourceBinding();
 	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
-    private String myServerName = "HAPI FHIR Server";
-
+	private String myServerName = "HAPI FHIR Server";
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
-
 	private boolean myStarted;
-
-    private boolean myUseBrowserFriendlyContentTypes;
+	private boolean myUseBrowserFriendlyContentTypes;
 
 	/**
 	 * Constructor
@@ -107,7 +105,7 @@ public class RestfulServer extends HttpServlet {
 		this(new FhirContext());
 	}
 
-	public RestfulServer(FhirContext theCtx) {
+    public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
 	}
 
@@ -452,7 +450,7 @@ public class RestfulServer extends HttpServlet {
 		int start = Math.min(offsetI, resultList.size() - 1);
 
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequest);
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(this, theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
@@ -877,6 +875,19 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Should the server "pretty print" responses by default (requesting clients can always override this
+	 * default by supplying an <code>Accept</code> header in the request, or a <code>_pretty</code> 
+	 * parameter in the request URL.
+	 * <p>
+	 * The default is <code>false</code>
+	 * </p>
+	 * @return Returns the default pretty print setting
+	 */
+	public boolean isDefaultPrettyPrint() {
+		return myDefaultPrettyPrint;
+	}
+
 	public boolean isUseBrowserFriendlyContentTypes() {
 		return myUseBrowserFriendlyContentTypes;
 	}
@@ -912,6 +923,19 @@ public class RestfulServer extends HttpServlet {
     public void setBundleInclusionRule(BundleInclusionRule theBundleInclusionRule) {
         myBundleInclusionRule = theBundleInclusionRule;
     }
+
+	/**
+	 * Should the server "pretty print" responses by default (requesting clients can always override this
+	 * default by supplying an <code>Accept</code> header in the request, or a <code>_pretty</code> 
+	 * parameter in the request URL.
+	 * <p>
+	 * The default is <code>false</code>
+	 * </p>
+	 * @param theDefaultPrettyPrint The default pretty print setting
+	 */
+	public void setDefaultPrettyPrint(boolean theDefaultPrettyPrint) {
+		myDefaultPrettyPrint = theDefaultPrettyPrint;
+	}
 
 	/**
 	 * Sets the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with
