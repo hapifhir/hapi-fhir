@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 
 import org.hl7.fhir.instance.model.IBase;
 
-import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;

@@ -8,8 +8,8 @@
 	<body>
 		<release version="0.9" date="TBA">
 			<action type="add">
-				Support for DSTU2 features introduced: New Bundle encoding style, as well as new
-				extension encoding in JSON.   
+				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 
+				encoding changes (ID in resource bodt, meta tag)
 			</action>
 			<action type="fix" issue="65">
 				Fix an issue encoding extensions on primitive types in JSON. Previously the "_value" object
@@ -142,6 +142,16 @@
 			<action type="fix" issue="122">
 				DateClientParam.before() incorrectly placed "&lt;=" instead of 
 				"&lt;" in the request URL. Thanks to Ryan for reporting!    
+			</action>
+			<action type="add" issue="77" dev="wdebeau1">
+				Server now only automatically adds _include resources which are provided
+				as references if the client request actually requested that specific include.
+				See RestfulServer
+			</action>
+			<action type="fix" issue="120">
+				User defined resource types which contain extensions that use a bound code type
+				(e.g. an BoundCodeDt with a custom Enum) failed to parse correctly. Thanks
+				to baopingle for reporting and providing a test case!
 			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">

@@ -20,18 +20,15 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +65,6 @@ import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.ICodeEnum;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
@@ -227,45 +223,34 @@ class ModelScanner {
 	 * annotations if the HL7.org ones are found instead.
 	 */
 	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
-		
+
 		T retVal = theTarget.getAnnotation(theAnnotationType);
 		if (true) {
 			return retVal;
 		}
 
 		// Below disabled for now due to performance issues
-		
+
 		/*
-		if (retVal == null) {
-			String sourceClassName = theAnnotationType.getName();
-			String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
+		 * if (retVal == null) { String sourceClassName = theAnnotationType.getName(); String candidateAltClassName =
+		 * sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
+		 * 
+		 * if (!sourceClassName.equals(candidateAltClassName)) { try { final Class<? extends Annotation>
+		 * altAnnotationClass = (Class<? extends Annotation>) Class.forName(candidateAltClassName); final Annotation
+		 * altAnnotation = theTarget.getAnnotation(altAnnotationClass); if (altAnnotation == null) { return null; }
+		 * 
+		 * ourLog.debug("Forwarding annotation request for [{}] to class [{}]", sourceClassName, candidateAltClassName);
+		 * 
+		 * InvocationHandler h = new InvocationHandler() {
+		 * 
+		 * @Override public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable { Method
+		 * altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes()); return
+		 * altMethod.invoke(altAnnotation, theArgs); } }; retVal = (T)
+		 * Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
+		 * 
+		 * } catch (ClassNotFoundException e) { return null; } } }
+		 */
 
-			if (!sourceClassName.equals(candidateAltClassName)) {
-				try {
-					final Class<? extends Annotation> altAnnotationClass = (Class<? extends Annotation>) Class.forName(candidateAltClassName);
-					final Annotation altAnnotation = theTarget.getAnnotation(altAnnotationClass);
-					if (altAnnotation == null) {
-						return null;
-					}
-
-					ourLog.debug("Forwarding annotation request for [{}] to class [{}]", sourceClassName, candidateAltClassName);
-
-					InvocationHandler h = new InvocationHandler() {
-						@Override
-						public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
-							Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
-							return altMethod.invoke(altAnnotation, theArgs);
-						}
-					};
-					retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
-
-				} catch (ClassNotFoundException e) {
-					return null;
-				}
-			}
-		}
-		*/
-		
 		return retVal;
 	}
 
@@ -534,7 +519,13 @@ class ModelScanner {
 				 * Child is an extension
 				 */
 				Class<? extends IBase> et = (Class<? extends IBase>) nextElementType;
-				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et);
+
+				IValueSetEnumBinder<Enum<?>> binder = null;
+				if (BoundCodeDt.class.isAssignableFrom(nextElementType) || IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
+					binder = getBoundCodeBinder(next);
+				}
+
+				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et, binder);
 				orderMap.put(order, def);
 				if (IElement.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IElement>) nextElementType);
@@ -570,7 +561,8 @@ class ModelScanner {
 				RuntimeChildAny def = new RuntimeChildAny(next, elementName, childAnnotation, descriptionAnnotation);
 				orderMap.put(order, def);
 
-			} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType) || IBaseDatatype.class.isAssignableFrom(nextElementType) || IBaseExtension.class.isAssignableFrom(nextElementType)) {
+			} else if (IDatatype.class.isAssignableFrom(nextElementType) || IPrimitiveType.class.isAssignableFrom(nextElementType) || ICompositeType.class.isAssignableFrom(nextElementType) || IBaseDatatype.class.isAssignableFrom(nextElementType)
+					|| IBaseExtension.class.isAssignableFrom(nextElementType)) {
 				Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
 
 				addScanAlso(nextDatatype);

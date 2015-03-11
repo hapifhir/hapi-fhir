@@ -1395,7 +1395,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance(myDefinition.getInstanceConstructorArguments());
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				ElementCompositeState newState = new ElementCompositeState(myPreResourceState, compositeTarget, newChildInstance);
 				push(newState);
@@ -1403,7 +1403,7 @@ class ParserState<T> {
 			}
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
-				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance();
+				IPrimitiveType<?> newChildInstance = primitiveTarget.newInstance(myDefinition.getInstanceConstructorArguments());
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				PrimitiveState newState = new PrimitiveState(getPreResourceState(), newChildInstance);
 				push(newState);
@@ -1458,12 +1458,12 @@ class ParserState<T> {
 		return newState;
 	}
 
-	private class ElementCompositeState<T2 extends IBase> extends BaseState {
+	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
-		private T2 myInstance;
+		private IBase myInstance;
 
-		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, T2 theInstance) {
+		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
@@ -1516,7 +1516,7 @@ class ParserState<T> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(child.getInstanceConstructorArguments());
 				child.getMutator().addValue(myInstance, newChildInstance);
-				ParserState<T>.ElementCompositeState<ICompositeType> newState = new ElementCompositeState<ICompositeType>(getPreResourceState(), compositeTarget, newChildInstance);
+				ParserState<T>.ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1540,7 +1540,7 @@ class ParserState<T> {
 				RuntimeResourceBlockDefinition blockTarget = (RuntimeResourceBlockDefinition) target;
 				IBase newBlockInstance = blockTarget.newInstance();
 				child.getMutator().addValue(myInstance, newBlockInstance);
-				ElementCompositeState<IBase> newState = new ElementCompositeState<IBase>(getPreResourceState(), blockTarget, newBlockInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), blockTarget, newBlockInstance);
 				push(newState);
 				return;
 			}
@@ -1592,7 +1592,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected T2 getCurrentElement() {
+		protected IBase getCurrentElement() {
 			return myInstance;
 		}
 
@@ -1627,7 +1627,7 @@ class ParserState<T> {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
 				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
 				myExtension.setValue(newChildInstance);
-				ElementCompositeState<IBase> newState = new ElementCompositeState<IBase>(getPreResourceState(), compositeTarget, newChildInstance);
+				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
 				return;
 			}
@@ -1664,7 +1664,7 @@ class ParserState<T> {
 	}
 
 
-	private class SecurityLabelElementStateHapi extends ElementCompositeState<BaseCodingDt> {
+	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
 		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState,BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
 			super(thePreResourceState, theDef, codingDt);
@@ -2224,18 +2224,21 @@ class ParserState<T> {
 		DISPLAY, INITIAL, REFERENCE
 	}
 
-	private class ResourceStateHapi extends ElementCompositeState<IResource> {
+	private class ResourceStateHapi extends ElementCompositeState {
+
+		private IResource myInstance;
 
 		public ResourceStateHapi(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance) {
 			super(thePreResourceState, theDef, theInstance);
+			myInstance = theInstance;
 		}
 
 		@Override
 		public void enteringNewElement(String theNamespace, String theChildName) throws DataFormatException {
 			if ("id".equals(theChildName)) {
-				push(new PrimitiveState(getPreResourceState(), getCurrentElement().getId()));
+				push(new PrimitiveState(getPreResourceState(), myInstance.getId()));
 			} else if ("meta".equals(theChildName)) {
-				push(new MetaElementState(getPreResourceState(), getCurrentElement().getResourceMetadata()));
+				push(new MetaElementState(getPreResourceState(), myInstance.getResourceMetadata()));
 			} else {
 				super.enteringNewElement(theNamespace, theChildName);
 			}
@@ -2243,7 +2246,7 @@ class ParserState<T> {
 
 	}
 
-	private class ResourceStateHl7Org extends ElementCompositeState<IBaseResource> {
+	private class ResourceStateHl7Org extends ElementCompositeState {
 
 		public ResourceStateHl7Org(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
 			super(thePreResourceState, theDef, theInstance);

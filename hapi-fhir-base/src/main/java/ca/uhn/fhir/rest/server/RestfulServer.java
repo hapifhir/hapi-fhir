@@ -77,6 +77,7 @@ public class RestfulServer extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
+	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
@@ -87,18 +88,19 @@ public class RestfulServer extends HttpServlet {
 	private Map<String, ResourceBinding> myResourceNameToProvider = new HashMap<String, ResourceBinding>();
 	private Collection<IResourceProvider> myResourceProviders;
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
+	private ResourceBinding myServerBinding = new ResourceBinding();
 	private BaseMethodBinding<?> myServerConformanceMethod;
 	private Object myServerConformanceProvider;
-	private String myServerName = "HAPI FHIR Server";
+    private String myServerName = "HAPI FHIR Server";
+
 	/** This is configurable but by default we just use HAPI version */
 	private String myServerVersion = VersionUtil.getVersion();
-    private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 
 	private boolean myStarted;
 
-	private boolean myUseBrowserFriendlyContentTypes;
+    private boolean myUseBrowserFriendlyContentTypes;
 
-    /**
+	/**
 	 * Constructor
 	 */
 	public RestfulServer() {
@@ -257,8 +259,6 @@ public class RestfulServer extends HttpServlet {
 
 	}
 
-	private ResourceBinding myServerBinding = new ResourceBinding();
-
 	private void findSystemMethods(Object theSystemProvider, Class<?> clazz) {
 		Class<?> supertype = clazz.getSuperclass();
 		if (!Object.class.equals(supertype)) {
@@ -292,6 +292,10 @@ public class RestfulServer extends HttpServlet {
 	public AddProfileTagEnum getAddProfileTag() {
 		return myAddProfileTag;
 	}
+
+	public BundleInclusionRule getBundleInclusionRule() {
+        return myBundleInclusionRule;
+    }
 
 	/**
 	 * Returns the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either
@@ -901,6 +905,15 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	/**
+     * Set how bundle factory should decide whether referenced resources should be included in bundles
+     *
+     * @param theBundleInclusionRule - inclusion rule (@see BundleInclusionRule for behaviors)
+     */
+    public void setBundleInclusionRule(BundleInclusionRule theBundleInclusionRule) {
+        myBundleInclusionRule = theBundleInclusionRule;
+    }
+
+	/**
 	 * Sets the default encoding to return (XML/JSON) if an incoming request does not specify a preference (either with
 	 * the <code>_format</code> URL parameter, or with an <code>Accept</code> header in the request. The default is
 	 * {@link EncodingEnum#XML}.
@@ -1073,28 +1086,15 @@ public class RestfulServer extends HttpServlet {
 		theResponse.getWriter().write(theException.getMessage());
 	}
 
-	private static boolean partIsOperation(String nextString) {
+    private static boolean partIsOperation(String nextString) {
 		return nextString.length() > 0 && (nextString.charAt(0) == '_' || nextString.charAt(0) == '$');
 	}
 
-	public enum NarrativeModeEnum {
+    public enum NarrativeModeEnum {
 		NORMAL, ONLY, SUPPRESS;
 
 		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
 			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
 		}
 	}
-
-    public BundleInclusionRule getBundleInclusionRule() {
-        return myBundleInclusionRule;
-    }
-
-    /**
-     * set how bundle factory should decide whether referenced resources should be included in bundles
-     *
-     * @param theBundleInclusionRule - inclusion rule (@see BundleInclusionRule for behaviors)
-     */
-    public void setBundleInclusionRule(BundleInclusionRule theBundleInclusionRule) {
-        myBundleInclusionRule = theBundleInclusionRule;
-    }
 }

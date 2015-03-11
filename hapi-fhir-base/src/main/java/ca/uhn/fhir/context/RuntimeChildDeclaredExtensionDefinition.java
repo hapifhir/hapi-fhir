@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -47,17 +48,29 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	private String myExtensionUrl;
 	private boolean myModifier;
 	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToChildExtension;
+	private Object myInstanceConstructorArguments;
 
 	/**
-	 * @param theDefinedLocally See {@link Extension#definedLocally()}
+	 * @param theBoundTypeBinder
+	 *            If the child is of a type that requires a constructor argument to instantiate, this is the argument to
+	 *            use
+	 * @param theDefinedLocally
+	 *            See {@link Extension#definedLocally()}
 	 */
-	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IBase> theChildType) throws ConfigurationException {
+	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IBase> theChildType, IValueSetEnumBinder<Enum<?>> theBoundTypeBinder)
+			throws ConfigurationException {
 		super(theField, theChild, theDescriptionAnnotation, theElementName);
 		assert isNotBlank(theExtensionUrl);
 		myExtensionUrl = theExtensionUrl;
 		myChildType = theChildType;
-		myDefinedLocally=theExtension.definedLocally();
+		myDefinedLocally = theExtension.definedLocally();
 		myModifier = theExtension.isModifier();
+		myInstanceConstructorArguments = theBoundTypeBinder;
+	}
+
+	@Override
+	public Object getInstanceConstructorArguments() {
+		return myInstanceConstructorArguments;
 	}
 
 	@Override
@@ -144,7 +157,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
 				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
-			}else {
+			} else {
 				myChildDef = elementDef;
 			}
 		} else {

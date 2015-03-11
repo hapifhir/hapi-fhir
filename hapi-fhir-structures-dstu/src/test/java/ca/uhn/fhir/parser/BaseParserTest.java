@@ -3,7 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -138,4 +138,22 @@ public class BaseParserTest {
 
 	}
 
+	/**
+	 * See #120
+	 */
+	@Test
+	public void testParseExtensionWithBoundCodeType() {
+		//@formatter:off
+		String resText = 
+			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">" +
+			"  <extension url=\"http://agfa.com/extensions#workflowAction\">" +
+			"    <valueCode value=\"sign-off\"/>" +
+			"  </extension>" +
+			"</DiagnosticReport>";
+		//@formatter:on
+		
+		MyDiagnosticReportWithBoundCodeExtension res = ourCtx.newXmlParser().parseResource(MyDiagnosticReportWithBoundCodeExtension.class, resText);
+		assertEquals(WorkflowActionEnum.SIGNOFF, res.getWorkflowAction().getValueAsEnum());
+	}
+	
 }

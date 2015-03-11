@@ -103,52 +103,30 @@ patient.getManagingOrganization().setReference("Organization/124362");]]></sourc
 					bundles. Both resources are added to a bundle, which will then have
 					two entries:
 				</p>
-				<source><![CDATA[// Create an organization
-Organization org = new Organization();
-org.setId("Organization/65546");
-org.getName().setValue("Contained Test Organization");
-
-// Create a patient
-Patient patient = new Patient();
-patient.setId("Patient/1333");
-patient.addIdentifier("urn:mrns", "253345");
-patient.getManagingOrganization().setResource(org);
-
-// Create a list containing both resources. In a server method, you might just
-// return this list, but here we will create a bundle to encode.
-List<IResource> resources = new ArrayList<IResource>();
-resources.add(org);
-resources.add(patient);		
-
-// Create a bundle with both
-Bundle b = Bundle.withResources(resources, ourCtx, "http://example.com/base");
-
-// Encode the buntdle
-String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
-System.out.println(encoded);]]></source>
-
+				<macro name="snippet">
+					<param name="id" value="addIncludes" />
+					<param name="file" value="examples/src/main/java/example/IncludesExamples.java" />
+				</macro>
+		
 				<p>
 					This will give the following output:
 				</p>
-				<source><![CDATA[<feed xmlns="http://www.w3.org/2005/Atom">
+				<source><![CDATA[<Bundle xmlns="http://hl7.org/fhir">
+   <id value="4e151274-2b19-4930-97f2-8427167a176c"/>
+   <type value="searchset"/>
+   <total value="1"/>
+   <link>
+      <relation value="fhir-base"/>
+      <url value="http://example.com/base"/>
+   </link>
+   <link>
+      <relation value="self"/>
+      <url value="http://example.com/base/Patient"/>
+   </link>
    <entry>
-      <title>Organization Organization/65546</title>
-      <id>http://example.com/base/Organization/65546</id>
-      <published>2014-10-14T09:22:54-04:00</published>
-      <link rel="self" href="http://example.com/base/Organization/65546"/>
-      <content type="text/xml">
-         <Organization xmlns="http://hl7.org/fhir">
-            <name value="Contained Test Organization"/>
-         </Organization>
-      </content>
-   </entry>
-   <entry>
-      <title>Patient Patient/1333</title>
-      <id>http://example.com/base/Patient/1333</id>
-      <published>2014-10-14T09:22:54-04:00</published>
-      <link rel="self" href="http://example.com/base/Patient/1333"/>
-      <content type="text/xml">
+      <resource>
          <Patient xmlns="http://hl7.org/fhir">
+            <id value="1333"/>
             <identifier>
                <system value="urn:mrns"/>
                <value value="253345"/>
@@ -157,9 +135,21 @@ System.out.println(encoded);]]></source>
                <reference value="Organization/65546"/>
             </managingOrganization>
          </Patient>
-      </content>
+      </resource>
    </entry>
-</feed>]]></source>
+   <entry>
+      <resource>
+         <Organization xmlns="http://hl7.org/fhir">
+            <id value="65546"/>
+            <name value="Test Organization"/>
+         </Organization>
+      </resource>
+      <search>
+         <mode value="include"/>
+      </search>
+   </entry>
+</Bundle>
+]]></source>
 		
 			</subsection>
 			
