@@ -28,6 +28,12 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		<dependency>
+			<groupId>net.sf.saxon</groupId>
+			<artifactId>saxon</artifactId>
+			<version>8.7</version>
+		</dependency>
+		
 	<dependency>
 		<groupId>xpp3</groupId>
 		<artifactId>xpp3_min</artifactId>
