@@ -49,7 +49,7 @@ public class FhirSystemDaoDstu2Test {
         Patient p = new Patient();
         p.addIdentifier().setSystem("urn:system").setValue(methodName);
         p.setId("Patient/" + methodName);
-        IdDt id = ourPatientDao.create(p).getId();
+        IdDt id = ourPatientDao.update(p).getId();
         ourLog.info("Created patient, got it: {}", id);
 
         p = new Patient();
@@ -91,7 +91,7 @@ public class FhirSystemDaoDstu2Test {
         Patient p = new Patient();
         p.addIdentifier().setSystem("urn:system").setValue(methodName);
         p.setId("Patient/" + methodName);
-        IdDt idv1 = ourPatientDao.create(p).getId();
+        IdDt idv1 = ourPatientDao.update(p).getId();
         ourLog.info("Created patient, got id: {}", idv1);
 
         p = new Patient();
@@ -301,7 +301,7 @@ public class FhirSystemDaoDstu2Test {
         Patient p2 = new Patient();
         p2.addIdentifier().setSystem("urn:system").setValue(methodName);
         p2.setId("Patient/" + methodName);
-        IdDt id2 = ourPatientDao.create(p2).getId();
+        IdDt id2 = ourPatientDao.update(p2).getId();
         ourLog.info("Created patient, got it: {}", id2);
 
         Bundle request = new Bundle();
@@ -356,7 +356,7 @@ public class FhirSystemDaoDstu2Test {
         Patient p = new Patient();
         p.addIdentifier().setSystem("urn:system").setValue(methodName);
         p.setId("Patient/" + methodName);
-        IdDt id = ourPatientDao.create(p).getId();
+        IdDt id = ourPatientDao.update(p).getId();
         ourLog.info("Created patient, got it: {}", id);
 
         Bundle request = new Bundle();
@@ -516,7 +516,7 @@ public class FhirSystemDaoDstu2Test {
         Patient p = new Patient();
         p.addIdentifier().setSystem("urn:system").setValue(methodName);
         p.setId("Patient/" + methodName);
-        IdDt id = ourPatientDao.create(p).getId();
+        IdDt id = ourPatientDao.update(p).getId();
         ourLog.info("Created patient, got it: {}", id);
 
         p = new Patient();

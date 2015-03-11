@@ -65,6 +65,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -690,16 +691,24 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 	@Override
 	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
-		StopWatch w = new StopWatch();
-		ResourceTable entity = new ResourceTable();
-		entity.setResourceType(toResourceName(theResource));
-
 		if (isNotBlank(theResource.getId().getIdPart())) {
-			if (theResource.getId().isIdPartValidLong()) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+			if (getContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+				if (theResource.getId().isIdPartValidLong()) {
+					throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+				}
+			} else {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getId().getIdPart()));
 			}
 		}
 
+		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
+	}
+
+	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
+		StopWatch w = new StopWatch();
+		ResourceTable entity = new ResourceTable();
+		entity.setResourceType(toResourceName(theResource));
+		
 		if (isNotBlank(theIfNoneExist)) {
 			Set<Long> match = processMatchUrl(theIfNoneExist, myResourceType);
 			if (match.size() > 1) {
@@ -867,6 +876,20 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			return;
 		}
 
+		if ("_id".equals(theSort.getParamName())) {
+			From<?, ?> forcedIdJoin = theFrom.join("myForcedId", JoinType.LEFT);
+			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
+				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
+				theOrders.add(theBuilder.asc(theFrom.get("myId")));
+			}else {
+				theOrders.add(theBuilder.desc(forcedIdJoin.get("myForcedId")));
+				theOrders.add(theBuilder.desc(theFrom.get("myId")));
+			}
+
+			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, null);
+			return;
+		}
+		
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
 		if (param == null) {
@@ -1632,7 +1655,14 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (resourceId == null || isBlank(resourceId.getIdPart())) {
 				throw new InvalidRequestException("Can not update a resource with no ID");
 			}
-			entity = readEntityLatestVersion(resourceId);
+			try {
+				entity = readEntityLatestVersion(resourceId);
+			} catch (ResourceNotFoundException e) {
+				if (Character.isDigit(theResource.getId().getIdPart().charAt(0))) {
+					throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+				}
+				return doCreate(theResource, null, true);
+			}
 		}
 
 		if (resourceId.hasVersionIdPart() && resourceId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {

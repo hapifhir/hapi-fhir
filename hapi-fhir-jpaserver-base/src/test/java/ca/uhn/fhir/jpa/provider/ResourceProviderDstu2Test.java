@@ -416,36 +416,6 @@ public class ResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testCreateWithClientSuppliedId() {
-		deleteToken("Patient", Patient.SP_IDENTIFIER, "urn:system:rpdstu2", "testCreateWithId01");
-
-		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testCreateWithId01");
-		IdDt p1Id = ourClient.create().resource(p1).withId("testCreateWithIdRpDstu2").execute().getId();
-
-		assertThat(p1Id.getValue(), containsString("Patient/testCreateWithIdRpDstu2/_history"));
-
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testCreateWithId01")).encodedJson().prettyPrint().execute();
-		assertEquals(1, actual.size());
-		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
-
-		/*
-		 * ensure that trying to create the same ID again fails appropriately
-		 */
-		try {
-			ourClient.create().resource(p1).withId("testCreateWithIdRpDstu2").execute().getId();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			// good
-		}
-
-		Bundle history = ourClient.history(null, (String) null, null, null);
-
-		assertEquals("Expected[" + p1Id.getIdPart() + "] but was " + history.getEntries().get(0).getResource().getId(), p1Id.getIdPart(), history.getEntries().get(0).getResource().getId().getIdPart());
-		assertNotNull(history.getEntries().get(0).getResource());
-	}
-
-	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");
 		delete("Location", Location.SP_NAME, "testDeepChainingL2");
