@@ -446,11 +446,20 @@ function setResource(target, resourceName) {
 }
 
 function updateSort(value) {
-	$('#search_sort').val(value);
+	$('#sort_by').val(value);
 	if (value == '') {
 		$('#search_sort_button').text('Default Sort');				
 	} else {
 		$('#search_sort_button').text(value);
+	}
+}
+
+function updateSortDirection(value) {
+	$('#sort_direction').val(value);
+	if (value == '') {
+		$('#search_sort_direction_button').text('Default');
+	} else {
+		$('#search_sort_direction_button').text(value);
 	}
 }
 

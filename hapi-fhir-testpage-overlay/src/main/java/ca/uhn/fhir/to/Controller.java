@@ -327,7 +327,7 @@ public class Controller {
 		IResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(null, getContext(theRequest), myConfig, interceptor);
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		String resourceName = theRequest.getResource();
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(theRequest.getResource());
@@ -368,80 +368,6 @@ public class Controller {
 		ourLog.info(logPrefix(theModel) + "Showing resource page: {}", resourceName);
 
 		return "resource";
-	}
-
-	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
-		Conformance conformance = (Conformance) theConformance;
-		for (Rest nextRest : conformance.getRest()) {
-			for (RestResource nextRes : nextRest.getResource()) {
-				if (nextRes.getType().getValue().equals(resourceName)) {
-					for (StringDt next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getType().getValueAsEnum() != SearchParamTypeEnum.COMPOSITE) {
-							sortParams.add(next.getName().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				}
-			}
-			for (RestQuery nextQuery : nextRest.getQuery()) {
-				boolean queryMatchesResource = false;
-				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
-				if (returnTypeExt != null) {
-					for (ExtensionDt nextExt : returnTypeExt) {
-						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
-							queries.add(nextQuery);
-							queryMatchesResource = true;
-							break;
-						}
-					}
-				}
-
-				if (queryMatchesResource) {
-					ArrayList<String> nextQueryIncludes = new ArrayList<String>();
-					queryIncludes.add(nextQueryIncludes);
-					List<ExtensionDt> includesExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_ALLOWED_INCLUDE);
-					if (includesExt != null) {
-						for (ExtensionDt nextExt : includesExt) {
-							nextQueryIncludes.add(nextExt.getValueAsPrimitive().getValueAsString());
-						}
-					}
-				}
-			}
-		}
-		return haveSearchParams;
-	}
-
-	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
-			List<List<String>> queryIncludes) {
-		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
-		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
-			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
-				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
-					for (StringDt next : nextRes.getSearchInclude()) {
-						if (next.isEmpty() == false) {
-							includes.add(next.getValue());
-						}
-					}
-					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
-						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
-							sortParams.add(next.getNameElement().getValue());
-						}
-					}
-					if (nextRes.getSearchParam().size() > 0) {
-						haveSearchParams = true;
-					}
-				}
-			}
-		}
-		return haveSearchParams;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -523,6 +449,20 @@ public class Controller {
 			clientCodeJsonWriter.write("limit", limit);
 		} else {
 			clientCodeJsonWriter.writeNull("limit");
+		}
+
+		String[] sort = theReq.getParameterValues("sort_by");
+		if (sort != null) {
+			for (String next : sort) {
+				String direction = theReq.getParameter("sort_direction");
+				if ("asc".equals(direction)) {
+					query.sort().ascending(new StringClientParam(next));
+				} else if ("desc".equals(direction)) {
+					query.sort().descending(new StringClientParam(next));
+				} else {
+					query.sort().defaultOrder(new StringClientParam(next));
+				}
+			}
 		}
 
 		long start = System.currentTimeMillis();
@@ -754,6 +694,80 @@ public class Controller {
 
 		processAndAddLastClientInvocation(client, returnsResource, theModel, delay, theMethodDescription, interceptor, theRequest);
 
+	}
+
+	private boolean extractSearchParamsDev(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		ca.uhn.fhir.model.dstu2.resource.Conformance conformance = (ca.uhn.fhir.model.dstu2.resource.Conformance) theConformance;
+		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
+			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (StringDt next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValueAsEnum() != ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean extractSearchParamsDstu1(IResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> sortParams, List<RestQuery> queries, boolean haveSearchParams,
+			List<List<String>> queryIncludes) {
+		Conformance conformance = (Conformance) theConformance;
+		for (Rest nextRest : conformance.getRest()) {
+			for (RestResource nextRes : nextRest.getResource()) {
+				if (nextRes.getType().getValue().equals(resourceName)) {
+					for (StringDt next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (RestResourceSearchParam next : nextRes.getSearchParam()) {
+						if (next.getType().getValueAsEnum() != SearchParamTypeEnum.COMPOSITE) {
+							sortParams.add(next.getName().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				}
+			}
+			for (RestQuery nextQuery : nextRest.getQuery()) {
+				boolean queryMatchesResource = false;
+				List<ExtensionDt> returnTypeExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_RETURN_TYPE);
+				if (returnTypeExt != null) {
+					for (ExtensionDt nextExt : returnTypeExt) {
+						if (resourceName.equals(nextExt.getValueAsPrimitive().getValueAsString())) {
+							queries.add(nextQuery);
+							queryMatchesResource = true;
+							break;
+						}
+					}
+				}
+
+				if (queryMatchesResource) {
+					ArrayList<String> nextQueryIncludes = new ArrayList<String>();
+					queryIncludes.add(nextQueryIncludes);
+					List<ExtensionDt> includesExt = nextQuery.getUndeclaredExtensionsByUrl(ExtensionConstants.QUERY_ALLOWED_INCLUDE);
+					if (includesExt != null) {
+						for (ExtensionDt nextExt : includesExt) {
+							nextQueryIncludes.add(nextExt.getValueAsPrimitive().getValueAsString());
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
 	}
 
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
@@ -1008,7 +1022,7 @@ public class Controller {
 				throw new Error("Unknown qualifier: " + parts.get(0));
 			}
 			IAndUnits number = matcher.number(parts.get(1));
-			
+
 			if (isBlank(parts.get(3))) {
 				theQuery.where(number.andNoUnits());
 			} else if (isBlank(parts.get(2))) {
@@ -1016,9 +1030,9 @@ public class Controller {
 			} else {
 				theQuery.where(number.andUnits(parts.get(2), parts.get(3)));
 			}
-			
+
 			values.add(parts.get(0) + parts.get(1) + "|" + parts.get(2) + "|" + parts.get(3));
-			
+
 			if (values.isEmpty()) {
 				return true;
 			}
@@ -1276,8 +1290,7 @@ public class Controller {
 			}
 
 			/*
-			 * DSTU2 no longer has a title in the bundle format, but it's still
-			 * useful here..
+			 * DSTU2 no longer has a title in the bundle format, but it's still useful here..
 			 */
 			if (bundle != null) {
 				INarrativeGenerator gen = getContext(theRequest).getNarrativeGenerator();

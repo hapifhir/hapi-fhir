@@ -131,36 +131,54 @@
 										<h4>Includes <small>Also load and include referenced resources in results</small></h4>
 									</div>
 									
+									<!-- Includes -->
 									<div class="row-fluid">
 										<span th:each="include : ${includes}" class="includeCheckContainer">
 											<span class="includeCheckCheck">
-				                    			<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
-				                    		</span>
+												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
+											</span>
 											<span class="includeCheckName" th:text="${include}"/>
-				                    	</span>
+										</span>
 									</div>
 
+									<!-- Results Sorting -->
 									<div class="row-fluid">
 										<h4>Sort Results</h4>
 									</div>
-									
 									<div class="row-fluid">
-										<div class='col-sm-3'>
-  
-											<div class="btn-group">
-				                    			<input type="hidden" id="search_sort" />
-												<button type="button" class="btn btn-info" id="search_sort_button">Default Sort</button>
-												<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-													<span class="caret"></span>
-													<span class="sr-only">Default Sort</span>
-												</button>
-												<ul class="dropdown-menu" role="menu">
-													<li><a href="javascript:updateSort('');">Default Sort</a></li>
-													<li class="divider"></li>
-													<li th:each="param : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${param} + '\');'" th:text="${param}"></a></li>
-												</ul>
-											</div>
-								        </div>
+										<!-- Sort By... -->
+										<div class='col-sm-6'>
+										<label>Sort By</label>
+										<div class="btn-group">
+											<input type="hidden" id="sort_by" />
+											<button type="button" class="btn btn-info" id="search_sort_button">Default</button>
+											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+												<span class="caret"></span>
+												<span class="sr-only">Default Sort</span>
+											</button>
+											<ul class="dropdown-menu" role="menu">
+												<li><a href="javascript:updateSort('');">Default Sort</a></li>
+												<li class="divider"></li>
+												<li th:each="param : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${param} + '\');'" th:text="${param}"></a></li>
+											</ul>
+										</div>
+										&nbsp;&nbsp;&nbsp;
+										<label>Direction</label>
+										<div class="btn-group">
+											<input type="hidden" id="sort_direction" />
+											<button type="button" class="btn btn-info" id="search_sort_direction_button">Default</button>
+											<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+												<span class="caret"></span>
+												<span class="sr-only">Default Sort</span>
+											</button>
+											<ul class="dropdown-menu" role="menu">
+												<li><a href="javascript:updateSortDirection('');">Default</a></li>
+												<li class="divider"></li>
+												<li><a href="javascript:updateSortDirection('asc');">Ascending</a></li>
+												<li><a href="javascript:updateSortDirection('desc');">Descending</a></li>
+											</ul>
+										</div>
+										</div>
 									</div>
 									<br clear="all"/>
 

@@ -153,6 +153,9 @@
 				(e.g. an BoundCodeDt with a custom Enum) failed to parse correctly. Thanks
 				to baopingle for reporting and providing a test case!
 			</action>
+			<action type="add">
+				Sorting is now supported in the Web Testing UI (previously a button existed for sorting, but it didn't do anything)
+			</action>
 		</release>
 		<release version="0.8" date="2014-Dec-17">
 			<action type="add">
