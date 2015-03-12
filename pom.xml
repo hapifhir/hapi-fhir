@@ -523,6 +523,9 @@
 					<td>
 					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=watch&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 					</td>
+					<td>
+					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=fork&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+					</td>
             	<td><div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://hl7api.sourceforge.net/"></div></td>
             	<td><div class="fb-like" data-href="http://hl7api.sourceforge.net/" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></div></td>
             	</tr></table>
