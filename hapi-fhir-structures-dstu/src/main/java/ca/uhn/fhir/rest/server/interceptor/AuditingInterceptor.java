@@ -115,6 +115,10 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true;
 		}
 		try{
+			if(theResponseObject == null || theResponseObject.isEmpty()){
+				log.debug("No bundle to audit");
+				return true;
+			}
 			log.info("Auditing bundle: " + theResponseObject + " from request " + theRequestDetails);
 			SecurityEvent auditEvent = new SecurityEvent();	
 			auditEvent.setEvent(getEventInfo(theRequestDetails));			
@@ -164,6 +168,10 @@ public class AuditingInterceptor extends InterceptorAdapter {
 			return true;
 		}
 		try{
+			if(theResponseObject == null){
+				log.debug("No object to audit");
+				return true;
+			}
 			log.info("Auditing resource: " + theResponseObject + " from request: " + theRequestDetails);
 			SecurityEvent auditEvent = new SecurityEvent();
 			auditEvent.setEvent(getEventInfo(theRequestDetails));	
