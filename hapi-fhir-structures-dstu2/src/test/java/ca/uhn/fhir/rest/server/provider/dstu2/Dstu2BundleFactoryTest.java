@@ -74,7 +74,7 @@ public class Dstu2BundleFactoryTest {
 
     @Test
     public void whenIncludeIsAsterisk_bundle_shouldContainAllReferencedResources() throws Exception {
-        Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes("*"));
+        Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(new String("*")));
 
         assertEquals(6, bundle.getEntry().size());
         assertEquals(2, numberOfEntriesOfType(bundle, Specimen.class));
