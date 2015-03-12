@@ -40,7 +40,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-
+		ourLog.error("AA", theException);
 		BaseOperationOutcome oo = null;
 		int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 

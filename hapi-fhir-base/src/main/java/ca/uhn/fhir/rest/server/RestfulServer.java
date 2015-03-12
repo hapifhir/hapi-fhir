@@ -496,7 +496,7 @@ public class RestfulServer extends HttpServlet {
 
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
-		RequestDetails requestDetails = null;
+		Request requestDetails = null;
 		try {
 
 			String resourceName = null;
@@ -622,31 +622,31 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			Request r = new Request();
-			r.setServer(this);
-			r.setResourceName(resourceName);
-			r.setId(id);
-			r.setOperation(operation);
-			r.setSecondaryOperation(secondaryOperation);
-			r.setParameters(params);
-			r.setRequestType(theRequestType);
-			r.setFhirServerBase(fhirServerBase);
-			r.setCompleteUrl(completeUrl);
-			r.setServletRequest(theRequest);
-			r.setServletResponse(theResponse);
-			r.setRespondGzip(respondGzip);
-			r.setCompartmentName(compartment);
+			requestDetails = new Request();
+			requestDetails.setServer(this);
+			requestDetails.setResourceName(resourceName);
+			requestDetails.setId(id);
+			requestDetails.setOperation(operation);
+			requestDetails.setSecondaryOperation(secondaryOperation);
+			requestDetails.setParameters(params);
+			requestDetails.setRequestType(theRequestType);
+			requestDetails.setFhirServerBase(fhirServerBase);
+			requestDetails.setCompleteUrl(completeUrl);
+			requestDetails.setServletRequest(theRequest);
+			requestDetails.setServletResponse(theResponse);
+			requestDetails.setRespondGzip(respondGzip);
+			requestDetails.setCompartmentName(compartment);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-				r.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
-				handlePagingRequest(r, theResponse, pagingAction);
+				requestDetails.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
+				handlePagingRequest(requestDetails, theResponse, pagingAction);
 				return;
 			}
 
 			if (resourceMethod == null) {
 				if (resourceBinding != null) {
-					resourceMethod = resourceBinding.getMethod(r);
+					resourceMethod = resourceBinding.getMethod(requestDetails);
 				}
 			}
 			if (resourceMethod == null) {
@@ -661,7 +661,7 @@ public class RestfulServer extends HttpServlet {
 				throw new InvalidRequestException(b.toString());
 			}
 
-			requestDetails = r;
+			requestDetails = requestDetails;
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
 			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
 			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
@@ -674,7 +674,7 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			resourceMethod.invokeServer(this, r);
+			resourceMethod.invokeServer(this, requestDetails);
 
 		} catch (NotModifiedException e) {
 
