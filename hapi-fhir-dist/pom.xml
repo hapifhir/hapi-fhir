@@ -86,8 +86,9 @@
 								<configuration>
 									<attach>false</attach>
 									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-all.xml</descriptor>
+										<descriptor>${project.basedir}/src/assembly/hapi-fhir-standard-distribution.xml</descriptor>
 										<descriptor>${project.basedir}/src/assembly/hapi-fhir-jpaserver-example.xml</descriptor>
+										<descriptor>${project.basedir}/src/assembly/hapi-fhir-android-distribution.xml</descriptor>
 									</descriptors>
 								</configuration>
 							</execution>

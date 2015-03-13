@@ -46,13 +46,16 @@
 				<li><a href="./doc_rest_server_interceptor.html">Interceptors (server)</a></li>
 				<li><a href="./doc_server_tester.html">Web Testing UI</a></li>
 			</ul>
-			<!-- 
-			<li name="Logging" href="./doc_logging.html" />
-			<li name="ETags" href="./doc_rest_etag.html" />
-			<li name="Tinder Plugin" href="./doc_tinder.html" />
-			<li name="JPA/Database Server" href="./doc_jpa.html" />
+			
+			<h4>Other Features</h4>
+
+			<ul>
+				<li><a href="./doc_logging.html">Logging</a></li>
+				<li><a href="./doc_rest_etag.html">ETags</a></li>
+				<li><a href="./doc_jpa.html">JPA/Database Server</a></li>
+				<li><a href="./doc_tinder.html">Maven Plugin (hapi-tinder-plugin)</a></li>
 			</ul>
- -->
+			
  			<h4>JavaDocs</h4>
  			<ul>
 				<li><a href="./apidocs/index.html">Core API</a></li>

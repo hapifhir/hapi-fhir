@@ -38,10 +38,10 @@
    <version>${project.version}</version>
 </dependency>]]></source>
 			
-			<subsection name="Supporting DEV (DSTU2) Resources">
+			<subsection name="Supporting DSTU2 Resources">
 			
 				<p>
-					HAPI also has a <code>hapi-fhir-structures-dev-[version].jar</code>, which 
+					HAPI also has a <code>hapi-fhir-structures-dstu2-[version].jar</code>, which 
 					contains the latest versions of the releases. You can include this JAR on
 					your classpath if you want to use resources that were created or updated by
 					HL7 after the DSTU1 release. Be warned though that using these resources
@@ -54,7 +54,7 @@
 				</p>
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
-   <artifactId>hapi-fhir-structures-dev</artifactId>
+   <artifactId>hapi-fhir-structures-dstu2</artifactId>
    <version>${project.version}</version>
 </dependency>]]></source>
 				

@@ -17,6 +17,7 @@ import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -71,6 +72,13 @@ public class BinaryClientTest {
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, resp.getContent());
 	}
 
+	public static void main(String[] args) {
+		
+		IClient c = Mockito.mock(IClient.class, new ReturnsDeepStubs());
+		
+	}
+	
+	
 	@Test
 	public void testCreate() throws Exception {
 		Binary res = new Binary();

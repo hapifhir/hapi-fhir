@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Android Support</title>
+		<author email="jamesagnew@users.sourceforge.net">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Android Client Development">
+
+			<p>
+				HAPI now has a specially built binary (JAR) which can be used on Android. Android developers
+				may use this JAR to take advantage of the FHIR model classes, and the FHIR client (running a FHIR server
+				on Android is not yet supported. Help wanted!)
+			</p>
+
+			<p>
+				The Android JAR ships as a "shade JAR", meaning it is a single JAR containing all of the 
+				dependencies required in order to use HAPI FHIR. You should not need to include any other
+				libraries.
+			</p>
+			<p>
+				Note that the Android JAR is still new and hasn't received as much testing as other
+				parts of the library. We would greatly appreciate feedback, testing, etc. Also note that
+				because mobile apps run on less powerful hardware compared to desktop and server applications,
+				it is all the more important to keep a single instance of the <code>FhirContext</code>
+				around for good performance, since this object is expensive to create. We are hoping to 
+				improve performance of the creation of this object in a future release. If you are an
+				Android developer and would like to help with this, please get in touch!
+			</p>
+			
+			<subsection name="Get the Android JAR">
+				<p>
+					To use the Android JAR from Maven, add the following dependency:
+				</p>
+				<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-android</artifactId>
+   <version>${project.version}</version>
+</dependency>]]></source>
+			
+				<p>
+					Gradle users can use the following:
+				</p>
+				<source><![CDATA[dependencies {
+    compile group: 'ca.uhn.hapi.fhir', name: 'hapi-fhir-android', version: '${project.version}'
+    }]]></source>
+			
+				<p>
+					You may also download a copy from the GitHub 
+					<a href="https://github.com/jamesagnew/hapi-fhir/releases">Releases</a> page.
+				</p>
+			</subsection>
+		</section>
+		
+	</body>
+
+</document>

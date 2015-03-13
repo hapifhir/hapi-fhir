@@ -40,6 +40,48 @@
 		<section name="Announcements">
 
 			<p>
+				<b>March 14, 2015 - HAPI FHIR 0.9 Released</b> - HAPI 0.9 has now been released. This 
+				release is an important one. It brings a number of fixes and new features, and most importantly
+				brings suport for DSTU2 resources and parsing/encoding. DSTU2 is the upcoming next version
+				of the FHIR specification itself. Also of particular note, the 
+				<a href="./doc_jpa.html">JPA Server</a> has graduated to being included in the
+				Maven repos (so you can create your own server which works just like <a href="http://fhirtest.uhn.ca">ours</a>).
+				The <a href="./doc_android.html">Android JAR</a> has also been included.
+			</p>
+			<p>
+				As always, you can see the complete list of what has
+				changed by consulting the <a href="./changes-report.html">changelog</a>, and the
+				<a href="./download.html">download page</a> has information on where to get it.
+			</p>
+			<p>
+				<b>Note on DSTU2:</b> It is important to note that DSTU2 is not yet formally ballotted by HL7, and as such it 
+				is subject to change. A number of developers are starting to target it however, so support
+				was important to us at HAPI HQ. See the <a href="./doc_dstu2.html">HAPI DSTU2 page</a>
+				for information about how to add support for FHIR DSTU2 in your applications.
+			</p>
+			<p>
+				<b>What's Next:</b> We are planning on making the next release of HAPI be the 1.0 release.
+				The biggest development on our plate for the next development cycle will be to finish
+				the integration of the HL7.org structure classes. Some people may have noticed a project
+				in our GitHub repo called "hapi-fhir-structures-hl7org" that isn't a part of the current build.
+				What we are trying to do is to unify the HL7.org Java Reference Implementation data model with
+				the HAPI one in a single set of classes. This will mean that HAPI users can take advantage
+				of tools from the RI (such as the excellent validator that comes with it) and users of the
+				RI can take advantage of HAPI's client and server toolkits. It is still not 100% clear what
+				this integration will look like when it is complete, but that should become clear in the 
+				coming weeks.
+			</p>
+			<p>
+				As always, thanks to everyone who contributed code, pull requests, and filed bugs to make
+				this release better. HAPI FHIR is the collective work of a large number of people now
+				and we all benefit from the collective hard work being put in from around the world!
+			</p>
+			<p>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
+			
+			<!-- 
+			<p>
 				<b>Dec 17, 2014 - HAPI FHIR 0.8 Released</b> - HAPI 0.8 has been released!
 				As always, thanks to everyone who contributed on this; this release includes
 				a lot of bug fixes and new features from around the world.
@@ -112,7 +154,6 @@
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
 
-			<!-- 
 			<p>
 				<b>Sep 8, 2014 - HAPI FHIR 0.6 Released</b> - A new build has been uploaded,
 				containing a number of new features and bug fixes. See the changelog

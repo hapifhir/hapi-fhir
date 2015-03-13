@@ -250,32 +250,6 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return myEntries;
 	}
 
-	// public static void main(String[] args) {
-	//
-	// FhirContext ctx = new FhirContext();
-	// String txt = "<Organization xmlns=\"http://hl7.org/fhir\">\n" +
-	// "   <extension url=\"http://fhir.connectinggta.ca/Profile/organization#providerIdPool\">\n" +
-	// "      <valueUri value=\"urn:oid:2.16.840.1.113883.3.239.23.21.1\"/>\n" +
-	// "   </extension>\n" +
-	// "   <text>\n" +
-	// "      <status value=\"generated\"/>\n" +
-	// "      <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" +
-	// "   </text>\n" +
-	// "   <identifier>\n" +
-	// "      <use value=\"official\"/>\n" +
-	// "      <label value=\"HSP 2.16.840.1.113883.3.239.23.21\"/>\n" +
-	// "      <system value=\"urn:cgta:hsp_ids\"/>\n" +
-	// "      <value value=\"urn:oid:2.16.840.1.113883.3.239.23.21\"/>\n" +
-	// "   </identifier>\n" +
-	// "   <name value=\"火星第五人民医院\"/>\n" +
-	// "</Organization>";
-	//
-	// IGenericClient c = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/base");
-	// c.registerInterceptor(new LoggingInterceptor(true));
-	// c.update().resource(txt).withId("1665").execute();
-	// }
-	//
-
 	public StringDt getLinkBase() {
 		if (myLinkBase == null) {
 			myLinkBase = new StringDt();

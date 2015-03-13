@@ -40,11 +40,11 @@
 					resources themselves, so the new bundle also gains the meta element described above.  
 				</li>
 				<li>
-					In <a href="http://hl7-fhir.github.io/json.html">JSON encoding</a>, the 
+					<strike>In <a href="http://hl7-fhir.github.io/json.html">JSON encoding</a>, the 
 					encoding of extensions has changed a bit, so that extensions on non-primitive
 					elements now appear with the extension URL as the JSON key, instead of being 
 					a value in an object called "extension". See the JSON documentation to see how
-					this new style looks.
+					this new style looks.</strike> This change was reverted by HL7.
 				</li>
 				<li>
 					A number of new resources have been added, and some existing resources have changed.
