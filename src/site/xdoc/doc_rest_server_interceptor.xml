@@ -171,12 +171,6 @@
 					<param name="file" value="examples/src/main/java/example/ServletExamples.java" />
 				</macro>
 				
-				<p>
-					This interceptor will then produce output similar to the following:
-				</p>
-				<source><![CDATA[2014-09-04 02:37:30.030 Source[127.0.0.1] Operation[vread Patient/1667/_history/1] UA[Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36] Params[?_format=json]
-2014-09-04 03:30:00.443 Source[127.0.0.1] Operation[search-type Organization] UA[Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)] Params[]]]></source>
-				
 			</subsection>
 			
 		</section>

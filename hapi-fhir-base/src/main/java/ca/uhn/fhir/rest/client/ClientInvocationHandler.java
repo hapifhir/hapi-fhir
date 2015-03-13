@@ -37,13 +37,13 @@ class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 	private FhirContext myContext;
 	private Map<Method, ILambda> myMethodToLambda;
 
-	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda) {
-		super(theClient, theUrlBase);
+	public ClientInvocationHandler(HttpClient theClient, FhirContext theContext, String theUrlBase, Map<Method, Object> theMethodToReturnValue, Map<Method, BaseMethodBinding<?>> theBindings, Map<Method, ILambda> theMethodToLambda, RestfulClientFactory theFactory) {
+		super(theClient, theUrlBase, theFactory);
 
-		myContext =theContext;
+		myContext = theContext;
 		myMethodToReturnValue = theMethodToReturnValue;
 		myBindings = theBindings;
-		myMethodToLambda=theMethodToLambda;
+		myMethodToLambda = theMethodToLambda;
 	}
 
 	public void addBinding(Method theMethod, BaseMethodBinding<?> theBinding) {
@@ -70,6 +70,5 @@ class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 
 		throw new UnsupportedOperationException("The method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getSimpleName() + " has no handler. Did you forget to annotate it with a RESTful method annotation?");
 	}
-
 
 }

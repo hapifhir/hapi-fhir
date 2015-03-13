@@ -12,7 +12,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9</version>
 	<name>HAPI-FHIR</name>
 	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
 
@@ -775,7 +775,7 @@
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
-				<module>hapi-fhir-structures-dev</module>
+				<!--<module>hapi-fhir-structures-dev</module>-->
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>

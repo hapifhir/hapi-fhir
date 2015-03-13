@@ -67,13 +67,16 @@ public abstract class BaseClient {
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
-
+	private final RestfulClientFactory myFactory;
 	private final String myUrlBase;
 
-	BaseClient(HttpClient theClient, String theUrlBase) {
+	private boolean myDontValidateConformance;
+
+	BaseClient(HttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
 		myClient = theClient;
 		myUrlBase = theUrlBase;
+		myFactory = theFactory;
 	}
 
 	protected Map<String, List<String>> createExtraParams() {
@@ -130,7 +133,21 @@ public abstract class BaseClient {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
 	}
 	
+	/**
+	 * This method is an internal part of the HAPI API andmay change, use with caution. If you 
+	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
+	 */
+	public void setDontValidateConformance(boolean theDontValidateConformance) {
+		myDontValidateConformance = theDontValidateConformance;
+	}
+
+
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
+
+		if (!myDontValidateConformance) {
+			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient);
+		}
+		
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
