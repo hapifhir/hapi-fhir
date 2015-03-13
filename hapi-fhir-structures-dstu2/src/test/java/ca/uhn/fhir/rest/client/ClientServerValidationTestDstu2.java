@@ -104,7 +104,7 @@ public class ClientServerValidationTestDstu2 {
 
 		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
 		try {
-			myCtx.newRestfulGenericClient("http://foo");
+			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 			fail();
 		} catch (FhirClientConnectionException e) {
 			String out = e.toString();
