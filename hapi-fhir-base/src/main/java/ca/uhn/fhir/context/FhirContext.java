@@ -288,6 +288,14 @@ public class FhirContext {
 	}
 
 	/**
+	 * This method should be considered experimental and will likely change in future releases
+	 * of HAPI. Use with caution!
+	 */
+	public IVersionSpecificBundleFactory newBundleFactory() {
+		return myVersion.newBundleFactory(this);
+	}
+
+	/**
 	 * Create and return a new JSON parser.
 	 * 
 	 * <p>
@@ -484,10 +492,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	public IVersionSpecificBundleFactory newBundleFactory() {
-		return myVersion.newBundleFactory(this);
 	}
 
 }

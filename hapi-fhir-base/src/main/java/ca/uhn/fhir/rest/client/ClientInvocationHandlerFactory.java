@@ -67,8 +67,8 @@ class ClientInvocationHandlerFactory {
 		myBindings.put(theMethod, theBinding);
 	}
 
-	ClientInvocationHandler newInvocationHandler() {
-		return new ClientInvocationHandler(myClient, myContext, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda);
+	ClientInvocationHandler newInvocationHandler(RestfulClientFactory theRestfulClientFactory) {
+		return new ClientInvocationHandler(myClient, myContext, myUrlBase, myMethodToReturnValue, myBindings, myMethodToLambda, theRestfulClientFactory);
 	}
 
 	interface ILambda {

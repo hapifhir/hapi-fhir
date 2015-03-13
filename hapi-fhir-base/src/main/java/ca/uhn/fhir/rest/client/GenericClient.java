@@ -43,7 +43,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -61,7 +60,6 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -128,21 +126,18 @@ import ca.uhn.fhir.util.ICallable;
 public class GenericClient extends BaseClient implements IGenericClient {
 
 	private static final String I18N_CANNOT_DETEMINE_RESOURCE_TYPE = "ca.uhn.fhir.rest.client.GenericClient.cannotDetermineResourceTypeFromUri";
-
 	private static final String I18N_INCOMPLETE_URI_FOR_READ = "ca.uhn.fhir.rest.client.GenericClient.incompleteUriForRead";
-
 	private static final String I18N_NO_VERSION_ID_FOR_VREAD = "ca.uhn.fhir.rest.client.GenericClient.noVersionIdForVread";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericClient.class);
 	private FhirContext myContext;
-
 	private HttpRequestBase myLastRequest;
-
 	private boolean myLogRequestAndResponse;
+
 	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
-	public GenericClient(FhirContext theContext, HttpClient theHttpClient, String theServerBase) {
-		super(theHttpClient, theServerBase);
+	public GenericClient(FhirContext theContext, HttpClient theHttpClient, String theServerBase, RestfulClientFactory theFactory) {
+		super(theHttpClient, theServerBase, theFactory);
 		myContext = theContext;
 	}
 

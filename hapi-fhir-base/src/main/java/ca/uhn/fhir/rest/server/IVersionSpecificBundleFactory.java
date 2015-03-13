@@ -30,6 +30,10 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
+/**
+ * This interface should be considered experimental and will likely change in future releases
+ * of HAPI. Use with caution!
+ */
 public interface IVersionSpecificBundleFactory {
 
 	void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);

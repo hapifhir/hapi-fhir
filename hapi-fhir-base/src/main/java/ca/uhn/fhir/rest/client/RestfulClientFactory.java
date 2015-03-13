@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.client;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,10 +63,8 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	private Map<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory> myInvocationHandlers = new HashMap<Class<? extends IRestfulClient>, ClientInvocationHandlerFactory>();
 	private HttpHost myProxy;
 	private ServerValidationModeEnum myServerValidationMode = DEFAULT_SERVER_VALIDATION_MODE;
-
 	private int mySocketTimeout = DEFAULT_SOCKET_TIMEOUT;
-
-	private Set<String> myValidatedServerBaseUrls = new HashSet<String>();
+	private Set<String> myValidatedServerBaseUrls = Collections.synchronizedSet(new HashSet<String>());
 
 	/**
 	 * Constructor
@@ -169,11 +167,10 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			throw new ConfigurationException(theClientType.getCanonicalName() + " is not an interface");
 		}
 
-		HttpClient httpClient = getHttpClient();
-		maybeValidateServerBase(theServerBase, httpClient);
-
+		
 		ClientInvocationHandlerFactory invocationHandler = myInvocationHandlers.get(theClientType);
 		if (invocationHandler == null) {
+			HttpClient httpClient = getHttpClient();
 			invocationHandler = new ClientInvocationHandlerFactory(httpClient, myContext, theServerBase, theClientType);
 			for (Method nextMethod : theClientType.getMethods()) {
 				BaseMethodBinding<?> binding = BaseMethodBinding.bindMethod(nextMethod, myContext, null);
@@ -182,7 +179,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 			myInvocationHandlers.put(theClientType, invocationHandler);
 		}
 
-		T proxy = instantiateProxy(theClientType, invocationHandler.newInvocationHandler());
+		T proxy = instantiateProxy(theClientType, invocationHandler.newInvocationHandler(this));
 
 		return proxy;
 	}
@@ -190,11 +187,13 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		HttpClient httpClient = getHttpClient();
-		maybeValidateServerBase(theServerBase, httpClient);
-		return new GenericClient(myContext, httpClient, theServerBase);
+		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
 
-	private void maybeValidateServerBase(String theServerBase, HttpClient theHttpClient) {
+	/**
+	 * This method is internal to HAPI - It may change in future versions, use with caution.
+	 */
+	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, HttpClient theHttpClient) {
 		String serverBase = theServerBase;
 		if (!serverBase.endsWith("/")) {
 			serverBase = serverBase + "/";
@@ -270,7 +269,9 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 
 	private void validateServerBase(String theServerBase, HttpClient theHttpClient) {
 
-		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase);
+		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+		client.setDontValidateConformance(true);
+		
 		BaseConformance conformance;
 		try {
 			conformance = client.conformance();
