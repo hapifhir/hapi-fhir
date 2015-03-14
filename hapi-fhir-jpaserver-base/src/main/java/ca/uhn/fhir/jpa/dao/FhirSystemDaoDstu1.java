@@ -107,22 +107,21 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 			}
 
 			ResourceTable entity;
-			if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.CREATE) {
+			if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
 				entity = null;
-			} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.UPDATE || nextResouceOperationIn == BundleEntryTransactionMethodEnum.DELETE) {
+			} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.PUT || nextResouceOperationIn == BundleEntryTransactionMethodEnum.DELETE) {
 				if (candidateMatches == null || candidateMatches.size() == 0) {
 					if (nextId == null || StringUtils.isBlank(nextId.getIdPart())) {
 						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationFailedNoId", nextResouceOperationIn.name()));
 					}
 					entity = tryToLoadEntity(nextId);
 					if (entity == null) {
-						if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.UPDATE) {
+						if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.PUT) {
 							ourLog.debug("Attempting to UPDATE resource with unknown ID '{}', will CREATE instead", nextId);
 						} else if (candidateMatches == null) {
 							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationFailedUnknownId", nextResouceOperationIn.name(), nextId));
 						} else {
 							ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
-							ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(nextResource, BundleEntryTransactionMethodEnum.NOOP);
 							persistedResources.add(null);
 							retVal.add(nextResource);
 							continue;
@@ -133,8 +132,6 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				} else {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl, candidateMatches.size()));
 				}
-			} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.NOOP) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "incomingNoopInTransaction"));
 			} else if (nextId.isEmpty()) {
 				entity = null;
 			} else {
@@ -143,11 +140,11 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 
 			BundleEntryTransactionMethodEnum nextResouceOperationOut;
 			if (entity == null) {
-				nextResouceOperationOut = BundleEntryTransactionMethodEnum.CREATE;
+				nextResouceOperationOut = BundleEntryTransactionMethodEnum.POST;
 				entity = toEntity(nextResource);
 				if (nextId.isEmpty() == false && nextId.getIdPart().startsWith("cid:")) {
 					ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
-				} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.CREATE) {
+				} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
 					if (nextId.isEmpty() == false) {
 						ourLog.debug("Resource in transaction has ID[{}] but is marked for CREATE, will ignore ID", nextId.getIdPart());
 					}
@@ -156,13 +153,12 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 							ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
 							BaseHasResource existingEntity = loadFirstEntityFromCandidateMatches(candidateMatches);
 							IResource existing = (IResource) toResource(existingEntity);
-							ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(existing, BundleEntryTransactionMethodEnum.NOOP);
 							persistedResources.add(null);
 							retVal.add(existing);
 							continue;
 						}
 						if (candidateMatches.size() > 1) {
-							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", BundleEntryTransactionMethodEnum.CREATE.name(), matchUrl, candidateMatches.size()));
+							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", BundleEntryTransactionMethodEnum.POST.name(), matchUrl, candidateMatches.size()));
 						}
 					}
 				} else {
@@ -177,7 +173,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 			} else {
 				nextResouceOperationOut = nextResouceOperationIn;
 				if (nextResouceOperationOut == null) {
-					nextResouceOperationOut = BundleEntryTransactionMethodEnum.UPDATE;
+					nextResouceOperationOut = BundleEntryTransactionMethodEnum.PUT;
 				}
 				updates++;
 				ourLog.info("Resource Type[{}] with ID[{}] exists, updating it", resourceName, nextId);
