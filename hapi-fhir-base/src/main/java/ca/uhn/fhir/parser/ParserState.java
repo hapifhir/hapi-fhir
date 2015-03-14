@@ -1113,8 +1113,8 @@ class ParserState<T> {
 			if (!myEntry.getSearchMode().isEmpty()) {
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(myEntry.getResource(), myEntry.getSearchMode().getValueAsEnum());
 			}
-			if (!myEntry.getTransactionOperation().isEmpty()) {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.put(myEntry.getResource(), myEntry.getTransactionOperation().getValueAsEnum());
+			if (!myEntry.getTransactionMethod().isEmpty()) {
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(myEntry.getResource(), myEntry.getTransactionMethod().getValueAsEnum());
 			}
 			if (!myEntry.getScore().isEmpty()) {
 				ResourceMetadataKeyEnum.ENTRY_SCORE.put(myEntry.getResource(), myEntry.getScore());
@@ -1139,12 +1139,13 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if ("operation".equals(theLocalPart)) {
-				push(new PrimitiveState(getPreResourceState(), myEntry.getTransactionOperation()));
+			if ("method".equals(theLocalPart)) {
+				push(new PrimitiveState(getPreResourceState(), myEntry.getTransactionMethod()));
 			} else if ("url".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
 			} else {
-				throw new DataFormatException("Unexpected element in Bundle.entry.search: " + theLocalPart);
+				ourLog.warn("Unexpected element in Bundle.entry.search: " + theLocalPart);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
 			}
 		}
 
@@ -1307,6 +1308,9 @@ class ParserState<T> {
 		public void wereBack() {
 			for (BundleEntry nextEntry : myInstance.getEntries()) {
 				IResource nextResource = nextEntry.getResource();
+				if (nextResource == null) {
+					continue;
+				}
 
 				String bundleBaseUrl = myInstance.getLinkBase().getValue();
 				String entryBaseUrl = nextEntry.getLinkBase().getValue();

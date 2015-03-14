@@ -300,9 +300,9 @@ public class JsonParser extends BaseParser implements IParser {
 				// IResource nextResource = nextEntry.getResource();
 			}
 
-			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
+			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
 				theEventWriter.writeStartObject("transaction");
-				writeOptionalTagWithTextNode(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
+				writeOptionalTagWithTextNode(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
 				writeOptionalTagWithTextNode(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEnd();
 			}

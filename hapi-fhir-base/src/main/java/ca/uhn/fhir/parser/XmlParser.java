@@ -413,9 +413,9 @@ public class XmlParser extends BaseParser implements IParser {
 				// IResource nextResource = nextEntry.getResource();
 			}
 
-			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
+			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
 				theEventWriter.writeStartElement("transaction");
-				writeOptionalTagWithValue(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
+				writeOptionalTagWithValue(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
 				writeOptionalTagWithValue(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEndElement();
 			}

@@ -30,7 +30,11 @@
 					A public test server is now operating at
 					<a href="http://fhirtest.uhn.ca">http://fhirtest.uhn.ca</a>. 
 					This server is built entirely using components of HAPI-FHIR
-					and demonstrates all of its capabilities.
+					and demonstrates all of its capabilities. This server is also
+					entirely open source. You can host your own copy by 
+					following instructions on our 
+					<a href="./doc_jpa.html">JPA Server</a> 
+					documentation.
 				</p>
 				
 			</subsection>

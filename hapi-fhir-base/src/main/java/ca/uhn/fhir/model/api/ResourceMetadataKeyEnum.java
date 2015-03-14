@@ -36,7 +36,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
@@ -351,7 +351,7 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	};
 
 	/**
-	 * If present and populated with a {@link BundleEntryTransactionOperationEnum}, contains the "bundle entry transaction operation",
+	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation",
 	 * which is the value of the status field in the Bundle entry containing this resource. The value for this key
 	 * corresponds to field <code>Bundle.entry.transaction.operation</code>. 
 	 * This value can be
@@ -362,18 +362,18 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	 * Note that status is only used in FHIR DSTU2 and later.
 	 * </p>
 	 * <p>
-	 * Values for this key are of type <b>{@link BundleEntryTransactionOperationEnum}</b>
+	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeyEnum<BundleEntryTransactionOperationEnum> ENTRY_TRANSACTION_OPERATION = new ResourceMetadataKeyEnum<BundleEntryTransactionOperationEnum>("ENTRY_TRANSACTION_OPERATION") {
+	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum>("ENTRY_TRANSACTION_OPERATION") {
 		@Override
-		public BundleEntryTransactionOperationEnum get(IResource theResource) {
-			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_OPERATION, BundleEntryTransactionOperationEnum.class, BundleEntryTransactionOperationEnum.VALUESET_BINDER);
+		public BundleEntryTransactionMethodEnum get(IResource theResource) {
+			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_METHOD, BundleEntryTransactionMethodEnum.class, BundleEntryTransactionMethodEnum.VALUESET_BINDER);
 		}
 
 		@Override
-		public void put(IResource theResource, BundleEntryTransactionOperationEnum theObject) {
-			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_OPERATION, theObject);
+		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
+			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
 		}
 	};
 

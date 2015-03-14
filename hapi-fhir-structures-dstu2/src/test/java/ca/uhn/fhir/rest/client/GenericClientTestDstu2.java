@@ -76,7 +76,7 @@ public class GenericClientTestDstu2 {
 				+ "</Patient>"
 				+ "</resource>\n"  
 				+ "   </entry>\n"  
-				+ "</feed>";
+				+ "</Bundle>";
 		//@formatter:on
 		return msg;
 	}

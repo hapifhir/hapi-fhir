@@ -26,12 +26,17 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
-public enum BundleEntryTransactionOperationEnum {
+/**
+ * This Enum is only used to support using the DSTU1 Bundle structure (<code>ca.uhn.fhir.model.api.Bundle</code>)
+ * on a DSTU2 server. It is preferably to use the new DSTU2 Bundle (<code>ca.uhn.fhir.model.dstu2.resource.Bundle</code>)
+ * for this purpose.
+ */
+public enum BundleEntryTransactionMethodEnum {
 
-	CREATE("create", "http://hl7.org/fhir/restful-interaction"),
-	UPDATE("update", "http://hl7.org/fhir/restful-interaction"),
-	DELETE("delete", "http://hl7.org/fhir/restful-interaction"),
-	NOOP("noop", "http://hl7.org/fhir/transaction-operation"),
+	GET("GET", "http://hl7.org/fhir/http-verb"),
+	POST("POST", "http://hl7.org/fhir/http-verb"),
+	PUT("PUT", "http://hl7.org/fhir/http-verb"),
+	DELETE("DELETE", "http://hl7.org/fhir/http-verb"),
 	
 	;
 	
@@ -39,7 +44,7 @@ public enum BundleEntryTransactionOperationEnum {
 	 * Identifier for this Value Set:
 	 * http://hl7.org/fhir/vs/address-use
 	 */
-	public static final String VALUESET_IDENTIFIER = "http://hl7.org/fhir/bundle-entry-status";
+	public static final String VALUESET_IDENTIFIER = "http://hl7.org/fhir/http-verb";
 
 	/**
 	 * Name for this Value Set:
@@ -47,18 +52,18 @@ public enum BundleEntryTransactionOperationEnum {
 	 */
 	public static final String VALUESET_NAME = "BundleEntryStatus";
 
-	private static Map<String, BundleEntryTransactionOperationEnum> CODE_TO_ENUM = new HashMap<String, BundleEntryTransactionOperationEnum>();
-	private static Map<String, Map<String, BundleEntryTransactionOperationEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, BundleEntryTransactionOperationEnum>>();
+	private static Map<String, BundleEntryTransactionMethodEnum> CODE_TO_ENUM = new HashMap<String, BundleEntryTransactionMethodEnum>();
+	private static Map<String, Map<String, BundleEntryTransactionMethodEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, BundleEntryTransactionMethodEnum>>();
 	
 	private final String myCode;
 	private final String mySystem;
 	
 	static {
-		for (BundleEntryTransactionOperationEnum next : BundleEntryTransactionOperationEnum.values()) {
+		for (BundleEntryTransactionMethodEnum next : BundleEntryTransactionMethodEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
 			
 			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
-				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, BundleEntryTransactionOperationEnum>());
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, BundleEntryTransactionMethodEnum>());
 			}
 			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
@@ -81,33 +86,33 @@ public enum BundleEntryTransactionOperationEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public BundleEntryTransactionOperationEnum forCode(String theCode) {
-		BundleEntryTransactionOperationEnum retVal = CODE_TO_ENUM.get(theCode);
+	public BundleEntryTransactionMethodEnum forCode(String theCode) {
+		BundleEntryTransactionMethodEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
 
 	/**
 	 * Converts codes to their respective enumerated values
 	 */
-	public static final IValueSetEnumBinder<BundleEntryTransactionOperationEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntryTransactionOperationEnum>() {
+	public static final IValueSetEnumBinder<BundleEntryTransactionMethodEnum> VALUESET_BINDER = new IValueSetEnumBinder<BundleEntryTransactionMethodEnum>() {
 		@Override
-		public String toCodeString(BundleEntryTransactionOperationEnum theEnum) {
+		public String toCodeString(BundleEntryTransactionMethodEnum theEnum) {
 			return theEnum.getCode();
 		}
 
 		@Override
-		public String toSystemString(BundleEntryTransactionOperationEnum theEnum) {
+		public String toSystemString(BundleEntryTransactionMethodEnum theEnum) {
 			return theEnum.getSystem();
 		}
 		
 		@Override
-		public BundleEntryTransactionOperationEnum fromCodeString(String theCodeString) {
+		public BundleEntryTransactionMethodEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
 		
 		@Override
-		public BundleEntryTransactionOperationEnum fromCodeString(String theCodeString, String theSystemString) {
-			Map<String, BundleEntryTransactionOperationEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+		public BundleEntryTransactionMethodEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, BundleEntryTransactionMethodEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
 			if (map == null) {
 				return null;
 			}
@@ -119,7 +124,7 @@ public enum BundleEntryTransactionOperationEnum {
 	/** 
 	 * Constructor
 	 */
-	BundleEntryTransactionOperationEnum(String theCode, String theSystem) {
+	BundleEntryTransactionMethodEnum(String theCode, String theSystem) {
 		myCode = theCode;
 		mySystem = theSystem;
 	}

@@ -274,7 +274,7 @@ public class XmlParserTest {
 			"         <score value=\"0.123\"/>\n" +
 			"      </search>\n" +
 			"      <transaction>\n" +
-			"         <operation value=\"create\"/>\n" +
+			"         <method value=\"POST\"/>\n" +
 			"         <url value=\"http://foo/Patient?identifier=value\"/>\n" +
 			"      </transaction>\n" +
 			"   </entry>\n" + 
@@ -289,7 +289,7 @@ public class XmlParserTest {
 		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
 		assertEquals("0.123", ResourceMetadataKeyEnum.ENTRY_SCORE.get(pt).getValueAsString());
 		assertEquals("match", ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(pt).getCode());
-		assertEquals("create", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(pt).getCode());
+		assertEquals("POST", ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(pt).getCode());
 		assertEquals("http://foo/Patient?identifier=value", ResourceMetadataKeyEnum.LINK_SEARCH.get(pt));
 		assertEquals("2001-02-22T11:22:33-05:00", ResourceMetadataKeyEnum.UPDATED.get(pt).getValueAsString());
 		

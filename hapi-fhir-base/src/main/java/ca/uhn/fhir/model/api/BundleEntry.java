@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionOperationEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
 public class BundleEntry extends BaseBundle {
@@ -58,7 +58,7 @@ public class BundleEntry extends BaseBundle {
 	private IResource myResource;
 	private DecimalDt myScore;
 	private BoundCodeDt<BundleEntrySearchModeEnum> mySearchMode;
-	private BoundCodeDt<BundleEntryTransactionOperationEnum> myTransactionOperation;
+	private BoundCodeDt<BundleEntryTransactionMethodEnum> myTransactionOperation;
 	private XhtmlDt mySummary;
 	private StringDt myTitle;
 	private InstantDt myUpdated;
@@ -357,14 +357,14 @@ public class BundleEntry extends BaseBundle {
 		mySearchMode = theSearchMode;
 	}
 
-	public BoundCodeDt<BundleEntryTransactionOperationEnum> getTransactionOperation() {
+	public BoundCodeDt<BundleEntryTransactionMethodEnum> getTransactionMethod() {
 		if (myTransactionOperation == null) {
-			myTransactionOperation = new BoundCodeDt<BundleEntryTransactionOperationEnum>(BundleEntryTransactionOperationEnum.VALUESET_BINDER);
+			myTransactionOperation = new BoundCodeDt<BundleEntryTransactionMethodEnum>(BundleEntryTransactionMethodEnum.VALUESET_BINDER);
 		}
 		return myTransactionOperation;
 	}
 
-	public void setTransactionOperation(BoundCodeDt<BundleEntryTransactionOperationEnum> theTransactionOperation) {
+	public void setTransactionMethod(BoundCodeDt<BundleEntryTransactionMethodEnum> theTransactionOperation) {
 		myTransactionOperation = theTransactionOperation;
 	}
 

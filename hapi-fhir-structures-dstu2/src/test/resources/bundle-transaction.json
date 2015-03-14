@@ -1,0 +1,161 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-transaction",
+  "meta": {
+    "lastUpdated": "2014-08-18T01:43:30Z"
+  },
+  "type": "transaction",
+  "base": "http://example.com/base",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "status": "generated",
+          "div": "<div>Some narrative\n            <hr/>\n            <p>\n              <b>Generated Narrative with Details</b>\n            </p>\n            <p>\n              <b>text</b>: \n            </p>\n            <p>\n              <b>name</b>: Peter James Chalmers (OFFICIAL)\n            </p>\n            <p>\n              <b>gender</b>: MALE\n            </p>\n            <p>\n              <b>birthDate</b>: Dec 25, 1974\n            </p>\n            <p>\n              <b>active</b>: true\n            </p>\n          </div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25",
+        "active": true
+      },
+      "transaction": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "status": "generated",
+          "div": "<div>Some narrative\n            <hr/>\n            <p>\n              <b>Generated Narrative with Details</b>\n            </p>\n            <p>\n              <b>text</b>: \n            </p>\n            <p>\n              <b>name</b>: Peter James Chalmers (OFFICIAL)\n            </p>\n            <p>\n              <b>gender</b>: MALE\n            </p>\n            <p>\n              <b>birthDate</b>: Dec 25, 1974\n            </p>\n            <p>\n              <b>active</b>: true\n            </p>\n          </div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25",
+        "active": true
+      },
+      "transaction": {
+        "method": "POST",
+        "url": "Patient",
+        "ifNoneExist": "Patient?identifier=234234"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "123",
+        "text": {
+          "status": "generated",
+          "div": "<div>Some narrative\n            <hr/>\n            <p>\n              <b>Generated Narrative with Details</b>\n            </p>\n            <p>\n              <b>text</b>: \n            </p>\n            <p>\n              <b>name</b>: Peter James Chalmers (OFFICIAL)\n            </p>\n            <p>\n              <b>gender</b>: MALE\n            </p>\n            <p>\n              <b>birthDate</b>: Dec 25, 1974\n            </p>\n            <p>\n              <b>active</b>: true\n            </p>\n          </div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25",
+        "active": true
+      },
+      "transaction": {
+        "method": "PUT",
+        "url": "Patient/123"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "text": {
+          "status": "generated",
+          "div": "<div>Some narrative\n            <hr/>\n            <p>\n              <b>Generated Narrative with Details</b>\n            </p>\n            <p>\n              <b>text</b>: \n            </p>\n            <p>\n              <b>name</b>: Peter James Chalmers (OFFICIAL)\n            </p>\n            <p>\n              <b>gender</b>: MALE\n            </p>\n            <p>\n              <b>birthDate</b>: Dec 25, 1974\n            </p>\n            <p>\n              <b>active</b>: true\n            </p>\n          </div>"
+        },
+        "name": [
+          {
+            "use": "official",
+            "family": [
+              "Chalmers"
+            ],
+            "given": [
+              "Peter",
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1974-12-25",
+        "active": true
+      },
+      "transaction": {
+        "method": "PUT",
+        "url": "Patient?identifier=234234"
+      }
+    },
+    {
+      "transaction": {
+        "method": "DELETE",
+        "url": "Patient/234"
+      }
+    },
+    {
+      "transaction": {
+        "method": "DELETE",
+        "url": "Patient?identifier=123456"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Parameters",
+        "parameter": [
+          {
+            "name": "coding",
+            "valueCoding": {
+              "system": "http://loinc.org",
+              "code": "1963-8"
+            }
+          }
+        ]
+      },
+      "transaction": {
+        "method": "POST",
+        "url": "ValueSet/$lookup"
+      }
+    },
+    {
+      "transaction": {
+        "method": "GET",
+        "url": "Patient?name=peter"
+      }
+    }
+  ]
+}

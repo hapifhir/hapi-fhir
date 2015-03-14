@@ -109,6 +109,30 @@
 				
 			</subsection>
 
+			<subsection name="New Bundle Format">
+			
+				<p>
+					In FHIR DSTU2, the Atom specification for Bundles has been dropped in
+					favour of a new Bundle format that is a native FHIR resource. In order to
+					support this change, a new Bundle structure class has been added to the
+					resource structures in the DSTU2 structures JAR 
+					<a href="./apidocs-dstu2/ca/uhn/fhir/model/dstu2/resource/Bundle.html">here</a>.
+				</p>
+				<p>
+					If you are working with Bundles directly in your application, it is recommended
+					to migrate to this new bundle structure. The "old" 
+					<a href="./apidocs/ca/uhn/fhir/model/api/Bundle.html">Bundle</a>
+					class will work, but the new one is generated from the FHIR specification so it 
+					is better aligned to the spec in terms of method names, JavaDocs, etc.
+				</p>
+				<p>
+					Because the new bundle type is a resource like any other resource, you should
+					parse and encode it using the 
+					<code><a href="./apidocs/ca/uhn/fhir/parser/IParser.html#parseResource(java.lang.Class,%20java.lang.String)">parseResource</a></code>
+					and <code>encodeResource</code> methods instead of the previously used <code>parseBundle</code> and <code>encodeBundle</code>.
+				</p>
+			</subsection>
+
 		</section>
 		
 	</body>
