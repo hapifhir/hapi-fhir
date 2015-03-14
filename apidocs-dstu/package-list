@@ -1,4 +1,5 @@
 ca.uhn.fhir.model.dstu
+ca.uhn.fhir.model.dstu.api
 ca.uhn.fhir.model.dstu.composite
 ca.uhn.fhir.model.dstu.resource
 ca.uhn.fhir.model.dstu.valueset

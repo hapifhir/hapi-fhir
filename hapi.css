@@ -1,19 +1,11 @@
-
+/*
 #bodyColumn {
 	width: 78.5% !important;
-	/*
-	margin-left: 180px !important;
-	*/
 }
 
 #breadcrumbs {
 	background: white;
 	padding: 0px;
-	/*
-	border-bottom-width: 1px;
-	border-bottom-color: #C0C0C0;
-	border-bottom-style: solid;
-	*/
 	height: 40px;
 }
 
@@ -48,6 +40,71 @@
 .section {
 	padding: 0px;
 }
+
+*/
+
+TABLE.pagenavlinks {
+	border: 0px;
+}
+A.pagenavlinks {
+	background: #CCC;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #888;
+	border-radius: 7px;
+	padding: 7px;
+}
+
+.navbar .brand {
+    color: #FF8;
+}
+
+.well {
+	padding: 5px;
+}
+
+.nav-list {
+	padding-right: 0px;
+	font-size: 12px;
+}
+
+.nav-list LI {
+	line-height: 15px;
+}
+
+/*
+.nav-list .divider {
+	display: none;
+}
+*/
+
+body {
+    padding-top: 40px;
+    padding-bottom: 10px;
+}
+
+pre {
+  padding: 3px;
+  margin: 0 0 10px;
+  font-size: 0.8em;
+  line-height: 1.0em;
+}
+
+.page-header {
+	padding-bottom: 2px;
+	margin: 0px 0 0px;
+}
+h1[id]:before,
+h2[id]:before,
+h3[id]:before,
+h4[id]:before,
+h5[id]:before,
+h6[id]:before,
+a[name]:before {
+    height: auto; 
+    margin: auto; 
+}
+
 
 .section h2 {
 	border-bottom-width: 2px;
@@ -87,11 +144,12 @@
 
 tt {
 	white-space: pre;
-	color: #448;
+	color: #846;
 	margin-bottom: 5px;
 	margin-top: 10px;
 	padding: 2px;
 	border: 1px solid #AAA;
+	background-color: #F0F0F0;
 }
 
 h1,h2,h3,h4,h5 {
@@ -103,6 +161,7 @@ h4 {
 	font-size: 1.2em;
 	padding: 0px;
 	margin-bottom: 0px;
+	margin-top: 20px;
 }
 
 li.expanded ul {
@@ -120,14 +179,12 @@ dfn {
 	border-bottom: 1px dotted #40A040;
 }
 
+/*
 a,a.externalLink,a:active,a:hover,a:link,a:visited {
 	color: #993300;
 }
 
 DIV.sidebar-nav UL LI UL LI {
-        /*
-        list-style: initial;
-        list-style-type: circle;
-        */
         font-size: 0.9em;
 }
+*/

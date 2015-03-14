@@ -4,10 +4,9 @@ ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
 ca.uhn.fhir.model.base.composite
 ca.uhn.fhir.model.base.resource
-ca.uhn.fhir.model.dstu.composite
-ca.uhn.fhir.model.dstu.resource
 ca.uhn.fhir.model.dstu.valueset
 ca.uhn.fhir.model.primitive
+ca.uhn.fhir.model.valueset
 ca.uhn.fhir.model.view
 ca.uhn.fhir.narrative
 ca.uhn.fhir.parser
@@ -27,3 +26,5 @@ ca.uhn.fhir.rest.server.interceptor
 ca.uhn.fhir.store
 ca.uhn.fhir.util
 ca.uhn.fhir.validation
+org.hl7.fhir.instance.model
+org.hl7.fhir.instance.model.api

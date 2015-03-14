@@ -1,0 +1,70 @@
+body {
+  padding-top: 80px;
+  padding-bottom: 20px;
+}
+
+.navbar a > i {
+  opacity: 0.5;
+}
+
+.navbar a:hover > i {
+  opacity: 1;
+}
+
+.subhead {
+  padding-bottom: 0;
+  margin-bottom: 9px;
+}
+
+.subhead h1 {
+  font-size: 54px;
+}
+
+
+@media (max-width: 480px) {
+
+  .modal {
+    position: fixed !important;
+    top: 25% !important;
+  }
+}
+
+
+@media (max-width: 767px) {
+
+  body {
+    padding-top: 0;
+  }
+}
+
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+
+  .thumbnail p {
+    font-size: 12px;
+  }
+
+  .thumbnail .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 979px) {
+
+  /* Remove any padding from the body */
+  body {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 980px) {
+
+  /* Unfloat brand */
+  .navbar-fixed-top .brand {
+    float: left;
+    margin-left: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
