@@ -518,10 +518,10 @@
 									<replacevalue><![CDATA[
             	<table cellpadding="0" cellspacing="0" border="0"><tr>
 					<td>
-					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=watch&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 					</td>
 					<td>
-					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=watch&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
 					</td>
 					<td>
 					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=fork&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>

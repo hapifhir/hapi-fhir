@@ -100,7 +100,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
-					<skip>true</skip>
+					<skip>false</skip>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -171,6 +171,25 @@
 									</excludes>
 								</filter>
 							</filters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>${maven_assembly_plugin_version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<attach>true</attach>
+							<descriptors>
+								<descriptor>${project.basedir}/src/assembly/android-sources.xml</descriptor>
+								<descriptor>${project.basedir}/src/assembly/android-javadoc.xml</descriptor>
+							</descriptors>
 						</configuration>
 					</execution>
 				</executions>

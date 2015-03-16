@@ -15,8 +15,11 @@
 			</p>
 			<p>
 				This is the homepage for the HAPI-FHIR library. We are developing 
-				an open-source implementation of the FHIR specification in Java. 
-				This library is still in experimental stage, so please tread with caution.
+				an open-source implementation of the FHIR specification in Java.
+				<a href="http://hl7.org/implement/standards/fhir/">FHIR</a>
+				(Fast Healthcare Interoperable Resources)
+				is a specification for exchanging healthcare data in a modern
+				and developer friendly way.
 			</p>
 			
 			<p>
@@ -204,7 +207,7 @@
 				License, version 2.0.
 			</p>
 			
-			<subsection name="Multiple Usage Patterns">
+			<subsection name="Some Ways You Can Use HAPI FHIR">
 				<p>
 					HAPI is designed with one main intent: providing a flexible way of adding
 					FHIR capability to applications. We at <a href="http://www.uhn.ca">University Health Network</a> 
@@ -215,7 +218,8 @@
 				</p>
 				<p>
 					The library is designed to support several main usage patterns:
-					<img src="images/hapi-usage.png" alt="HAPI Usage Patterns"/>  
+					<br/>
+					<object data="svg/hapi_usage_patterns.svg" width="672" height="468" type="image/svg+xml"></object>
 				</p>
 			</subsection>
 						
