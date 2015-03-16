@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.codehaus.plexus.util.StringUtils;
 
 public class ValueSetTm {
@@ -37,12 +38,12 @@ public class ValueSetTm {
 		if (getClass() != obj.getClass())
 			return false;
 		ValueSetTm other = (ValueSetTm) obj;
-		if (myId == null) {
-			if (other.myId != null)
-				return false;
-		} else if (!myId.equals(other.myId))
-			return false;
-		return true;
+
+		String id1 = myId != null && myId.isEmpty() == false ? myId : myName;
+		String id2 = other.myId != null && other.myId.isEmpty() == false ? other.myId : other.myName;
+		id1 = StringUtils.defaultString(id1);
+		id2 = StringUtils.defaultString(id2);
+		return id1.equals(id2);
 	}
 
 	public String getClassName() {
@@ -93,7 +94,7 @@ public class ValueSetTm {
 		myName = theName;
 	}
 
-	public  class Code {
+	public class Code {
 
 		private String myCode;
 		private String myDefinition;
@@ -133,7 +134,7 @@ public class ValueSetTm {
 							while (!Character.isLetterOrDigit(newValue.charAt(newValue.length() - 1))) {
 								newValue = newValue.substring(0, newValue.length() - 1);
 							}
-							ourLog.info("[{}] Replacing numeric code {} with description: {}", new Object[] {myName, retVal, newValue});
+							ourLog.info("[{}] Replacing numeric code {} with description: {}", new Object[] { myName, retVal, newValue });
 							retVal = newValue;
 						}
 					}

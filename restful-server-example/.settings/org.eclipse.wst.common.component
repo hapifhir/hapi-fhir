@@ -3,10 +3,10 @@
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
-        <dependent-module archiveName="hapi-fhir-base-0.9.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-base/hapi-fhir-base">
+        <dependent-module archiveName="hapi-fhir-base-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-base/hapi-fhir-base">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hapi-fhir-structures-dstu-0.9.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
+        <dependent-module archiveName="hapi-fhir-structures-dstu-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/hapi-fhir-structures-dstu/hapi-fhir-structures-dstu">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/" handle="module:/overlay/prj/hapi-fhir-testpage-overlay?includes=**/**&amp;excludes=META-INF/MANIFEST.MF">

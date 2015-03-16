@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,9 +28,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import org.apache.commons.lang3.StringUtils;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -63,6 +63,196 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  */
 public abstract class ResourceMetadataKeyEnum<T> {
 
+	/**
+	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number
+	 * of scenarios, such as POSTing transaction bundles to a server, or returning resource history.
+	 * <p>
+	 * Values for this key are of type <b>{@link InstantDt}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<InstantDt> DELETED_AT = new ResourceMetadataKeyEnum<InstantDt>("DELETED_AT") {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
+		}
+
+		@Override
+		public void put(IResource theResource, InstantDt theObject) {
+			theResource.getResourceMetadata().put(DELETED_AT, theObject);
+		}
+	};
+
+	/**
+	 * Denotes the search score which a given resource should match in a transaction. See the FHIR transaction definition for information about this. Corresponds to the value in
+	 * <code>Bundle.entry.score</code> in a Bundle resource.
+	 * <p>
+	 * Note that search URL is only used in FHIR DSTU2 and later.
+	 * </p>
+	 * <p>
+	 * Values for this key are of type <b>{@link DecimalDt}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<DecimalDt> ENTRY_SCORE = new ResourceMetadataKeyEnum<DecimalDt>("ENTRY_SCORE") {
+		@Override
+		public DecimalDt get(IResource theResource) {
+			return getDecimalFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SCORE);
+		}
+
+		@Override
+		public void put(IResource theResource, DecimalDt theObject) {
+			theResource.getResourceMetadata().put(ENTRY_SCORE, theObject);
+		}
+	};
+
+	/**
+	 * If present and populated with a {@link BundleEntrySearchModeEnum}, contains the "bundle entry search mode", which is the value of the status field in the Bundle entry containing this resource.
+	 * The value for this key corresponds to field <code>Bundle.entry.search.mode</code>. This value can be set to provide a status value of "include" for included resources being returned by a
+	 * server, or to "match" to indicate that the resource was returned because it matched the given search criteria.
+	 * <p>
+	 * Note that status is only used in FHIR DSTU2 and later.
+	 * </p>
+	 * <p>
+	 * Values for this key are of type <b>{@link BundleEntrySearchModeEnum}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<BundleEntrySearchModeEnum>("ENTRY_SEARCH_MODE") {
+		@Override
+		public BundleEntrySearchModeEnum get(IResource theResource) {
+			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SEARCH_MODE, BundleEntrySearchModeEnum.class, BundleEntrySearchModeEnum.VALUESET_BINDER);
+		}
+
+		@Override
+		public void put(IResource theResource, BundleEntrySearchModeEnum theObject) {
+			theResource.getResourceMetadata().put(ENTRY_SEARCH_MODE, theObject);
+		}
+	};
+
+	/**
+	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation", which is the value of the status field in the Bundle entry
+	 * containing this resource. The value for this key corresponds to field <code>Bundle.entry.transaction.operation</code>. This value can be set in resources being transmitted to a server to
+	 * provide a status value of "create" or "update" to indicate behaviour the server should observe. It may also be set to similar values (or to "noop") in resources being returned by a server as a
+	 * result of a transaction to indicate to the client what operation was actually performed.
+	 * <p>
+	 * Note that status is only used in FHIR DSTU2 and later.
+	 * </p>
+	 * <p>
+	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum>(
+			"ENTRY_TRANSACTION_OPERATION") {
+		@Override
+		public BundleEntryTransactionMethodEnum get(IResource theResource) {
+			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_METHOD, BundleEntryTransactionMethodEnum.class,
+					BundleEntryTransactionMethodEnum.VALUESET_BINDER);
+		}
+
+		@Override
+		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
+			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
+		}
+	};
+
+	/**
+	 * If present and populated with a string, provides the "alternate link" (the link element in the bundle entry with <code>rel="alternate"</code>). Server implementations may populate this with a
+	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient/1243") in which case the server will convert this to
+	 * an absolute URL at runtime.
+	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> LINK_ALTERNATE = new ResourceMetadataKeyEnum<String>("LINK_ALTERNATE") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_ALTERNATE);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(LINK_ALTERNATE, theObject);
+		}
+	};
+
+	/**
+	 * If present and populated with a string, provides the "search link" (the link element in the bundle entry with <code>rel="search"</code>). Server implementations may populate this with a
+	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient?name=tester") in which case the server will convert
+	 * this to an absolute URL at runtime.
+	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> LINK_SEARCH = new ResourceMetadataKeyEnum<String>("LINK_SEARCH") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_SEARCH);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(LINK_SEARCH, theObject);
+		}
+	};
+
+	/**
+	 * The value for this key represents a previous ID used to identify this resource. This key is currently only used internally during transaction method processing.
+	 * <p>
+	 * Values for this key are of type <b>{@link IdDt}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<IdDt> PREVIOUS_ID = new ResourceMetadataKeyEnum<IdDt>("PREVIOUS_ID") {
+		@Override
+		public IdDt get(IResource theResource) {
+			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
+		}
+
+		@Override
+		public void put(IResource theResource, IdDt theObject) {
+			theResource.getResourceMetadata().put(PREVIOUS_ID, theObject);
+		}
+	};
+
+	/**
+	 * The value for this key represents a {@link List} of profile IDs that this resource claims to conform to.
+	 * 
+	 * <p>
+	 * Values for this key are of type <b>List&lt;IdDt&gt;</b>. Note that the returned list is <i>unmodifiable</i>, so you need to create a new list and call <code>put</code> to change its value.
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<List<IdDt>>("PROFILES") {
+		@Override
+		public List<IdDt> get(IResource theResource) {
+			return getIdListFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PROFILES);
+		}
+
+		@Override
+		public void put(IResource theResource, List<IdDt> theObject) {
+			theResource.getResourceMetadata().put(PROFILES, theObject);
+		}
+	};
+
+	/**
+	 * The value for this key is the bundle entry <b>Published</b> time. This is defined by FHIR as "Time resource copied into the feed", which is generally best left to the current time.
+	 * <p>
+	 * Values for this key are of type <b>{@link InstantDt}</b>
+	 * </p>
+	 * <p>
+	 * <b>Server Note</b>: In servers, it is generally advisable to leave this value <code>null</code>, in which case the server will substitute the current time automatically.
+	 * </p>
+	 * 
+	 * @see InstantDt
+	 */
+	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<InstantDt>("PUBLISHED") {
+		@Override
+		public InstantDt get(IResource theResource) {
+			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
+		}
+
+		@Override
+		public void put(IResource theResource, InstantDt theObject) {
+			theResource.getResourceMetadata().put(PUBLISHED, theObject);
+		}
+	};
+
 	public static final ResourceMetadataKeyEnum<List<BaseCodingDt>> SECURITY_LABELS = new ResourceMetadataKeyEnum<List<BaseCodingDt>>("SECURITY_LABELS") {
 		@Override
 		public List<BaseCodingDt> get(IResource resource) {
@@ -90,89 +280,6 @@ public abstract class ResourceMetadataKeyEnum<T> {
 			iResource.getResourceMetadata().put(SECURITY_LABELS, labels);
 		}
 
-	};
-
-
-	/**
-	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number
-	 * of scenarios, such as POSTing transaction bundles to a server, or returning resource history.
-	 * <p>
-	 * Values for this key are of type <b>{@link InstantDt}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> DELETED_AT = new ResourceMetadataKeyEnum<InstantDt>("DELETED_AT") {
-		@Override
-		public InstantDt get(IResource theResource) {
-			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
-		}
-
-		@Override
-		public void put(IResource theResource, InstantDt theObject) {
-			theResource.getResourceMetadata().put(DELETED_AT, theObject);
-		}
-	};
-
-	/**
-	 * The value for this key represents a {@link List} of profile IDs that this
-	 * resource claims to conform to. 
-	 * 
-	 * <p>
-	 * Values for this key are of type <b>List&lt;IdDt&gt;</b>. Note that the returned list is
-	 * <i>unmodifiable</i>, so you need to create a new list and call <code>put</code> to
-	 * change its value.
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<List<IdDt>> PROFILES = new ResourceMetadataKeyEnum<List<IdDt>>("PROFILES") {
-		@Override
-		public List<IdDt> get(IResource theResource) {
-			return getIdListFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PROFILES);
-		}
-
-		@Override
-		public void put(IResource theResource, List<IdDt> theObject) {
-			theResource.getResourceMetadata().put(PROFILES, theObject);
-		}
-	};
-
-	/**
-	 * The value for this key represents a previous ID used to identify this resource. This key is currently only used internally during transaction method processing.
-	 * <p>
-	 * Values for this key are of type <b>{@link IdDt}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<IdDt> PREVIOUS_ID = new ResourceMetadataKeyEnum<IdDt>("PREVIOUS_ID") {
-		@Override
-		public IdDt get(IResource theResource) {
-			return getIdFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PREVIOUS_ID);
-		}
-
-		@Override
-		public void put(IResource theResource, IdDt theObject) {
-			theResource.getResourceMetadata().put(PREVIOUS_ID, theObject);
-		}
-	};
-
-	/**
-	 * The value for this key is the bundle entry <b>Published</b> time. This is defined by FHIR as "Time resource copied into the feed", which is generally best left to the current time.
-	 * <p>
-	 * Values for this key are of type <b>{@link InstantDt}</b>
-	 * </p>
-	 * <p>
-	 * <b>Server Note</b>: In servers, it is generally advisable to leave this value <code>null</code>, in which case the server will substitute the current time automatically.
-	 * </p>
-	 * 
-	 * @see InstantDt
-	 */
-	public static final ResourceMetadataKeyEnum<InstantDt> PUBLISHED = new ResourceMetadataKeyEnum<InstantDt>("PUBLISHED") {
-		@Override
-		public InstantDt get(IResource theResource) {
-			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), PUBLISHED);
-		}
-
-		@Override
-		public void put(IResource theResource, InstantDt theObject) {
-			theResource.getResourceMetadata().put(PUBLISHED, theObject);
-		}
 	};
 
 	/**
@@ -248,6 +355,24 @@ public abstract class ResourceMetadataKeyEnum<T> {
 	/**
 	 * The value for this key is the version ID of the resource object.
 	 * <p>
+	 * Values for this key are of type <b>{@link String}</b>
+	 * </p>
+	 */
+	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<String>("VERSION") {
+		@Override
+		public String get(IResource theResource) {
+			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION);
+		}
+
+		@Override
+		public void put(IResource theResource, String theObject) {
+			theResource.getResourceMetadata().put(VERSION, theObject);
+		}
+	};
+
+	/**
+	 * The value for this key is the version ID of the resource object.
+	 * <p>
 	 * Values for this key are of type <b>{@link IdDt}</b>
 	 * </p>
 	 * 
@@ -266,141 +391,6 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		}
 	};
 
-	/**
-	 * The value for this key is the version ID of the resource object.
-	 * <p>
-	 * Values for this key are of type <b>{@link String}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<String> VERSION = new ResourceMetadataKeyEnum<String>("VERSION") {
-		@Override
-		public String get(IResource theResource) {
-			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), VERSION);
-		}
-
-		@Override
-		public void put(IResource theResource, String theObject) {
-			theResource.getResourceMetadata().put(VERSION, theObject);
-		}
-	};
-
-	/**
-	 * If present and populated with a string, provides the "search link" (the link element in the bundle entry with <code>rel="search"</code>). Server implementations may populate this with a
-	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient?name=tester") in which case the server will convert
-	 * this to an absolute URL at runtime.
-	 * <p>
-	 * Values for this key are of type <b>{@link String}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<String> LINK_SEARCH = new ResourceMetadataKeyEnum<String>("LINK_SEARCH") {
-		@Override
-		public String get(IResource theResource) {
-			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_SEARCH);
-		}
-
-		@Override
-		public void put(IResource theResource, String theObject) {
-			theResource.getResourceMetadata().put(LINK_SEARCH, theObject);
-		}
-	};
-
-	/**
-	 * If present and populated with a string, provides the "alternate link" (the link element in the bundle entry with <code>rel="alternate"</code>). Server implementations may populate this with a
-	 * complete URL, in which case the URL will be placed as-is in the bundle. They may alternately specify a resource relative URL (e.g. "Patient/1243") in which case the server will convert this to
-	 * an absolute URL at runtime.
-	 * <p>
-	 * Values for this key are of type <b>{@link String}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<String> LINK_ALTERNATE = new ResourceMetadataKeyEnum<String>("LINK_ALTERNATE") {
-		@Override
-		public String get(IResource theResource) {
-			return getStringFromMetadataOrNullIfNone(theResource.getResourceMetadata(), LINK_ALTERNATE);
-		}
-
-		@Override
-		public void put(IResource theResource, String theObject) {
-			theResource.getResourceMetadata().put(LINK_ALTERNATE, theObject);
-		}
-	};
-
-	/**
-	 * If present and populated with a {@link BundleEntrySearchModeEnum}, contains the "bundle entry search mode",
-	 * which is the value of the status field in the Bundle entry containing this resource. The value for this key
-	 * corresponds to field <code>Bundle.entry.search.mode</code>. 
-	 * This value can be
-	 * set to provide a status value of "include" for included resources being returned by a server, or to 
-	 * "match" to indicate that the resource was returned because it matched the given search criteria.
-	 * <p>
-	 * Note that status is only used in FHIR DSTU2 and later.
-	 * </p>
-	 * <p>
-	 * Values for this key are of type <b>{@link BundleEntrySearchModeEnum}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<BundleEntrySearchModeEnum> ENTRY_SEARCH_MODE = new ResourceMetadataKeyEnum<BundleEntrySearchModeEnum>("ENTRY_SEARCH_MODE") {
-		@Override
-		public BundleEntrySearchModeEnum get(IResource theResource) {
-			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SEARCH_MODE, BundleEntrySearchModeEnum.class, BundleEntrySearchModeEnum.VALUESET_BINDER);
-		}
-
-		@Override
-		public void put(IResource theResource, BundleEntrySearchModeEnum theObject) {
-			theResource.getResourceMetadata().put(ENTRY_SEARCH_MODE, theObject);
-		}
-	};
-
-	/**
-	 * If present and populated with a {@link BundleEntryTransactionMethodEnum}, contains the "bundle entry transaction operation",
-	 * which is the value of the status field in the Bundle entry containing this resource. The value for this key
-	 * corresponds to field <code>Bundle.entry.transaction.operation</code>. 
-	 * This value can be
-	 * set in resources being transmitted to a server to provide a status value of "create" or "update" to indicate behaviour the 
-	 * server should observe. It may also be set to similar values (or to "noop") in resources being returned by 
-	 * a server as a result of a transaction to indicate to the client what operation was actually performed.
-	 * <p>
-	 * Note that status is only used in FHIR DSTU2 and later.
-	 * </p>
-	 * <p>
-	 * Values for this key are of type <b>{@link BundleEntryTransactionMethodEnum}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum> ENTRY_TRANSACTION_METHOD = new ResourceMetadataKeyEnum<BundleEntryTransactionMethodEnum>("ENTRY_TRANSACTION_OPERATION") {
-		@Override
-		public BundleEntryTransactionMethodEnum get(IResource theResource) {
-			return getEnumFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_TRANSACTION_METHOD, BundleEntryTransactionMethodEnum.class, BundleEntryTransactionMethodEnum.VALUESET_BINDER);
-		}
-
-		@Override
-		public void put(IResource theResource, BundleEntryTransactionMethodEnum theObject) {
-			theResource.getResourceMetadata().put(ENTRY_TRANSACTION_METHOD, theObject);
-		}
-	};
-
-	/**
-	 * Denotes the search score which a given resource should match in a transaction. See the
-	 * FHIR transaction definition for information about this. Corresponds to
-	 * the value in <code>Bundle.entry.score</code> in a Bundle resource.
-	 * <p>
-	 * Note that search URL is only used in FHIR DSTU2 and later.
-	 * </p>
-	 * <p>
-	 * Values for this key are of type <b>{@link DecimalDt}</b>
-	 * </p>
-	 */
-	public static final ResourceMetadataKeyEnum<DecimalDt> ENTRY_SCORE = new ResourceMetadataKeyEnum<DecimalDt>("ENTRY_SCORE") {
-		@Override
-		public DecimalDt get(IResource theResource) {
-			return getDecimalFromMetadataOrNullIfNone(theResource.getResourceMetadata(), ENTRY_SCORE);
-		}
-
-		@Override
-		public void put(IResource theResource, DecimalDt theObject) {
-			theResource.getResourceMetadata().put(ENTRY_SCORE, theObject);
-		}
-	};
-
-	
 	private final String myValue;
 
 	public ResourceMetadataKeyEnum(String theValue) {
@@ -445,14 +435,53 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		return myValue;
 	}
 
+	private static DecimalDt getDecimalFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<DecimalDt> theKey) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof DecimalDt) {
+			if (((DecimalDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (DecimalDt) retValObj;
+			}
+		} else if (retValObj instanceof String) {
+			if (StringUtils.isBlank((String) retValObj)) {
+				return null;
+			}
+			return new DecimalDt((String) retValObj);
+		} else if (retValObj instanceof Double) {
+			return new DecimalDt((Double) retValObj);
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Enum<?>> T getEnumFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<T> theKey, Class<T> theEnumType,
+			IValueSetEnumBinder<T> theBinder) {
+		Object retValObj = theResourceMetadata.get(theKey);
+		if (retValObj == null) {
+			return null;
+		} else if (theEnumType.equals(retValObj.getClass())) {
+			return (T) retValObj;
+		} else if (retValObj instanceof String) {
+			return theBinder.fromCodeString((String) retValObj);
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ InstantDt.class.getCanonicalName());
+	}
+
 	private static IdDt getIdFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
 		return toId(theKey, theResourceMetadata.get(theKey));
 	}
 
 	private static List<IdDt> getIdListFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<?> theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj instanceof List) {
-			List<?> retValList = (List<?>)retValObj;
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof List) {
+			List<?> retValList = (List<?>) retValObj;
 			for (Object next : retValList) {
 				if (!(next instanceof IdDt)) {
 					List<IdDt> retVal = new ArrayList<IdDt>();
@@ -468,28 +497,6 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		} else {
 			return Collections.singletonList(toId(theKey, retValObj));
 		}
-	}
-
-	private static IdDt toId(ResourceMetadataKeyEnum<?> theKey, Object retValObj) {
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof String) {
-			if (isNotBlank((String) retValObj)) {
-				return new IdDt((String) retValObj);
-			} else {
-				return null;
-			}
-		} else if (retValObj instanceof IdDt) {
-			if (((IdDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (IdDt) retValObj;
-			}
-		} else if (retValObj instanceof Number) {
-			return new IdDt(((Number) retValObj).toString());
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ IdDt.class.getCanonicalName());
 	}
 
 	private static InstantDt getInstantFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<InstantDt> theKey) {
@@ -529,44 +536,6 @@ public abstract class ResourceMetadataKeyEnum<T> {
 				+ InstantDt.class.getCanonicalName());
 	}
 
-
-	private static DecimalDt getDecimalFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<DecimalDt> theKey) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (retValObj instanceof DecimalDt) {
-			if (((DecimalDt) retValObj).isEmpty()) {
-				return null;
-			} else {
-				return (DecimalDt) retValObj;
-			}
-		} else if (retValObj instanceof String) {
-			if (StringUtils.isBlank((String) retValObj)) {
-				return null;
-			}
-			return new DecimalDt((String) retValObj);
-		} else if (retValObj instanceof Double) {
-			return new DecimalDt((Double) retValObj);
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ InstantDt.class.getCanonicalName());
-	}
-
-	
-	@SuppressWarnings("unchecked")
-	private static <T extends Enum<?>> T getEnumFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<T> theKey, Class<T> theEnumType, IValueSetEnumBinder<T> theBinder) {
-		Object retValObj = theResourceMetadata.get(theKey);
-		if (retValObj == null) {
-			return null;
-		} else if (theEnumType.equals(retValObj.getClass())) {
-			return (T) retValObj;
-		} else if (retValObj instanceof String) {
-			return theBinder.fromCodeString((String) retValObj);
-		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
-				+ InstantDt.class.getCanonicalName());
-	}
-
 	private static String getStringFromMetadataOrNullIfNone(Map<ResourceMetadataKeyEnum<?>, Object> theResourceMetadata, ResourceMetadataKeyEnum<String> theKey) {
 		Object retValObj = theResourceMetadata.get(theKey);
 		if (retValObj == null) {
@@ -580,6 +549,28 @@ public abstract class ResourceMetadataKeyEnum<T> {
 		}
 		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 				+ String.class.getCanonicalName());
+	}
+
+	private static IdDt toId(ResourceMetadataKeyEnum<?> theKey, Object retValObj) {
+		if (retValObj == null) {
+			return null;
+		} else if (retValObj instanceof String) {
+			if (isNotBlank((String) retValObj)) {
+				return new IdDt((String) retValObj);
+			} else {
+				return null;
+			}
+		} else if (retValObj instanceof IdDt) {
+			if (((IdDt) retValObj).isEmpty()) {
+				return null;
+			} else {
+				return (IdDt) retValObj;
+			}
+		} else if (retValObj instanceof Number) {
+			return new IdDt(((Number) retValObj).toString());
+		}
+		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+				+ IdDt.class.getCanonicalName());
 	}
 
 }

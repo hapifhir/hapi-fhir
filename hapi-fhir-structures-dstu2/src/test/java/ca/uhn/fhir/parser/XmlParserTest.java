@@ -21,6 +21,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -86,7 +89,7 @@ public class XmlParserTest {
 			"<valueSet>", 
 			"<reference value=\"ValueSet2\"/>", 
 			"</valueSet>", 
-			"</security>", 
+			"</security>",
 			"</meta>", 
 			"<name>", 
 			"<family value=\"FAMILY\"/>", 
@@ -116,6 +119,64 @@ public class XmlParserTest {
 		assertEquals("ValueSet2", label.getValueSet().getReference().getValue());
 	}
 
+	@Test
+	public void testEncodeAndParseMetaProfileAndTags() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+		
+		List<IdDt> profiles = new ArrayList<IdDt>();
+		profiles.add(new IdDt("http://foo/Profile1"));
+		profiles.add(new IdDt("http://foo/Profile2"));
+		ResourceMetadataKeyEnum.PROFILES.put(p, profiles);
+
+		TagList tagList = new TagList();
+		tagList.addTag("scheme1", "term1", "label1");
+		tagList.addTag("scheme2", "term2", "label2");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+			"<meta>",
+			"<meta>",
+			"<profile value=\"http://foo/Profile1\"/>",
+			"<profile value=\"http://foo/Profile2\"/>",
+			"<tag>",
+			"<system value=\"scheme1\"/>",
+			"<code value=\"term1\"/>",
+			"<display value=\"label1\"/>",
+			"</tag>",
+			"<tag>",
+			"<system value=\"scheme2\"/>",
+			"<code value=\"term2\"/>",
+			"<display value=\"label2\"/>",
+			"</tag>",
+			"</meta>",
+			"</meta>",
+			"<name>",
+			"<family value=\"FAMILY\"/>",
+			"</name>", 
+			"</Patient>"));
+		//@formatter:on
+		
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
+		List<IdDt> gotLabels = ResourceMetadataKeyEnum.PROFILES.get(parsed);
+		
+		assertEquals(2,gotLabels.size());
+
+		IdDt label = (IdDt) gotLabels.get(0);
+		assertEquals("http://foo/Profile1", label.getValue());
+		label = (IdDt) gotLabels.get(1);
+		assertEquals("http://foo/Profile2", label.getValue());
+		
+		tagList = ResourceMetadataKeyEnum.TAG_LIST.get(parsed);
+		assertEquals(2, tagList.size());
+		
+		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
+		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
+	}
 	
 	@Test
 	public void testDuration() {

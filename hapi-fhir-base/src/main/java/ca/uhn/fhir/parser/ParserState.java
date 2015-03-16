@@ -1716,6 +1716,23 @@ class ParserState<T> {
 				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
 				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
 				securityLabels.add(securityLabel);
+			} else if (theLocalPart.equals("profile")) {
+				@SuppressWarnings("unchecked")
+				List<IdDt> profiles = (List<IdDt>) myMap.get(ResourceMetadataKeyEnum.PROFILES);
+				if (profiles == null) {
+					profiles = new ArrayList<IdDt>();
+					myMap.put(ResourceMetadataKeyEnum.PROFILES, profiles);
+				}
+				IdDt profile = new IdDt();
+				push(new PrimitiveState(getPreResourceState(), profile));
+				profiles.add(profile);
+			} else if (theLocalPart.equals("tag")) {
+				TagList tagList = (TagList) myMap.get(ResourceMetadataKeyEnum.TAG_LIST);
+				if (tagList == null) {
+					tagList = new TagList();
+					myMap.put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+				}
+				push(new TagState(tagList));
 			} else {
 				throw new DataFormatException("Unexpected element '" + theLocalPart + "' found in 'meta' element");
 			}
@@ -2371,11 +2388,14 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if (Tag.ATTR_TERM.equals(theLocalPart)) {
+			/*
+			 * We allow for both the DSTU1 and DSTU2 names here
+			 */
+			if (Tag.ATTR_TERM.equals(theLocalPart) || "code".equals(theLocalPart)) {
 				mySubState = TERM;
-			} else if (Tag.ATTR_SCHEME.equals(theLocalPart)) {
+			} else if (Tag.ATTR_SCHEME.equals(theLocalPart) || "system".equals(theLocalPart)) {
 				mySubState = SCHEME;
-			} else if (Tag.ATTR_LABEL.equals(theLocalPart)) {
+			} else if (Tag.ATTR_LABEL.equals(theLocalPart) || "display".equals(theLocalPart)) {
 				mySubState = LABEL;
 			} else {
 				throw new DataFormatException("Unexpected element: " + theLocalPart);

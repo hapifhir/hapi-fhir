@@ -19,7 +19,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.Tag;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
@@ -50,6 +53,63 @@ public class JsonParserTest {
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 	}
 
+	@Test
+	public void testEncodeAndParseMetaProfileAndTags() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+		
+		List<IdDt> profiles = new ArrayList<IdDt>();
+		profiles.add(new IdDt("http://foo/Profile1"));
+		profiles.add(new IdDt("http://foo/Profile2"));
+		ResourceMetadataKeyEnum.PROFILES.put(p, profiles);
+
+		TagList tagList = new TagList();
+		tagList.addTag("scheme1", "term1", "label1");
+		tagList.addTag("scheme2", "term2", "label2");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder("\"meta\":{", 
+				"\"profile\":[", 
+				"\"http://foo/Profile1\",", 
+				"\"http://foo/Profile2\"", 
+				"],", 
+				"\"tag\":[", 
+				"{", 
+				"\"system\":\"scheme1\",", 
+				"\"code\":\"term1\",", 
+				"\"display\":\"label1\"", 
+				"},", 
+				"{", 
+				"\"system\":\"scheme2\",", 
+				"\"code\":\"term2\",", 
+				"\"display\":\"label2\"", 
+				"}", 
+				"]", 
+				"},"));
+		//@formatter:on
+		
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
+		List<IdDt> gotLabels = ResourceMetadataKeyEnum.PROFILES.get(parsed);
+		
+		assertEquals(2,gotLabels.size());
+
+		IdDt label = (IdDt) gotLabels.get(0);
+		assertEquals("http://foo/Profile1", label.getValue());
+		label = (IdDt) gotLabels.get(1);
+		assertEquals("http://foo/Profile2", label.getValue());
+		
+		tagList = ResourceMetadataKeyEnum.TAG_LIST.get(parsed);
+		assertEquals(2, tagList.size());
+		
+		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
+		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
+	}
+
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -351,7 +411,11 @@ public class JsonParserTest {
 		FhirContext ctx = FhirContext.forDstu2();
 		Bundle b = ctx.newJsonParser().parseBundle(text);
 		
-		assertEquals(Patient.class, b.getEntries().get(0).getResource().getClass());
+		IResource patient = b.getEntries().get(0).getResource();
+		assertEquals(Patient.class, patient.getClass());
+		
+		assertNull(ResourceMetadataKeyEnum.TAG_LIST.get(patient));
+		assertNull(ResourceMetadataKeyEnum.PROFILES.get(patient));
 	}
 	
 	@Test

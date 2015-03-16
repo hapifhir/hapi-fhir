@@ -25,11 +25,12 @@ import org.apache.velocity.tools.generic.EscapeTool;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.dev.resource.ValueSet.ComposeIncludeConcept;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
@@ -66,7 +67,7 @@ public class ValueSetGenerator {
 	}
 
 	public void parse() throws FileNotFoundException, IOException {
-		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDev();
+		FhirContext ctx = "dstu".equals(myVersion) ? FhirContext.forDstu1() : FhirContext.forDstu2();
 		IParser newXmlParser = ctx.newXmlParser();
 
 		ourLog.info("Parsing built-in ValueSets");
@@ -74,15 +75,18 @@ public class ValueSetGenerator {
 		if (version.equals("dev")) {
 			version = "dstu2";
 		}
-		
+
 		String vs = IOUtils.toString(ValueSetGenerator.class.getResourceAsStream("/vs/" + version + "/all-valuesets-bundle.xml"));
-		Bundle bundle = newXmlParser.parseBundle(vs);
-		for (BundleEntry next : bundle.getEntries()) {
-			if ("dstu".equals(myVersion)) {
+		if ("dstu".equals(myVersion)) {
+			Bundle bundle = newXmlParser.parseBundle(vs);
+			for (BundleEntry next : bundle.getEntries()) {
 				ValueSet nextVs = (ValueSet) next.getResource();
 				parseValueSet(nextVs);
-			} else {
-				ca.uhn.fhir.model.dev.resource.ValueSet nextVs = (ca.uhn.fhir.model.dev.resource.ValueSet) next.getResource();
+			}
+		} else {
+			ca.uhn.fhir.model.dstu2.resource.Bundle bundle = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, vs);
+			for (Entry nextEntry : bundle.getEntry()) {
+				ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) nextEntry.getResource();
 				parseValueSet(nextVs);
 			}
 		}
@@ -158,7 +162,7 @@ public class ValueSetGenerator {
 		return vs;
 	}
 
-	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dev.resource.ValueSet nextVs) {
+	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs) {
 		myConceptCount += nextVs.getDefine().getConcept().size();
 		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
@@ -168,13 +172,13 @@ public class ValueSetGenerator {
 
 		vs.setName(nextVs.getName());
 		vs.setDescription(nextVs.getDescription());
-		vs.setId(nextVs.getIdentifierElement().getValueAsString());
+		vs.setId(StringUtils.defaultString(nextVs.getIdentifier().getValue()));
 		vs.setClassName(toClassName(nextVs.getName()));
 
 		{
-			ca.uhn.fhir.model.dev.resource.ValueSet.Define define = nextVs.getDefine();
+			ca.uhn.fhir.model.dstu2.resource.ValueSet.Define define = nextVs.getDefine();
 			String system = define.getSystemElement().getValueAsString();
-			for (ca.uhn.fhir.model.dev.resource.ValueSet.DefineConcept nextConcept : define.getConcept()) {
+			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.DefineConcept nextConcept : define.getConcept()) {
 				String nextCodeValue = nextConcept.getCode();
 				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay());
 				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition());
@@ -182,7 +186,7 @@ public class ValueSetGenerator {
 			}
 		}
 
-		for (ca.uhn.fhir.model.dev.resource.ValueSet.ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude nextInclude : nextVs.getCompose().getInclude()) {
 			String system = nextInclude.getSystemElement().getValueAsString();
 			for (ComposeIncludeConcept nextConcept : nextInclude.getConcept()) {
 				String nextCodeValue = nextConcept.getCode();

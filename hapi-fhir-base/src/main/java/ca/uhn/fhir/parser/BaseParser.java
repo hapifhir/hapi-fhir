@@ -28,6 +28,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -73,7 +74,7 @@ public abstract class BaseParser implements IParser {
 
 		Set<String> allIds = new HashSet<String>();
 		Map<String, IBaseResource> existingIdToContainedResource = null;
-		
+
 		if (theTarget instanceof IResource) {
 			List<? extends IResource> containedResources = ((IResource) theTarget).getContained().getContainedResources();
 			for (IResource next : containedResources) {
@@ -182,7 +183,7 @@ public abstract class BaseParser implements IParser {
 		if (resource == null) {
 			return null;
 		}
-		
+
 		String resourceBaseUrl = null;
 		if (resource.getId() != null && resource.getId().hasBaseUrl()) {
 			if (!resource.getId().getBaseUrl().equals(bundleBaseUrl)) {
@@ -191,6 +192,8 @@ public abstract class BaseParser implements IParser {
 		}
 		return resourceBaseUrl;
 	}
+
+	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
 	@Override
 	public String encodeBundleToString(Bundle theBundle) throws DataFormatException {
@@ -241,8 +244,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded
-	 * values.
+	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
 	 */
 	public boolean getSuppressNarratives() {
 		return mySuppressNarratives;
@@ -259,6 +261,54 @@ public abstract class BaseParser implements IParser {
 		return parseBundle(reader);
 	}
 
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
+		T retVal = doParseResource(theResourceType, theReader);
+
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
+		if ("Bundle".equals(def.getName())) {
+			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
+			if (base != null && base.size() > 0) {
+				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
+				IResource res = ((IResource) retVal);
+				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
+			}
+
+			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
+			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
+			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
+			if (entries != null) {
+				for (IBase nextEntry : entries) {
+					List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
+
+					if (entryBase == null || entryBase.isEmpty()) {
+						entryBase = base;
+					}
+
+					if (entryBase != null && entryBase.size() > 0) {
+						IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
+
+						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+						if (entryResources != null && entryResources.size() > 0) {
+							IResource res = (IResource) entryResources.get(0);
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
+							String versionIdPart = res.getId().getVersionIdPart();
+							if (isBlank(versionIdPart)) {
+								versionIdPart = ResourceMetadataKeyEnum.VERSION.get(res);
+							}
+
+							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
+						}
+
+					}
+
+				}
+			}
+
+		}
+
+		return retVal;
+	}
+
 	@SuppressWarnings("cast")
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, String theMessageString) {
@@ -271,57 +321,6 @@ public abstract class BaseParser implements IParser {
 		return parseResource(null, theReader);
 	}
 
-	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
-	
-	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
-		T retVal = doParseResource(theResourceType, theReader);
-		
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
-		if ("Bundle".equals(def.getName())) {
-			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
-			if (base != null && base.size() > 0) {
-				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
-				IResource res = ((IResource)retVal);
-				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
-			}
-			
-			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
-			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
-			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
-			if (entries != null) {
-				for (IBase nextEntry : entries) {
-					List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
-					
-					if (entryBase == null || entryBase.isEmpty()) {
-						entryBase = base;
-					}
-					
-					if (entryBase != null && entryBase.size() > 0) {
-						IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
-						
-						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
-						if (entryResources != null && entryResources.size() > 0) {
-							IResource res = (IResource) entryResources.get(0);
-							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
-							String versionIdPart = res.getId().getVersionIdPart();
-							if (isBlank(versionIdPart)) {
-								versionIdPart = ResourceMetadataKeyEnum.VERSION.get(res);
-							}
-							
-							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
-						}
-						
-					}
-					
-					
-				}
-			}
-			
-		}
-		
-		return retVal;
-	}
-	
 	@Override
 	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theMessageString);
@@ -354,6 +353,14 @@ public abstract class BaseParser implements IParser {
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
 	}
 
+	protected static <T> List<T> extractMetadataListNotNull(IResource resource, ResourceMetadataKeyEnum<List<T>> key) {
+		List<T> securityLabels = key.get(resource);
+		if (securityLabels == null) {
+			securityLabels = Collections.emptyList();
+		}
+		return securityLabels;
+	}
+
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
@@ -368,8 +375,8 @@ public abstract class BaseParser implements IParser {
 			IdDt newId;
 			if (theResource instanceof IResource && ((IResource) theResource).getId().isLocal()) {
 				newId = ((IResource) theResource).getId();
-			} else if (theResource instanceof IAnyResource && ((IAnyResource)theResource).getId() != null && ((IAnyResource)theResource).getId().startsWith("#")) {
-				newId = new IdDt(((IAnyResource)theResource).getId());
+			} else if (theResource instanceof IAnyResource && ((IAnyResource) theResource).getId() != null && ((IAnyResource) theResource).getId().startsWith("#")) {
+				newId = new IdDt(((IAnyResource) theResource).getId());
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());

@@ -214,11 +214,11 @@ public class TinderStructuresMojo extends AbstractMojo {
 //		ProfileParser pp = new ProfileParser();
 //		pp.parseSingleProfile(new File("../hapi-tinder-test/src/test/resources/profile/patient.xml"), "http://foo");
 
-		ValueSetGenerator vsp = new ValueSetGenerator("dev");
+		ValueSetGenerator vsp = new ValueSetGenerator("dstu2");
 //		 vsp.setResourceValueSetFiles(theResourceValueSetFiles);Directory("src/main/resources/vs/");
 		vsp.parse();
 
-		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dev", ".");
+		DatatypeGeneratorUsingSpreadsheet dtp = new DatatypeGeneratorUsingSpreadsheet("dstu2", ".");
 		dtp.parse();
 		dtp.markResourcesForImports();
 		dtp.bindValueSets(vsp);
@@ -226,16 +226,23 @@ public class TinderStructuresMojo extends AbstractMojo {
 
 		String dtOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/composite";
 
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu", ".");
-		rp.setBaseResourceNames(Arrays.asList("securityevent" // , "contract", "valueset", "organization", "location" 
-//				, "observation", "conformance", "referralrequest", "patient","practitioner","encounter",
-//				"organization","location","relatedperson","appointment","slot","order","availability","device", "valueset"
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet("dstu2", ".");
+		rp.setBaseResourceNames(Arrays.asList( "auditevent" 
+
+//				//, "contract" 
+//				"valueset", "organization", "location" 
+//				, "observation", "conformance"
+//				//, "referralrequest"
+//				, "patient","practitioner","encounter",
+//				"organization","location","relatedperson","appointment","slot","order"
+//				//,"availability"
+//				,"device", "valueset"
 				));
 		rp.parse();
 		rp.bindValueSets(vsp);
 		rp.markResourcesForImports();
 		
-		// rp.bindValueSets(vsp);
+		rp.bindValueSets(vsp);
 
 		String rpOutputDir = "target/generated-sources/tinder/ca/uhn/fhir/model/dev/resource";
 		String rpSOutputDir = "target/generated-resources/tinder/ca/uhn/fhir/model/dev";

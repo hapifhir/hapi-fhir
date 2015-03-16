@@ -96,6 +96,7 @@ import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -671,14 +672,30 @@ public class JsonParser extends BaseParser implements IParser {
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-			List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(resource);
-			if (securityLabels == null) {
-				securityLabels = Collections.emptyList();
+
+			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			IdDt resourceId = resource.getId();
+			String versionIdPart = resourceId.getVersionIdPart();
+			if (isBlank(versionIdPart)) {
+				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
 			}
-			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource), securityLabels)) {
+			List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
+			List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+			TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(resource);
+			if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, profiles) == false) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", ResourceMetadataKeyEnum.UPDATED.get(resource));
+				
+				if (profiles != null && profiles.isEmpty()==false) {
+					theEventWriter.writeStartArray("profile");
+					for (IdDt profile : profiles) {
+						if (profile != null && isNotBlank(profile.getValue())) {
+							theEventWriter.write(profile.getValue());
+						}
+					}
+					theEventWriter.writeEnd();
+				}
 
 				if (securityLabels.isEmpty()==false) {
 					theEventWriter.writeStartArray("security");
@@ -690,6 +707,19 @@ public class JsonParser extends BaseParser implements IParser {
 					}
 					theEventWriter.writeEnd();
 				}
+				
+				if (tags != null && tags.isEmpty()==false) {
+					theEventWriter.writeStartArray("tag");
+					for (Tag tag : tags) {
+						theEventWriter.writeStartObject();
+						writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
+						writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
+						writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
+						theEventWriter.writeEnd();
+					}
+					theEventWriter.writeEnd();
+				}
+
 				theEventWriter.writeEnd(); //end meta
 			}
 		}

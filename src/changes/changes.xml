@@ -6,7 +6,13 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="0.9" date="TBA">
+		<release version="1.0" date="TBA">
+			<action type="add">
+				Add support for "profile" and "tag" elements in the resource Meta block
+				when parsing DSTU2 structures.
+			</action>
+		</release>
+		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
 				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 
 				encoding changes (ID in resource bodt, meta tag)
