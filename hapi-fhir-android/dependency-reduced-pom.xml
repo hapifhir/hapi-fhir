@@ -125,7 +125,7 @@
     <dependency>
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
-      <version>4.3.5</version>
+      <version>4.3.6</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

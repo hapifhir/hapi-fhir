@@ -10,14 +10,6 @@
 		<section name="Downloading HAPI FHIR">
 
 			<p>
-				<b>Important note to users of HAPI 0.7 and before:</b> The section below
-				references "hapi-fhir-structures-dstu-[version].jar", which was added for
-				HAPI 0.8 (and this version has not yet been released). If you are using HAPI 
-				FHIR 0.7 or before, you only need to include the <code>hapi-fhir-base</code>
-				JAR, not the structures one. 
-			</p>
-
-			<p>
 				To use HAPI in your application, at a minimum you need to include the HAPI-FHIR core
 				JAR <code>hapi-fhir-base-[version].jar</code>, as well as at least one "structures" JAR.
 				The structures JAR contains classes with the resource and datatype definitions for a given
@@ -30,12 +22,12 @@
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-base</artifactId>
-   <version>${project.version}</version>
+   <version>${hapi_stable_version}</version>
 </dependency>
 <dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-structures-dstu</artifactId>
-   <version>${project.version}</version>
+   <version>${hapi_stable_version}</version>
 </dependency>]]></source>
 			
 			<subsection name="Supporting DSTU2 Resources">
@@ -50,12 +42,12 @@
 				</p>
 				
 				<p>
-					If you are using Maven, add the following dependency to include DEV resources:
+					If you are using Maven, add the following dependency to include DSTU2 resources:
 				</p>
 			<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-structures-dstu2</artifactId>
-   <version>${project.version}</version>
+   <version>${hapi_stable_version}</version>
 </dependency>]]></source>
 				
 			</subsection>
