@@ -226,7 +226,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
+				<version>${maven_antrun_plugin_version}</version>
 				<executions>
 					<execution>
 						<id>copyNarrativeCss</id>
