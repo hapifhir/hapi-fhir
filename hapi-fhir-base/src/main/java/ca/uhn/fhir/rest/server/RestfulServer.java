@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -45,8 +44,6 @@ import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -54,12 +51,10 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
-import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
@@ -680,7 +675,7 @@ public class RestfulServer extends HttpServlet {
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, e, theRequest, theResponse)) {
+				if (!next.handleException(this, requestDetails, e, theRequest, theResponse)) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
 					return;
 				}
@@ -691,7 +686,7 @@ public class RestfulServer extends HttpServlet {
 
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, e, theRequest, theResponse)) {
+				if (!next.handleException(this, requestDetails, e, theRequest, theResponse)) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
 					return;
 				}
@@ -710,13 +705,13 @@ public class RestfulServer extends HttpServlet {
 			 */
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, e, theRequest, theResponse)) {
+				if (!next.handleException(this, requestDetails, e, theRequest, theResponse)) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
 					return;
 				}
 			}
 
-			new ExceptionHandlingInterceptor().handleException(requestDetails, e, theRequest, theResponse);
+			new ExceptionHandlingInterceptor().handleException(this, requestDetails, e, theRequest, theResponse);
 			
 		}
 	}

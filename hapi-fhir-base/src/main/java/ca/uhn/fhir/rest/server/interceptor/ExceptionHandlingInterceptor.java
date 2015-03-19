@@ -59,12 +59,12 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	public boolean handleException(RestfulServer theRestfulServer, RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		ourLog.error("AA", theException);
 		BaseOperationOutcome oo = null;
 		int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
-		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+        FhirContext ctx = theRestfulServer.getFhirContext();
 
 		if (theException instanceof BaseServerResponseException) {
 			oo = ((BaseServerResponseException) theException).getOperationOutcome();
@@ -109,12 +109,13 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		}
 
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
-		String fhirServerBase = ((Request) theRequestDetails).getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser,
+        String fhirServerBase = theRestfulServer.getServerBaseForRequest(theRequest);
+
+		RestfulServerUtils.streamResponseAsResource(theRestfulServer, theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser,
 				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
 
 		theResponse.setStatus(statusCode);
-		theRequestDetails.getServer().addHeadersToResponse(theResponse);
+		theRestfulServer.addHeadersToResponse(theResponse);
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
 		theResponse.getWriter().append(theException.getMessage());
