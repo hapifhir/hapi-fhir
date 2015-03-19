@@ -162,6 +162,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
+	public FhirContext getFhirContext() {
+		return myContext;
+	}
+
+
+	@Override
 	public MethodOutcome create(IResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(theResource, myContext);
 		if (isKeepResponses()) {

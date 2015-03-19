@@ -53,12 +53,12 @@ public interface IRestfulClient {
 	
 	/**
 	 * Specifies that the client should request that the server respond with "pretty printing"
-	 * enabled. Note that this is a non-standard parameter, so it may only 
-	 * work against HAPI based servers.
+	 * enabled. Note that this is a non-standard parameter, not all servers will
+	 * support it.
 	 * 
 	 * @param thePrettyPrint The pretty print flag to use in the request (default is <code>false</code>)
 	 */
-	void setPrettyPrint(boolean thePrettyPrint);
+	void setPrettyPrint(Boolean thePrettyPrint);
 	
 	/**
 	 * Base URL for the server, with no trailing "/"

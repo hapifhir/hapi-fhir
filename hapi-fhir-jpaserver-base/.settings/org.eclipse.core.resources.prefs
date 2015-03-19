@@ -3,4 +3,6 @@ encoding//src/main/java=UTF-8
 encoding//src/main/resources=UTF-8
 encoding//src/test/java=UTF-8
 encoding//src/test/resources=UTF-8
+encoding//target/generated-resources/tinder=UTF-8
+encoding//target/generated-sources/tinder=UTF-8
 encoding/<project>=UTF-8

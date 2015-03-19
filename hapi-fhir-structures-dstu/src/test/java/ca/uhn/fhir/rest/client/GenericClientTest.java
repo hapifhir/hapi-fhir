@@ -414,6 +414,32 @@ public class GenericClientTest {
 	}
 
 	@Test
+	public void testSetDefaultEncoding() throws Exception {
+
+		String msg = ourCtx.newJsonParser().encodeResourceToString(new Patient());
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+//		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+//				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+//				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
+//		when(myHttpResponse.getAllHeaders()).thenReturn(headers);
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		(client).setEncoding(EncodingEnum.JSON);
+		int count = 0;
+		
+		client.read(Patient.class, new IdDt("Patient/1234"));
+		assertEquals("http://example.com/fhir/Patient/1234?_format=json", capt.getAllValues().get(count).getURI().toString());
+		count++;
+
+	}
+
+	@Test
 	public void testReadFluent() throws Exception {
 
 		String msg = getResourceResult();

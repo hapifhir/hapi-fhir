@@ -50,6 +50,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.IClientResponseHandlerHandlesBinary;
@@ -57,21 +58,20 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public abstract class BaseClient {
+public abstract class BaseClient implements IRestfulClient {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
 	private final HttpClient myClient;
+	private boolean myDontValidateConformance;
 	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
+	private final RestfulClientFactory myFactory;
 	private List<IClientInterceptor> myInterceptors = new ArrayList<IClientInterceptor>();
 	private boolean myKeepResponses = false;
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
-	private final RestfulClientFactory myFactory;
 	private final String myUrlBase;
-
-	private boolean myDontValidateConformance;
-
+	
 	BaseClient(HttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
 		myClient = theClient;
@@ -104,6 +104,14 @@ public abstract class BaseClient {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public HttpClient getHttpClient() {
+		return myClient;
+	}
+
+	/**
 	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
 	 */
 	public HttpResponse getLastResponse() {
@@ -117,14 +125,26 @@ public abstract class BaseClient {
 		return myLastResponseBody;
 	}
 
-	String getServerBase() {
+	/**
+	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
+	 * HAPI based servers (and any other servers which might implement it).
+	 */
+	public Boolean getPrettyPrint() {
+		return myPrettyPrint;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getServerBase() {
 		return myUrlBase;
 	}
 
 	public String getUrlBase() {
 		return myUrlBase;
 	}
-
+	
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
 		return invokeClient(theContext, binding, clientInvocation, false);
 	}
@@ -132,15 +152,6 @@ public abstract class BaseClient {
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
 	}
-	
-	/**
-	 * This method is an internal part of the HAPI API andmay change, use with caution. If you 
-	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
-	 */
-	public void setDontValidateConformance(boolean theDontValidateConformance) {
-		myDontValidateConformance = theDontValidateConformance;
-	}
-
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
 
@@ -335,14 +346,6 @@ public abstract class BaseClient {
 		return Boolean.TRUE.equals(myPrettyPrint);
 	}
 
-	/**
-	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
-	 * HAPI based servers (and any other servers which might implement it).
-	 */
-	public Boolean getPrettyPrint() {
-		return myPrettyPrint;
-	}
-	
 	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, HttpResponse response, String responseString) {
 		if (myKeepResponses) {
 			myLastResponse = response;
@@ -359,19 +362,27 @@ public abstract class BaseClient {
 			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 		}
 	}
-
+	
 	public void registerInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.add(theInterceptor);
 	}
 
 	/**
-	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the FHIR
-	 * specification)
+	 * This method is an internal part of the HAPI API andmay change, use with caution. If you 
+	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
 	 */
-	public BaseClient setEncoding(EncodingEnum theEncoding) {
+	public void setDontValidateConformance(boolean theDontValidateConformance) {
+		myDontValidateConformance = theDontValidateConformance;
+	}
+
+	/**
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR
+	 * specification. In this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
+	 */
+	public void setEncoding(EncodingEnum theEncoding) {
 		myEncoding = theEncoding;
-		return this;
+//		return this;
 	}
 
 	/**
@@ -399,9 +410,9 @@ public abstract class BaseClient {
 	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
 	 * HAPI based servers (and any other servers which might implement it).
 	 */
-	public BaseClient setPrettyPrint(Boolean thePrettyPrint) {
+	public void setPrettyPrint(Boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
-		return this;
+//		return this;
 	}
 
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {

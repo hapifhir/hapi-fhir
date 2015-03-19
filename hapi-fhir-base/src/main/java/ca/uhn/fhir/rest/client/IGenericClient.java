@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
 
-public interface IGenericClient {
+public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Retrieves and returns the server conformance statement

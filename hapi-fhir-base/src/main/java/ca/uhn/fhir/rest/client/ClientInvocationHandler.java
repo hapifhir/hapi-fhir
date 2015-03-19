@@ -71,4 +71,9 @@ class ClientInvocationHandler extends BaseClient implements InvocationHandler {
 		throw new UnsupportedOperationException("The method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getSimpleName() + " has no handler. Did you forget to annotate it with a RESTful method annotation?");
 	}
 
+	@Override
+	public FhirContext getFhirContext() {
+		return myContext;
+	}
+
 }
