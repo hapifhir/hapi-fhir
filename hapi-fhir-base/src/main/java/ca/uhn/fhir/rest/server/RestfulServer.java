@@ -496,7 +496,9 @@ public class RestfulServer extends HttpServlet {
 
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
-		Request requestDetails = null;
+		Request requestDetails = new Request();
+		requestDetails.setServer(this);
+
 		try {
 
 			String resourceName = null;
@@ -533,6 +535,7 @@ public class RestfulServer extends HttpServlet {
 			String completeUrl = StringUtils.isNotBlank(theRequest.getQueryString()) ? requestUrl + "?" + theRequest.getQueryString() : requestUrl.toString();
 
 			Map<String, String[]> params = new HashMap<String, String[]>(theRequest.getParameterMap());
+			requestDetails.setParameters(params);
 
 			StringTokenizer tok = new StringTokenizer(requestPath, "/");
 			if (tok.hasMoreTokens()) {
@@ -542,6 +545,7 @@ public class RestfulServer extends HttpServlet {
 					resourceName = null;
 				}
 			}
+			requestDetails.setResourceName(resourceName);
 
 			ResourceBinding resourceBinding = null;
 			BaseMethodBinding<?> resourceMethod = null;
@@ -608,6 +612,10 @@ public class RestfulServer extends HttpServlet {
 					id = new IdDt(contentLocation);
 				}
 			}
+			requestDetails.setId(id);
+			requestDetails.setOperation(operation);
+			requestDetails.setSecondaryOperation(secondaryOperation);
+			requestDetails.setCompartmentName(compartment);
 
 			// TODO: look for more tokens for version, compartments, etc...
 
@@ -621,21 +629,13 @@ public class RestfulServer extends HttpServlet {
 					}
 				}
 			}
+			requestDetails.setRespondGzip(respondGzip);
 
-			requestDetails = new Request();
-			requestDetails.setServer(this);
-			requestDetails.setResourceName(resourceName);
-			requestDetails.setId(id);
-			requestDetails.setOperation(operation);
-			requestDetails.setSecondaryOperation(secondaryOperation);
-			requestDetails.setParameters(params);
 			requestDetails.setRequestType(theRequestType);
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 			requestDetails.setServletRequest(theRequest);
 			requestDetails.setServletResponse(theResponse);
-			requestDetails.setRespondGzip(respondGzip);
-			requestDetails.setCompartmentName(compartment);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
@@ -660,8 +660,6 @@ public class RestfulServer extends HttpServlet {
 				b.append(params.keySet());
 				throw new InvalidRequestException(b.toString());
 			}
-
-			requestDetails = requestDetails;
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
 			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
 			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());

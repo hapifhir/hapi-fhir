@@ -127,6 +127,19 @@ public class RestfulServerMethodTest {
 		assertThat(responseContent, StringContains.containsString("AAAABBBB"));
 	}
 
+	@Test
+	public void testInvalidResourceTriggers400() throws Exception {
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/FooResource?blah=bar");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(400, status.getStatusLine().getStatusCode());
+	}
 
 	@Test
 	public void testDateRangeParam() throws Exception {

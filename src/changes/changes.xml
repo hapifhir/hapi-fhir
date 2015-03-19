@@ -35,6 +35,9 @@
 				was updated after being deleted. Thanks to Elliott Lavy and Lloyd
 				McKenzie for reporting!
 			</action>
+			<action type="fix" issue="128">
+				Fix regression in 0.9 - Server responds with an HTTP 500 and a NullPointerException instead of an HTTP 400 and a useful error message if the client requests an unknown resource type
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
