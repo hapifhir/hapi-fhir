@@ -96,10 +96,17 @@ public class ValueSetGenerator {
 				File file = new File(next.getValueSetFile());
 				ourLog.info("Parsing ValueSet file: {}" + file.getName());
 				vs = IOUtils.toString(new FileReader(file));
-				ValueSet nextVs = (ValueSet) newXmlParser.parseResource(vs);
-				ValueSetTm tm = parseValueSet(nextVs);
-
-				myMarkedValueSets.add(tm);
+				ValueSetTm tm;
+				if ("dstu".equals(myVersion)) {
+					ValueSet nextVs = (ValueSet) newXmlParser.parseResource(ValueSet.class, vs);
+					tm = parseValueSet(nextVs);
+				} else {
+					ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.ValueSet.class, vs);
+					tm = parseValueSet(nextVs);
+				}
+				if (tm != null) {
+					myMarkedValueSets.add(tm);
+				}
 			}
 		}
 
@@ -147,6 +154,11 @@ public class ValueSetGenerator {
 			}
 		}
 
+//		if (vs.getCodes().isEmpty()) {
+//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
+//			return null;
+//		}
+		
 		if (myValueSets.containsKey(vs.getName())) {
 			ourLog.warn("Duplicate Name: " + vs.getName());
 		} else {
@@ -194,6 +206,11 @@ public class ValueSetGenerator {
 			}
 		}
 
+//		if (vs.getCodes().isEmpty()) {
+//			ourLog.info("ValueSet " + nextVs.getName() + " has no codes, not going to generate any code for it");
+//			return null;
+//		}
+		
 		if (myValueSets.containsKey(vs.getName())) {
 			ourLog.warn("Duplicate Name: " + vs.getName());
 		} else {
