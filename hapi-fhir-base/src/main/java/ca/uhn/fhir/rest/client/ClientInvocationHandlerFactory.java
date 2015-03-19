@@ -52,7 +52,7 @@ class ClientInvocationHandlerFactory {
 			myMethodToReturnValue.put(theClientType.getMethod("getServerBase"), theUrlBase);
 
 			myMethodToLambda.put(theClientType.getMethod("setEncoding", EncodingEnum.class), new SetEncodingLambda());
-			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", boolean.class), new SetPrettyPrintLambda());
+			myMethodToLambda.put(theClientType.getMethod("setPrettyPrint", Boolean.class), new SetPrettyPrintLambda());
 			myMethodToLambda.put(theClientType.getMethod("registerInterceptor", IClientInterceptor.class), new RegisterInterceptorLambda());
 			myMethodToLambda.put(theClientType.getMethod("unregisterInterceptor", IClientInterceptor.class), new UnregisterInterceptorLambda());
 
