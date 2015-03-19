@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -128,6 +129,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		IParser parser = encoding.newParser(getContext());
 		BufferedReader requestReader = theRequest.getServletRequest().getReader();
 
+		if (theRequest.getRequestType() == RequestType.GET) {
+			return null;
+		}
+		
 		Class<? extends IBaseResource> wantedResourceType = getContext().getResourceDefinition("Parameters").getImplementingClass();
 		return parser.parseResource(wantedResourceType, requestReader);
 	}

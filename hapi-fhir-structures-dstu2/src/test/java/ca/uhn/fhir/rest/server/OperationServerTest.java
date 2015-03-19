@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -33,6 +35,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -105,7 +108,6 @@ public class OperationServerTest {
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		assertEquals("100", resp.getEntryFirstRep().getTransactionResponse().getStatus());
 	}
-
 
 	@Test
 	public void testOperationOnServer() throws Exception {
@@ -202,6 +204,63 @@ public class OperationServerTest {
 		assertThat(response, containsString("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt"));
 	}
 
+	@Test
+	public void testReadWithOperations() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("read", ourLastMethod);
+	}
+
+	@Test
+	public void testInstanceEverythingPost() throws Exception {
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(new Parameters());
+		
+		// Try with a POST
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$everything");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("instance $everything", ourLastMethod);
+		assertThat(response, startsWith("<Bundle"));
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
+
+	}
+
+	@Test
+	public void testInstanceEverythingHapiClient() throws Exception {
+		Parameters p = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort).operation().onInstance(new IdDt("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
+		Bundle b = (Bundle) p.getParameterFirstRep().getResource();
+
+		assertEquals("instance $everything", ourLastMethod);
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
+
+	}
+
+	@Test
+	public void testInstanceEverythingGet() throws Exception {
+		
+		// Try with a GET
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("instance $everything", ourLastMethod);
+		assertThat(response, startsWith("<Bundle"));
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
+		
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -273,6 +332,24 @@ public class OperationServerTest {
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
+		}
+
+		/**
+		 * Just to make sure this method doesn't "steal" calls
+		 */
+		@Read
+		public Patient read(@IdParam IdDt theId) {
+			ourLastMethod = "read";
+			Patient retVal = new Patient();
+			retVal.setId(theId);
+			return retVal;
+		}
+
+		@Operation(name = "$everything")
+		public Bundle patientEverything(@IdParam IdDt thePatientId) {
+			ourLastMethod = "instance $everything";
+			ourLastId = thePatientId;
+			return new Bundle();
 		}
 
 		//@formatter:off
