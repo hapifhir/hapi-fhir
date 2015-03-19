@@ -104,6 +104,10 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
+/**
+ * This class is the FHIR JSON parser/encoder. Users should not interact with this
+ * class directly, but should use {@link FhirContext#newJsonParser()} to get an instance.
+ */
 public class JsonParser extends BaseParser implements IParser {
 
 	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN_DSTU1;

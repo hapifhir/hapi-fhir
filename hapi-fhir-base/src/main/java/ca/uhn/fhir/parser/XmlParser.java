@@ -20,14 +20,15 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -49,8 +50,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -91,7 +92,12 @@ import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
 
+/**
+ * This class is the FHIR XML parser/encoder. Users should not interact with this
+ * class directly, but should use {@link FhirContext#newXmlParser()} to get an instance.
+ */
 public class XmlParser extends BaseParser implements IParser {
+	
 	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
 	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";

@@ -20,11 +20,14 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -32,6 +35,7 @@ import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -51,6 +55,160 @@ public class XmlParserTest {
 		XMLUnit.setIgnoreAttributeOrder(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreWhitespace(true);
+	}
+
+	/**
+	 * See #113
+	 */
+	@Test
+	public void testEncodeContainedResources() {
+		
+		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		
+		String medId = "123";
+		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
+
+		// Adding medication to Contained.
+		Medication medResource = new Medication();
+		medResource.setCode(codeDt);
+		medResource.setId("#" + String.valueOf(medId));
+		ArrayList<IResource> medResList = new ArrayList<IResource>();
+		medResList.add(medResource);
+		ContainedDt medContainedDt = new ContainedDt();
+		medContainedDt.setContainedResources(medResList);
+		medicationPrescript.setContained(medContainedDt);
+
+		// Medication reference. This should point to the contained resource.
+		ResourceReferenceDt medRefDt = new ResourceReferenceDt("#" + medId);
+		medRefDt.setDisplay("MedRef");
+		medicationPrescript.setMedication(medRefDt);
+		
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = p.encodeResourceToString(medicationPrescript);
+		ourLog.info(encoded);
+		
+		//@formatter:on
+		assertThat(encoded, stringContainsInOrder(
+			"<MedicationPrescription xmlns=\"http://hl7.org/fhir\">",
+			"<contained>", 
+			"<Medication xmlns=\"http://hl7.org/fhir\">", 
+			"<id value=\"123\"/>", 
+			"<code>", 
+			"<coding>", 
+			"<system value=\"urn:sys\"/>", 
+			"<code value=\"code1\"/>", 
+			"</coding>", 
+			"</code>", 
+			"</Medication>", 
+			"</contained>", 
+			"<medication>", 
+			"<reference value=\"#123\"/>", 
+			"<display value=\"MedRef\"/>", 
+			"</medication>", 
+			"</MedicationPrescription>"));
+		//@formatter:off
+
+	}
+	
+	/**
+	 * See #113
+	 */
+	@Test
+	public void testEncodeContainedResourcesManualContainUsingNonLocalId() {
+		
+		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		
+		String medId = "123";
+		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
+
+		// Adding medication to Contained.
+		Medication medResource = new Medication();
+		medResource.setCode(codeDt);
+		medResource.setId(String.valueOf(medId)); // ID does not start with '#'
+		ArrayList<IResource> medResList = new ArrayList<IResource>();
+		medResList.add(medResource);
+		ContainedDt medContainedDt = new ContainedDt();
+		medContainedDt.setContainedResources(medResList);
+		medicationPrescript.setContained(medContainedDt);
+
+		// Medication reference. This should point to the contained resource.
+		ResourceReferenceDt medRefDt = new ResourceReferenceDt("#" + medId);
+		medRefDt.setDisplay("MedRef");
+		medicationPrescript.setMedication(medRefDt);
+		
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = p.encodeResourceToString(medicationPrescript);
+		ourLog.info(encoded);
+		
+		//@formatter:on
+		assertThat(encoded, stringContainsInOrder(
+			"<MedicationPrescription xmlns=\"http://hl7.org/fhir\">",
+			"<contained>", 
+			"<Medication xmlns=\"http://hl7.org/fhir\">", 
+			"<id value=\"123\"/>", 
+			"<code>", 
+			"<coding>", 
+			"<system value=\"urn:sys\"/>", 
+			"<code value=\"code1\"/>", 
+			"</coding>", 
+			"</code>", 
+			"</Medication>", 
+			"</contained>", 
+			"<medication>", 
+			"<reference value=\"#123\"/>", 
+			"<display value=\"MedRef\"/>", 
+			"</medication>", 
+			"</MedicationPrescription>"));
+		//@formatter:off
+
+	}
+
+	/**
+	 * See #113
+	 */
+	@Test
+	public void testEncodeContainedResourcesAutomatic() {
+		
+		MedicationPrescription medicationPrescript = new MedicationPrescription();
+		String nameDisp = "MedRef";
+		CodeableConceptDt codeDt = new CodeableConceptDt("urn:sys", "code1");
+		
+		// Adding medication to Contained.
+		Medication medResource = new Medication();
+		// No ID set
+		medResource.setCode(codeDt);
+
+		// Medication reference. This should point to the contained resource.
+		ResourceReferenceDt medRefDt = new ResourceReferenceDt();
+		medRefDt.setDisplay(nameDisp);
+		// Resource reference set, but no ID
+		medRefDt.setResource(medResource);
+		medicationPrescript.setMedication(medRefDt);
+		
+		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
+		String encoded = p.encodeResourceToString(medicationPrescript);
+		ourLog.info(encoded);
+		
+		//@formatter:on
+		assertThat(encoded, stringContainsInOrder(
+			"<MedicationPrescription xmlns=\"http://hl7.org/fhir\">",
+			"<contained>", 
+			"<Medication xmlns=\"http://hl7.org/fhir\">", 
+			"<id value=\"1\"/>", 
+			"<code>", 
+			"<coding>", 
+			"<system value=\"urn:sys\"/>", 
+			"<code value=\"code1\"/>", 
+			"</coding>", 
+			"</code>", 
+			"</Medication>", 
+			"</contained>", 
+			"<medication>", 
+			"<reference value=\"#1\"/>", 
+			"<display value=\"MedRef\"/>", 
+			"</medication>", 
+			"</MedicationPrescription>"));
+		//@formatter:off
 	}
 
 	@Test

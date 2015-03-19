@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -47,7 +47,6 @@ import org.hl7.fhir.instance.model.api.IReference;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
@@ -62,6 +61,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
 	private boolean mySuppressNarratives;
@@ -80,6 +80,9 @@ public abstract class BaseParser implements IParser {
 			for (IResource next : containedResources) {
 				String nextId = next.getId().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
+					if (!nextId.startsWith("#")) {
+						nextId = '#' + nextId;
+					}
 					allIds.add(nextId);
 					if (existingIdToContainedResource == null) {
 						existingIdToContainedResource = new HashMap<String, IBaseResource>();
@@ -119,7 +122,7 @@ public abstract class BaseParser implements IParser {
 					if (existingIdToContainedResource != null) {
 						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReference().getValue());
 						if (potentialTarget != null) {
-							theContained.addContained(potentialTarget);
+							theContained.addContained(next.getReference(), potentialTarget);
 							containResourcesForEncoding(theContained, potentialTarget, theTarget);
 						}
 					}
@@ -384,6 +387,11 @@ public abstract class BaseParser implements IParser {
 			}
 
 			myResourceToId.put(theResource, newId);
+			myResources.add(theResource);
+		}
+
+		public void addContained(IdDt theId, IBaseResource theResource) {
+			myResourceToId.put(theResource, theId);
 			myResources.add(theResource);
 		}
 
