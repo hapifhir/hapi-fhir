@@ -395,7 +395,7 @@ public class FhirResourceDaoDstu2Test {
 	}
 
 	@Test
-	public void testDelete() {
+	public void testDeleteResource() {
 		int initialHistory = ourPatientDao.history(null).size();
 
 		IdDt id1;
@@ -404,13 +404,13 @@ public class FhirResourceDaoDstu2Test {
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("Tester_testDelete").addGiven("Joe");
+			patient.addName().addFamily("Tester_testDeleteResource").addGiven("Joe");
 			id1 = ourPatientDao.create(patient).getId();
 		}
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testDelete").addGiven("John");
+			patient.addName().addFamily("Tester_testDeleteResource").addGiven("John");
 			id2 = ourPatientDao.create(patient).getId();
 		}
 		{
@@ -421,7 +421,7 @@ public class FhirResourceDaoDstu2Test {
 		ourLog.info("ID1:{}   ID2:{}   ID2b:{}", new Object[] { id1, id2, id2b });
 
 		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-		params.put(Patient.SP_FAMILY, new StringDt("Tester_testDelete"));
+		params.put(Patient.SP_FAMILY, new StringDt("Tester_testDeleteResource"));
 		List<Patient> patients = toList(ourPatientDao.search(params));
 		assertEquals(2, patients.size());
 
@@ -455,6 +455,39 @@ public class FhirResourceDaoDstu2Test {
 		patients = toList(ourPatientDao.search(params));
 		assertEquals(0, patients.size());
 
+	}
+
+	@Test
+	public void testDeleteThenUndelete() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
+		IdDt id = ourPatientDao.create(patient).getId();
+		assertThat(id.getValue(), endsWith("/_history/1"));
+
+		// should be ok
+		ourPatientDao.read(id.toUnqualifiedVersionless());
+
+		// Delete it
+		ourPatientDao.delete(id.toUnqualifiedVersionless());
+
+		try {
+			ourPatientDao.read(id.toUnqualifiedVersionless());
+			fail();
+		} catch (ResourceGoneException e) {
+			// expected
+		}
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
+		patient.setId(id.toUnqualifiedVersionless());
+		IdDt id2 = ourPatientDao.update(patient).getId();
+
+		assertThat(id2.getValue(), endsWith("/_history/3"));
+		
+		IdDt gotId = ourPatientDao.read(id.toUnqualifiedVersionless()).getId();
+		assertEquals(id2, gotId);
 	}
 
 	@Test

@@ -30,6 +30,11 @@
 				oretty print behaviour in the Fluent Client. Thanks to Stackoverflow
 				user ewall for the idea.
 			</action>
+			<action type="fix" issue="129">
+				JPA Server did not mark a resource as "no longer deleted" if it
+				was updated after being deleted. Thanks to Elliott Lavy and Lloyd
+				McKenzie for reporting!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

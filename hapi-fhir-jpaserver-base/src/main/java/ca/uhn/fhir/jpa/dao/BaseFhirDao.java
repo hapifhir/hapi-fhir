@@ -187,7 +187,8 @@ public abstract class BaseFhirDao implements IDao {
 
 					String typeString = nextValue.getReference().getResourceType();
 					if (isBlank(typeString)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - "
+								+ nextValue.getReference().getValue());
 					}
 					Class<? extends IBaseResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
@@ -212,7 +213,8 @@ public abstract class BaseFhirDao implements IDao {
 						valueOf = translateForcedIdToPid(nextValue.getReference());
 					} catch (Exception e) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit + " (this is an invalid ID, must be numeric on this server)");
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit
+								+ " (this is an invalid ID, must be numeric on this server)");
 					}
 					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {
@@ -600,12 +602,12 @@ public abstract class BaseFhirDao implements IDao {
 			String qualifier = null;
 			for (int i = 0; i < paramMap.size(); i++) {
 				switch (paramName.charAt(i)) {
-					case '.':
-					case ':':
-						qualifier = paramName.substring(i);
-						paramName = paramName.substring(0, i);
-						i = Integer.MAX_VALUE;
-						break;
+				case '.':
+				case ':':
+					qualifier = paramName.substring(i);
+					paramName = paramName.substring(0, i);
+					i = Integer.MAX_VALUE;
+					break;
 				}
 			}
 
@@ -892,7 +894,8 @@ public abstract class BaseFhirDao implements IDao {
 		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true);
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+			boolean theUpdateVersion) {
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
@@ -900,7 +903,8 @@ public abstract class BaseFhirDao implements IDao {
 		if (theResource != null) {
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
+				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with ["
+						+ resourceType + "]");
 			}
 		}
 
@@ -912,7 +916,7 @@ public abstract class BaseFhirDao implements IDao {
 		if (theUpdateVersion) {
 			entity.setVersion(entity.getVersion() + 1);
 		}
-		
+
 		Collection<ResourceIndexedSearchParamString> paramsString = new ArrayList<ResourceIndexedSearchParamString>(entity.getParamsString());
 		Collection<ResourceIndexedSearchParamToken> paramsToken = new ArrayList<ResourceIndexedSearchParamToken>(entity.getParamsToken());
 		Collection<ResourceIndexedSearchParamNumber> paramsNumber = new ArrayList<ResourceIndexedSearchParamNumber>(entity.getParamsNumber());
@@ -938,44 +942,50 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setDeleted(theDeletedTimestampOrNull);
 			entity.setUpdated(theDeletedTimestampOrNull);
 
-		} else if (thePerformIndexing) {
-
-			stringParams = extractSearchParamStrings(entity, theResource);
-			numberParams = extractSearchParamNumber(entity, theResource);
-			quantityParams = extractSearchParamQuantity(entity, theResource);
-			dateParams = extractSearchParamDates(entity, theResource);
-
-			tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
-			for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {
-				if (next instanceof ResourceIndexedSearchParamToken) {
-					tokenParams.add((ResourceIndexedSearchParamToken) next);
-				} else {
-					stringParams.add((ResourceIndexedSearchParamString) next);
-				}
-			}
-
-			links = extractResourceLinks(entity, theResource);
-			populateResourceIntoEntity(theResource, entity);
-			entity.setUpdated(new Date());
-			entity.setLanguage(theResource.getLanguage().getValue());
-			entity.setParamsString(stringParams);
-			entity.setParamsStringPopulated(stringParams.isEmpty() == false);
-			entity.setParamsToken(tokenParams);
-			entity.setParamsTokenPopulated(tokenParams.isEmpty() == false);
-			entity.setParamsNumber(numberParams);
-			entity.setParamsNumberPopulated(numberParams.isEmpty() == false);
-			entity.setParamsQuantity(quantityParams);
-			entity.setParamsQuantityPopulated(quantityParams.isEmpty() == false);
-			entity.setParamsDate(dateParams);
-			entity.setParamsDatePopulated(dateParams.isEmpty() == false);
-			entity.setResourceLinks(links);
-			entity.setHasLinks(links.isEmpty() == false);
-
 		} else {
+			
+			entity.setDeleted(null);
+			
+			if (thePerformIndexing) {
 
-			populateResourceIntoEntity(theResource, entity);
-			entity.setUpdated(new Date());
-			entity.setLanguage(theResource.getLanguage().getValue());
+				stringParams = extractSearchParamStrings(entity, theResource);
+				numberParams = extractSearchParamNumber(entity, theResource);
+				quantityParams = extractSearchParamQuantity(entity, theResource);
+				dateParams = extractSearchParamDates(entity, theResource);
+
+				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
+				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {
+					if (next instanceof ResourceIndexedSearchParamToken) {
+						tokenParams.add((ResourceIndexedSearchParamToken) next);
+					} else {
+						stringParams.add((ResourceIndexedSearchParamString) next);
+					}
+				}
+
+				links = extractResourceLinks(entity, theResource);
+				populateResourceIntoEntity(theResource, entity);
+				entity.setUpdated(new Date());
+				entity.setLanguage(theResource.getLanguage().getValue());
+				entity.setParamsString(stringParams);
+				entity.setParamsStringPopulated(stringParams.isEmpty() == false);
+				entity.setParamsToken(tokenParams);
+				entity.setParamsTokenPopulated(tokenParams.isEmpty() == false);
+				entity.setParamsNumber(numberParams);
+				entity.setParamsNumberPopulated(numberParams.isEmpty() == false);
+				entity.setParamsQuantity(quantityParams);
+				entity.setParamsQuantityPopulated(quantityParams.isEmpty() == false);
+				entity.setParamsDate(dateParams);
+				entity.setParamsDatePopulated(dateParams.isEmpty() == false);
+				entity.setResourceLinks(links);
+				entity.setHasLinks(links.isEmpty() == false);
+
+			} else {
+
+				populateResourceIntoEntity(theResource, entity);
+				entity.setUpdated(new Date());
+				entity.setLanguage(theResource.getLanguage().getValue());
+
+			}
 			
 		}
 
