@@ -25,16 +25,18 @@ import java.util.Map;
 import java.util.Set;
 
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IFhirResourceDao<T extends IResource> extends IDao {
 
-	void addTag(IdDt theId, String theScheme, String theTerm, String theLabel);
+	void addTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
 	DaoMethodOutcome create(T theResource);
 
@@ -79,7 +81,7 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	 */
 	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
 
-	void removeTag(IdDt theId, String theScheme, String theTerm);
+	void removeTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm);
 
 	IBundleProvider search(Map<String, IQueryParameterType> theParams);
 
@@ -104,4 +106,23 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing);
 
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaGetOperation();
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaGetOperation(IdDt theId);
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaDeleteOperation(IdDt theId1, MetaDt theMetaDel);
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaAddOperation(IdDt theId1, MetaDt theMetaAdd);
 }

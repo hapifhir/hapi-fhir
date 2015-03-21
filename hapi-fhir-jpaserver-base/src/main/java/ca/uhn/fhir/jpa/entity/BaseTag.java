@@ -38,7 +38,7 @@ public class BaseTag implements Serializable {
 
 	@Column(name="TAG_ID", insertable=false,updatable=false)
 	private Long myTagId;
-	
+
 	public TagDefinition getTag() {
 		return myTag;
 	}

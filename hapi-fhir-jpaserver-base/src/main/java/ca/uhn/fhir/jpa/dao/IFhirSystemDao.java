@@ -21,11 +21,10 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 
 /**
@@ -40,5 +39,10 @@ public interface IFhirSystemDao<T> extends IDao {
 	TagList getAllTags();
 
 	Map<String, Long> getResourceCounts();
+
+	/**
+	 * Not supported for DSTU1
+	 */
+	MetaDt metaGetOperation();
 
 }

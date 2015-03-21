@@ -67,7 +67,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getTerm().equals(theTag)) {
+			if (next.getTag().equals(theTag)) {
 				return;
 			}
 		}
@@ -118,9 +118,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceVersion;
 	}
 
-	public boolean hasTag(String theTerm, String theLabel, String theScheme) {
+	public boolean hasTag(String theTerm, String theScheme) {
 		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
 				return true;
 			}
 		}

@@ -79,7 +79,9 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -95,8 +97,11 @@ import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -655,22 +660,26 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public void addTag(IdDt theId, String theScheme, String theTerm, String theLabel) {
+	public void addTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 
+		//@formatter:off
 		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-			if (ObjectUtil.equals(next.getTag().getScheme(), theScheme) && ObjectUtil.equals(next.getTag().getTerm(), theTerm)) {
+			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType) && 
+					ObjectUtil.equals(next.getTag().getSystem(), theScheme) && 
+					ObjectUtil.equals(next.getTag().getCode(), theTerm)) {
 				return;
 			}
 		}
+		//@formatter:on
 
 		entity.setHasTags(true);
 
-		TagDefinition def = getTag(theScheme, theTerm, theLabel);
+		TagDefinition def = getTag(TagTypeEnum.TAG, theScheme, theTerm, theLabel);
 		BaseTag newEntity = entity.addTag(def);
 
 		myEntityManager.persist(newEntity);
@@ -708,7 +717,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		StopWatch w = new StopWatch();
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
-		
+
 		if (isNotBlank(theIfNoneExist)) {
 			Set<Long> match = processMatchUrl(theIfNoneExist, myResourceType);
 			if (match.size() > 1) {
@@ -723,7 +732,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (theResource.getId().isEmpty() == false) {
 			if (isValidPid(theResource.getId())) {
-				throw new UnprocessableEntityException("This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
+				throw new UnprocessableEntityException(
+						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
 			createForcedIdIfNeeded(entity, theResource.getId());
 
@@ -794,7 +804,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return p;
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -813,7 +824,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
+					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = normalizeString(rawSearchTerm);
@@ -827,7 +839,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return singleCode;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
+			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		if (theParameter instanceof TokenParam) {
@@ -847,10 +860,12 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH
+					+ "): " + system);
 		}
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH
+					+ "): " + code);
 		}
 
 		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
@@ -881,7 +896,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 				theOrders.add(theBuilder.asc(forcedIdJoin.get("myForcedId")));
 				theOrders.add(theBuilder.asc(theFrom.get("myId")));
-			}else {
+			} else {
 				theOrders.add(theBuilder.desc(forcedIdJoin.get("myForcedId")));
 				theOrders.add(theBuilder.desc(theFrom.get("myId")));
 			}
@@ -889,7 +904,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, null);
 			return;
 		}
-		
+
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
 		RuntimeSearchParam param = resourceDef.getSearchParam(theSort.getParamName());
 		if (param == null) {
@@ -911,15 +926,15 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		default:
 			throw new NotImplementedException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
-		
+
 		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.INNER);
-//		Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
-//		Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
-//		thePredicates.add(theBuilder.or(p, pn));
-		
+		// Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
+		// Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
+		// thePredicates.add(theBuilder.or(p, pn));
+
 		if (theSort.getOrder() == null || theSort.getOrder() == SortOrderEnum.ASC) {
 			theOrders.add(theBuilder.asc(stringJoin.get(sortAttrName)));
-		}else {
+		} else {
 			theOrders.add(theBuilder.desc(stringJoin.get(sortAttrName)));
 		}
 
@@ -1011,7 +1026,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		final T current = currentTmp;
 
-		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
+		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END"
+				+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
 		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
 		countQuery.setParameter("PID", translateForcedIdToPid(theId));
 		countQuery.setParameter("RESTYPE", resourceType);
@@ -1049,8 +1065,9 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 					retVal.add(current);
 				}
 
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC",
-						ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
+								+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
 				q.setParameter("PID", translateForcedIdToPid(theId));
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
@@ -1136,7 +1153,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
 			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
+						+ "] is not a token type, only token is supported");
 			}
 		}
 
@@ -1184,7 +1202,8 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
+						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", theId.getVersionIdPartAsLong());
@@ -1213,20 +1232,24 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 	}
 
 	@Override
-	public void removeTag(IdDt theId, String theScheme, String theTerm) {
+	public void removeTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 
+		//@formatter:off
 		for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-			if (next.getTag().getScheme().equals(theScheme) && next.getTag().getTerm().equals(theTerm)) {
+			if (ObjectUtil.equals(next.getTag().getTagType(), theTagType) && 
+					ObjectUtil.equals(next.getTag().getSystem(), theScheme) && 
+					ObjectUtil.equals(next.getTag().getCode(), theTerm)) {
 				myEntityManager.remove(next);
 				entity.getTags().remove(next);
 			}
 		}
-
+		//@formatter:off
+		
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);
 		}
@@ -1698,6 +1721,123 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
 			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
+	}
+
+	@Override
+	public MetaDt metaGetOperation() {
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		q.setParameter("res_type", myResourceName);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+
+		return retVal;
+	}
+
+	@Override
+	public MetaDt metaGetOperation(IdDt theId) {
+		Long pid = super.translateForcedIdToPid(theId);
+		
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		q.setParameter("res_type", myResourceName);
+		q.setParameter("res_id", pid);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+
+		return retVal;
+	}
+
+	@Override
+	public MetaDt metaDeleteOperation(IdDt theResourceId, MetaDt theMetaDel) {
+		StopWatch w = new StopWatch();
+		BaseHasResource entity = readEntity(theResourceId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theResourceId);
+		}
+
+		List<TagDefinition> tags = toTagList(theMetaDel);
+
+		//@formatter:off
+		for (TagDefinition nextDef : tags) {
+			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
+						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
+						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+					myEntityManager.remove(next);
+					entity.getTags().remove(next);
+				}
+			}
+		}
+		//@formatter:off
+		
+		if (entity.getTags().isEmpty()) {
+			entity.setHasTags(false);
+		}
+
+		myEntityManager.merge(entity);
+
+		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
+		
+		return metaGetOperation(theResourceId);
+	}
+
+	@Override
+	public MetaDt metaAddOperation(IdDt theResourceId, MetaDt theMetaAdd) {
+		StopWatch w = new StopWatch();
+		BaseHasResource entity = readEntity(theResourceId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theResourceId);
+		}
+
+		List<TagDefinition> tags = toTagList(theMetaAdd);
+
+		//@formatter:off
+		for (TagDefinition nextDef : tags) {
+			
+			boolean hasTag = false;
+			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
+						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
+						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+					hasTag = true;
+					break;
+				}
+			}
+
+			if (!hasTag) {
+				entity.setHasTags(true);
+				
+				TagDefinition def = getTag(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
+				BaseTag newEntity = entity.addTag(def);
+				myEntityManager.persist(newEntity);
+			}
+		}
+		//@formatter:on
+
+		myEntityManager.merge(entity);
+		notifyWriteCompleted();
+		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
+		
+		return metaGetOperation(theResourceId);
+	}
+
+	private ArrayList<TagDefinition> toTagList(MetaDt theMeta) {
+		ArrayList<TagDefinition> retVal = new ArrayList<TagDefinition>();
+
+		for (CodingDt next : theMeta.getTag()) {
+			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay()));
+		}
+		for (CodingDt next : theMeta.getSecurity()) {
+			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay()));
+		}
+		for (UriDt next : theMeta.getProfile()) {
+			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, next.getValue(), null));
+		}
+
+		return retVal;
 	}
 
 }

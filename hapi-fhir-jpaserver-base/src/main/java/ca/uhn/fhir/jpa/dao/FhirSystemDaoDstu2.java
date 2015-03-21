@@ -29,13 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.TypedQuery;
+
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryTransactionResponse;
@@ -461,7 +465,27 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		return response;
 	}
 
-	private void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry) {
+	@Override
+	public MetaDt metaGetOperation() {
+		
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+		
+		return retVal;
+	}
+	
+	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
+		String url = nextEntry.getTransaction().getUrl();
+		if (isBlank(url)) {
+			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionMissingUrl", verb.name()));
+		}
+		return url;
+	}
+
+	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry) {
 		IdDt newId = outcome.getId().toUnqualifiedVersionless();
 		if (newId.equals(nextResourceId) == false) {
 			idSubstitutions.put(nextResourceId, newId);
@@ -476,14 +500,6 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		newEntry.getTransactionResponse().setEtag(outcome.getId().getVersionIdPart());
 	}
 
-	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
-		String url = nextEntry.getTransaction().getUrl();
-		if (isBlank(url)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionMissingUrl", verb.name()));
-		}
-		return url;
-	}
-
 	private static class UrlParts {
 		private IFhirResourceDao<? extends IResource> myDao;
 		private String myParams;
@@ -493,14 +509,6 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 		public IFhirResourceDao<? extends IResource> getDao() {
 			return myDao;
-		}
-
-		public void setVersionId(String theVersionId) {
-			myVersionId = theVersionId;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
 		}
 
 		public String getParams() {
@@ -513,6 +521,10 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 		public String getResourceType() {
 			return myResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
 		}
 
 		public void setDao(IFhirResourceDao<? extends IResource> theDao) {
@@ -529,6 +541,10 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 		public void setResourceType(String theResourceType) {
 			myResourceType = theResourceType;
+		}
+
+		public void setVersionId(String theVersionId) {
+			myVersionId = theVersionId;
 		}
 	}
 

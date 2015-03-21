@@ -39,10 +39,12 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
@@ -258,6 +260,11 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 		notifyWriteCompleted();
 
 		return retVal;
+	}
+
+	@Override
+	public MetaDt metaGetOperation() {
+		throw new NotImplementedOperationException("meta not supported in DSTU1");
 	}
 
 

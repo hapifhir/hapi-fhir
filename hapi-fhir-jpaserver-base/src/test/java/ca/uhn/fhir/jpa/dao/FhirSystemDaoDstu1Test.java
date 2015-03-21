@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -243,7 +244,7 @@ public class FhirSystemDaoDstu1Test {
          * Remove a tag from a version
 		 */
 
-        ourObservationDao.removeTag(o1id2, "testGetAllTagsScheme2", "testGetAllTagsTerm2");
+        ourObservationDao.removeTag(o1id2, TagTypeEnum.TAG, "testGetAllTagsScheme2", "testGetAllTagsTerm2");
         tags2 = ourObservationDao.getTags(o1id2);
         assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
         assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));
@@ -255,7 +256,7 @@ public class FhirSystemDaoDstu1Test {
 		/*
 		 * Add a tag
 		 */
-        ourObservationDao.addTag(o1id2, "testGetAllTagsScheme3", "testGetAllTagsTerm3", "testGetAllTagsLabel3");
+        ourObservationDao.addTag(o1id2, TagTypeEnum.TAG, "testGetAllTagsScheme3", "testGetAllTagsTerm3", "testGetAllTagsLabel3");
         tags2 = ourObservationDao.getTags(o1id2);
         assertNull(tags2.getTag("testGetAllTagsScheme1", "testGetAllTagsTerm1"));
         assertNull(tags2.getTag("testGetAllTagsScheme2", "testGetAllTagsTerm2"));

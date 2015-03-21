@@ -219,9 +219,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		return myVersion;
 	}
 
-	public boolean hasTag(String theTerm) {
+	public boolean hasTag(System theSystem, String theTerm) {
 		for (ResourceTag next : getTags()) {
-			if (next.getTag().getTerm().equals(theTerm)) {
+			if (next.getTag().getSystem().equals(theSystem) && next.getTag().getCode().equals(theTerm)) {
 				return true;
 			}
 		}

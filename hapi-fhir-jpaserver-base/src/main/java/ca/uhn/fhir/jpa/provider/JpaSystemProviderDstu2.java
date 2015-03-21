@@ -22,12 +22,19 @@ package ca.uhn.fhir.jpa.provider;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 
 public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 
+	@Operation(name="$meta", idempotent=true)
+	public MetaDt operation() {
+		return getDao().metaGetOperation();
+	}
+	
 	@Transaction
 	public Bundle transaction(HttpServletRequest theRequest, @TransactionParam Bundle theResources) {
 		startRequest(theRequest);

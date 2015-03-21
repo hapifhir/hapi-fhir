@@ -25,6 +25,8 @@ import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -35,68 +37,84 @@ import javax.persistence.UniqueConstraint;
 
 import ca.uhn.fhir.model.api.Tag;
 
+//@formatter:on
 @Entity
-@Table(name = "HFJ_TAG_DEF", uniqueConstraints= {@UniqueConstraint(columnNames= {"TAG_SCHEME","TAG_TERM"})})
-//@org.hibernate.annotations.Table(appliesTo="HFJ_TAG", indexes= {@Index(name)})
+@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { 
+	@UniqueConstraint(columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) 
+})
+//@formatter:off
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(cascade= {}, fetch= FetchType.LAZY, mappedBy= "myTag")
-	private Collection<ResourceTag> myResources;
+	@Column(name = "TAG_CODE", length = 200)
+	private String myCode;
 
-	@OneToMany(cascade= {}, fetch= FetchType.LAZY, mappedBy= "myTag")
-	private Collection<ResourceHistoryTag> myResourceVersions;
+	@Column(name = "TAG_DISPLAY", length = 200)
+	private String myDisplay;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "TAG_ID")
 	private Long myId;
 
-	@Column(name = "TAG_LABEL", length = 200)
-	private String myLabel;
+	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
+	private Collection<ResourceTag> myResources;
 
-	@Column(name = "TAG_SCHEME", length = 200)
-	private String myScheme;
+	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
+	private Collection<ResourceHistoryTag> myResourceVersions;
 
-	@Column(name = "TAG_TERM", length = 200)
-	private String myTerm;
+	@Column(name = "TAG_SYSTEM", length = 200)
+	private String mySystem;
+
+	@Column(name="TAG_TYPE", nullable=false)
+	@Enumerated(EnumType.ORDINAL)
+	private TagTypeEnum myTagType;
 
 	public TagDefinition() {
 	}
 
-	public TagDefinition(String theTerm, String theLabel, String theScheme) {
-		setTerm(theTerm);
-		setScheme(theScheme);
-		setLabel(theLabel);
+	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay) {
+		setTagType(theTagType);
+		setCode(theCode);
+		setSystem(theSystem);
+		setDisplay(theDisplay);
 	}
 
-	public void setLabel(String theLabel) {
-		myLabel = theLabel;
+	public String getCode() {
+		return myCode;
 	}
 
-	public void setScheme(String theScheme) {
-		myScheme = theScheme;
+	public String getDisplay() {
+		return myDisplay;
 	}
 
-	public String getLabel() {
-		return myLabel;
+	public String getSystem() {
+		return mySystem;
 	}
 
-	public String getScheme() {
-		return myScheme;
+	public TagTypeEnum getTagType() {
+		return myTagType;
 	}
 
-	public String getTerm() {
-		return myTerm;
+	public void setCode(String theCode) {
+		myCode = theCode;
 	}
 
-	public void setTerm(String theTerm) {
-		myTerm = theTerm;
+	public void setDisplay(String theDisplay) {
+		myDisplay = theDisplay;
+	}
+
+	public void setSystem(String theSystem) {
+		mySystem = theSystem;
+	}
+
+	public void setTagType(TagTypeEnum theTagType) {
+		myTagType = theTagType;
 	}
 
 	public Tag toTag() {
-		return new Tag( getScheme(), getTerm(),getLabel());
+		return new Tag(getSystem(), getCode(), getDisplay());
 	}
 
 }

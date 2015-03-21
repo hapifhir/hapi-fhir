@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -80,14 +81,17 @@ import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -108,6 +112,7 @@ import com.google.common.collect.Lists;
 
 public abstract class BaseFhirDao implements IDao {
 
+	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirDao.class);
 
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
@@ -336,16 +341,16 @@ public abstract class BaseFhirDao implements IDao {
 		return myResourceTypeToDao.get(theType);
 	}
 
-	protected TagDefinition getTag(String theScheme, String theTerm, String theLabel) {
+	protected TagDefinition getTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 		Root<TagDefinition> from = cq.from(TagDefinition.class);
-		cq.where(builder.and(builder.equal(from.get("myScheme"), theScheme), builder.equal(from.get("myTerm"), theTerm)));
+		cq.where(builder.and(builder.equal(from.get("mySystem"), theScheme), builder.equal(from.get("myCode"), theTerm)));
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 		try {
 			return q.getSingleResult();
 		} catch (NoResultException e) {
-			TagDefinition retVal = new TagDefinition(theTerm, theLabel, theScheme);
+			TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
 			myEntityManager.persist(retVal);
 			return retVal;
 		}
@@ -559,10 +564,28 @@ public abstract class BaseFhirDao implements IDao {
 			throw new InternalErrorException(e);
 		}
 
-		TagList tagList = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				TagDefinition tag = getTag(next.getScheme(), next.getTerm(), next.getLabel());
+				TagDefinition tag = getTag(TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
+				theEntity.addTag(tag);
+				theEntity.setHasTags(true);
+			}
+		}
+
+		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
+		if (securityLabels != null) {
+			for (BaseCodingDt next : securityLabels) {
+				TagDefinition tag = getTag(TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
+				theEntity.addTag(tag);
+				theEntity.setHasTags(true);
+			}
+		}
+
+		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
+		if (profiles != null) {
+			for (IdDt next : profiles) {
+				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				theEntity.addTag(tag);
 				theEntity.setHasTags(true);
 			}
@@ -770,6 +793,24 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
+	protected MetaDt toMetaDt(List<TagDefinition> tagDefinitions) {
+		MetaDt retVal = new MetaDt();
+		for (TagDefinition next : tagDefinitions) {
+			switch (next.getTagType()) {
+			case PROFILE:
+				retVal.addProfile(next.getCode());
+				break;
+			case SECURITY_LABEL:
+				retVal.addSecurity().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+				break;
+			case TAG:
+				retVal.addTag().setSystem(next.getSystem()).setCode(next.getCode()).setDisplay(next.getDisplay());
+				break;
+			}
+		}
+		return retVal;
+	}
+
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 		switch (myContext.getVersion().getVersion()) {
@@ -850,10 +891,34 @@ public abstract class BaseFhirDao implements IDao {
 		Collection<? extends BaseTag> tags = theEntity.getTags();
 		if (theEntity.isHasTags()) {
 			TagList tagList = new TagList();
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			List<IdDt> profiles = new ArrayList<IdDt>();
 			for (BaseTag next : tags) {
-				tagList.add(new Tag(next.getTag().getScheme(), next.getTag().getTerm(), next.getTag().getLabel()));
+				switch (next.getTag().getTagType()) {
+				case PROFILE:
+					profiles.add(new IdDt(next.getTag().getCode()));
+					break;
+				case SECURITY_LABEL:
+					BaseCodingDt secLabel = myContext.getVersion().newCodingDt();
+					secLabel.setSystem(next.getTag().getSystem());
+					secLabel.setCode(next.getTag().getCode());
+					secLabel.setDisplay(next.getTag().getDisplay());
+					securityLabels.add(secLabel);
+					break;
+				case TAG:
+					tagList.add(new Tag(next.getTag().getSystem(), next.getTag().getCode(), next.getTag().getDisplay()));
+					break;
+				}
 			}
-			res.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+			if (tagList.size() > 0) {
+				ResourceMetadataKeyEnum.TAG_LIST.put(res, tagList);
+			}
+			if (securityLabels.size() > 0) {
+				ResourceMetadataKeyEnum.SECURITY_LABELS.put(res, securityLabels);
+			}
+			if (profiles.size() > 0) {
+				ResourceMetadataKeyEnum.PROFILES.put(res, profiles);
+			}
 		}
 
 		return retVal;
@@ -943,9 +1008,9 @@ public abstract class BaseFhirDao implements IDao {
 			entity.setUpdated(theDeletedTimestampOrNull);
 
 		} else {
-			
+
 			entity.setDeleted(null);
-			
+
 			if (thePerformIndexing) {
 
 				stringParams = extractSearchParamStrings(entity, theResource);
@@ -986,7 +1051,7 @@ public abstract class BaseFhirDao implements IDao {
 				entity.setLanguage(theResource.getLanguage().getValue());
 
 			}
-			
+
 		}
 
 		if (entity.getId() == null) {

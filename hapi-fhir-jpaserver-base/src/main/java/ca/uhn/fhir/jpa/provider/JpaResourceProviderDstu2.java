@@ -24,11 +24,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -91,6 +94,26 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		} finally {
 			endRequest(theRequest);
 		}
+	}
+
+	@Operation(name="$meta", idempotent=true)
+	public MetaDt meta() {
+		return getDao().metaGetOperation();
+	}
+	
+	@Operation(name="$meta", idempotent=true)
+	public MetaDt meta(@IdParam IdDt theId) {
+		return getDao().metaGetOperation(theId);
+	}
+	
+	@Operation(name="$meta-add", idempotent=true)
+	public MetaDt metaAdd(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+		return getDao().metaAddOperation(theId, theMeta);
+	}
+
+	@Operation(name="$meta-delete", idempotent=true)
+	public MetaDt metaDelete(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+		return getDao().metaDeleteOperation(theId, theMeta);
 	}
 
 }
