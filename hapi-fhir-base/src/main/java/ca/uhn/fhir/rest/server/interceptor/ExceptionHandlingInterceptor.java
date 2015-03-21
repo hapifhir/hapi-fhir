@@ -20,7 +20,11 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -107,17 +111,32 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 			ourLog.error("Unknown error during processing", theException);
 		}
 
+		// Add headers associated with the specific error code
+		if (theException instanceof BaseServerResponseException) {
+			Map<String, String[]> additional = ((BaseServerResponseException) theException).getAssociatedHeaders();
+			if (additional != null) {
+				for (Entry<String, String[]> next : additional.entrySet()) {
+					if (isNotBlank(next.getKey()) && next.getValue() != null) {
+						String nextKey = next.getKey();
+						for (String nextValue : next.getValue()) {
+							theResponse.addHeader(nextKey, nextValue);
+						}
+					}
+				}
+			}
+		}
+
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
 		String fhirServerBase = ((Request) theRequestDetails).getFhirServerBase();
 		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser,
 				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
 
-		theResponse.setStatus(statusCode);
-		theRequestDetails.getServer().addHeadersToResponse(theResponse);
-		theResponse.setContentType("text/plain");
-		theResponse.setCharacterEncoding("UTF-8");
-		theResponse.getWriter().append(theException.getMessage());
-		theResponse.getWriter().close();
+//		theResponse.setStatus(statusCode);
+//		theRequestDetails.getServer().addHeadersToResponse(theResponse);
+//		theResponse.setContentType("text/plain");
+//		theResponse.setCharacterEncoding("UTF-8");
+//		theResponse.getWriter().append(theException.getMessage());
+//		theResponse.getWriter().close();
 
 		return false;
 	}

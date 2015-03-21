@@ -25,6 +25,7 @@ import java.util.Map;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class RequestDetails {
@@ -34,13 +35,16 @@ public class RequestDetails {
 	private IdDt myId;
 	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
+	private RequestTypeEnum myRequestType;
 	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
 	private RestfulServer myServer;
 	private RestfulOperationSystemEnum mySystemOperationType;
+
 	public String getCompartmentName() {
 		return myCompartmentName;
 	}
+
 	public String getCompleteUrl() {
 		return myCompleteUrl;
 	}
@@ -55,6 +59,10 @@ public class RequestDetails {
 
 	public Map<String, String[]> getParameters() {
 		return myParameters;
+	}
+
+	public RequestTypeEnum getRequestType() {
+		return myRequestType;
 	}
 
 	public String getResourceName() {
@@ -91,6 +99,10 @@ public class RequestDetails {
 
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
+	}
+
+	public void setRequestType(RequestTypeEnum theRequestType) {
+		myRequestType = theRequestType;
 	}
 
 	public void setResourceName(String theResourceName) {

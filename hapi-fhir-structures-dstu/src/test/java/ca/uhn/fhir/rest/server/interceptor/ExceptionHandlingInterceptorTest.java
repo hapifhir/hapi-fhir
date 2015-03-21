@@ -48,11 +48,8 @@ public class ExceptionHandlingInterceptorTest {
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
-
 	private static int ourPort;
-
 	private static Server ourServer;
-
 	private static RestfulServer servlet;
 	private static ExceptionHandlingInterceptor myInterceptor;
 	

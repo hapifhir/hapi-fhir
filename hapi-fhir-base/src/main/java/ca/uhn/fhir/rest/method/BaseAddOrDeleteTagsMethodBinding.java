@@ -42,8 +42,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.TagListParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -200,7 +200,7 @@ abstract class BaseAddOrDeleteTagsMethodBinding extends BaseMethodBinding<Void> 
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		if (theRequest.getRequestType() != RequestType.POST) {
+		if (theRequest.getRequestType() != RequestTypeEnum.POST) {
 			return false;
 		}
 		if (!Constants.PARAM_TAGS.equals(theRequest.getOperation())) {

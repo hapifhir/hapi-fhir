@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -107,8 +107,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		Set<RequestType> allowableRequestTypes = provideAllowableRequestTypes();
-		RequestType requestType = theRequest.getRequestType();
+		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
+		RequestTypeEnum requestType = theRequest.getRequestType();
 		if (!allowableRequestTypes.contains(requestType)) {
 			return false;
 		}
@@ -286,7 +286,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		return retVal;
 	}
 
-	protected abstract Set<RequestType> provideAllowableRequestTypes();
+	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
 	/**
 	 * Subclasses may override if the incoming request should not contain a resource

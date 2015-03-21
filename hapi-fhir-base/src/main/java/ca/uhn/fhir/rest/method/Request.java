@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 
 /**
  * This class is internal to HAPI - Use with caution as methods may change in future versions of the library
@@ -39,7 +39,6 @@ public class Request extends RequestDetails {
 
 	private String myFhirServerBase;
 	private String myOperation;
-	private RequestType myRequestType;
 	private boolean myRespondGzip;
 	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
@@ -52,10 +51,6 @@ public class Request extends RequestDetails {
 
 	public String getOperation() {
 		return myOperation;
-	}
-
-	public RequestType getRequestType() {
-		return myRequestType;
 	}
 
 
@@ -116,11 +111,6 @@ public class Request extends RequestDetails {
 
 	}
 
-	public void setRequestType(RequestType theRequestType) {
-		myRequestType = theRequestType;
-	}
-
-
 	public void setRespondGzip(boolean theRespondGzip) {
 		myRespondGzip = theRespondGzip;
 	}
@@ -137,7 +127,7 @@ public class Request extends RequestDetails {
 		myServletResponse = theServletResponse;
 	}
 
-	public static Request withResourceAndParams(String theResourceName, RequestType theRequestType, Set<String> theParamNames) {
+	public static Request withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
 		Request retVal = new Request();
 		retVal.setResourceName(theResourceName);
 		retVal.setRequestType(theRequestType);

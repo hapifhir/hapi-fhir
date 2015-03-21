@@ -39,8 +39,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.method.TransactionParamBinder.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -80,7 +80,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		if (theRequest.getRequestType() != RequestType.POST) {
+		if (theRequest.getRequestType() != RequestTypeEnum.POST) {
 			return false;
 		}
 		if (isNotBlank(theRequest.getOperation())) {

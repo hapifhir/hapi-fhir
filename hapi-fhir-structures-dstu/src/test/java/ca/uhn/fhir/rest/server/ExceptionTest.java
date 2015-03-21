@@ -31,8 +31,10 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
@@ -47,11 +49,8 @@ public class ExceptionTest {
 	private static Class<? extends Exception> ourExceptionType;
 	private static boolean ourGenerateOperationOutcome;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionTest.class);
-
 	private static int ourPort;
-
 	private static Server ourServer;
-
 	private static RestfulServer servlet;
 	
 	@Before
@@ -163,6 +162,19 @@ public class ExceptionTest {
 		}
 	}
 	
+	@Test
+	public void testMethodNotAllowed() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwMethodNotAllowed=aaa&_format=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			ourLog.info(status.toString());
+			assertEquals(MethodNotAllowedException.STATUS_CODE, status.getStatusLine().getStatusCode());
+			assertEquals("POST,PUT", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		}
+	}
 	
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -225,6 +237,11 @@ public class ExceptionTest {
 		@Search()
 		public List<Patient> throwUnprocessableEntity(@RequiredParam(name = "throwUnprocessableEntity") StringParam theParam) {
 			throw new UnprocessableEntityException("Exception Text");
+		}
+
+		@Search()
+		public List<Patient> throwMethodNotAllowed(@RequiredParam(name = "throwMethodNotAllowed") StringParam theParam) {
+			throw new MethodNotAllowedException("Exception Text", RequestTypeEnum.POST, RequestTypeEnum.PUT);
 		}
 
 		@Search

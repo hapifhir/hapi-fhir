@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -127,7 +127,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				return false;
 			}
 		}
-		if (theRequest.getRequestType() != RequestType.GET) {
+		if (theRequest.getRequestType() != RequestTypeEnum.GET) {
 			ourLog.trace("Method {} doesn't match because request type is not GET: {}", theRequest.getId(), theRequest.getRequestType());
 			return false;
 		}

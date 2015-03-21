@@ -87,6 +87,36 @@ public class OperationServerTest {
 	}
 
 	@Test
+	public void testOperationWithGetUsingParams() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertNull(ourLastParam2);
+		assertEquals("$OP_TYPE", ourLastMethod);
+
+		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
+		assertEquals("RET1", resp.getParameter().get(0).getName());
+	}
+
+	@Test
+	public void testOperationWithGetUsingParamsFailsWithNonPrimitive() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo");
+		HttpResponse status = ourClient.execute(httpGet);
+
+		assertEquals(405, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertThat(response, containsString("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype"));
+	}
+
+	@Test
 	public void testOperationOnTypeReturnBundle() throws Exception {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringDt("PARAM1val"));
@@ -181,6 +211,19 @@ public class OperationServerTest {
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
+	}
+
+	@Test
+	public void testOperationCantUseGetIfItIsntIdempotent() throws Exception {
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
+		assertThat(response, containsString("HTTP Method GET is not allowed"));
 	}
 
 	@Test
@@ -345,7 +388,7 @@ public class OperationServerTest {
 			return retVal;
 		}
 
-		@Operation(name = "$everything")
+		@Operation(name = "$everything", idempotent=true)
 		public Bundle patientEverything(@IdParam IdDt thePatientId) {
 			ourLastMethod = "instance $everything";
 			ourLastId = thePatientId;
@@ -353,7 +396,7 @@ public class OperationServerTest {
 		}
 
 		//@formatter:off
-		@Operation(name="$OP_TYPE")
+		@Operation(name="$OP_TYPE", idempotent=true)
 		public Parameters opType(
 				@OperationParam(name="PARAM1") StringDt theParam1,
 				@OperationParam(name="PARAM2") Patient theParam2
@@ -363,6 +406,21 @@ public class OperationServerTest {
 			ourLastMethod = "$OP_TYPE";
 			ourLastParam1 = theParam1;
 			ourLastParam2 = theParam2;
+
+			Parameters retVal = new Parameters();
+			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));
+			return retVal;
+		}
+
+		//@formatter:off
+		@Operation(name="$OP_TYPE_ONLY_STRING", idempotent=true)
+		public Parameters opTypeOnlyString(
+				@OperationParam(name="PARAM1") StringDt theParam1
+				) {
+			//@formatter:on
+
+			ourLastMethod = "$OP_TYPE";
+			ourLastParam1 = theParam1;
 
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("RET1").setValue(new StringDt("RETVAL1"));

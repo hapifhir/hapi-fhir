@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -400,7 +401,8 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else if (nextAnnotation instanceof OperationParam) {
-						param = new OperationParamBinder((OperationParam)nextAnnotation);
+						Operation op = theMethod.getAnnotation(Operation.class);
+						param = new OperationParamBinder(op.name(), (OperationParam)nextAnnotation);
 					} else {
 						continue;
 					}

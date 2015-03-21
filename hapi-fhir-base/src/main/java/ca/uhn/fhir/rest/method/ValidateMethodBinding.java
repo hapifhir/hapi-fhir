@@ -30,8 +30,8 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
@@ -103,9 +103,9 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 	}
 
 	@Override
-	protected Set<RequestType> provideAllowableRequestTypes() {
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
 		// TODO: is post correct here?
-		return Collections.singleton(RequestType.POST);
+		return Collections.singleton(RequestTypeEnum.POST);
 	}
 
 

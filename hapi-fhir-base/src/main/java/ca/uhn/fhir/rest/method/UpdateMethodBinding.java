@@ -33,8 +33,8 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
@@ -129,8 +129,8 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	 */
 
 	@Override
-	protected Set<RequestType> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestType.PUT);
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestTypeEnum.PUT);
 	}
 
 	@Override

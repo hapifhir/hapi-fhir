@@ -29,10 +29,11 @@ import java.util.Set;
 
 public class Constants {
 
+	public static final Charset CHARSET_UTF8;
 	public static final String CHARSETNAME_UTF_8 = "UTF-8";
 	public static final String CT_ATOM_XML = "application/atom+xml";
-	public static final String CT_FHIR_JSON = "application/json+fhir";
 
+	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
 	public static final String CT_HTML = "text/html";
 	public static final String CT_JSON = "application/json";
@@ -48,6 +49,7 @@ public class Constants {
 	public static final String FORMAT_XML = "xml";
 	public static final String HEADER_ACCEPT = "Accept";
 	public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String HEADER_ALLOW = "Allow";
 	public static final String HEADER_AUTHORIZATION = "Authorization";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BASIC = "Basic ";
 	public static final String HEADER_AUTHORIZATION_VALPREFIX_BEARER = "Bearer ";
@@ -64,16 +66,24 @@ public class Constants {
 	public static final String HEADER_CORS_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 	public static final String HEADER_ETAG = "ETag";
 	public static final String HEADER_ETAG_LC = HEADER_ETAG.toLowerCase();
-	public static final String HEADER_IF_NONE_MATCH = "If-None-Match";
-	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
 	public static final String HEADER_IF_MATCH = "If-Match";
 	public static final String HEADER_IF_MATCH_LC = HEADER_IF_MATCH.toLowerCase();
+	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
+	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
+	public static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+	public static final String HEADER_IF_NONE_MATCH_LC = HEADER_IF_NONE_MATCH.toLowerCase();
 	public static final String HEADER_LAST_MODIFIED = "Last-Modified";
 	public static final String HEADER_LAST_MODIFIED_LOWERCASE = HEADER_LAST_MODIFIED.toLowerCase();
 	public static final String HEADER_LOCATION = "Location";
 	public static final String HEADER_LOCATION_LC = HEADER_LOCATION.toLowerCase();
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
+	public static final String LINK_FHIR_BASE = "fhir-base";
+	public static final String LINK_FIRST = "first";
+	public static final String LINK_LAST = "last";
+	public static final String LINK_NEXT = "next";
+	public static final String LINK_PREVIOUS = "previous";
+	public static final String LINK_SELF = "self";
 	public static final String OPENSEARCH_NS_OLDER = "http://purl.org/atompub/tombstones/1.0";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -112,15 +122,6 @@ public class Constants {
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String HEADER_IF_NONE_EXIST = "If-None-Exist";
-	public static final String HEADER_IF_NONE_EXIST_LC = HEADER_IF_NONE_EXIST.toLowerCase();
-	public static final String LINK_SELF = "self";
-	public static final String LINK_FIRST = "first";
-	public static final String LINK_PREVIOUS = "previous";
-	public static final String LINK_NEXT = "next";
-	public static final String LINK_LAST = "last";
-	public static final String LINK_FHIR_BASE = "fhir-base";
-	public static final Charset CHARSET_UTF8;
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

@@ -50,13 +50,12 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.method.SearchMethodBinding;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -138,27 +137,27 @@ public class RestfulServer extends HttpServlet {
 
 	@Override
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.DELETE, request, response);
+		handleRequest(RequestTypeEnum.DELETE, request, response);
 	}
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.GET, request, response);
+		handleRequest(RequestTypeEnum.GET, request, response);
 	}
 
 	@Override
 	protected void doOptions(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.OPTIONS, theReq, theResp);
+		handleRequest(RequestTypeEnum.OPTIONS, theReq, theResp);
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.POST, request, response);
+		handleRequest(RequestTypeEnum.POST, request, response);
 	}
 
 	@Override
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		handleRequest(SearchMethodBinding.RequestType.PUT, request, response);
+		handleRequest(RequestTypeEnum.PUT, request, response);
 	}
 
 	/**
@@ -485,7 +484,7 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
-	protected void handleRequest(SearchMethodBinding.RequestType theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		for (IServerInterceptor next : myInterceptors) {
 			boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
 			if (!continueProcessing) {
@@ -549,7 +548,7 @@ public class RestfulServer extends HttpServlet {
 
 			ResourceBinding resourceBinding = null;
 			BaseMethodBinding<?> resourceMethod = null;
-			if (Constants.URL_TOKEN_METADATA.equals(resourceName) || theRequestType == RequestType.OPTIONS) {
+			if (Constants.URL_TOKEN_METADATA.equals(resourceName) || theRequestType == RequestTypeEnum.OPTIONS) {
 				resourceMethod = myServerConformanceMethod;
 			} else if (resourceName == null) {
 				resourceBinding = myServerBinding;
@@ -606,7 +605,7 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			if (theRequestType == RequestType.PUT) {
+			if (theRequestType == RequestTypeEnum.PUT) {
 				String contentLocation = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 				if (contentLocation != null) {
 					id = new IdDt(contentLocation);

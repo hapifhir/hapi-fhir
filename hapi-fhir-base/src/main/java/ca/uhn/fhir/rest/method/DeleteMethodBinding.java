@@ -36,8 +36,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -100,8 +100,8 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	protected Set<RequestType> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestType.DELETE);
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestTypeEnum.DELETE);
 	}
 
 	@Override

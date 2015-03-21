@@ -10,7 +10,7 @@
 	<logger name="org.eclipse" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.apache" additivity="false" level="info">
+	<logger name="org.apache" additivity="false" level="debug">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

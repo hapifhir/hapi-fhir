@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.apache.http.MethodNotSupportedException;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
@@ -40,22 +41,26 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private Integer myIdParamIndex;
 	private String myName;
+	private boolean myHttpGetPermitted;
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, Operation theAnnotation) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
+		myHttpGetPermitted = theAnnotation.idempotent();
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 		myName = theAnnotation.name();
 		if (isBlank(myName)) {
@@ -129,7 +134,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		IParser parser = encoding.newParser(getContext());
 		BufferedReader requestReader = theRequest.getServletRequest().getReader();
 
-		if (theRequest.getRequestType() == RequestType.GET) {
+		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			return null;
 		}
 		
@@ -157,7 +162,24 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
+			// always ok
+		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+			if (!myHttpGetPermitted) {
+				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
+				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
+			}
+		} else {
+			if (!myHttpGetPermitted) {
+				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
+				throw new MethodNotAllowedException(message, RequestTypeEnum.POST);
+			} else {
+				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
+				throw new MethodNotAllowedException(message, RequestTypeEnum.GET, RequestTypeEnum.POST);				
+			}
+		}
+		
 		if (myIdParamIndex != null) {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}

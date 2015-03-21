@@ -33,8 +33,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -117,15 +117,15 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
 			return false;
 		}
-		if (theRequest.getRequestType() == RequestType.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is GET but operation is not null: {}", theRequest.getId(), theRequest.getOperation());
 			return false;
 		}
-		if (theRequest.getRequestType() == RequestType.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			ourLog.trace("Method {} doesn't match because request type is POST but operation is not _search: {}", theRequest.getId(), theRequest.getOperation());
 			return false;
 		}
-		if (theRequest.getRequestType() != RequestType.GET && theRequest.getRequestType() != RequestType.POST) {
+		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
 			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
 			return false;
 		}

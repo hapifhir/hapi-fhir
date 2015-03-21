@@ -29,7 +29,7 @@ import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -76,11 +76,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
-		if (theRequest.getRequestType() == RequestType.OPTIONS) {
+		if (theRequest.getRequestType() == RequestTypeEnum.OPTIONS) {
 			return true;
 		}
 
-		if (theRequest.getRequestType() == RequestType.GET && "metadata".equals(theRequest.getOperation())) {
+		if (theRequest.getRequestType() == RequestTypeEnum.GET && "metadata".equals(theRequest.getOperation())) {
 			return true;
 		}
 

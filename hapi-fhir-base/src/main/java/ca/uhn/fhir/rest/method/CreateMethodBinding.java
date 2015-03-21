@@ -30,8 +30,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.SearchMethodBinding.RequestType;
 
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
@@ -50,8 +50,8 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected Set<RequestType> provideAllowableRequestTypes() {
-		return Collections.singleton(RequestType.POST);
+	protected Set<RequestTypeEnum> provideAllowableRequestTypes() {
+		return Collections.singleton(RequestTypeEnum.POST);
 	}
 
 	@Override
