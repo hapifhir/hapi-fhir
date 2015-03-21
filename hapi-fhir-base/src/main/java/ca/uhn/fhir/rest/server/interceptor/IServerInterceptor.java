@@ -26,7 +26,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
@@ -58,7 +57,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 */
@@ -77,7 +76,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws AuthenticationException
@@ -98,7 +97,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws AuthenticationException
@@ -119,7 +118,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws AuthenticationException
@@ -141,7 +140,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws AuthenticationException
@@ -161,7 +160,7 @@ public interface IServerInterceptor {
 	 *            The incoming request
 	 * @param theServletResponse
 	 *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link HttpServletResponse#getWriter()}) but in that case it is important to return
-	 *            <code>false</code>
+	 *            <code>false</code> to indicate that the server itself should not also provide a response.
 	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws AuthenticationException
@@ -180,16 +179,16 @@ public interface IServerInterceptor {
 	 * </p>
 	 * 
 	 *
-     * @param server
      * @param theRequestDetails
-     *            Contains either <code>null</code>, or a bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
-     *            FHIR-specific aspects of the request which have been pulled out of the {@link javax.servlet.http.HttpServletRequest servlet request}. This parameter may be
-     *            null if the request processing did not successfully parse the incoming request, but will generally not be null.
+     *            A bean containing details about the request that is about to be processed, including details such as the resource type and logical ID (if any) and other
+     *            FHIR-specific aspects of the request which have been pulled out of the {@link javax.servlet.http.HttpServletRequest servlet request}. Note that the
+     *            bean properties are not all guaranteed to be populated, depending on how early
+     *            during processing the exception occurred. 
      * @param theServletRequest
      *            The incoming request
      * @param theServletResponse
      *            The response. Note that interceptors may choose to provide a response (i.e. by calling {@link javax.servlet.http.HttpServletResponse#getWriter()}) but in that case it is important to return
-     *            <code>false</code>
+     *            <code>false</code> to indicate that the server itself should not also provide a response.
      * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do. If your interceptor is providing a response rather than letting HAPI handle the
 	 *         response normally, you must return <code>false</code>. In this case, no further processing will occur and no further interceptors will be called.
 	 * @throws ServletException
@@ -197,7 +196,7 @@ public interface IServerInterceptor {
 	 * @throws IOException
 	 *             If this exception is thrown, it will be re-thrown up to the container for handling.
 	 */
-	public boolean handleException(RestfulServer server, RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
+	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
 			IOException;
 
 }

@@ -71,7 +71,7 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean handleException(RestfulServer server, RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
+	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
 			IOException {
 		return true;
 	}

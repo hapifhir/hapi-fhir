@@ -16,7 +16,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 public class ServerOperations {
 
    //START SNIPPET: patientTypeOperation
-   @Operation(name="$everything")
+   @Operation(name="$everything", idempotent=true)
    public Bundle patientTypeOperation(
       @OperationParam(name="start") DateDt theStart,
       @OperationParam(name="end") DateDt theEnd) {
@@ -28,7 +28,7 @@ public class ServerOperations {
    //END SNIPPET: patientTypeOperation
 
    //START SNIPPET: patientInstanceOperation
-   @Operation(name="$everything")
+   @Operation(name="$everything", idempotent=true)
    public Bundle patientInstanceOperation(
       @IdParam IdDt thePatientId,
       @OperationParam(name="start") DateDt theStart,

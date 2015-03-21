@@ -1574,6 +1574,31 @@
 			
 			</subsection>
 
+			<subsection name="Idempotent Operations / Handling HTTP Get">
+				
+				<p>
+					The FHIR specification notes that if an operation is
+					<a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a>
+					(which means roughly that it does not modity any data or state
+					on the server) then it may be invoked with an HTTP <code>GET</code>
+					instead of an HTTP <code>POST</code>.
+				</p>
+				<p>
+					If you are implementing an operation which is idempotent,
+					you should mark your operation with 
+					<code>idempotent=true</code>,
+					as shown in some of the examples above. The default value
+					for this flag is <code>false</code>, meaning that operations
+					will not support <code>HTTP GET</code> by default.
+				</p>
+				<p>
+					Note that the HTTP GET form is only supported if the operation
+					has only primitive parameters (no complex parameters or resource parameters).
+					If a client makes a request containing a complex parameter, the
+					server will respond with an <code>HTTP 405 Method Not Supported</code>.
+				</p>
+			</subsection>
+			
 		</section>
 
 	</body>
