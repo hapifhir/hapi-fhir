@@ -1537,7 +1537,7 @@
 			</subsection>
 
 			<subsection name="Server Operations">
-			
+
 				<p>
 					Server operations do not operate on a specific resource type or
 					instance, but rather operate globally on the server itself. The following 
