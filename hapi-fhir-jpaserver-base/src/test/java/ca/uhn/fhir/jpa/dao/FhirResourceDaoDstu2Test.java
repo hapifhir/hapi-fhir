@@ -18,6 +18,7 @@ import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -846,6 +847,29 @@ public class FhirResourceDaoDstu2Test {
 
 	}
 
+	@Test
+	public void testReverseIncludes() {
+		String methodName = "testReverseIncludes";
+		Organization org = new Organization();
+		org.setName("X"+methodName+"X");
+		IdDt orgId = ourOrganizationDao.create(org).getId();
+		
+		Patient pat = new Patient();
+		pat.addName().addFamily("X"+methodName+"X");
+		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
+		ourPatientDao.create(pat);
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Organization.SP_NAME, new StringParam("X"+methodName+"X"));
+		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
+		IBundleProvider resultsP = ourOrganizationDao.search(map);
+		assertEquals(1, resultsP.size());
+		List<IResource> results = resultsP.getResources(0, resultsP.size());
+		assertEquals(2, results.size());
+		assertEquals(Organization.class, results.get(0).getClass());
+		assertEquals(Patient.class, results.get(1).getClass());
+	}
+	
 	@Test
 	public void testResourceInstanceMetaOperation() {
 		deleteEverything();

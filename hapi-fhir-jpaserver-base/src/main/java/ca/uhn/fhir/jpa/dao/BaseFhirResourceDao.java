@@ -1122,14 +1122,13 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
-		if (theIncludePids != null) {
-			cq.where(from.get("myId").in(theIncludePids));
-		}
+//		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
+		cq.where(from.get("myId").in(theIncludePids));
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
 		for (ResourceTable next : q.getResultList()) {
-			T resource = toResource(myResourceType, next);
+			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition(next.getResourceType()).getImplementingClass();
+			IResource resource = (IResource) toResource(resourceType, next);
 			Integer index = position.get(next.getId());
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", next.getId());
@@ -1442,7 +1441,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			return;
 		}
 		
-		Long[] matchesArray = theMatches.toArray(new Long[theMatches.size()]);
 		Set<Long> pidsToInclude = new HashSet<Long>();
 		
 		for (Include nextInclude : theRevIncludes) {
@@ -1465,10 +1463,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 			
 			for (String nextPath : param.getPathsSplit()) {
-				String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN :target_pids";
+				String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN (:target_pids)";
 				TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
 				q.setParameter("src_path", nextPath);
-				q.setParameter("target_pids", matchesArray);
+				q.setParameter("target_pids", theMatches);
 				List<ResourceLink> results = q.getResultList();
 				for (ResourceLink resourceLink : results) {
 					pidsToInclude.add(resourceLink.getSourceResourcePid());

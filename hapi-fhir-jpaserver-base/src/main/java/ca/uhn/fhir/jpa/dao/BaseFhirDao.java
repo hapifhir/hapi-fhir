@@ -855,7 +855,7 @@ public abstract class BaseFhirDao implements IDao {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity);
 	}
-
+	
 	protected <T extends IBaseResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
