@@ -236,7 +236,7 @@ public class GenericClientExample {
                .encodedJson()
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
                .and(Patient.BIRTHDATE.after().day("2011-01-01"))
-               .include(Patient.INCLUDE_MANAGINGORGANIZATION)
+               .include(Patient.INCLUDE_ORGANIZATION)
                .sort().ascending(Patient.BIRTHDATE)
                .sort().descending(Patient.NAME).limitTo(123)
                .execute();

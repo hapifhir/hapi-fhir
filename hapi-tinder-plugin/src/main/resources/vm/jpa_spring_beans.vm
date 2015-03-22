@@ -27,7 +27,7 @@
 	</util:list>
 
 #foreach ( $res in $resources )
-	<bean id="my${res.name}Dao${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.FhirResourceDao">
+	<bean id="my${res.name}Dao${versionCapitalized}" class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">
 		<property name="resourceType" value="ca.uhn.fhir.model.${version}.resource.${res.declaringClassNameComplete}"/>
 		<property name="context" ref="myFhirContext${versionCapitalized}"/>
 	</bean>

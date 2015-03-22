@@ -65,4 +65,10 @@ public @interface Operation {
 	 * </p> 
 	 */
 	boolean idempotent() default false;
+
+	/**
+	 * This parameter may be used to specify the parts which will be found in the
+	 * response to this operation.
+	 */
+	OperationParam[] returnParameters() default {};
 }

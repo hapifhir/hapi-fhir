@@ -38,6 +38,18 @@
 			<action type="fix" issue="128">
 				Fix regression in 0.9 - Server responds with an HTTP 500 and a NullPointerException instead of an HTTP 400 and a useful error message if the client requests an unknown resource type
 			</action>
+			<action type="add">
+				Add support for 
+				<![CDATA[<code>_revinclude</code>]]>
+				parameter in client, server, and JPA.
+			</action>
+			<action type="add">
+				Include constants on resources (such as 
+				<![CDATA[<code>Observation.INCLUDE_VALUE_STRING</code>]]>)
+				have been switched in the DSTU2 structures to use
+				the new syntax required in DSTU2: [resource name]:[search param NAME]
+				insead of the DSTU1 style [resource name].[search param PATH]
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

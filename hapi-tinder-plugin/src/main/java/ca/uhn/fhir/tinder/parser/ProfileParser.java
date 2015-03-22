@@ -145,7 +145,7 @@ public class ProfileParser extends BaseStructureParser {
 					}
 
 					for (StructureSearchParam nextParam : nextStructure.getSearchParam()) {
-						SearchParameter param = new SearchParameter();
+						SearchParameter param = new SearchParameter(getVersion(), retVal.getName());
 						param.setName(nextParam.getName().getValue());
 						
 						String path = defaultString(nextParam.getXpath().getValue());
@@ -154,7 +154,7 @@ public class ProfileParser extends BaseStructureParser {
 						
 						param.setType(nextParam.getType().getValue());
 						param.setDescription(nextParam.getDocumentation().getValue());
-						retVal.addSearchParameter(param);
+						retVal.addSearchParameter(getVersion(), param);
 					}
 
 					addResource(retVal);

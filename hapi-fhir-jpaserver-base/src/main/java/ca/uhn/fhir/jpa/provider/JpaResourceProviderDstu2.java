@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -96,24 +97,48 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		}
 	}
 
-	@Operation(name="$meta", idempotent=true)
-	public MetaDt meta() {
-		return getDao().metaGetOperation();
+	//@formatter:off
+	@Operation(name="$meta", idempotent=true, returnParameters= {
+		@OperationParam(name="return", type=MetaDt.class)
+	})
+	//@formatter:on
+	public Parameters meta() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
+		return parameters;
 	}
 	
-	@Operation(name="$meta", idempotent=true)
-	public MetaDt meta(@IdParam IdDt theId) {
-		return getDao().metaGetOperation(theId);
+	//@formatter:off
+	@Operation(name="$meta", idempotent=true, returnParameters= {
+		@OperationParam(name="return", type=MetaDt.class)
+	})
+	//@formatter:on
+	public Parameters meta(@IdParam IdDt theId) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theId));
+		return parameters;
 	}
 	
-	@Operation(name="$meta-add", idempotent=true)
-	public MetaDt metaAdd(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
-		return getDao().metaAddOperation(theId, theMeta);
+	//@formatter:off
+	@Operation(name="$meta-add", idempotent=true, returnParameters= {
+		@OperationParam(name="return", type=MetaDt.class)
+	})
+	//@formatter:on
+	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("return").setValue(getDao().metaAddOperation(theId, theMeta));
+		return parameters;
 	}
 
-	@Operation(name="$meta-delete", idempotent=true)
-	public MetaDt metaDelete(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
-		return getDao().metaDeleteOperation(theId, theMeta);
+	//@formatter:off
+	@Operation(name="$meta-delete", idempotent=true, returnParameters= {
+		@OperationParam(name="return", type=MetaDt.class)
+	})
+	//@formatter:on
+	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("return").setValue(getDao().metaDeleteOperation(theId, theMeta));
+		return parameters;
 	}
 
 }

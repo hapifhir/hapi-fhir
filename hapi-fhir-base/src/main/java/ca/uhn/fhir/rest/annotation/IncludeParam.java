@@ -25,29 +25,38 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import ca.uhn.fhir.model.api.Include;
+
 /**
  * Method parameter which is used to indicate a parameter that will
- * be populated with the "_include" values for a search param.  
+ * be populated with the "_include" (or "_revinclude") values for a search param.
+ * The parameter annotated with this annotation is used for either "_include"
+ * or "_revinclude", depending on whether {@link #reverse()} has been
+ * set to <code>true</code> (default is <code>false</code>).
+ * 
  * <p>
- * Only one parameter may be annotated with this annotation, and that
+ * Only up to two parameters may be annotated with this annotation (one each
+ * for <code>reverse=false</code> and <code>reverse=true</code>. That
  * parameter should be one of the following:
  * </p> 
  * <ul>
- * <li><code>Collection&lt;PathSpecification&gt;</code></li> 
- * <li><code>List&lt;PathSpecification&gt;</code></li> 
- * <li><code>Set&lt;PathSpecification&gt;</code></li> 
+ * <li><code>Collection&lt;Include&gt;</code></li> 
+ * <li><code>List&lt;Include&gt;</code></li> 
+ * <li><code>Set&lt;Include&gt;</code></li> 
  * </ul>
+ * 
+ * @see Include
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value= {ElementType.PARAMETER})
 public @interface IncludeParam {
 
 	/**
-	 * Optional parameter, if provided the server will only allow the values
+	 * Optional value, if provided the server will only allow the values
 	 * within the given set. If an _include parameter is passed to the server
 	 * which does not match any allowed values the server will return an error.
 	 * <p>
-	 * Values for this parameter takew the form that the FHIR specification
+	 * Values for this parameter take the form that the FHIR specification
 	 * defines for <code>_include</code> values, namely <code>[Resource Name].[path]</code>.
 	 * For example: <code>"Patient.link.other"</code>
 	 * or <code>"Encounter.partOf"</code> 
@@ -68,5 +77,12 @@ public @interface IncludeParam {
 	 * </p> 
 	 */
 	String[] allow() default {};
+	
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the values
+	 * for this parameter correspond to the <code>_revinclude<code> parameter
+	 * instead of the <code>_include<code> parameter.
+	 */
+	boolean reverse() default false;
 	
 }

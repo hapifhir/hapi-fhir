@@ -90,6 +90,7 @@ public class Constants {
 	public static final String PARAM_FORMAT = "_format";
 	public static final String PARAM_HISTORY = "_history";
 	public static final String PARAM_INCLUDE = "_include";
+	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
 	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";

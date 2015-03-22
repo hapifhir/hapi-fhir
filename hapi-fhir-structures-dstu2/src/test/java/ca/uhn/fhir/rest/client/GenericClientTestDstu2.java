@@ -60,6 +60,35 @@ public class GenericClientTestDstu2 {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+	@SuppressWarnings("unused")
+	@Test
+	public void testSearchWithReverseInclude() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.encodedJson()
+				.revinclude(ca.uhn.fhir.model.dstu2.resource.Provenance.INCLUDE_TARGET)
+				.execute();
+		//@formatter:on
+
+		assertEquals(
+				"http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json",
+				capt.getValue().getURI().toString());
+
+	}
+
+	
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
 		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 

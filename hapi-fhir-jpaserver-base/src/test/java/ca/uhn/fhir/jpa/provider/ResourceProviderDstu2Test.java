@@ -284,7 +284,7 @@ public class ResourceProviderDstu2Test {
 				.search()
 				.forResource(Patient.class)
 				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2","testSearchWithInclude02"))
-				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.include(Patient.INCLUDE_ORGANIZATION)
 				.prettyPrint()
 				.execute();
 		//@formatter:on
@@ -443,7 +443,7 @@ public class ResourceProviderDstu2Test {
 		Bundle res = ourClient.search()
 			.forResource(Encounter.class)
 			.where(Encounter.IDENTIFIER.exactly().systemAndCode("urn:foo", "testDeepChainingE1"))
-			.include(Encounter.INCLUDE_LOCATION_LOCATION)
+			.include(Encounter.INCLUDE_LOCATION)
 			.include(Location.INCLUDE_PARTOF)
 			.execute();
 		//@formatter:on

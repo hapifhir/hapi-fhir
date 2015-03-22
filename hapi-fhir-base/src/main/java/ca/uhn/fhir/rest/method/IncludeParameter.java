@@ -43,9 +43,11 @@ class IncludeParameter extends BaseQueryParameter {
 	private Set<String> myAllow;
 	private Class<? extends Collection<Include>> myInstantiableCollectionType;
 	private Class<?> mySpecType;
+	private boolean myReverse;
 
 	public IncludeParameter(IncludeParam theAnnotation, Class<? extends Collection<Include>> theInstantiableCollectionType, Class<?> theSpecType) {
 		myInstantiableCollectionType = theInstantiableCollectionType;
+		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
 			myAllow = new HashSet<String>();
 			for (String next : theAnnotation.allow()) {
@@ -93,7 +95,7 @@ class IncludeParameter extends BaseQueryParameter {
 
 	@Override
 	public String getName() {
-		return "_include";
+		return myReverse ? "_revinclude" : "_include";
 	}
 
 	@Override
@@ -131,10 +133,10 @@ class IncludeParameter extends BaseQueryParameter {
 			}
 
 			String value = nextParamList.get(0);
-			if (myAllow != null) {
+			if (myAllow != null && !myAllow.isEmpty()) {
 				if (!myAllow.contains(value)) {
 					if (!myAllow.contains("*")) {
-						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString());
+						String msg = theContext.getLocalizer().getMessage(IncludeParameter.class, "invalidIncludeNameInRequest", value, new TreeSet<String>(myAllow).toString(), getName());
 						throw new InvalidRequestException(msg);
 					}
 				}

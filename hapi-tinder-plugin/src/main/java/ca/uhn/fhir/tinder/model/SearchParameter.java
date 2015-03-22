@@ -9,16 +9,21 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SearchParameter {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameter.class);
+	private List<String> myCompositeOf;
+	private List<String> myCompositeTypes;
 	private String myDescription;
 	private String myName;
 	private String myPath;
+	private String myResourceName;
 	private List<String> myTargetTypes;
 	private String myType;
-	private List<String> myCompositeOf;
-	private List<String> myCompositeTypes;
 
-	public SearchParameter() {
+	private String myVersion;
 
+	public SearchParameter(String theVersion, String theResourceName) {
+		this.myVersion = theVersion;
+		this.myResourceName = theResourceName;
 	}
 
 	public List<String> getCompositeOf() {
@@ -65,8 +70,17 @@ public class SearchParameter {
 
 	public List<Include> getPaths() {
 		ArrayList<Include> retVal = new ArrayList<Include>();
-		for (String next : getPath().split("\\s*\\|\\s*")) {
-			retVal.add(new Include(next));
+		if ("dstu".equals(myVersion)) {
+			for (String next : getPath().split("\\s*\\|\\s*")) {
+				retVal.add(new Include(next));
+			}
+		} else {
+			if (myType == null) {
+				ourLog.warn("Search parameter {} has no type", myName);
+			}
+			if ("resource".equals(myType) || "reference".equals(myType)) {
+				retVal.add(new Include(myResourceName + ":" + myName));
+			}
 		}
 		return retVal;
 	}
@@ -100,8 +114,8 @@ public class SearchParameter {
 
 	public void setName(String theName) {
 		if (theName != null && Character.isUpperCase(theName.charAt(0))) {
-			myName = theName.substring(theName.indexOf('.')+1);
-		}else {
+			myName = theName.substring(theName.indexOf('.') + 1);
+		} else {
 			myName = theName;
 		}
 	}
@@ -118,7 +132,7 @@ public class SearchParameter {
 		myType = theType;
 	}
 
-	public static class Include implements Comparable<Include>{
+	public static class Include implements Comparable<Include> {
 		private String myPath;
 
 		public Include(String thePath) {
@@ -126,11 +140,8 @@ public class SearchParameter {
 		}
 
 		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((myPath == null) ? 0 : myPath.hashCode());
-			return result;
+		public int compareTo(Include theO) {
+			return myPath.compareTo(theO.myPath);
 		}
 
 		@Override
@@ -153,7 +164,8 @@ public class SearchParameter {
 		public String getIncludeName() {
 			String retVal = myPath;
 			retVal = retVal.substring(retVal.indexOf('.') + 1);
-			retVal = retVal.toUpperCase().replace('.', '_').replace("[X]", "");
+			retVal = retVal.substring(retVal.indexOf(':') + 1);
+			retVal = retVal.toUpperCase().replace('.', '_').replace("[X]", "").replace("-", "_");
 			return retVal;
 		}
 
@@ -164,8 +176,11 @@ public class SearchParameter {
 		}
 
 		@Override
-		public int compareTo(Include theO) {
-			return myPath.compareTo(theO.myPath);
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((myPath == null) ? 0 : myPath.hashCode());
+			return result;
 		}
 
 	}

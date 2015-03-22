@@ -42,7 +42,6 @@ public class ValueSetGenerator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetGenerator.class);
 	private List<ValueSetFileDefinition> myResourceValueSetFiles;
 	private Set<ValueSetTm> myMarkedValueSets = new HashSet<ValueSetTm>();
-
 	private Map<String, ValueSetTm> myValueSets = new HashMap<String, ValueSetTm>();
 	private int myValueSetCount;
 	private int myConceptCount;

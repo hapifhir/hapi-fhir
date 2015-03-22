@@ -1399,7 +1399,7 @@ public class FhirResourceDaoDstu2Test {
 			// Named include
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-			params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+			params.addInclude(Patient.INCLUDE_ORGANIZATION);
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertEquals(2, patients.size());
@@ -1410,7 +1410,7 @@ public class FhirResourceDaoDstu2Test {
 			// Named include with parent
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-			params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+			params.addInclude(Patient.INCLUDE_ORGANIZATION);
 			params.addInclude(Organization.INCLUDE_PARTOF);
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
@@ -1470,7 +1470,7 @@ public class FhirResourceDaoDstu2Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludesThatHaveTextId_P1"));
-		params.addInclude(Patient.INCLUDE_MANAGINGORGANIZATION);
+		params.addInclude(Patient.INCLUDE_ORGANIZATION);
 		IBundleProvider search = ourPatientDao.search(params);
 		List<IResource> patients = toList(search);
 		assertEquals(2, patients.size());

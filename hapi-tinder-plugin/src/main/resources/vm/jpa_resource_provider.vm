@@ -66,8 +66,14 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 			@IncludeParam(allow= {
 #foreach ( $param in $searchParamsReference )
 #set ( $haveMore = $foreach.hasNext )
-#foreach ( $include in $param.paths )
+#if ( $version == 'dstu' )
+	#foreach ( $include in $param.paths )
 				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
+	#end
+#else
+	#foreach ( $include in $includes )
+				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
+	#end
 #end				 
 #end
 				#{if}($searchParamsReference.empty == false), #{end}"*"

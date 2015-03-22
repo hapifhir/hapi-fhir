@@ -25,6 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.hl7.fhir.instance.model.IBase;
+
 /**
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -35,5 +37,11 @@ public @interface OperationParam {
 	 * The name of the parameter
 	 */
 	String name();
+	
+	/**
+	 * The type of the parameter. This will only have effect on <code>@OperationParam</code>
+	 * annotations specified as values for {@link Operation#returnParameters()}
+	 */
+	Class<? extends IBase> type() default IBase.class;
 	
 }

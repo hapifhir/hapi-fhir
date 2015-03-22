@@ -24,15 +24,23 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 
 public class JpaSystemProviderDstu2 extends BaseJpaSystemProvider<Bundle> {
 
-	@Operation(name="$meta", idempotent=true)
-	public MetaDt operation() {
-		return getDao().metaGetOperation();
+	//@formatter:off
+	@Operation(name="$meta", idempotent=true, returnParameters= {
+		@OperationParam(name="return", type=MetaDt.class)
+	})
+	//@formatter:on
+	public Parameters operation() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
+		return parameters;
 	}
 	
 	@Transaction

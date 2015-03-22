@@ -1323,6 +1323,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myCompartmentName;
 		private CriterionList myCriterion = new CriterionList();
 		private List<Include> myInclude = new ArrayList<Include>();
+		private List<Include> myRevInclude = new ArrayList<Include>();
 		private Integer myParamLimit;
 		private String myResourceId;
 		private String myResourceName;
@@ -1354,6 +1355,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myInclude) {
 				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+			}
+
+			for (Include next : myRevInclude) {
+				addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
 			}
 
 			for (SortInternal next : mySort) {
@@ -1441,6 +1446,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery withIdAndCompartment(String theResourceId, String theCompartmentName) {
 			myResourceId = theResourceId;
 			myCompartmentName = theCompartmentName;
+			return this;
+		}
+
+		@Override
+		public IQuery revinclude(Include theInclude) {
+			myRevInclude.add(theInclude);
 			return this;
 		}
 

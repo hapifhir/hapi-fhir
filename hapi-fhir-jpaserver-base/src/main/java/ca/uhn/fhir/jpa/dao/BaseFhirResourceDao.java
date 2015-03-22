@@ -125,9 +125,9 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
 
 @Transactional(propagation = Propagation.REQUIRED)
-public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
+public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirDao implements IFhirResourceDao<T> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDao.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirResourceDao.class);
 
 	@PersistenceContext()
 	private EntityManager myEntityManager;
@@ -703,10 +703,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		if (isNotBlank(theResource.getId().getIdPart())) {
 			if (getContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 				if (theResource.getId().isIdPartValidLong()) {
-					throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
 			} else {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getId().getIdPart()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getId().getIdPart()));
 			}
 		}
 
@@ -740,7 +740,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 			if (entity.getForcedId() != null) {
 				try {
 					translateForcedIdToPid(theResource.getId());
-					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "duplicateCreateForcedId", theResource.getId().getIdPart()));
+					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "duplicateCreateForcedId", theResource.getId().getIdPart()));
 				} catch (ResourceNotFoundException e) {
 					// good, this ID doesn't exist so we can create it
 				}
@@ -963,7 +963,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 		Set<Long> resource = processMatchUrl(theUrl, myResourceType);
 		if (resource.isEmpty()) {
-			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "unableToDeleteNotFound", theUrl));
+			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "unableToDeleteNotFound", theUrl));
 		} else if (resource.size() > 1) {
 			throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
 		}
@@ -1367,15 +1367,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 								for (Include next : theParams.getIncludes()) {
 									for (IResource nextResource : resources) {
 										RuntimeResourceDefinition def = getContext().getResourceDefinition(nextResource);
-										List<Object> values;
-										if ("*".equals(next.getValue())) {
-											values = new ArrayList<Object>();
-											values.addAll(t.getAllPopulatedChildElementsOfType(nextResource, BaseResourceReferenceDt.class));
-										} else if (next.getValue().startsWith(def.getName() + ".")) {
-											values = t.getValues(nextResource, next.getValue());
-										} else {
-											continue;
-										}
+										List<Object> values = getIncludeValues(t, next, nextResource, def);
 
 										for (Object object : values) {
 											if (object == null) {
@@ -1420,6 +1412,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 
 						return retVal;
 					}
+
 				});
 			}
 
@@ -1439,6 +1432,10 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 		return search(Collections.singletonMap(theParameterName, theValue));
 	}
 
+	
+	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IResource theResource, RuntimeResourceDefinition theResourceDef);
+
+	
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
 		SearchParameterMap map = new SearchParameterMap();
@@ -1682,7 +1679,7 @@ public class FhirResourceDao<T extends IResource> extends BaseFhirDao implements
 				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {
 				if (Character.isDigit(theResource.getId().getIdPart().charAt(0))) {
-					throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
 				return doCreate(theResource, null, true);
 			}

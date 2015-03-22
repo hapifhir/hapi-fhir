@@ -26,7 +26,10 @@ import ca.uhn.fhir.rest.method.SearchStyleEnum;
 
 public interface IQuery extends IClientExecutable<IQuery, Bundle>, IBaseQuery<IQuery> {
 
-	IQuery include(Include theIncludeManagingorganization);
+	/**
+	 * Add an "_include" specification
+	 */
+	IQuery include(Include theInclude);
 
 	ISort sort();
 
@@ -42,5 +45,12 @@ public interface IQuery extends IClientExecutable<IQuery, Bundle>, IBaseQuery<IQ
 	IQuery usingStyle(SearchStyleEnum theStyle);
 
 	IQuery withIdAndCompartment(String theResourceId, String theCompartmentName);
+
+	/**
+	 * Add a "_revinclude" specification
+	 * 
+	 * @since 1.0
+	 */
+	IQuery revinclude(Include theIncludeTarget);
 	
 }

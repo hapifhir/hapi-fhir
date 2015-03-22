@@ -599,6 +599,22 @@ public List<DiagnosticReport> getDiagnosticReport(
 }
 //END SNIPPET: pathSpec
 
+//START SNIPPET: revInclude
+@Search()
+public List<DiagnosticReport> getDiagnosticReport( 
+             @RequiredParam(name=DiagnosticReport.SP_IDENTIFIER) 
+             TokenParam theIdentifier,
+             
+             @IncludeParam() 
+             Set<Include> theIncludes, 
+             
+             @IncludeParam(reverse=true)
+             Set<Include> theReverseIncludes
+         ) {
+ 
+return new ArrayList<DiagnosticReport>(); // populate this
+}
+//END SNIPPET: revInclude
 
 //START SNIPPET: pathSpecSimple
 @Search()

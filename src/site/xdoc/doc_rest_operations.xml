@@ -917,6 +917,22 @@
 
 			</subsection>
 
+			<subsection name="Reverse Resource Includes (_revinclude)">
+
+				<p>
+					To add support for reverse includes (via the <code>_revinclude</code> parameter),
+					use the same format as with the <code>_include</code> parameter (shown above) 
+					but add <code>reverse=true</code> to the <code>@IncludeParam</code>
+					annotation, as shown below.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="revInclude" />
+					<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+				</macro>
+
+			</subsection>
+			
 			<subsection name="Named Queries (_query)">
 
 				<p>
