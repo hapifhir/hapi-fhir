@@ -41,6 +41,7 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	private Integer myCount;
 	private Set<Include> myIncludes;
+	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
@@ -97,6 +98,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 		return myIncludes;
 	}
 
+	public Set<Include> getRevIncludes() {
+		return myRevIncludes;
+	}
+
 	public SortSpec getSort() {
 		return mySort;
 	}
@@ -107,6 +112,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	public void setIncludes(Set<Include> theIncludes) {
 		myIncludes = theIncludes;
+	}
+
+	public void setRevIncludes(Set<Include> theRevIncludes) {
+		myRevIncludes = theRevIncludes;
 	}
 
 	public void setSort(SortSpec theSort) {

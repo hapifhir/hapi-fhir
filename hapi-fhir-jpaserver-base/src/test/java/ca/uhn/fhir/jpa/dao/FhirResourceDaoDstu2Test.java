@@ -1,6 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -90,6 +96,7 @@ public class FhirResourceDaoDstu2Test {
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
+	private static IFhirSystemDao<Bundle> ourSystemDao;
 
 	@Test
 	public void testChoiceParamConcept() {
@@ -836,6 +843,244 @@ public class FhirResourceDaoDstu2Test {
 
 		Patient v2 = ourPatientDao.read(p1idv2);
 		assertEquals(2, v2.getIdentifier().size());
+
+	}
+
+	@Test
+	public void testResourceInstanceMetaOperation() {
+		deleteEverything();
+		
+		String methodName = "testResourceInstanceMetaOperation";
+		IdDt id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			id1 = ourPatientDao.create(patient).getId();
+
+			MetaDt metaAdd = new MetaDt();
+			metaAdd.addTag().setSystem((String) null).setCode("Dog").setDisplay("Puppies");
+			metaAdd.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
+			metaAdd.addProfile("http://profile/1");
+			ourPatientDao.metaAddOperation(id1, metaAdd);
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			TagList tagList = new TagList();
+			tagList.addTag("http://foo", "Cat", "Kittens");
+			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/2"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
+
+			id2 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue(methodName);
+			TagList tagList = new TagList();
+			tagList.addTag("http://foo", "Foo", "Bars");
+			ResourceMetadataKeyEnum.TAG_LIST.put(device, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(device, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/3"));
+			ResourceMetadataKeyEnum.PROFILES.put(device, profiles);
+
+			ourDeviceDao.create(device);
+		}
+
+		MetaDt meta;
+
+		meta = ourPatientDao.metaGetOperation();
+		List<CodingDt> published = meta.getTag();
+		assertEquals(2, published.size());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		List<CodingDt> secLabels = meta.getSecurity();
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
+		List<UriDt> profiles = meta.getProfile();
+		assertEquals(2, profiles.size());
+		assertEquals("http://profile/1", profiles.get(0).getValue());
+		assertEquals("http://profile/2", profiles.get(1).getValue());
+
+		meta = ourPatientDao.metaGetOperation(id2);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+		{
+			MetaDt metaDel = new MetaDt();
+			metaDel.addTag().setSystem((String) null).setCode("Dog");
+			metaDel.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1");
+			metaDel.addProfile("http://profile/1");
+			ourPatientDao.metaDeleteOperation(id1, metaDel);
+		}
+
+		meta = ourPatientDao.metaGetOperation();
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+	}
+
+	@Test
+	public void testResourceMetaOperation() {
+		deleteEverything();
+
+		String methodName = "testResourceMetaOperation";
+		IdDt id1, id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			TagList tagList = new TagList();
+			tagList.addTag(null, "Dog", "Puppies");
+			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/1"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
+
+			id1 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+			patient.addName().addFamily("Tester").addGiven("Joe");
+			TagList tagList = new TagList();
+			tagList.addTag("http://foo", "Cat", "Kittens");
+			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/2"));
+			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
+
+			id2 = ourPatientDao.create(patient).getId();
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setSystem("urn:system").setValue(methodName);
+			TagList tagList = new TagList();
+			tagList.addTag("http://foo", "Foo", "Bars");
+			ResourceMetadataKeyEnum.TAG_LIST.put(device, tagList);
+
+			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+			securityLabels.add(new CodingDt().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(device, securityLabels);
+
+			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
+			profiles.add(new IdDt("http://profile/3"));
+			ResourceMetadataKeyEnum.PROFILES.put(device, profiles);
+
+			ourDeviceDao.create(device);
+		}
+
+		MetaDt meta;
+
+		meta = ourPatientDao.metaGetOperation();
+		List<CodingDt> published = meta.getTag();
+		assertEquals(2, published.size());
+		assertEquals(null, published.get(0).getSystem());
+		assertEquals("Dog", published.get(0).getCode());
+		assertEquals("Puppies", published.get(0).getDisplay());
+		assertEquals("http://foo", published.get(1).getSystem());
+		assertEquals("Cat", published.get(1).getCode());
+		assertEquals("Kittens", published.get(1).getDisplay());
+		List<CodingDt> secLabels = meta.getSecurity();
+		assertEquals(2, secLabels.size());
+		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
+		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
+		List<UriDt> profiles = meta.getProfile();
+		assertEquals(2, profiles.size());
+		assertEquals("http://profile/1", profiles.get(0).getValue());
+		assertEquals("http://profile/2", profiles.get(1).getValue());
+
+		meta = ourPatientDao.metaGetOperation(id2);
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
+
+		ourPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
+		ourPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
+		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, "http://profile/1");
+
+		meta = ourPatientDao.metaGetOperation();
+		published = meta.getTag();
+		assertEquals(1, published.size());
+		assertEquals("http://foo", published.get(0).getSystem());
+		assertEquals("Cat", published.get(0).getCode());
+		assertEquals("Kittens", published.get(0).getDisplay());
+		secLabels = meta.getSecurity();
+		assertEquals(1, secLabels.size());
+		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
+		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
+		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
+		profiles = meta.getProfile();
+		assertEquals(1, profiles.size());
+		assertEquals("http://profile/2", profiles.get(0).getValue());
 
 	}
 
@@ -2066,241 +2311,12 @@ public class FhirResourceDaoDstu2Test {
 		ourOrganizationDao = ourCtx.getBean("myOrganizationDaoDstu2", IFhirResourceDao.class);
 		ourLocationDao = ourCtx.getBean("myLocationDaoDstu2", IFhirResourceDao.class);
 		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu2", IFhirResourceDao.class);
+		ourSystemDao = ourCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
 	}
 
-	@Test
-	public void testResourceMetaOperation() {
-		String methodName = "testResourceMetaOperation";
-		IdDt id1, id2;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
-			TagList tagList = new TagList();
-			tagList.addTag(null, "Dog", "Puppies");
-			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
-
-			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
-			securityLabels.add(new CodingDt().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
-
-			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
-			profiles.add(new IdDt("http://profile/1"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
-
-			id1 = ourPatientDao.create(patient).getId();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
-			TagList tagList = new TagList();
-			tagList.addTag("http://foo", "Cat", "Kittens");
-			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
-
-			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
-			securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
-
-			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
-			profiles.add(new IdDt("http://profile/2"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
-
-			id2 = ourPatientDao.create(patient).getId();
-		}
-		{
-			Device device = new Device();
-			device.addIdentifier().setSystem("urn:system").setValue(methodName);
-			TagList tagList = new TagList();
-			tagList.addTag("http://foo", "Foo", "Bars");
-			ResourceMetadataKeyEnum.TAG_LIST.put(device, tagList);
-
-			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
-			securityLabels.add(new CodingDt().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(device, securityLabels);
-
-			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
-			profiles.add(new IdDt("http://profile/3"));
-			ResourceMetadataKeyEnum.PROFILES.put(device, profiles);
-
-			ourDeviceDao.create(device);
-		}
-
-		MetaDt meta;
-
-		meta = ourPatientDao.metaGetOperation();
-		List<CodingDt> published = meta.getTag();
-		assertEquals(2, published.size());
-		assertEquals(null, published.get(0).getSystem());
-		assertEquals("Dog", published.get(0).getCode());
-		assertEquals("Puppies", published.get(0).getDisplay());
-		assertEquals("http://foo", published.get(1).getSystem());
-		assertEquals("Cat", published.get(1).getCode());
-		assertEquals("Kittens", published.get(1).getDisplay());
-		List<CodingDt> secLabels = meta.getSecurity();
-		assertEquals(2, secLabels.size());
-		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriDt> profiles = meta.getProfile();
-		assertEquals(2, profiles.size());
-		assertEquals("http://profile/1", profiles.get(0).getValue());
-		assertEquals("http://profile/2", profiles.get(1).getValue());
-
-		meta = ourPatientDao.metaGetOperation(id2);
-		published = meta.getTag();
-		assertEquals(1, published.size());
-		assertEquals("http://foo", published.get(0).getSystem());
-		assertEquals("Cat", published.get(0).getCode());
-		assertEquals("Kittens", published.get(0).getDisplay());
-		secLabels = meta.getSecurity();
-		assertEquals(1, secLabels.size());
-		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
-		profiles = meta.getProfile();
-		assertEquals(1, profiles.size());
-		assertEquals("http://profile/2", profiles.get(0).getValue());
-
-		ourPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
-		ourPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
-		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, "http://profile/1");
-
-		meta = ourPatientDao.metaGetOperation();
-		published = meta.getTag();
-		assertEquals(1, published.size());
-		assertEquals("http://foo", published.get(0).getSystem());
-		assertEquals("Cat", published.get(0).getCode());
-		assertEquals("Kittens", published.get(0).getDisplay());
-		secLabels = meta.getSecurity();
-		assertEquals(1, secLabels.size());
-		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
-		profiles = meta.getProfile();
-		assertEquals(1, profiles.size());
-		assertEquals("http://profile/2", profiles.get(0).getValue());
-
-	}
-
-	@Test
-	public void testResourceInstanceMetaOperation() {
-		String methodName = "testResourceInstanceMetaOperation";
-		IdDt id1, id2;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
-			id1 = ourPatientDao.create(patient).getId();
-
-			MetaDt metaAdd = new MetaDt();
-			metaAdd.addTag().setSystem((String) null).setCode("Dog").setDisplay("Puppies");
-			metaAdd.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1");
-			metaAdd.addProfile("http://profile/1");
-			ourPatientDao.metaAddOperation(id1, metaAdd);
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-			patient.addName().addFamily("Tester").addGiven("Joe");
-			TagList tagList = new TagList();
-			tagList.addTag("http://foo", "Cat", "Kittens");
-			ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
-
-			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
-			securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
-
-			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
-			profiles.add(new IdDt("http://profile/2"));
-			ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
-
-			id2 = ourPatientDao.create(patient).getId();
-		}
-		{
-			Device device = new Device();
-			device.addIdentifier().setSystem("urn:system").setValue(methodName);
-			TagList tagList = new TagList();
-			tagList.addTag("http://foo", "Foo", "Bars");
-			ResourceMetadataKeyEnum.TAG_LIST.put(device, tagList);
-
-			List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
-			securityLabels.add(new CodingDt().setSystem("seclabel:sys:3").setCode("seclabel:code:3").setDisplay("seclabel:dis:3"));
-			ResourceMetadataKeyEnum.SECURITY_LABELS.put(device, securityLabels);
-
-			ArrayList<IdDt> profiles = new ArrayList<IdDt>();
-			profiles.add(new IdDt("http://profile/3"));
-			ResourceMetadataKeyEnum.PROFILES.put(device, profiles);
-
-			ourDeviceDao.create(device);
-		}
-
-		MetaDt meta;
-
-		meta = ourPatientDao.metaGetOperation();
-		List<CodingDt> published = meta.getTag();
-		assertEquals(2, published.size());
-		assertEquals(null, published.get(0).getSystem());
-		assertEquals("Dog", published.get(0).getCode());
-		assertEquals("Puppies", published.get(0).getDisplay());
-		assertEquals("http://foo", published.get(1).getSystem());
-		assertEquals("Cat", published.get(1).getCode());
-		assertEquals("Kittens", published.get(1).getDisplay());
-		List<CodingDt> secLabels = meta.getSecurity();
-		assertEquals(2, secLabels.size());
-		assertEquals("seclabel:sys:1", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:1", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:1", secLabels.get(0).getDisplayElement().getValue());
-		assertEquals("seclabel:sys:2", secLabels.get(1).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(1).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(1).getDisplayElement().getValue());
-		List<UriDt> profiles = meta.getProfile();
-		assertEquals(2, profiles.size());
-		assertEquals("http://profile/1", profiles.get(0).getValue());
-		assertEquals("http://profile/2", profiles.get(1).getValue());
-
-		meta = ourPatientDao.metaGetOperation(id2);
-		published = meta.getTag();
-		assertEquals(1, published.size());
-		assertEquals("http://foo", published.get(0).getSystem());
-		assertEquals("Cat", published.get(0).getCode());
-		assertEquals("Kittens", published.get(0).getDisplay());
-		secLabels = meta.getSecurity();
-		assertEquals(1, secLabels.size());
-		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
-		profiles = meta.getProfile();
-		assertEquals(1, profiles.size());
-		assertEquals("http://profile/2", profiles.get(0).getValue());
-
-		{
-			MetaDt metaDel = new MetaDt();
-			metaDel.addTag().setSystem((String) null).setCode("Dog");
-			metaDel.addSecurity().setSystem("seclabel:sys:1").setCode("seclabel:code:1");
-			metaDel.addProfile("http://profile/1");
-			ourPatientDao.metaDeleteOperation(id1, metaDel);
-		}
-
-		meta = ourPatientDao.metaGetOperation();
-		published = meta.getTag();
-		assertEquals(1, published.size());
-		assertEquals("http://foo", published.get(0).getSystem());
-		assertEquals("Cat", published.get(0).getCode());
-		assertEquals("Kittens", published.get(0).getDisplay());
-		secLabels = meta.getSecurity();
-		assertEquals(1, secLabels.size());
-		assertEquals("seclabel:sys:2", secLabels.get(0).getSystemElement().getValue());
-		assertEquals("seclabel:code:2", secLabels.get(0).getCodeElement().getValue());
-		assertEquals("seclabel:dis:2", secLabels.get(0).getDisplayElement().getValue());
-		profiles = meta.getProfile();
-		assertEquals(1, profiles.size());
-		assertEquals("http://profile/2", profiles.get(0).getValue());
-
+	private static void deleteEverything() {
+		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
 	}
 
 }

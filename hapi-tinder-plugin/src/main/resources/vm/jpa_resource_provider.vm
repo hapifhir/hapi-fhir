@@ -63,6 +63,11 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 #end
 #end	
 
+#if ( $version != 'dstu' )
+			@IncludeParam(reverse=true)
+			Set<Include> theRevIncludes,
+#end
+
 			@IncludeParam(allow= {
 #foreach ( $param in $searchParamsReference )
 #set ( $haveMore = $foreach.hasNext )
@@ -94,7 +99,9 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});	
 #end
-
+#if ( $version != 'dstu' )
+			paramMap.setRevIncludes(theRevIncludes);
+#end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -22,9 +21,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseFhirResourceD
 		} else if (theInclude.getValue().startsWith(theResourceDef.getName() + ":")) {
 			values = new ArrayList<Object>();
 			RuntimeSearchParam sp = theResourceDef.getSearchParam(theInclude.getValue().substring(theInclude.getValue().indexOf(':')+1));
-			StringTokenizer tok = new StringTokenizer(sp.getPath(), "|");
-			while (tok.hasMoreElements()) {
-				String nextPath = tok.nextToken().trim();
+			for (String nextPath : sp.getPathsSplit()) {
 				values.addAll(theTerser.getValues(theResource, nextPath));
 			}
 		} else {

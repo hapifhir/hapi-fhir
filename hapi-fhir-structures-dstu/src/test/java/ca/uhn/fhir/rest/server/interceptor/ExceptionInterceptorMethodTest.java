@@ -73,7 +73,7 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.handleException(any(RequestDetails.class), any(Throwable.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-				HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[4];
+				HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[3];
 				resp.setStatus(405);
 				resp.setContentType("text/plain");
 				resp.getWriter().write("HELP IM A BUG");

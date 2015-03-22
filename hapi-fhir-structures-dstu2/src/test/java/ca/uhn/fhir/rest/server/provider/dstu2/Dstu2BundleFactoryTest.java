@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -89,7 +90,8 @@ public class Dstu2BundleFactoryTest {
 
     @Test
     public void whenIncludeIsDiagnosticReportSubject_bundle_shouldIncludePatient() throws Exception {
-        Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(DiagnosticReport.INCLUDE_SUBJECT.getValue()));
+        Set<Include> includes = includes(DiagnosticReport.INCLUDE_SUBJECT.getValue());
+		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes);
 
         assertEquals(2, bundle.getEntry().size());
         assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));

@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -79,7 +80,6 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.StopWatch;
@@ -1354,6 +1354,11 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						List<IResource> retVal = new ArrayList<IResource>();
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
+						// Load _revinclude resources
+						if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty()==false) {
+							loadReverseIncludes(pidsSubList, retVal, theParams.getRevIncludes());
+						}
+						
 						// Load _include resources
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IdDt> previouslyLoadedPids = new HashSet<IdDt>();
@@ -1393,14 +1398,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 									}
 								}
 
-								if (!includePids.isEmpty()) {
-									ourLog.info("Loading {} included resources", includePids.size());
-									resources = loadResourcesById(includePids);
-									for (IResource next : resources) {
-										ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
-									}
-									retVal.addAll(resources);
-								}
+								resources = addResourcesAsIncludesById(retVal, includePids, resources);
 							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
@@ -1427,6 +1425,61 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return retVal;
 	}
 
+	private List<IResource> addResourcesAsIncludesById(List<IResource> theListToPopulate, Set<IdDt> includePids, List<IResource> resources) {
+		if (!includePids.isEmpty()) {
+			ourLog.info("Loading {} included resources", includePids.size());
+			resources = loadResourcesById(includePids);
+			for (IResource next : resources) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
+			}
+			theListToPopulate.addAll(resources);
+		}
+		return resources;
+	}
+
+	protected void loadReverseIncludes(List<Long> theMatches, List<IResource> theResourceListToPopulate, Set<Include> theRevIncludes) {
+		if (theMatches.size() == 0) {
+			return;
+		}
+		
+		Long[] matchesArray = theMatches.toArray(new Long[theMatches.size()]);
+		Set<Long> pidsToInclude = new HashSet<Long>();
+		
+		for (Include nextInclude : theRevIncludes) {
+			int colonIdx = nextInclude.getValue().indexOf(':');
+			if (colonIdx < 2) {
+				continue;
+			}
+			String resType = nextInclude.getValue().substring(0, colonIdx);
+			RuntimeResourceDefinition def = getContext().getResourceDefinition(resType);
+			if (def == null) {
+				ourLog.warn("Unknown resource type in _revinclude=" + nextInclude.getValue());
+				continue;
+			}
+			
+			String paramName = nextInclude.getValue().substring(colonIdx+1);
+			RuntimeSearchParam param = def.getSearchParam(paramName);
+			if (param == null) {
+				ourLog.warn("Unknown param name in _revinclude=" + nextInclude.getValue());
+				continue;
+			}
+			
+			for (String nextPath : param.getPathsSplit()) {
+				String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN :target_pids";
+				TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+				q.setParameter("src_path", nextPath);
+				q.setParameter("target_pids", matchesArray);
+				List<ResourceLink> results = q.getResultList();
+				for (ResourceLink resourceLink : results) {
+					pidsToInclude.add(resourceLink.getSourceResourcePid());
+				}
+			}
+			
+			loadResourcesByPid(pidsToInclude, theResourceListToPopulate, BundleEntrySearchModeEnum.INCLUDE);
+		}
+	}
+
+	
 	@Override
 	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
 		return search(Collections.singletonMap(theParameterName, theValue));
@@ -1817,7 +1870,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		myEntityManager.merge(entity);
 		notifyWriteCompleted();
 		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
-		
+
 		return metaGetOperation(theResourceId);
 	}
 

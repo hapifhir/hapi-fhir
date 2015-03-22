@@ -33,6 +33,8 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
+	static final int MAX_SP_NAME = 100;
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -40,7 +42,7 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	@Column(name = "SP_NAME", length = 100, nullable=false)
+	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable=false)
 	private String myParamName;
 
 	@ManyToOne(optional = false)

@@ -345,7 +345,25 @@ public abstract class BaseFhirDao implements IDao {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 		Root<TagDefinition> from = cq.from(TagDefinition.class);
-		cq.where(builder.and(builder.equal(from.get("mySystem"), theScheme), builder.equal(from.get("myCode"), theTerm)));
+		
+		//@formatter:off
+		if (isNotBlank(theScheme)) {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType), 
+					builder.equal(from.get("mySystem"), theScheme), 
+					builder.equal(from.get("myCode"), theTerm))
+				);
+		} else {
+			cq.where(
+				builder.and(
+					builder.equal(from.get("myTagType"), theTagType), 
+					builder.isNull(from.get("mySystem")), 
+					builder.equal(from.get("myCode"), theTerm))
+				);
+		}
+		//@formatter:on
+		
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 		try {
 			return q.getSingleResult();
@@ -382,7 +400,7 @@ public abstract class BaseFhirDao implements IDao {
 			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 			Root<TagDefinition> from = cq.from(TagDefinition.class);
 			cq.where(from.get("myId").in(tagIds));
-			cq.orderBy(builder.asc(from.get("myScheme")), builder.asc(from.get("myTerm")));
+			cq.orderBy(builder.asc(from.get("mySystem")), builder.asc(from.get("myCode")));
 			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 			q.setMaxResults(getConfig().getHardTagListLimit());
 

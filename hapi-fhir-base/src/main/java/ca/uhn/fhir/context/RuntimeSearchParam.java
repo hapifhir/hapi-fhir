@@ -1,6 +1,9 @@
 package ca.uhn.fhir.context;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
 
@@ -63,6 +66,21 @@ public class RuntimeSearchParam {
 
 	public String getPath() {
 		return myPath;
+	}
+
+	public List<String> getPathsSplit() {
+		String path = getPath();
+		if (path.indexOf('|')==-1) {
+			return Collections.singletonList(path);
+		}
+		
+		List<String> retVal = new ArrayList<String>();
+		StringTokenizer tok = new StringTokenizer(path, "|");
+		while (tok.hasMoreElements()) {
+			String nextPath = tok.nextToken().trim();
+			retVal.add(nextPath.trim());
+		}
+		return retVal;
 	}
 
 }

@@ -20,10 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import java.util.Set;
@@ -32,37 +34,52 @@ import java.util.Set;
  * Created by Bill de Beaubien on 2/26/2015.
  */
 public class ResourceReferenceInfo {
-    private String myOwningResource;
-    private String myName;
-    private BaseResourceReferenceDt myResource;
+	private String myOwningResource;
+	private String myName;
+	private BaseResourceReferenceDt myResource;
 
-    public ResourceReferenceInfo(IBaseResource theOwningResource, String theName, BaseResourceReferenceDt theResource) {
-        myOwningResource = theOwningResource.getClass().getAnnotation(ResourceDef.class).name();
-        myName = theName;
-        myResource = theResource;
-    }
+	public ResourceReferenceInfo(IBaseResource theOwningResource, String theName, BaseResourceReferenceDt theResource) {
+		myOwningResource = theOwningResource.getClass().getAnnotation(ResourceDef.class).name();
+		myName = theName;
+		myResource = theResource;
+	}
 
-    public String getName() {
-        return myName;
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("name", myName);
+		b.append("resource", myResource.getReference());
+		return b.build();
+	}
 
-    public BaseResourceReferenceDt getResourceReference() {
-        return myResource;
-    }
+	public String getName() {
+		return myName;
+	}
 
-    public boolean matchesIncludeSet(Set<Include> theIncludes) {
-        if (theIncludes == null)
-            return false;
-        for (Include include : theIncludes) {
-            if (matchesInclude(include))
-                return true;
-        }
-        return false;
-    }
+	public BaseResourceReferenceDt getResourceReference() {
+		return myResource;
+	}
 
-    public boolean matchesInclude(Include theInclude) {
-        if (theInclude.getValue().equals("*"))
-            return true;
-        return (theInclude.getValue().equals(myOwningResource + "." + myName));
-    }
+	public boolean matchesIncludeSet(Set<Include> theIncludes) {
+		if (theIncludes == null)
+			return false;
+		for (Include include : theIncludes) {
+			if (matchesInclude(include))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean matchesInclude(Include theInclude) {
+		if (theInclude.getValue().equals("*")) {
+			return true;
+		}
+		if (theInclude.getValue().indexOf(':') != -1) {
+			// DSTU2 style
+			return (theInclude.getValue().equals(myOwningResource + ':' + myName));
+		} else {
+			// DSTU1 style
+			return (theInclude.getValue().equals(myOwningResource + '.' + myName));
+		}
+	}
 }

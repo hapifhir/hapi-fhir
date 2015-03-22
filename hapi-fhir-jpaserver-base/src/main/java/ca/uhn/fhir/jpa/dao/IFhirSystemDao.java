@@ -45,4 +45,9 @@ public interface IFhirSystemDao<T> extends IDao {
 	 */
 	MetaDt metaGetOperation();
 
+	/**
+	 * Use with caution! This deletes everything!!
+	 */
+	void deleteAllTagsOnServer();
+
 }

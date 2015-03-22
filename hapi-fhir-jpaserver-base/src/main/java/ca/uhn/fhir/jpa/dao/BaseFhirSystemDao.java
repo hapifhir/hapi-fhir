@@ -33,6 +33,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
@@ -43,6 +46,12 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public abstract class BaseFhirSystemDao<T> extends BaseFhirDao implements IFhirSystemDao<T> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirSystemDao.class);
+
+	@Transactional(propagation=Propagation.REQUIRED)
+	@Override
+	public void deleteAllTagsOnServer() {
+		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
+	}
 
 	@PersistenceContext()
 	protected EntityManager myEntityManager;

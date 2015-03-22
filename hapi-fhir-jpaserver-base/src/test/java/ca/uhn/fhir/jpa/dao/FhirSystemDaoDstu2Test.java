@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -33,10 +32,10 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -52,7 +51,7 @@ public class FhirSystemDaoDstu2Test {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
 	private static IFhirResourceDao<Observation> ourObservationDao;
-
+	
 	@Test
 	public void testTransactionCreateMatchUrlWithOneMatch() {
 		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
@@ -678,6 +677,12 @@ public class FhirSystemDaoDstu2Test {
 
 	@Test
 	public void testSystemMetaOperation() {
+		deleteEverything();
+		
+		MetaDt meta = ourSystemDao.metaGetOperation();
+		List<CodingDt> published = meta.getTag();
+		assertEquals(0, published.size());
+
 		String methodName = "testSystemMetaOperation";
 		IdDt id1;
 		{
@@ -717,10 +722,8 @@ public class FhirSystemDaoDstu2Test {
 			ourPatientDao.create(patient);
 		}
 
-		MetaDt meta;
-		
 		meta = ourSystemDao.metaGetOperation();
-		List<CodingDt> published = meta.getTag();
+		published = meta.getTag();
 		assertEquals(2, published.size());
 		assertEquals(null, published.get(0).getSystem());
 		assertEquals("Dog", published.get(0).getCode());
@@ -760,6 +763,28 @@ public class FhirSystemDaoDstu2Test {
 		assertEquals(1, profiles.size());
 		assertEquals("http://profile/2", profiles.get(0).getValue());
 
+	}
+
+	private void deleteEverything() {
+		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
+	}
+
+	static void doDeleteEverything(IFhirSystemDao<Bundle> systemDao) {
+		IBundleProvider all = systemDao.history(null);
+		List<IResource> allRes = all.getResources(0, all.size());
+		for (IResource iResource : allRes) {
+			if (ResourceMetadataKeyEnum.DELETED_AT.get(iResource) == null) {
+				ourLog.info("Deleting: {}", iResource.getId());
+				
+				Bundle b = new Bundle();
+				b.setType(BundleTypeEnum.TRANSACTION);
+				String url = iResource.getId().toVersionless().getValue();
+				b.addEntry().getTransaction().setMethod(HTTPVerbEnum.DELETE).setUrl(url);
+				systemDao.transaction(b);
+			}
+		}
+		
+		systemDao.deleteAllTagsOnServer();
 	}
 
 }
