@@ -102,6 +102,26 @@ public class JsonParserTest {
 	}
 	
 	@Test
+	public void testEncodeOmitsVersionAndBase() {
+		Patient p = new Patient();
+		p.getManagingOrganization().setReference("http://example.com/base/Patient/1/_history/2");
+		
+		String enc;
+		
+		enc = ourCtx.newJsonParser().encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"http://example.com/base/Patient/1\""));
+		
+		enc = ourCtx.newJsonParser().setServerBaseUrl("http://example.com/base").encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"Patient/1\""));
+
+		enc = ourCtx.newJsonParser().setServerBaseUrl("http://example.com/base2").encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"http://example.com/base/Patient/1\""));
+	}
+
+	@Test
 	public void testDecimalPrecisionPreserved() {
 		String number = "52.3779939997090374535378485873776474764643249869328698436986235758587";
 		

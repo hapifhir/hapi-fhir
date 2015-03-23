@@ -1122,7 +1122,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-//		cq.where(builder.equal(from.get("myResourceType"), getContext().getResourceDefinition(myResourceType).getName()));
 		cq.where(from.get("myId").in(theIncludePids));
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 

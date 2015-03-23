@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -62,6 +63,20 @@ public class SearchTest {
 	private static int ourPort;
 
 	private static Server ourServer;
+
+	@Test
+	public void testEncodeConvertsReferencesToRelative() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
+		String ref = patient.getManagingOrganization().getReference().getValue();
+		assertEquals("Organization/555", ref);
+	}
 
 	@Test
 	public void testOmitEmptyOptionalParam() throws Exception {
@@ -312,6 +327,15 @@ public class SearchTest {
 			retVal.add(patient);
 			return retVal;
 		}
+		
+		@Search(queryName="searchWithRef")
+		public Patient searchWithRef() {
+			Patient patient = new Patient();
+			patient.setId("Patient/1/_history/1");
+			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
+			return patient;
+		}
+
 
 		@Search
 		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam) {

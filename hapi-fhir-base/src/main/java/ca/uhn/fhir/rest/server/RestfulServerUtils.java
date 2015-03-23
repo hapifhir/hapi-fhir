@@ -147,7 +147,9 @@ public class RestfulServerUtils {
 			if (theNarrativeMode == RestfulServer.NarrativeModeEnum.ONLY) {
 				writer.append(theResource.getText().getDiv().getValueAsString());
 			} else {
-				getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode).encodeResourceToWriter(theResource, writer);
+				IParser parser = getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
+				parser.setServerBaseUrl(theServerBase);
+				parser.encodeResourceToWriter(theResource, writer);
 			}
 		} finally {
 			writer.close();
@@ -372,8 +374,9 @@ public class RestfulServerUtils {
 					writer.append("<hr/>");
 				}
 			} else {
-				IParser newParser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
-				newParser.encodeBundleToWriter(bundle, writer);
+				IParser parser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
+				parser.setServerBaseUrl(theServerBase);
+				parser.encodeBundleToWriter(bundle, writer);
 			}
 		} finally {
 			writer.close();

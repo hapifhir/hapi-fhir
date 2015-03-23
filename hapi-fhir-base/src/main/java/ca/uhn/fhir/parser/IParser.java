@@ -32,7 +32,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 
 /**
- * 
+ * A parser, which can be used to convert between HAPI FHIR model/structure objects, and
+ * their respective String wire formats, in either XML or JSON.
  * <p>
  * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread or every message being parsed/encoded.
  * </p>
@@ -66,10 +67,25 @@ public interface IParser {
 	 */
 	void encodeTagListToWriter(TagList theTagList, Writer theWriter) throws IOException;
 
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you
+	 * should use {@link #parseResource(Class, Reader)} with the Bundle class found in the 
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 */
 	<T extends IBaseResource> Bundle parseBundle(Class<T> theResourceType, Reader theReader);
 
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you
+	 * should use {@link #parseResource(Class, Reader)} with the Bundle class found in the 
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 */
 	Bundle parseBundle(Reader theReader);
 
+	/**
+	 * Parse a DSTU1 style Atom Bundle. Note that as of DSTU2, Bundle is a resource so you
+	 * should use {@link #parseResource(Class, String)} with the Bundle class found in the 
+	 * <code>ca.uhn.hapi.fhir.model.[version].resource</code> package instead.
+	 */
 	Bundle parseBundle(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	/**
@@ -143,7 +159,7 @@ public interface IParser {
 	 * 
 	 * @param thePrettyPrint
 	 *            The flag
-	 * @return Returns an instance of <code>this</code> parser so that method calls can be conveniently chained
+	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setPrettyPrint(boolean thePrettyPrint);
 
@@ -151,5 +167,15 @@ public interface IParser {
 	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
+
+	/**
+	 * Sets the server's base URL used by this parser. If a value is set, resource references
+	 * will be turned into relative references if they are provided as absolute URLs but
+	 * have a base matching the given base.  
+	 * 
+	 * @param theUrl The base URL, e.g. "http://example.com/base"
+	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
+	 */
+	IParser setServerBaseUrl(String theUrl);
 
 }

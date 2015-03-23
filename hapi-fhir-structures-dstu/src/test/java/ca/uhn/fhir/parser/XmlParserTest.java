@@ -98,6 +98,26 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testEncodeOmitsVersionAndBase() {
+		Patient p = new Patient();
+		p.getManagingOrganization().setReference("http://example.com/base/Patient/1/_history/2");
+		
+		String enc;
+		
+		enc = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"http://example.com/base/Patient/1\""));
+		
+		enc = ourCtx.newXmlParser().setServerBaseUrl("http://example.com/base").encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"Patient/1\""));
+
+		enc = ourCtx.newXmlParser().setServerBaseUrl("http://example.com/base2").encodeResourceToString(p);
+		ourLog.info(enc);
+		assertThat(enc, containsString("\"http://example.com/base/Patient/1\""));
+	}
+
+	@Test
 	public void testDuplicateContainedResources() {
 
 		Observation resA = new Observation();

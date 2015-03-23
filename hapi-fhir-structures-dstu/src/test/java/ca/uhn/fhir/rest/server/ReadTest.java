@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
@@ -66,6 +67,19 @@ public class ReadTest {
 
 		assertThat(responseContent, stringContainsInOrder("1", "\""));
 		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
+	}
+	
+	@Test
+	public void testEncodeConvertsReferencesToRelative() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String ref = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getManagingOrganization().getReference().getValue();
+		assertEquals("Organization/555", ref);
 	}
 
 	@Test
@@ -216,6 +230,7 @@ public class ReadTest {
 			Patient patient = new Patient();
 			patient.addIdentifier(theId.getIdPart(), theId.getVersionIdPart());
 			patient.setId("Patient/1/_history/1");
+			patient.getManagingOrganization().setReference("http://localhost:" + ourPort + "/Organization/555/_history/666");
 			return patient;
 		}
 

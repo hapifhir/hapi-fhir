@@ -4,17 +4,22 @@
 	<properties>
 		<author>James Agnew</author>
 		<title>HAPI FHIR Changelog</title>
-		<!--
-		com.phloc:phloc-commons ............................... 4.3.5 -> 4.3.6
-		[INFO]   org.apache.httpcomponents:httpclient .................... 4.3.6 -> 4.4
-		[INFO]   org.codehaus.woodstox:woodstox-core-asl ............... 4.4.0 -> 4.4.1
-		[INFO]   org.slf4j:jcl-over-slf4j ............................. 1.7.9 -> 1.7.10
-		[INFO]   org.slf4j:slf4j-api .................................. 1.7.9 -> 1.7.10
-		[INFO]   org.springframework:spring-beans ...... 4.1.3.RELEASE -> 4.1.5.RELEASE
-		-->
 	</properties>
 	<body>
 		<release version="1.0" date="TBA">
+			<action type="add">
+				Bump the version of a few dependencies to the
+				latest versions:
+				<![CDATA[
+					<ul>
+						<li>Phloc-commons (for schematron validation) 4.3.5 -> 4.3.6</li>
+						<li>Apache HttpClient 4.3.6 -> 4.4</li>
+						<li>Woodstox 4.4.0 -> 4.4.1</li>
+						<li>SLF4j 1.7.9 -> 1.7.10</li>
+						<li>Spring (used in hapi-fhir-jpaserver-base module) 4.1.3.RELEASE -> 4.1.5.RELEASE</li>
+					</ul>
+				]]>
+			</action>
 			<action type="add">
 				Add support for "profile" and "tag" elements in the resource Meta block
 				when parsing DSTU2 structures.
@@ -49,6 +54,15 @@
 				have been switched in the DSTU2 structures to use
 				the new syntax required in DSTU2: [resource name]:[search param NAME]
 				insead of the DSTU1 style [resource name].[search param PATH]
+			</action>
+			<action type="add" fix="124">
+				When encoding resources, the parser will now convert any resource
+				references to versionless references automatically (i.e. it will 
+				omit the version part automatically if one is present in the reference)
+				since references between resources must be versionless. Additionally,
+				references in server responses will omit the server base URL part of the
+				reference if the base matches the base for the server giving
+				the response.
 			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">

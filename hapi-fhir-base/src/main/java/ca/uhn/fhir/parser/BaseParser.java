@@ -21,6 +21,7 @@ package ca.uhn.fhir.parser;
  */
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -65,6 +66,7 @@ public abstract class BaseParser implements IParser {
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
 	private boolean mySuppressNarratives;
+	private String myServerBaseUrl;
 
 	public BaseParser(FhirContext theContext) {
 		myContext = theContext;
@@ -163,8 +165,9 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
-		String reference = theRef.getReference().getValue();
-		if (isBlank(reference)) {
+		IdDt ref = theRef.getReference();
+		if (isBlank(ref.getIdPart())) {
+			String reference = ref.getValue();
 			if (theRef.getResource() != null) {
 				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
@@ -177,8 +180,22 @@ public abstract class BaseParser implements IParser {
 					reference = theRef.getResource().getId().getValue();
 				}
 			}
+			return reference;
+		} else {
+			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
+				String reference = ref.toUnqualifiedVersionless().getValue();
+				return reference;
+			} else {
+				String reference = ref.toVersionless().getValue();
+				return reference;
+			}
 		}
-		return reference;
+	}
+
+	@Override
+	public IParser setServerBaseUrl(String theUrl) {
+		myServerBaseUrl = isNotBlank(theUrl) ? theUrl : null;
+		return this;
 	}
 
 	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
