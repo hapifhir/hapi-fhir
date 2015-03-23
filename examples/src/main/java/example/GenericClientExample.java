@@ -364,6 +364,29 @@ public class GenericClientExample {
    public static void main(String[] args) {
       operation();
    }
+   @SuppressWarnings("unused")
+   private static void operationHttpGet() {
+      // START SNIPPET: operationHttpGet
+      // Create a client to talk to the HeathIntersections server
+      FhirContext ctx = FhirContext.forDstu2();
+      IGenericClient client = ctx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
+      client.registerInterceptor(new LoggingInterceptor(true));
+      
+      // Create the input parameters to pass to the server
+      Parameters inParams = new Parameters();
+      inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
+      inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
+      
+      // Invoke $everything on "Patient/1"
+      Parameters outParams = client
+         .operation()
+         .onInstance(new IdDt("Patient", "1"))
+         .named("$everything")
+         .withParameters(inParams)
+         .useHttpGet() // Use HTTP GET instead of POST
+         .execute();
+      // END SNIPPET: operationHttpGet
+   }
 
    @SuppressWarnings("unused")
    private static void operation() {
@@ -386,6 +409,24 @@ public class GenericClientExample {
          .withParameters(inParams)
          .execute();
       // END SNIPPET: operation
+   }
+
+   @SuppressWarnings("unused")
+   private static void operationNoIn() {
+      // START SNIPPET: operationNoIn
+      // Create a client to talk to the HeathIntersections server
+      FhirContext ctx = FhirContext.forDstu2();
+      IGenericClient client = ctx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
+      client.registerInterceptor(new LoggingInterceptor(true));
+      
+      // Invoke $everything on "Patient/1"
+      Parameters outParams = client
+         .operation()
+         .onInstance(new IdDt("Patient", "1"))
+         .named("$everything")
+         .withNoParameters(Parameters.class) // No input parameters
+         .execute();
+      // END SNIPPET: operationNoIn
    }
 
 }

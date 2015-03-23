@@ -99,7 +99,7 @@ public class ReferenceParameterTest {
 		assertThat(status.getFirstHeader("Content-Location").getValue(), containsString("Patient/22/_history/33"));
 
 		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
-		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
+		assertEquals(null, p.getManagingOrganization().getReference().getVersionIdPart());
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class ReferenceParameterTest {
 		assertEquals("33", p.getId().getVersionIdPart());
 
 		assertEquals("44", p.getManagingOrganization().getReference().getIdPart());
-		assertEquals("55", p.getManagingOrganization().getReference().getVersionIdPart());
+		assertEquals(null, p.getManagingOrganization().getReference().getVersionIdPart());
 	}
 
 	@Test

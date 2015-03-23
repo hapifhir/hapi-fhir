@@ -1246,8 +1246,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				entity.getTags().remove(next);
 			}
 		}
-		//@formatter:off
-		
+		//@formatter:on
+
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);
 		}
@@ -1318,19 +1318,24 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				ourLog.info("Sort PID order is now: {}", loadPids);
 
 				pids = new ArrayList<Long>(loadPids);
-				
+
 				// Any ressources which weren't matched by the sort get added to the bottom
 				for (Long next : originalPids) {
-					if (loadPids.contains(next)==false) {
+					if (loadPids.contains(next) == false) {
 						pids.add(next);
 					}
 				}
-				
-			}else {
+
+			} else {
 				pids = new ArrayList<Long>(loadPids);
 			}
 		} else {
 			pids = new ArrayList<Long>(loadPids);
+		}
+
+		// Load _revinclude resources
+		if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
+			loadReverseIncludes(pids, theParams.getRevIncludes());
 		}
 
 		IBundleProvider retVal = new IBundleProvider() {
@@ -1352,12 +1357,11 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						List<IResource> retVal = new ArrayList<IResource>();
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
-						// Load _revinclude resources
-						if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty()==false) {
-							loadReverseIncludes(pidsSubList, retVal, theParams.getRevIncludes());
-						}
-						
-						// Load _include resources
+						/*
+						 * Load _include resources - Note that _revincludes are handled differently
+						 * than _include ones, as they are counted towards the total count and paged,
+						 * so they are loaded outside the bundle provider
+						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IdDt> previouslyLoadedPids = new HashSet<IdDt>();
 
@@ -1401,7 +1405,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
-								oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
+								oo.addIssue().setSeverity(IssueSeverityEnum.WARNING)
+										.setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
 								retVal.add(0, oo);
 							}
 						}
@@ -1435,57 +1440,65 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return resources;
 	}
 
-	protected void loadReverseIncludes(List<Long> theMatches, List<IResource> theResourceListToPopulate, Set<Include> theRevIncludes) {
+	protected void loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes) {
 		if (theMatches.size() == 0) {
 			return;
 		}
-		
-		Set<Long> pidsToInclude = new HashSet<Long>();
+
+		HashSet<Long> pidsToInclude = new HashSet<Long>();
 		
 		for (Include nextInclude : theRevIncludes) {
-			int colonIdx = nextInclude.getValue().indexOf(':');
-			if (colonIdx < 2) {
-				continue;
-			}
-			String resType = nextInclude.getValue().substring(0, colonIdx);
-			RuntimeResourceDefinition def = getContext().getResourceDefinition(resType);
-			if (def == null) {
-				ourLog.warn("Unknown resource type in _revinclude=" + nextInclude.getValue());
-				continue;
-			}
-			
-			String paramName = nextInclude.getValue().substring(colonIdx+1);
-			RuntimeSearchParam param = def.getSearchParam(paramName);
-			if (param == null) {
-				ourLog.warn("Unknown param name in _revinclude=" + nextInclude.getValue());
-				continue;
-			}
-			
-			for (String nextPath : param.getPathsSplit()) {
-				String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN (:target_pids)";
+			boolean matchAll = "*".equals(nextInclude.getValue());
+			if (matchAll) {
+				String sql = "SELECT r FROM ResourceLink r WHERE r.myTargetResourcePid IN (:target_pids)";
 				TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
-				q.setParameter("src_path", nextPath);
 				q.setParameter("target_pids", theMatches);
 				List<ResourceLink> results = q.getResultList();
 				for (ResourceLink resourceLink : results) {
 					pidsToInclude.add(resourceLink.getSourceResourcePid());
 				}
+			} else {
+				int colonIdx = nextInclude.getValue().indexOf(':');
+				if (colonIdx < 2) {
+					continue;
+				}
+				String resType = nextInclude.getValue().substring(0, colonIdx);
+				RuntimeResourceDefinition def = getContext().getResourceDefinition(resType);
+				if (def == null) {
+					ourLog.warn("Unknown resource type in _revinclude=" + nextInclude.getValue());
+					continue;
+				}
+
+				String paramName = nextInclude.getValue().substring(colonIdx + 1);
+				RuntimeSearchParam param = def.getSearchParam(paramName);
+				if (param == null) {
+					ourLog.warn("Unknown param name in _revinclude=" + nextInclude.getValue());
+					continue;
+				}
+
+				for (String nextPath : param.getPathsSplit()) {
+					String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN (:target_pids)";
+					TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+					q.setParameter("src_path", nextPath);
+					q.setParameter("target_pids", theMatches);
+					List<ResourceLink> results = q.getResultList();
+					for (ResourceLink resourceLink : results) {
+						pidsToInclude.add(resourceLink.getSourceResourcePid());
+					}
+				}
 			}
-			
-			loadResourcesByPid(pidsToInclude, theResourceListToPopulate, BundleEntrySearchModeEnum.INCLUDE);
 		}
+		
+		theMatches.addAll(pidsToInclude);
 	}
 
-	
 	@Override
 	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
 		return search(Collections.singletonMap(theParameterName, theValue));
 	}
 
-	
 	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IResource theResource, RuntimeResourceDefinition theResourceDef);
 
-	
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
 		SearchParameterMap map = new SearchParameterMap();
@@ -1632,8 +1645,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to
-	 * share the same value.
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
@@ -1760,7 +1772,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 	private void validateResourceType(BaseHasResource entity) {
 		if (!myResourceName.equals(entity.getResourceType())) {
-			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
+			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type "
+					+ entity.getResourceType());
 		}
 	}
 
@@ -1785,7 +1798,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	@Override
 	public MetaDt metaGetOperation(IdDt theId) {
 		Long pid = super.translateForcedIdToPid(theId);
-		
+
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		q.setParameter("res_type", myResourceName);
@@ -1818,8 +1831,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				}
 			}
 		}
-		//@formatter:off
-		
+		//@formatter:on
+
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);
 		}
@@ -1827,7 +1840,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		myEntityManager.merge(entity);
 
 		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
-		
+
 		return metaGetOperation(theResourceId);
 	}
 

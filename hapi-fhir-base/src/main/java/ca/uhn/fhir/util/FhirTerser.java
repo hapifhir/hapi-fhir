@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
@@ -204,7 +205,7 @@ public class FhirTerser {
 		return retVal;
 	}
 
-	public List<Object> getValues(IResource theResource, String thePath) {
+	public List<Object> getValues(IBaseResource theResource, String thePath) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 
 		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
@@ -321,6 +322,27 @@ public class FhirTerser {
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 		visit(theResource, null, def, theVisitor);
+	}
+
+	public Object getSingleValueOrNull(IBase theTarget, String thePath) {
+		Validate.notNull(theTarget, "theTarget must not be null");
+		Validate.notBlank(thePath, "thePath must not be empty");
+		
+		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theTarget.getClass());
+		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
+			throw new IllegalArgumentException("Target is not a composite type: " + theTarget.getClass().getName());
+		}
+		
+		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
+		Object currentObj = theTarget;
+
+		List<String> parts = Arrays.asList(thePath.split("\\."));
+		List<Object> retVal = getValues(currentDef, currentObj, parts);
+		if (retVal.isEmpty()) {
+			return null;
+		} else {
+			return retVal.get(0);
+		}
 	}
 
 }

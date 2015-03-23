@@ -408,10 +408,35 @@
 			</p>
 			<macro name="snippet">
 				<param name="id" value="operation" />
-				<param name="file"
-					value="examples/src/main/java/example/GenericClientExample.java" />
+				<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
 			</macro>
-		</section>			
+			
+			<p>
+				Note that if the operation does not require any input parameters,
+				you may also invoke the operation using the following form. Note that
+				the <code>withNoParameters</code> still requires you to provide the
+				type of the Parameters resource so that it can return the correct type in 
+				the response.
+			</p>
+			<macro name="snippet">
+				<param name="id" value="operationNoIn" />
+				<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
+			</macro>
+			
+			<subsection name="Using the HTTP GET Form">
+				<p>
+					By default, the client will invoke operations using the HTTP POST form.
+					The FHIR specification also allows requests to use the HTTP GET verb 
+					if the operation is idempotent and has no composite/resource parameters.
+					Use the following form to invoke operation with HTTP GET.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="operationHttpGet" />
+					<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+			</subsection>
+			
+		</section>
 
 	</body>
 

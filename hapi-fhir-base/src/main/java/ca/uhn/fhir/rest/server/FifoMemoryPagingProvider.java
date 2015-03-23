@@ -54,14 +54,16 @@ public class FifoMemoryPagingProvider implements IPagingProvider {
 		return myBundleProviders.get(theId);
 	}
 
-	public void setDefaultPageSize(int theDefaultPageSize) {
+	public FifoMemoryPagingProvider setDefaultPageSize(int theDefaultPageSize) {
 		Validate.isTrue(theDefaultPageSize > 0, "size must be greater than 0");
 		myDefaultPageSize = theDefaultPageSize;
+		return this;
 	}
 
-	public void setMaximumPageSize(int theMaximumPageSize) {
+	public FifoMemoryPagingProvider setMaximumPageSize(int theMaximumPageSize) {
 		Validate.isTrue(theMaximumPageSize > 0, "size must be greater than 0");
 		myMaximumPageSize = theMaximumPageSize;
+		return this;
 	}
 
 	@Override

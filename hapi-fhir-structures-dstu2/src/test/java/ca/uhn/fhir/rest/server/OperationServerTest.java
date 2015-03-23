@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -163,6 +164,19 @@ public class OperationServerTest {
 	}
 
 	@Test
+	public void testOperationWithBundleProviderResponse() throws Exception {
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true");
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		String response = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(response);
+		
+		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+	}
+
+	@Test
 	public void testOperationWithListParam() throws Exception {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
@@ -317,6 +331,9 @@ public class OperationServerTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
+		
+		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
+		
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(new PatientProvider());
 		servlet.setPlainProviders(new PlainProvider());
@@ -333,6 +350,22 @@ public class OperationServerTest {
 	}
 
 	public static class PlainProvider {
+
+		//@formatter:off
+		@Operation(name="$OP_INSTANCE_BUNDLE_PROVIDER", idempotent=true)
+		public IBundleProvider opInstanceReturnsBundleProvider() {
+			ourLastMethod = "$OP_INSTANCE_BUNDLE_PROVIDER";
+
+			List<IResource> resources = new ArrayList<IResource>();
+			for (int i =0; i < 100;i++) {
+				Patient p = new Patient();
+				p.setId("Patient/" + i);
+				p.addName().addFamily("Patient " + i);
+				resources.add(p);
+			}
+			
+			return new SimpleBundleProvider(resources);
+		}
 
 		//@formatter:off
 		@Operation(name="$OP_SERVER")

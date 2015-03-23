@@ -1030,6 +1030,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myOperationName;
 		private IBaseParameters myParameters;
 		private Class<? extends IBaseResource> myType;
+		private boolean myUseHttpGet;
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -1047,7 +1048,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				id = null;
 			}
 
-			HttpPostClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters);
+			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
 			IClientResponseHandler handler;
 			handler = new ResourceResponseHandler(myParameters.getClass(), null);
@@ -1100,6 +1101,27 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
 			Validate.notNull(theParameters, "theParameters can not be null");
 			myParameters = theParameters;
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(Class<T> theOutputParameterType) {
+			Validate.notNull(theOutputParameterType, "theOutputParameterType may not be null");
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(theOutputParameterType);
+			if (def == null) {
+				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
+			}
+			if (!"Parameters".equals(def.getName())) {
+				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName() + " is a resource named: " + def.getName());
+			}
+			myParameters = (IBaseParameters) def.newInstance();
+			return this;
+		}
+
+		@Override
+		public IOperationUntypedWithInput useHttpGet() {
+			myUseHttpGet = true;
 			return this;
 		}
 

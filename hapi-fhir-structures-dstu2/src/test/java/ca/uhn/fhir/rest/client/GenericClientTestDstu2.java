@@ -270,6 +270,253 @@ public class GenericClientTestDstu2 {
 	}
 
 	@Test
+	public void testOperationWithNoInParameters() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inParams = new Parameters();
+		final String reqString = p.encodeResourceToString(inParams);
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT1"));
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		Parameters resp = client
+				.operation()
+				.onServer()
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class).execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(extractBody(capt, idx), reqString);
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onType(Patient.class)
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class).execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(extractBody(capt, idx), reqString);
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("Patient", "123"))
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class).execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(extractBody(capt, idx), reqString);
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		// @formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("http://foo.com/bar/baz/Patient/123/_history/22"))
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class)
+				.execute();
+		// @formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+	}
+
+	@Test
+	public void testOperationAsGetWithNoInParameters() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT1"));
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		Parameters resp = client
+				.operation()
+				.onServer()
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onType(Patient.class)
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("Patient", "123"))
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		// @formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("http://foo.com/bar/baz/Patient/123/_history/22"))
+				.named("$SOMEOPERATION")
+				.withNoParameters(Parameters.class)
+				.useHttpGet()
+				.execute();
+		// @formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+	}
+
+	@Test
+	public void testOperationAsGetWithInParameters() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("param1").setValue(new StringDt("STRINGVALIN1"));
+		inParams.addParameter().setName("param1").setValue(new StringDt("STRINGVALIN1b"));
+		inParams.addParameter().setName("param2").setValue(new StringDt("STRINGVALIN2"));
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT1"));
+		outParams.addParameter().setValue(new StringDt("STRINGVALOUT2"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		Parameters resp = client
+				.operation()
+				.onServer()
+				.named("$SOMEOPERATION")
+				.withParameters(inParams)
+				.useHttpGet()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onType(Patient.class)
+				.named("$SOMEOPERATION")
+				.withParameters(inParams)
+				.useHttpGet()
+				.execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("Patient", "123"))
+				.named("$SOMEOPERATION")
+				.withParameters(inParams)
+				.useHttpGet()
+				.execute();
+		//@formatter:on		
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		// @formatter:off
+		resp = client
+				.operation()
+				.onInstance(new IdDt("http://foo.com/bar/baz/Patient/123/_history/22"))
+				.named("$SOMEOPERATION")
+				.withParameters(inParams)
+				.useHttpGet()
+				.execute();
+		// @formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+	}
+
+	@Test
 	public void testOperationWithBundleResponse() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 

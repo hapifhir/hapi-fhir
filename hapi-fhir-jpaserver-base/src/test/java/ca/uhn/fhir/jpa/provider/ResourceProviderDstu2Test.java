@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
@@ -10,7 +11,9 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -37,18 +40,23 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
 import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.ImagingStudy;
 import ca.uhn.fhir.model.dstu2.resource.Location;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
+import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
@@ -296,6 +304,53 @@ public class ResourceProviderDstu2Test {
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	}
+
+	@Test
+	public void testEverythingOperation() throws Exception {
+		String methodName = "testEverythingOperation";
+		
+		Organization org1 = new Organization();
+		org1.setName(methodName + "1");
+		IdDt orgId1 = ourClient.create().resource(org1).execute().getId();
+		
+		Patient p = new Patient();
+		p.addName().addFamily(methodName);
+		p.getManagingOrganization().setReference(orgId1);
+		IdDt patientId = ourClient.create().resource(p).execute().getId();
+		
+		Organization org2 = new Organization();
+		org2.setName(methodName + "1");
+		IdDt orgId2 = ourClient.create().resource(org2).execute().getId();
+
+		Device dev = new Device();
+		dev.setModel(methodName);
+		dev.getOwner().setReference(orgId2);
+		IdDt devId = ourClient.create().resource(dev).execute().getId();		
+		
+		Observation obs = new Observation();
+		obs.getSubject().setReference(patientId);
+		obs.getDevice().setReference(devId);
+		IdDt obsId = ourClient.create().resource(obs).execute().getId();
+		
+		Encounter enc = new Encounter();
+		enc.getPatient().setReference(patientId);
+		IdDt encId = ourClient.create().resource(enc).execute().getId();
+		
+		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
+		
+		Set<IdDt> ids = new HashSet<IdDt>();
+		for (Entry next : b.getEntry()) {
+			ids.add(next.getResource().getId());
+		}
+		
+		ourLog.info(ids.toString());
+		
+		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));
+		
+		// _revinclude's are counted but not _include's
+		assertEquals(3, b.getTotal().intValue());
 	}
 
 	
@@ -680,7 +735,7 @@ public class ResourceProviderDstu2Test {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
+		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 		

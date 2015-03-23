@@ -112,4 +112,28 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 			endRequest(theServletRequest);
 		}
 	}
+
+
+
+#if ( $version != 'dstu' && (${className} == 'Patient' || ${className} == 'Encounter') )
+	@Operation(name="everything", idempotent=true)
+	public ca.uhn.fhir.rest.server.IBundleProvider everything(
+			javax.servlet.http.HttpServletRequest theServletRequest, 
+			@IdParam ca.uhn.fhir.model.primitive.IdDt theId) {
+
+		startRequest(theServletRequest);
+		try {
+			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.setRevIncludes(Collections.singleton(new Include("*")));
+			paramMap.setIncludes(Collections.singleton(new Include("*")));
+			paramMap.add("_id", new StringParam(theId.getIdPart()));		
+			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
+			return retVal;
+		} finally {
+			endRequest(theServletRequest);
+		}
+
+	}
+#end
+
 }

@@ -24,6 +24,20 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 public interface IOperationUntyped {
 
+	/**
+	 * Use the given parameters resource as the input to the operation
+	 * 
+	 * @param theParameters The parameters to use as input. May also be <code>null</code> if the operation
+	 * does not require any input parameters.
+	 */
 	<T extends IBaseParameters> IOperationUntypedWithInput<T> withParameters(T theParameters);
+
+	/**
+	 * The operation does not require any input parameters
+	 * 
+	 * @param theOutputParameterType The type to use for the output parameters (this should be set to
+	 * <code>Parameters.class</code> drawn from the version of the FHIR structures you are using)
+	 */
+	<T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(Class<T> theOutputParameterType);
 
 }

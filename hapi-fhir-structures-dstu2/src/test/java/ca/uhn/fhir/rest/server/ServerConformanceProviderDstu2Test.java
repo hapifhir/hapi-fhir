@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -26,7 +27,9 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -37,13 +40,65 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 
-public class ServerConformanceProviderTest {
+public class ServerConformanceProviderDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
 	private FhirContext myCtx = new FhirContext();
 	
 	@Test
 	public void testSearchParameterDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer();
+		rs.setProviders(new SearchProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		
+		boolean found=false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
+				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
+				found=true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
+		assertThat(conf, containsString("<type value=\"token\"/>"));
+		
+	}
+
+	@Test
+	public void testEverythingOperationDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer();
+		rs.setProviders(new ProviderWithOperations());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		
+	}
+
+	@Test
+	public void testOperationDocumentation() throws Exception {
 
 		RestfulServer rs = new RestfulServer();
 		rs.setProviders(new SearchProvider());
@@ -203,9 +258,23 @@ public class ServerConformanceProviderTest {
 			return null;
 		}
 
-		
 	}
 	
+	public static class ProviderWithOperations implements IResourceProvider {
+		
+		@Operation(name="everything", idempotent=true)
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(
+				javax.servlet.http.HttpServletRequest theServletRequest, 
+				@IdParam ca.uhn.fhir.model.primitive.IdDt theId) {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+	}
 
 	private HttpServletRequest createHttpServletRequest() {
 		HttpServletRequest req = mock(HttpServletRequest.class);

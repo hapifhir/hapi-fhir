@@ -24,4 +24,15 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 public interface IOperationUntypedWithInput<T extends IBaseParameters> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
 
+	/**
+	 * The client should invoke this method using an HTTP GET instead of an HTTP POST. Note that
+	 * according the the FHIR specification, all methods must support using the POST method, but
+	 * only certain methods may support the HTTP GET method, so it is generally not necessary
+	 * to use this feature. 
+	 * <p>
+	 * If you have a specific reason for needing to use a GET however, this method will enable it.
+	 * </p>
+	 */
+	IOperationUntypedWithInput<T> useHttpGet();
+
 }

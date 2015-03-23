@@ -107,7 +107,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
 		return parameters;
 	}
-	
+
 	//@formatter:off
 	@Operation(name="$meta", idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
@@ -118,13 +118,13 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theId));
 		return parameters;
 	}
-	
+
 	//@formatter:off
 	@Operation(name="$meta-add", idempotent=true, returnParameters= {
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
-	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("return").setValue(getDao().metaAddOperation(theId, theMeta));
 		return parameters;
@@ -135,7 +135,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		@OperationParam(name="return", type=MetaDt.class)
 	})
 	//@formatter:on
-	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name="meta") MetaDt theMeta) {
+	public Parameters metaDelete(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("return").setValue(getDao().metaDeleteOperation(theId, theMeta));
 		return parameters;
