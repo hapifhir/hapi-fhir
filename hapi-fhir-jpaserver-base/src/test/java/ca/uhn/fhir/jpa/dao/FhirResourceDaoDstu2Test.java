@@ -1754,21 +1754,6 @@ public class FhirResourceDaoDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithNoResults() {
-		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
-		for (IResource next : value.getResources(0, value.size())) {
-			ourDeviceDao.delete(next.getId());
-		}
-
-		value = ourDeviceDao.search(new SearchParameterMap());
-		assertEquals(0, value.size());
-
-		List<IResource> res = value.getResources(0, 0);
-		assertTrue(res.isEmpty());
-
-	}
-
-	@Test
 	public void testSortByDate() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
@@ -2341,6 +2326,33 @@ public class FhirResourceDaoDstu2Test {
 
 	private static void deleteEverything() {
 		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
+	}
+
+	
+	@Test
+	public void testSearchWithNoResults() {
+		Device dev = new Device();
+		dev.addIdentifier().setSystem("Foo");
+		ourDeviceDao.create(dev);
+		
+		
+		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
+		ourLog.info("Initial size: " + value.size());
+		for (IResource next : value.getResources(0, value.size())) {
+			ourLog.info("Deleting: {}", next.getId());
+			ourDeviceDao.delete(next.getId());
+		}
+
+		value = ourDeviceDao.search(new SearchParameterMap());
+		if (value.size() > 0) {
+			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getId()));
+			fail(ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
+		}
+		assertEquals(0, value.size());
+
+		List<IResource> res = value.getResources(0, 0);
+		assertTrue(res.isEmpty());
+
 	}
 
 }

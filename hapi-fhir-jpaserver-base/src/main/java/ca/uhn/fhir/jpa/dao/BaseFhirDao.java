@@ -90,7 +90,6 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -98,6 +97,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -160,7 +160,7 @@ public abstract class BaseFhirDao implements IDao {
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != RestSearchParameterType.REFERENCE) {
+			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
 				continue;
 			}
 

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
@@ -30,7 +30,7 @@ public class NameChanges {
 			
 			RuntimeResourceDefinition def = ctx.getResourceDefinition((Class<? extends IResource>) Class.forName(classInfo.getName()));
 			for (RuntimeSearchParam nextParam : def.getSearchParams()) {
-				if (nextParam.getParamType() == RestSearchParameterType.COMPOSITE) {
+				if (nextParam.getParamType() == RestSearchParameterTypeEnum.COMPOSITE) {
 					continue;
 				}
 				

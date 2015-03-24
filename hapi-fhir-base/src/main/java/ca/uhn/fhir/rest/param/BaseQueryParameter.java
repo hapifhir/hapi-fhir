@@ -31,11 +31,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -49,7 +49,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract String getName();
 
-	public abstract RestSearchParameterType getParamType();
+	public abstract RestSearchParameterTypeEnum getParamType();
 
 	/**
 	 * Returns null if blacklist is "none"

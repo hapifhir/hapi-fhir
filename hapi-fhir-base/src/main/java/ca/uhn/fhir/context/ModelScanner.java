@@ -78,10 +78,10 @@ import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.ICodedDatatype;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 class ModelScanner {
@@ -681,11 +681,11 @@ class ModelScanner {
 		for (Field nextField : theClass.getFields()) {
 			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.class);
 			if (searchParam != null) {
-				RestSearchParameterType paramType = RestSearchParameterType.valueOf(searchParam.type().toUpperCase());
+				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.valueOf(searchParam.type().toUpperCase());
 				if (paramType == null) {
 					throw new ConfigurationException("Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
-				if (paramType == RestSearchParameterType.COMPOSITE) {
+				if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
 					compositeFields.put(nextField, searchParam);
 					continue;
 				}
@@ -708,7 +708,7 @@ class ModelScanner {
 				compositeOf.add(param);
 			}
 
-			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterType.COMPOSITE, compositeOf);
+			RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), RestSearchParameterTypeEnum.COMPOSITE, compositeOf);
 			theResourceDef.addSearchParam(param);
 		}
 	}

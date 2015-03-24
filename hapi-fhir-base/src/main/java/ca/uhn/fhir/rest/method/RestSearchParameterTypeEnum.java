@@ -1,5 +1,5 @@
 
-package ca.uhn.fhir.model.dstu.valueset;
+package ca.uhn.fhir.rest.method;
 
 /*
  * #%L
@@ -26,7 +26,7 @@ import java.util.Map;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
-public enum RestSearchParameterType {
+public enum RestSearchParameterTypeEnum {
 
 	/**
 	 * Code Value: <b>number</b>
@@ -98,18 +98,18 @@ public enum RestSearchParameterType {
 	 */
 	public static final String VALUESET_NAME = "SearchParamType";
 
-	private static Map<String, RestSearchParameterType> CODE_TO_ENUM = new HashMap<String, RestSearchParameterType>();
-	private static Map<String, Map<String, RestSearchParameterType>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, RestSearchParameterType>>();
+	private static Map<String, RestSearchParameterTypeEnum> CODE_TO_ENUM = new HashMap<String, RestSearchParameterTypeEnum>();
+	private static Map<String, Map<String, RestSearchParameterTypeEnum>> SYSTEM_TO_CODE_TO_ENUM = new HashMap<String, Map<String, RestSearchParameterTypeEnum>>();
 	
 	private final String myCode;
 	private final String mySystem;
 	
 	static {
-		for (RestSearchParameterType next : RestSearchParameterType.values()) {
+		for (RestSearchParameterTypeEnum next : RestSearchParameterTypeEnum.values()) {
 			CODE_TO_ENUM.put(next.getCode(), next);
 			
 			if (!SYSTEM_TO_CODE_TO_ENUM.containsKey(next.getSystem())) {
-				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, RestSearchParameterType>());
+				SYSTEM_TO_CODE_TO_ENUM.put(next.getSystem(), new HashMap<String, RestSearchParameterTypeEnum>());
 			}
 			SYSTEM_TO_CODE_TO_ENUM.get(next.getSystem()).put(next.getCode(), next);			
 		}
@@ -132,33 +132,33 @@ public enum RestSearchParameterType {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public RestSearchParameterType forCode(String theCode) {
-		RestSearchParameterType retVal = CODE_TO_ENUM.get(theCode);
+	public RestSearchParameterTypeEnum forCode(String theCode) {
+		RestSearchParameterTypeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
 
 	/**
 	 * Converts codes to their respective enumerated values
 	 */
-	public static final IValueSetEnumBinder<RestSearchParameterType> VALUESET_BINDER = new IValueSetEnumBinder<RestSearchParameterType>() {
+	public static final IValueSetEnumBinder<RestSearchParameterTypeEnum> VALUESET_BINDER = new IValueSetEnumBinder<RestSearchParameterTypeEnum>() {
 		@Override
-		public String toCodeString(RestSearchParameterType theEnum) {
+		public String toCodeString(RestSearchParameterTypeEnum theEnum) {
 			return theEnum.getCode();
 		}
 
 		@Override
-		public String toSystemString(RestSearchParameterType theEnum) {
+		public String toSystemString(RestSearchParameterTypeEnum theEnum) {
 			return theEnum.getSystem();
 		}
 		
 		@Override
-		public RestSearchParameterType fromCodeString(String theCodeString) {
+		public RestSearchParameterTypeEnum fromCodeString(String theCodeString) {
 			return CODE_TO_ENUM.get(theCodeString);
 		}
 		
 		@Override
-		public RestSearchParameterType fromCodeString(String theCodeString, String theSystemString) {
-			Map<String, RestSearchParameterType> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
+		public RestSearchParameterTypeEnum fromCodeString(String theCodeString, String theSystemString) {
+			Map<String, RestSearchParameterTypeEnum> map = SYSTEM_TO_CODE_TO_ENUM.get(theSystemString);
 			if (map == null) {
 				return null;
 			}
@@ -170,7 +170,7 @@ public enum RestSearchParameterType {
 	/** 
 	 * Constructor
 	 */
-	RestSearchParameterType(String theCode, String theSystem) {
+	RestSearchParameterTypeEnum(String theCode, String theSystem) {
 		myCode = theCode;
 		mySystem = theSystem;
 	}

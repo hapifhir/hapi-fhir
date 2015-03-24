@@ -25,8 +25,8 @@ import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implements IQueryParameterAnd<T> {
@@ -47,7 +47,7 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 		}
 	}
 
-	public abstract RestSearchParameterType getSearchParamType();
+	public abstract RestSearchParameterTypeEnum getSearchParamType();
 	
 	abstract T newInstance();
 

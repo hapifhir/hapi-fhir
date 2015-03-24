@@ -96,7 +96,6 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -105,6 +104,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -1150,7 +1150,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (sp == null) {
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
-			if (sp.getParamType() != RestSearchParameterType.TOKEN) {
+			if (sp.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
 				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
 						+ "] is not a token type, only token is supported");
 			}
@@ -1278,7 +1278,9 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			cq.multiselect(from.get("myId").as(Long.class));
-			cq.where(builder.equal(from.get("myResourceType"), myResourceName));
+			Predicate typeEquals = builder.equal(from.get("myResourceType"), myResourceName);
+			Predicate notDeleted = builder.isNotNull(from.get("myDeleted"));
+			cq.where(builder.and(typeEquals, notDeleted));
 
 			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
 			for (Tuple next : query.getResultList()) {

@@ -64,10 +64,13 @@
 				reference if the base matches the base for the server giving
 				the response.
 			</action>
-			<action type="fix" fix="131">
+			<action type="fix" fix="130">
 				Narrative generator incorrectly sets the Resource.text.status to 'generated' even if the
 				given resource type does not have a template (and therefore no narrative is actually generated).
 				Thanks to Bill de Beaubien for reporting!
+			</action>
+			<action type="fix">
+				Searching in JPA server with no search parameter returns deleted resources when it should exclude them.
 			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">

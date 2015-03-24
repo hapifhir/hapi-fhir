@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 /*
  * #%L
@@ -31,15 +31,15 @@ public class RuntimeSearchParam {
 
 	private String myDescription;
 	private String myName;
-	private RestSearchParameterType myParamType;
+	private RestSearchParameterTypeEnum myParamType;
 	private String myPath;
 	private List<RuntimeSearchParam> myCompositeOf;
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterType theParamType) {
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType) {
 		this(theName, theDescription, thePath, theParamType, null);
 	}
 
-	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterType theParamType, List<RuntimeSearchParam> theCompositeOf) {
+	public RuntimeSearchParam(String theName, String theDescription, String thePath, RestSearchParameterTypeEnum theParamType, List<RuntimeSearchParam> theCompositeOf) {
 		super();
 		myName = theName;
 		myDescription = theDescription;
@@ -60,7 +60,7 @@ public class RuntimeSearchParam {
 		return myName;
 	}
 
-	public RestSearchParameterType getParamType() {
+	public RestSearchParameterTypeEnum getParamType() {
 		return myParamType;
 	}
 

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
+import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
 /*
  * #%L
@@ -31,8 +31,8 @@ public class QuantityAndListParam  extends BaseAndListParam<QuantityOrListParam>
 	}
 	
 	@Override
-	public RestSearchParameterType getSearchParamType() {
-		return RestSearchParameterType.QUANTITY;
+	public RestSearchParameterTypeEnum getSearchParamType() {
+		return RestSearchParameterTypeEnum.QUANTITY;
 	}
 
 }
