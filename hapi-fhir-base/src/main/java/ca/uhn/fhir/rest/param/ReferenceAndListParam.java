@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 
 /*
  * #%L
@@ -31,8 +31,8 @@ public class ReferenceAndListParam extends BaseAndListParam<ReferenceOrListParam
 	}
 	
 	@Override
-	public SearchParamTypeEnum getSearchParamType() {
-		return SearchParamTypeEnum.REFERENCE;
+	public RestSearchParameterType getSearchParamType() {
+		return RestSearchParameterType.REFERENCE;
 	}
 
 	

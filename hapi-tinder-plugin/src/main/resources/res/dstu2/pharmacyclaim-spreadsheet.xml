@@ -16,12 +16,15 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>8865</WindowHeight>
-  <WindowWidth>22350</WindowWidth>
+  <SupBook>
+   <Path>\Gforge\HL7\FHIR\trunk\build\source\composition\Invariants</Path>
+   <SheetName>Invariants</SheetName>
+  </SupBook>
+  <WindowHeight>10155</WindowHeight>
+  <WindowWidth>23100</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
   <ActiveSheet>1</ActiveSheet>
-  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1519,7 +1522,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">F02</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">up</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">right</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2175,7 +2178,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">PharmacyClaim.coverage.preauthref</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">PharmacyClaim.coverage.preAuthRef</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2973,7 +2976,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">PharmacyClaim.item.subsite</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">PharmacyClaim.item.subSite</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
@@ -3817,9 +3820,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>88</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>4</LeftColumnRightPane>
+   <LeftColumnRightPane>14</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3831,11 +3834,13 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>12</ActiveCol>
+     <ActiveRow>16</ActiveRow>
+     <ActiveCol>0</ActiveCol>
+     <RangeSelection>R17</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -3850,7 +3855,7 @@
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C4,R4C4:R90C4</Range>
    <Type>List</Type>
-   <Value>'Invariants'!#REF!</Value>
+   <Value>'\Gforge\HL7\FHIR\trunk\build\source\composition\[Invariants]Invariants'!#REF!</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
@@ -6003,9 +6008,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
@@ -6764,8 +6769,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>2</ActiveCol>
+     <ActiveCol>0</ActiveCol>
+     <RangeSelection>R2</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6901,7 +6906,7 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s145"><Data ss:Type="String">PharmacyServiceProduct</Data></Cell>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">!PharmacyServiceProduct</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Allowable service and product codes</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7068,8 +7073,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>19</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

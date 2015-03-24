@@ -89,7 +89,11 @@ public class SearchParameter {
 		if (myTargetTypes == null) {
 			return Collections.emptyList();
 		}
-		return myTargetTypes;
+		ArrayList<String> retVal = new ArrayList<String>();
+		for (String i : myTargetTypes) {
+			retVal.add(Resource.correctName(i));
+		}
+		return retVal;
 	}
 
 	public String getType() {

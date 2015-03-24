@@ -31,7 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.Request;
@@ -49,7 +49,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 	public abstract String getName();
 
-	public abstract SearchParamTypeEnum getParamType();
+	public abstract RestSearchParameterType getParamType();
 
 	/**
 	 * Returns null if blacklist is "none"

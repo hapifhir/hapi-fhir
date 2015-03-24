@@ -10,7 +10,7 @@
   <LastAuthor>Claude Nanjo</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-02-24T03:15:08Z</LastSaved>
-  <Version>14.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
@@ -20,11 +20,11 @@
    <Path>Macintosh HD:work:org.hl7.fhir:build:source:alert:Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  <WindowHeight>1170</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
-  <WindowTopX>29805</WindowTopX>
-  <WindowTopY>3735</WindowTopY>
-  <ActiveSheet>6</ActiveSheet>
+  <WindowHeight>12270</WindowHeight>
+  <WindowWidth>24345</WindowWidth>
+  <WindowTopX>0</WindowTopX>
+  <WindowTopY>0</WindowTopY>
+  <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -983,7 +983,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">Communication Request</Data><NamedCell
+    <Cell ss:StyleID="s78"><Data ss:Type="String">A request for information to be sent to a receiver</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><Data ss:Type="String">A request to convey information. E.g., the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3716,12 +3716,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>4</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3729,15 +3730,14 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>10</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -5931,9 +5931,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="53.25"
@@ -6211,7 +6211,6 @@
    </PageSetup>
    <Unsynced/>
    <Zoom>150</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6334,12 +6333,12 @@
     <Cell ss:StyleID="s139"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">QICore CommunicationRequest</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Example of QICore CommunicationRequest</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">qicore</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">communicationrequest-qicore-example.xml</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">communicationrequest-qicore</Data></Cell>
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6703,7 +6702,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>3</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6723,10 +6723,15 @@
    <Value>&quot;xml,csv,tool&quot;</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R40C6</Range>
+   <Range>R2C6,R4C6:R40C6</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;Profiles!A2:A40&quot;</Value>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R3C6</Range>
+   <Type>List</Type>
+   <Value>Profiles!R2C1:R20C1</Value>
   </DataValidation>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>

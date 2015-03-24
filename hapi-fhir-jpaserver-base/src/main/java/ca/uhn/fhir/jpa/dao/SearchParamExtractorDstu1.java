@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -76,7 +77,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.DATE) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.DATE) {
 				continue;
 			}
 
@@ -133,7 +134,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.NUMBER) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.NUMBER) {
 				continue;
 			}
 
@@ -230,7 +231,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.QUANTITY) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.QUANTITY) {
 				continue;
 			}
 
@@ -280,7 +281,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.STRING) {
 				continue;
 			}
 
@@ -368,7 +369,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.TOKEN) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.TOKEN) {
 				continue;
 			}
 

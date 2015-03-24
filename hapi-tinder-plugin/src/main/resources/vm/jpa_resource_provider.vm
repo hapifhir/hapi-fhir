@@ -48,6 +48,9 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 
+#elseif (${param.type} == 'uri' )
+			@OptionalParam(name="${param.name}")
+			UriAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'quantity' )
 			@OptionalParam(name="${param.name}")
 			QuantityAndListParam the${param.nameCapitalized}, 

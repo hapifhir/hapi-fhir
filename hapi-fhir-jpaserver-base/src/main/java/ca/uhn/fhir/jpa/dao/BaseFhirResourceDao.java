@@ -96,7 +96,7 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -1150,7 +1150,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (sp == null) {
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
-			if (sp.getParamType() != SearchParamTypeEnum.TOKEN) {
+			if (sp.getParamType() != RestSearchParameterType.TOKEN) {
 				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
 						+ "] is not a token type, only token is supported");
 			}

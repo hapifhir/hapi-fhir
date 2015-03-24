@@ -863,7 +863,7 @@ public class FhirResourceDaoDstu2Test {
 		map.add(Organization.SP_NAME, new StringParam("X"+methodName+"X"));
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = ourOrganizationDao.search(map);
-		assertEquals(1, resultsP.size());
+		assertEquals(2, resultsP.size());
 		List<IResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());
 		assertEquals(Organization.class, results.get(0).getClass());
@@ -1539,7 +1539,7 @@ public class FhirResourceDaoDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
 				.setDisplay("testSearchTokenParamDisplay");
 		ourPatientDao.create(patient);
 

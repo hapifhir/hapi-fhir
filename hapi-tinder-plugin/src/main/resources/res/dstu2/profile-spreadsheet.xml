@@ -4793,7 +4793,7 @@
     <Cell ss:StyleID="s116"><Data ss:Type="String">valueset</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Profile.snapshot.element.binding.reference[x]</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Profile.snapshot.element.binding.valueSet[x]</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">A vocabulary binding code</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6102,9 +6102,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">

@@ -9,13 +9,17 @@
   <Author>Grahame</Author>
   <LastAuthor>Grahame</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-02-21T08:57:50Z</LastSaved>
+  <LastSaved>2015-03-16T22:13:49Z</LastSaved>
   <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <SupBook>
+   <Path>\work\org.hl7.fhir\build\source\alert\Invariants</Path>
+   <SheetName>Invariants</SheetName>
+  </SupBook>
   <WindowHeight>14430</WindowHeight>
   <WindowWidth>25920</WindowWidth>
   <WindowTopX>0</WindowTopX>
@@ -799,7 +803,7 @@
   <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R50C1"/>
  </Names>
  <Worksheet ss:Name="Instructions">
-  <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="3" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="4" x:FullColumns="1"
    x:FullRows="1" ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
    <Row ss:AutoFitHeight="0">
@@ -812,6 +816,10 @@
     <Cell ss:StyleID="s67" ss:HRef="http://wiki.hl7.org/?title=FHIR_Spreadsheet_Authoring"><Data
       ss:Type="String">http://wiki.hl7.org?title=FHIR_Spreadsheet_Authoring</Data></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">entered-in-error-status</Data></Cell>
+    <Cell><Data ss:Type="String">.status = retired</Data></Cell>
+   </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -823,7 +831,8 @@
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <ActiveRow>3</ActiveRow>
+     <RangeSelection>R4</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -833,9 +842,9 @@
  <Worksheet ss:Name="Data Elements">
   <Names>
    <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C1:R104C24" ss:Hidden="1"/>
+    ss:RefersTo="='Data Elements'!R1C1:R105C24" ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="27" ss:ExpandedRowCount="104" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="27" ss:ExpandedRowCount="105" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s69" ss:Width="227.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.25"/>
@@ -1008,7 +1017,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Globally unique logical id for concept map</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1127,6 +1136,45 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="165">
+    <Cell ss:StyleID="s86"><Data ss:Type="String">ConceptMap.useContext</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">CodeableConcept</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">y</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ConformanceUseContext</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">class</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Content intends to support these contexts</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of concept maps.</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Assist in searching for appropriate concept maps</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">N/A</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s90"/>
+    <Cell ss:StyleID="s92"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="90">
     <Cell ss:StyleID="s86"><Data ss:Type="String">ConceptMap.publisher</Data><NamedCell
@@ -1493,7 +1541,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The source value set that specifies the concepts that are being mapped</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Should be a version specific reference</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Should be a version specific reference. URIs SHOULD be absolute</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1526,7 +1574,8 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Should be a version specific reference. URIs SHOULD be absolute</Data><NamedCell
+      ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1587,7 +1636,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Code System (if value set crosses code systems)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Code System (if the source is a value value set that crosses more than one code system)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1713,7 +1762,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Code System (if necessary)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The code system of the dependency code (if the source/dependency is a value set that cross code systems)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1807,7 +1856,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">System of the target (if necessary)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The code system of the target code (if the target is a value set that cross code systems)</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Should be a version specific reference</Data><NamedCell
@@ -3863,7 +3912,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>12</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3876,19 +3925,16 @@
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>13</ActiveRow>
-     <ActiveCol>7</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C22:R3C22,R5C22:R104C22,R4C23</Range>
+   <Range>R2C22:R3C22,R4C23,R5C22:R6C22,R8C22:R105C22,R7C25</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;left,right,up,down,[xpixels];[ypixels]&quot;</Value>
@@ -3896,21 +3942,21 @@
    <ErrorStyle>Info</ErrorStyle>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C19:R3C21,R5C19:R104C21,R4C19:R4C22</Range>
+   <Range>R2C19:R3C21,R4C19:R4C22,R5C19:R105C21,R7C22:R7C24</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;N/A&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C8:R104C9</Range>
+   <Range>R2C8:R105C9</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;Bindings!A2..A30&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C6:R104C7</Range>
+   <Range>R3C6:R105C7</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;Y,N&quot;</Value>
@@ -3922,14 +3968,14 @@
    <Value>&quot;DomainResource,Type,Resource,Structure&quot;</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C5:R104C5</Range>
+   <Range>R3C5:R105C5</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R104C3</Range>
+   <Range>R2C3:R105C3</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;0..1,1..1,0..*,1..*&quot;</Value>
@@ -3940,18 +3986,24 @@
    <Value>Invariantids</Value>
    <ErrorHide/>
   </DataValidation>
-  <AutoFilter x:Range="R1C1:R104C24"
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R7C4</Range>
+   <Type>List</Type>
+   <Value>'\work\org.hl7.fhir\build\source\alert\[Invariants]Invariants'!#REF!</Value>
+   <ErrorHide/>
+  </DataValidation>
+  <AutoFilter x:Range="R1C1:R105C24"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R104C14,R10C15</Range>
+   <Range>R11C15,R2C14:R105C14</Range>
    <Condition>
     <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R3C24,R4C1:R4C25,R5C1:R104C24</Range>
+   <Range>R2C1:R3C24,R4C1:R4C25,R5C1:R6C24,R7C1:R7C27,R8C1:R105C24</Range>
    <Condition>
     <Value1>RC3=&quot;0..0&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#F2F2F2'/>
@@ -3962,7 +4014,7 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R4C1,R14C1:R104C1,R6C1:R10C1,R12C1</Range>
+   <Range>R2C1:R4C1,R15C1:R105C1,R13C1,R9C1:R11C1,R6C1:R7C1</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -3976,35 +4028,35 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C3:R104C3,R2C15:R104C15</Range>
+   <Range>R2C15:R105C15,R3C3:R105C3</Range>
    <Condition>
     <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C10:R104C10,R2C13:R104C13</Range>
+   <Range>R2C13:R105C13,R2C10:R105C10</Range>
    <Condition>
     <Value1>AND(SEARCH(&quot;|&quot;,RC5)&lt;&gt;0,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R104C11,R2C13:R104C13</Range>
+   <Range>R2C13:R105C13,R2C11:R105C11</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,NOT(EXACT(LEFT(RC5,1),LOWER(LEFT(RC5,1)))))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R104C12</Range>
+   <Range>R2C11:R105C12</Range>
    <Condition>
     <Value1>AND(RC11&lt;&gt;&quot;&quot;,RC12&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R104C15</Range>
+   <Range>R2C14:R105C15</Range>
    <Condition>
     <Value1>AND(RC14&lt;&gt;&quot;&quot;,RC14=RC15)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -4018,51 +4070,58 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C19:R104C20</Range>
+   <Range>R3C19:R105C20</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;N/A&quot;,R2C)),RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:orange'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C22,R13C22:R104C22,R5C22:R7C22</Range>
+   <Range>R2C22,R14C22:R105C22,R5C22,R8C22</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[1]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[1]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R3C24,R4C1:R4C25,R5C1:R104C24</Range>
+   <Range>R2C1:R3C24,R4C1:R4C25,R5C1:R6C24,R7C1:R7C27,R8C1:R105C24</Range>
    <Condition>
     <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R5C1,R13C1</Range>
+   <Range>R5C1,R14C1,R8C1</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-2]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C22,R4C23,R11C22:R12C22</Range>
+   <Range>R3C22,R4C23,R12C22:R13C22,R6C22</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[2]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[2]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R11C1</Range>
+   <Range>R12C1</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-3]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R8C22:R10C22</Range>
+   <Range>R9C22:R11C22</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[3]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[3]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R7C25</Range>
+   <Condition>
+    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(#REF!,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(#REF!,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
@@ -4597,7 +4656,7 @@
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C4:R50C4</Range>
    <Type>List</Type>
-   <Value>'Data Elements'!R2C1:R104C1</Value>
+   <Value>'Data Elements'!R2C1:R105C1</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C3:R50C3</Range>
@@ -4671,7 +4730,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s114"><Data ss:Type="String">url</Data></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s78"/>
     <Cell ss:StyleID="s115"><Data ss:Type="String">ConceptMap.url</Data></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">The url of the concept map</Data></Cell>
@@ -4741,31 +4800,31 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"><Data ss:Type="String">system</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s118"><Data ss:Type="String">ConceptMap.element.map.codeSystem</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">The system for any destination concepts mapped by this map</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s117"><Data ss:Type="String">dependson</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s118"><Data ss:Type="String">ConceptMap.element.dependsOn.element</Data></Cell>
     <Cell ss:StyleID="s119"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s117"><Data ss:Type="String">product</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s118"><Data ss:Type="String">ConceptMap.element.map.product.element</Data></Cell>
     <Cell ss:StyleID="s119"/>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">context</Data></Cell>
+    <Cell><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s119"/>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">ConceptMap.useContext</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">A use context assigned to the concept map</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"/>
@@ -4907,15 +4966,14 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>4</ActiveCol>
+     <ActiveRow>13</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R31C2</Range>
+   <Range>R3C2:R11C2,R16C2:R31C2</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;number,date,string,token,reference,composite,quantity&quot;</Value>
@@ -4923,21 +4981,21 @@
   <AutoFilter x:Range="R1C1:R1C5" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R31C5</Range>
+   <Range>R3C1:R11C5,R2C1,R2C3:R2C5,R16C1:R31C5,R12C1:R15C1,R12C3:R15C5</Range>
    <Condition>
     <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R5C1:R31C1,R2C1:R3C1</Range>
+   <Range>R2C1:R3C1,R5C1:R31C1</Range>
    <Condition>
     <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R31C2</Range>
+   <Range>R3C2:R11C2,R16C2:R31C2</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -4951,14 +5009,14 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R31C4</Range>
+   <Range>R3C4:R31C4</Range>
    <Condition>
     <Value1>AND(RC2=&quot;reference&quot;,RC3=&quot;&quot;,RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R31C4</Range>
+   <Range>R3C4:R31C4</Range>
    <Condition>
     <Value1>AND(RC2=&quot;reference&quot;,RC3&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
@@ -4972,7 +5030,7 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R31C5</Range>
+   <Range>R3C1:R11C5,R2C1,R2C3:R2C5,R16C1:R31C5,R12C1:R15C1,R12C3:R15C5</Range>
    <Condition>
     <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
@@ -4985,13 +5043,27 @@
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C4</Range>
+   <Condition>
+    <Value1>AND(#REF!=&quot;reference&quot;,RC3=&quot;&quot;,RC=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C4</Range>
+   <Condition>
+    <Value1>AND(#REF!=&quot;reference&quot;,RC3&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
+   </Condition>
+  </ConditionalFormatting>
  </Worksheet>
  <Worksheet ss:Name="Operations">
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="53" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="55" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s112" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="130.5"/>
    <Column ss:StyleID="s112" ss:AutoFitWidth="0" ss:Width="124.5"/>
@@ -5153,6 +5225,17 @@
     <Cell ss:StyleID="s132"><Data ss:Type="String">Error details, if result = false. If this is provided when result = true, the message carries hints and wanrings</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">translate.equivalence</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">A code indicating the equivalence of the translation, using values from [ConceptMapEquivalence]{concept-equivalence.html}</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s117"><Data ss:Type="String">translate.outcome</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">out</Data></Cell>
@@ -5162,6 +5245,116 @@
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s132"><Data ss:Type="String">The translation outcome</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">operation</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Batch Mode Translation</Data></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">Translate a set of concepts from one value set to another, based on the existing value set and concept maps resources, and/or other additional knowledge available to the server</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">An item to be translated</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.concept</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">A codeable concept to be translated. If the source is a coding, or a code/system pair, wrap it in a CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.target</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">Identifies the value set in which a translation is sought. May be a logical id, or an absolute or relative location. If more than one is provided, multiple translations are requested for the concept</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.map</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Reference(ConceptMap)</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">A specific concept map to use for the translation. If none is provided, the server chooses which concept map to use</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">*</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">Tuple</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">The outcome of validating an item. There must be an entry for every item in the same order</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.result</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">boolean</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">True if the concept could be translated</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.message</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">Error details, if result = false. If this is provided when result = true, the message carries hints and wanrings</Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.equivalence</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">code</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">A code indicating the equivalence of the translation, using values from [ConceptMapEquivalence]{concept-equivalence.html}. TODO: what about multiple translations? </Data></Cell>
+    <Cell ss:StyleID="s133"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s117"><Data ss:Type="String">batch.item.outcome</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">CodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s118"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">The translation outcome - a CodeableConcept to allow for multiple translations</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5216,106 +5409,7 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">ConceptMap</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">A list of new entries (code / system &#45;-&gt; code/system) that the client should add to it's closure table. The only kind of entry mapping equivalences that can be returned are equal, narrower, wider, and unmatched</Data></Cell>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s133"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">A list of new entries (code / system &#45;-&gt; code/system) that the client should add to its closure table. The only kind of entry mapping equivalences that can be returned are equal, narrower, wider, and unmatched</Data></Cell>
     <Cell ss:StyleID="s133"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5616,7 +5710,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>4</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5629,31 +5723,32 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>0</ActiveRow>
+     <ActiveRow>16</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R52C3</Range>
+   <Range>R2C3:R54C3</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;0,1,[n]&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R52C4</Range>
+   <Range>R2C4:R54C4</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;1,[n],*&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R52C5</Range>
+   <Range>R2C5:R54C5</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;query,operation,SomeResource,Reference(SomeResource),boolean,string,token,code,id,oid,uuid,number,integer,decimal,date,dateTime,time,instant,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Duration,Money,ContactPoint,etc.&quot;</Value>
@@ -5662,49 +5757,49 @@
   <AutoFilter x:Range="R1C1:R2C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R52C9</Range>
+   <Range>R2C1:R54C9</Range>
    <Condition>
     <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R9C1,R18C1:R52C1,R11C1:R16C1</Range>
+   <Range>R2C1:R9C1,R25C1:R27C1,R31C1:R54C1,R29C1,R11C1:R12C1,R15C1:R22C1</Range>
    <Condition>
     <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R52C2,R2C8:R52C8,R2C5:R52C5</Range>
+   <Range>R2C2:R54C2,R2C5:R54C5,R2C8:R54C8</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R52C2</Range>
+   <Range>R2C2:R54C2</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;IN&quot;, RC&lt;&gt;&quot;OUT&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R52C3</Range>
+   <Range>R2C3:R54C3</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,ISERR(VALUE(RC)))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R52C4</Range>
+   <Range>R2C3:R54C4</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1))&lt;&gt;(RC=&quot;&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R52C4</Range>
+   <Range>R2C4:R54C4</Range>
    <Condition>
     <Value1>AND(RC3&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;*&quot;,RC&lt;RC3)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -5715,36 +5810,57 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R52C5</Range>
+   <Range>R2C5:R54C5</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC2&lt;&gt;&quot;QUERY&quot;, RC2&lt;&gt;&quot;OPERATION&quot;)</Value1>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R52C6</Range>
+   <Range>R2C6:R54C6</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1)),(RC&lt;&gt;&quot;&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C9:R52C9</Range>
+   <Range>R2C9:R54C9</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R52C9</Range>
+   <Range>R2C1:R54C9</Range>
    <Condition>
     <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R10C1,R17C1</Range>
+   <Range>R10C1,R28C1,R13C1,R23C1</Range>
    <Condition>
     <Value1>AND(R[-2]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R24C1</Range>
+   <Condition>
+    <Value1>AND(R[-11]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R14C1</Range>
+   <Condition>
+    <Value1>AND(R[15]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R30C1</Range>
+   <Condition>
+    <Value1>AND(R[-7]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
@@ -6082,9 +6198,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s112" ss:DefaultRowHeight="15">

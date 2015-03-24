@@ -10,7 +10,7 @@
   <LastAuthor>Lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2014-11-17T05:30:16Z</LastSaved>
-  <Version>15.00</Version>
+  <Version>14.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
@@ -20,11 +20,10 @@
    <Path>Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  <WindowHeight>11660</WindowHeight>
+  <WindowHeight>11655</WindowHeight>
   <WindowWidth>21600</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -803,7 +802,7 @@
   <NamedRange ss:Name="Invariantids" ss:RefersTo="=Invariants!R2C1:R50C1"/>
  </Names>
  <Worksheet ss:Name="Instructions">
-  <Table ss:ExpandedColumnCount="1" ss:ExpandedRowCount="3" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="2" ss:ExpandedRowCount="4" x:FullColumns="1"
    x:FullRows="1" ss:DefaultRowHeight="15">
    <Column ss:AutoFitWidth="0" ss:Width="411"/>
    <Row ss:AutoFitHeight="0">
@@ -816,6 +815,10 @@
     <Cell ss:StyleID="s67" ss:HRef="http://wiki.hl7.org/?title=FHIR_Spreadsheet_Authoring"><Data
       ss:Type="String">http://wiki.hl7.org?title=FHIR_Spreadsheet_Authoring</Data></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">entered-in-error-status</Data></Cell>
+    <Cell><Data ss:Type="String">n/a - this would be handled whereever the media is linked from</Data></Cell>
+   </Row>
   </Table>
   <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
    <PageSetup>
@@ -824,10 +827,12 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <Panes>
     <Pane>
      <Number>3</Number>
-     <ActiveRow>1</ActiveRow>
+     <ActiveRow>4</ActiveRow>
+     <ActiveCol>1</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -836,33 +841,33 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase"
-    ss:RefersTo="='Data Elements'!R1C1:R100C25" ss:Hidden="1"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R99C25"
+    ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="100" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="25" ss:ExpandedRowCount="99" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s68" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s69" ss:Width="227.5"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.5"/>
-   <Column ss:StyleID="s68" ss:Width="29.5"/>
+   <Column ss:StyleID="s69" ss:Width="227.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="77.25"/>
+   <Column ss:StyleID="s68" ss:Width="29.25"/>
    <Column ss:StyleID="s68" ss:Width="34.5"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="28.5"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="27"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
    <Column ss:Index="10" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="81"/>
-   <Column ss:StyleID="s68" ss:Width="52" ss:Span="1"/>
-   <Column ss:Index="13" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="80.5"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="121"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161.5"/>
+   <Column ss:StyleID="s68" ss:Width="51.75" ss:Span="1"/>
+   <Column ss:Index="13" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="80.25"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120.75"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="161.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="120"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="135"/>
    <Column ss:Index="21" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="103.5"
     ss:Span="1"/>
-   <Column ss:Index="23" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.5"/>
+   <Column ss:Index="23" ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="50.25"/>
    <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="66"/>
-   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.5"/>
+   <Column ss:StyleID="s68" ss:AutoFitWidth="0" ss:Width="119.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="45" ss:StyleID="s70">
     <Cell ss:StyleID="s71"><Data ss:Type="String">Element</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
@@ -1008,7 +1013,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">MediaType</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">DigitalMediaType</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">class</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1044,7 +1049,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">y</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">MediaSubtype</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">DigitalMediaSubtype</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">class</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1100,43 +1105,6 @@
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0008,0018 | ~0008,0050 | 0020,000D | 0020,000E&#10;</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="90">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">Media.created</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">dateTime</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">y</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">when.init</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">When the media was taken/recorded (start)</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">For an image including multiple frames, this is the start time. Creation time is used for tracking, organizing versions and searching</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">.effectiveTime</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">0008,0020 + 0008,0030</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1488,7 +1456,7 @@
     <Cell ss:StyleID="s88"><Data ss:Type="String">The actual content of the media - inline or by direct reference to the media source file</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Recommended content types: image/jpeg, image/png, image/tiff, video/mpeg, audio/mp4, application/dicom. Application/dicom can contain the transfer syntax as a parameter</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Recommended content types: image/jpeg, image/png, image/tiff, video/mpeg, audio/mp4, application/dicom. Application/dicom can contain the transfer syntax as a parameter.&#10;&#10;For an media that covers a period of time (video/sound), the content.creationTime is the end time. Creation time is used for tracking, organizing versions and searching</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.text</Data><NamedCell
@@ -3781,13 +3749,12 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>10</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>8</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3795,48 +3762,21 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
-     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>15</ActiveRow>
-     <ActiveCol>8</ActiveCol>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>0</ActiveCol>
+     <RangeSelection>R6</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C23:R100C23</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;left,right,up,down,[xpixels];[ypixels]&quot;</Value>
-   <ErrorHide/>
-   <ErrorStyle>Info</ErrorStyle>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C19:R100C22</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;N/A&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C8:R100C9</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Bindings!A2..A30&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C6:R100C7</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;Y,N&quot;</Value>
-  </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C5</Range>
    <Type>List</Type>
@@ -3844,23 +3784,10 @@
    <Value>&quot;DomainResource,Type,Resource,Structure&quot;</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C5:R100C5</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData&quot;</Value>
-   <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4,R4C4:R100C4</Range>
+   <Range>R2C4,R4C4:R99C4</Range>
    <Type>List</Type>
    <Value>Invariants!#REF!</Value>
    <ErrorHide/>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R100C3</Range>
-   <Type>List</Type>
-   <CellRangeList/>
-   <Value>&quot;0..1,1..1,0..*,1..*&quot;</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R3C4</Range>
@@ -3868,18 +3795,59 @@
    <Value>Invariantids</Value>
    <ErrorHide/>
   </DataValidation>
-  <AutoFilter x:Range="R1C1:R100C25"
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C23:R99C23</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;left,right,up,down,[xpixels];[ypixels]&quot;</Value>
+   <ErrorHide/>
+   <ErrorStyle>Info</ErrorStyle>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C19:R99C22</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;N/A&quot;</Value>
+   <ErrorHide/>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C8:R99C9</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;Bindings!A2..A30&quot;</Value>
+   <ErrorHide/>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R3C6:R99C7</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;Y,N&quot;</Value>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R3C5:R99C5</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData&quot;</Value>
+   <ErrorHide/>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C3:R99C3</Range>
+   <Type>List</Type>
+   <CellRangeList/>
+   <Value>&quot;0..1,1..1,0..*,1..*&quot;</Value>
+  </DataValidation>
+  <AutoFilter x:Range="R1C1:R99C25"
    xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R100C14</Range>
+   <Range>R2C14:R99C14</Range>
    <Condition>
     <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:yellow'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R100C25</Range>
+   <Range>R2C1:R99C25</Range>
    <Condition>
     <Value1>RC3=&quot;0..0&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#F2F2F2'/>
@@ -3890,7 +3858,7 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R100C1</Range>
+   <Range>R2C1:R5C1,R7C1:R99C1</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -3904,35 +3872,35 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C3:R100C3,R2C15:R100C15</Range>
+   <Range>R3C3:R99C3,R2C15:R99C15</Range>
    <Condition>
     <Value1>(RC1=&quot;&quot;)&lt;&gt;(RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C10:R100C10,R2C13:R100C13</Range>
+   <Range>R2C10:R99C10,R2C13:R99C13</Range>
    <Condition>
     <Value1>AND(SEARCH(&quot;|&quot;,RC5)&lt;&gt;0,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R100C11,R2C13:R100C13</Range>
+   <Range>R2C11:R99C11,R2C13:R99C13</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,NOT(EXACT(LEFT(RC5,1),LOWER(LEFT(RC5,1)))))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C11:R100C12</Range>
+   <Range>R2C11:R99C12</Range>
    <Condition>
     <Value1>AND(RC11&lt;&gt;&quot;&quot;,RC12&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C14:R100C15</Range>
+   <Range>R2C14:R99C15</Range>
    <Condition>
     <Value1>AND(RC14&lt;&gt;&quot;&quot;,RC14=RC15)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -3946,24 +3914,38 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R3C19:R100C20</Range>
+   <Range>R3C19:R99C20</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;N/A&quot;,R2C)),RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:orange'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C23:R100C23</Range>
+   <Range>R2C23:R4C23,R6C23:R99C23</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(R[1]C1,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(R[1]C1,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R100C25</Range>
+   <Range>R2C1:R99C25</Range>
    <Condition>
     <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R6C1</Range>
+   <Condition>
+    <Value1>AND(RC&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R5C23</Range>
+   <Condition>
+    <Value1>AND(RC&lt;&gt;&quot;&quot;,LEFT(RC5,1)&lt;&gt;&quot;@&quot;,LEFT(#REF!,LEN(RC1)+1)&lt;&gt;(RC1&amp;&quot;.&quot;),LEFT(#REF!,LEN(RC1)+2)&lt;&gt;(&quot;!&quot;&amp;RC1&amp;&quot;.&quot;))</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
@@ -3977,9 +3959,9 @@
    <Column ss:Index="2" ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="115.5"/>
    <Column ss:StyleID="s100" ss:Width="55.5"/>
    <Column ss:StyleID="s100" ss:Width="165"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="205"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="199"/>
-   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="188.5"/>
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="204.75"/>
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="198.75"/>
+   <Column ss:StyleID="s100" ss:AutoFitWidth="0" ss:Width="188.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75" ss:StyleID="s70">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
@@ -4499,15 +4481,15 @@
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R50C4</Range>
-   <Type>List</Type>
-   <Value>'Data Elements'!R2C1:R100C1</Value>
-  </DataValidation>
-  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C3:R50C3</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;error,warning&quot;</Value>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R2C4:R50C4</Range>
+   <Type>List</Type>
+   <Value>'Data Elements'!R2C1:R99C1</Value>
   </DataValidation>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -4598,7 +4580,7 @@
     <Cell ss:StyleID="s116"><Data ss:Type="String">created</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">date</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Media.created</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Media.content.creation</Data></Cell>
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4804,7 +4786,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>5</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4887,7 +4870,7 @@
    <Column ss:StyleID="s111" ss:Width="24"/>
    <Column ss:StyleID="s111" ss:Width="25.5"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="106.5" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="223"/>
+   <Column ss:Index="7" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="222.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="253.5" ss:Span="1"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s123"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
@@ -5612,13 +5595,13 @@
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="21" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="82.5" ss:Span="1"/>
-   <Column ss:Index="3" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="199"/>
+   <Column ss:Index="3" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="198.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="157.5"/>
    <Column ss:StyleID="s111" ss:Width="106.5"/>
-   <Column ss:StyleID="s111" ss:Width="113.5"/>
+   <Column ss:StyleID="s111" ss:Width="113.25"/>
    <Column ss:StyleID="s111" ss:Width="120"/>
    <Column ss:StyleID="s111" ss:Width="127.5"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="74.5"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="74.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Event Code</Data><Comment
       ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"> <Font
@@ -5936,14 +5919,14 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="281.5"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="281.25"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="252"/>
    <Column ss:StyleID="s111" ss:Width="63"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
@@ -6275,14 +6258,14 @@
     ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="41" x:FullColumns="1"
-   x:FullRows="1" ss:StyleID="s136" ss:DefaultColumnWidth="260.5"
+   x:FullRows="1" ss:StyleID="s136" ss:DefaultColumnWidth="260.25"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s136" ss:Width="88.5"/>
-   <Column ss:StyleID="s136" ss:Width="28"/>
-   <Column ss:StyleID="s136" ss:Width="328"/>
+   <Column ss:StyleID="s136" ss:Width="27.75"/>
+   <Column ss:StyleID="s136" ss:Width="327.75"/>
    <Column ss:StyleID="s136" ss:Width="57"/>
    <Column ss:StyleID="s136" ss:Width="205.5" ss:Span="1"/>
-   <Column ss:Index="7" ss:StyleID="s136" ss:Width="40"/>
+   <Column ss:Index="7" ss:StyleID="s136" ss:Width="39.75"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
@@ -6766,17 +6749,17 @@
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s111" ss:Width="115"/>
+   <Column ss:StyleID="s111" ss:Width="114.75"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="274.5"/>
    <Column ss:StyleID="s111" ss:Width="51"/>
    <Column ss:StyleID="s111" ss:Width="45"/>
-   <Column ss:StyleID="s111" ss:Width="146.5"/>
+   <Column ss:StyleID="s111" ss:Width="146.25"/>
    <Column ss:StyleID="s111" ss:Width="172.5"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="97.5"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="88.5"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="172.5"/>
-   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="166" ss:Span="1"/>
+   <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="165.75" ss:Span="1"/>
    <Column ss:Index="13" ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="106.5"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Binding Name</Data><Comment
@@ -6833,11 +6816,11 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s145"><Data ss:Type="String">MediaType</Data></Cell>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">DigitalMediaType</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">Whether the Media is a photo, video, or audio</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">Code List</Data></Cell>
     <Cell ss:StyleID="s114"/>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">#media-type</Data></Cell>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">#digital-media-type</Data></Cell>
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s114"/>
     <Cell ss:StyleID="s114"/>
@@ -6848,11 +6831,11 @@
     <Cell ss:StyleID="s115"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">MediaSubtype</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">DigitalMediaSubtype</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Detailed information about the type of the image - its kind, purpose, or the kind of equipment used to generate it </Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Value Set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">y</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">valueset-media-subtype</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">valueset-digital-media-subtype</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
@@ -7300,6 +7283,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>4</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -7378,13 +7362,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s136" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s136" ss:Width="80.5"/>
+   <Column ss:StyleID="s136" ss:Width="80.25"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="34.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.5" ss:Span="1"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
    <Column ss:Index="6" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.5"/>
+   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
@@ -8041,20 +8025,20 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="media-type">
+ <Worksheet ss:Name="digital-media-type">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="='media-type'!R1C1:R1C9"
-    ss:Hidden="1"/>
+   <NamedRange ss:Name="_FilterDatabase"
+    ss:RefersTo="='digital-media-type'!R1C1:R1C9" ss:Hidden="1"/>
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s136" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s136" ss:Width="80.5"/>
+   <Column ss:StyleID="s136" ss:Width="80.25"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="34.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.5" ss:Span="1"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
    <Column ss:Index="6" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.5"/>
+   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"
@@ -8718,13 +8702,13 @@
   </Names>
   <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s136" ss:DefaultRowHeight="15">
-   <Column ss:StyleID="s136" ss:Width="80.5"/>
+   <Column ss:StyleID="s136" ss:Width="80.25"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="34.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.5"/>
-   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.5" ss:Span="1"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="155.25"/>
+   <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="80.25" ss:Span="1"/>
    <Column ss:Index="6" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="244.5"/>
    <Column ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="84" ss:Span="1"/>
-   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.5"/>
+   <Column ss:Index="9" ss:StyleID="s136" ss:AutoFitWidth="0" ss:Width="242.25"/>
    <Row ss:AutoFitHeight="0" ss:Height="15.75">
     <Cell ss:StyleID="s101"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data
        xmlns="http://www.w3.org/TR/REC-html40"> <Font html:Face="Tahoma"

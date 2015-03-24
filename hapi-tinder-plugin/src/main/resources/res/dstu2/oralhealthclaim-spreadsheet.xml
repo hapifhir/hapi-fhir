@@ -9,20 +9,23 @@
   <Author>Grahame</Author>
   <LastAuthor>Paul</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2014-12-09T17:40:29Z</LastSaved>
+  <LastSaved>2015-01-20T16:25:34Z</LastSaved>
   <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-  <WindowHeight>8865</WindowHeight>
-  <WindowWidth>22350</WindowWidth>
+  <SupBook>
+   <Path>\Gforge\HL7\FHIR\trunk\build\source\composition\Invariants</Path>
+   <SheetName>Invariants</SheetName>
+  </SupBook>
+  <WindowHeight>10155</WindowHeight>
+  <WindowWidth>24345</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>8</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
-  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1465,7 +1468,7 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">F02</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">up</Data><NamedCell
+    <Cell ss:StyleID="s91"><Data ss:Type="String">right</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2121,7 +2124,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.coverage.preauthref</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.coverage.preAuthRef</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2440,7 +2443,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingteeth</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingTeeth</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
@@ -2473,7 +2476,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingteeth.tooth</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingTeeth.tooth</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell
@@ -2507,7 +2510,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingteeth.reason</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingTeeth.reason</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2541,7 +2544,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingteeth.extractiondate</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.missingTeeth.extractionDate</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2601,7 +2604,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2633,7 +2636,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.start</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.start</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2664,7 +2667,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.examFee</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.examFee</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2695,7 +2698,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.diagnosticFee</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.diagnosticFee</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2726,7 +2729,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.initialPayment</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.initialPayment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2757,7 +2760,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.durationMonths</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.durationMonths</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2788,7 +2791,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.paymentCount</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.paymentCount</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -2819,7 +2822,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.orthoPlan.periodicPayment</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!OralHealthClaim.orthoPlan.periodicPayment</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell
@@ -3329,7 +3332,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.item.subsite</Data><NamedCell
+    <Cell ss:StyleID="s86"><Data ss:Type="String">OralHealthClaim.item.subSite</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell
@@ -4197,13 +4200,12 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>98</TopRowBottomPane>
+   <TopRowBottomPane>8</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>8</LeftColumnRightPane>
+   <LeftColumnRightPane>16</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -4219,8 +4221,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>103</ActiveRow>
-     <ActiveCol>13</ActiveCol>
+     <ActiveRow>17</ActiveRow>
+     <ActiveCol>21</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4270,7 +4272,7 @@
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
    <Range>R2C4,R4C4:R101C4</Range>
    <Type>List</Type>
-   <Value>'Invariants'!#REF!</Value>
+   <Value>'\Gforge\HL7\FHIR\trunk\build\source\composition\[Invariants]Invariants'!#REF!</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
@@ -6360,9 +6362,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
@@ -6769,14 +6771,14 @@
     <Cell ss:StyleID="s127"/>
     <Cell ss:StyleID="s139"><Data ss:Type="String">y</Data></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s138"><Data ss:Type="String">General-Claim-OthoPlan</Data></Cell>
+    <Cell ss:StyleID="s78"/>
+    <Cell ss:StyleID="s80"><Data ss:Type="String">PreAuthorization with Orthodontic Treatment Plan</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="Number">100153</Data></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">oralhealthclaim-example-orthoplan.xml</Data></Cell>
+    <Cell ss:StyleID="s127"/>
+    <Cell ss:StyleID="s139"><Data ss:Type="String">y</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"/>
@@ -7174,7 +7176,7 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R6C1:R42C1,R2C1:R4C1</Range>
+   <Range>R2C1:R42C1</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,R[-1]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -7283,7 +7285,7 @@
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s145"><Data ss:Type="String">AccidentType</Data></Cell>
+    <Cell ss:StyleID="s145"><Data ss:Type="String">!AccidentType</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">Type of accident: work place, auto, etc.</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">Y</Data></Cell>
@@ -7298,7 +7300,7 @@
     <Cell ss:StyleID="s115"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActIncidentCode</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">AdditionalMaterials</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!AdditionalMaterials</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7313,7 +7315,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Exception</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Exception</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The eligibility exception codes.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7328,7 +7330,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">FundsReserve</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!FundsReserve</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">For whom funds are to be reserved: (Patient, Provider, None)</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7343,7 +7345,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ICD10</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!ICD10</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">ICD10 Diagnostic codes</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7357,7 +7359,7 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">http://hl7.org/fhir/sid/icd-10</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Intervention</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Intervention</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Intervention and exception codes (Pharm)</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7371,7 +7373,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">MissingReason</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!MissingReason</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Reason codes for the missing teeth</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7385,7 +7387,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Modifiers</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Modifiers</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Item type or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7399,7 +7401,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">OralProsthoMaterial</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!OralProsthoMaterial</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Material of the prior denture or bridge prosthesis. (Oral)</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7413,7 +7415,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">OralSites</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!OralSites</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The code for the teeth, quadrant, sextant and arch</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7427,7 +7429,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">PayeeType</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!PayeeType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">A code for the party to be reimbursed.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7441,7 +7443,7 @@
     <Cell ss:StyleID="s117"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Relationship</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Relationship</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The code for the relationship of the patient to the subscriber</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7455,7 +7457,7 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">CoverageRoleType?</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Ruleset</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Ruleset</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The static and dynamic model to which contents conform, may be business version or standard and version.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7470,7 +7472,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ServiceProduct</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!ServiceProduct</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Allowable service and product codes</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7485,7 +7487,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Use</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Use</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Complete, proposed, exploratory, other</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">code list</Data></Cell>
     <Cell ss:StyleID="s117"/>
@@ -7500,7 +7502,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Surface</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Surface</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The code for the tooth surface and surface combinations</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7515,7 +7517,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ItemType</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!ItemType</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Service, Product, Rx Dispense, Rx Compound etc.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7530,7 +7532,7 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">http://hl7.org/fhir/v3/vs/ActInvoiceGroupCode</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Tooth</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Tooth</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The codes for the teeth, subset of OralSites</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7545,7 +7547,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">ProcessPriority</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!ProcessPriority</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The timeliness with which processing is required: STAT, normal, Deferred</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7560,7 +7562,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">UDI</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!UDI</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">The FDA, or other, UDI repository.</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7575,7 +7577,7 @@
     <Cell ss:StyleID="s118"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Conditions</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">!Conditions</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Patient conditions and symptoms</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Y</Data></Cell>
@@ -7723,10 +7725,11 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -7739,11 +7742,12 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>8</ActiveRow>
-     <ActiveCol>11</ActiveCol>
+     <ActiveRow>23</ActiveRow>
+     <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

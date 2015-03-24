@@ -42,6 +42,7 @@
 								<link>http://jamesagnew.github.io/hapi-fhir/apidocs/</link>
 								<link>https://docs.oracle.com/javaee/7/api/</link>
 							</links>
+							<additionalparam>-Xdoclint:none</additionalparam>
 						</configuration>
 					</reportSet>
 				</reportSets>
@@ -64,6 +65,7 @@
 							<linksource>true</linksource>
 							<verbose>false</verbose>
 							<debug>false</debug>
+							<additionalparam>-Xdoclint:none</additionalparam>
 						</configuration>
 						<executions>
 							<execution>

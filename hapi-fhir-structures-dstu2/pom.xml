@@ -238,6 +238,8 @@
 						<baseResourceName>StatusRequest</baseResourceName>
 						<baseResourceName>Person</baseResourceName>
 						<baseResourceName>ProcedureRequest</baseResourceName>
+						<baseResourceName>ProcessRequest</baseResourceName>
+						<baseResourceName>Claim</baseResourceName>
 						<baseResourceName>VisionClaim</baseResourceName>
 						<baseResourceName>DeviceMetric</baseResourceName>
 						<baseResourceName>Organization</baseResourceName>

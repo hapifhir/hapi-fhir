@@ -209,19 +209,21 @@ public abstract class BaseStructureParser {
 	}
 
 	private String doScanForImportNamesAndReturnFqn(String theNextType) throws MojoFailureException {
-		if ("Any".equals(theNextType)) {
+		String nextType = Resource.correctName(theNextType);
+		
+		if ("Any".equals(nextType)) {
 			return (IResource.class.getCanonicalName());
 		}
-		if ("ExtensionDt".equals(theNextType)) {
+		if ("ExtensionDt".equals(nextType)) {
 			return (ExtensionDt.class.getCanonicalName());
 		}
 //		if ("ResourceReferenceDt".equals(theNextType)) {
 //			return "ca.uhn.fhir.model." + myVersion + ".composite." + ResourceReferenceDt.class.getSimpleName();
 //		}
-		if ("ResourceDt".equals(theNextType)) {
+		if ("ResourceDt".equals(nextType)) {
 			return IResource.class.getCanonicalName();
 		}
-		if ("Binary".equals(theNextType)) {
+		if ("Binary".equals(nextType)) {
 			return "ca.uhn.fhir.model." + myVersion + ".resource." + Binary.class.getSimpleName();
 		}
 		// if ("BoundCodeableConceptDt".equals(theNextType)) {
@@ -230,55 +232,55 @@ public abstract class BaseStructureParser {
 		// QuantityCompararatorEnum
 		// QuantityComparatorEnum
 
-		if (myLocallyDefinedClassNames.containsKey(theNextType)) {
-			return (theNextType);
+		if (myLocallyDefinedClassNames.containsKey(nextType)) {
+			return nextType;
 		} else {
 			try {
-				String type = myPackageBase + ".composite." + theNextType;
+				String type = myPackageBase + ".composite." + nextType;
 				Class.forName(type);
 				return (type);
 			} catch (ClassNotFoundException e) {
 				try {
-					String type = "ca.uhn.fhir.model." + myVersion + ".composite." + theNextType;
+					String type = "ca.uhn.fhir.model." + myVersion + ".composite." + nextType;
 					Class.forName(type);
 					return (type);
 				} catch (ClassNotFoundException e5) {
 					try {
-						String type = "ca.uhn.fhir.model." + myVersion + ".resource." + theNextType;
+						String type = "ca.uhn.fhir.model." + myVersion + ".resource." + nextType;
 						Class.forName(type);
 						return (type);
 					} catch (ClassNotFoundException e1) {
 						try {
-							String type = "ca.uhn.fhir.model.primitive." + theNextType;
+							String type = "ca.uhn.fhir.model.primitive." + nextType;
 							Class.forName(type);
 							return (type);
 						} catch (ClassNotFoundException e2) {
 							try {
-								String type = myPackageBase + ".valueset." + theNextType;
+								String type = myPackageBase + ".valueset." + nextType;
 								Class.forName(type);
 								return (type);
 							} catch (ClassNotFoundException e3) {
 								try {
-									String type = "ca.uhn.fhir.model.api." + theNextType;
+									String type = "ca.uhn.fhir.model.api." + nextType;
 									Class.forName(type);
 									return (type);
 								} catch (ClassNotFoundException e4) {
 									try {
-										String type = "ca.uhn.fhir.model." + myVersion + ".valueset." + theNextType;
+										String type = "ca.uhn.fhir.model." + myVersion + ".valueset." + nextType;
 										Class.forName(type);
 										return (type);
 									} catch (ClassNotFoundException e6) {
-										String fileName = myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + theNextType + ".java";
+										String fileName = myBaseDir + "/src/main/java/" + myPackageBase.replace('.', '/') + "/composite/" + nextType + ".java";
 										File file = new File(fileName);
 										if (file.exists()) {
-											return myPackageBase + ".composite." + theNextType;
+											return myPackageBase + ".composite." + nextType;
 										}
-										fileName = myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + theNextType + ".java";
+										fileName = myBaseDir + "/src/main/java/ca/uhn/fhir/model/primitive/" + nextType + ".java";
 										file = new File(fileName);
 										if (file.exists()) {
-											return "ca.uhn.fhir.model.primitive." + theNextType;
+											return "ca.uhn.fhir.model.primitive." + nextType;
 										}
-										throw new MojoFailureException("Unknown type: " + theNextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+										throw new MojoFailureException("Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 									}
 								}
 							}
@@ -391,13 +393,6 @@ public abstract class BaseStructureParser {
 		myExtensions = theExts;
 	}
 
-	private String translateClassName(String theName) {
-		if ("List".equals(theName)) {
-			return "ListResource";
-		}
-		return theName;
-	}
-
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileWriter w = new FileWriter(theFile, false);
 
@@ -405,6 +400,7 @@ public abstract class BaseStructureParser {
 
 		ArrayList<String> imports = new ArrayList<String>();
 		for (String next : myImports) {
+			next = Resource.correctName(next);
 			if (next.contains(".")) {
 				imports.add(next);
 			} else {
@@ -498,7 +494,7 @@ public abstract class BaseStructureParser {
 
 			// File f = new File(theOutputDirectory, (next.getDeclaringClassNameComplete()) /*+ getFilenameSuffix()*/ +
 			// ".java");
-			String elementName = translateClassName(next.getElementName());
+			String elementName = Resource.correctName(next.getElementName());
 			File f = new File(theOutputDirectory, elementName + getFilenameSuffix() + ".java");
 			try {
 				write(next, f, thePackageBase);

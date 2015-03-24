@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Sat, Feb 14, 2015 16:12-0500 for FHIR v0.4.0 
+  Generated on Tue, Mar 24, 2015 11:45+0000 for FHIR v0.4.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.4.0">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
@@ -58,7 +58,7 @@
   </xs:simpleType>
   <xs:complexType name="dateTime">
     <xs:annotation>
-      <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds may be provided but may also be ignored.  Dates SHALL be valid dates.</xs:documentation>
+      <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.</xs:documentation>
       <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -262,14 +262,16 @@
       <xs:element ref="AllergyIntolerance"/>
       <xs:element ref="Appointment"/>
       <xs:element ref="AppointmentResponse"/>
+      <xs:element ref="AuditEvent"/>
       <xs:element ref="Basic"/>
       <xs:element ref="Binary"/>
       <xs:element ref="BodySite"/>
       <xs:element ref="Bundle"/>
       <xs:element ref="CarePlan"/>
       <xs:element ref="CarePlan2"/>
+      <xs:element ref="Claim"/>
       <xs:element ref="ClaimResponse"/>
-      <xs:element ref="ClinicalAssessment"/>
+      <xs:element ref="ClinicalImpression"/>
       <xs:element ref="Communication"/>
       <xs:element ref="CommunicationRequest"/>
       <xs:element ref="Composition"/>
@@ -296,7 +298,6 @@
       <xs:element ref="EnrollmentResponse"/>
       <xs:element ref="EpisodeOfCare"/>
       <xs:element ref="ExplanationOfBenefit"/>
-      <xs:element ref="ExtensionDefinition"/>
       <xs:element ref="FamilyHistory"/>
       <xs:element ref="Goal"/>
       <xs:element ref="Group"/>
@@ -305,7 +306,6 @@
       <xs:element ref="ImagingStudy"/>
       <xs:element ref="Immunization"/>
       <xs:element ref="ImmunizationRecommendation"/>
-      <xs:element ref="InstitutionalClaim"/>
       <xs:element ref="List"/>
       <xs:element ref="Location"/>
       <xs:element ref="Media"/>
@@ -320,7 +320,6 @@
       <xs:element ref="Observation"/>
       <xs:element ref="OperationDefinition"/>
       <xs:element ref="OperationOutcome"/>
-      <xs:element ref="OralHealthClaim"/>
       <xs:element ref="Order"/>
       <xs:element ref="OrderResponse"/>
       <xs:element ref="Organization"/>
@@ -328,36 +327,28 @@
       <xs:element ref="Patient"/>
       <xs:element ref="PaymentNotice"/>
       <xs:element ref="PaymentReconciliation"/>
-      <xs:element ref="PendedRequest"/>
       <xs:element ref="Person"/>
-      <xs:element ref="PharmacyClaim"/>
       <xs:element ref="Practitioner"/>
       <xs:element ref="Procedure"/>
       <xs:element ref="ProcedureRequest"/>
-      <xs:element ref="ProfessionalClaim"/>
-      <xs:element ref="Profile"/>
+      <xs:element ref="ProcessRequest"/>
+      <xs:element ref="ProcessResponse"/>
       <xs:element ref="Provenance"/>
       <xs:element ref="Questionnaire"/>
       <xs:element ref="QuestionnaireAnswers"/>
-      <xs:element ref="Readjudicate"/>
       <xs:element ref="ReferralRequest"/>
       <xs:element ref="RelatedPerson"/>
-      <xs:element ref="Reversal"/>
       <xs:element ref="RiskAssessment"/>
       <xs:element ref="Schedule"/>
       <xs:element ref="SearchParameter"/>
-      <xs:element ref="SecurityEvent"/>
       <xs:element ref="Slot"/>
       <xs:element ref="Specimen"/>
-      <xs:element ref="StatusRequest"/>
-      <xs:element ref="StatusResponse"/>
       <xs:element ref="StructureDefinition"/>
       <xs:element ref="Subscription"/>
       <xs:element ref="Substance"/>
       <xs:element ref="Supply"/>
       <xs:element ref="SupportingDocumentation"/>
       <xs:element ref="ValueSet"/>
-      <xs:element ref="VisionClaim"/>
       <xs:element ref="VisionPrescription"/>
       <xs:element ref="Parameters"/>
     </xs:choice>
@@ -385,6 +376,9 @@
            <xs:element name="valueDateTime" type="dateTime"/>
            <xs:element name="valueTime" type="time"/>
            <xs:element name="valueCode" type="code"/>
+           <xs:element name="valueOid" type="oid"/>
+           <xs:element name="valueUuid" type="uuid"/>
+           <xs:element name="valueId" type="id"/>
            <xs:element name="valueAttachment" type="Attachment"/>
            <xs:element name="valueIdentifier" type="Identifier"/>
            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
@@ -395,6 +389,7 @@
            <xs:element name="valueRatio" type="Ratio"/>
            <xs:element name="valueReference" type="Reference"/>
            <xs:element name="valueSampledData" type="SampledData"/>
+           <xs:element name="valueSignature" type="Signature"/>
            <xs:element name="valueHumanName" type="HumanName"/>
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
@@ -422,20 +417,6 @@
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="Element">
-    <xs:annotation>
-      <xs:documentation>Base definition for all elements in a resource.</xs:documentation>
-      <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
-    </xs:annotation>
-        <xs:sequence>
-          <xs:element name="extension" type="Extension" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-        <xs:attribute name="id" type="id-primitive" use="optional"/>
   </xs:complexType>
   <xs:complexType name="Narrative">
     <xs:annotation>
@@ -494,6 +475,20 @@
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="Element">
+    <xs:annotation>
+      <xs:documentation>Base definition for all elements in a resource.</xs:documentation>
+      <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
+    </xs:annotation>
+        <xs:sequence>
+          <xs:element name="extension" type="Extension" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="id-primitive" use="optional"/>
+  </xs:complexType>
   <xs:complexType name="Period">
     <xs:annotation>
       <xs:documentation>A time period defined by a start and end date and optionally time.</xs:documentation>
@@ -547,11 +542,6 @@
           <xs:element name="primary" type="boolean" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>Indicates that this code was chosen by a user directly - i.e. off a pick list of available items (codes or displays).</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="valueSet" type="Reference" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>The set of possible coded values this coding was chosen from or constrained by.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -693,6 +683,11 @@
           <xs:element name="title" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>A label or set of text to display in place of the data.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="creation" type="dateTime" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The date that the attachment was first created.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -902,6 +897,68 @@
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="Signature">
+    <xs:annotation>
+      <xs:documentation>An XML digital signature along with supporting context.</xs:documentation>
+      <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:sequence>
+          <xs:element name="type" type="Coding" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="when" type="instant" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>When the digital signature was signed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        <xs:choice minOccurs="1" maxOccurs="1">
+           <xs:annotation>
+             <xs:documentation>A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).</xs:documentation>
+           </xs:annotation>
+           <xs:element name="whoBoolean" type="boolean"/>
+           <xs:element name="whoInteger" type="integer"/>
+           <xs:element name="whoDecimal" type="decimal"/>
+           <xs:element name="whoBase64Binary" type="base64Binary"/>
+           <xs:element name="whoInstant" type="instant"/>
+           <xs:element name="whoString" type="string"/>
+           <xs:element name="whoUri" type="uri"/>
+           <xs:element name="whoDate" type="date"/>
+           <xs:element name="whoDateTime" type="dateTime"/>
+           <xs:element name="whoTime" type="time"/>
+           <xs:element name="whoCode" type="code"/>
+           <xs:element name="whoOid" type="oid"/>
+           <xs:element name="whoUuid" type="uuid"/>
+           <xs:element name="whoId" type="id"/>
+           <xs:element name="whoAttachment" type="Attachment"/>
+           <xs:element name="whoIdentifier" type="Identifier"/>
+           <xs:element name="whoCodeableConcept" type="CodeableConcept"/>
+           <xs:element name="whoCoding" type="Coding"/>
+           <xs:element name="whoQuantity" type="Quantity"/>
+           <xs:element name="whoRange" type="Range"/>
+           <xs:element name="whoPeriod" type="Period"/>
+           <xs:element name="whoRatio" type="Ratio"/>
+           <xs:element name="whoReference" type="Reference"/>
+           <xs:element name="whoSampledData" type="SampledData"/>
+           <xs:element name="whoSignature" type="Signature"/>
+           <xs:element name="whoHumanName" type="HumanName"/>
+           <xs:element name="whoAddress" type="Address"/>
+           <xs:element name="whoContactPoint" type="ContactPoint"/>
+           <xs:element name="whoTiming" type="Timing"/>
+           <xs:element name="whoMeta" type="Meta"/>
+          </xs:choice>
+          <xs:element name="blob" type="base64Binary" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The base64 encoding of the XML-Signature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:complexType name="Age">
     <xs:complexContent>
       <xs:restriction base="Quantity">
@@ -1095,6 +1152,16 @@
               <xs:documentation>The name of this element definition (to refer to it from other element definitions using ElementDefinition.nameReference). This is a unique name referring to a specific set of constraints applied to this element. One use of this is to provide a name to different slices of the same element.</xs:documentation>
             </xs:annotation>
           </xs:element>
+          <xs:element name="label" type="string" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The text to display beside the element indicating its meaning or to use to prompt for the element in a user display or form.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="code" type="Coding" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation>A code that provides the meaning for the element according to a particular terminology.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element name="slicing" type="ElementDefinition.Slicing" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>Indicates that the element is sliced into a set of alternative definitions (there are multiple definitions on a single element in the base resource). The set of slices is any elements that come after this in the element sequence that have the same path, until a shorter path occurs (the shorter path terminates the set).</xs:documentation>
@@ -1105,9 +1172,9 @@
               <xs:documentation>A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="formal" type="string" minOccurs="0" maxOccurs="1">
+          <xs:element name="definition" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>The definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource.</xs:documentation>
+              <xs:documentation>Provides a complete explanation of the meaning of the data element for human readability.  For the case of elements derived from existing elements (e.g. constraints), the definition SHALL be consistent with the base definition, but convey the meaning of the element in the particular context of use of the resource.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="comments" type="string" minOccurs="0" maxOccurs="1">
@@ -1120,7 +1187,7 @@
               <xs:documentation>Explains why this element is needed and why it's been constrained as it has.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="synonym" type="string" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="alias" type="string" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation>Identifies additional names by which this element might also be known.</xs:documentation>
             </xs:annotation>
@@ -1160,6 +1227,9 @@
            <xs:element name="defaultValueDateTime" type="dateTime"/>
            <xs:element name="defaultValueTime" type="time"/>
            <xs:element name="defaultValueCode" type="code"/>
+           <xs:element name="defaultValueOid" type="oid"/>
+           <xs:element name="defaultValueUuid" type="uuid"/>
+           <xs:element name="defaultValueId" type="id"/>
            <xs:element name="defaultValueAttachment" type="Attachment"/>
            <xs:element name="defaultValueIdentifier" type="Identifier"/>
            <xs:element name="defaultValueCodeableConcept" type="CodeableConcept"/>
@@ -1170,6 +1240,7 @@
            <xs:element name="defaultValueRatio" type="Ratio"/>
            <xs:element name="defaultValueReference" type="Reference"/>
            <xs:element name="defaultValueSampledData" type="SampledData"/>
+           <xs:element name="defaultValueSignature" type="Signature"/>
            <xs:element name="defaultValueHumanName" type="HumanName"/>
            <xs:element name="defaultValueAddress" type="Address"/>
            <xs:element name="defaultValueContactPoint" type="ContactPoint"/>
@@ -1196,6 +1267,9 @@
            <xs:element name="fixedDateTime" type="dateTime"/>
            <xs:element name="fixedTime" type="time"/>
            <xs:element name="fixedCode" type="code"/>
+           <xs:element name="fixedOid" type="oid"/>
+           <xs:element name="fixedUuid" type="uuid"/>
+           <xs:element name="fixedId" type="id"/>
            <xs:element name="fixedAttachment" type="Attachment"/>
            <xs:element name="fixedIdentifier" type="Identifier"/>
            <xs:element name="fixedCodeableConcept" type="CodeableConcept"/>
@@ -1206,6 +1280,7 @@
            <xs:element name="fixedRatio" type="Ratio"/>
            <xs:element name="fixedReference" type="Reference"/>
            <xs:element name="fixedSampledData" type="SampledData"/>
+           <xs:element name="fixedSignature" type="Signature"/>
            <xs:element name="fixedHumanName" type="HumanName"/>
            <xs:element name="fixedAddress" type="Address"/>
            <xs:element name="fixedContactPoint" type="ContactPoint"/>
@@ -1227,6 +1302,9 @@
            <xs:element name="patternDateTime" type="dateTime"/>
            <xs:element name="patternTime" type="time"/>
            <xs:element name="patternCode" type="code"/>
+           <xs:element name="patternOid" type="oid"/>
+           <xs:element name="patternUuid" type="uuid"/>
+           <xs:element name="patternId" type="id"/>
            <xs:element name="patternAttachment" type="Attachment"/>
            <xs:element name="patternIdentifier" type="Identifier"/>
            <xs:element name="patternCodeableConcept" type="CodeableConcept"/>
@@ -1237,6 +1315,7 @@
            <xs:element name="patternRatio" type="Ratio"/>
            <xs:element name="patternReference" type="Reference"/>
            <xs:element name="patternSampledData" type="SampledData"/>
+           <xs:element name="patternSignature" type="Signature"/>
            <xs:element name="patternHumanName" type="HumanName"/>
            <xs:element name="patternAddress" type="Address"/>
            <xs:element name="patternContactPoint" type="ContactPoint"/>
@@ -1245,7 +1324,7 @@
           </xs:choice>
         <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
-             <xs:documentation>An example value for this element.</xs:documentation>
+             <xs:documentation>A sample value for this element demonstrating the type of information that would typically be captured.</xs:documentation>
            </xs:annotation>
            <xs:element name="exampleBoolean" type="boolean"/>
            <xs:element name="exampleInteger" type="integer"/>
@@ -1258,6 +1337,9 @@
            <xs:element name="exampleDateTime" type="dateTime"/>
            <xs:element name="exampleTime" type="time"/>
            <xs:element name="exampleCode" type="code"/>
+           <xs:element name="exampleOid" type="oid"/>
+           <xs:element name="exampleUuid" type="uuid"/>
+           <xs:element name="exampleId" type="id"/>
            <xs:element name="exampleAttachment" type="Attachment"/>
            <xs:element name="exampleIdentifier" type="Identifier"/>
            <xs:element name="exampleCodeableConcept" type="CodeableConcept"/>
@@ -1268,6 +1350,7 @@
            <xs:element name="exampleRatio" type="Ratio"/>
            <xs:element name="exampleReference" type="Reference"/>
            <xs:element name="exampleSampledData" type="SampledData"/>
+           <xs:element name="exampleSignature" type="Signature"/>
            <xs:element name="exampleHumanName" type="HumanName"/>
            <xs:element name="exampleAddress" type="Address"/>
            <xs:element name="exampleContactPoint" type="ContactPoint"/>
@@ -1331,6 +1414,11 @@
               <xs:documentation>An internal reference to the definition of a mapping.</xs:documentation>
             </xs:annotation>
           </xs:element>
+          <xs:element name="language" type="code" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Identifies the computable language in which mapping.map is expressed.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element name="map" type="string" minOccurs="1" maxOccurs="1">
             <xs:annotation>
               <xs:documentation>Expresses what part of the target specification corresponds to this element.</xs:documentation>
@@ -1385,14 +1473,9 @@
               <xs:documentation>A descriptive name for this - can be useful for generating implementation artifacts.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="isExtensible" type="boolean" minOccurs="1" maxOccurs="1">
+          <xs:element name="strength" type="BindingStrength" minOccurs="1" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>If true, then conformant systems may use additional codes or (where the data type permits) text alone to convey concepts not covered by the set of codes identified in the binding.  If false, then conformant systems are constrained to the provided codes alone.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="conformance" type="BindingConformance" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>Indicates the degree of conformance expectations associated with this binding.</xs:documentation>
+              <xs:documentation>Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="description" type="string" minOccurs="0" maxOccurs="1">
@@ -1402,34 +1485,38 @@
           </xs:element>
         <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
-             <xs:documentation>Points to the value set or external definition that identifies the set of codes to be used.</xs:documentation>
+             <xs:documentation>Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.</xs:documentation>
            </xs:annotation>
-           <xs:element name="referenceBoolean" type="boolean"/>
-           <xs:element name="referenceInteger" type="integer"/>
-           <xs:element name="referenceDecimal" type="decimal"/>
-           <xs:element name="referenceBase64Binary" type="base64Binary"/>
-           <xs:element name="referenceInstant" type="instant"/>
-           <xs:element name="referenceString" type="string"/>
-           <xs:element name="referenceUri" type="uri"/>
-           <xs:element name="referenceDate" type="date"/>
-           <xs:element name="referenceDateTime" type="dateTime"/>
-           <xs:element name="referenceTime" type="time"/>
-           <xs:element name="referenceCode" type="code"/>
-           <xs:element name="referenceAttachment" type="Attachment"/>
-           <xs:element name="referenceIdentifier" type="Identifier"/>
-           <xs:element name="referenceCodeableConcept" type="CodeableConcept"/>
-           <xs:element name="referenceCoding" type="Coding"/>
-           <xs:element name="referenceQuantity" type="Quantity"/>
-           <xs:element name="referenceRange" type="Range"/>
-           <xs:element name="referencePeriod" type="Period"/>
-           <xs:element name="referenceRatio" type="Ratio"/>
-           <xs:element name="referenceReference" type="Reference"/>
-           <xs:element name="referenceSampledData" type="SampledData"/>
-           <xs:element name="referenceHumanName" type="HumanName"/>
-           <xs:element name="referenceAddress" type="Address"/>
-           <xs:element name="referenceContactPoint" type="ContactPoint"/>
-           <xs:element name="referenceTiming" type="Timing"/>
-           <xs:element name="referenceMeta" type="Meta"/>
+           <xs:element name="valueSetBoolean" type="boolean"/>
+           <xs:element name="valueSetInteger" type="integer"/>
+           <xs:element name="valueSetDecimal" type="decimal"/>
+           <xs:element name="valueSetBase64Binary" type="base64Binary"/>
+           <xs:element name="valueSetInstant" type="instant"/>
+           <xs:element name="valueSetString" type="string"/>
+           <xs:element name="valueSetUri" type="uri"/>
+           <xs:element name="valueSetDate" type="date"/>
+           <xs:element name="valueSetDateTime" type="dateTime"/>
+           <xs:element name="valueSetTime" type="time"/>
+           <xs:element name="valueSetCode" type="code"/>
+           <xs:element name="valueSetOid" type="oid"/>
+           <xs:element name="valueSetUuid" type="uuid"/>
+           <xs:element name="valueSetId" type="id"/>
+           <xs:element name="valueSetAttachment" type="Attachment"/>
+           <xs:element name="valueSetIdentifier" type="Identifier"/>
+           <xs:element name="valueSetCodeableConcept" type="CodeableConcept"/>
+           <xs:element name="valueSetCoding" type="Coding"/>
+           <xs:element name="valueSetQuantity" type="Quantity"/>
+           <xs:element name="valueSetRange" type="Range"/>
+           <xs:element name="valueSetPeriod" type="Period"/>
+           <xs:element name="valueSetRatio" type="Ratio"/>
+           <xs:element name="valueSetReference" type="Reference"/>
+           <xs:element name="valueSetSampledData" type="SampledData"/>
+           <xs:element name="valueSetSignature" type="Signature"/>
+           <xs:element name="valueSetHumanName" type="HumanName"/>
+           <xs:element name="valueSetAddress" type="Address"/>
+           <xs:element name="valueSetContactPoint" type="ContactPoint"/>
+           <xs:element name="valueSetTiming" type="Timing"/>
+           <xs:element name="valueSetMeta" type="Meta"/>
           </xs:choice>
         </xs:sequence>
       </xs:extension>
@@ -1533,7 +1620,7 @@
       </xs:enumeration>
       <xs:enumeration value="openAtEnd">
         <xs:annotation>
-          <xs:documentation>Additional content is allowed, but only at the end of the list.</xs:documentation>
+          <xs:documentation>Additional content is allowed, but only at the end of the list. Note that using this requires that the slices be ordered, which makes it hard to share uses. This should only be done where absolutely required.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
@@ -1549,33 +1636,38 @@
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="BindingConformance-list">
+  <xs:simpleType name="BindingStrength-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="required">
         <xs:annotation>
-          <xs:documentation>Only codes in the specified set are allowed.  If the binding is extensible, other codes may be used for concepts not covered by the bound set of codes.</xs:documentation>
+          <xs:documentation>To be conformant, instances of this element SHALL include a code from the specified value set.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="extensible">
+        <xs:annotation>
+          <xs:documentation>To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="preferred">
         <xs:annotation>
-          <xs:documentation>For greater interoperability, implementers are strongly encouraged to use the bound set of codes, however alternate codes may be used in derived profiles and implementations if necessary without being considered non-conformant.</xs:documentation>
+          <xs:documentation>Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="example">
         <xs:annotation>
-          <xs:documentation>The codes in the set are an example to illustrate the meaning of the field. There is no particular preference for its use nor any assertion that the provided values are sufficient to meet implementation needs.</xs:documentation>
+          <xs:documentation>Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="BindingConformance">
+  <xs:complexType name="BindingStrength">
     <xs:annotation>
-      <xs:documentation>Binding conformance for applications</xs:documentation>
+      <xs:documentation>Indication of the degree of conformance expectations associated with a binding</xs:documentation>
       <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
        <xs:extension base="Element">
-         <xs:attribute name="value" type="BindingConformance-list" use="optional"/>
+         <xs:attribute name="value" type="BindingStrength-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -1636,20 +1728,20 @@
   </xs:complexType>
   <xs:complexType name="Timing">
     <xs:annotation>
-      <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
+      <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.</xs:documentation>
       <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:sequence>
-          <xs:element name="event" type="Period" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="event" type="dateTime" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation>Identifies specific time periods when the event should occur.</xs:documentation>
+              <xs:documentation>Identifies specific times when the event occurs.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="repeat" type="Timing.Repeat" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>Identifies a repeating pattern to the intended time periods.</xs:documentation>
+              <xs:documentation>A set of rules that describe when the event should occur.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -1658,30 +1750,15 @@
   </xs:complexType>
   <xs:complexType name="Timing.Repeat">
     <xs:annotation>
-      <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
+      <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.</xs:documentation>
       <xs:documentation>If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:sequence>
-          <xs:element name="frequency" type="integer" minOccurs="0" maxOccurs="1">
+          <xs:element name="bounds" type="Period" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>Indicates how often the event should occur.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="when" type="EventTiming" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>Identifies the occurrence of daily life that determines timing.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="duration" type="decimal" minOccurs="1" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>How long each repetition should last.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="units" type="UnitsOfTime" minOccurs="1" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>The units of time for the duration.</xs:documentation>
+              <xs:documentation>Outer bounds for start and/or end limits of the timing schedule.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="count" type="integer" minOccurs="0" maxOccurs="1">
@@ -1689,14 +1766,99 @@
               <xs:documentation>A total count of the desired number of repetitions.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="end" type="dateTime" minOccurs="0" maxOccurs="1">
+          <xs:element name="duration" type="decimal" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>When to stop repeating the timing schedule.</xs:documentation>
+              <xs:documentation>How long this thing happens for when it happens.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="durationUnits" type="UnitsOfTime" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The units of time for the duration, in UCUM units.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="frequency" type="integer" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="frequencyMax" type="integer" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="period" type="decimal" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="periodMax" type="decimal" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="periodUnits" type="UnitsOfTime" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>The units of time for the period in UCUM units.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="when" type="EventTiming" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>A real world event that the occurrence of the event should be tied to.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="UnitsOfTime-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="s">
+        <xs:annotation>
+          <xs:documentation>second.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="min">
+        <xs:annotation>
+          <xs:documentation>minute.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="h">
+        <xs:annotation>
+          <xs:documentation>hour.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="d">
+        <xs:annotation>
+          <xs:documentation>day.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="wk">
+        <xs:annotation>
+          <xs:documentation>week.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mo">
+        <xs:annotation>
+          <xs:documentation>month.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="a">
+        <xs:annotation>
+          <xs:documentation>year.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="UnitsOfTime">
+    <xs:annotation>
+      <xs:documentation>A unit of time (units from UCUM)</xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="UnitsOfTime-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
   </xs:complexType>
   <xs:simpleType name="EventTiming-list">
     <xs:restriction base="xs:string">
@@ -1708,6 +1870,26 @@
       <xs:enumeration value="WAKE">
         <xs:annotation>
           <xs:documentation>event occurs [duration] after waking.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="C">
+        <xs:annotation>
+          <xs:documentation>event occurs at a meal (from the Latin cibus).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CM">
+        <xs:annotation>
+          <xs:documentation>event occurs at breakfast (from the Latin cibus matutinus).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CD">
+        <xs:annotation>
+          <xs:documentation>event occurs at lunch (from the Latin cibus diurnus).</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="CV">
+        <xs:annotation>
+          <xs:documentation>event occurs at dinner (from the Latin ante cibus vespertinus).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="AC">
@@ -1760,56 +1942,6 @@
     <xs:complexContent>
        <xs:extension base="Element">
          <xs:attribute name="value" type="EventTiming-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="UnitsOfTime-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="s">
-        <xs:annotation>
-          <xs:documentation>second.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="min">
-        <xs:annotation>
-          <xs:documentation>minute.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="h">
-        <xs:annotation>
-          <xs:documentation>hour.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="d">
-        <xs:annotation>
-          <xs:documentation>day.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="wk">
-        <xs:annotation>
-          <xs:documentation>week.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="mo">
-        <xs:annotation>
-          <xs:documentation>month.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="a">
-        <xs:annotation>
-          <xs:documentation>year.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="UnitsOfTime">
-    <xs:annotation>
-      <xs:documentation>A unit of time (units from UCUM)</xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="UnitsOfTime-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -2016,14 +2148,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>When the resource last changed - e.g. when the version changed.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="deleted" type="boolean" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation>Set to 'true' if the resource is deleted. Deleted resources can not be fetched via the RESTful API, but may appear in bundles for various reasons.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
           <xs:element name="profile" type="uri" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation>A list of profiles that this resource claims to conform to. The URL is a reference to Profile.url.</xs:documentation>
+              <xs:documentation>A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]].</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="security" type="Coding" minOccurs="0" maxOccurs="unbounded">
@@ -2191,6 +2318,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueDateTime" type="dateTime"/>
            <xs:element name="valueTime" type="time"/>
            <xs:element name="valueCode" type="code"/>
+           <xs:element name="valueOid" type="oid"/>
+           <xs:element name="valueUuid" type="uuid"/>
+           <xs:element name="valueId" type="id"/>
            <xs:element name="valueAttachment" type="Attachment"/>
            <xs:element name="valueIdentifier" type="Identifier"/>
            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
@@ -2201,6 +2331,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueRatio" type="Ratio"/>
            <xs:element name="valueReference" type="Reference"/>
            <xs:element name="valueSampledData" type="SampledData"/>
+           <xs:element name="valueSignature" type="Signature"/>
            <xs:element name="valueHumanName" type="HumanName"/>
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
@@ -2234,7 +2365,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation>The name of the parameter (reference to the operation definition).</xs:documentation>
             </xs:annotation>
           </xs:element>
-        <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
              <xs:documentation>The value of the parameter.</xs:documentation>
            </xs:annotation>
@@ -2249,6 +2380,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueDateTime" type="dateTime"/>
            <xs:element name="valueTime" type="time"/>
            <xs:element name="valueCode" type="code"/>
+           <xs:element name="valueOid" type="oid"/>
+           <xs:element name="valueUuid" type="uuid"/>
+           <xs:element name="valueId" type="id"/>
            <xs:element name="valueAttachment" type="Attachment"/>
            <xs:element name="valueIdentifier" type="Identifier"/>
            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
@@ -2259,12 +2393,18 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
            <xs:element name="valueRatio" type="Ratio"/>
            <xs:element name="valueReference" type="Reference"/>
            <xs:element name="valueSampledData" type="SampledData"/>
+           <xs:element name="valueSignature" type="Signature"/>
            <xs:element name="valueHumanName" type="HumanName"/>
            <xs:element name="valueAddress" type="Address"/>
            <xs:element name="valueContactPoint" type="ContactPoint"/>
            <xs:element name="valueTiming" type="Timing"/>
            <xs:element name="valueMeta" type="Meta"/>
           </xs:choice>
+          <xs:element name="resource" type="ResourceContainer" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation>If the parameter is a whole resource.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -2331,41 +2471,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="ExtensionContext-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="resource">
-        <xs:annotation>
-          <xs:documentation>The context is all elements matching a particular resource element path.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="datatype">
-        <xs:annotation>
-          <xs:documentation>The context is all nodes matching a particular data type element path (root or repeating element) or all elements referencing a particular primitive data type (expressed as the datatype name).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="mapping">
-        <xs:annotation>
-          <xs:documentation>The context is all nodes whose mapping to a specified reference model corresponds to a particular mapping structure.  The context identifies the mapping target. The mapping should clearly identify where such an extension could be used.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="extension">
-        <xs:annotation>
-          <xs:documentation>The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="ExtensionContext">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="ExtensionContext-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
   </xs:complexType>
   <xs:simpleType name="DataAbsentReason-list">
     <xs:restriction base="xs:string">
@@ -2502,36 +2607,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="ResourceProfileStatus-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="draft">
-        <xs:annotation>
-          <xs:documentation>This profile is still under development.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="active">
-        <xs:annotation>
-          <xs:documentation>This profile is ready for normal use.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="retired">
-        <xs:annotation>
-          <xs:documentation>This profile has been deprecated, withdrawn or superseded and should no longer be used.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="ResourceProfileStatus">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="ResourceProfileStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
   <xs:simpleType name="DataType-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Address">
@@ -2654,9 +2729,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="Signature">
+        <xs:annotation>
+          <xs:documentation>An XML digital signature along with supporting context.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Timing">
         <xs:annotation>
-          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
+          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="base64Binary">
@@ -2681,7 +2761,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="dateTime">
         <xs:annotation>
-          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds may be provided but may also be ignored.  Dates SHALL be valid dates.</xs:documentation>
+          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="decimal">
@@ -2787,6 +2867,21 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
+  <xs:simpleType name="ClinicalBaseGender-list">
+    <xs:restriction base="xs:string">
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="ClinicalBaseGender">
+    <xs:annotation>
+      <xs:documentation></xs:documentation>
+      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+       <xs:extension base="Element">
+         <xs:attribute name="value" type="ClinicalBaseGender-list" use="optional"/>
+       </xs:extension>
+     </xs:complexContent>
+  </xs:complexType>
   <xs:simpleType name="MessageEvent-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="MedicationAdministration-Complete">
@@ -2814,11 +2909,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Notification of a change to an administrative resource (either create or update). Note that there is no delete, though some administrative resources have status or period elements for this use.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="conceptmap-translate">
-        <xs:annotation>
-          <xs:documentation>Translate a code from one value set to another, based on the existing value set and concept maps resources, and/or other additional knowledge available to the server. The coded value is carried as an extension in the message header.  The outcome is an operationOutcome with hints, warnings, or errors, or the translated code in an extension.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="diagnosticreport-provide">
         <xs:annotation>
           <xs:documentation>Provide a diagnostic report, or update a previously provided diagnostic report.</xs:documentation>
@@ -2844,11 +2934,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>The definition of a value set is used to create a simple collection of codes suitable for use for data entry or validation. An expanded value set will be returned, or an error message.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="valueset-validate">
-        <xs:annotation>
-          <xs:documentation>Validate that a coded value is in the set of codes allowed by a value set. The coded value is carried as an extension in the message header. The outcome is an OperationOutcome with hints, warnings, or errors.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="MessageEvent">
@@ -2862,33 +2947,33 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="ValueSetStatus-list">
+  <xs:simpleType name="ConformanceResourceStatus-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="draft">
         <xs:annotation>
-          <xs:documentation>This valueset is still under development.</xs:documentation>
+          <xs:documentation>This resource is still under development</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="active">
         <xs:annotation>
-          <xs:documentation>This valueset is ready for normal use.</xs:documentation>
+          <xs:documentation>This resource is ready for normal use</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="retired">
         <xs:annotation>
-          <xs:documentation>This valueset has been withdrawn or superceded and should no longer be used.</xs:documentation>
+          <xs:documentation>This resource has been withdrawn or superceded and should no longer be used</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="ValueSetStatus">
+  <xs:complexType name="ConformanceResourceStatus">
     <xs:annotation>
       <xs:documentation></xs:documentation>
       <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
        <xs:extension base="Element">
-         <xs:attribute name="value" type="ValueSetStatus-list" use="optional"/>
+         <xs:attribute name="value" type="ConformanceResourceStatus-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -2919,51 +3004,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
        <xs:extension base="Element">
          <xs:attribute name="value" type="QuestionnaireStatus-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="FilterOperator-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="=">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code equals the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="is-a">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code has an is-a relationship with the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="is-not-a">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code does not have an is-a relationship with the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="regex">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code  matches the regex specified in the provided value.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="in">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="not-in">
-        <xs:annotation>
-          <xs:documentation>The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="FilterOperator">
-    <xs:annotation>
-      <xs:documentation></xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="FilterOperator-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -3087,6 +3127,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="quantity">
         <xs:annotation>
           <xs:documentation>A search parameter that searches on a quantity.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="uri">
+        <xs:annotation>
+          <xs:documentation>A search parameter that searches on a URI (RFC 3986).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
@@ -3224,9 +3269,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="Signature">
+        <xs:annotation>
+          <xs:documentation>An XML digital signature along with supporting context.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="Timing">
         <xs:annotation>
-          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used for to record when things are expected or requested to occur.</xs:documentation>
+          <xs:documentation>Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="base64Binary">
@@ -3251,7 +3301,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="dateTime">
         <xs:annotation>
-          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds may be provided but may also be ignored.  Dates SHALL be valid dates.</xs:documentation>
+          <xs:documentation>A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="decimal">
@@ -3311,12 +3361,17 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Appointment">
         <xs:annotation>
-          <xs:documentation>A scheduled healthcare event for a patient and/or practitioner(s) where a service may take place at a specific date/time.</xs:documentation>
+          <xs:documentation>A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="AppointmentResponse">
         <xs:annotation>
           <xs:documentation>A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AuditEvent">
+        <xs:annotation>
+          <xs:documentation>A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Basic">
@@ -3336,7 +3391,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Bundle">
         <xs:annotation>
-          <xs:documentation>A container for a group of resources.</xs:documentation>
+          <xs:documentation>A container for a collection of resources.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="CarePlan">
@@ -3349,14 +3404,19 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="Claim">
+        <xs:annotation>
+          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="ClaimResponse">
         <xs:annotation>
           <xs:documentation>This resource provides the adjudication details from the processing of a Claim resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ClinicalAssessment">
+      <xs:enumeration value="ClinicalImpression">
         <xs:annotation>
-          <xs:documentation>A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow.</xs:documentation>
+          <xs:documentation>A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called &quot;ClinicalImpression&quot; rather than &quot;ClinicalAssessment&quot; to avoid confusion with the recording of assessment tools such as Apgar score.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Communication">
@@ -3426,7 +3486,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="DeviceUseRequest">
         <xs:annotation>
-          <xs:documentation>Represents a request for the use of a device.</xs:documentation>
+          <xs:documentation>Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="DeviceUseStatement">
@@ -3436,7 +3496,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="DiagnosticOrder">
         <xs:annotation>
-          <xs:documentation>A request for a diagnostic investigation service to be performed.</xs:documentation>
+          <xs:documentation>A record of a request for a diagnostic investigation service to be performed.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="DiagnosticReport">
@@ -3489,11 +3549,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ExtensionDefinition">
-        <xs:annotation>
-          <xs:documentation>Defines an extension that can be used in resources.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="FamilyHistory">
         <xs:annotation>
           <xs:documentation>Significant health events and conditions for people related to the subject relevant in the context of care for the subject.</xs:documentation>
@@ -3501,7 +3556,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Goal">
         <xs:annotation>
-          <xs:documentation>Describes the intended objective(s) of the care.</xs:documentation>
+          <xs:documentation>Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Group">
@@ -3532,11 +3587,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="ImmunizationRecommendation">
         <xs:annotation>
           <xs:documentation>A patient's point-of-time immunization status and recommendation with optional supporting justification.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="InstitutionalClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="List">
@@ -3609,11 +3659,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A collection of error, warning or information messages that result from a system action.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="OralHealthClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Order">
         <xs:annotation>
           <xs:documentation>A request to perform an action.</xs:documentation>
@@ -3636,7 +3681,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Patient">
         <xs:annotation>
-          <xs:documentation>Demographics and other administrative information about a person or animal receiving care or other health-related services.</xs:documentation>
+          <xs:documentation>Demographics and other administrative information about an individual or animal receiving care or other health-related services.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="PaymentNotice">
@@ -3649,19 +3694,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides payment details and claim references supporting a bulk payment.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="PendedRequest">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the resource for which the status is to be checked.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Person">
         <xs:annotation>
           <xs:documentation>Demographics and administrative information about a person independent of a specific health-related context.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PharmacyClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Practitioner">
@@ -3679,19 +3714,19 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A request for a procedure to be performed. May be a proposal or an order.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ProfessionalClaim">
+      <xs:enumeration value="ProcessRequest">
         <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
+          <xs:documentation>This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="Profile">
+      <xs:enumeration value="ProcessResponse">
         <xs:annotation>
-          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+          <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Provenance">
         <xs:annotation>
-          <xs:documentation>Provenance information that describes the activity that led to the creation of a set of resources. This information can be used to help determine their reliability or trace where the information in them came from. The focus of the provenance resource is record keeping, audit and traceability, and not explicit statements of clinical significance.</xs:documentation>
+          <xs:documentation>Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g., Document Completion - has the artifact been legally authenticated), all of which may impact Security, Privacy, and Trust policies.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Questionnaire">
@@ -3704,11 +3739,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="Readjudicate">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and line items details for the claim which is to be re-adjudicated.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="ReferralRequest">
         <xs:annotation>
           <xs:documentation>Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organisation.</xs:documentation>
@@ -3717,11 +3747,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="RelatedPerson">
         <xs:annotation>
           <xs:documentation>Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Reversal">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the request for which all actions are to be reversed or terminated.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="RiskAssessment">
@@ -3739,11 +3764,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A Search Parameter that defines a named search item that can be used to search/filter on a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="SecurityEvent">
-        <xs:annotation>
-          <xs:documentation>A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Slot">
         <xs:annotation>
           <xs:documentation>A slot of time on a schedule that may be available for booking appointments.</xs:documentation>
@@ -3754,24 +3774,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Sample for analysis.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="StatusRequest">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the resource for which the processing status is to be checked.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="StatusResponse">
-        <xs:annotation>
-          <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="StructureDefinition">
         <xs:annotation>
-          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+          <xs:documentation>A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
-          <xs:documentation>Todo.</xs:documentation>
+          <xs:documentation>The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined &quot;channel&quot; so that another system is able to take an appropriate action.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Substance">
@@ -3792,11 +3802,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="ValueSet">
         <xs:annotation>
           <xs:documentation>A value set specifies a set of codes drawn from one or more code systems.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="VisionClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="VisionPrescription">
@@ -3912,38 +3917,18 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="Use-list">
+  <xs:simpleType name="ConformanceUseContext-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="complete">
-        <xs:annotation>
-          <xs:documentation>The treatment is complete and this represents a Claim for the services.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="proposed">
-        <xs:annotation>
-          <xs:documentation>The treatment is proposed and this represents a Pre-authorization for the services.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="exploratory">
-        <xs:annotation>
-          <xs:documentation>The treatment is proposed and this represents a Pre-determination for the services.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="other">
-        <xs:annotation>
-          <xs:documentation>A locally defined or otherwise resolved status.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="Use">
+  <xs:complexType name="ConformanceUseContext">
     <xs:annotation>
       <xs:documentation></xs:documentation>
       <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
        <xs:extension base="Element">
-         <xs:attribute name="value" type="Use-list" use="optional"/>
+         <xs:attribute name="value" type="ConformanceUseContext-list" use="optional"/>
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
@@ -3961,12 +3946,17 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Appointment">
         <xs:annotation>
-          <xs:documentation>A scheduled healthcare event for a patient and/or practitioner(s) where a service may take place at a specific date/time.</xs:documentation>
+          <xs:documentation>A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="AppointmentResponse">
         <xs:annotation>
           <xs:documentation>A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AuditEvent">
+        <xs:annotation>
+          <xs:documentation>A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Basic">
@@ -3986,7 +3976,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Bundle">
         <xs:annotation>
-          <xs:documentation>A container for a group of resources.</xs:documentation>
+          <xs:documentation>A container for a collection of resources.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="CarePlan">
@@ -3999,14 +3989,19 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="Claim">
+        <xs:annotation>
+          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="ClaimResponse">
         <xs:annotation>
           <xs:documentation>This resource provides the adjudication details from the processing of a Claim resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ClinicalAssessment">
+      <xs:enumeration value="ClinicalImpression">
         <xs:annotation>
-          <xs:documentation>A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow.</xs:documentation>
+          <xs:documentation>A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called &quot;ClinicalImpression&quot; rather than &quot;ClinicalAssessment&quot; to avoid confusion with the recording of assessment tools such as Apgar score.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Communication">
@@ -4076,7 +4071,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="DeviceUseRequest">
         <xs:annotation>
-          <xs:documentation>Represents a request for the use of a device.</xs:documentation>
+          <xs:documentation>Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="DeviceUseStatement">
@@ -4086,7 +4081,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="DiagnosticOrder">
         <xs:annotation>
-          <xs:documentation>A request for a diagnostic investigation service to be performed.</xs:documentation>
+          <xs:documentation>A record of a request for a diagnostic investigation service to be performed.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="DiagnosticReport">
@@ -4139,11 +4134,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ExtensionDefinition">
-        <xs:annotation>
-          <xs:documentation>Defines an extension that can be used in resources.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="FamilyHistory">
         <xs:annotation>
           <xs:documentation>Significant health events and conditions for people related to the subject relevant in the context of care for the subject.</xs:documentation>
@@ -4151,7 +4141,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Goal">
         <xs:annotation>
-          <xs:documentation>Describes the intended objective(s) of the care.</xs:documentation>
+          <xs:documentation>Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Group">
@@ -4182,11 +4172,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="ImmunizationRecommendation">
         <xs:annotation>
           <xs:documentation>A patient's point-of-time immunization status and recommendation with optional supporting justification.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="InstitutionalClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="List">
@@ -4259,11 +4244,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A collection of error, warning or information messages that result from a system action.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="OralHealthClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Order">
         <xs:annotation>
           <xs:documentation>A request to perform an action.</xs:documentation>
@@ -4286,7 +4266,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Patient">
         <xs:annotation>
-          <xs:documentation>Demographics and other administrative information about a person or animal receiving care or other health-related services.</xs:documentation>
+          <xs:documentation>Demographics and other administrative information about an individual or animal receiving care or other health-related services.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="PaymentNotice">
@@ -4299,19 +4279,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>This resource provides payment details and claim references supporting a bulk payment.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="PendedRequest">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the resource for which the status is to be checked.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Person">
         <xs:annotation>
           <xs:documentation>Demographics and administrative information about a person independent of a specific health-related context.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PharmacyClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Practitioner">
@@ -4329,19 +4299,19 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A request for a procedure to be performed. May be a proposal or an order.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="ProfessionalClaim">
+      <xs:enumeration value="ProcessRequest">
         <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
+          <xs:documentation>This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="Profile">
+      <xs:enumeration value="ProcessResponse">
         <xs:annotation>
-          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+          <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Provenance">
         <xs:annotation>
-          <xs:documentation>Provenance information that describes the activity that led to the creation of a set of resources. This information can be used to help determine their reliability or trace where the information in them came from. The focus of the provenance resource is record keeping, audit and traceability, and not explicit statements of clinical significance.</xs:documentation>
+          <xs:documentation>Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g., Document Completion - has the artifact been legally authenticated), all of which may impact Security, Privacy, and Trust policies.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Questionnaire">
@@ -4354,11 +4324,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="Readjudicate">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and line items details for the claim which is to be re-adjudicated.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="ReferralRequest">
         <xs:annotation>
           <xs:documentation>Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organisation.</xs:documentation>
@@ -4367,11 +4332,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="RelatedPerson">
         <xs:annotation>
           <xs:documentation>Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="Reversal">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the request for which all actions are to be reversed or terminated.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="RiskAssessment">
@@ -4389,11 +4349,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>A Search Parameter that defines a named search item that can be used to search/filter on a resource.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="SecurityEvent">
-        <xs:annotation>
-          <xs:documentation>A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="Slot">
         <xs:annotation>
           <xs:documentation>A slot of time on a schedule that may be available for booking appointments.</xs:documentation>
@@ -4404,24 +4359,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           <xs:documentation>Sample for analysis.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="StatusRequest">
-        <xs:annotation>
-          <xs:documentation>This resource provides the request and response details for the resource for which the processing status is to be checked.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="StatusResponse">
-        <xs:annotation>
-          <xs:documentation>This resource provides processing status, errors and notes from the processing of a resource.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
       <xs:enumeration value="StructureDefinition">
         <xs:annotation>
-          <xs:documentation>A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.</xs:documentation>
+          <xs:documentation>A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Subscription">
         <xs:annotation>
-          <xs:documentation>Todo.</xs:documentation>
+          <xs:documentation>The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined &quot;channel&quot; so that another system is able to take an appropriate action.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="Substance">
@@ -4442,11 +4387,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="ValueSet">
         <xs:annotation>
           <xs:documentation>A value set specifies a set of codes drawn from one or more code systems.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="VisionClaim">
-        <xs:annotation>
-          <xs:documentation>A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="VisionPrescription">
@@ -4476,7 +4416,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="final">
         <xs:annotation>
-          <xs:documentation>The composition or document is complete and verified by an appropriate person, and no further work is planned.</xs:documentation>
+          <xs:documentation>This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="appended">

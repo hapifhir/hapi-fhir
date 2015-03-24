@@ -102,7 +102,7 @@ public class ResourceValidatorTest {
 		} catch (ValidationFailureException e) {
 			String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(encoded);
-			assertThat(encoded, containsString("Inv-3: At most, only one of count or end can be present"));
+			assertThat(encoded, containsString("Invalid content was found starting with element 'end'"));
 		}
 	}
 
@@ -124,7 +124,7 @@ public class ResourceValidatorTest {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("Inv-2: A system is required if a value is provided."));
+		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("A system is required if a value is provided."));
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
@@ -170,7 +170,7 @@ public class ResourceValidatorTest {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("Inv-3: At most, only one of count or end can be present"));
+		assertThat(encoded, containsString("Invalid content was found starting with element 'end'"));
 	}
 
 	private FhirValidator createFhirValidator() {

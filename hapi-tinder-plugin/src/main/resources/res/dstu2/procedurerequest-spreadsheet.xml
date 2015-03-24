@@ -10,7 +10,7 @@
   <LastAuthor>Claude Nanjo</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
   <LastSaved>2015-02-28T08:19:24Z</LastSaved>
-  <Version>14.00</Version>
+  <Version>15.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
   <AllowPNG/>
@@ -20,12 +20,11 @@
    <Path>Macintosh HD:Users:cnanjo:repository:fhir:trunk:build:source:procedurerequest:Invariants</Path>
    <SheetName>Invariants</SheetName>
   </SupBook>
-  <WindowHeight>13725</WindowHeight>
-  <WindowWidth>28800</WindowWidth>
+  <WindowHeight>12270</WindowHeight>
+  <WindowWidth>24345</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>6</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
+  <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -791,6 +790,14 @@
   </Style>
   <Style ss:ID="s151" ss:Parent="s63">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
+   <Borders/>
+   <Font ss:FontName="Calibri" x:Family="Swiss" ss:Size="11" ss:Color="#000000"/>
+   <Interior ss:Color="#FFFFFF" ss:Pattern="Solid"/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s152" ss:Parent="s63">
+   <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
    <Borders>
     <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="3"/>
    </Borders>
@@ -984,7 +991,7 @@
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">Procedure Request</Data><NamedCell
+    <Cell ss:StyleID="s78"><Data ss:Type="String">A request for a procedure to be performed</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s80"><Data ss:Type="String">A request for a procedure to be performed. May be a proposal or an order.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1292,7 +1299,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | aborted</Data><NamedCell
+    <Cell ss:StyleID="s87"><Data ss:Type="String">proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">The status of the order.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -3731,12 +3738,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>8</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    <Panes>
     <Pane>
@@ -3744,15 +3752,15 @@
     </Pane>
     <Pane>
      <Number>1</Number>
+     <ActiveCol>1</ActiveCol>
     </Pane>
     <Pane>
      <Number>2</Number>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>5</ActiveRow>
-     <ActiveCol>0</ActiveCol>
-     <RangeSelection>R6</RangeSelection>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>12</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -4645,24 +4653,24 @@
     <Cell ss:StyleID="s116"><Data ss:Type="String">Search by subject - a patient</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s115"/>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">orderer</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">ProcedureRequest.orderer</Data></Cell>
     <Cell ss:StyleID="s116"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s115"/>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">performer</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">ProcedureRequest.performer</Data></Cell>
     <Cell ss:StyleID="s116"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s115"/>
+    <Cell ss:StyleID="s115"><Data ss:Type="String">encounter</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">ProcedureRequest.encounter</Data></Cell>
     <Cell ss:StyleID="s116"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4866,7 +4874,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
+     <ActiveRow>6</ActiveRow>
      <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
@@ -6029,11 +6037,11 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R1C4"/>
   </Names>
-  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="40" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultColumnWidth="65.25"
    ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="114"/>
@@ -6058,17 +6066,6 @@
         x:Family="Swiss" html:Size="8" html:Color="#000000">Type of source (spreadsheet or profile XML file).  Default is spreadsheet</Font> </ss:Data></Comment><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">IG Name</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s113"><Data ss:Type="String">cqf-procedurerequest</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">cqf-procedurerequest.xml</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s126"><Data ss:Type="String">procedurerequest-cqf-profile-spreadsheet.xml</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">spreadsheet</Data><NamedCell
-      ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">cqf</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s115"><Data ss:Type="String">procedurerequest-qicore</Data></Cell>
@@ -6309,8 +6306,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Zoom>150</Zoom>
-   <Selected/>
+   <Zoom>96</Zoom>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6330,8 +6326,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>3</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>2</ActiveRow>
+     <ActiveCol>2</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -6339,38 +6335,73 @@
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R40C4</Range>
+   <Range>R2C4:R39C4</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;spreadsheet,profile&quot;</Value>
   </DataValidation>
-  <AutoFilter x:Range="R1C1:R2C4" xmlns="urn:schemas-microsoft-com:office:excel">
+  <AutoFilter x:Range="R1C1:R1C4" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R40C4</Range>
+   <Range>R2C1:R4C4,R6C1:R39C4</Range>
    <Condition>
     <Value1>AND(R[1048572]C1=&quot;&quot;,R[1048572]C&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R40C1</Range>
+   <Range>R2C1:R4C1,R7C1:R39C1</Range>
    <Condition>
     <Value1>AND(R[1048572]C&lt;&gt;&quot;&quot;,R[1048571]C=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R40C2,R2C4:R40C4</Range>
+   <Range>R2C2:R4C2,R6C2:R39C2,R2C4:R4C4,R6C4:R39C4</Range>
    <Condition>
     <Value1>AND(R[1048572]C1&lt;&gt;&quot;&quot;,R[1048572]C[16380]=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R40C4</Range>
+   <Range>R2C1:R4C4,R6C1:R39C4</Range>
    <Condition>
     <Value1>LEFT(R[1048572]C1,1)=&quot;!&quot;</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R5C1:R5C4</Range>
+   <Condition>
+    <Value1>AND(#REF!=&quot;&quot;,#REF!&lt;&gt;&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R6C1</Range>
+   <Condition>
+    <Value1>AND(R[-4]C&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R5C1</Range>
+   <Condition>
+    <Value1>AND(#REF!&lt;&gt;&quot;&quot;,R[-4]C=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R5C2,R5C4</Range>
+   <Condition>
+    <Value1>AND(#REF!&lt;&gt;&quot;&quot;,#REF!=&quot;&quot;)</Value1>
+    <Format Style='border:.5pt solid #D8D8D8;background:red'/>
+   </Condition>
+  </ConditionalFormatting>
+  <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R5C1:R5C4</Range>
+   <Condition>
+    <Value1>LEFT(#REF!,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
    </Condition>
   </ConditionalFormatting>
@@ -6433,12 +6464,12 @@
     <Cell ss:StyleID="s139"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s140"/>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">QICore ProcedureRequest</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Example of QICore ProcedureRequest</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">qicore</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">procedurerequest-qicore-example.xml</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="String">procedurerequest-qicore</Data></Cell>
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -6802,6 +6833,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>3</ActiveRow>
      <ActiveCol>0</ActiveCol>
     </Pane>
    </Panes>
@@ -6822,10 +6854,15 @@
    <Value>&quot;xml,csv,tool&quot;</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R40C6</Range>
+   <Range>R2C6,R4C6:R40C6</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;Profiles!A2:A40&quot;</Value>
+  </DataValidation>
+  <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
+   <Range>R3C6</Range>
+   <Type>List</Type>
+   <Value>Profiles!R2C1:R19C1</Value>
   </DataValidation>
   <AutoFilter x:Range="R1C1:R2C7" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
@@ -7392,9 +7429,7 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>0</ActiveCol>
-     <RangeSelection>R3</RangeSelection>
+     <ActiveCol>4</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -7538,12 +7573,12 @@
     <Cell ss:StyleID="s139"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s140"><Data ss:Type="String">planned</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">draft</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The request has been planned</Data></Cell>
+    <Cell ss:StyleID="s150"><Data ss:Type="String">The request is in preliminary form, prior to being requested</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"><Data ss:Type="String">This may require waiting for a patient to actually attend</Data></Cell>
@@ -7575,8 +7610,8 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The receiving system has accepted the request, but work has not yet commenced</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The receiving system has accepted the request, but work has not yet commenced</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7586,8 +7621,8 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The work to fulfill the request is happening</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The work to fulfill the request is happening</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7597,8 +7632,8 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">7</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The work has been complete, the report(s) released, and no further work is planned</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The work has been complete, the report(s) released, and no further work is planned</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7608,8 +7643,8 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">8</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The request has been held by originating system/user request</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The request has been held by originating system/user request</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7619,19 +7654,19 @@
     <Cell ss:StyleID="s130"><Data ss:Type="Number">9</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The receiving system has declined to fulfill the request</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The receiving system has declined to fulfill the request</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
+    <Cell ss:StyleID="s141"><Data ss:Type="String">For consistency, changed to refused</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s140"><Data ss:Type="String">aborted</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">10</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"><Data ss:Type="String">The request was attempted, but due to some procedural error, it could not be completed</Data></Cell>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The request was attempted, but due to some procedural error, it could not be completed</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7641,8 +7676,8 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7652,8 +7687,8 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7663,8 +7698,8 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7674,8 +7709,8 @@
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
-    <Cell ss:StyleID="s150"/>
+    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -8047,9 +8082,9 @@
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s144"/>
@@ -8087,8 +8122,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>5</ActiveCol>
+     <ActiveRow>9</ActiveRow>
+     <ActiveCol>3</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
@@ -8732,9 +8767,9 @@
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s144"/>
@@ -9404,9 +9439,9 @@
     <Cell ss:StyleID="s142"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
+    <Cell ss:StyleID="s152"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s133"/>
     <Cell ss:StyleID="s144"/>
@@ -9439,7 +9474,9 @@
     </Pane>
     <Pane>
      <Number>0</Number>
+     <ActiveRow>0</ActiveRow>
      <ActiveCol>0</ActiveCol>
+     <RangeSelection>R1:R1048576</RangeSelection>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

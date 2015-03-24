@@ -237,7 +237,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// param.addChain(chain);
 				// }
 				param.setDocumentation(nextParamDescription);
-				param.setType(nextParameter.getParamType());
+				param.getTypeElement().setValue(nextParameter.getParamType().getCode());
 			}
 		}
 	}
@@ -302,7 +302,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// param.addChain(chain);
 				// }
 				param.setDocumentation(nextParamDescription);
-				param.setType(nextParameter.getParamType());
+				param.getTypeElement().setValue(nextParameter.getParamType().getCode());
 				for (Class<? extends IResource> nextTarget : nextParameter.getDeclaredTypes()) {
 					RuntimeResourceDefinition targetDef = myRestfulServer.getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {

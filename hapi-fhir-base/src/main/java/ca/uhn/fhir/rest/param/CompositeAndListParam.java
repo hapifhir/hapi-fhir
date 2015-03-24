@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 
 /*
  * #%L
@@ -41,8 +41,8 @@ public class CompositeAndListParam<A extends IQueryParameterType, B extends IQue
 	}
 
 	@Override
-	public SearchParamTypeEnum getSearchParamType() {
-		return SearchParamTypeEnum.COMPOSITE;
+	public RestSearchParameterType getSearchParamType() {
+		return RestSearchParameterType.COMPOSITE;
 	}
 	
 	

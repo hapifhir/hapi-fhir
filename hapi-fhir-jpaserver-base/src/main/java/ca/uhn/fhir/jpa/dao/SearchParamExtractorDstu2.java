@@ -49,7 +49,7 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -59,6 +59,8 @@ import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -82,7 +84,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.DATE) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.DATE) {
 				continue;
 			}
 
@@ -145,7 +147,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.NUMBER) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.NUMBER) {
 				continue;
 			}
 
@@ -248,7 +250,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.QUANTITY) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.QUANTITY) {
 				continue;
 			}
 
@@ -304,7 +306,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.STRING) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.STRING) {
 				continue;
 			}
 
@@ -398,7 +400,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
-			if (nextSpDef.getParamType() != SearchParamTypeEnum.TOKEN) {
+			if (nextSpDef.getParamType() != RestSearchParameterType.TOKEN) {
 				continue;
 			}
 
@@ -416,6 +418,13 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 			List<String> codes = new ArrayList<String>();
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
+				
+				// Patient:language 
+				if (nextObject instanceof Patient.Communication) {
+					Communication nextValue = (Patient.Communication) nextObject;
+					nextObject= nextValue.getLanguage();
+				}
+				
 				if (nextObject instanceof IdentifierDt) {
 					IdentifierDt nextValue = (IdentifierDt) nextObject;
 					if (nextValue.isEmpty()) {

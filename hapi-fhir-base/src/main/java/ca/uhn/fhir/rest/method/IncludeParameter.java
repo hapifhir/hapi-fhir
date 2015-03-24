@@ -32,7 +32,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.PathSpecification;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.param.BaseQueryParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -99,7 +99,7 @@ class IncludeParameter extends BaseQueryParameter {
 	}
 
 	@Override
-	public SearchParamTypeEnum getParamType() {
+	public RestSearchParameterType getParamType() {
 		return null;
 	}
 

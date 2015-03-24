@@ -24,7 +24,7 @@
   <WindowWidth>9870</WindowWidth>
   <WindowTopX>5520</WindowTopX>
   <WindowTopY>6075</WindowTopY>
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -3355,7 +3355,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4183,7 +4182,7 @@
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s116"><Data ss:Type="String">_profile</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">token</Data></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">uri</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Resource.meta.profile</Data></Cell>
     <Cell ss:StyleID="s118"/>
@@ -4384,14 +4383,14 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>3</ActiveRow>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R30C2</Range>
+   <Range>R2C2:R5C2,R7C2:R30C2</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;number,date,string,token,reference,composite,quantity&quot;</Value>
@@ -4420,7 +4419,7 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R30C3</Range>
+   <Range>R2C3:R30C3,R6C2</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;reference&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -4460,7 +4459,7 @@
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C9"
     ss:Hidden="1"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="49" x:FullColumns="1"
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="47" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="130.5"/>
    <Column ss:StyleID="s111" ss:AutoFitWidth="0" ss:Width="124.5"/>
@@ -4591,40 +4590,29 @@
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-change</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-add</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Instance</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">operation</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Add or delete profiles, tags, and security labels for a resource</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and either adds or deletes the profiles, tags, and security labels found in it to or from the nominated resource. &#10;&#10;This operation can also be used on historical entries</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">This operation is special in that executing this operation does not cause a new version of the resource to be created. The meta is updated directly. This is because the content in meta does not affect the meaning of the resource, and the security labels (in particular) are used to apply access rules to existing resources</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Add profiles, tags, and security labels to a resource</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and either adds the profiles, tags, and security labels found in it to the nominated resource. &#10;&#10;This operation can also be used on historical entries - to update them without creating a different historical version</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">This operation is special in that executing this operation does not cause a new version of the resource to be created. The meta is updated directly. This is because the content in meta does not affect the meaning of the resource, and the security labels (in particular) are used to apply access rules to existing versions of resources</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="97.5">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-change.meta</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-add.meta</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Meta</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Profiles, tags, and security labels to add</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Profiles, tags, and security labels to add to or delete from the existing resource. Note that profiles, tags, and security labels are sets, and duplicates are not created. E.g. Profiles are unique by URL, and tags and security labels are unique by system+code</Data></Cell>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="97.5">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-change.mode</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">0</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">code</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Whether to add or delete (default = add)</Data></Cell>
-    <Cell ss:StyleID="s117"><Data ss:Type="String">Whether to add or delete. The default action is add the labels</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Profiles, tags, and security labels to add to the existing resource. Note that profiles, tags, and security labels are sets, and duplicates are not created.&#10;&#10;The identity of a tag or security label is the system+code. When matching existing tags during adding, version and display are ignored. For profiles matching is based on the full URL</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-change.return</Data></Cell>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-add.return</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">out</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
@@ -4635,47 +4623,36 @@
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-delete</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Instance</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">operation</Data></Cell>
     <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Delete profiles, tags, and security labels for a resource</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and either deletes the profiles, tags, and security labels found in it from the nominated resource. &#10;&#10;This operation can also be used on historical entries</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="String">This operation is special in that executing this operation does not cause a new version of the resource to be created. The meta is updated directly. This is because the content in meta does not affect the meaning of the resource, and the security labels (in particular) are used to apply access rules to existing versions of resources</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="97.5">
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-delete.meta</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">in</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Meta</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Profiles, tags, and security labels to delete</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Profiles, tags, and security labels to add delete from the existing resource. It is not an error if these tags, profiles, and labels do not exist.&#10;&#10;The identity of a tag or security label is the system+code. When matching existing tags during deletion, version and display are ignored. For profiles matching is based on the full URL</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
+    <Cell ss:StyleID="s116"><Data ss:Type="String">meta-delete.return</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">out</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Meta</Data></Cell>
     <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
-    <Cell ss:StyleID="s132"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s116"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s131"/>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resulting meta for the resource</Data></Cell>
+    <Cell ss:StyleID="s117"><Data ss:Type="String">Resulting meta for the resource</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -5039,10 +5016,11 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>7</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5055,32 +5033,33 @@
     </Pane>
     <Pane>
      <Number>2</Number>
+     <ActiveRow>1</ActiveRow>
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>2</ActiveRow>
-     <ActiveCol>0</ActiveCol>
+     <ActiveRow>12</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R48C3</Range>
+   <Range>R2C3:R46C3</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;0,1,[n]&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R48C4</Range>
+   <Range>R2C4:R46C4</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;1,[n],*&quot;</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R48C5</Range>
+   <Range>R2C5:R46C5</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>&quot;query,operation,SomeResource,Reference(SomeResource),boolean,string,token,code,id,oid,uuid,number,integer,decimal,date,dateTime,time,instant,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Duration,Money,ContactPoint,etc.&quot;</Value>
@@ -5089,49 +5068,49 @@
   <AutoFilter x:Range="R1C1:R2C9" xmlns="urn:schemas-microsoft-com:office:excel">
   </AutoFilter>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R48C9</Range>
+   <Range>R2C1:R46C9</Range>
    <Condition>
     <Value1>AND(RC1=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R14C1:R48C1,R2C1:R11C1</Range>
+   <Range>R15C1:R46C1,R2C1:R11C1</Range>
    <Condition>
     <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C8:R48C8,R2C5:R48C5,R2C2:R48C2</Range>
+   <Range>R2C8:R46C8,R2C5:R46C5,R2C2:R46C2</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,RC=&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C2:R48C2</Range>
+   <Range>R2C2:R46C2</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;IN&quot;, RC&lt;&gt;&quot;OUT&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R48C3</Range>
+   <Range>R2C3:R46C3</Range>
    <Condition>
     <Value1>AND(RC&lt;&gt;&quot;&quot;,ISERR(VALUE(RC)))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C3:R48C4</Range>
+   <Range>R2C3:R46C4</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1))&lt;&gt;(RC=&quot;&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C4:R48C4</Range>
+   <Range>R2C4:R46C4</Range>
    <Condition>
     <Value1>AND(RC3&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;&quot;,RC&lt;&gt;&quot;*&quot;,RC&lt;RC3)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
@@ -5142,43 +5121,43 @@
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C5:R48C5</Range>
+   <Range>R2C5:R46C5</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC2&lt;&gt;&quot;QUERY&quot;, RC2&lt;&gt;&quot;OPERATION&quot;)</Value1>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C6:R48C6</Range>
+   <Range>R2C6:R46C6</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,ISERR(SEARCH(&quot;.&quot;,RC1)),(RC&lt;&gt;&quot;&quot;))</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C9:R48C9</Range>
+   <Range>R2C9:R46C9</Range>
    <Condition>
     <Value1>AND(RC1&lt;&gt;&quot;&quot;,NOT(ISERR(SEARCH(&quot;.&quot;,RC1))),RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R2C1:R48C9</Range>
+   <Range>R2C1:R46C9</Range>
    <Condition>
     <Value1>LEFT(RC1,1)=&quot;!&quot;</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:#A5A5A5'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R13C1</Range>
+   <Range>R12C1:R13C1</Range>
    <Condition>
-    <Value1>AND(#REF!=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
+    <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
   <ConditionalFormatting xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R12C1</Range>
+   <Range>R14C1</Range>
    <Condition>
-    <Value1>AND(R[-2]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
+    <Value1>AND(R[-1]C=&quot;&quot;,RC&lt;&gt;&quot;&quot;)</Value1>
     <Format Style='border:.5pt solid #D8D8D8;background:red'/>
    </Condition>
   </ConditionalFormatting>
@@ -5515,9 +5494,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">

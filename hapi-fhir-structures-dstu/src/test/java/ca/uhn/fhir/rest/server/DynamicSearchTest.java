@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.SearchParamTypeEnum;
+import ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringAndListParam;
@@ -173,8 +173,8 @@ public class DynamicSearchTest {
 		@Override
 		public List<RuntimeSearchParam> getSearchParameters() {
 			ArrayList<RuntimeSearchParam> retVal = new ArrayList<RuntimeSearchParam>();
-			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", SearchParamTypeEnum.STRING));
-			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", SearchParamTypeEnum.DATE));
+			retVal.add(new RuntimeSearchParam("param1", "This is the first parameter", "Patient.param1", RestSearchParameterType.STRING));
+			retVal.add(new RuntimeSearchParam("param2", "This is the second parameter", "Patient.param2", RestSearchParameterType.DATE));
 			return retVal;
 		}
 

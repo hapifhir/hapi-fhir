@@ -107,7 +107,7 @@ public abstract class Child extends BaseElement {
 			if ("Any".equals(next)) {
 				next = "IResource";
 			}
-			retVal.add(next);
+			retVal.add(Resource.correctName(next));
 			// retVal.add(next + getTypeSuffix());
 		}
 		return retVal;

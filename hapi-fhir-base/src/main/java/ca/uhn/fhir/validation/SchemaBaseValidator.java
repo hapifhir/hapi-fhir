@@ -46,6 +46,7 @@ import org.xml.sax.SAXParseException;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
@@ -146,7 +147,11 @@ class SchemaBaseValidator implements IValidator {
 
 	@Override
 	public void validateBundle(ValidationContext<Bundle> theContext) {
-		doValidate(theContext, "fhir-atom-single.xsd");
+		if (myCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			doValidate(theContext, "fhir-single.xsd");
+		} else {
+			doValidate(theContext, "fhir-atom-single.xsd");
+		}
 	}
 
 	@Override

@@ -25,7 +25,6 @@ import java.util.List;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
@@ -42,8 +41,6 @@ public interface BaseOperationOutcome extends IResource {
 		public abstract CodeDt getSeverityElement();
 		
 		public abstract StringDt getDetailsElement();
-
-		public abstract BaseCodingDt getType();
 
 		public abstract BaseIssue addLocation(String theString);
 
