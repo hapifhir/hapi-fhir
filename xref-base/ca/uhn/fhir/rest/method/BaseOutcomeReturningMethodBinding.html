@@ -52,8 +52,8 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdDt;
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.parser.IParser;
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.MethodOutcome;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding.RequestType;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RequestTypeEnum;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.EncodingEnum;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.RestfulServer;
@@ -115,8 +115,8 @@
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 	@Override
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> incomingServerRequestMatchesMethod(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest) {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		Set&lt;RequestType&gt; allowableRequestTypes = provideAllowableRequestTypes();
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		RequestType requestType = theRequest.getRequestType();
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		Set&lt;RequestTypeEnum&gt; allowableRequestTypes = provideAllowableRequestTypes();
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		RequestTypeEnum requestType = theRequest.getRequestType();
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">if</strong> (!allowableRequestTypes.contains(requestType)) {
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		}
@@ -294,7 +294,7 @@
 <a class="jxr_linenumber" name="L286" href="#L286">286</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L287" href="#L287">287</a> 	}
 <a class="jxr_linenumber" name="L288" href="#L288">288</a> 
-<a class="jxr_linenumber" name="L289" href="#L289">289</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> Set&lt;RequestType&gt; provideAllowableRequestTypes();
+<a class="jxr_linenumber" name="L289" href="#L289">289</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">abstract</strong> Set&lt;RequestTypeEnum&gt; provideAllowableRequestTypes();
 <a class="jxr_linenumber" name="L290" href="#L290">290</a> 
 <a class="jxr_linenumber" name="L291" href="#L291">291</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L292" href="#L292">292</a> <em class="jxr_javadoccomment">	 * Subclasses may override if the incoming request should not contain a resource</em>

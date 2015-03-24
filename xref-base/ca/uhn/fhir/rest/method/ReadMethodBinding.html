@@ -52,7 +52,7 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.valueset.BundleTypeEnum;
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.IdParam;
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Read;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding.RequestType;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RequestTypeEnum;
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.ETagSupportEnum;
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider;
@@ -135,7 +135,7 @@
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 				<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 			}
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 		}
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<strong class="jxr_keyword">if</strong> (theRequest.getRequestType() != RequestType.GET) {
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<strong class="jxr_keyword">if</strong> (theRequest.getRequestType() != RequestTypeEnum.GET) {
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 			ourLog.trace(<span class="jxr_string">"Method {} doesn't match because request type is not GET: {}"</span>, theRequest.getId(), theRequest.getRequestType());
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 		}

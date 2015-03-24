@@ -162,7 +162,7 @@
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 	}
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 	@Override
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValuesAsQueryTokens(<a href="../../../../../ca/uhn/fhir/rest/method/QualifiedParamList.html">QualifiedParamList</a> theParameters) {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong>  setValuesAsQueryTokens(QualifiedParamList theParameters) {
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		myBase.setMissing(<strong class="jxr_keyword">null</strong>);
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 		myComparator = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 		setValueAsString(<strong class="jxr_keyword">null</strong>);
@@ -172,33 +172,34 @@
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (theParameters.size() &gt; 1) {
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html">InvalidRequestException</a>(<span class="jxr_string">"This server does not support multi-valued dates for this paramater: "</span> + theParameters);
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 		}
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	}
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	@Override
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 		StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		b.append(getClass().getSimpleName());
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		b.append(<span class="jxr_string">"["</span>);
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		<strong class="jxr_keyword">if</strong> (myComparator!=<strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			b.append(myComparator.getCode());
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 		}
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		b.append(getValueAsString());
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		<strong class="jxr_keyword">if</strong> (myBase.getMissing()!=<strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 			b.append(<span class="jxr_string">" missing="</span>).append(myBase.getMissing());
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		}
-<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		b.append(<span class="jxr_string">"]"</span>);
-<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		<strong class="jxr_keyword">return</strong> b.toString();
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 	}
-<a class="jxr_linenumber" name="L184" href="#L184">184</a> 
-<a class="jxr_linenumber" name="L185" href="#L185">185</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a> getValueAsInstantDt() {
-<a class="jxr_linenumber" name="L186" href="#L186">186</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a>(getValue());
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 	}
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
-<a class="jxr_linenumber" name="L189" href="#L189">189</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a> getValueAsDateTimeDt() {
-<a class="jxr_linenumber" name="L190" href="#L190">190</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(getValueAsString());
-<a class="jxr_linenumber" name="L191" href="#L191">191</a> 	}
-<a class="jxr_linenumber" name="L192" href="#L192">192</a> 
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> }
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 		
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 	}
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	@Override
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 		StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		b.append(getClass().getSimpleName());
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		b.append(<span class="jxr_string">"["</span>);
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		<strong class="jxr_keyword">if</strong> (myComparator!=<strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			b.append(myComparator.getCode());
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		}
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 		b.append(getValueAsString());
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 		<strong class="jxr_keyword">if</strong> (myBase.getMissing()!=<strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			b.append(<span class="jxr_string">" missing="</span>).append(myBase.getMissing());
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		}
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 		b.append(<span class="jxr_string">"]"</span>);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 		<strong class="jxr_keyword">return</strong> b.toString();
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 	}
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a> getValueAsInstantDt() {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/InstantDt.html">InstantDt</a>(getValue());
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 	}
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a> getValueAsDateTimeDt() {
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/DateTimeDt.html">DateTimeDt</a>(getValueAsString());
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 	}
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -93,35 +93,35 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  			@OptionalParam(name=<span class="jxr_string">"product"</span>)
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			TokenAndListParam theProduct, 
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				<span class="jxr_string">"ConceptMap.source"</span> , 				<span class="jxr_string">"ConceptMap.target"</span> 				, <span class="jxr_string">"*"</span>
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			}) 
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			Set&lt;Include&gt; theIncludes,
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			@Sort 
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			SortSpec theSort,
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			@Count
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			Integer theCount
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	) {
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		startRequest(theServletRequest);
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);	
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			paramMap.add(<span class="jxr_string">"version"</span>, theVersion);	
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			paramMap.add(<span class="jxr_string">"name"</span>, theName);	
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			paramMap.add(<span class="jxr_string">"publisher"</span>, thePublisher);	
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);	
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);	
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);	
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			paramMap.add(<span class="jxr_string">"source"</span>, theSource);	
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			paramMap.add(<span class="jxr_string">"target"</span>, theTarget);	
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			paramMap.add(<span class="jxr_string">"system"</span>, theSystem);	
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			paramMap.add(<span class="jxr_string">"dependson"</span>, theDependson);	
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			paramMap.add(<span class="jxr_string">"product"</span>, theProduct);	
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			@IncludeParam(allow= {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  					<span class="jxr_string">"ConceptMap.source"</span> , 						<span class="jxr_string">"ConceptMap.target"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			}) 
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			Set&lt;Include&gt; theIncludes,
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			@Sort 
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			SortSpec theSort,
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			@Count
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			Integer theCount
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	) {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		startRequest(theServletRequest);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);	
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			paramMap.add(<span class="jxr_string">"version"</span>, theVersion);	
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			paramMap.add(<span class="jxr_string">"name"</span>, theName);	
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			paramMap.add(<span class="jxr_string">"publisher"</span>, thePublisher);	
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);	
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);	
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			paramMap.add(<span class="jxr_string">"date"</span>, theDate);	
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			paramMap.add(<span class="jxr_string">"source"</span>, theSource);	
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			paramMap.add(<span class="jxr_string">"target"</span>, theTarget);	
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			paramMap.add(<span class="jxr_string">"system"</span>, theSystem);	
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			paramMap.add(<span class="jxr_string">"dependson"</span>, theDependson);	
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			paramMap.add(<span class="jxr_string">"product"</span>, theProduct);	
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 			paramMap.setIncludes(theIncludes);
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 			paramMap.setSort(theSort);
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 			paramMap.setCount(theCount);
@@ -132,7 +132,11 @@
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 			endRequest(theServletRequest);
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> 		}
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 	}
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> }
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

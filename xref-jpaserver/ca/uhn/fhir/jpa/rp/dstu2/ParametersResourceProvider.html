@@ -45,34 +45,41 @@
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  			@OptionalParam(name=<span class="jxr_string">"_language"</span>)
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  			StringParam theResourceLanguage, 
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  				<span class="jxr_string">"*"</span>
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  			}) 
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  			Set&lt;Include&gt; theIncludes,
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  			
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  			@Sort 
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  			SortSpec theSort,
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  			@IncludeParam(reverse=<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  			Set&lt;Include&gt; theRevIncludes,
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  			@IncludeParam(allow= {
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  				<span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  			}) 
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  			
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  			@Count
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  			Integer theCount
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	) {
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  		startRequest(theServletRequest);
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  			paramMap.setIncludes(theIncludes);
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  			paramMap.setSort(theSort);
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  			paramMap.setCount(theCount);
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap);
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  			endRequest(theServletRequest);
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		}
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	}
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  }
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  			@Sort 
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  			SortSpec theSort,
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  			
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  			@Count
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  			Integer theCount
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		startRequest(theServletRequest);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  			paramMap.setRevIncludes(theRevIncludes);
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  			paramMap.setIncludes(theIncludes);
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			paramMap.setSort(theSort);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  			paramMap.setCount(theCount);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap);
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			endRequest(theServletRequest);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		}
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	}
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

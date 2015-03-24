@@ -38,8 +38,8 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdDt;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.annotation.Validate;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding.RequestType;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.RequestTypeEnum;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.client.BaseHttpClientInvocation;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.Constants;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/method/ValidateMethodBinding.html">ValidateMethodBinding</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/rest/method/BaseOutcomeReturningMethodBindingWithResourceParam.html">BaseOutcomeReturningMethodBindingWithResourceParam</a> {
@@ -111,9 +111,9 @@
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 	}
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 	@Override
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<strong class="jxr_keyword">protected</strong> Set&lt;RequestType&gt; provideAllowableRequestTypes() {
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<strong class="jxr_keyword">protected</strong> Set&lt;RequestTypeEnum&gt; provideAllowableRequestTypes() {
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 		<em class="jxr_comment">// TODO: is post correct here?</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">return</strong> Collections.singleton(RequestType.POST);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">return</strong> Collections.singleton(RequestTypeEnum.POST);
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 	}
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 

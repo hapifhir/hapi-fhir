@@ -103,7 +103,7 @@
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>    
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			@Description(shortDefinition=<span class="jxr_string">""</span>)
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  			@OptionalParam(name=<span class="jxr_string">"format"</span>)
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			TokenAndListParam theFormat, 
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			UriAndListParam theFormat, 
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>    
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 			@OptionalParam(name=<span class="jxr_string">"language"</span>)
@@ -111,7 +111,7 @@
 <a class="jxr_linenumber" name="L103" href="#L103">103</a>   
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 			@OptionalParam(name=<span class="jxr_string">"location"</span>)
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			StringAndListParam theLocation, 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			UriAndListParam theLocation, 
 <a class="jxr_linenumber" name="L107" href="#L107">107</a>   
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 			@OptionalParam(name=<span class="jxr_string">"event"</span>)
@@ -129,60 +129,82 @@
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 			@OptionalParam(name=<span class="jxr_string">"patient"</span>, targetTypes={  Patient.<strong class="jxr_keyword">class</strong> ,   Practitioner.<strong class="jxr_keyword">class</strong> ,   Group.<strong class="jxr_keyword">class</strong> ,   Device.<strong class="jxr_keyword">class</strong>   } )
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 			ReferenceAndListParam thePatient, 
 <a class="jxr_linenumber" name="L123" href="#L123">123</a>   
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			@Description(shortDefinition=<span class="jxr_string">"Combination of relation and relatesTo"</span>)
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			@OptionalParam(name=<span class="jxr_string">"relatesto-relation"</span>, compositeTypes= { ReferenceParam.<strong class="jxr_keyword">class</strong>, TokenParam.<strong class="jxr_keyword">class</strong> })
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			CompositeAndListParam&lt;ReferenceParam, TokenParam&gt; theRelatesto_relation,
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 				<span class="jxr_string">"DocumentReference.subject"</span> , 				<span class="jxr_string">"DocumentReference.author"</span> , 				<span class="jxr_string">"DocumentReference.custodian"</span> , 				<span class="jxr_string">"DocumentReference.authenticator"</span> , 				<span class="jxr_string">"DocumentReference.relatesTo.target"</span> , 				<span class="jxr_string">"DocumentReference.subject"</span> 				, <span class="jxr_string">"*"</span>
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			}) 
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			Set&lt;Include&gt; theIncludes,
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			@Sort 
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			SortSpec theSort,
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			@Count
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			Integer theCount
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	) {
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		startRequest(theServletRequest);
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);	
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			paramMap.add(<span class="jxr_string">"subject"</span>, theSubject);	
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);	
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			paramMap.add(<span class="jxr_string">"class"</span>, theClass);	
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			paramMap.add(<span class="jxr_string">"author"</span>, theAuthor);	
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			paramMap.add(<span class="jxr_string">"custodian"</span>, theCustodian);	
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(<span class="jxr_string">"authenticator"</span>, theAuthenticator);	
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			paramMap.add(<span class="jxr_string">"created"</span>, theCreated);	
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			paramMap.add(<span class="jxr_string">"indexed"</span>, theIndexed);	
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);	
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"relatesto"</span>, theRelatesto);	
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"relation"</span>, theRelation);	
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);	
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"confidentiality"</span>, theConfidentiality);	
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"format"</span>, theFormat);	
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"language"</span>, theLanguage);	
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"location"</span>, theLocation);	
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"event"</span>, theEvent);	
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.add(<span class="jxr_string">"period"</span>, thePeriod);	
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.add(<span class="jxr_string">"facility"</span>, theFacility);	
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			paramMap.add(<span class="jxr_string">"patient"</span>, thePatient);	
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			paramMap.add(<span class="jxr_string">"relatesto-relation"</span>, theRelatesto_relation);	
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			paramMap.setIncludes(theIncludes);
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			paramMap.setSort(theSort);
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			paramMap.setCount(theCount);
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap);
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 			<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			endRequest(theServletRequest);
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> 		}
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	}
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> }
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			@OptionalParam(name=<span class="jxr_string">"setting"</span>)
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			TokenAndListParam theSetting, 
+<a class="jxr_linenumber" name="L127" href="#L127">127</a>   
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 			@OptionalParam(name=<span class="jxr_string">"relatedid"</span>)
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			TokenAndListParam theRelatedid, 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a>   
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 			@Description(shortDefinition=<span class="jxr_string">""</span>)
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 			@OptionalParam(name=<span class="jxr_string">"relatedref"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			ReferenceAndListParam theRelatedref, 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a>   
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			@Description(shortDefinition=<span class="jxr_string">"Combination of relation and relatesTo"</span>)
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			@OptionalParam(name=<span class="jxr_string">"relatesto-relation"</span>, compositeTypes= { ReferenceParam.<strong class="jxr_keyword">class</strong>, TokenParam.<strong class="jxr_keyword">class</strong> })
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			CompositeAndListParam&lt;ReferenceParam, TokenParam&gt; theRelatesto_relation,
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			@IncludeParam(reverse=<strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			Set&lt;Include&gt; theRevIncludes,
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			@IncludeParam(allow= {
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 					<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> , 						<span class="jxr_string">"DocumentReference:authenticator"</span> , 					<span class="jxr_string">"DocumentReference:author"</span> , 					<span class="jxr_string">"DocumentReference:custodian"</span> , 					<span class="jxr_string">"DocumentReference:patient"</span> , 					<span class="jxr_string">"DocumentReference:relatedref"</span> , 					<span class="jxr_string">"DocumentReference:relatesto"</span> , 					<span class="jxr_string">"DocumentReference:subject"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			}) 
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			Set&lt;Include&gt; theIncludes,
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			@Sort 
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			SortSpec theSort,
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			@Count
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			Integer theCount
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	) {
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 		startRequest(theServletRequest);
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, theId);		
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, theResourceLanguage);			
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);	
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 			paramMap.add(<span class="jxr_string">"subject"</span>, theSubject);	
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			paramMap.add(<span class="jxr_string">"type"</span>, theType);	
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 			paramMap.add(<span class="jxr_string">"class"</span>, theClass);	
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 			paramMap.add(<span class="jxr_string">"author"</span>, theAuthor);	
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 			paramMap.add(<span class="jxr_string">"custodian"</span>, theCustodian);	
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 			paramMap.add(<span class="jxr_string">"authenticator"</span>, theAuthenticator);	
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 			paramMap.add(<span class="jxr_string">"created"</span>, theCreated);	
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 			paramMap.add(<span class="jxr_string">"indexed"</span>, theIndexed);	
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 			paramMap.add(<span class="jxr_string">"status"</span>, theStatus);	
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 			paramMap.add(<span class="jxr_string">"relatesto"</span>, theRelatesto);	
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 			paramMap.add(<span class="jxr_string">"relation"</span>, theRelation);	
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);	
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 			paramMap.add(<span class="jxr_string">"confidentiality"</span>, theConfidentiality);	
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 			paramMap.add(<span class="jxr_string">"format"</span>, theFormat);	
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 			paramMap.add(<span class="jxr_string">"language"</span>, theLanguage);	
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 			paramMap.add(<span class="jxr_string">"location"</span>, theLocation);	
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 			paramMap.add(<span class="jxr_string">"event"</span>, theEvent);	
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> 			paramMap.add(<span class="jxr_string">"period"</span>, thePeriod);	
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> 			paramMap.add(<span class="jxr_string">"facility"</span>, theFacility);	
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 			paramMap.add(<span class="jxr_string">"patient"</span>, thePatient);	
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 			paramMap.add(<span class="jxr_string">"setting"</span>, theSetting);	
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 			paramMap.add(<span class="jxr_string">"relatedid"</span>, theRelatedid);	
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 			paramMap.add(<span class="jxr_string">"relatedref"</span>, theRelatedref);	
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 			paramMap.add(<span class="jxr_string">"relatesto-relation"</span>, theRelatesto_relation);	
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> 			paramMap.setRevIncludes(theRevIncludes);
+<a class="jxr_linenumber" name="L185" href="#L185">185</a> 			paramMap.setIncludes(theIncludes);
+<a class="jxr_linenumber" name="L186" href="#L186">186</a> 			paramMap.setSort(theSort);
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 			paramMap.setCount(theCount);
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 
+<a class="jxr_linenumber" name="L189" href="#L189">189</a> 			ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.IBundleProvider retVal = getDao().search(paramMap);
+<a class="jxr_linenumber" name="L190" href="#L190">190</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L191" href="#L191">191</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L192" href="#L192">192</a> 			endRequest(theServletRequest);
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 		}
+<a class="jxr_linenumber" name="L194" href="#L194">194</a> 	}
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 
+<a class="jxr_linenumber" name="L196" href="#L196">196</a> 
+<a class="jxr_linenumber" name="L197" href="#L197">197</a> 
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

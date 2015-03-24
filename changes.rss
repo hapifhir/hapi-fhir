@@ -3,20 +3,20 @@
   <title>HAPI-FHIR: HAPI FHIR Changelog</title>
   <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html" />
   <subtitle>These are the latest changes of this project.</subtitle>
-  <updated>2015-03-16T12:21:49Z</updated>
+  <updated>2015-03-24T18:33:36Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2015-03-16T12:21:49Z</dc:date>
+  <dc:date>2015-03-24T18:33:36Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
-    <title>0.9</title>
-    <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html#a0.9" />
+    <title>1.0</title>
+    <link rel="alternate" href="http://hl7api.sourceforge.net/hapi-fhir//changes-report.html#a1.0" />
     <author>
       <name />
     </author>
-    <updated>2015-03-16T12:21:49Z</updated>
-    <published>2015-03-16T12:21:49Z</published>
-    <summary type="html">&lt;p&gt;Version 0.9 is available with 28 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2015-03-16T12:21:49Z</dc:date>
+    <updated>2015-03-24T18:33:36Z</updated>
+    <published>2015-03-24T18:33:36Z</published>
+    <summary type="html">&lt;p&gt;Version 1.0 is available with 9 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2015-03-24T18:33:36Z</dc:date>
   </entry>
 </feed>
 

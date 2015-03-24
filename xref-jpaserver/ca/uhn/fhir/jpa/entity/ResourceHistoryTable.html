@@ -75,7 +75,7 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addTag(<a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceHistoryTag.html">ResourceHistoryTag</a> theTag) {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">for</strong> (ResourceHistoryTag next : getTags()) {
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			<strong class="jxr_keyword">if</strong> (next.getTag().getTerm().equals(theTag)) {
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			<strong class="jxr_keyword">if</strong> (next.getTag().equals(theTag)) {
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  				<strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			}
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  		}
@@ -126,9 +126,9 @@
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">return</strong> myResourceVersion;
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 	}
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasTag(String theTerm, String theLabel, String theScheme) {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> hasTag(String theTerm, String theScheme) {
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 		<strong class="jxr_keyword">for</strong> (ResourceHistoryTag next : getTags()) {
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			<strong class="jxr_keyword">if</strong> (next.getTag().getScheme().equals(theScheme) &amp;&amp; next.getTag().getTerm().equals(theTerm)) {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			<strong class="jxr_keyword">if</strong> (next.getTag().getSystem().equals(theScheme) &amp;&amp; next.getTag().getCode().equals(theTerm)) {
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> 			}
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 		}
