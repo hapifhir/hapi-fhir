@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.dstu.resource.Composition;
+import ca.uhn.fhir.model.dstu.resource.Condition;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
@@ -73,6 +74,7 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserTest.MyPatientWithOneDeclaredExtension;
@@ -97,6 +99,22 @@ public class XmlParserTest {
 
 	}
 
+	/**
+	 * See #131
+	 */
+	@Test
+	public void testParseAndReencodeCondition() {
+		FhirContext ctx = FhirContext.forDstu1();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		InputStreamReader reader = new InputStreamReader(XmlParserTest.class.getResourceAsStream("/condition.xml"));
+		Condition cond = ctx.newXmlParser().parseResource(Condition.class, reader);
+		
+		String enc = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(cond);
+		ourLog.info(enc);
+		
+		assertThat(enc, not(containsString("generated")));
+	}
+	
 	@Test
 	public void testEncodeOmitsVersionAndBase() {
 		Patient p = new Patient();

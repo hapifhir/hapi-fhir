@@ -147,6 +147,10 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				result = cleanWhitespace(result);
 				ourLog.trace("Post-whitespace cleaning: ", result);
 			}
+			
+			if (isBlank(result)) {
+				return;
+			}
 
 			theNarrative.getDiv().setValueAsString(result);
 			theNarrative.getStatus().setValueAsString("generated");
