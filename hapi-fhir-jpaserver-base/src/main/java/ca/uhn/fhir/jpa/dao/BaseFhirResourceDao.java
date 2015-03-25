@@ -1279,7 +1279,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			cq.multiselect(from.get("myId").as(Long.class));
 			Predicate typeEquals = builder.equal(from.get("myResourceType"), myResourceName);
-			Predicate notDeleted = builder.isNotNull(from.get("myDeleted"));
+			Predicate notDeleted = builder.isNull(from.get("myDeleted"));
 			cq.where(builder.and(typeEquals, notDeleted));
 
 			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
