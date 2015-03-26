@@ -362,6 +362,22 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>update-project-license</id>
+						<phase>package</phase>
+						<goals>
+							<goal>update-project-license</goal>
+						</goals>
+						<configuration>
+							<licenseName>apache_v2</licenseName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>${maven_antrun_plugin_version}</version>
 				<inherited>false</inherited>
