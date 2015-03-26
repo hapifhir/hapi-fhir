@@ -72,6 +72,10 @@
 			<action type="fix">
 				Searching in JPA server with no search parameter returns deleted resources when it should exclude them.
 			</action>
+			<action type="add" fix="135">
+				Remove Eclipse and IntelliJ artifacts (.project, *.iml, etc) from version control. Thanks
+				to Doug Martin for the suggestion!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
