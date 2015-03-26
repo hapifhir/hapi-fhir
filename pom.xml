@@ -184,6 +184,7 @@
 		<junit_version>4.12</junit_version>
 		<logback_version>1.1.2</logback_version>
 		<maven_antrun_plugin_version>1.8</maven_antrun_plugin_version>
+		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_gpg_plugin_version>1.6</maven_gpg_plugin_version>
@@ -354,6 +355,25 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.9.1,)
+										</versionRange>
+										<goals>
+											<goal>add-source</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -364,6 +384,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
+				<inherited>false</inherited>
 				<executions>
 					<execution>
 						<id>update-project-license</id>
