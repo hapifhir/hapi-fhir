@@ -76,6 +76,16 @@
 				Remove Eclipse and IntelliJ artifacts (.project, *.iml, etc) from version control. Thanks
 				to Doug Martin for the suggestion!
 			</action>
+			<action type="add">
+				REST server methods may now have a parameter of
+				type NarrativeModeEnum which will be populated with
+				the value of the _narrative URL parameter
+				if one was supplied. Annotation client methods 
+				may also include a parameter of this type, and it
+				will be used to populate this parameter on the request
+				URL if it is not null. Thanks to Neal Acharya for the
+				idea!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

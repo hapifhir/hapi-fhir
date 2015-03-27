@@ -94,7 +94,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>${maven_assembly_plugin_version}</version>
+            <version>2.5.3</version>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -104,8 +104,8 @@
                 <configuration>
                   <attach>true</attach>
                   <descriptors>
-                    <descriptor>${project.basedir}/src/assembly/android-sources.xml</descriptor>
-                    <descriptor>${project.basedir}/src/assembly/android-javadoc.xml</descriptor>
+                    <descriptor>/Users/t3903uhn/git/hapi-fhir/hapi-fhir-android/src/assembly/android-sources.xml</descriptor>
+                    <descriptor>/Users/t3903uhn/git/hapi-fhir/hapi-fhir-android/src/assembly/android-javadoc.xml</descriptor>
                   </descriptors>
                 </configuration>
               </execution>

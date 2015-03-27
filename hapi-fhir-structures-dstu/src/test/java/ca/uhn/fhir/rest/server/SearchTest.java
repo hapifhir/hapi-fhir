@@ -23,10 +23,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.google.common.net.UrlEscapers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -41,7 +40,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -50,7 +48,10 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.util.PortUtil;
+
+import com.google.common.net.UrlEscapers;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -63,7 +64,13 @@ public class SearchTest {
 	private static int ourPort;
 
 	private static Server ourServer;
+	private static NarrativeModeEnum ourLastNarrativeMode;
 
+	@Before
+	public void before() {
+		ourLastNarrativeMode=null;
+	}
+	
 	@Test
 	public void testEncodeConvertsReferencesToRelative() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef");
@@ -76,6 +83,36 @@ public class SearchTest {
 		Patient patient = (Patient) ourCtx.newXmlParser().parseBundle(responseContent).getEntries().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
+	}
+
+	@Test
+	public void testNarrativeParamNone() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(null, ourLastNarrativeMode);
+	}
+
+	@Test
+	public void testNarrativeParamPopulated() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=ONly");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(NarrativeModeEnum.ONLY, ourLastNarrativeMode);
+	}
+
+	@Test
+	public void testNarrativeParamPopulatedInvalid() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=BLAH");
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(null, ourLastNarrativeMode);
 	}
 
 	@Test
@@ -327,7 +364,15 @@ public class SearchTest {
 			retVal.add(patient);
 			return retVal;
 		}
-		
+
+		@Search(queryName="searchWithNarrative")
+		public Patient searchWithNarrative(NarrativeModeEnum theNarrativeMode) {
+			ourLastNarrativeMode = theNarrativeMode;
+			Patient patient = new Patient();
+			patient.setId("Patient/1/_history/1");
+			return patient;
+		}
+
 		@Search(queryName="searchWithRef")
 		public Patient searchWithRef() {
 			Patient patient = new Patient();

@@ -350,6 +350,19 @@
 			
 			</subsection>
 		
+			<subsection name="Accessing the _narrative parameter value">
+			
+				<p>
+					There are different ways of 
+					<a href="./doc_narrative.html">generating narratives</a> for use on your server. HAPI's Server
+					also provides a non-standard parameter called <code>_narrative</code> which can be used to
+					control narrative behavour. If you add a parameter to any server (or annotation client) method
+					with a type of <code>NarrativeModeEnum</code>, the value will be populated with the value
+					of this URL parameter.
+				</p>
+			
+			</subsection>
+			
 		</section>
 
 		<!--

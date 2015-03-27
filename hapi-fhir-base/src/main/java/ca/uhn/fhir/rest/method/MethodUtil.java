@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -77,6 +78,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.util.ReflectionUtil;
 
@@ -342,6 +344,8 @@ public class MethodUtil {
 				param = new ServletRequestParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
 				param = new ServletResponseParameter();
+			} else if (parameterType.equals(NarrativeModeEnum.class)) {
+				param = new NarrativeModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];

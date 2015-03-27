@@ -1006,7 +1006,7 @@
 					<a href="./apidocs/ca/uhn/fhir/model/api/annotation/Description.html">@Description</a>
 					annotation. This annotation allows you to add a description of the method 
 					and the individual parameters. These descriptions will be placed in the
-					server's metadata statement, which can be helpful to anyone who is developing
+					server's conformance statement, which can be helpful to anyone who is developing
 					software against your server.
 				</p>
 

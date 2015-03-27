@@ -71,6 +71,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -148,7 +149,7 @@ public class ClientTest {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
@@ -173,8 +174,7 @@ public class ClientTest {
 	}
 
 	/**
-	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to
-	 * ignore it.
+	 * Some servers (older ones?) return the resourcde you created instead of an OperationOutcome. We just need to ignore it.
 	 */
 	@Test
 	public void testCreateWithResourceResponse() throws Exception {
@@ -509,7 +509,7 @@ public class ClientTest {
 
 	@Test
 	public void testHistoryWithParams() throws Exception {
-		
+
 		//@formatter:off
 		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
 		//@formatter:on
@@ -528,17 +528,17 @@ public class ClientTest {
 		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
 
 		// ensures the local timezone
-		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T12:01:02").getValue()).getValueAsString(); 
+		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T12:01:02").getValue()).getValueAsString();
 		expectedDateString = expectedDateString.replace(":", "%3A").replace("+", "%2B");
-		
+
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T12:01:02"), new IntegerDt(12));
 		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since="+expectedDateString.replaceAll("\\..*", "")));
+		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_since=" + expectedDateString.replaceAll("\\..*", "")));
 		assertThat(capt.getAllValues().get(0).getURI().toString(), containsString("_count=12"));
 
 		client.getHistoryPatientInstance(new IdDt("111"), new InstantDt("2012-01-02T12:01:02").getValue(), new IntegerDt(12).getValue());
 		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("http://foo/Patient/111/_history?"));
-		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since="+expectedDateString));
+		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_since=" + expectedDateString));
 		assertThat(capt.getAllValues().get(1).getURI().toString(), containsString("_count=12"));
 
 		client.getHistoryPatientInstance(new IdDt("111"), null, new IntegerDt(12));
@@ -562,7 +562,7 @@ public class ClientTest {
 		// error message to tell the user why the method isn't working
 		FhirContext ctx = new FhirContext();
 		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
-		
+
 		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
 
 		try {
@@ -592,7 +592,8 @@ public class ClientTest {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"), new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
+		Header[] headers = new Header[] { new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Wed, 15 Nov 1995 04:58:08 GMT"),
+				new BasicHeader(Constants.HEADER_CONTENT_LOCATION, "http://foo.com/Patient/123/_history/2333"),
 				new BasicHeader(Constants.HEADER_CATEGORY, "http://foo/tagdefinition.html; scheme=\"http://hl7.org/fhir/tag\"; label=\"Some tag\"") };
 
 		when(httpResponse.getAllHeaders()).thenReturn(headers);
@@ -653,7 +654,6 @@ public class ClientTest {
 
 	}
 
-	
 	@Test
 	public void testReadFailureInternalError() throws Exception {
 
@@ -1085,7 +1085,7 @@ public class ClientTest {
 		assertThat(IOUtils.toString(post.getEntity().getContent()), StringContains.containsString("<Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
-		assertEquals(EncodingEnum.XML.getResourceContentType()+Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	/**
@@ -1213,6 +1213,36 @@ public class ClientTest {
 
 	}
 
+	@Test
+	public void testNarrativeModeParam() throws Exception {
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		ITestClientWithNarrativeParam client = ctx.newRestfulClient(ITestClientWithNarrativeParam.class, "http://foo");
+
+		int idx = 0;
+
+		Patient response = client.getPatients(null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		assertNotNull(response);
+		idx++;
+
+		response = client.getPatients(NarrativeModeEnum.ONLY);
+		assertEquals("http://foo/Patient?_narrative=only", capt.getAllValues().get(idx).getURI().toString());
+		assertNotNull(response);
+
+	}
+
 	private Header[] toHeaderArray(String theName, String theValue) {
 		return new Header[] { new BasicHeader(theName, theValue) };
 	}
@@ -1240,4 +1270,10 @@ public class ClientTest {
 		@Search()
 		public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam String theInclude);
 	}
+
+	public interface ITestClientWithNarrativeParam extends IBasicClient {
+		@Search()
+		public Patient getPatients(NarrativeModeEnum theNarrativeMode);
+	}
+
 }
