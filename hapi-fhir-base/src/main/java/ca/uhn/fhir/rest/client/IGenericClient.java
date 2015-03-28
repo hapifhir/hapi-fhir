@@ -66,6 +66,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Use {@link #create() fluent method instead}. This method will be removed.
 	 * 
 	 */
+	@Deprecated
 	MethodOutcome create(IResource theResource);
 
 	/**
@@ -83,6 +84,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return An outcome
 	 * @deprecated Use {@link #delete()} instead
 	 */
+	@Deprecated
 	MethodOutcome delete(Class<? extends IResource> theType, IdDt theId);
 
 	/**
@@ -95,6 +97,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return An outcome
 	 * @deprecated Use {@link #delete()} instead
 	 */
+	@Deprecated
 	MethodOutcome delete(Class<? extends IResource> theType, String theId);
 
 	/**
@@ -125,6 +128,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return A bundle containing returned resources
 	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
+	@Deprecated
 	<T extends IResource> Bundle history(Class<T> theType, IdDt theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
@@ -145,6 +149,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return A bundle containing returned resources
 	 * @deprecated As of 0.9, use the fluent {@link #history()} method instead
 	 */
+	@Deprecated
 	<T extends IResource> Bundle history(Class<T> theType, String theId, DateTimeDt theSince, Integer theLimit);
 
 	/**
@@ -268,6 +273,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @deprecated Use {@link #transaction()}
 	 * 
 	 */
+	@Deprecated
 	List<IResource> transaction(List<IResource> theResources);
 
 	/**
@@ -341,6 +347,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * @return The resource
 	 * @deprecated Deprecated in 0.7 - IdDt can contain an ID and a version, so this class doesn't make a lot of sense
 	 */
+	@Deprecated
 	<T extends IResource> T vread(Class<T> theType, IdDt theId, IdDt theVersionId);
 
 	/**

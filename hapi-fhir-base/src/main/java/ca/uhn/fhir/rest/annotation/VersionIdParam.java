@@ -28,6 +28,7 @@ import java.lang.annotation.Target;
 /**
  * @deprecated IdDt can now hold both an ID and a version ID, so a single parameter with the {@link IdParam} annotation may be used 
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface VersionIdParam {

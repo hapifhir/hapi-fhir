@@ -181,6 +181,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 	/**
 	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
 	 */
+	@Deprecated
 	public BigDecimal asBigDecimal() {
 		return getIdPartAsBigDecimal();
 	}

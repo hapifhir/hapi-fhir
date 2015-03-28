@@ -61,12 +61,14 @@ public class Tag extends BaseElement implements IElement {
 	/**
 	 * @deprecated Tags will become immutable in a future release, so this constructor should not be used.
 	 */
+	@Deprecated
 	public Tag() {
 	}
 
 	/**
 	 * @deprecated There is no reason to create a tag with a term and not a scheme, so this constructor will be removed
 	 */
+	@Deprecated
 	public Tag(String theTerm) {
 		this((String) null, theTerm, null);
 	}
@@ -148,6 +150,7 @@ public class Tag extends BaseElement implements IElement {
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object
 	 */
+	@Deprecated
 	public Tag setLabel(String theLabel) {
 		myLabel = theLabel;
 		return this;
@@ -160,6 +163,7 @@ public class Tag extends BaseElement implements IElement {
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object
 	 */
+	@Deprecated
 	public Tag setScheme(String theScheme) {
 		myScheme = theScheme;
 		return this;
@@ -172,6 +176,7 @@ public class Tag extends BaseElement implements IElement {
 	 * ensuring that the TagList acts as an unordered set. Use the constructor to set this field when creating a new
 	 * tag object
 	 */
+	@Deprecated
 	public Tag setTerm(String theTerm) {
 		myTerm = theTerm;
 		return this;

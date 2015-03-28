@@ -454,6 +454,7 @@ public class FhirContext {
 	 * 
 	 * @deprecated Support for DEV resources will be removed, you should use DSTU2 resources instead 
 	 */
+	@Deprecated
 	public static FhirContext forDev() {
 		return new FhirContext(FhirVersionEnum.DEV);
 	}

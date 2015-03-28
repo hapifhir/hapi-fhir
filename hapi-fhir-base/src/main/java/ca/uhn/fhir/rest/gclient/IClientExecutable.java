@@ -35,6 +35,7 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	 * 
 	 * @deprecated Use the client logging interceptor to log requests and responses instead. See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html#req_resp_logging">here</a> for more information.
 	 */
+	@Deprecated
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
 
 	T prettyPrint();

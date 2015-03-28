@@ -34,6 +34,7 @@ public interface IIdentifiableElement extends IElement {
 	 * @deprecated Use {@link #getElementSpecificId()} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@Deprecated
 	IdDt getId();
 
 	/**
@@ -46,12 +47,14 @@ public interface IIdentifiableElement extends IElement {
 	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@Deprecated
 	void setId(IdDt theId);
 
 	/**
 	 * @deprecated Use {@link #setElementSpecificId(String)} instead. This method will be removed because it is easily
 	 *             confused with other ID methods (such as patient#getIdentifier)
 	 */
+	@Deprecated
 	void setId(String theId);
 
 }

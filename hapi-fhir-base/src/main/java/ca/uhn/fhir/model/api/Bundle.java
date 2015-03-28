@@ -68,6 +68,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 	 * @deprecated Tags wil become immutable in a future release of HAPI, so
 	 *             {@link #addCategory(String, String, String)} should be used instead
 	 */
+	@Deprecated
 	public Tag addCategory() {
 		Tag retVal = new Tag();
 		getCategories().add(retVal);

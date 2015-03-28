@@ -25,6 +25,7 @@ package ca.uhn.fhir.rest.gclient;
  * @deprecated Use {@link ReferenceClientParam} instead. That class is identical to this one but was renamed to reduct
  *             confusing duplicate names in the API. This class will be removed in a future release.
  */
+@Deprecated
 public class ReferenceParam extends ReferenceClientParam {
 
 	public ReferenceParam(String theParamName) {

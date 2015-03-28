@@ -21,13 +21,13 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
  * @deprecated Use {@link PreconditionFailedException} instead - This exception is
  * strangely named and will be removed at some point.
  */
+@Deprecated
 public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
 	private static final long serialVersionUID = 1L;

@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 /**
  * @deprecated Use {@link ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor} instead. Note that BasicAuthInterceptor class is a HAPI client interceptor instead of being a commons-httpclient interceptor, so you register it to your client instance once it's created using {@link IGenericClient#registerInterceptor(IClientInterceptor)} or {@link IBasicClient#registerInterceptor(IClientInterceptor)} instead 
  */
+@Deprecated
 public class HttpBasicAuthInterceptor  implements HttpRequestInterceptor {
 
 	private String myUsername;
