@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.ServletContext;
@@ -30,11 +29,12 @@ import javax.servlet.http.HttpServletRequest;
  * Works like the normal {@link ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy} unless there's an
  * x-forwarded-host present, in which case that's used in place of the server's address.
  *
- * Because Apache Http Server's mod_proxy doesn't supply <i>x-forwarded-proto</i>, you have to tell it whether to use http or https
- * by using the appropriate factory method.
+ * If the Apache Http Server <i>mod_proxy</i> isn't configured to supply <i>x-forwarded-proto</i>, the factory method that you use
+ * to create the address strategy will determine the default. Note that <i>mod_proxy</i> doesn't set this by default, but it can be
+ * configured via <i>RequestHeader set X-Forwarded-Proto http</i> (or https)
  *
- * If you want to make that determination based on something other than the constructor argument, you should be able to do so
- * by overriding <i>prefix</i>.
+ * If you want to set the protocol based on something other than the constructor argument, you should be able to do so
+ * by overriding <i>protocol</i>.
  *
  * Note that while this strategy was designed to work with Apache Http Server, and has been tested against it, it should work with
  * any proxy server that sets <i>x-forwarded-host</i>
@@ -65,13 +65,17 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
                 forwardedHost = forwardedHost.substring(0, commaPos - 1);
             }
             String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
-            String serverBase = prefix(theRequest) + forwardedHost + requestFullPath;
+            String serverBase = protocol(theRequest) + forwardedHost + requestFullPath;
             return serverBase;
         }
         return super.determineServerBase(theServletContext, theRequest);
     }
 
-    protected String prefix(HttpServletRequest theRequest) {
+    protected String protocol(HttpServletRequest theRequest) {
+        String protocol = theRequest.getHeader("x-forwarded-proto");
+        if (protocol != null) {
+            return protocol + "://";
+        }
         return myUseHttps ? "https://" : "http://";
     }
 }
