@@ -58,24 +58,40 @@ public class ApacheProxyAddressStrategy extends IncomingRequestAddressStrategy {
 
     @Override
     public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
+        String forwardedHost = getForwardedHost(theRequest);
+        if (forwardedHost != null) {
+            return forwardedServerBase(theServletContext, theRequest, forwardedHost);
+        }
+        return super.determineServerBase(theServletContext, theRequest);
+    }
+
+    private String getForwardedHost(HttpServletRequest theRequest) {
         String forwardedHost = theRequest.getHeader("x-forwarded-host");
         if (forwardedHost != null) {
             int commaPos = forwardedHost.indexOf(',');
             if (commaPos >= 0) {
                 forwardedHost = forwardedHost.substring(0, commaPos - 1);
             }
-            String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
-            String serverBase = protocol(theRequest) + forwardedHost + requestFullPath;
-            return serverBase;
         }
-        return super.determineServerBase(theServletContext, theRequest);
+        return forwardedHost;
+    }
+
+    public String forwardedServerBase(ServletContext theServletContext, HttpServletRequest theRequest, String theForwardedHost) {
+        String serverBase = super.determineServerBase(theServletContext, theRequest);
+        String host = theRequest.getHeader("host");
+        if (host != null) {
+            serverBase = serverBase.replace(host, theForwardedHost);
+            serverBase = serverBase.substring(serverBase.indexOf("://"));
+            return protocol(theRequest) + serverBase;
+        }
+        return serverBase;
     }
 
     protected String protocol(HttpServletRequest theRequest) {
         String protocol = theRequest.getHeader("x-forwarded-proto");
         if (protocol != null) {
-            return protocol + "://";
+            return protocol;
         }
-        return myUseHttps ? "https://" : "http://";
+        return myUseHttps ? "https" : "http";
     }
 }
