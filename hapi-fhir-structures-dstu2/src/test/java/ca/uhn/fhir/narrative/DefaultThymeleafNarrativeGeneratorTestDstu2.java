@@ -62,16 +62,17 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		NarrativeDt narrative = new NarrativeDt();
 		myGen.generateNarrative(value, narrative);
 		String output = narrative.getDiv().getValueAsString();
+		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div>"));
 
 		String title = myGen.generateTitle(value);
 		assertEquals("joe john BLOW (123456)", title);
-		ourLog.info(title);
+//		ourLog.info(title);
 
-		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
+		value.getIdentifierFirstRep().setValue("FOO MRN 123");
 		title = myGen.generateTitle(value);
 		assertEquals("joe john BLOW (FOO MRN 123)", title);
-		ourLog.info(title);
+//		ourLog.info(title);
 
 	}
 

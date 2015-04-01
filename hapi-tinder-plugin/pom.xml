@@ -106,6 +106,15 @@
 			<version>3.2</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- This is just used for  -->
+		<dependency>
+			<groupId>org.ini4j</groupId>
+			<artifactId>ini4j</artifactId>
+			<version>0.5.4</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<properties>

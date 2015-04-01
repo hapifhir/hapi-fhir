@@ -70,10 +70,11 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		assertEquals("joe john BLOW (123456)", title);
 		ourLog.info(title);
 
-		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
-		title = gen.generateTitle(value);
-		assertEquals("joe john BLOW (FOO MRN 123)", title);
-		ourLog.info(title);
+		// Removed because label is gone in DSTU2
+//		value.getIdentifierFirstRep().setLabel("FOO MRN 123");
+//		title = gen.generateTitle(value);
+//		assertEquals("joe john BLOW (FOO MRN 123)", title);
+//		ourLog.info(title);
 
 	}
 

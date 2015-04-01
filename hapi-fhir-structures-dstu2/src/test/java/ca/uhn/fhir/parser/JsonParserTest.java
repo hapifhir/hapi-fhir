@@ -116,8 +116,8 @@ public class JsonParserTest {
 		p.addName().addFamily("FAMILY");
 		
 		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
-		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1").setValueSet(new ResourceReferenceDt("ValueSet1")));
-		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2").setValueSet(new ResourceReferenceDt("ValueSet2")));
+		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1"));
+		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2"));
 		
 		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
 
@@ -134,20 +134,14 @@ public class JsonParserTest {
 			"                \"version\":\"VERSION1\",\n" + 
 			"                \"code\":\"CODE1\",\n" + 
 			"                \"display\":\"DISPLAY1\",\n" + 
-			"                \"primary\":true,\n" + 
-			"                \"valueSet\":{\n" + 
-			"                    \"reference\":\"ValueSet1\"\n" + 
-			"                }\n" + 
+			"                \"primary\":true\n" + 
 			"            },\n" + 
 			"            {\n" + 
 			"                \"system\":\"SYSTEM2\",\n" + 
 			"                \"version\":\"VERSION2\",\n" + 
 			"                \"code\":\"CODE2\",\n" + 
 			"                \"display\":\"DISPLAY2\",\n" + 
-			"                \"primary\":false,\n" + 
-			"                \"valueSet\":{\n" + 
-			"                    \"reference\":\"ValueSet2\"\n" + 
-			"                }\n" + 
+			"                \"primary\":false\n" + 
 			"            }\n" + 
 			"        ]\n" + 
 			"    },\n" + 
@@ -172,7 +166,6 @@ public class JsonParserTest {
 		assertEquals("DISPLAY1", label.getDisplay());
 		assertEquals(true, label.getPrimary());
 		assertEquals("VERSION1", label.getVersion());
-		assertEquals("ValueSet1", label.getValueSet().getReference().getValue());
 
 		label = (CodingDt) gotLabels.get(1);
 		assertEquals("SYSTEM2", label.getSystem());
@@ -180,7 +173,6 @@ public class JsonParserTest {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals(false, label.getPrimary());
 		assertEquals("VERSION2", label.getVersion());
-		assertEquals("ValueSet2", label.getValueSet().getReference().getValue());
 	}
 
 	
