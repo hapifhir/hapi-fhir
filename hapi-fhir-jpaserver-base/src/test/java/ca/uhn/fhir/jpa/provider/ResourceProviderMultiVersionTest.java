@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu2.resource.SupportingDocumentation;
+import ca.uhn.fhir.model.dstu2.resource.PaymentNotice;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -105,12 +105,12 @@ public class ResourceProviderMultiVersionTest {
 		p.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testUnknownResourceType01");
 		IdDt id = ourClientDstu2.create().resource(p).execute().getId();
 
-		SupportingDocumentation s = new SupportingDocumentation();
+		PaymentNotice s = new PaymentNotice();
 		s.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testUnknownResourceType02");
 		id = ourClientDstu2.create().resource(s).execute().getId();
 
 		Bundle history = ourClientDstu2.history(null, id, null, null);
-		assertEquals(SupportingDocumentation.class, history.getEntries().get(0).getResource().getClass());
+		assertEquals(PaymentNotice.class, history.getEntries().get(0).getResource().getClass());
 		assertEquals(ca.uhn.fhir.model.dstu2.resource.Patient.class, history.getEntries().get(1).getResource().getClass());
 
 		history = ourClientDstu1.history(null, id, null, null);

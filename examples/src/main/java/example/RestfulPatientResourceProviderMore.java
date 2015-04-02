@@ -297,7 +297,7 @@ public Patient getResourceById(@IdParam IdDt theId) {
    Patient retVal = new Patient();
    
    // ...populate...
-   retVal.addIdentifier().setSystem("urn:mrns").setValue("12345").setLabel("MRN 12345");
+   retVal.addIdentifier().setSystem("urn:mrns").setValue("12345");
    retVal.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
    
@@ -389,7 +389,7 @@ public List<Patient> searchByLastName(@RequiredParam(name=Patient.SP_FAMILY) Str
    
    // ...populate...
    Patient patient = new Patient();
-   patient.addIdentifier().setSystem("urn:mrns").setValue("12345").setLabel("MRN 12345");
+   patient.addIdentifier().setSystem("urn:mrns").setValue("12345");
    patient.addName().addFamily("Smith").addGiven("Tester").addGiven("Q");
    // ...etc...
 

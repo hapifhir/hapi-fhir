@@ -27,9 +27,9 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Tue, Mar 31, 2015 09:45-0400 for FHIR v0.4.0 
+  Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.4.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.5.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
   <xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="fhir-xhtml.xsd"/>
@@ -210,7 +210,6 @@
   </xs:complexType>
   <xs:simpleType name="unsignedInt-primitive">
     <xs:restriction base="xs:nonNegativeInteger">
-	    <!--<xs:minLength value="1"/>-->
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="unsignedInt">
@@ -259,7 +258,6 @@
   </xs:complexType>
   <xs:simpleType name="positiveInt-primitive">
     <xs:restriction base="xs:positiveInteger">
-	    <!--<xs:minLength value="1"/>-->
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="positiveInt">
@@ -377,7 +375,6 @@
       <xs:element ref="Subscription"/>
       <xs:element ref="Substance"/>
       <xs:element ref="Supply"/>
-      <xs:element ref="SupportingDocumentation"/>
       <xs:element ref="ValueSet"/>
       <xs:element ref="VisionPrescription"/>
       <xs:element ref="Parameters"/>
@@ -1766,12 +1763,12 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           </xs:element>
           <xs:element name="comments" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>Comments about the use of the element, including notes about how to use the data properly, exceptions to proper use, etc.</xs:documentation>
+              <xs:documentation>Explanatory notes and implementation guidance about the data element, including notes about how to use the data properly, exceptions to proper use, etc.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="requirements" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation>Explains why this element is needed and why it's been constrained as it has.</xs:documentation>
+              <xs:documentation>This element is for traceability of why the element was created and why the constraints exist as they do. This may be used to point to source materials or specifications that drove the structure of this element.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="alias" type="string" minOccurs="0" maxOccurs="unbounded">
@@ -3664,7 +3661,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Procedure">
         <xs:annotation>
-          <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+          <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="ProcedureRequest">
@@ -3750,11 +3747,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="Supply">
         <xs:annotation>
           <xs:documentation>A supply - a  request for something, and provision of what is supplied.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SupportingDocumentation">
-        <xs:annotation>
-          <xs:documentation>This resource provides the supporting information for a process, for example clinical or financial  information related to a claim or pre-authorization.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="ValueSet">
@@ -4324,7 +4316,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="Procedure">
         <xs:annotation>
-          <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+          <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="ProcedureRequest">
@@ -4410,11 +4402,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       <xs:enumeration value="Supply">
         <xs:annotation>
           <xs:documentation>A supply - a  request for something, and provision of what is supplied.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SupportingDocumentation">
-        <xs:annotation>
-          <xs:documentation>This resource provides the supporting information for a process, for example clinical or financial  information related to a claim or pre-authorization.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="ValueSet">
@@ -4540,7 +4527,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           </xs:element>
           <xs:element name="recorder" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation>Indicates who has responsibility for the record.</xs:documentation>
+              <xs:documentation>Individual who recorded the record and takes responsibility for its conten.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="patient" minOccurs="1" maxOccurs="1" type="Reference">
@@ -18680,12 +18667,12 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:element name="Procedure" type="Procedure">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
     </xs:annotation>
   </xs:element>
   <xs:complexType name="Procedure">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
       <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -18794,7 +18781,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:complexType name="Procedure.BodySite">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -18812,7 +18799,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:complexType name="Procedure.Performer">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -18833,7 +18820,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:complexType name="Procedure.RelatedItem">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -18854,7 +18841,7 @@ other observer (for example a relative or EMT), or any observation made about th
   </xs:complexType>
   <xs:complexType name="Procedure.Device">
     <xs:annotation>
-      <xs:documentation>An action that is performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
+      <xs:documentation>An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -20807,7 +20794,7 @@ other observer (for example a relative or EMT), or any observation made about th
           </xs:element>
           <xs:element name="fhirVersion" minOccurs="0" maxOccurs="1" type="id">
             <xs:annotation>
-              <xs:documentation>The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.</xs:documentation>
+              <xs:documentation>The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="mapping" type="StructureDefinition.Mapping" minOccurs="0" maxOccurs="unbounded">
@@ -21430,111 +21417,6 @@ other observer (for example a relative or EMT), or any observation made about th
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="SupplyStatus-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element name="SupportingDocumentation" type="SupportingDocumentation">
-    <xs:annotation>
-      <xs:documentation>This resource provides the supporting information for a process, for example clinical or financial  information related to a claim or pre-authorization.</xs:documentation>
-    </xs:annotation>
-  </xs:element>
-  <xs:complexType name="SupportingDocumentation">
-    <xs:annotation>
-      <xs:documentation>This resource provides the supporting information for a process, for example clinical or financial  information related to a claim or pre-authorization.</xs:documentation>
-      <xs:documentation>If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="DomainResource">
-        <xs:sequence>
-          <xs:element name="identifier" minOccurs="1" maxOccurs="unbounded" type="Identifier">
-            <xs:annotation>
-              <xs:documentation>The Response Business Identifier.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="ruleset" minOccurs="0" maxOccurs="1" type="Coding">
-            <xs:annotation>
-              <xs:documentation>The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="originalRuleset" minOccurs="0" maxOccurs="1" type="Coding">
-            <xs:annotation>
-              <xs:documentation>The style (standard) and version of the original material which was converted into this resource.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="created" minOccurs="0" maxOccurs="1" type="dateTime">
-            <xs:annotation>
-              <xs:documentation>The date when this resource was created.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="target" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>The Insurer, organization or Provider who is target  of the submission.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="provider" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>The practitioner who is responsible for the services rendered to the patient.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="organization" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>The organization which is responsible for the services rendered to the patient.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="request" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>Original request.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="response" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>Original response.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="author" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>Person who created the submission.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation>The patient who is directly or indirectly the subject of the supporting information.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="detail" type="SupportingDocumentation.Detail" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation>Supporting Files.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="SupportingDocumentation.Detail">
-    <xs:annotation>
-      <xs:documentation>This resource provides the supporting information for a process, for example clinical or financial  information related to a claim or pre-authorization.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="linkId" minOccurs="1" maxOccurs="1" type="integer">
-            <xs:annotation>
-              <xs:documentation>A link Id for the response to reference.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:choice minOccurs="1" maxOccurs="1" >
-            <xs:annotation>
-              <xs:documentation>The attached content.</xs:documentation>
-            </xs:annotation>
-            <xs:element name="contentReference" type="Reference"/>
-            <xs:element name="contentAttachment" type="Attachment"/>
-          </xs:choice>
-          <xs:element name="dateTime" minOccurs="0" maxOccurs="1" type="dateTime">
-            <xs:annotation>
-              <xs:documentation>The date and optionally time when the material was created.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

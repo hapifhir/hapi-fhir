@@ -227,7 +227,6 @@
 						<baseResourceName>Observation</baseResourceName>
 						<baseResourceName>AllergyIntolerance</baseResourceName>
 						<baseResourceName>ExplanationOfBenefit</baseResourceName>
-						<baseResourceName>SupportingDocumentation</baseResourceName>
 						<baseResourceName>RelatedPerson</baseResourceName>
 						<baseResourceName>AuditEvent</baseResourceName>
 						<baseResourceName>EligibilityResponse</baseResourceName>
