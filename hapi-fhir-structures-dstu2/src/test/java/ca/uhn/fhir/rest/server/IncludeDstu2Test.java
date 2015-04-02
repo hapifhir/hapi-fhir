@@ -378,12 +378,12 @@ public class IncludeDstu2Test {
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getManagingOrganization().setResource(o1);
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getManagingOrganization().setResource(o1);
 
 			return Arrays.asList(p1, p2);
@@ -397,12 +397,12 @@ public class IncludeDstu2Test {
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.addUndeclaredExtension(false, "http://foo", new ResourceReferenceDt(o1));
 
 			return Arrays.asList(p1, p2);
@@ -421,12 +421,12 @@ public class IncludeDstu2Test {
 
 			ExtPatient p1 = new ExtPatient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getSecondOrg().setResource(o1);
 
 			ExtPatient p2 = new ExtPatient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getSecondOrg().setResource(o1);
 
 			return Arrays.asList(p1, p2);
@@ -439,12 +439,12 @@ public class IncludeDstu2Test {
 
 			Patient p1 = new Patient();
 			p1.setId("p1");
-			p1.addIdentifier().setLabel("p1");
+			p1.addIdentifier().setValue("p1");
 			p1.getManagingOrganization().setResource(o1);
 
 			Patient p2 = new Patient();
 			p2.setId("p2");
-			p2.addIdentifier().setLabel("p2");
+			p2.addIdentifier().setValue("p2");
 			p2.getManagingOrganization().setResource(o1);
 
 			return Arrays.asList(p1, p2);

@@ -3703,11 +3703,11 @@
    <Row ss:Height="30">
     <Cell ss:StyleID="s106"><Data ss:Type="Number">3</Data><NamedCell
       ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">No Range flag on Quantity</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">No Comparator flag on Quantity</Data></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Range</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Quantity values cannot have a comparator when used in a Range</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">lowcomparator.oclIsUndefined and high.comparator.oclIsUndefined)</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">low.comparator.oclIsUndefined and high.comparator.oclIsUndefined)</Data></Cell>
     <Cell ss:StyleID="s107"><Data ss:Type="String">not(exists(f:low/f:comparator) or exists(f:high/f:comparator))</Data></Cell>
    </Row>
    <Row>
@@ -5606,9 +5606,9 @@
    </Condition>
   </ConditionalFormatting>
  </Worksheet>
- <Worksheet ss:Name="Packages">
+ <Worksheet ss:Name="Profiles">
   <Names>
-   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Packages!R1C1:R2C4"/>
+   <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
   <Table ss:ExpandedColumnCount="4" ss:ExpandedRowCount="41" x:FullColumns="1"
    x:FullRows="1" ss:StyleID="s111" ss:DefaultRowHeight="15">

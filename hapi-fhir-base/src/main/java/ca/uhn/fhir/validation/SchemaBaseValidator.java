@@ -113,7 +113,7 @@ class SchemaBaseValidator implements IValidator {
 			try {
 				schema = schemaFactory.newSchema(new Source[] { baseSource });
 			} catch (SAXException e) {
-				throw new ConfigurationException("Could not load/parse schema file", e);
+				throw new ConfigurationException("Could not load/parse schema file: " + theSchemaName, e);
 			}
 			myKeyToSchema.put(key, schema);
 			return schema;

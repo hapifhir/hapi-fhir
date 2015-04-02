@@ -99,17 +99,6 @@ public class ${className}
 		setValue(theValue);
 	}
 
-	/**
-	 * Creates a new identifier with the given system and value
-	 */
-	@SimpleSetter
-	public IdentifierDt(@SimpleSetter.Parameter(name="theUse") IdentifierUseEnum theUse, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theValue") String theValue, @SimpleSetter.Parameter(name="theLabel") String theLabel) {
-		setUse(theUse);
-		setSystem(theSystem);
-		setValue(theValue);
-		setLabel(theLabel);
-	}
-	
 	@Override
 	public String toString() {
 		return "IdentifierDt[" + getValueAsQueryToken() + "]";

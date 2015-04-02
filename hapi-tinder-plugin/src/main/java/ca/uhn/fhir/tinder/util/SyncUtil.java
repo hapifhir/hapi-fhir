@@ -29,6 +29,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		fw.close();
 		
 		ourLog.info("Fixed {} valuesets", b.getEntry().size());
+		
+		
 	}
 
 }

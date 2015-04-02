@@ -18,41 +18,29 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu2.composite.TimingDt;
+import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 
-public class ResourceValidatorTest {
+public class ResourceValidatorDstu2Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorDstu2Test.class);
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testSchemaResourceValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"));
-		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
-
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+	private FhirValidator createFhirValidator() {
+		
+		AllergyIntolerance allergy = new AllergyIntolerance();
+		allergy.getSubstance().addCoding().setCode("some substance");
 		
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
-		val.setValidateAgainstStandardSchematron(false);
-
-		val.validate(p);
-
-		p.getAnimal().getBreed().setText("The Breed");
-		try {
-			val.validate(p);
-			fail();
-		} catch (ValidationFailureException e) {
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			assertEquals(1, e.getOperationOutcome().getIssue().size());
-			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Invalid content was found starting with element 'breed'"));
-		}
+		val.setValidateAgainstStandardSchematron(true);
+		return val;
 	}
 
 	/**
@@ -92,8 +80,8 @@ public class ResourceValidatorTest {
 
 		MedicationPrescription p = (MedicationPrescription) b.getEntries().get(0).getResource();
 		TimingDt timing = new TimingDt();
-		timing.getRepeat().setCount(5);
-		timing.getRepeat().setEnd(DateTimeDt.withCurrentTime());
+		timing.getRepeat().setDuration(123);
+		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum)null);
 		p.getDosageInstructionFirstRep().setScheduled(timing);
 
 		try {
@@ -102,7 +90,74 @@ public class ResourceValidatorTest {
 		} catch (ValidationFailureException e) {
 			String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(encoded);
-			assertThat(encoded, containsString("Invalid content was found starting with element 'end'"));
+			assertThat(encoded, containsString("if there's a duration, there needs to be"));
+		}
+	}
+
+	@Test
+	public void testSchemaBundleValidatorFails() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
+		Bundle b = ourCtx.newJsonParser().parseBundle(res);
+
+		FhirValidator val = createFhirValidator();
+
+		ValidationResult validationResult = val.validateWithResult(b);
+		assertTrue(validationResult.isSuccessful());
+
+		MedicationPrescription p = (MedicationPrescription) b.getEntries().get(0).getResource();
+		TimingDt timing = new TimingDt();
+		timing.getRepeat().setDuration(123);
+		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum)null);
+		p.getDosageInstructionFirstRep().setScheduled(timing);
+		
+		validationResult = val.validateWithResult(b);
+		assertFalse(validationResult.isSuccessful());
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("if there's a duration, there needs to be"));
+	}
+
+	@Test
+	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
+		Bundle b = ourCtx.newJsonParser().parseBundle(res);
+
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b));
+		
+		FhirValidator val = createFhirValidator();
+
+		ValidationResult result = val.validateWithResult(b);
+
+		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		
+		assertTrue(result.toString(), result.isSuccessful());
+		assertNotNull(operationOutcome);
+		assertEquals(0, operationOutcome.getIssue().size());
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	public void testSchemaResourceValidator() throws IOException {
+		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"));
+		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
+
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+		
+		FhirValidator val = ourCtx.newValidator();
+		val.setValidateAgainstStandardSchema(true);
+		val.setValidateAgainstStandardSchematron(false);
+
+		val.validate(p);
+
+		p.getAnimal().getBreed().setText("The Breed");
+		try {
+			val.validate(p);
+			fail();
+		} catch (ValidationFailureException e) {
+			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			assertEquals(1, e.getOperationOutcome().getIssue().size());
+			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Invalid content was found starting with element 'breed'"));
 		}
 	}
 
@@ -129,54 +184,5 @@ public class ResourceValidatorTest {
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
 		assertTrue(validationResult.isSuccessful());
-	}
-
-	@Test
-	public void testSchemaBundleValidatorIsSuccessful() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
-		Bundle b = ourCtx.newJsonParser().parseBundle(res);
-
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b));
-		
-		FhirValidator val = createFhirValidator();
-
-		ValidationResult result = val.validateWithResult(b);
-
-		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-		
-		assertTrue(result.toString(), result.isSuccessful());
-		assertNotNull(operationOutcome);
-		assertEquals(0, operationOutcome.getIssue().size());
-	}
-
-	@Test
-	public void testSchemaBundleValidatorFails() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"));
-		Bundle b = ourCtx.newJsonParser().parseBundle(res);
-
-		FhirValidator val = createFhirValidator();
-
-		ValidationResult validationResult = val.validateWithResult(b);
-		assertTrue(validationResult.isSuccessful());
-
-		MedicationPrescription p = (MedicationPrescription) b.getEntries().get(0).getResource();
-		TimingDt timing = new TimingDt();
-		timing.getRepeat().setCount(5);
-		timing.getRepeat().setEnd(DateTimeDt.withCurrentTime());
-		p.getDosageInstructionFirstRep().setScheduled(timing);
-		
-		validationResult = val.validateWithResult(b);
-		assertFalse(validationResult.isSuccessful());
-		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
-		ourLog.info(encoded);
-		assertThat(encoded, containsString("Invalid content was found starting with element 'end'"));
-	}
-
-	private FhirValidator createFhirValidator() {
-		FhirValidator val = ourCtx.newValidator();
-		val.setValidateAgainstStandardSchema(true);
-		val.setValidateAgainstStandardSchematron(true);
-		return val;
 	}
 }

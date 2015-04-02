@@ -217,8 +217,8 @@ public class XmlParserTest {
 		p.addName().addFamily("FAMILY");
 		
 		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
-		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1").setValueSet(new ResourceReferenceDt("ValueSet1")));
-		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2").setValueSet(new ResourceReferenceDt("ValueSet2")));
+		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1"));
+		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2"));
 		
 		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
 
@@ -234,9 +234,6 @@ public class XmlParserTest {
 			"<code value=\"CODE1\"/>", 
 			"<display value=\"DISPLAY1\"/>", 
 			"<primary value=\"true\"/>", 
-			"<valueSet>", 
-			"<reference value=\"ValueSet1\"/>", 
-			"</valueSet>", 
 			"</security>", 
 			"<security>", 
 			"<system value=\"SYSTEM2\"/>", 
@@ -244,9 +241,6 @@ public class XmlParserTest {
 			"<code value=\"CODE2\"/>", 
 			"<display value=\"DISPLAY2\"/>", 
 			"<primary value=\"false\"/>", 
-			"<valueSet>", 
-			"<reference value=\"ValueSet2\"/>", 
-			"</valueSet>", 
 			"</security>",
 			"</meta>", 
 			"<name>", 
@@ -266,7 +260,6 @@ public class XmlParserTest {
 		assertEquals("DISPLAY1", label.getDisplay());
 		assertEquals(true, label.getPrimary());
 		assertEquals("VERSION1", label.getVersion());
-		assertEquals("ValueSet1", label.getValueSet().getReference().getValue());
 
 		label = (CodingDt) gotLabels.get(1);
 		assertEquals("SYSTEM2", label.getSystem());
@@ -274,7 +267,6 @@ public class XmlParserTest {
 		assertEquals("DISPLAY2", label.getDisplay());
 		assertEquals(false, label.getPrimary());
 		assertEquals("VERSION2", label.getVersion());
-		assertEquals("ValueSet2", label.getValueSet().getReference().getValue());
 	}
 
 	@Test

@@ -106,7 +106,7 @@ public class ReadTest {
 		public Patient read(@IdParam IdDt theId) {
 			Patient p1 = new Patient();
 			p1.setId("p1ReadId");
-			p1.addIdentifier().setLabel("p1ReadValue");
+			p1.addIdentifier().setValue("p1ReadValue");
 			return p1;
 		}
 

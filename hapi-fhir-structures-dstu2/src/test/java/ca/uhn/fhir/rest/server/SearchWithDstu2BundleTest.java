@@ -100,7 +100,7 @@ public class SearchWithDstu2BundleTest {
 			
 			Patient p1 = new Patient();
 			p1.setId("Patient/123/_history/456");
-			p1.addIdentifier().setLabel("p1ReadValue");
+			p1.addIdentifier().setValue("p1ReadValue");
 			
 			retVal.addEntry().setResource(p1);
 			
