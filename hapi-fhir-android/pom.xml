@@ -145,6 +145,7 @@
 									<include>org.glassfish:javax.json</include>
 									<include>org.codehaus.woodstox:woodstox-core-asl</include>
 									<include>javax.xml.stream:stax-api</include>
+									<include>javax.servlet:javax.servlet-api</include>
 									<include>org.codehaus.woodstox:stax2-api</include>
 									<include>org.slf4j:slf4j*</include>
 									<include>org.apache.commons:*</include>
