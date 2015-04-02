@@ -1,6 +1,7 @@
 /target
 /bin
 /target/
+dependency-reduced-pom.xml
 
 # Created by https://www.gitignore.io
 
