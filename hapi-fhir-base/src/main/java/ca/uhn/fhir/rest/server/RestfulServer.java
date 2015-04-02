@@ -45,6 +45,7 @@ import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -456,8 +457,17 @@ public class RestfulServer extends HttpServlet {
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		IVersionSpecificBundleFactory bundleFactory = myFhirContext.newBundleFactory();
-        bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
-				null, IResource.WILDCARD_ALL_SET);
+
+		Set<Include> includes = new HashSet<Include>();
+		String[] reqIncludes = theRequest.getServletRequest().getParameterValues(Constants.PARAM_INCLUDE);
+		if (reqIncludes != null) {
+			for (String nextInclude : reqIncludes) {
+				includes.add(new Include(nextInclude));
+			}
+		}
+
+		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
+				null, includes);
 
 		Bundle bundle = bundleFactory.getDstu1Bundle();
 		if (bundle != null) {

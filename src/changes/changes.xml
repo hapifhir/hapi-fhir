@@ -88,7 +88,12 @@
 			</action>
 			<action type="add">
 				Android JAR now includes servlet-API classes, as the project will not
-				work without them.
+				work without them. Thanks 
+			</action>
+			<action type="fix" issue="116">
+				Requested _include values are preserved across paging links when the
+				server returns multiple pages. Thanks to Bill de Beaubien for 
+				reporting! 
 			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">

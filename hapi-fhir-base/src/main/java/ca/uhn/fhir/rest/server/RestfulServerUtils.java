@@ -30,6 +30,7 @@ import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletOutputStream;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
@@ -218,38 +220,51 @@ public class RestfulServerUtils {
 		return EncodingEnum.XML;
 	}
 
-	public static String createPagingLink(String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
-		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
-		b.append('?');
-		b.append(Constants.PARAM_PAGINGACTION);
-		b.append('=');
+	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
 		try {
+			StringBuilder b = new StringBuilder();
+			b.append(theServerBase);
+			b.append('?');
+			b.append(Constants.PARAM_PAGINGACTION);
+			b.append('=');
 			b.append(URLEncoder.encode(theSearchId, "UTF-8"));
+
+			b.append('&');
+			b.append(Constants.PARAM_PAGINGOFFSET);
+			b.append('=');
+			b.append(theOffset);
+			b.append('&');
+			b.append(Constants.PARAM_COUNT);
+			b.append('=');
+			b.append(theCount);
+			if (theResponseEncoding != null) {
+				b.append('&');
+				b.append(Constants.PARAM_FORMAT);
+				b.append('=');
+				b.append(theResponseEncoding.getRequestContentType());
+			}
+			if (thePrettyPrint) {
+				b.append('&');
+				b.append(Constants.PARAM_PRETTY);
+				b.append('=');
+				b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
+			}
+
+			if (theIncludes != null) {
+				for (Include nextInclude : theIncludes) {
+					if (isNotBlank(nextInclude.getValue())) {
+						b.append('&');
+						b.append(Constants.PARAM_INCLUDE);
+						b.append('=');
+						b.append(URLEncoder.encode(nextInclude.getValue(), "UTF-8"));
+					}
+				}
+			}
+
+			return b.toString();
 		} catch (UnsupportedEncodingException e) {
 			throw new Error("UTF-8 not supported", e);// should not happen
 		}
-		b.append('&');
-		b.append(Constants.PARAM_PAGINGOFFSET);
-		b.append('=');
-		b.append(theOffset);
-		b.append('&');
-		b.append(Constants.PARAM_COUNT);
-		b.append('=');
-		b.append(theCount);
-		if (theResponseEncoding != null) {
-			b.append('&');
-			b.append(Constants.PARAM_FORMAT);
-			b.append('=');
-			b.append(theResponseEncoding.getRequestContentType());
-		}
-		if (thePrettyPrint) {
-			b.append('&');
-			b.append(Constants.PARAM_PRETTY);
-			b.append('=');
-			b.append(Constants.PARAM_PRETTY_VALUE_TRUE);
-		}
-		return b.toString();
 	}
 
 	public static void addProfileToBundleEntry(FhirContext theContext, IResource theResource, String theServerBase) {
