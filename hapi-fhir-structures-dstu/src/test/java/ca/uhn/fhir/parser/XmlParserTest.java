@@ -1,15 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -83,6 +75,43 @@ public class XmlParserTest {
 
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
+
+	/**
+	 * see #144 and #146
+	 */
+	@Test
+	public void testParseContained() {
+
+		FhirContext c = FhirContext.forDstu1();
+		IParser parser = c.newXmlParser().setPrettyPrint(true);
+
+		Observation o = new Observation();
+		o.getName().setText("obs text");
+
+		Patient p = new Patient();
+		p.addName().addFamily("patient family");
+		o.getSubject().setResource(p);
+		
+		String enc = parser.encodeResourceToString(o);
+		ourLog.info(enc);
+		
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder(
+			"<Observation xmlns=\"http://hl7.org/fhir\">",
+			"<contained>",
+			"<Patient xmlns=\"http://hl7.org/fhir\" id=\"1\">",
+			"</contained>",
+			"<reference value=\"#1\"/>"
+			));
+		//@formatter:on
+		
+		o = parser.parseResource(Observation.class, enc);
+		assertEquals("obs text", o.getName().getText().getValue());
+		
+		assertNotNull(o.getSubject().getResource());
+		p = (Patient) o.getSubject().getResource();
+		assertEquals("patient family", p.getNameFirstRep().getFamilyAsSingleString());
+	}
 
 	@Test
 	public void testComposition() {

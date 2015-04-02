@@ -43,8 +43,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-public class XmlParserTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
+public class XmlParserDstu2Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 
 	@BeforeClass
@@ -384,7 +384,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"));
 
 		Bundle parsed = ourCtx.newXmlParser().parseBundle(content);
 		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
@@ -415,7 +415,7 @@ public class XmlParserTest {
 
 	@Test
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/bundle-example.xml"));
+		String content = IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle-example.xml"));
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = newXmlParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);

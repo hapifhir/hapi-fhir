@@ -6,14 +6,15 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -28,19 +29,23 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationReliabilityEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-public class JsonParserTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserTest.class);
+public class JsonParserDstu2Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 
 	@Test
@@ -52,6 +57,54 @@ public class JsonParserTest {
 
 		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+	}
+
+	/**
+	 * See #144 and #146
+	 */
+	@Test
+	public void testReportSerialize() {
+
+		ReportObservation obsv = new ReportObservation();
+		obsv.getCode().addCoding().setCode("name");
+		obsv.setValue(new StringDt("value test"));
+		obsv.setStatus(ObservationStatusEnum.FINAL);
+		obsv.setReliability(ObservationReliabilityEnum.OK);
+		obsv.addIdentifier().setSystem("System").setValue("id value");
+		
+		DiagnosticReport report = new DiagnosticReport();
+		report.getContained().getContainedResources().add(obsv);
+		report.addResult().setResource(obsv);
+
+		IParser parser = new FhirContext().newXmlParser().setPrettyPrint(true);
+		String message = parser.encodeResourceToString(report);
+		ourLog.info(message);
+		Assert.assertThat(message, containsString("contained"));
+	}
+
+	/**
+	 * See #144 and #146
+	 */
+	@Test
+	public void testReportSerializeWithMatchingId() {
+
+		ReportObservation obsv = new ReportObservation();
+		obsv.getCode().addCoding().setCode("name");
+		obsv.setValue(new StringDt("value test"));
+		obsv.setStatus(ObservationStatusEnum.FINAL);
+		obsv.setReliability(ObservationReliabilityEnum.OK);
+		obsv.addIdentifier().setSystem("System").setValue("id value");
+		
+		DiagnosticReport report = new DiagnosticReport();
+		report.getContained().getContainedResources().add(obsv);
+		
+		obsv.setId("#123");
+		report.addResult().setReference("#123");
+
+		IParser parser = new FhirContext().newXmlParser().setPrettyPrint(true);
+		String message = parser.encodeResourceToString(report);
+		ourLog.info(message);
+		Assert.assertThat(message, containsString("contained"));
 	}
 
 	/**
@@ -69,10 +122,10 @@ public class JsonParserTest {
 		Patient p = new Patient();
 		p.addName().addFamily("patient family");
 		o.getSubject().setResource(p);
-		
+
 		String enc = parser.encodeResourceToString(o);
 		ourLog.info(enc);
-		
+
 		//@formatter:off
 		assertThat(enc, stringContainsInOrder(
 			"\"resourceType\":\"Observation\"",
@@ -82,10 +135,10 @@ public class JsonParserTest {
 			"\"reference\":\"#1\""
 			));
 		//@formatter:on
-		
+
 		o = parser.parseResource(Observation.class, enc);
 		assertEquals("obs text", o.getCode().getText());
-		
+
 		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
 		assertEquals("patient family", p.getNameFirstRep().getFamilyAsSingleString());
@@ -217,7 +270,7 @@ public class JsonParserTest {
 	 */
 	@Test
 	public void testEncodeBundleWithDeletedEntry() throws ConfigurationException, DataFormatException, IOException {
-		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserTest.class.getResourceAsStream("/xml-bundle.xml")));
+		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/xml-bundle.xml")));
 		String val = ourCtx.newJsonParser().encodeBundleToString(b);
 
 		ourLog.info(val);
@@ -417,7 +470,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/bundle-example.json"));
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
 		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
@@ -437,6 +490,10 @@ public class JsonParserTest {
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
 
+		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertSame(p.getMedication().getResource(), m);
+		
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
 
@@ -457,7 +514,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseAndEncodeBundleOldStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/bundle-transaction.json"));
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction.json"));
 
 		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
 		// assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
@@ -502,7 +559,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserTest.class.getResourceAsStream("/bundle-example.json"));
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());

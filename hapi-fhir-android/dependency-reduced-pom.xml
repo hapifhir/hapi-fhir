@@ -55,6 +55,7 @@
                   <include>org.glassfish:javax.json</include>
                   <include>org.codehaus.woodstox:woodstox-core-asl</include>
                   <include>javax.xml.stream:stax-api</include>
+                  <include>javax.servlet:javax.servlet-api</include>
                   <include>org.codehaus.woodstox:stax2-api</include>
                   <include>org.slf4j:slf4j*</include>
                   <include>org.apache.commons:*</include>
@@ -126,12 +127,6 @@
       <groupId>com.phloc</groupId>
       <artifactId>phloc-commons</artifactId>
       <version>4.3.6</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
