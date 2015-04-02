@@ -95,7 +95,7 @@
 				server returns multiple pages. Thanks to Bill de Beaubien for 
 				reporting! 
 			</action>
-			<action type="add" issue="119" dev="wdebeau1">
+			<action type="add" issue="138" dev="wdebeau1">
 				Add new server address strategy "ApacheProxyAddressStrategy" which uses 
 				headers "x-forwarded-host" and "x-forwarded-proto" to determine the
 				server's address. This is useful if you are deploying a HAPI FHIR 
