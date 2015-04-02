@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 /**
  * @deprecated Use {@link DateParam} instead (this class is identical, but was renamed to be less confusing)
  */
+@Deprecated
 public class QualifiedDateParam extends DateParam {
 	/**
 	 * Constructor

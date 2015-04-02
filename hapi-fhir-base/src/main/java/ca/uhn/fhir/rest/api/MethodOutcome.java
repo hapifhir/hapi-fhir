@@ -97,6 +97,7 @@ public class MethodOutcome {
 	/**
 	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
 	 */
+	@Deprecated
 	public MethodOutcome(IdDt theId, IdDt theVersionId) {
 		myId = theId;
 		myVersionId = theVersionId;
@@ -105,6 +106,7 @@ public class MethodOutcome {
 	/**
 	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance
 	 */
+	@Deprecated
 	public MethodOutcome(IdDt theId, IdDt theVersionId, BaseOperationOutcome theBaseOperationOutcome) {
 		myId = theId;
 		myVersionId = theVersionId;
@@ -127,6 +129,7 @@ public class MethodOutcome {
 	/**
 	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
 	 */
+	@Deprecated
 	public IdDt getVersionId() {
 		return myVersionId;
 	}
@@ -173,6 +176,7 @@ public class MethodOutcome {
 	/**
 	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IdDt)}
 	 */
+	@Deprecated
 	public void setVersionId(IdDt theVersionId) {
 		myVersionId = theVersionId;
 	}

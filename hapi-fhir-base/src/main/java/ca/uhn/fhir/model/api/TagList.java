@@ -79,6 +79,7 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	/**
 	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addTag(String, String, String)} should be used instead
 	 */
+	@Deprecated
 	public Tag addTag() {
 		myOrderedTags = null;
 		return addTag(null, null, null);

@@ -31,6 +31,7 @@ package ca.uhn.fhir.model.api;
  * 
  * @deprecated {@link Include} should be used instead
  */
+@Deprecated
 public class PathSpecification extends Include {
 
 	public PathSpecification(String theInclude) {

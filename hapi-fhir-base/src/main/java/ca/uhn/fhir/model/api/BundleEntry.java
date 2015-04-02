@@ -67,6 +67,7 @@ public class BundleEntry extends BaseBundle {
 	 * @deprecated Tags wil become immutable in a future release of HAPI, so
 	 *             {@link #addCategory(String, String, String)} should be used instead
 	 */
+	@Deprecated
 	public Tag addCategory() {
 		Tag retVal = new Tag();
 		getCategories().add(retVal);
@@ -146,6 +147,7 @@ public class BundleEntry extends BaseBundle {
 	 *             if this entry represents a deleted resource, use {@link #setDeletedResourceId(IdDt)}.
 	 */
 	@Override
+	@Deprecated
 	public IdDt getId() {
 		return super.getId();
 	}
@@ -160,6 +162,7 @@ public class BundleEntry extends BaseBundle {
 	/**
 	 * @deprecated Use resource ID to determine base URL
 	 */
+	@Deprecated
 	public StringDt getLinkBase() {
 		if (myLinkBase == null) {
 			myLinkBase = new StringDt();
@@ -220,6 +223,7 @@ public class BundleEntry extends BaseBundle {
 	 *             DSTU2, it is recommended that you migrate code away from using this method and over to using resource
 	 *             metadata instead.
 	 */
+	@Deprecated
 	public InstantDt getUpdated() {
 		if (myUpdated == null) {
 			myUpdated = new InstantDt();
@@ -283,6 +287,7 @@ public class BundleEntry extends BaseBundle {
 	 * @deprecated Bundle entries no longer have an ID in DSTU2, as ID is explicitly stated in the resource itself.
 	 */
 	@Override
+	@Deprecated
 	public void setId(IdDt theId) {
 		super.setId(theId);
 	}
@@ -294,6 +299,7 @@ public class BundleEntry extends BaseBundle {
 	/**
 	 * @deprecated Use resource ID to determine base URL
 	 */
+	@Deprecated
 	public void setLinkBase(StringDt theLinkBase) {
 		myLinkBase = theLinkBase;
 	}
@@ -329,6 +335,7 @@ public class BundleEntry extends BaseBundle {
 	 *             DSTU2, it is recommended that you migrate code away from using this method and over to using resource
 	 *             metadata instead.
 	 */
+	@Deprecated
 	public void setUpdated(InstantDt theUpdated) {
 		Validate.notNull(theUpdated, "Updated may not be null");
 		myUpdated = theUpdated;

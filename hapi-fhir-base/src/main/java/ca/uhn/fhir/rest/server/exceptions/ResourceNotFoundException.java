@@ -57,6 +57,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 	/**
 	 * @deprecated This doesn't make sense, since an identifier is not a resource ID and shouldn't generate a 404 if it isn't found - Should be removed
 	 */
+	@Deprecated
 	public ResourceNotFoundException(Class<? extends IResource> theClass, BaseIdentifierDt theId) {
 		super(STATUS_CODE, "Resource of type " + theClass.getSimpleName() + " with ID " + theId + " is not known");
 	}

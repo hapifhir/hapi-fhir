@@ -25,6 +25,7 @@ package ca.uhn.fhir.rest.gclient;
  * @deprecated Use {@link CompositeClientParam} instead. That class is identical to this one but was renamed to reduce
  *             confusing duplicate names in the API. This class will be removed in a future release.
  */
+@Deprecated
 public class CompositeParam<A extends IParam, B extends IParam> extends CompositeClientParam<A,B> {
 
 	public CompositeParam(String theParamName) {
