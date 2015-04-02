@@ -153,13 +153,27 @@
 				<p>
 					The server will attempt to determine what the base URL should be based on
 					what the request it receives looks like, but if it is not getting
-					the right address you may wish to hardcode the base URL, as shown
-					in the following example:
+					the right address you may wish to use a different "address strategy".
+				</p>
+				<p>
+					The simplest way to do this is to configure the server to use a hardcoded
+					base URL, which means that the server won't try to figure out the
+					"http://foo.com/fhir" part of the URL but will instead just use a fixed
+					value you supply. This is shown in the following example:
 				</p>
 				<macro name="snippet">
 					<param name="id" value="addressStrategy"/>
 					<param name="file" value="examples/src/main/java/example/ExampleProviders.java"/>
 				</macro>
+				
+				<h4>Other Strategies</h4>
+				<p>
+					See the 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/IServerAddressStrategy.html">IServerAddressStrategy</a>
+					JavaDoc (specifically the list of "All Known Implementing Classes") to see
+					other strategies that are available.
+				</p>
+				
 			</subsection>
 
 			<subsection name="Deploy">

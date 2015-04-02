@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
