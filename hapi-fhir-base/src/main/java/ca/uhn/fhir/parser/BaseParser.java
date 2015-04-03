@@ -158,7 +158,7 @@ public abstract class BaseParser implements IParser {
 
 	}
 
-	public void containResourcesForEncoding(IBaseResource theResource) {
+	protected void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
 		myContainedResources = contained;

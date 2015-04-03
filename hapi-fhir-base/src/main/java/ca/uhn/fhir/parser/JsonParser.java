@@ -457,7 +457,7 @@ public class JsonParser extends BaseParser implements IParser {
 		case RESOURCE:
 			IBaseResource resource = (IBaseResource) theNextValue;
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
-			encodeResourceToJsonStreamWriter(def, resource, theWriter, theChildName, true);
+			encodeResourceToJsonStreamWriter(def, resource, theWriter, theChildName, false);
 			break;
 		case UNDECL_EXT:
 		default:
@@ -632,12 +632,12 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
-			boolean theIsSubElementWithinResource) throws IOException {
+			boolean theContainedResource) throws IOException {
 		String resourceId = null;
 		if (theResource instanceof IResource) {
 			IResource res = (IResource) theResource;
 			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
-				if (theIsSubElementWithinResource) {
+				if (theContainedResource) {
 					resourceId = res.getId().getIdPart();
 				} else if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 					resourceId = res.getId().getIdPart();
@@ -645,17 +645,17 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		} else if (theResource instanceof IAnyResource) {
 			IAnyResource res = (IAnyResource) theResource;
-			if (theIsSubElementWithinResource && StringUtils.isNotBlank(res.getId())) {
+			if (theContainedResource && StringUtils.isNotBlank(res.getId())) {
 				resourceId = res.getId();
 			}
 		}
 
-		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theIsSubElementWithinResource, resourceId);
+		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
-			boolean theIsSubElementWithinResource, String theResourceId) throws IOException {
-		if (!theIsSubElementWithinResource) {
+			boolean theContainedResource, String theResourceId) throws IOException {
+		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
 
@@ -704,7 +704,7 @@ public class JsonParser extends BaseParser implements IParser {
 					for (BaseCodingDt securityLabel : securityLabels) {
 						theEventWriter.writeStartObject();
 						BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
-						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, def.getChildren(), theIsSubElementWithinResource);
+						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource);
 						theEventWriter.writeEnd();
 					}
 					theEventWriter.writeEnd();
@@ -731,7 +731,7 @@ public class JsonParser extends BaseParser implements IParser {
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {
-			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theIsSubElementWithinResource);
+			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
 		}
 
 		theEventWriter.writeEnd();

@@ -1,0 +1,72 @@
+<Bundle xmlns="http://hl7.org/fhir">
+   <id value="09105af9-528c-47d0-a844-b7964236d6ff"/>
+   <type value="searchset"/>
+   <base value="http://fhirtest.uhn.ca/baseDstu2"/>
+   <total value="1"/>
+   <link>
+      <relation value="self"/>
+      <url value="http://10.160.2.151:28080/hapi-fhir-jpaserver/baseDstu2/MedicationPrescription?patient=13123&amp;_format=xml"/>
+   </link>
+   <entry>
+      <resource>
+         <MedicationPrescription xmlns="http://hl7.org/fhir">
+            <id value="20399"/>
+            <meta>
+               <versionId value="1"/>
+               <lastUpdated value="2015-04-02T20:31:44.459-04:00"/>
+            </meta>
+            <text>
+               <status value="generated"/>
+               <div xmlns="http://www.w3.org/1999/xhtml"> Thyroxine 0.112 MG Oral Tablet [Levoxyl] (rxnorm: 206485) </div>
+            </text>
+            <contained>
+               <Medication xmlns="http://hl7.org/fhir">
+                  <id value="med"/>
+                  <name value="Thyroxine 0.112 MG Oral Tablet [Levoxyl]"/>
+                  <code>
+                     <coding>
+                        <system value="http://www.nlm.nih.gov/research/umls/rxnorm"/>
+                        <code value="206485"/>
+                        <display value="Thyroxine 0.112 MG Oral Tablet [Levoxyl]"/>
+                     </coding>
+                  </code>
+               </Medication>
+            </contained>
+            <status value="active"/>
+            <patient>
+               <reference value="Patient/13123"/>
+            </patient>
+            <medication>
+               <reference value="#med"/>
+            </medication>
+            <dosageInstruction>
+               <text value="1 daily"/>
+               <doseQuantity>
+                  <value value="1"/>
+                  <units value="{tablet}"/>
+                  <system value="http://unitsofmeasure.org"/>
+                  <code value="{tablet}"/>
+               </doseQuantity>
+            </dosageInstruction>
+            <dispense>
+               <numberOfRepeatsAllowed value="1"/>
+               <quantity>
+                  <value value="90"/>
+                  <units value="{tablet}"/>
+                  <system value="http://unitsofmeasure.org"/>
+                  <code value="{tablet}"/>
+               </quantity>
+               <expectedSupplyDuration>
+                  <value value="90"/>
+                  <units value="days"/>
+                  <system value="http://unitsofmeasure.org"/>
+                  <code value="d"/>
+               </expectedSupplyDuration>
+            </dispense>
+         </MedicationPrescription>
+      </resource>
+      <search>
+         <mode value="match"/>
+      </search>
+   </entry>
+</Bundle>

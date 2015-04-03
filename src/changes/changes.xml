@@ -102,6 +102,18 @@
 				server behind an Apache proxy (e.g. for load balancing or other reasons).
 				Thanks to Bill de Beaubien for contributing!
 			</action>
+			<action type="fix" issue="143">
+				Resource references between separate resources found in a single
+				bundle did not get populated with the actual resource when parsing a
+				DSTU2 style bundle. Thanks to Nick Peterson for reporting and figuring
+				out why none of our unit tests were actually catching the problem!
+			</action>
+			<action type="fix" issue="146">
+				JSON encoder did not encode contained resources when encoding
+				a DSTU2 style bundle. Thanks to Mohammad Jafari and baopingle
+				for all of their help in tracking this issue down and developing
+				useful unit tests to demonstrate it.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

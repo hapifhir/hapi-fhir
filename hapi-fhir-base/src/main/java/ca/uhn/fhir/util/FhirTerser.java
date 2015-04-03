@@ -220,7 +220,7 @@ public class FhirTerser {
 
 	}
 
-	private <T extends IElement> void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+	private void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
 		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
@@ -248,12 +248,7 @@ public class FhirTerser {
 			break;
 		case RESOURCE:
 		case RESOURCE_BLOCK:
-		case COMPOSITE_DATATYPE: {
-			if (theChildDefinition instanceof RuntimeChildDirectResource) {
-				// Don't descend into embedded resources
-				return;
-			}
-			
+		case COMPOSITE_DATATYPE: {			
 			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
@@ -286,7 +281,13 @@ public class FhirTerser {
 							}
 							throw new DataFormatException(b.toString());
 						}
-						visit(nextValue, nextChild, childElementDef, theCallback);
+						
+						if (nextChild instanceof RuntimeChildDirectResource) {
+							// Don't descend into embedded resources
+							theCallback.acceptElement(nextValue, nextChild, childElementDef);
+						} else {
+							visit(nextValue, nextChild, childElementDef, theCallback);
+						}
 					}
 				}
 			}

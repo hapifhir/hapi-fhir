@@ -12,7 +12,6 @@ import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -468,6 +467,34 @@ public class JsonParserDstu2Test {
 		assertNull(ResourceMetadataKeyEnum.PROFILES.get(patient));
 	}
 
+	/**
+	 * Test for #146
+	 */
+	@Test
+	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		assertEquals("#med", p.getMedication().getReference().getValue());
+		
+		Medication m = (Medication) p.getMedication().getResource();
+		assertNotNull(m);
+		assertEquals("#med", m.getId().getValue());
+		assertEquals(1, p.getContained().getContainedResources().size());
+		assertSame(m, p.getContained().getContainedResources().get(0));
+
+		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+		assertThat(reencoded, containsString("contained"));
+
+		reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+		assertThat(reencoded, containsString("contained"));
+	}
+
+	
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
@@ -514,28 +541,26 @@ public class JsonParserDstu2Test {
 
 	@Test
 	public void testParseAndEncodeBundleOldStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-transaction.json"));
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
-		// assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
-		// assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
-		// assertEquals("1", parsed.getId().getVersionIdPart());
-		// assertEquals(new InstantDt("2014-08-18T01:43:30Z"),
-		// parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		// assertEquals("searchset", parsed.getType().getValue());
-		// assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		// assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
-		// assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2",
-		// parsed.getLinkNext().getValue());
-		// assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication",
-		// parsed.getLinkSelf().getValue());
-		//
-		// assertEquals(2, parsed.getEntries().size());
-		//
-		// MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
-		// assertEquals("Patient/347", p.getPatient().getReference().getValue());
-		// assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		// assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+		
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType().getValue());
+		assertEquals(3, parsed.getTotalResults().getValue().intValue());
+
+		assertEquals(2, parsed.getEntries().size());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertEquals("Medication/example", p.getMedication().getReference().getValue());
+		assertSame(p.getMedication().getResource(), m);
+
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
@@ -578,6 +603,11 @@ public class JsonParserDstu2Test {
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntry().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertEquals("Medication/example", p.getMedication().getReference().getValue());
+		assertSame(p.getMedication().getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);

@@ -30,8 +30,6 @@ import java.util.Map;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
@@ -39,8 +37,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -65,7 +61,6 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
-import ca.uhn.fhir.model.api.IExtension;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -74,6 +69,7 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -81,6 +77,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.IModelVisitor;
 
 class ParserState<T> {
@@ -1465,6 +1462,10 @@ class ParserState<T> {
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
+		public BaseRuntimeElementCompositeDefinition<?> getDefinition() {
+			return myDefinition;
+		}
+
 		private IBase myInstance;
 
 		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
@@ -1570,8 +1571,13 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
+				if (myInstance instanceof IResource) {
+					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
+					push(state);
+				} else {
 				ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
 				push(state);
+				}
 				return;
 			}
 			case UNDECL_EXT:
@@ -1816,10 +1822,18 @@ class ParserState<T> {
 
 	private class PreResourceStateHapi extends PreResourceState {
 		private BundleEntry myEntry;
+		private Object myTarget;
+		private IMutator myMutator;
 
 		public PreResourceStateHapi(BundleEntry theEntry, Class<? extends IBaseResource> theResourceType) {
 			super(theResourceType);
 			myEntry = theEntry;
+		}
+
+		public PreResourceStateHapi(Object theTarget, IMutator theMutator, Class<? extends IBaseResource> theResourceType) {
+			super(theResourceType);
+			myTarget = theTarget;
+			myMutator = theMutator;
 		}
 
 		public PreResourceStateHapi(Class<? extends IBaseResource> theResourceType) {
@@ -1833,7 +1847,7 @@ class ParserState<T> {
 			if (myEntry == null) {
 				myObject = (T) getCurrentElement();
 			}
-
+			
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
@@ -1846,8 +1860,10 @@ class ParserState<T> {
 //				}
 			}
 
-			
+
 		}
+
+		
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
@@ -1855,6 +1871,9 @@ class ParserState<T> {
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
+				if (myMutator != null) {
+					myMutator.addValue(myTarget, getCurrentElement());
+				}
 		}
 
 	}
@@ -1976,7 +1995,10 @@ class ParserState<T> {
 
 		@Override
 		public void wereBack() {
-			myContext.newTerser().visit(myInstance, new IModelVisitor() {
+			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
+			
+			FhirTerser terser = myContext.newTerser();
+			terser.visit(myInstance, new IModelVisitor() {
 
 				@Override
 				public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
@@ -2002,6 +2024,35 @@ class ParserState<T> {
 				}
 			});
 
+			if (bundle) {
+				/*
+				 * Stitch together resource references
+				 */
+				Map<IdDt, IResource> idToResource = new HashMap<IdDt, IResource>();
+				FhirTerser t = myContext.newTerser();
+				List<IResource> resources = t.getAllPopulatedChildElementsOfType(myInstance, IResource.class);
+				for (IResource next : resources) {
+					IdDt id = next.getId();
+					if (id != null && id.isEmpty() == false) {
+						String resName = myContext.getResourceDefinition(next).getName();
+						idToResource.put(id.withResourceType(resName).toUnqualifiedVersionless(), next);
+					}
+				}
+
+				for (IResource next : resources) {
+					List<BaseResourceReferenceDt> refs = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
+					for (BaseResourceReferenceDt nextRef : refs) {
+						if (nextRef.isEmpty() == false && nextRef.getReference() != null) {
+							IResource target = idToResource.get(nextRef.getReference().toUnqualifiedVersionless());
+							if (target != null) {
+								nextRef.setResource(target);
+							}
+						}
+					}
+				}
+
+			}
+			
 		}
 
 	}
@@ -2264,7 +2315,6 @@ class ParserState<T> {
 				super.enteringNewElement(theNamespace, theChildName);
 			}
 		}
-
 	}
 
 	private class ResourceStateHl7Org extends ElementCompositeState {

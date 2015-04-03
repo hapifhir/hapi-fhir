@@ -405,6 +405,10 @@ public class XmlParserDstu2Test {
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
 
+		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertSame(p.getMedication().getResource(), m);
+
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
 
@@ -436,6 +440,10 @@ public class XmlParserDstu2Test {
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
 		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
 //		assertEquals("3123", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntry().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertSame(p.getMedication().getResource(), m);
 
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,8 +64,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(5, bundle.getEntries().size());
-			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("4", bundle.getEntries().get(4).getId().getIdPart());
+			assertEquals("0", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("4", bundle.getEntries().get(4).getResource().getId().getIdPart());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=5&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkNext()
 					.getValue());
 			assertNull(bundle.getLinkPrevious().getValue());
@@ -79,8 +80,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newJsonParser().parseBundle(responseContent);
 			assertEquals(5, bundle.getEntries().size());
-			assertEquals("5", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("9", bundle.getEntries().get(4).getId().getIdPart());
+			assertEquals("5", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("9", bundle.getEntries().get(4).getResource().getId().getIdPart());
 			assertNull(bundle.getLinkNext().getValue());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=5&_format=json&_pretty=true", bundle.getLinkPrevious()
 					.getValue());
@@ -104,8 +105,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("8", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("9", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals("8", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("9", bundle.getEntries().get(1).getResource().getId().getIdPart());
 			assertNull(bundle.getLinkNext().getValue());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=3&" + Constants.PARAM_COUNT + "=5&_format=xml&_pretty=true", bundle.getLinkPrevious()
 					.getValue());
@@ -131,8 +132,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("1", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals("0", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("1", bundle.getEntries().get(1).getResource().getId().getIdPart());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
 			assertNull(bundle.getLinkPrevious().getValue());
 			link = bundle.getLinkNext().getValue();
@@ -146,8 +147,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals("2", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("3", bundle.getEntries().get(1).getResource().getId().getIdPart());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkNext().getValue());
 			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkSelf().getValue());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml", bundle.getLinkPrevious().getValue());
@@ -175,9 +176,11 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("1", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml&_include=Patient.managingOrganization&_include=foo", bundle.getLinkNext().getValue());
+			assertEquals("0", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("1", bundle.getEntries().get(1).getResource().getId().getIdPart());
+			assertThat(bundle.getLinkNext().getValue(), Matchers.startsWith(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml"));
+			assertThat(bundle.getLinkNext().getValue(), containsString("&_include=foo"));
+			assertThat(bundle.getLinkNext().getValue(), containsString("&_include=Patient.managingOrganization"));
 			assertNull(bundle.getLinkPrevious().getValue());
 			link = bundle.getLinkNext().getValue();
 		}
@@ -190,11 +193,19 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml&_include=Patient.managingOrganization&_include=foo", bundle.getLinkNext().getValue());
-			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml&_include=Patient.managingOrganization&_include=foo", bundle.getLinkSelf().getValue());
-			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml&_include=Patient.managingOrganization&_include=foo", bundle.getLinkPrevious().getValue());
+			assertEquals("2", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("3", bundle.getEntries().get(1).getResource().getId().getIdPart());
+			assertThat(bundle.getLinkNext().getValue(), Matchers.startsWith(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2&_format=xml"));
+			assertThat(bundle.getLinkNext().getValue(), containsString("&_include=foo"));
+			assertThat(bundle.getLinkNext().getValue(), containsString("&_include=Patient.managingOrganization"));
+
+			assertThat(bundle.getLinkSelf().getValue(), Matchers.startsWith(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2&_format=xml"));
+			assertThat(bundle.getLinkSelf().getValue(), containsString("&_include=foo"));
+			assertThat(bundle.getLinkSelf().getValue(), containsString("&_include=Patient.managingOrganization"));
+			
+			assertThat(bundle.getLinkPrevious().getValue(), Matchers.startsWith(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2&_format=xml"));
+			assertThat(bundle.getLinkPrevious().getValue(), containsString("&_include=foo"));
+			assertThat(bundle.getLinkPrevious().getValue(), containsString("&_include=Patient.managingOrganization"));
 		}
 	}
 	
@@ -216,8 +227,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("0", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("1", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals("0", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("1", bundle.getEntries().get(1).getResource().getId().getIdPart());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
 			assertNull(bundle.getLinkPrevious().getValue());
 			link = bundle.getLinkNext().getValue();
@@ -231,8 +242,8 @@ public class PagingTest {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourContext.newXmlParser().parseBundle(responseContent);
 			assertEquals(2, bundle.getEntries().size());
-			assertEquals("2", bundle.getEntries().get(0).getId().getIdPart());
-			assertEquals("3", bundle.getEntries().get(1).getId().getIdPart());
+			assertEquals("2", bundle.getEntries().get(0).getResource().getId().getIdPart());
+			assertEquals("3", bundle.getEntries().get(1).getResource().getId().getIdPart());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=4&" + Constants.PARAM_COUNT + "=2", bundle.getLinkNext().getValue());
 			assertEquals(base + '/' + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=2&" + Constants.PARAM_COUNT + "=2", bundle.getLinkSelf().getValue());
 			assertEquals(base + '?' + Constants.PARAM_PAGINGACTION + "=ABCD&" + Constants.PARAM_PAGINGOFFSET + "=0&" + Constants.PARAM_COUNT + "=2", bundle.getLinkPrevious().getValue());
