@@ -24,7 +24,11 @@
 	"entry": 
 	[
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Patient",
@@ -114,7 +118,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Encounter",
@@ -148,7 +156,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "ClinicalImpression",
@@ -193,7 +205,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "ClinicalImpression",
@@ -238,7 +254,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Encounter",
@@ -267,7 +287,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "ClinicalImpression",
@@ -311,7 +335,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Encounter",
@@ -340,7 +368,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "ClinicalImpression",
@@ -384,7 +416,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Observation",
@@ -417,7 +453,11 @@
 		},
 
 		{
-			"transaction": { "method":"POST" },
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
 			"resource": 
 			{
 				"resourceType": "Observation",
@@ -447,7 +487,50 @@
 			{
 				"mode": "match"
 			}
-		}
+		},
 
+		{
+			"transaction": 
+			{
+				"method": "POST"
+			},
+
+			"resource": 
+			{
+				"resourceType": "Condition",
+				"id": "20443",
+				"meta": 
+				{
+					"versionId": "1",
+					"lastUpdated": "2015-04-03T22:56:49.886-04:00"
+				},
+
+				"text": 
+				{
+					"status": "generated",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">pharyngitis working </div>"
+				},
+
+				"patient": 
+				{
+					"reference": "Patient/1702",
+					"display": "Eve Everywoman "
+				},
+
+				"code": 
+				{
+					"coding": 
+					[
+						{
+							"system": "http://loinc.org",
+							"code": "28397-8",
+							"display": "pharyngitis"
+						}
+					],
+
+					"text": "pharyngitis"
+				}
+			}
+		}
 	]
 }

@@ -494,6 +494,11 @@ public abstract class BaseFhirDao implements IDao {
 			public int size() {
 				return tuples.size();
 			}
+
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
 		};
 	}
 

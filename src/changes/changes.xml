@@ -123,6 +123,9 @@
 				the main focus resource if it was referred to in a deep chain. Thanks
 				to David Hay for reporting!
 			</action>
+			<action type="add" issue="148">
+				JPA Server $everything operation now allows a _count parameter
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

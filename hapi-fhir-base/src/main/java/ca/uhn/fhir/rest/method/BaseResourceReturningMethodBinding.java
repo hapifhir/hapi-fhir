@@ -246,12 +246,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 		}
 
-		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
-
-		boolean respondGzip = theRequest.isRespondGzip();
-
-		HttpServletResponse response = theRequest.getServletResponse();
 		Object resultObj = invokeServer(theRequest, params);
+
+		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
+		boolean respondGzip = theRequest.isRespondGzip();
+		HttpServletResponse response = theRequest.getServletResponse();
 		switch (getReturnType()) {
 		case BUNDLE: {
 
@@ -283,12 +282,15 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
 				break;
 			} else {
-                Set<Include> includes = getRequestIncludesFromParams(params);
+				Set<Include> includes = getRequestIncludesFromParams(params);
 
 				IBundleProvider result = (IBundleProvider) resultObj;
+				if (count == null) {
+					count = result.preferredPageSize();
+				}
+
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null,
-						getResponseBundleType(), includes);
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null, getResponseBundleType(), includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {

@@ -268,7 +268,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public IBaseResource getResourceBundle() {
+	public IResource getResourceBundle() {
 		return myBundle;
 	}
 

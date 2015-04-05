@@ -56,6 +56,11 @@ public class BundleProviders {
 			public InstantDt getPublished() {
 				return published;
 			}
+
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
 		};
 	}
 

@@ -659,6 +659,18 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private List<IResource> addResourcesAsIncludesById(List<IResource> theListToPopulate, Set<IdDt> includePids, List<IResource> resources) {
+		if (!includePids.isEmpty()) {
+			ourLog.info("Loading {} included resources", includePids.size());
+			resources = loadResourcesById(includePids);
+			for (IResource next : resources) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
+			}
+			theListToPopulate.addAll(resources);
+		}
+		return resources;
+	}
+
 	@Override
 	public void addTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		StopWatch w = new StopWatch();
@@ -711,50 +723,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		}
 
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
-	}
-
-	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
-		StopWatch w = new StopWatch();
-		ResourceTable entity = new ResourceTable();
-		entity.setResourceType(toResourceName(theResource));
-
-		if (isNotBlank(theIfNoneExist)) {
-			Set<Long> match = processMatchUrl(theIfNoneExist, myResourceType);
-			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessage(BaseFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
-				throw new PreconditionFailedException(msg);
-			} else if (match.size() == 1) {
-				Long pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, theResource).setCreated(false);
-			}
-		}
-
-		if (theResource.getId().isEmpty() == false) {
-			if (isValidPid(theResource.getId())) {
-				throw new UnprocessableEntityException(
-						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
-			}
-			createForcedIdIfNeeded(entity, theResource.getId());
-
-			if (entity.getForcedId() != null) {
-				try {
-					translateForcedIdToPid(theResource.getId());
-					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "duplicateCreateForcedId", theResource.getId().getIdPart()));
-				} catch (ResourceNotFoundException e) {
-					// good, this ID doesn't exist so we can create it
-				}
-			}
-
-		}
-
-		updateEntity(theResource, entity, false, null, thePerformIndexing, true);
-
-		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
-
-		notifyWriteCompleted();
-		ourLog.info("Processed create on {} in {}ms", myResourceName, w.getMillisAndRestart());
-		return outcome;
 	}
 
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
@@ -979,6 +947,50 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return toMethodOutcome(savedEntity, null);
 	}
 
+	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
+		StopWatch w = new StopWatch();
+		ResourceTable entity = new ResourceTable();
+		entity.setResourceType(toResourceName(theResource));
+
+		if (isNotBlank(theIfNoneExist)) {
+			Set<Long> match = processMatchUrl(theIfNoneExist, myResourceType);
+			if (match.size() > 1) {
+				String msg = getContext().getLocalizer().getMessage(BaseFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
+				throw new PreconditionFailedException(msg);
+			} else if (match.size() == 1) {
+				Long pid = match.iterator().next();
+				entity = myEntityManager.find(ResourceTable.class, pid);
+				return toMethodOutcome(entity, theResource).setCreated(false);
+			}
+		}
+
+		if (theResource.getId().isEmpty() == false) {
+			if (isValidPid(theResource.getId())) {
+				throw new UnprocessableEntityException(
+						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
+			}
+			createForcedIdIfNeeded(entity, theResource.getId());
+
+			if (entity.getForcedId() != null) {
+				try {
+					translateForcedIdToPid(theResource.getId());
+					throw new UnprocessableEntityException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "duplicateCreateForcedId", theResource.getId().getIdPart()));
+				} catch (ResourceNotFoundException e) {
+					// good, this ID doesn't exist so we can create it
+				}
+			}
+
+		}
+
+		updateEntity(theResource, entity, false, null, thePerformIndexing, true);
+
+		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
+
+		notifyWriteCompleted();
+		ourLog.info("Processed create on {} in {}ms", myResourceName, w.getMillisAndRestart());
+		return outcome;
+	}
+
 	@Override
 	public TagList getAllResourceTags() {
 		StopWatch w = new StopWatch();
@@ -986,6 +998,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		ourLog.info("Processed getTags on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return tags;
 	}
+
+	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IResource theResource, RuntimeResourceDefinition theResourceDef);
 
 	public Class<T> getResourceType() {
 		return myResourceType;
@@ -1093,6 +1107,11 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 
 			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
+
+			@Override
 			public int size() {
 				return count;
 			}
@@ -1138,6 +1157,159 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 			theResourceListToPopulate.set(index, resource);
 		}
+	}
+
+	protected void loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes) {
+		if (theMatches.size() == 0) {
+			return;
+		}
+
+		HashSet<Long> pidsToInclude = new HashSet<Long>();
+		
+		for (Include nextInclude : theRevIncludes) {
+			boolean matchAll = "*".equals(nextInclude.getValue());
+			if (matchAll) {
+				String sql = "SELECT r FROM ResourceLink r WHERE r.myTargetResourcePid IN (:target_pids)";
+				TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+				q.setParameter("target_pids", theMatches);
+				List<ResourceLink> results = q.getResultList();
+				for (ResourceLink resourceLink : results) {
+					pidsToInclude.add(resourceLink.getSourceResourcePid());
+				}
+			} else {
+				int colonIdx = nextInclude.getValue().indexOf(':');
+				if (colonIdx < 2) {
+					continue;
+				}
+				String resType = nextInclude.getValue().substring(0, colonIdx);
+				RuntimeResourceDefinition def = getContext().getResourceDefinition(resType);
+				if (def == null) {
+					ourLog.warn("Unknown resource type in _revinclude=" + nextInclude.getValue());
+					continue;
+				}
+
+				String paramName = nextInclude.getValue().substring(colonIdx + 1);
+				RuntimeSearchParam param = def.getSearchParam(paramName);
+				if (param == null) {
+					ourLog.warn("Unknown param name in _revinclude=" + nextInclude.getValue());
+					continue;
+				}
+
+				for (String nextPath : param.getPathsSplit()) {
+					String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN (:target_pids)";
+					TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
+					q.setParameter("src_path", nextPath);
+					q.setParameter("target_pids", theMatches);
+					List<ResourceLink> results = q.getResultList();
+					for (ResourceLink resourceLink : results) {
+						pidsToInclude.add(resourceLink.getSourceResourcePid());
+					}
+				}
+			}
+		}
+		
+		theMatches.addAll(pidsToInclude);
+	}
+
+	@Override
+	public MetaDt metaAddOperation(IdDt theResourceId, MetaDt theMetaAdd) {
+		StopWatch w = new StopWatch();
+		BaseHasResource entity = readEntity(theResourceId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theResourceId);
+		}
+
+		List<TagDefinition> tags = toTagList(theMetaAdd);
+
+		//@formatter:off
+		for (TagDefinition nextDef : tags) {
+			
+			boolean hasTag = false;
+			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
+						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
+						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+					hasTag = true;
+					break;
+				}
+			}
+
+			if (!hasTag) {
+				entity.setHasTags(true);
+				
+				TagDefinition def = getTag(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
+				BaseTag newEntity = entity.addTag(def);
+				myEntityManager.persist(newEntity);
+			}
+		}
+		//@formatter:on
+
+		myEntityManager.merge(entity);
+		notifyWriteCompleted();
+		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
+
+		return metaGetOperation(theResourceId);
+	}
+
+	@Override
+	public MetaDt metaDeleteOperation(IdDt theResourceId, MetaDt theMetaDel) {
+		StopWatch w = new StopWatch();
+		BaseHasResource entity = readEntity(theResourceId);
+		if (entity == null) {
+			throw new ResourceNotFoundException(theResourceId);
+		}
+
+		List<TagDefinition> tags = toTagList(theMetaDel);
+
+		//@formatter:off
+		for (TagDefinition nextDef : tags) {
+			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
+				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
+						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
+						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
+					myEntityManager.remove(next);
+					entity.getTags().remove(next);
+				}
+			}
+		}
+		//@formatter:on
+
+		if (entity.getTags().isEmpty()) {
+			entity.setHasTags(false);
+		}
+
+		myEntityManager.merge(entity);
+
+		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
+
+		return metaGetOperation(theResourceId);
+	}
+
+	@Override
+	public MetaDt metaGetOperation() {
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		q.setParameter("res_type", myResourceName);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+
+		return retVal;
+	}
+
+	@Override
+	public MetaDt metaGetOperation(IdDt theId) {
+		Long pid = super.translateForcedIdToPid(theId);
+
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		q.setParameter("res_type", myResourceName);
+		q.setParameter("res_id", pid);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+
+		return retVal;
 	}
 
 	@PostConstruct
@@ -1341,7 +1513,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		}
 
 		IBundleProvider retVal = new IBundleProvider() {
-
 			@Override
 			public InstantDt getPublished() {
 				return now;
@@ -1423,6 +1594,11 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 
 			@Override
+			public Integer preferredPageSize() {
+				return theParams.getCount();
+			}
+
+			@Override
 			public int size() {
 				return pids.size();
 			}
@@ -1433,76 +1609,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return retVal;
 	}
 
-	private List<IResource> addResourcesAsIncludesById(List<IResource> theListToPopulate, Set<IdDt> includePids, List<IResource> resources) {
-		if (!includePids.isEmpty()) {
-			ourLog.info("Loading {} included resources", includePids.size());
-			resources = loadResourcesById(includePids);
-			for (IResource next : resources) {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
-			}
-			theListToPopulate.addAll(resources);
-		}
-		return resources;
-	}
-
-	protected void loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes) {
-		if (theMatches.size() == 0) {
-			return;
-		}
-
-		HashSet<Long> pidsToInclude = new HashSet<Long>();
-		
-		for (Include nextInclude : theRevIncludes) {
-			boolean matchAll = "*".equals(nextInclude.getValue());
-			if (matchAll) {
-				String sql = "SELECT r FROM ResourceLink r WHERE r.myTargetResourcePid IN (:target_pids)";
-				TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
-				q.setParameter("target_pids", theMatches);
-				List<ResourceLink> results = q.getResultList();
-				for (ResourceLink resourceLink : results) {
-					pidsToInclude.add(resourceLink.getSourceResourcePid());
-				}
-			} else {
-				int colonIdx = nextInclude.getValue().indexOf(':');
-				if (colonIdx < 2) {
-					continue;
-				}
-				String resType = nextInclude.getValue().substring(0, colonIdx);
-				RuntimeResourceDefinition def = getContext().getResourceDefinition(resType);
-				if (def == null) {
-					ourLog.warn("Unknown resource type in _revinclude=" + nextInclude.getValue());
-					continue;
-				}
-
-				String paramName = nextInclude.getValue().substring(colonIdx + 1);
-				RuntimeSearchParam param = def.getSearchParam(paramName);
-				if (param == null) {
-					ourLog.warn("Unknown param name in _revinclude=" + nextInclude.getValue());
-					continue;
-				}
-
-				for (String nextPath : param.getPathsSplit()) {
-					String sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r.myTargetResourcePid IN (:target_pids)";
-					TypedQuery<ResourceLink> q = myEntityManager.createQuery(sql, ResourceLink.class);
-					q.setParameter("src_path", nextPath);
-					q.setParameter("target_pids", theMatches);
-					List<ResourceLink> results = q.getResultList();
-					for (ResourceLink resourceLink : results) {
-						pidsToInclude.add(resourceLink.getSourceResourcePid());
-					}
-				}
-			}
-		}
-		
-		theMatches.addAll(pidsToInclude);
-	}
-
 	@Override
 	public IBundleProvider search(String theParameterName, IQueryParameterType theValue) {
 		return search(Collections.singletonMap(theParameterName, theValue));
 	}
-
-	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IResource theResource, RuntimeResourceDefinition theResourceDef);
 
 	@Override
 	public Set<Long> searchForIds(Map<String, IQueryParameterType> theParams) {
@@ -1708,6 +1818,22 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return qp;
 	}
 
+	private ArrayList<TagDefinition> toTagList(MetaDt theMeta) {
+		ArrayList<TagDefinition> retVal = new ArrayList<TagDefinition>();
+
+		for (CodingDt next : theMeta.getTag()) {
+			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay()));
+		}
+		for (CodingDt next : theMeta.getSecurity()) {
+			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay()));
+		}
+		for (UriDt next : theMeta.getProfile()) {
+			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, next.getValue(), null));
+		}
+
+		return retVal;
+	}
+
 	@Override
 	public DaoMethodOutcome update(T theResource) {
 		return update(theResource, null);
@@ -1786,123 +1912,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
 			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
-	}
-
-	@Override
-	public MetaDt metaGetOperation() {
-		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		q.setParameter("res_type", myResourceName);
-		List<TagDefinition> tagDefinitions = q.getResultList();
-
-		MetaDt retVal = super.toMetaDt(tagDefinitions);
-
-		return retVal;
-	}
-
-	@Override
-	public MetaDt metaGetOperation(IdDt theId) {
-		Long pid = super.translateForcedIdToPid(theId);
-
-		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		q.setParameter("res_type", myResourceName);
-		q.setParameter("res_id", pid);
-		List<TagDefinition> tagDefinitions = q.getResultList();
-
-		MetaDt retVal = super.toMetaDt(tagDefinitions);
-
-		return retVal;
-	}
-
-	@Override
-	public MetaDt metaDeleteOperation(IdDt theResourceId, MetaDt theMetaDel) {
-		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId);
-		if (entity == null) {
-			throw new ResourceNotFoundException(theResourceId);
-		}
-
-		List<TagDefinition> tags = toTagList(theMetaDel);
-
-		//@formatter:off
-		for (TagDefinition nextDef : tags) {
-			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
-						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
-						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
-					myEntityManager.remove(next);
-					entity.getTags().remove(next);
-				}
-			}
-		}
-		//@formatter:on
-
-		if (entity.getTags().isEmpty()) {
-			entity.setHasTags(false);
-		}
-
-		myEntityManager.merge(entity);
-
-		ourLog.info("Processed metaDeleteOperation on {} in {}ms", new Object[] { theResourceId.getValue(), w.getMillisAndRestart() });
-
-		return metaGetOperation(theResourceId);
-	}
-
-	@Override
-	public MetaDt metaAddOperation(IdDt theResourceId, MetaDt theMetaAdd) {
-		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theResourceId);
-		if (entity == null) {
-			throw new ResourceNotFoundException(theResourceId);
-		}
-
-		List<TagDefinition> tags = toTagList(theMetaAdd);
-
-		//@formatter:off
-		for (TagDefinition nextDef : tags) {
-			
-			boolean hasTag = false;
-			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
-				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) && 
-						ObjectUtil.equals(next.getTag().getSystem(), nextDef.getSystem()) && 
-						ObjectUtil.equals(next.getTag().getCode(), nextDef.getCode())) {
-					hasTag = true;
-					break;
-				}
-			}
-
-			if (!hasTag) {
-				entity.setHasTags(true);
-				
-				TagDefinition def = getTag(nextDef.getTagType(), nextDef.getSystem(), nextDef.getCode(), nextDef.getDisplay());
-				BaseTag newEntity = entity.addTag(def);
-				myEntityManager.persist(newEntity);
-			}
-		}
-		//@formatter:on
-
-		myEntityManager.merge(entity);
-		notifyWriteCompleted();
-		ourLog.info("Processed metaAddOperation on {} in {}ms", new Object[] { theResourceId, w.getMillisAndRestart() });
-
-		return metaGetOperation(theResourceId);
-	}
-
-	private ArrayList<TagDefinition> toTagList(MetaDt theMeta) {
-		ArrayList<TagDefinition> retVal = new ArrayList<TagDefinition>();
-
-		for (CodingDt next : theMeta.getTag()) {
-			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay()));
-		}
-		for (CodingDt next : theMeta.getSecurity()) {
-			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay()));
-		}
-		for (UriDt next : theMeta.getProfile()) {
-			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, next.getValue(), null));
-		}
-
-		return retVal;
 	}
 
 }

@@ -208,6 +208,11 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			public int size() {
 				return resources.size();
 			}
+
+			@Override
+			public Integer preferredPageSize() {
+				return null;
+			}
 		};
 	}
 

@@ -59,5 +59,10 @@ public class SimpleBundleProvider implements IBundleProvider {
 	public InstantDt getPublished() {
 		return InstantDt.withCurrentTime();
 	}
+
+	@Override
+	public Integer preferredPageSize() {
+		return null;
+	}
 	
 }
