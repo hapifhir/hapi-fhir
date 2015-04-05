@@ -19,8 +19,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -28,6 +26,8 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.DeleteTags;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
@@ -310,7 +311,7 @@ public Patient getResourceById(@IdParam IdDt theId) {
 //END SNIPPET: read
 
 //START SNIPPET: delete
-@Read()
+@Delete()
 public void deletePatient(@IdParam IdDt theId) {
 	// .. Delete the patient ..
 	if (couldntFindThisId) {
@@ -326,7 +327,7 @@ public void deletePatient(@IdParam IdDt theId) {
 
 
 //START SNIPPET: deleteConditional
-@Read()
+@Delete()
 public void deletePatientConditional(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
    // Only one of theId or theConditionalUrl will have a value depending
    // on whether the URL receieved was a logical ID, or a conditional
