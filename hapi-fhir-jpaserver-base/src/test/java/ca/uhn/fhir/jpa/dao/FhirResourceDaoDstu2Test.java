@@ -716,6 +716,21 @@ public class FhirResourceDaoDstu2Test {
 	}
 
 	@Test
+	public void testPersistContactPoint() {
+		List<IResource> found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		int initialSize2000 = found.size();
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testPersistContactPoint");
+		patient.addTelecom().setValue("555-123-4567");
+		ourPatientDao.create(patient);
+
+		found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		assertEquals(1 + initialSize2000, found.size());
+
+	}
+
+	@Test
 	public void testPersistSearchParamDate() {
 		List<Patient> found = toList(ourPatientDao.search(Patient.SP_BIRTHDATE, new DateParam(QuantityCompararatorEnum.GREATERTHAN, "2000-01-01")));
 		int initialSize2000 = found.size();

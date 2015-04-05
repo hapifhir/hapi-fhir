@@ -53,6 +53,12 @@ public class PagingPatientProvider implements IResourceProvider {
 			public InstantDt getPublished() {
 				return searchTime;
 			}
+
+         @Override
+         public Integer preferredPageSize() {
+            // Typically this method just returns null
+            return null;
+         }
 		};
 	}
 

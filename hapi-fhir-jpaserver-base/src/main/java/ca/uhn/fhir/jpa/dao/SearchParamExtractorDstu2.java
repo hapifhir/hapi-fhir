@@ -432,6 +432,13 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 					}
 					systems.add(nextValue.getSystemElement().getValueAsString());
 					codes.add(nextValue.getValueElement().getValue());
+				} else if (nextObject instanceof ContactPointDt) {
+						ContactPointDt nextValue = (ContactPointDt) nextObject;
+						if (nextValue.isEmpty()) {
+							continue;
+						}
+						systems.add(nextValue.getSystemElement().getValueAsString());
+						codes.add(nextValue.getValueElement().getValue());
 				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					if (nextValue.isEmpty()) {

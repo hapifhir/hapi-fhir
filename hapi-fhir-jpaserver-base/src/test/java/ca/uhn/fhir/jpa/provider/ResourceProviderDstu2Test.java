@@ -1,11 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -15,7 +10,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -37,13 +31,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import ch.qos.logback.core.util.FileUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -66,7 +58,7 @@ import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -392,10 +384,8 @@ public class ResourceProviderDstu2Test {
 
 			assertFalse(ids.toString(), dupes);
 
-			/*
-			 * Condition/11 is the 11th resource and the default page size is 10 so we don't show the 11th.
-			 */
-			assertThat(ids.toString(), not(containsString("Condition")));
+			// Default size
+			assertEquals(10, ids.size());
 		}
 
 		/*
@@ -403,7 +393,7 @@ public class ResourceProviderDstu2Test {
 		 */
 		{
 			Parameters input = new Parameters();
-			input.addParameter().setName(Constants.PARAM_COUNT).setValue(new IntegerDt(100));
+			input.addParameter().setName(Constants.PARAM_COUNT).setValue(new UnsignedIntDt(100));
 			Parameters output = ourClient.operation().onInstance(patientId).named("everything").withParameters(input).execute();
 			b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 
@@ -418,7 +408,7 @@ public class ResourceProviderDstu2Test {
 
 			assertFalse(ids.toString(), dupes);
 			assertThat(ids.toString(), containsString("Condition"));
-
+			assertThat(ids.size(), greaterThan(10));
 		}
 	}
 
