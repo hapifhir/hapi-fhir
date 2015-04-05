@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import ch.qos.logback.core.util.FileUtil;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -345,14 +347,45 @@ public class ResourceProviderDstu2Test {
 			ids.add(next.getResource().getId());
 		}
 		
-		ourLog.info(ids.toString());
 		
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));
 		
 		// _revinclude's are counted but not _include's
 		assertEquals(3, b.getTotal().intValue());
+		
+		ourLog.info(ids.toString());
 	}
 
+	/**
+	 * See #147
+	 */
+	@Test
+	public void testEverythingDoesnRepeatPatient() throws Exception {
+		ca.uhn.fhir.model.dstu2.resource.Bundle b;
+		b = ourFhirCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
+		
+		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		assertEquals("Patient", patientId.getResourceType());
+		
+		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
+		
+		List<IdDt> ids = new ArrayList<IdDt>();
+		boolean dupes = false;
+		for (Entry next : b.getEntry()) {
+			IdDt toAdd = next.getResource().getId().toUnqualifiedVersionless();
+			dupes = dupes | ids.contains(toAdd);
+			ids.add(toAdd);
+		}
+		
+		ourLog.info(ids.toString());
+		
+		assertFalse(ids.toString(), dupes);
+	}
 	
 	@Test
 	public void testCountParam() throws Exception {

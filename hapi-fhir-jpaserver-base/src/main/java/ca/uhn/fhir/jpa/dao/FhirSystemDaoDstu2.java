@@ -487,8 +487,9 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry) {
 		IdDt newId = outcome.getId().toUnqualifiedVersionless();
-		if (newId.equals(nextResourceId) == false) {
-			idSubstitutions.put(nextResourceId, newId);
+		IdDt resourceId = nextResourceId.toUnqualifiedVersionless();
+		if (newId.equals(resourceId) == false) {
+			idSubstitutions.put(resourceId, newId);
 		}
 		idToPersistedOutcome.put(newId, outcome);
 		if (outcome.getCreated().booleanValue()) {

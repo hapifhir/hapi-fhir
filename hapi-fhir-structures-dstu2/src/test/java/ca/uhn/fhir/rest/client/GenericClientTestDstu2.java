@@ -615,6 +615,47 @@ public class GenericClientTestDstu2 {
 	}
 
 	@Test
+	public void testTransactionWithTransactionResource() throws Exception {
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle input = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+
+		Patient p1 = new Patient(); // No ID
+		p1.addName().addFamily("PATIENT1");
+		input.addEntry().setResource(p1);
+
+		Patient p2 = new Patient(); // Yes ID
+		p2.addName().addFamily("PATIENT2");
+		p2.setId("Patient/2");
+		input.addEntry().setResource(p2);
+
+		//@formatter:off
+        ca.uhn.fhir.model.dstu2.resource.Bundle response = client.transaction()
+                .withBundle(input)
+                .encodedJson()
+                .execute();
+        //@formatter:on
+
+		assertEquals("http://example.com/fhir?_format=json", capt.getValue().getURI().toString());
+		assertEquals(2, response.getEntry().size());
+
+		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getTransactionResponse().getLocation());
+		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getTransactionResponse().getLocation());
+	}
+
+	@Test
 	public void testDeleteConditional() throws Exception {
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);

@@ -488,12 +488,12 @@ public class FhirSystemDaoDstu2Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
-		p.setId(id);
+		p.setId("urn:"+methodName);
 		request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
-		o.getSubject().setReference(id);
+		o.getSubject().setReference("Patient/urn:"+methodName);
 		request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
 		Bundle resp = ourSystemDao.transaction(request);
@@ -501,18 +501,16 @@ public class FhirSystemDaoDstu2Test {
 
 		Entry nextEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + "", nextEntry.getTransactionResponse().getStatus());
+		IdDt patientId = new IdDt(nextEntry.getTransactionResponse().getLocation());
 
 		assertThat(nextEntry.getTransactionResponse().getLocation(), not(containsString("test")));
-		assertNotEquals(id.toVersionless(), new IdDt(nextEntry.getTransactionResponse().getLocation()).toVersionless());
+		assertNotEquals(id.toVersionless(), patientId.toVersionless());
 
-		assertThat(nextEntry.getTransactionResponse().getLocation(), endsWith("/_history/1"));
-
-		nextEntry = resp.getEntry().get(1);
-		assertEquals("" + Constants.STATUS_HTTP_201_CREATED, nextEntry.getTransactionResponse().getStatus());
+		assertThat(patientId.getValue(), endsWith("/_history/1"));
 
 		nextEntry = resp.getEntry().get(2);
 		o = ourObservationDao.read(new IdDt(nextEntry.getTransactionResponse().getLocation()));
-		assertEquals(id.toVersionless(), o.getSubject().getReference());
+		assertEquals(patientId.toVersionless(), o.getSubject().getReference());
 
 	}
 

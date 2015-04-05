@@ -1366,6 +1366,9 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IdDt> previouslyLoadedPids = new HashSet<IdDt>();
+							for (IResource next : retVal) {
+								previouslyLoadedPids.add(next.getId().toUnqualifiedVersionless());
+							}
 
 							Set<IdDt> includePids = new HashSet<IdDt>();
 							List<IResource> resources = retVal;

@@ -101,7 +101,6 @@ import ca.uhn.fhir.rest.method.DeleteMethodBinding;
 import ca.uhn.fhir.rest.method.HistoryMethodBinding;
 import ca.uhn.fhir.rest.method.HttpDeleteClientInvocation;
 import ca.uhn.fhir.rest.method.HttpGetClientInvocation;
-import ca.uhn.fhir.rest.method.HttpPostClientInvocation;
 import ca.uhn.fhir.rest.method.HttpSimpleGetClientInvocation;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
 import ca.uhn.fhir.rest.method.MethodUtil;
@@ -1538,6 +1537,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private Bundle myBundle;
 		private List<IResource> myResources;
+		private IBaseBundle myBaseBundle;
 
 		public TransactionExecutable(Bundle theResources) {
 			myBundle = theResources;
@@ -1547,18 +1547,25 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myResources = theResources;
 		}
 
-		@SuppressWarnings("unchecked")
+		public TransactionExecutable(IBaseBundle theBundle) {
+			myBaseBundle = theBundle;
+		}
+
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public T execute() {
+			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			if (myResources != null) {
 				ResourceListResponseHandler binding = new ResourceListResponseHandler(null);
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myResources, myContext);
-				Map<String, List<String>> params = new HashMap<String, List<String>>();
 				return (T) invoke(params, binding, invocation);
+			} else if (myBaseBundle != null) {
+				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(),null);
+				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
+				return (T) invoke(params, binding, invocation);				
 			} else {
 				BundleResponseHandler binding = new BundleResponseHandler(null);
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBundle, myContext);
-				Map<String, List<String>> params = new HashMap<String, List<String>>();
 				return (T) invoke(params, binding, invocation);
 			}
 		}
@@ -1568,13 +1575,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TransactionInternal implements ITransaction {
 
 		@Override
-		public ITransactionTyped<Bundle> withBundle(Bundle theResources) {
-			return new TransactionExecutable<Bundle>(theResources);
+		public ITransactionTyped<Bundle> withBundle(Bundle theBundle) {
+			Validate.notNull(theBundle, "theBundle must not be null");
+			return new TransactionExecutable<Bundle>(theBundle);
 		}
 
 		@Override
 		public ITransactionTyped<List<IResource>> withResources(List<IResource> theResources) {
+			Validate.notNull(theResources, "theResources must not be null");
 			return new TransactionExecutable<List<IResource>>(theResources);
+		}
+
+		@Override
+		public <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundle) {
+			Validate.notNull(theBundle, "theBundle must not be null");
+			return new TransactionExecutable<T>(theBundle);
 		}
 
 	}

@@ -40,6 +40,10 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theResource, theUrlExtension);
 	}
 
+	public HttpPostClientInvocation(FhirContext theContext, IBaseResource theResource) {
+		super(theContext, theResource, null);
+	}
+
 	public HttpPostClientInvocation(FhirContext theContext, TagList theTagList, String... theUrlExtension) {
 		super(theContext, theTagList, theUrlExtension);
 	}

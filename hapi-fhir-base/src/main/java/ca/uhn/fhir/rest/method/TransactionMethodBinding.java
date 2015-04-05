@@ -27,6 +27,8 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -74,6 +76,21 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
+	public RestfulOperationTypeEnum getResourceOperationType() {
+		return null;
+	}
+
+	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.TRANSACTION_RESPONSE;
+	}
+
+	@Override
+	public ReturnTypeEnum getReturnType() {
+		return ReturnTypeEnum.BUNDLE;
+	}
+
+	@Override
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return RestfulOperationSystemEnum.TRANSACTION;
 	}
@@ -93,26 +110,33 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public ReturnTypeEnum getReturnType() {
-		return ReturnTypeEnum.BUNDLE;
+	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
+		FhirContext context = getContext();
+		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
+			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
+			return createTransactionInvocation(bundle, context);
+		} else {
+			@SuppressWarnings("unchecked")
+			List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
+			return createTransactionInvocation(resources, context);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		
+
 		/*
-		 * The design of HAPI's transaction method for DSTU1 support assumed that a
-		 * transaction was just an update on a bunch of resources (because that's what
-		 * it was), but in DSTU2 transaction has become much more broad, so we no longer
-		 * hold the user's hand much here.
+		 * The design of HAPI's transaction method for DSTU1 support assumed that a transaction was just an update on a
+		 * bunch of resources (because that's what it was), but in DSTU2 transaction has become much more broad, so we
+		 * no longer hold the user's hand much here.
 		 */
 		if (myTransactionParamStyle == ParamStyle.RESOURCE_BUNDLE) {
 			// This is the DSTU2 style
 			Object response = invokeServerMethod(theMethodParams);
 			return response;
 		}
-		
+
 		// Grab the IDs of all of the resources in the transaction
 		List<IResource> resources;
 		if (theMethodParams[myTransactionParamIndex] instanceof Bundle) {
@@ -162,35 +186,16 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return null; // This is parsed in TransactionParamBinder
 	}
 
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
-	}
-
-	@Override
-	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
-		FhirContext context = getContext();
-		if (theArgs[myTransactionParamIndex] instanceof Bundle) {
-			Bundle bundle = (Bundle) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(bundle, context);
-		} else {
-			@SuppressWarnings("unchecked")
-			List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
-			return createTransactionInvocation(resources, context);
-		}
-	}
-
-	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {
-		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
-	}
-
 	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theBundle);
 	}
 
-	@Override
-	protected BundleTypeEnum getResponseBundleType() {
-		return BundleTypeEnum.TRANSACTION_RESPONSE;
+	public static BaseHttpClientInvocation createTransactionInvocation(IBaseBundle theBundle, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, theBundle);
+	}
+
+	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 
 }
