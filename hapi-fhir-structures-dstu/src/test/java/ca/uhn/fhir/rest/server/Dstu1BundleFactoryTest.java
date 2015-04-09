@@ -77,6 +77,23 @@ public class Dstu1BundleFactoryTest {
     }
 
     @Test
+    public void whenMedicationHasIngredients_include_shouldIncludeThem() throws Exception {
+        Medication medication = new Medication();
+        medication.setName("Main Medication");
+        medication.setId("Medication/1");
+        Medication ingredientMedication = new Medication();
+        ingredientMedication.setName("Ingredient");
+        ingredientMedication.setId("Medication/2");
+        Medication.ProductIngredient ingredient = new Medication.ProductIngredient();
+        ingredient.setItem(new ResourceReferenceDt(ingredientMedication));
+        medication.getProduct().getIngredient().add(ingredient);
+
+        myResourceList = Arrays.asList(new IResource[]{medication});
+        Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes("Medication.product.ingredient.item"));
+        assertEquals(2, bundle.getEntries().size());
+    }
+
+    @Test
     public void whenIncludeIsAsterisk_bundle_shouldContainAllReferencedResources() throws Exception {
         Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes("*"));
 
