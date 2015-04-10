@@ -27,8 +27,11 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -225,31 +228,39 @@ class ModelScanner {
 	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
 
 		T retVal = theTarget.getAnnotation(theAnnotationType);
-		if (true) {
+		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG) == false) {
 			return retVal;
 		}
 
-		// Below disabled for now due to performance issues
+		if (retVal == null) {
+			String sourceClassName = theAnnotationType.getName();
+			String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
 
-		/*
-		 * if (retVal == null) { String sourceClassName = theAnnotationType.getName(); String candidateAltClassName =
-		 * sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
-		 * 
-		 * if (!sourceClassName.equals(candidateAltClassName)) { try { final Class<? extends Annotation>
-		 * altAnnotationClass = (Class<? extends Annotation>) Class.forName(candidateAltClassName); final Annotation
-		 * altAnnotation = theTarget.getAnnotation(altAnnotationClass); if (altAnnotation == null) { return null; }
-		 * 
-		 * ourLog.debug("Forwarding annotation request for [{}] to class [{}]", sourceClassName, candidateAltClassName);
-		 * 
-		 * InvocationHandler h = new InvocationHandler() {
-		 * 
-		 * @Override public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable { Method
-		 * altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes()); return
-		 * altMethod.invoke(altAnnotation, theArgs); } }; retVal = (T)
-		 * Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
-		 * 
-		 * } catch (ClassNotFoundException e) { return null; } } }
-		 */
+			if (!sourceClassName.equals(candidateAltClassName)) {
+				try {
+					final Class<? extends Annotation> altAnnotationClass = (Class<? extends Annotation>) Class.forName(candidateAltClassName);
+					final Annotation altAnnotation = theTarget.getAnnotation(altAnnotationClass);
+					if (altAnnotation == null) {
+						return null;
+					}
+
+					ourLog.debug("Forwarding annotation request for [{}] to class [{}]", sourceClassName, candidateAltClassName);
+
+					InvocationHandler h = new InvocationHandler() {
+
+						@Override
+						public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+							Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
+							return altMethod.invoke(altAnnotation, theArgs);
+						}
+					};
+					retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
+
+				} catch (ClassNotFoundException e) {
+					return null;
+				}
+			}
+		}
 
 		return retVal;
 	}

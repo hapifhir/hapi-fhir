@@ -94,7 +94,7 @@ public class XmlParserTest {
 		String output = ourCtx.newXmlParser().encodeResourceToString(b);
 		ourLog.info(output);
 		
-		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\">AQIDBA==</Binary>", output);
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
 	}
 	
 	
@@ -126,7 +126,9 @@ public class XmlParserTest {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded, stringContainsInOrder("<Organization", "<id value=\"65546\"/>", "</Organization>"));
 		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<id value=\"1333\"/>", "</Patient>"));
 		
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
