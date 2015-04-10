@@ -202,7 +202,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<servlet_api_version>3.1.0</servlet_api_version>
 		<slf4j_version>1.7.10</slf4j_version>
-		<spring_version>4.1.5.RELEASE</spring_version>
+		<spring_version>4.1.6.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
