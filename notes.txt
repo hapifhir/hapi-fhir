@@ -1,0 +1,6 @@
+Ok, I’m getting down to being done with Java RI / HAPI harmonization. What I have right now is a copy of the RI model in the HAPI repo and it is more or less working. A few kinks still to work out but that shouldn’t be too much.
+
+There are two things that need input though. 
+
+#1 - The smaller of the two is that in the RI, resource.getId() returns a string with the logical ID. In HAPI, this method returns an IdDt, which is actually a partial or complete identity (http://foo/Patent/123/_history/22). IdDt has a bunch of helper methods (toUnqualified(), toVersionless(), etc.) and the client and server have methods all over the place that interact with this type.
+
