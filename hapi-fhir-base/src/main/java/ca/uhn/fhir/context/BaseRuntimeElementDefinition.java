@@ -158,7 +158,26 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	public abstract ChildTypeEnum getChildType();
 
 	public enum ChildTypeEnum {
-		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK, PRIMITIVE_XHTML, UNDECL_EXT, EXTENSION_DECLARED, CONTAINED_RESOURCES
+		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK, 
+		/**
+		 * HAPI style
+		 */
+		PRIMITIVE_XHTML, 
+		UNDECL_EXT, EXTENSION_DECLARED, 
+		/**
+		 * HAPI structure style
+		 */
+		CONTAINED_RESOURCES, 
+		ID_DATATYPE, 
+		/**
+		 * HL7.org structure style
+		 */
+		CONTAINED_RESOURCE_LIST, 
+		
+		/**
+		 * HL7.org style
+		 */
+		PRIMITIVE_XHTML_HL7ORG
 
 	}
 

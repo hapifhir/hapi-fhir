@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import org.hl7.fhir.instance.model.IPrimitiveType;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,16 +22,8 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+public interface IBaseEnumeration<T extends Enum<?>> extends IPrimitiveType<T> {
 
-public interface IAnyResource extends IBaseResource {
-
-	IIdType getId();
-
-	IAnyResource setId(String theId);
-
-	IIdType getIdElement();
-
-	IMetaType getMeta();
+	// Marker interface
 	
 }

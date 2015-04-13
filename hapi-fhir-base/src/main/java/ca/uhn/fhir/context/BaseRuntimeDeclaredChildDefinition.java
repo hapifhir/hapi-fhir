@@ -183,7 +183,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	private final class FieldPlainMutator implements IMutator {
+	protected final class FieldPlainMutator implements IMutator {
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
 			try {
@@ -214,7 +214,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	private final class FieldListMutator implements IMutator {
+	protected final class FieldListMutator implements IMutator {
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
 			try {

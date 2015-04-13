@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
@@ -143,16 +144,18 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
-		IResource resource;
+		IBaseResource resource;
 		if (requestContainsResource()) {
 			resource = parseIncomingServerResource(theRequest);
-			TagList tagList = new TagList();
-			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
-				String nextTagComplete = enumeration.nextElement();
-				MethodUtil.parseTagValue(tagList, nextTagComplete);
-			}
-			if (tagList.isEmpty() == false) {
-				resource.getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+			if (theServer.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+				TagList tagList = new TagList();
+				for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
+					String nextTagComplete = enumeration.nextElement();
+					MethodUtil.parseTagValue(tagList, nextTagComplete);
+				}
+				if (tagList.isEmpty() == false) {
+					((IResource)resource).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+				}
 			}
 		} else {
 			resource = null;
@@ -268,21 +271,21 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	/**
 	 * @throws IOException
 	 */
-	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
 		IParser parser = encoding.newParser(getContext());
 		BufferedReader requestReader = theRequest.getServletRequest().getReader();
-		
+
 		Class<? extends IBaseResource> wantedResourceType = requestContainsResourceType();
-		IResource retVal;
+		IBaseResource retVal;
 		if (wantedResourceType != null) {
-			retVal = (IResource) parser.parseResource(wantedResourceType, requestReader);
+			retVal = parser.parseResource(wantedResourceType, requestReader);
 		} else {
 			retVal = parser.parseResource(requestReader);
 		}
-		
+
 		retVal.setId(theRequest.getId());
-		
+
 		return retVal;
 	}
 
@@ -294,10 +297,9 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected boolean requestContainsResource() {
 		return true;
 	}
-	
+
 	/**
-	 * Subclasses may override to provide a specific resource type that this method wants
-	 * as a parameter
+	 * Subclasses may override to provide a specific resource type that this method wants as a parameter
 	 */
 	protected Class<? extends IBaseResource> requestContainsResourceType() {
 		return null;
@@ -307,7 +309,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		theResponse.setStatus(theE.getStatusCode());
 
 		theServer.addHeadersToResponse(theResponse);
-		
+
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncodingNotNull.getResourceContentType());
 			IParser parser = theEncodingNotNull.newParser(theServer.getFhirContext());

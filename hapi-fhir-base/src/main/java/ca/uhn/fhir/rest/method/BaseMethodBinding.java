@@ -26,9 +26,13 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
-import ca.uhn.fhir.model.api.Include;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
@@ -36,6 +40,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
@@ -123,7 +128,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return myParameters;
 	}
 
-    public Set<Include> getRequestIncludesFromParams(Object[] params) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Set<Include> getRequestIncludesFromParams(Object[] params) {
         if (params == null || params.length == 0)
             return null;
         int index = 0;
@@ -148,7 +154,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
             Set includes = new HashSet<Include>();
             for (Object o : (Iterable)params[index]) {
                 if (o instanceof Include) {
-                    includes.add((Include) o);
+                    includes.add(o);
                 }
             }
             return includes;
@@ -215,7 +221,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return parser;
 	}
 
-	protected Object[] createParametersForServerRequest(Request theRequest, IResource theResource) {
+	protected Object[] createParametersForServerRequest(Request theRequest, IBaseResource theResource) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);

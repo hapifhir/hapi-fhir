@@ -31,15 +31,14 @@ package org.hl7.fhir.instance.model;
 
 // Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
-import java.util.*;
+import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * Base Resource for everything.
  */
@@ -111,8 +110,8 @@ public abstract class Resource extends Base implements IAnyResource {
     /**
      * @return The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
      */
-    public String getId() { 
-      return this.id == null ? null : this.id.getValue();
+    public IdType getId() { 
+      return getIdElement(); // this.id == null ? null : this.id.getValue();
     }
 
     /**
@@ -127,6 +126,14 @@ public abstract class Resource extends Base implements IAnyResource {
         this.id.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @param value The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
+     */
+    public Resource setId(IIdType value) {
+    	this.id = (IdType) value;
+    	return this;
     }
 
     /**

@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,9 +56,11 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
-import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IReference;
 
@@ -225,6 +227,7 @@ class ModelScanner {
 	 * all of the annotation processing code this method just creates an interface Proxy to simulate the HAPI
 	 * annotations if the HL7.org ones are found instead.
 	 */
+	@SuppressWarnings("unchecked")
 	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
 
 		T retVal = theTarget.getAnnotation(theAnnotationType);
@@ -493,18 +496,18 @@ class ModelScanner {
 
 			Class<?> nextElementType = determineElementType(next);
 
-			if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
-				/*
-				 * Child is a resource as a direct child, as in Bundle.entry.resource
-				 */
-				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
-				orderMap.put(order, def);
-
-			} else if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IDomainResource.class.isAssignableFrom(theClass))) {
+			if (BaseContainedDt.class.isAssignableFrom(nextElementType) || (childAnnotation.name().equals("contained") && IBaseResource.class.isAssignableFrom(nextElementType))) {
 				/*
 				 * Child is contained resources
 				 */
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
+				orderMap.put(order, def);
+
+			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
+				/*
+				 * Child is a resource as a direct child, as in Bundle.entry.resource
+				 */
+				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
 			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IReference.class.isAssignableFrom(nextElementType)) {
@@ -538,8 +541,8 @@ class ModelScanner {
 
 				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et, binder);
 				orderMap.put(order, def);
-				if (IElement.class.isAssignableFrom(nextElementType)) {
-					addScanAlso((Class<? extends IElement>) nextElementType);
+				if (IBase.class.isAssignableFrom(nextElementType)) {
+					addScanAlso((Class<? extends IBase>) nextElementType);
 				}
 			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IReference.class.isAssignableFrom(nextElementType)) {
 				/*
@@ -582,17 +585,25 @@ class ModelScanner {
 					if (nextElementType.equals(BoundCodeDt.class)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
+					} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
+						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfField(next);
+						def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
 					} else if (childAnnotation.enumFactory().getSimpleName().equals("NoEnumFactory") == false) {
 						Class<? extends IBaseEnumFactory<?>> enumFactory = childAnnotation.enumFactory();
 						def = new RuntimeChildEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, enumFactory);
+						// } else if ("id".equals(elementName) && IIdType.class.isAssignableFrom(nextDatatype)) {
+						// def = new RuntimeChildIdDatatypeDefinition(next, elementName, descriptionAnnotation,
+						// childAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildPrimitiveDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 					}
+				} else if (IBaseXhtml.class.isAssignableFrom(nextElementType)) {
+					def = new RuntimeChildXhtmlDatatypeDefinition(next, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 				} else {
 					if (IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildCompositeBoundDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
-					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.getName().equals(nextElementType.getClass().getName())) {
+					} else if (BaseNarrativeDt.class.isAssignableFrom(nextElementType) || INarrative.class.isAssignableFrom(nextElementType)) {
 						def = new RuntimeChildNarrativeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
 					} else {
 						def = new RuntimeChildCompositeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype);
@@ -633,6 +644,12 @@ class ModelScanner {
 			@SuppressWarnings("unchecked")
 			Class<XhtmlDt> clazz = (Class<XhtmlDt>) theClass;
 			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz);
+		} else if (IBaseXhtml.class.isAssignableFrom(theClass)) {
+			@SuppressWarnings("unchecked")
+			Class<? extends IBaseXhtml> clazz = (Class<? extends IBaseXhtml>) theClass;
+			resourceDef = new RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(resourceName, clazz);
+		} else if (IIdType.class.isAssignableFrom(theClass)) {
+			resourceDef = new RuntimeIdDatatypeDefinition(theDatatypeDefinition, theClass);
 		} else {
 			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass);
 		}

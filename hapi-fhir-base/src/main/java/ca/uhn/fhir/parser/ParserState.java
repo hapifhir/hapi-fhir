@@ -41,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.BaseBundle;
@@ -1367,6 +1369,37 @@ class ParserState<T> {
 
 	}
 
+	private class ContainedResourcesStateHl7Org extends PreResourceState {
+
+		public ContainedResourcesStateHl7Org(PreResourceState thePreResourcesState) {
+			super(thePreResourcesState, FhirVersionEnum.DSTU2_HL7ORG);
+		}
+
+		@Override
+		public void endingElement() throws DataFormatException {
+			pop();
+		}
+
+		@Override
+		public void wereBack() {
+			IBaseResource res = getCurrentElement();
+			assert res != null;
+			if (res.getId() == null || res.getId().isEmpty()) {
+				ourLog.debug("Discarding contained resource with no ID!");
+			} else {
+				getPreResourceState().getContainedResources().put(res.getId().getValue(), res);
+				if (!res.getId().isLocal()) {
+					res.getId().setValue('#' + res.getId().getIdPart());
+				}
+			}
+			
+			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(preResCurrentElement);
+			def.getChildByName("contained").getMutator().addValue(preResCurrentElement, res);
+		}
+
+	}
+
 	private class DeclaredExtensionState extends BaseState {
 
 		private IBase myChildInstance;
@@ -1396,7 +1429,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance(myDefinition.getInstanceConstructorArguments());
+				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance(myDefinition.getInstanceConstructorArguments());
 				myDefinition.getMutator().addValue(myParentInstance, newChildInstance);
 				ElementCompositeState newState = new ElementCompositeState(myPreResourceState, compositeTarget, newChildInstance);
 				push(newState);
@@ -1525,6 +1558,7 @@ class ParserState<T> {
 				push(newState);
 				return;
 			}
+			case ID_DATATYPE:
 			case PRIMITIVE_DATATYPE: {
 				RuntimePrimitiveDatatypeDefinition primitiveTarget = (RuntimePrimitiveDatatypeDefinition) target;
 				IPrimitiveType<?> newChildInstance;
@@ -1557,6 +1591,14 @@ class ParserState<T> {
 				push(state);
 				return;
 			}
+			case PRIMITIVE_XHTML_HL7ORG: {
+				RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition xhtmlTarget = (RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition) target;
+				IBaseXhtml newDt = xhtmlTarget.newInstance();
+				child.getMutator().addValue(myInstance, newDt);
+				XhtmlStateHl7Org state = new XhtmlStateHl7Org(getPreResourceState(), newDt);
+				push(state);
+				return;
+			}
 			case CONTAINED_RESOURCES: {
 				List<? extends IBase> values = child.getAccessor().getValues(myInstance);
 				Object newDt;
@@ -1567,6 +1609,11 @@ class ParserState<T> {
 					newDt = values.get(0);
 				}
 				ContainedResourcesStateHapi state = new ContainedResourcesStateHapi(getPreResourceState());
+				push(state);
+				return;
+			}
+			case CONTAINED_RESOURCE_LIST: {
+				ContainedResourcesStateHl7Org state = new ContainedResourcesStateHl7Org(getPreResourceState());
 				push(state);
 				return;
 			}
@@ -1650,10 +1697,15 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE_REF: {
-				BaseResourceReferenceDt newChildInstance = (BaseResourceReferenceDt) newResourceReferenceDt(getPreResourceState().myInstance);
+				ICompositeType newChildInstance = (ICompositeType) newResourceReferenceDt(getPreResourceState().myInstance);
 				myExtension.setValue(newChildInstance);
-				ResourceReferenceStateHapi newState = new ResourceReferenceStateHapi(getPreResourceState(), newChildInstance);
-				push(newState);
+				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+					ParserState<T>.ResourceReferenceStateHl7Org newState = new ResourceReferenceStateHl7Org(getPreResourceState(), (IReference) newChildInstance);
+					push(newState);
+				} else {
+					ResourceReferenceStateHapi newState = new ResourceReferenceStateHapi(getPreResourceState(), (BaseResourceReferenceDt) newChildInstance);
+					push(newState);
+				}
 				return;
 			}
 			case PRIMITIVE_XHTML:
@@ -2008,6 +2060,19 @@ class ParserState<T> {
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
 								IResource target = (IResource) myContainedResources.get(ref.substring(1));
+								if (target != null) {
+									nextRef.setResource(target);
+								} else {
+									ourLog.warn("Resource contains unknown local ref: " + ref);
+								}
+							}
+						}
+					}else					if (theElement instanceof IReference) {
+						IReference nextRef = (IReference) theElement;
+						String ref = nextRef.getReference().getValue();
+						if (isNotBlank(ref)) {
+							if (ref.startsWith("#")) {
+								IBaseResource target = myContainedResources.get(ref.substring(1));
 								if (target != null) {
 									nextRef.setResource(target);
 								} else {
@@ -2454,6 +2519,26 @@ class ParserState<T> {
 
 	}
 
+	private class XhtmlStateHl7Org extends XhtmlState {
+		private IBaseXhtml myHl7OrgDatatype;
+
+		private XhtmlStateHl7Org(PreResourceState thePreResourceState, IBaseXhtml theHl7OrgDatatype) {
+			super(thePreResourceState, new XhtmlDt(), true);
+			myHl7OrgDatatype = theHl7OrgDatatype;
+		}
+
+		@Override
+		public void doPop() {
+			// TODO: this is not very efficient
+			String value = getDt().getValueAsString();
+			myHl7OrgDatatype.setValueAsString(value);
+			
+			super.doPop();
+		}
+		
+		
+	}
+	
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
@@ -2467,6 +2552,10 @@ class ParserState<T> {
 			myIncludeOuterEvent = theIncludeOuterEvent;
 		}
 
+		public XhtmlDt getDt() {
+			return myDt;
+		}
+
 		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
@@ -2476,10 +2565,14 @@ class ParserState<T> {
 			super.attributeValue(theName, theValue);
 		}
 
+		protected void doPop() {
+			pop();
+		}
+		
 		@Override
 		public void endingElement() throws DataFormatException {
 			if (myJsonMode) {
-				pop();
+				doPop();
 				return;
 			}
 			super.endingElement();
@@ -2507,7 +2600,7 @@ class ParserState<T> {
 			if (theEvent.isEndElement()) {
 				if (myDepth == 0) {
 					myDt.setValue(myEvents);
-					pop();
+					doPop();
 				}
 			}
 		}

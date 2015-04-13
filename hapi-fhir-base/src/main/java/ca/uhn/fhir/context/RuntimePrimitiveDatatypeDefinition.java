@@ -30,11 +30,11 @@ import org.hl7.fhir.instance.model.IPrimitiveType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
-public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType> implements IRuntimeDatatypeDefinition {
+public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefinition<IPrimitiveType<?>> implements IRuntimeDatatypeDefinition {
 
 	private boolean mySpecialization;
 
-	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType> theImplementingClass) {
+	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass) {
 		super(theDef.name(), theImplementingClass);
 		
 		String resourceName = theDef.name();

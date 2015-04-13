@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -43,6 +44,9 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 	private List<Class<? extends IBaseResource>> myResourceTypes;
 	private Set<String> myValidChildNames;
 
+	/**
+	 * Constructor
+	 */
 	public RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		myResourceTypes = theResourceTypes;
@@ -56,7 +60,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
+		if (IReference.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
 		return null;
@@ -64,7 +68,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
-		if (BaseResourceReferenceDt.class.isAssignableFrom(theDatatype)) {
+		if (IReference.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
 		return null;

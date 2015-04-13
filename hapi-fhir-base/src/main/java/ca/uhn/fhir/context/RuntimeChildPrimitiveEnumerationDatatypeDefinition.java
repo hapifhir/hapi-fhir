@@ -27,19 +27,32 @@ import org.hl7.fhir.instance.model.IBase;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 
-public class RuntimeChildPrimitiveBoundCodeDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
+public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
 
 	private Object myBinder;
+	private Class<?> myEnumerationType;
 
-	public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Object theBinder) {
+	public RuntimeChildPrimitiveEnumerationDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Class<?> theBinderType) {
 		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
 
-		myBinder = theBinder;
+		myEnumerationType = theBinderType;
 	}
 
 	@Override
 	public Object getInstanceConstructorArguments() {
-		return myBinder;
+		Object retVal = myBinder;
+		if (retVal == null) {
+			Class<?> clazz;
+			String className = myEnumerationType.getName() + "EnumFactory";
+			try {
+				clazz = Class.forName(className);
+				retVal = clazz.newInstance();
+				myBinder = retVal;
+			} catch (Exception e) {
+				throw new ConfigurationException("Failed to instantiate " + className, e);
+			}
+		}
+		return retVal;
 	}
 
 }

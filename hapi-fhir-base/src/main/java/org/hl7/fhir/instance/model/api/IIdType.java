@@ -25,4 +25,34 @@ public interface IIdType {
 
 	boolean isEmpty();
 
+	boolean isLocal();
+
+	/**
+	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
+	 * 
+	 * @see #getIdPart()
+	 */
+	String getValue();
+
+	/**
+	 * Returns only the logical ID part of this ID. For example, given the ID
+	 * "http://example,.com/fhir/Patient/123/_history/456", this method would
+	 * return "123".
+	 */
+	String getIdPart();
+
+	boolean hasIdPart();
+
+	String getBaseUrl();
+
+	IIdType toUnqualifiedVersionless();
+
+	IIdType toVersionless();
+
+	IIdType setValue(String theString);
+
+	boolean hasVersionIdPart();
+
+	String getVersionIdPart();
+
 }

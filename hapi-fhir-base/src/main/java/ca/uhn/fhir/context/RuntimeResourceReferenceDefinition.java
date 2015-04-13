@@ -36,6 +36,9 @@ public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefini
 	private final List<Class<? extends IBaseResource>> myResourceTypes;
 	private HashMap<Class<? extends IBaseResource>, RuntimeResourceDefinition> myResourceTypeToDefinition;
 
+	/**
+	 * Constructor
+	 */
 	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IBaseResource>> theResourceTypes) {
 		super(theName, BaseResourceReferenceDt.class);
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {

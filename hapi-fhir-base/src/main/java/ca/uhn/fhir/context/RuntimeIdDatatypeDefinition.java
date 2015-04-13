@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model.api;
+package ca.uhn.fhir.context;
 
 /*
  * #%L
@@ -20,16 +20,19 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
-public interface IAnyResource extends IBaseResource {
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
-	IIdType getId();
+public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition implements IRuntimeDatatypeDefinition {
 
-	IAnyResource setId(String theId);
+	public RuntimeIdDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass) {
+		super(theDef, theImplementingClass);
+	}
 
-	IIdType getIdElement();
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.ID_DATATYPE;
+	}
 
-	IMetaType getMeta();
-	
 }

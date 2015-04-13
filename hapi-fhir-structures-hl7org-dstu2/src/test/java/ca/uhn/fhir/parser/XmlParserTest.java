@@ -77,27 +77,20 @@ public class XmlParserTest {
 
 	@BeforeClass
 	public static void beforeClass2() {
-		 System.setProperty("file.encoding", "ISO-8859-1");
+		System.setProperty("file.encoding", "ISO-8859-1");
 	}
-	
-	@Test
-	public void testProfileWithBoundCode() throws IOException {
-		String content = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/DMIXAuditException.xml"), "UTF-8");
-		ourCtx.newXmlParser().parseResource(Profile.class, content);	
-	}
-	
+
 	@Test
 	public void testEncodeBinaryWithNoContentType() {
 		Binary b = new Binary();
-		b.setContent(new byte[] {1,2,3,4});
-		
+		b.setContent(new byte[] { 1, 2, 3, 4 });
+
 		String output = ourCtx.newXmlParser().encodeResourceToString(b);
 		ourLog.info(output);
-		
+
 		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
 	}
-	
-	
+
 	@Test
 	public void testEncodeNonContained() {
 		// Create an organization
@@ -110,18 +103,18 @@ public class XmlParserTest {
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getManagingOrganization().setResource(org);
-		
+
 		// Create a list containing both resources. In a server method, you might just
 		// return this list, but here we will create a bundle to encode.
 		List<Resource> resources = new ArrayList<Resource>();
 		resources.add(org);
-		resources.add(patient);		
-		
+		resources.add(patient);
+
 		// Create a bundle with both
 		Bundle b = new Bundle();
 		b.addEntry().setResource(org);
 		b.addEntry().setResource(patient);
-		
+
 		// Encode the buntdle
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
@@ -129,13 +122,29 @@ public class XmlParserTest {
 		assertThat(encoded, stringContainsInOrder("<Organization", "<id value=\"65546\"/>", "</Organization>"));
 		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
 		assertThat(encoded, stringContainsInOrder("<Patient", "<id value=\"1333\"/>", "</Patient>"));
-		
+
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, not(containsString("<contained>")));
 		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+
+	}
+
+	@Test
+	public void testParseNarrative() throws Exception {
+		//@formatter:off
+		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
+		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">"); 
+		String res= "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <id value=\"1333\"/>\n" + 
+				"   <text>\n" + 
+				"      " + htmlNs + "\n" +
+				"   </text>\n" + 
+				"</Patient>";
+		//@formatter:on
 		
-		
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
+		assertEquals(htmlNoNs, p.getText().getDivAsString());
 	}
 	
 	@Test
@@ -150,22 +159,25 @@ public class XmlParserTest {
 		// Create a patient
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
-		patient.addIdentifier().setSystem("urn:mrns").setValue( "253345");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getText().setDivAsString("<div>BARFOO</div>");
 		patient.getManagingOrganization().setResource(org);
-		
+
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
+		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		
 		assertThat(encoded, not(containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
-		
-	}	
 
-	
+	}
+
 	@Test
-	public void testEncodeContained() {
+	public void testEncodeAndParseContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
-		
+
 		// Create an organization, note that the organization does not have an ID
 		Organization org = new Organization();
 		org.getNameElement().setValue("Contained Test Organization");
@@ -174,41 +186,41 @@ public class XmlParserTest {
 		Patient patient = new Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
-		
+
 		// Put the organization as a reference in the patient resource
 		patient.getManagingOrganization().setResource(org);
-		
+
 		String encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("<contained>"));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
-		
+
 		// Create a bundle with just the patient resource
 		Bundle b = new Bundle();
 		b.addEntry().setResource(patient);
-		
-		// Encode the buntdle
+
+		// Encode the bundle
 		encoded = xmlParser.encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>","id=\"1\"", "</contained>")));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>")));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
 		assertThat(encoded, stringContainsInOrder(Arrays.asList("<entry>", "</entry>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
-		
+
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference());
-		
+		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId());
+		assertEquals("#1", org.getId().getValue());
 		assertEquals("Contained Test Organization", org.getName());
-		
+
 		// And re-encode a second time
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"1\"", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared
@@ -216,8 +228,8 @@ public class XmlParserTest {
 		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"1\"", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -226,59 +238,55 @@ public class XmlParserTest {
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "id=\"333\"", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
-		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>",  "<Org", "<contained>"))));
-		
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+
 	}
-	
-	
+
 	/**
 	 * Thanks to Alexander Kley!
 	 */
 	@Test
 	public void testParseContainedBinaryResource() {
-		byte[] bin = new byte[] {0,1,2,3,4};
-	    final Binary binary = new Binary();
-	    binary.setContentType("PatientConsent").setContent( bin);
-//	    binary.setId(UUID.randomUUID().toString());
-	    
-	    DocumentManifest manifest = new DocumentManifest();
-//	    manifest.setId(UUID.randomUUID().toString());
-	    CodeableConcept cc = new CodeableConcept();
-	    cc.addCoding().setSystem("mySystem").setCode( "PatientDocument");
+		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
+		final Binary binary = new Binary();
+		binary.setContentType("PatientConsent").setContent(bin);
+		// binary.setId(UUID.randomUUID().toString());
+
+		DocumentManifest manifest = new DocumentManifest();
+		// manifest.setId(UUID.randomUUID().toString());
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setSystem("mySystem").setCode("PatientDocument");
 		manifest.setType(cc);
-	    manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue( UUID.randomUUID().toString()));
-	    manifest.addContent().setResource(binary);
-	    manifest.setStatus(DocumentReferenceStatus.CURRENT);
-	    
-	    String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
-	    ourLog.info(encoded);
-	    assertThat(encoded, StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>","<Binary", "</contained>")));
-	    
-	    DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
-	    assertEquals(1, actual.getContained().size());
-	    assertEquals(1, actual.getContent().size());
-	    assertNotNull(actual.getContent().get(0).getResource());
-	    
+		manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
+		manifest.addContent().setResource(binary);
+		manifest.setStatus(DocumentReferenceStatus.CURRENT);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
+		ourLog.info(encoded);
+		assertThat(encoded, StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>", "<Binary", "</contained>")));
+
+		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
+		assertEquals(1, actual.getContained().size());
+		assertEquals(1, actual.getContent().size());
+		assertNotNull(actual.getContent().get(0).getResource());
+
 	}
-	
-	
+
 	@Test
 	public void testComposition() {
-		
+
 		Composition comp = new Composition();
 		comp.setId("1");
-		
+
 		ourCtx.newXmlParser().encodeResourceToString(comp);
 		ourCtx.newXmlParser().encodeResourceToString(comp);
 		ourCtx.newXmlParser().encodeResourceToString(comp);
 		ourCtx.newXmlParser().encodeResourceToString(comp);
-		
-//		comp.
-		
+
+		// comp.
+
 	}
-	
-	
 
 	@Test
 	public void testEncodeBinaryResource() {
@@ -288,7 +296,7 @@ public class XmlParserTest {
 		patient.setContent(new byte[] { 1, 2, 3, 4 });
 
 		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
-		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\" contentType=\"foo\">AQIDBA==</Binary>", val);
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><contentType value=\"foo\"/><content value=\"AQIDBA==\"/></Binary>", val);
 
 	}
 
@@ -310,7 +318,7 @@ public class XmlParserTest {
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
 		Bundle b = new Bundle();
-		b.getMeta().addTag().setSystem("http://hl7.org/fhir/tag").setCode( "http://hl7.org/fhir/tag/message").setDisplay("Message");
+		b.getMeta().addTag().setSystem("http://hl7.org/fhir/tag").setCode("http://hl7.org/fhir/tag/message").setDisplay("Message");
 
 		InstantType pub = InstantType.withCurrentTime();
 		b.getMeta().setLastUpdatedElement(pub);
@@ -346,7 +354,7 @@ public class XmlParserTest {
 		Bundle b = new Bundle();
 		BundleEntryComponent e = b.addEntry();
 		e.setResource(new Patient());
-		e.getResource().getMeta().addTag().setSystem("scheme").setCode( "term").setDisplay( "label");
+		e.getResource().getMeta().addTag().setSystem("scheme").setCode("term").setDisplay("label");
 
 		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(val);
@@ -362,7 +370,6 @@ public class XmlParserTest {
 		assertNull(b.getEntry().get(0).getResource());
 
 	}
-
 
 	@Test
 	public void testEncodeEscapedChars() {
@@ -409,7 +416,7 @@ public class XmlParserTest {
 
 		DiagnosticReport rpt = new DiagnosticReport();
 		Specimen spm = new Specimen();
-		spm.addIdentifier().setSystem("urn").setValue( "123");
+		spm.addIdentifier().setSystem("urn").setValue("123");
 		rpt.getText().setDivAsString("AAA");
 		rpt.addSpecimen().setResource(spm);
 
@@ -472,7 +479,7 @@ public class XmlParserTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue( new Reference("Organization/123"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Reference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -483,7 +490,7 @@ public class XmlParserTest {
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getReference());
+		assertEquals("Organization/123", ref.getReference().getValue());
 
 	}
 
@@ -565,7 +572,6 @@ public class XmlParserTest {
 
 	}
 
-
 	@Test
 	public void testEncodeResourceRef() throws DataFormatException {
 
@@ -618,7 +624,7 @@ public class XmlParserTest {
 		HumanName name = patient.addName();
 		name.addFamily("Shmoe");
 		HumanName given = name.addGiven("Joe");
-		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
+		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("Hello"));
 		given.getExtension().add(ext2);
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
@@ -629,7 +635,7 @@ public class XmlParserTest {
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
-		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
 
@@ -642,7 +648,7 @@ public class XmlParserTest {
 		StringType family = name.addFamilyElement();
 		family.setValue("Shmoe");
 
-		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
+		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue(new StringType("Hello"));
 		family.getExtension().add(ext2);
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
@@ -653,7 +659,7 @@ public class XmlParserTest {
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
-		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
 
@@ -690,7 +696,7 @@ public class XmlParserTest {
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
 				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
 				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-				+ "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
+				+ "<gender value=\"male\"/>"
 				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
 				+ "</Patient>";
 		//@formatter:on
@@ -698,11 +704,13 @@ public class XmlParserTest {
 		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
 		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("<div>John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
-
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient));
+		
 		Diff d = new Diff(new StringReader(msg), new StringReader(encoded));
 		assertTrue(d.toString(), d.identical());
 
@@ -801,12 +809,12 @@ public class XmlParserTest {
 
 		Patient resource = (Patient) p.parseResource(msg);
 		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
-		assertEquals("Foo1Value", ((IPrimitiveType<?>)resource.getExtension().get(0).getValue()).getValueAsString());
-		assertEquals("Foo1Value2", ((IPrimitiveType<?>)resource.getExtension().get(1).getValue()).getValueAsString());
-		assertEquals("Foo2Value1", ((IPrimitiveType<?>)resource.getModifierExtension().get(0).getValue()).getValueAsString());
+		assertEquals("Foo1Value", ((IPrimitiveType<?>) resource.getExtension().get(0).getValue()).getValueAsString());
+		assertEquals("Foo1Value2", ((IPrimitiveType<?>) resource.getExtension().get(1).getValue()).getValueAsString());
+		assertEquals("Foo2Value1", ((IPrimitiveType<?>) resource.getModifierExtension().get(0).getValue()).getValueAsString());
 
-		assertEquals("2013-01-01", ((IPrimitiveType<?>)resource.getExtension().get(2).getExtension().get(0).getValue()).getValueAsString());
-		assertEquals("2013-01-02", ((IPrimitiveType<?>)resource.getExtension().get(2).getExtension().get(1).getExtension().get(0).getValue()).getValueAsString());
+		assertEquals("2013-01-01", ((IPrimitiveType<?>) resource.getExtension().get(2).getExtension().get(0).getValue()).getValueAsString());
+		assertEquals("2013-01-02", ((IPrimitiveType<?>) resource.getExtension().get(2).getExtension().get(1).getExtension().get(0).getValue()).getValueAsString());
 
 		String encoded = p.encodeResourceToString(resource);
 		ourLog.info(encoded);
@@ -815,51 +823,9 @@ public class XmlParserTest {
 		assertTrue(d.toString(), d.identical());
 	}
 
-	@Test
-	public void testLoadObservation() throws ConfigurationException, DataFormatException, IOException {
-
-		IParser p = ourCtx.newXmlParser();
-
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"), Charset.forName("UTF-8"));
-		IBaseResource resource = p.parseResource(string);
-
-		String result = p.encodeResourceToString(resource);
-		ourLog.info(result);
-	}
+	
 
 	
-	@Test
-	public void testLoadPatient() throws ConfigurationException, DataFormatException, IOException {
-
-		IParser p = ourCtx.newXmlParser();
-
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-dicom.xml"), Charset.forName("UTF-8"));
-		IBaseResource resource = p.parseResource(string);
-
-		String result = p.encodeResourceToString(resource);
-		ourLog.info(result);
-
-		// Nothing
-
-		string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-us-extensions.xml"), Charset.forName("UTF-8"));
-		resource = p.parseResource(string);
-
-		result = p.encodeResourceToString(resource);
-		ourLog.info(result);
-
-	}
-
-	@Test
-	public void testLoadQuestionnaire() throws ConfigurationException, DataFormatException, IOException {
-
-		IParser p = ourCtx.newXmlParser();
-
-		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/questionnaire-example.xml"), Charset.forName("UTF-8"));
-		IBaseResource resource = p.parseResource(string);
-
-		String result = p.encodeResourceToString(resource);
-		ourLog.info(result);
-	}
 
 	@Test
 	public void testReEncode() throws SAXException, IOException {
@@ -920,12 +886,10 @@ public class XmlParserTest {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
 		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
-		assertThat(
-				enc,
-				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
+		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
-		
+
 		/*
 		 * Now parse this back
 		 */
@@ -964,7 +928,8 @@ public class XmlParserTest {
 
 	}
 
-	@Test
+
+	// Narrative generation not currently supported for HL7org structures
 	public void testNarrativeGeneration() throws DataFormatException, IOException {
 
 		Patient patient = new Patient();
@@ -998,8 +963,9 @@ public class XmlParserTest {
 			@Override
 			public void setFhirContext(FhirContext theFhirContext) {
 				// nothing
-			}};
-			
+			}
+		};
+
 		FhirContext context = new FhirContext();
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newXmlParser();
@@ -1075,7 +1041,6 @@ public class XmlParserTest {
 
 	}
 
-
 	@Test
 	public void testParseBundleWithMixedReturnTypes() {
 		InputStreamReader str = new InputStreamReader(getClass().getResourceAsStream("/mixed-return-bundle.xml"));
@@ -1140,7 +1105,6 @@ public class XmlParserTest {
 
 		assertEquals("zh-CN", pt.getLanguage());
 	}
-
 
 	@Test
 	public void testParseWithXmlHeader() throws ConfigurationException, DataFormatException {
@@ -1216,7 +1180,6 @@ public class XmlParserTest {
 		assertTrue(d.toString(), d.identical());
 
 	}
-
 
 	@BeforeClass
 	public static void beforeClass() {

@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -266,7 +267,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return myLastRequest;
 	}
 
-	protected String getPreferredId(IResource theResource, String theId) {
+	protected String getPreferredId(IBaseResource theResource, String theId) {
 		if (isNotBlank(theId)) {
 			return theId;
 		}
@@ -574,7 +575,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return resp;
 		}
 
-		protected IResource parseResourceBody(String theResourceBody) {
+		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = null;
 			for (int i = 0; i < theResourceBody.length() && encoding == null; i++) {
 				switch (theResourceBody.charAt(i)) {
@@ -625,7 +626,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private CriterionList myCriterionList;
 		private String myId;
-		private IResource myResource;
+		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
 
@@ -1597,8 +1598,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class UpdateInternal extends BaseClientExecutable<IUpdateExecutable, MethodOutcome> implements IUpdate, IUpdateTyped, IUpdateExecutable, IUpdateWithQuery, IUpdateWithQueryTyped {
 
 		private CriterionList myCriterionList;
-		private IdDt myId;
-		private IResource myResource;
+		private IIdType myId;
+		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
 

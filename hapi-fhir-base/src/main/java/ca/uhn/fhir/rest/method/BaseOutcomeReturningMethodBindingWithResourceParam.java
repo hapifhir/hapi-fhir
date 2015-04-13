@@ -94,7 +94,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
 		if (myBinary) {
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
@@ -103,7 +103,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			binary.setContentType(ct);
 			binary.setContent(contents);
 			
-			return (IResource) binary;
+			return binary;
 		} else {
 			return super.parseIncomingServerResource(theRequest);
 		}

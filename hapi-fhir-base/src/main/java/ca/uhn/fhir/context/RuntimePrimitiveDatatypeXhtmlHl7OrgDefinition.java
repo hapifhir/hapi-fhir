@@ -20,26 +20,25 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
 
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Description;
+public class RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition  extends BaseRuntimeElementDefinition<IBaseXhtml> {
 
-public class RuntimeChildPrimitiveBoundCodeDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
-
-	private Object myBinder;
-
-	public RuntimeChildPrimitiveBoundCodeDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation,  Class<? extends IBase> theDatatype, Object theBinder) {
-		super(theField, theElementName, theDescriptionAnnotation, theChildAnnotation, theDatatype);
-
-		myBinder = theBinder;
+	public RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(String theName, Class<? extends IBaseXhtml> theImplementingClass) {
+		super(theName, theImplementingClass);
 	}
 
 	@Override
-	public Object getInstanceConstructorArguments() {
-		return myBinder;
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.PRIMITIVE_XHTML_HL7ORG;
+	}
+
+	@Override
+	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
+		// nothing
 	}
 
 }
