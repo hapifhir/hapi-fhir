@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DomainResource;
 import org.hl7.fhir.instance.model.Element;
+import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.ICompositeType;
@@ -36,16 +37,20 @@ import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICoding;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IMetaType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
 public class ModelInheritanceTest {
@@ -76,6 +81,11 @@ public class ModelInheritanceTest {
     @Test
     public void testAddress() {
         assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
+    }
+
+    @Test
+    public void testXhtml() {
+        assertTrue(IBaseXhtml.class.isAssignableFrom(XhtmlNode.class));
     }
 
     @Test
@@ -122,11 +132,17 @@ public class ModelInheritanceTest {
     public void testDomainResource() {
         assertTrue(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class));
         assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class));
+        assertTrue(IDomainResource.class.isAssignableFrom(DomainResource.class));
     }
 
     @Test
     public void testElement() {
         assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
+    }
+
+    @Test
+    public void testEnumeration() {
+        assertTrue(IBaseEnumeration.class.isAssignableFrom(Enumeration.class));
     }
 
     /**

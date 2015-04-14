@@ -122,12 +122,13 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		myId = theId;
 	}
 
-	public void setId(String theId) {
+	public BaseResource setId(String theId) {
 		if (theId == null) {
 			myId = null;
 		} else {
 			myId = new IdDt(theId);
 		}
+		return this;
 	}
 
 	@Override

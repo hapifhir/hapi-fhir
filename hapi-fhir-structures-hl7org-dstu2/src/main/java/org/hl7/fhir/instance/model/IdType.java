@@ -28,8 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.instance.model;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 
@@ -38,13 +37,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.api.IPrimitiveDatatype;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -545,37 +540,12 @@ public class IdType extends UriType implements IIdType {
 		return isBlank(getValue());
 	}
 
-	public void applyTo(IBaseResource theResouce) {
-		if (theResouce == null) {
-			throw new NullPointerException("theResource can not be null");
-		} else if (theResouce instanceof IResource) {
-			((IResource) theResouce).setId(new IdType(getValue()));
-		} else if (theResouce instanceof IAnyResource) {
-			((IAnyResource) theResouce).setId(getIdPart());
-		} else {
-			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
-		}
-	}
-
-	/**
-	 * Retrieves the ID from the given resource instance
-	 */
-	public static IdType of(IBaseResource theResouce) {
-		if (theResouce == null) {
-			throw new NullPointerException("theResource can not be null");
-		} else if (theResouce instanceof IResource) {
-			return ((IBaseResource) theResouce).getIdElement();
-		} else if (theResouce instanceof IAnyResource) {
-			// TODO: implement
-			throw new UnsupportedOperationException();
-		} else {
-			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
-		}
-	}
-
 	@Override
 	public IdType copy() {
 		return new IdType(getValue());
 	}
 
+	
+	
+	
 }

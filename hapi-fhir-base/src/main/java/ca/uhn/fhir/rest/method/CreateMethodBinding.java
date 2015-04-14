@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
@@ -55,8 +57,8 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 	}
 
 	@Override
-	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
-		IResource retVal = super.parseIncomingServerResource(theRequest);
+	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
+		IBaseResource retVal = super.parseIncomingServerResource(theRequest);
 		
 		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
 			retVal.setId(theRequest.getId());

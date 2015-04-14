@@ -33,8 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@DatatypeDef()
-public class XhtmlNode {
+import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBaseXhtml;
+
+@DatatypeDef(name="xhtml")
+public class XhtmlNode implements IBaseXhtml {
 
   public static final String NBSP = Character.toString((char)0xa0);
   
@@ -280,7 +284,40 @@ public class XhtmlNode {
 		return e1.equalsDeep(e2);
   }
 
-	public String getValueAsString() throws Exception {
-		return new XhtmlComposer().compose(this);
+	public String getValueAsString() {
+		try {
+			return new XhtmlComposer().compose(this);
+		} catch (Exception e) {
+			// TODO: composer shouldn't throw exception like this
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public void setValueAsString(String theValue) throws IllegalArgumentException {
+		try {
+			// TODO: this is ugly
+			XhtmlNode fragment = new XhtmlParser().parseFragment(theValue);
+			this.Attributes = fragment.Attributes;
+			this.childNodes = fragment.childNodes;
+			this.content = fragment.content;
+			this.name = fragment.name;
+			this.nodeType= fragment.nodeType;
+		} catch (Exception e) {
+			// TODO: composer shouldn't throw exception like this
+			throw new RuntimeException(e);
+		}
+		
+	}
+
+	@Override
+	public String getValue() {
+		return getValueAsString();
+	}
+
+	@Override
+	public IPrimitiveType<String> setValue(String theValue) throws IllegalArgumentException {
+		setValueAsString(theValue);
+		return this;
 	}
 }

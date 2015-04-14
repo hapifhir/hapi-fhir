@@ -123,7 +123,7 @@ public interface IParser {
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
+	IBaseResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -134,7 +134,7 @@ public interface IParser {
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
+	IBaseResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException;
 
 	/**
 	 * Parses a tag list, as defined in the <a href="http://hl7.org/implement/standards/fhir/http.html#tags">FHIR Specification</a>.

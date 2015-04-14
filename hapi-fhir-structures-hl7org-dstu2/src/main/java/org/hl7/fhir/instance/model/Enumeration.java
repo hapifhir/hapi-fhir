@@ -2,6 +2,7 @@ package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 
 /*
 Copyright (c) 2011+, HL7, Inc
@@ -37,7 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * 
  */
 @DatatypeDef(name="enumeration")
-public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> {
+public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T> {
 
 	private static final long serialVersionUID = 1L;
 	private EnumFactory<T> myEnumFactory;

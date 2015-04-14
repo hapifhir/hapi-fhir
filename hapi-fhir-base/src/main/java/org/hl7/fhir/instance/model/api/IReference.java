@@ -21,16 +21,20 @@ package org.hl7.fhir.instance.model.api;
  */
 
 import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
 public interface IReference extends IBase {
 
-	IAnyResource getResource();
+	IBaseResource getResource();
 
-	void setResource(IAnyResource theResource);
+	void setResource(IBaseResource theResource);
 
-	String getReference();
+	IIdType getReference();
 
 	IReference setReference(String theReference);
 
 	IBase setDisplay(String theValue);
+
+	IPrimitiveType<String> getDisplayElement();
 }

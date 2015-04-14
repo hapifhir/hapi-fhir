@@ -188,7 +188,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			break;
 		}
 		case RESOURCE: {
-			IResource resource;
+			IBaseResource resource;
 			if (myResourceType != null) {
 				resource = parser.parseResource(myResourceType, theResponseReader);
 			} else {
@@ -199,7 +199,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			switch (getMethodReturnType()) {
 			case BUNDLE:
-				return Bundle.withSingleResource(resource);
+				return Bundle.withSingleResource((IResource) resource);
 			case LIST_OF_RESOURCES:
 				return Collections.singletonList(resource);
 			case RESOURCE:

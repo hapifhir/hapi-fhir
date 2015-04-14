@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model.api;
+package ca.uhn.fhir.context;
 
 /*
  * #%L
@@ -20,16 +20,23 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
+import java.util.List;
+
 import org.hl7.fhir.instance.model.IBaseResource;
 
-public interface IAnyResource extends IBaseResource {
+/**
+ * HL7org structures use a List for contained instead of a distinct datatype  
+ */
+public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefinition<IBaseResource> {
 
-	IIdType getId();
+	public RuntimeElemContainedResourceList(Class<IBaseResource> theClass) {
+		super("contained", theClass);
+		assert List.class.isAssignableFrom(theClass);
+	}
 
-	IAnyResource setId(String theId);
+	@Override
+	public ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum getChildType() {
+		return ChildTypeEnum.CONTAINED_RESOURCE_LIST;
+	}
 
-	IIdType getIdElement();
-
-	IMetaType getMeta();
-	
 }

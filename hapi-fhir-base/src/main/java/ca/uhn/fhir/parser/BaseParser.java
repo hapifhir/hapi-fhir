@@ -20,8 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -43,11 +42,14 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
@@ -57,16 +59,14 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public abstract class BaseParser implements IParser {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
-	private boolean mySuppressNarratives;
 	private String myServerBaseUrl;
+	private boolean mySuppressNarratives;
 
 	public BaseParser(FhirContext theContext) {
 		myContext = theContext;
@@ -95,8 +95,11 @@ public abstract class BaseParser implements IParser {
 		} else if (theTarget instanceof IDomainResource) {
 			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
 			for (IAnyResource next : containedResources) {
-				String nextId = next.getId();
+				String nextId = next.getId().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
+					if (!nextId.startsWith("#")) {
+						nextId = '#' + nextId;
+					}
 					allIds.add(nextId);
 					if (existingIdToContainedResource == null) {
 						existingIdToContainedResource = new HashMap<String, IBaseResource>();
@@ -109,9 +112,9 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<BaseResourceReferenceDt> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, BaseResourceReferenceDt.class);
-			for (BaseResourceReferenceDt next : allElements) {
-				IResource resource = next.getResource();
+			List<IReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IReference.class);
+			for (IReference next : allElements) {
+				IBaseResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
 						theContained.addContained(resource);
@@ -132,44 +135,21 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		{
-			List<IReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IReference.class);
-			for (IReference next : allElements) {
-				IAnyResource resource = next.getResource();
-				if (resource != null) {
-					if (resource.getIdElement().isEmpty() || resource.getId().startsWith("#")) {
-						theContained.addContained(resource);
-					} else {
-						continue;
-					}
-
-					containResourcesForEncoding(theContained, resource, theTarget);
-				} else if (next.getReference() != null && next.getReference().startsWith("#")) {
-					if (existingIdToContainedResource != null) {
-						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReference());
-						if (potentialTarget != null) {
-							theContained.addContained(potentialTarget);
-							containResourcesForEncoding(theContained, potentialTarget, theTarget);
-						}
-					}
-				}
-			}
-		}
-
 	}
 
+	
 	protected void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
 		myContainedResources = contained;
 	}
 
-	protected String determineReferenceText(BaseResourceReferenceDt theRef) {
-		IdDt ref = theRef.getReference();
+	protected String determineReferenceText(IReference theRef) {
+		IIdType ref = theRef.getReference();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
 			if (theRef.getResource() != null) {
-				IdDt containedId = getContainedResources().getResourceId(theRef.getResource());
+				IIdType containedId = getContainedResources().getResourceId(theRef.getResource());
 				if (containedId != null && !containedId.isEmpty()) {
 					if (containedId.isLocal()) {
 						reference = containedId.getValue();
@@ -190,12 +170,6 @@ public abstract class BaseParser implements IParser {
 				return reference;
 			}
 		}
-	}
-
-	@Override
-	public IParser setServerBaseUrl(String theUrl) {
-		myServerBaseUrl = isNotBlank(theUrl) ? theUrl : null;
-		return this;
 	}
 
 	protected String determineResourceBaseUrl(String bundleBaseUrl, BundleEntry theEntry) {
@@ -270,6 +244,10 @@ public abstract class BaseParser implements IParser {
 		return mySuppressNarratives;
 	}
 
+	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource) {
+		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false && theIncludedResource == false;
+	}
+
 	@Override
 	public Bundle parseBundle(Reader theReader) {
 		return parseBundle(null, theReader);
@@ -337,18 +315,24 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public IResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
+	public IBaseResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theReader);
 	}
 
 	@Override
-	public IResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
+	public IBaseResource parseResource(String theMessageString) throws ConfigurationException, DataFormatException {
 		return parseResource(null, theMessageString);
 	}
 
 	@Override
 	public TagList parseTagList(String theString) {
 		return parseTagList(new StringReader(theString));
+	}
+
+	@Override
+	public IParser setServerBaseUrl(String theUrl) {
+		myServerBaseUrl = isNotBlank(theUrl) ? theUrl : null;
+		return this;
 	}
 
 	@Override
@@ -385,18 +369,16 @@ public abstract class BaseParser implements IParser {
 		private long myNextContainedId = 1;
 
 		private List<IBaseResource> myResources = new ArrayList<IBaseResource>();
-		private IdentityHashMap<IBaseResource, IdDt> myResourceToId = new IdentityHashMap<IBaseResource, IdDt>();
+		private IdentityHashMap<IBaseResource, IIdType> myResourceToId = new IdentityHashMap<IBaseResource, IIdType>();
 
 		public void addContained(IBaseResource theResource) {
 			if (myResourceToId.containsKey(theResource)) {
 				return;
 			}
 
-			IdDt newId;
-			if (theResource instanceof IResource && ((IResource) theResource).getId().isLocal()) {
-				newId = ((IResource) theResource).getId();
-			} else if (theResource instanceof IAnyResource && ((IAnyResource) theResource).getId() != null && ((IAnyResource) theResource).getId().startsWith("#")) {
-				newId = new IdDt(((IAnyResource) theResource).getId());
+			IIdType newId;
+			if (theResource.getId().isLocal()) {
+				newId = theResource.getId();
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());
@@ -407,7 +389,7 @@ public abstract class BaseParser implements IParser {
 			myResources.add(theResource);
 		}
 
-		public void addContained(IdDt theId, IBaseResource theResource) {
+		public void addContained(IIdType theId, IBaseResource theResource) {
 			myResourceToId.put(theResource, theId);
 			myResources.add(theResource);
 		}
@@ -416,7 +398,7 @@ public abstract class BaseParser implements IParser {
 			return myResources;
 		}
 
-		public IdDt getResourceId(IBaseResource theNext) {
+		public IIdType getResourceId(IBaseResource theNext) {
 			return myResourceToId.get(theNext);
 		}
 

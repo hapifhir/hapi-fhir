@@ -28,6 +28,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
@@ -38,7 +39,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.BaseClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 
-public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype {
+public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype, IReference {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
 	private IResource myResource;
@@ -114,7 +115,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 			IParser parser = context.newXmlParser();
 
 			Reader responseReader = BaseClient.createReaderFromResponse(response);
-			myResource = parser.parseResource(responseReader);
+			myResource = (IResource) parser.parseResource(responseReader);
 
 		} finally {
 			if (response instanceof CloseableHttpResponse) {

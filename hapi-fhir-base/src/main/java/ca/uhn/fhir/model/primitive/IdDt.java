@@ -30,6 +30,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -51,7 +52,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * </p>
  */
 @DatatypeDef(name = "id")
-public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
+public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -229,6 +230,11 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String> {
 		return myBaseUrl;
 	}
 
+	/**
+	 * Returns only the logical ID part of this ID. For example, given the ID
+	 * "http://example,.com/fhir/Patient/123/_history/456", this method would
+	 * return "123".
+	 */
 	public String getIdPart() {
 		return myUnqualifiedId;
 	}

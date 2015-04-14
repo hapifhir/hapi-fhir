@@ -5,11 +5,15 @@ import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +30,7 @@ import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -36,6 +41,7 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -54,6 +60,204 @@ public class XmlParserDstu2Test {
 		XMLUnit.setIgnoreWhitespace(true);
 	}
 
+	@Test
+	public void testEncodeBinaryWithNoContentType() {
+		Binary b = new Binary();
+		b.setContent(new byte[] {1,2,3,4});
+		
+		String output = ourCtx.newXmlParser().encodeResourceToString(b);
+		ourLog.info(output);
+		
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
+	}
+	
+	
+	@Test
+	public void testEncodeNonContained() {
+		// Create an organization
+		Organization org = new Organization();
+		org.setId("Organization/65546");
+		org.getNameElement().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+		patient.getManagingOrganization().setResource(org);
+		
+		// Create a list containing both resources. In a server method, you might just
+		// return this list, but here we will create a bundle to encode.
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		resources.add(org);
+		resources.add(patient);		
+		
+		// Create a bundle with both
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.addEntry().setResource(org);
+		b.addEntry().setResource(patient);
+		
+		// Encode the buntdle
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded, stringContainsInOrder("<Organization", "<id value=\"65546\"/>", "</Organization>"));
+		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<id value=\"1333\"/>", "</Patient>"));
+		
+		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
+		
+		
+	}
+
+	@Test
+	public void testParseNarrative() throws Exception {
+		//@formatter:off
+		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
+		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">"); 
+		String res= "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <id value=\"1333\"/>\n" + 
+				"   <text>\n" + 
+				"      " + htmlNs + "\n" +
+				"   </text>\n" + 
+				"</Patient>";
+		//@formatter:on
+		
+		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
+		assertEquals(htmlNoNs, p.getText().getDiv().getValueAsString());
+	}
+	
+	/**
+	 * Thanks to Alexander Kley!
+	 */
+	@Test
+	public void testParseContainedBinaryResource() {
+		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
+		final Binary binary = new Binary();
+		binary.setContentType("PatientConsent").setContent(bin);
+		// binary.setId(UUID.randomUUID().toString());
+
+		ca.uhn.fhir.model.dstu2.resource.DocumentManifest manifest = new ca.uhn.fhir.model.dstu2.resource.DocumentManifest();
+		// manifest.setId(UUID.randomUUID().toString());
+		CodeableConceptDt cc = new CodeableConceptDt();
+		cc.addCoding().setSystem("mySystem").setCode("PatientDocument");
+		manifest.setType(cc);
+		manifest.setMasterIdentifier(new IdentifierDt().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
+		manifest.addContent().setP(new ResourceReferenceDt(binary));
+		manifest.setStatus(DocumentReferenceStatusEnum.CURRENT);
+
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
+		ourLog.info(encoded);
+		assertThat(encoded, StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>", "<Binary", "</contained>")));
+
+		ca.uhn.fhir.model.dstu2.resource.DocumentManifest actual = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.DocumentManifest.class, encoded);
+		assertEquals(1, actual.getContained().getContainedResources().size());
+		assertEquals(1, actual.getContent().size());
+		assertNotNull(((ResourceReferenceDt)actual.getContent().get(0).getP()).getResource());
+
+	}
+
+	@Test
+	public void testEncodeAndParseContained() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getNameElement().setValue("Contained Test Organization");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+
+		// Put the organization as a reference in the patient resource
+		patient.getManagingOrganization().setResource(org);
+
+		String encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("<contained>"));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+
+		// Create a bundle with just the patient resource
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.addEntry().setResource(patient);
+
+		// Encode the bundle
+		encoded = xmlParser.encodeResourceToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>")));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<entry>", "</entry>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
+
+		// Re-parse the bundle
+		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
+		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+
+		assertNotNull(patient.getManagingOrganization().getResource());
+		org = (Organization) patient.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId().getValue());
+		assertEquals("Contained Test Organization", org.getName());
+
+		// And re-encode a second time
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+
+		// And re-encode once more, with the references cleared
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((String)null);
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+
+		// And re-encode once more, with the references cleared and a manually set local ID
+		patient.getContained().getContainedResources().clear();
+		patient.getManagingOrganization().setReference((String)null);
+		patient.getManagingOrganization().getResource().setId(("#333"));
+		encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>")));
+		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
+
+	}
+
+	
+	@Test
+	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getNameElement().setValue("Contained Test Organization");
+		org.getText().setDiv("<div>FOOBAR</div>");
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.setId("Patient/1333");
+		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
+		patient.getText().setDiv("<div>BARFOO</div>");
+		patient.getManagingOrganization().setResource(org);
+
+		String encoded = parser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
+		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		
+		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("BARFOO")));
+
+	}
+
+
+	
 	/**
 	 * see #144 and #146
 	 */

@@ -23,13 +23,13 @@ package ca.uhn.fhir.rest.method;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.AbstractHttpEntity;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 
 public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContents {
 
-	public HttpPutClientInvocation(FhirContext theContext, IResource theResource, String theUrlExtension) {
+	public HttpPutClientInvocation(FhirContext theContext, IBaseResource theResource, String theUrlExtension) {
 		super(theContext, theResource, theUrlExtension);
 	}
 

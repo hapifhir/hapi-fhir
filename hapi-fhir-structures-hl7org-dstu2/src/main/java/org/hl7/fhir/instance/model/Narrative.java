@@ -31,17 +31,16 @@ package org.hl7.fhir.instance.model;
 
 // Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
 
-import java.util.*;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.INarrative;
 /**
  * A human-readable formatted text, including images.
  */
@@ -158,8 +157,8 @@ public class Narrative extends Element implements INarrative {
     /**
      * The actual narrative content, a stripped down version of XHTML.
      */
-//    @Child(name="div", type={}, order=1, min=1, max=1)
-//    @Description(shortDefinition="Limited xhtml content", formalDefinition="The actual narrative content, a stripped down version of XHTML." )
+    @Child(name="div", type={}, order=1, min=1, max=1)
+    @Description(shortDefinition="Limited xhtml content", formalDefinition="The actual narrative content, a stripped down version of XHTML." )
     protected XhtmlNode div;
 
     private static final long serialVersionUID = 1463852859L;

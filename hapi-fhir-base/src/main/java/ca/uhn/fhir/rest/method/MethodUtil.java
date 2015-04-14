@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -27,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IMetaType;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -108,12 +108,14 @@ public class MethodUtil {
 
 	private static final String SCHEME = "scheme=\"";
 
-	static void addTagsToPostOrPut(IResource resource, BaseHttpClientInvocation retVal) {
-		TagList list = (TagList) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					retVal.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+	static void addTagsToPostOrPut(FhirContext theContext, IBaseResource resource, BaseHttpClientInvocation retVal) {
+		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			TagList list = (TagList) ((IResource)resource).getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+			if (list != null) {
+				for (Tag tag : list) {
+					if (StringUtils.isNotBlank(tag.getTerm())) {
+						retVal.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+					}
 				}
 			}
 		}
@@ -123,11 +125,11 @@ public class MethodUtil {
 		return new HttpGetClientInvocation("metadata");
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, FhirContext theContext) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, FhirContext theContext) {
 		return createCreateInvocation(theResource, null, null, theContext);
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, String theResourceBody, String theId, FhirContext theContext) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResource);
 		String resourceName = def.getName();
 
@@ -145,26 +147,26 @@ public class MethodUtil {
 		} else {
 			retVal = new HttpPostClientInvocation(theContext, theResourceBody, false, urlExtension.toString());
 		}
-		addTagsToPostOrPut(theResource, retVal);
+		addTagsToPostOrPut(theContext, theResource, retVal);
 
 		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, String theResourceBody, String theId, FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext, Map<String, List<String>> theIfNoneExistParams) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
 		retVal.setIfNoneExistParams(theIfNoneExistParams);
 		return retVal;
 	}
 
-	public static HttpPostClientInvocation createCreateInvocation(IResource theResource, String theResourceBody, String theId, FhirContext theContext, String theIfNoneExistUrl) {
+	public static HttpPostClientInvocation createCreateInvocation(IBaseResource theResource, String theResourceBody, String theId, FhirContext theContext, String theIfNoneExistUrl) {
 		HttpPostClientInvocation retVal = createCreateInvocation(theResource, theResourceBody, theId, theContext);
 		retVal.setIfNoneExistString(theIfNoneExistUrl);
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(IResource theResource, String theResourceBody, IdDt theId, FhirContext theContext) {
+	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
 		String resourceName = theContext.getResourceDefinition(theResource).getName();
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
@@ -194,13 +196,13 @@ public class MethodUtil {
 			}
 		}
 
-		addTagsToPostOrPut(theResource, retVal);
+		addTagsToPostOrPut(theContext, theResource, retVal);
 		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
+	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
 		StringBuilder b = new StringBuilder();
 
 		String resourceType = theContext.getResourceDefinition(theResource).getName();
@@ -221,7 +223,6 @@ public class MethodUtil {
 			}
 		}
 
-
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPutClientInvocation(theContext, theResource, b.toString());
@@ -229,12 +230,12 @@ public class MethodUtil {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, b.toString());
 		}
 
-		addTagsToPostOrPut(theResource, retVal);
+		addTagsToPostOrPut(theContext, theResource, retVal);
 
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IResource theResource, String theResourceBody, String theMatchUrl) {
+	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, String theMatchUrl) {
 		HttpPutClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPutClientInvocation(theContext, theResource, theMatchUrl);
@@ -242,7 +243,7 @@ public class MethodUtil {
 			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, theMatchUrl);
 		}
 
-		addTagsToPostOrPut(theResource, retVal);
+		addTagsToPostOrPut(theContext, theResource, retVal);
 
 		return retVal;
 	}
@@ -250,10 +251,10 @@ public class MethodUtil {
 	public static EncodingEnum detectEncoding(String theBody) {
 		for (int i = 0; i < theBody.length(); i++) {
 			switch (theBody.charAt(i)) {
-				case '<':
-					return EncodingEnum.XML;
-				case '{':
-					return EncodingEnum.JSON;
+			case '<':
+				return EncodingEnum.XML;
+			case '{':
+				return EncodingEnum.JSON;
 			}
 		}
 		return EncodingEnum.XML;
@@ -406,7 +407,7 @@ public class MethodUtil {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParamBinder(op.name(), (OperationParam)nextAnnotation);
+						param = new OperationParamBinder(op.name(), (OperationParam) nextAnnotation);
 					} else {
 						continue;
 					}
@@ -519,26 +520,26 @@ public class MethodUtil {
 	public static IQueryParameterAnd<?> parseQueryParams(RuntimeSearchParam theParamDef, String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
 		switch (theParamDef.getParamType()) {
-			case COMPOSITE:
-				throw new UnsupportedOperationException();
-			case DATE:
-				binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
-			case NUMBER:
-				binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
-			case QUANTITY:
-				binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
-			case REFERENCE:
-				binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
-			case STRING:
-				binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
-			case TOKEN:
-				binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
+		case COMPOSITE:
+			throw new UnsupportedOperationException();
+		case DATE:
+			binder = new QueryParameterAndBinder(DateAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case NUMBER:
+			binder = new QueryParameterAndBinder(NumberAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case QUANTITY:
+			binder = new QueryParameterAndBinder(QuantityAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case REFERENCE:
+			binder = new QueryParameterAndBinder(ReferenceAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case STRING:
+			binder = new QueryParameterAndBinder(StringAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
+		case TOKEN:
+			binder = new QueryParameterAndBinder(TokenAndListParam.class, Collections.<Class<? extends IQueryParameterType>> emptyList());
+			break;
 		}
 
 		return binder.parse(theUnqualifiedParamName, theParameters);
@@ -657,7 +658,7 @@ public class MethodUtil {
 
 				if (reader != null) {
 					IParser parser = ct.newParser(theContext);
-					IResource outcome = parser.parseResource(reader);
+					IBaseResource outcome = parser.parseResource(reader);
 					if (outcome instanceof BaseOperationOutcome) {
 						retVal.setOperationOutcome((BaseOperationOutcome) outcome);
 					}

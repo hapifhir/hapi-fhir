@@ -23,6 +23,8 @@ package ca.uhn.fhir.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBase;
+
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;
 
@@ -41,7 +43,7 @@ public class ElementUtil {
 				}
 			} else if (next instanceof String && (!((String)next).isEmpty())) {
 				return false;
-			} else if (next != null && !((IElement) next).isEmpty()) {
+			} else if (next != null && !((IBase) next).isEmpty()) {
 				return false;
 			}
 		}
