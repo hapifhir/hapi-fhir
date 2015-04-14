@@ -29,5 +29,7 @@ package org.hl7.fhir.instance.model;
  * <code>ca.uhn.fhir.model.dstu.resource.Patient</code>)
  */
 public interface IBaseResource extends IBase {
-	// nothing here yet
+
+	IIdType 
+	
 }

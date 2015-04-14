@@ -564,13 +564,18 @@ public class IdType extends UriType implements IIdType {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
-			return ((IResource) theResouce).getId();
+			return ((IBaseResource) theResouce).getIdElement();
 		} else if (theResouce instanceof IAnyResource) {
 			// TODO: implement
 			throw new UnsupportedOperationException();
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
+	}
+
+	@Override
+	public IdType copy() {
+		return new IdType(getValue());
 	}
 
 }
