@@ -24,6 +24,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
 import org.apache.commons.io.IOUtils;
+import org.custommonkey.xmlunit.Diff;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -60,6 +61,7 @@ import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TagList;
@@ -91,6 +93,39 @@ public class JsonParserTest {
 //		ourLog.info(out);
 //		// Backslashes need to be escaped because they are in a JSON value
 //		assertThat(out, containsString("<div>hello</div>"));
+
+	}
+
+	
+	@Test
+	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
+
+		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, xmlString);
+
+		assertEquals(0, obs.getExtension().size());
+		assertEquals("aaaa", obs.getExtAtt().getContentType());
+		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
+		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
+
+		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
+
+		fhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
+
+		IParser jsonParser = fhirCtx.newXmlParser();
+		String encoded = jsonParser.encodeResourceToString(obs);
+		ourLog.info(encoded);
+
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+
+		String expected = (jsonString);
+		String actual = (encoded.trim());
+
+		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
+		assertTrue(d.toString(), d.identical());
 
 	}
 
@@ -1244,40 +1279,6 @@ public class JsonParserTest {
 		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
 	}
 
-	@Test
-	public void testSimpleResourceEncodeWithCustomType() throws IOException {
-
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
-
-		assertEquals(0, obs.getExtension().size());
-		assertEquals("aaaa", obs.getExtAtt().getContentType());
-		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
-		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
-
-		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		Extension undeclaredExtension = undeclaredExtensions.get(0);
-		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
-
-		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
-		String encoded = jsonParser.encodeResourceToString(obs);
-		ourLog.info(encoded);
-
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
-
-		JSON expected = JSONSerializer.toJSON(jsonString);
-		JSON actual = JSONSerializer.toJSON(encoded.trim());
-
-		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
-		String act = actual.toString();
-
-		ourLog.info("Expected: {}", exp);
-		ourLog.info("Actual  : {}", act);
-		assertEquals(exp, act);
-
-	}
 
 	@ResourceDef(name = "Patient")
 	public static class MyPatientWithOneDeclaredAddressExtension extends Patient {
