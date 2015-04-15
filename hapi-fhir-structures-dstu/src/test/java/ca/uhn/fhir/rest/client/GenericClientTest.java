@@ -85,8 +85,7 @@ public class GenericClientTest {
 				"<title/>\n" + 
 				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
 				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
+				"<author>\n" +
 				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
 				"</author>\n" + 
 				"<entry>\n" + 
