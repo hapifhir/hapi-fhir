@@ -192,7 +192,6 @@ public class JsonParser extends BaseParser implements IParser {
 		writeTagWithTextNode(eventWriter, "title", theBundle.getTitle());
 		writeTagWithTextNode(eventWriter, "id", theBundle.getBundleId());
 		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
-		writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
 
 		boolean linkStarted = false;
 		linkStarted = writeAtomLinkInDstu1Format(eventWriter, "self", theBundle.getLinkSelf(), linkStarted);

@@ -1219,7 +1219,6 @@ public class JsonParserTest {
 		Bundle b = new Bundle();
 
 		InstantDt pub = InstantDt.withCurrentTime();
-		b.setPublished(pub);
 		Thread.sleep(2);
 
 		Patient p1 = new Patient();
@@ -1245,7 +1244,6 @@ public class JsonParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
-		strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
 		strings.addAll(Arrays.asList("this is the summary"));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));

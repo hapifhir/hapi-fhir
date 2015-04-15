@@ -266,7 +266,6 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 
 		writeOptionalTagWithTextNode(eventWriter, "updated", theBundle.getUpdated());
-		writeOptionalTagWithTextNode(eventWriter, "published", theBundle.getPublished());
 
 		if (StringUtils.isNotBlank(theBundle.getAuthorName().getValue())) {
 			eventWriter.writeStartElement("author");

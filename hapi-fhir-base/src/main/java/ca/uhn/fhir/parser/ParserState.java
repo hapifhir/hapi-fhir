@@ -680,8 +680,6 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
 				push(new AtomEntryState(myInstance, myResourceType));
-			} else if (theLocalPart.equals("published")) {
-				push(new AtomPrimitiveState(myInstance.getPublished()));
 			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
