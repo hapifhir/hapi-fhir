@@ -63,6 +63,7 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-android</artifactId>
 			<version>${slf4j_version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- <dependency> <groupId>org.codehaus.woodstox</groupId> <artifactId>stax2-api</artifactId> 
 			<version>3.1.4</version> </dependency> -->
@@ -147,7 +148,7 @@
 									<include>javax.xml.stream:stax-api</include>
 									<include>javax.servlet:javax.servlet-api</include>
 									<include>org.codehaus.woodstox:stax2-api</include>
-									<include>org.slf4j:slf4j*</include>
+									<!--<include>org.slf4j:slf4j*</include>-->
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
 									<include>org.glassfish:javax.json</include>
