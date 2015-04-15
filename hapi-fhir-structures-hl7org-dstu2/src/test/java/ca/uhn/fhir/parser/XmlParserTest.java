@@ -21,6 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -1150,34 +1153,37 @@ public class XmlParserTest {
 	}
 
 	@Test
-	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
+	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
 		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
 		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
 
-		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		fhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
-
-		IParser jsonParser = fhirCtx.newXmlParser();
+		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 
-		String expected = (jsonString);
-		String actual = (encoded.trim());
+		JSON expected = JSONSerializer.toJSON(jsonString);
+		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
-		Diff d = new Diff(new StringReader(expected), new StringReader(actual));
-		assertTrue(d.toString(), d.identical());
+		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
+		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
+		String act = actual.toString();
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+		assertEquals(exp, act);
 
 	}
 

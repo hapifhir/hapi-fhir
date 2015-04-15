@@ -64,6 +64,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -416,7 +417,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			BaseResourceReferenceDt referenceDt = (BaseResourceReferenceDt) theNextValue;
+			IReference referenceDt = (IReference) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {

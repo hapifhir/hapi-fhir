@@ -26,7 +26,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.ICompositeElement;
-import ca.uhn.fhir.model.api.IElement;
 
 public class ElementUtil {
 
@@ -38,7 +37,7 @@ public class ElementUtil {
 		for (int i = 0; i < theElements.length; i++) {
 			Object next = theElements[i];
 			if (next instanceof List) {
-				if (!isEmpty((List<? extends IElement>) next)) {
+				if (!isEmpty((List<? extends IBase>) next)) {
 					return false;
 				}
 			} else if (next instanceof String && (!((String)next).isEmpty())) {
@@ -50,12 +49,12 @@ public class ElementUtil {
 		return true;
 	}
 
-	public static boolean isEmpty(IElement... theElements) {
+	public static boolean isEmpty(IBase... theElements) {
 		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.length; i++) {
-			IElement next = theElements[i];
+			IBase next = theElements[i];
 			if (next != null && !next.isEmpty()) {
 				return false;
 			}
@@ -63,12 +62,12 @@ public class ElementUtil {
 		return true;
 	}
 
-	public static boolean isEmpty(List<? extends IElement> theElements) {
+	public static boolean isEmpty(List<? extends IBase> theElements) {
 		if (theElements == null) {
 			return true;
 		}
 		for (int i = 0; i < theElements.size(); i++) {
-			IElement next = theElements.get(i);
+			IBase next = theElements.get(i);
 			if (next != null && !next.isEmpty()) {
 				return false;
 			}
@@ -79,36 +78,38 @@ public class ElementUtil {
 	/**
 	 * @param theType Can be null
 	 */
-	public static <T extends IElement> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
-		ArrayList<T> retVal = new ArrayList<T>();
-		for (Object next : theElements) {
-			if (next == null) {
-				continue;
-			}else if (next instanceof IElement) {
-				addElement(retVal, (IElement) next, theType);
-			} else if (next instanceof List) {
-				for (Object nextElement : ((List<?>)next)) {
-					if (!(nextElement instanceof IElement)) {
-						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
-					}
-					addElement(retVal, (IElement) nextElement, theType);
-				}
-			} else {
-				throw new IllegalArgumentException("Found element of "+next.getClass());
-			}
-			
-		}
-		return retVal;
+	@SuppressWarnings("unused")
+	public static <T extends IBase> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
+		throw new UnsupportedOperationException();
+//		ArrayList<T> retVal = new ArrayList<T>();
+//		for (Object next : theElements) {
+//			if (next == null) {
+//				continue;
+//			}else if (next instanceof IBase) {
+//				addElement(retVal, (IBase) next, theType);
+//			} else if (next instanceof List) {
+//				for (Object nextElement : ((List<?>)next)) {
+//					if (!(nextElement instanceof IBase)) {
+//						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
+//					}
+//					addElement(retVal, (IBase) nextElement, theType);
+//				}
+//			} else {
+//				throw new IllegalArgumentException("Found element of "+next.getClass());
+//			}
+//			
+//		}
+//		return retVal;
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
-		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
-			retVal.add((T) next);
-		}
-		if (next instanceof ICompositeElement) {
-			retVal.addAll(((ICompositeElement) next).getAllPopulatedChildElementsOfType(theType));
-		}
-	}
+//	@SuppressWarnings("unchecked")
+//	private static <T extends IBase> void addElement(ArrayList<T> retVal, IBase next, Class<T> theType) {
+//		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
+//			retVal.add((T) next);
+//		}
+//		if (next instanceof ICompositeElement) {
+//			retVal.addAll(((ICompositeElement) next).getAllPopulatedChildElementsOfType(theType));
+//		}
+//	}
 	
 }
