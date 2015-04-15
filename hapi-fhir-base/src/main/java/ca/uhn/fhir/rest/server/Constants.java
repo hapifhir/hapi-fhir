@@ -36,6 +36,7 @@ public class Constants {
 	public static final String CT_FHIR_JSON = "application/json+fhir";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
 	public static final String CT_HTML = "text/html";
+	public static final String CT_HTML_WITH_UTF8 = "text/html; charset=UTF-8";
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";

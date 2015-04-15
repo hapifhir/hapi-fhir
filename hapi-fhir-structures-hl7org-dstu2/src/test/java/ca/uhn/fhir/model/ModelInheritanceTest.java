@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUseEnumFactory;
 import org.hl7.fhir.instance.model.IntegerType;
+import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Meta;
 import org.hl7.fhir.instance.model.Narrative;
 import org.hl7.fhir.instance.model.PrimitiveType;
@@ -53,6 +54,8 @@ import org.hl7.fhir.instance.model.api.IReference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
+
 public class ModelInheritanceTest {
     /*
      * <pre>
@@ -75,6 +78,13 @@ public class ModelInheritanceTest {
      * </pre>
      */
 
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	
+	@Test
+	public void testList() {
+		assertEquals("List", ourCtx.getResourceDefinition(List_.class).getName());
+	}
+	
     /**
      * This one should apply to all composite types
      */

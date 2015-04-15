@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -265,6 +266,16 @@ public class ServerInvalidDefinitionTest {
 
 				@Override
 				public void setResourceMetadata(ResourceMetadataMap theMap) {
+				}
+
+				@Override
+				public IBaseResource setId(String theId) {
+					return null;
+				}
+
+				@Override
+				public IBaseResource setId(IIdType theId) {
+					return null;
 				}
 			}.getClass();
 		}

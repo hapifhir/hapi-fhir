@@ -27,6 +27,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IReference;
 
@@ -42,7 +43,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClient;
 public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement implements IBaseDatatype, IReference {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReferenceDt.class);
-	private IResource myResource;
+	private IBaseResource myResource;
 
 	/**
 	 * Constructor
@@ -74,7 +75,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 	 * 
 	 * @see #loadResource(IRestfulClient)
 	 */
-	public IResource getResource() {
+	public IBaseResource getResource() {
 		return myResource;
 	}
 
@@ -87,7 +88,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 	 * Returns the referenced resource, fetching it <b>if it has not already been loaded</b>. This method invokes the HTTP client to retrieve the resource unless it has already been loaded, or was a
 	 * contained resource in which case it is simply returned.
 	 */
-	public IResource loadResource(IRestfulClient theClient) throws IOException {
+	public IBaseResource loadResource(IRestfulClient theClient) throws IOException {
 		if (myResource != null) {
 			return myResource;
 		}
@@ -128,7 +129,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 
 	public abstract BaseResourceReferenceDt setReference(IdDt theReference);
 
-	public void setResource(IResource theResource) {
+	public void setResource(IBaseResource theResource) {
 		myResource = theResource;
 	}
 

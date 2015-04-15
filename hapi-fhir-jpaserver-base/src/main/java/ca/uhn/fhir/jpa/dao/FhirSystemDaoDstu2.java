@@ -168,7 +168,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 					// CREATE
 					@SuppressWarnings("rawtypes")
 					IFhirResourceDao resourceDao = getDao(res.getClass());
-					res.setId(null);
+					res.setId((String)null);
 					DaoMethodOutcome outcome;
 					Entry newEntry = response.addEntry();
 					outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
@@ -204,7 +204,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 						res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
 						outcome = resourceDao.update(res, null, false);
 					} else {
-						res.setId(null);
+						res.setId((String)null);
 						outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
 					}
 

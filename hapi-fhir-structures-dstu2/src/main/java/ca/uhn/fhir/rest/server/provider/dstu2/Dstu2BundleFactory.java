@@ -104,7 +104,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
                     if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
                         continue;
 
-                    IResource nextRes = nextRefInfo.getResourceReference().getResource();
+                    IResource nextRes = (IResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
 							if (containedIds.contains(nextRes.getId().getValue())) {
@@ -342,7 +342,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
 				for (BaseResourceReferenceDt nextRef : references) {
-					IResource nextRes = nextRef.getResource();
+					IResource nextRes = (IResource) nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
 							if (containedIds.contains(nextRes.getId().getValue())) {

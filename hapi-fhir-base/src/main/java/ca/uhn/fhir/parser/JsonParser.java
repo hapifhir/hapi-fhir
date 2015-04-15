@@ -64,6 +64,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -72,6 +73,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeChildUndeclaredExtensionDefinition;
@@ -416,7 +418,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			BaseResourceReferenceDt referenceDt = (BaseResourceReferenceDt) theNextValue;
+			IReference referenceDt = (IReference) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -490,6 +492,9 @@ public class JsonParser extends BaseParser implements IParser {
 			if (nextChild.getElementName().equals("extension") || nextChild.getElementName().equals("modifierExtension")) {
 				continue;
 			}
+			if (nextChild.getElementName().equals("id")) {
+				continue;
+			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 
@@ -505,8 +510,15 @@ public class JsonParser extends BaseParser implements IParser {
 						continue;
 					}
 				}
+			} else if (nextChild instanceof RuntimeChildContainedResources) {
+				if (theIsSubElementWithinResource == false) {
+					String childName = nextChild.getValidChildNames().iterator().next();
+					BaseRuntimeElementDefinition<?> child = nextChild.getChildByName(childName);
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, null, child, childName, theIsSubElementWithinResource);
+				}
+				continue;
 			}
-
+			
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theNextValue);
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -1067,7 +1079,7 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		if (elementId != null) {
-			IElement object = (IElement) theState.getObject();
+			IBase object = (IBase) theState.getObject();
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setElementSpecificId(elementId);
 			} else if (object instanceof IResource) {

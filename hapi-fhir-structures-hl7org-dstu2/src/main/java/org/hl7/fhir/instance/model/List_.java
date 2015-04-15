@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 /**
  * A set of information summarized from a list of other resources.
  */
-@ResourceDef(name = "List_", profile = "http://hl7.org/fhir/Profile/List_")
+@ResourceDef(name = "List", profile = "http://hl7.org/fhir/Profile/List_")
 public class List_ extends DomainResource {
 
     public enum ListMode {

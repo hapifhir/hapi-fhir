@@ -5,6 +5,7 @@ import java.io.FileReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -69,7 +70,7 @@ public class ValidatorExamples {
          String nextFileContents = IOUtils.toString(new FileReader(nextFile));
 
          // Parse that string (this example assumes JSON encoding)
-         IResource resource = ctx.newJsonParser().parseResource(nextFileContents);
+         IBaseResource resource = ctx.newJsonParser().parseResource(nextFileContents);
 
          // Apply the validation. This will throw an exception on the first
          // validation failure

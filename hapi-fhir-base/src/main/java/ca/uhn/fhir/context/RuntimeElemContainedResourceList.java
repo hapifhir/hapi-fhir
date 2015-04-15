@@ -20,8 +20,6 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.IBaseResource;
 
 /**
@@ -31,7 +29,6 @@ public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefiniti
 
 	public RuntimeElemContainedResourceList(Class<IBaseResource> theClass) {
 		super("contained", theClass);
-		assert List.class.isAssignableFrom(theClass);
 	}
 
 	@Override

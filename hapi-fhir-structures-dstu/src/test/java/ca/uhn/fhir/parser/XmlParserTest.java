@@ -1101,7 +1101,7 @@ public class XmlParserTest {
 		IParser p = ourCtx.newXmlParser();
 
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/observation-example-eeg.xml"), Charset.forName("UTF-8"));
-		IResource resource = p.parseResource(string);
+		IBaseResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
 		ourLog.info(result);
@@ -1113,7 +1113,7 @@ public class XmlParserTest {
 		IParser p = ourCtx.newXmlParser();
 
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/patient-example-dicom.xml"), Charset.forName("UTF-8"));
-		IResource resource = p.parseResource(string);
+		IBaseResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
 		ourLog.info(result);
@@ -1134,7 +1134,7 @@ public class XmlParserTest {
 		IParser p = ourCtx.newXmlParser();
 
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/questionnaire-example.xml"), Charset.forName("UTF-8"));
-		IResource resource = p.parseResource(string);
+		IBaseResource resource = p.parseResource(string);
 
 		String result = p.encodeResourceToString(resource);
 		ourLog.info(result);
@@ -1551,7 +1551,7 @@ public class XmlParserTest {
 	public void testParseEncodeNarrative() {
 
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> Donald null <b>DUCK </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>7000135</td></tr><tr><td>Address</td><td><span>10 Duxon Street </span><br/><span>VICTORIA </span><span>BC </span><span>Can </span></td></tr><tr><td>Date of birth</td><td><span>01 June 1980</span></td></tr></tbody></table></div></text><identifier><use value=\"official\"/><label value=\"University Health Network MRN 7000135\"/><system value=\"urn:oid:2.16.840.1.113883.3.239.18.148\"/><value value=\"7000135\"/><assigner><reference value=\"Organization/1.3.6.1.4.1.12201\"/></assigner></identifier><name><family value=\"Duck\"/><given value=\"Donald\"/></name><telecom><system value=\"phone\"/><use value=\"home\"/></telecom><telecom><system value=\"phone\"/><use value=\"work\"/></telecom><telecom><system value=\"phone\"/><use value=\"mobile\"/></telecom><telecom><system value=\"email\"/><use value=\"home\"/></telecom><gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\"/><code value=\"M\"/></coding></gender><birthDate value=\"1980-06-01T00:00:00\"/><address><use value=\"home\"/><line value=\"10 Duxon Street\"/><city value=\"VICTORIA\"/><state value=\"BC\"/><zip value=\"V8N 1Y4\"/><country value=\"Can\"/></address><managingOrganization><reference value=\"Organization/1.3.6.1.4.1.12201\"/></managingOrganization></Patient>";
-		IResource res = ourCtx.newXmlParser().parseResource(input);
+		IBaseResource res = ourCtx.newXmlParser().parseResource(input);
 
 		String output = ourCtx.newXmlParser().encodeResourceToString(res);
 
