@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -215,6 +217,22 @@ public class ParameterUtil {
 		}
 
 		return b.toString();
+	}
+
+	/**
+	 * Escapes a string according to the rules for parameter escaping specified in the <a href="http://www.hl7.org/implement/standards/fhir/search.html#escaping">FHIR Specification Escaping
+	 * Section</a>
+	 */
+	public static String escapeAndUrlEncode(String theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		
+		try {
+			return URLEncoder.encode(escape(theValue), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new Error("UTF-8 not supported on this platform");
+		}
 	}
 
 	/**

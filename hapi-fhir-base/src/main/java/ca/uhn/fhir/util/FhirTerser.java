@@ -39,7 +39,6 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildDirectResource;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
@@ -61,7 +60,7 @@ public class FhirTerser {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions containingElement = (ISupportsUndeclaredExtensions) theElement;
 			for (ExtensionDt nextExt : containingElement.getUndeclaredExtensions()) {
-				theCallback.acceptUndeclaredExtension(containingElement, theChildDefinition, theDefinition, nextExt);
+				theCallback.acceptUndeclaredExtension(containingElement, null, theChildDefinition, theDefinition, nextExt);
 				addUndeclaredExtensions(nextExt, theDefinition, theChildDefinition, theCallback);
 			}
 		}
@@ -87,10 +86,10 @@ public class FhirTerser {
 	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<T>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, def, new IModelVisitor() {
+		visit(theResource, null, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+			public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 				if (theElement == null || theElement.isEmpty()) {
 					return;
 				}
@@ -102,7 +101,7 @@ public class FhirTerser {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
+			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
 					ExtensionDt theNextExt) {
 				if (theType.isAssignableFrom(theNextExt.getClass())) {
 					retVal.add((T) theNextExt);
@@ -118,36 +117,31 @@ public class FhirTerser {
     public <T extends IBase> List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
         final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
         BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-        visit(theResource, null, def, new IModelVisitor() {
+        visit(theResource, null, null, def, new IModelVisitor() {
             @SuppressWarnings("unchecked")
             @Override
-            public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+            public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
                 if (theElement == null || theElement.isEmpty()) {
                     return;
                 }
-                String name = null;
-                if (theChildDefinition != null) {
-                    name = theChildDefinition.getElementName();
-                }
                 if (BaseResourceReferenceDt.class.isAssignableFrom(theElement.getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, name, (BaseResourceReferenceDt)theElement));
+                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theElement));
                 }
             }
 
             @SuppressWarnings("unchecked")
             @Override
-            public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
+            public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
                                                   ExtensionDt theNextExt) {
-                String name = null;
-                if (theChildDefinition != null) {
-                    name = theChildDefinition.getElementName();
-                }
                 if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, name, (BaseResourceReferenceDt)theNextExt.getValue()));
+                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
                 }
             }
         });
-        return retVal;    }	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
+        return retVal;
+    }
+
+    private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
 
 		if (theSubList.size() == 1) {
@@ -220,8 +214,19 @@ public class FhirTerser {
 
 	}
 
-	private void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
-		theCallback.acceptElement(theElement, theChildDefinition, theDefinition);
+    private List<String> addNameToList(List<String> theCurrentList, BaseRuntimeChildDefinition theChildDefinition) {
+        if (theChildDefinition == null)
+            return null;
+        if (theCurrentList== null || theCurrentList.isEmpty())
+            return new ArrayList<String>(Arrays.asList(theChildDefinition.getElementName()));
+        List<String> newList = new ArrayList<String>(theCurrentList);
+        newList.add(theChildDefinition.getElementName());
+        return newList;
+    }
+
+	private void visit(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+        List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
+		theCallback.acceptElement(theElement, pathToElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
 		// if (theElement.isEmpty()) {
@@ -242,7 +247,7 @@ public class FhirTerser {
 				IResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-					visit(theResource, null, def, theCallback);
+					visit(theResource, pathToElement, null, def, theCallback);
 				}
 			}
 			break;
@@ -284,9 +289,9 @@ public class FhirTerser {
 						
 						if (nextChild instanceof RuntimeChildDirectResource) {
 							// Don't descend into embedded resources
-							theCallback.acceptElement(nextValue, nextChild, childElementDef);
+							theCallback.acceptElement(nextValue, null, nextChild, childElementDef);
 						} else {
-							visit(nextValue, nextChild, childElementDef, theCallback);
+							visit(nextValue, pathToElement, nextChild, childElementDef, theCallback);
 						}
 					}
 				}
@@ -297,7 +302,7 @@ public class FhirTerser {
 			BaseContainedDt value = (BaseContainedDt) theElement;
 			for (IResource next : value.getContainedResources()) {
 				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
-				visit(next, null, def, theCallback);
+				visit(next, pathToElement, null, def, theCallback);
 			}
 			break;
 		}
@@ -322,7 +327,7 @@ public class FhirTerser {
 	 */
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, def, theVisitor);
+		visit(theResource, null, null, def, theVisitor);
 	}
 
 	public Object getSingleValueOrNull(IBase theTarget, String thePath) {

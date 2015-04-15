@@ -123,7 +123,8 @@ public abstract class BaseFhirDao implements IDao {
 
 	private FhirContext myContext;
 
-	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+//	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
 	private List<IDaoListener> myListeners = new ArrayList<IDaoListener>();
