@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
@@ -167,10 +168,15 @@ public class TestRestfulServer extends RestfulServer {
 		 * Do some fancy logging to create a nice access log that has details
 		 * about each incoming request. 
 		 */
-		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		List<IServerInterceptor> interceptorBeans = myAppCtx.getBean("myServerInterceptors", List.class);
+		for (IServerInterceptor interceptor : interceptorBeans)
+			this.registerInterceptor(interceptor);
+
+		/*LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
 		loggingInterceptor.setLoggerName("fhirtest.access");
 		loggingInterceptor.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
 		this.registerInterceptor(loggingInterceptor);
+		*/
 
 	}
 

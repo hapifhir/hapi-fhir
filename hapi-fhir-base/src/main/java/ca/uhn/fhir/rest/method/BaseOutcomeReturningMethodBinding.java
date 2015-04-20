@@ -280,9 +280,9 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		} else {
 			retVal = parser.parseResource(requestReader);
 		}
-		
+
 		retVal.setId(theRequest.getId());
-		
+
 		return retVal;
 	}
 

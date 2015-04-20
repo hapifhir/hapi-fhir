@@ -21,4 +21,13 @@
 	</bean>
 	<tx:annotation-driven transaction-manager="myTxManager" />
 
+	<util:list id="myServerInterceptors">
+		<ref bean="myLoggingInterceptor"/>
+	</util:list>
+	<bean id="myLoggingInterceptor" class="ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor">
+		<property name="loggerName" value="fhirtest.access"/>
+		<property name="messageFormat"
+				  value="Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]"/>
+	</bean>
+
 </beans>
