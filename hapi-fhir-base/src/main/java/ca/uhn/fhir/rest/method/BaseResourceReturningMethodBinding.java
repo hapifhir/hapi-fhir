@@ -279,7 +279,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 						return;
 					}
 				}
-				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip, theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				break;
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
@@ -312,7 +312,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase());
+					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				}
 
 				break;
@@ -336,10 +336,17 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			}
 
-			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, respondGzip, theRequest.getFhirServerBase());
+			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip, theRequest.getFhirServerBase(), isAddContentLocationHeader());
 			break;
 		}
 		}
+	}
+
+	/**
+	 * Should the response include a Content-Location header. Search method bunding (and any others?) may override this to disable the content-location, since it doesn't make sense
+	 */
+	protected boolean isAddContentLocationHeader() {
+		return true;
 	}
 
 	/**

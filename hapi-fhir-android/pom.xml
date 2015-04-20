@@ -64,18 +64,21 @@
 			<artifactId>slf4j-android</artifactId>
 			<version>${slf4j_version}</version>
 		</dependency>
-		<!-- <dependency> <groupId>org.codehaus.woodstox</groupId> <artifactId>stax2-api</artifactId> 
-			<version>3.1.4</version> </dependency> -->
-
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j_version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons_io_version}</version>
+			<scope>test</scope>
 		</dependency>
 
-		<!-- 
-		Android does not come with the Servlet API bundled, and MethodUtil requires it
-		-->
+		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
+			requires it -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -134,11 +137,10 @@
 						</goals>
 						<configuration>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<!-- <minimizeJar>true</minimizeJar>-->
+							<!-- <minimizeJar>true</minimizeJar>  -->
 							<artifactSet>
 								<includes>
 									<include>commons-codec:commons-codec</include>
-									<include>commons-io:commons-io</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
@@ -147,7 +149,7 @@
 									<include>javax.xml.stream:stax-api</include>
 									<include>javax.servlet:javax.servlet-api</include>
 									<include>org.codehaus.woodstox:stax2-api</include>
-									<!-- <include>org.slf4j:slf4j*</include>  -->
+									<!-- <include>org.slf4j:slf4j*</include> -->
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
 									<include>org.glassfish:javax.json</include>
@@ -178,7 +180,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>DIST</id>
@@ -207,5 +209,5 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 </project>
