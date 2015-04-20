@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -29,12 +38,15 @@ import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
 import ca.uhn.fhir.model.dstu2.composite.DurationDt;
+import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
+import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
+import ca.uhn.fhir.model.dstu2.resource.DataElement;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
@@ -61,6 +73,282 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
+	public void testContainedResourceInExtensionUndeclared() {
+		Patient p = new Patient();
+		p.addName().addFamily("PATIENT");
+		
+		Organization o = new Organization();
+		o.setName("ORG");
+		p.addUndeclaredExtension(new ExtensionDt(false, "urn:foo", new ResourceReferenceDt(o)));
+		
+		String str = ourCtx.newXmlParser().encodeResourceToString(p);
+		ourLog.info(str);
+		
+		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
+		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
+		
+		List<ExtensionDt> exts = p.getUndeclaredExtensionsByUrl("urn:foo");
+		assertEquals(1, exts.size());
+		ResourceReferenceDt rr = (ResourceReferenceDt)exts.get(0).getValue();
+		o = (Organization) rr.getResource();
+		assertEquals("ORG", o.getName());
+	}
+	
+	@Test
+	public void testEncodeAndParseExtensionOnResourceReference() {
+		DataElement de = new DataElement();
+		Binding b = de.addElement().getBinding();
+		b.setName("BINDING");
+
+		Organization o = new Organization();
+		o.setName("ORG");
+		b.addUndeclaredExtension(new ExtensionDt(false, "urn:foo", new ResourceReferenceDt(o)));
+
+		String str = ourCtx.newXmlParser().encodeResourceToString(de);
+		ourLog.info(str);
+		
+		de = ourCtx.newXmlParser().parseResource(DataElement.class, str);
+		b = de.getElement().get(0).getBinding();
+		assertEquals("BINDING", b.getName());
+		
+		List<ExtensionDt> exts = b.getUndeclaredExtensionsByUrl("urn:foo");
+		assertEquals(1, exts.size());
+		ResourceReferenceDt rr = (ResourceReferenceDt)exts.get(0).getValue();
+		o = (Organization) rr.getResource();
+		assertEquals("ORG", o.getName());
+
+	}
+
+	@Test
+	public void testParseAndEncodeExtensionOnResourceReference() {
+		//@formatter:off
+		String input = "<DataElement>" + 
+				"<id value=\"gender\"/>"+ 
+				"<contained>"+ 
+				"<ValueSet>"+ 
+				"<id value=\"2179414\"/>"+ 
+				"<url value=\"2179414\"/>"+ 
+				"<version value=\"1.0\"/>"+ 
+				"<name value=\"Gender Code\"/>"+ 
+				"<description value=\"All codes representing the gender of a person.\"/>"+ 
+				"<status value=\"active\"/>"+ 
+				"<compose>"+ 
+				"<include>"+ 
+				"<system value=\"http://ncit.nci.nih.gov\"/>"+ 
+				"<concept>"+ 
+				"<code value=\"C17998\"/>"+ 
+				"<display value=\"Unknown\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"C20197\"/>"+ 
+				"<display value=\"Male\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"C16576\"/>"+ 
+				"<display value=\"Female\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"C38046\"/>"+ 
+				"<display value=\"Not specified\"/>"+ 
+				"</concept>"+ 
+				"</include>"+ 
+				"</compose>"+ 
+				"</ValueSet>"+ 
+				"</contained>"+ 
+				"<contained>"+ 
+				"<ValueSet>"+ 
+				"<id value=\"2179414-permitted\"/>"+ 
+				"<status value=\"active\"/>"+ 
+				"<define>"+ 
+				"<system value=\"http://example.org/fhir/2179414\"/>"+ 
+				"<caseSensitive value=\"true\"/>"+ 
+				"<concept>"+ 
+				"<code value=\"0\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"1\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"2\"/>"+ 
+				"</concept>"+ 
+				"<concept>"+ 
+				"<code value=\"3\"/>"+ 
+				"</concept>"+ 
+				"</define>"+ 
+				"</ValueSet>"+ 
+				"</contained>"+ 
+				"<contained>"+ 
+				"<ConceptMap>"+ 
+				"<id value=\"2179414-cm\"/>"+ 
+				"<status value=\"active\"/>"+ 
+				"<sourceReference>"+ 
+				"<reference value=\"#2179414\"/>"+ 
+				"</sourceReference>"+ 
+				"<targetReference>"+ 
+				"<reference value=\"#2179414-permitted\"/>"+ 
+				"</targetReference>"+ 
+				"<element>"+ 
+				"<code value=\"C17998\"/>"+ 
+				"<map>"+ 
+				"<code value=\"0\"/>"+ 
+				"<equivalence value=\"equal\"/>"+ 
+				"</map>"+ 
+				"</element>"+ 
+				"<element>"+ 
+				"<code value=\"C20197\"/>"+ 
+				"<map>"+ 
+				"<code value=\"1\"/>"+ 
+				"<equivalence value=\"equal\"/>"+ 
+				"</map>"+ 
+				"</element>"+ 
+				"<element>"+ 
+				"<code value=\"C16576\"/>"+ 
+				"<map>"+ 
+				"<code value=\"2\"/>"+ 
+				"<equivalence value=\"equal\"/>"+ 
+				"</map>"+ 
+				"</element>"+ 
+				"<element>"+ 
+				"<code value=\"C38046\"/>"+ 
+				"<map>"+ 
+				"<code value=\"3\"/>"+ 
+				"<equivalence value=\"equal\"/>"+ 
+				"</map>"+ 
+				"</element>"+ 
+				"</ConceptMap>"+ 
+				"</contained>"+ 
+				"<identifier>"+ 
+				"<value value=\"2179650\"/>"+ 
+				"</identifier>"+ 
+				"<version value=\"1.0\"/>"+ 
+				"<name value=\"Gender Code\"/>"+ 
+				"<useContext>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/FBPP\"/>"+ 
+				"<display value=\"FBPP Pooled Database\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/PhenX\"/>"+ 
+				"<display value=\"Demographics\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/EligibilityCriteria\"/>"+ 
+				"<display value=\"Pt. Administrative\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/UAMSClinicalResearch\"/>"+ 
+				"<display value=\"UAMS New CDEs\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/PhenX\"/>"+ 
+				"<display value=\"Substance Abuse and \"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Category\"/>"+ 
+				"<display value=\"CSAERS Adverse Event\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/PhenX\"/>"+ 
+				"<display value=\"Core: Tier 1\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Category\"/>"+ 
+				"<display value=\"Case Report Forms\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Category\"/>"+ 
+				"<display value=\"CSAERS Review Set\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Demonstration%20Applications\"/>"+ 
+				"<display value=\"CIAF\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/NIDA%20CTN%20Usage\"/>"+ 
+				"<display value=\"Clinical Research\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/NIDA%20CTN%20Usage\"/>"+ 
+				"<display value=\"Electronic Health Re\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Condition\"/>"+ 
+				"<display value=\"Barretts Esophagus\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Condition\"/>"+ 
+				"<display value=\"Bladder Cancer\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Condition\"/>"+ 
+				"<display value=\"Oral Leukoplakia\"/>"+ 
+				"</coding>"+ 
+				"<coding>"+ 
+				"<system value=\"http://example.org/Condition\"/>"+ 
+				"<display value=\"Sulindac for Breast\"/>"+ 
+				"</coding>"+ 
+				"</useContext>"+ 
+				"<status value=\"active\"/>"+ 
+				"<publisher value=\"DCP\"/>"+ 
+				"<element>"+ 
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/minLength\">"+ 
+				"<valueInteger value=\"1\"/>"+ 
+				"</extension>"+ 
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/elementdefinition-question\">"+ 
+				"<valueString value=\"Gender\"/>"+ 
+				"</extension>"+ 
+				"<path value=\"Gender\"/>"+ 
+				"<definition value=\"The code representing the gender of a person.\"/>"+ 
+				"<type>"+ 
+				"<code value=\"CodeableConcept\"/>"+ 
+				"</type>"+ 
+				"<maxLength value=\"13\"/>"+ 
+				"<binding>"+ 
+				"<name value=\"Gender\"/>"+ 
+				"<strength value=\"required\"/>"+ 
+				"<valueSetReference>"+ 
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset\">"+ 
+				"<valueReference>"+ 
+				"<reference value=\"#2179414-permitted\"/>"+ 
+				"</valueReference>"+ 
+				"</extension>"+ 
+				"<extension url=\"http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap\">"+ 
+				"<valueReference>"+ 
+				"<reference value=\"#2179414-cm\"/>"+ 
+				"</valueReference>"+ 
+				"</extension>"+ 
+				"<reference value=\"#2179414\"/>"+ 
+				"</valueSetReference>"+ 
+				"</binding>"+ 
+				"</element>"+ 
+				"</DataElement>";
+		//@formatter:on
+		DataElement de = ourCtx.newXmlParser().parseResource(DataElement.class, input);
+		String output = ourCtx.newXmlParser().encodeResourceToString(de).replace(" xmlns=\"http://hl7.org/fhir\"", "");
+		
+		ElementDefinitionDt elem = de.getElement().get(0);
+		Binding b = elem.getBinding();
+		assertEquals("Gender", b.getName());
+		
+		ResourceReferenceDt ref = (ResourceReferenceDt) b.getValueSet();
+		assertEquals("#2179414", ref.getReference().getValue());
+		
+		assertEquals(2, ref.getUndeclaredExtensions().size());
+		ExtensionDt ext = ref.getUndeclaredExtensions().get(0);
+		assertEquals("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset", ext.getUrl());
+		assertEquals(ResourceReferenceDt.class, ext.getValue().getClass());
+		assertEquals("#2179414-permitted", ((ResourceReferenceDt)ext.getValue()).getReference().getValue());
+		
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
+		
+		assertThat(output, containsString("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset"));
+		
+		ourLog.info("Expected: {}", input);
+		ourLog.info("Actual  : {}", output);
+		assertEquals(input, output);
+	}
+	
+	@Test
 	public void testEncodeBinaryWithNoContentType() {
 		Binary b = new Binary();
 		b.setContent(new byte[] {1,2,3,4});
@@ -71,6 +359,60 @@ public class XmlParserDstu2Test {
 		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
 	}
 	
+	@Test
+	public void testMoreExtensions() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setUse(IdentifierUseEnum.OFFICIAL).setSystem("urn:example").setValue("7000135");
+
+		ExtensionDt ext = new ExtensionDt();
+		ext.setUrl("http://example.com/extensions#someext");
+		ext.setValue(new DateTimeDt("2011-01-02T11:13:15"));
+
+		// Add the extension to the resource
+		patient.addUndeclaredExtension(ext);
+		// END SNIPPET: resourceExtension
+
+		// START SNIPPET: resourceStringExtension
+		HumanNameDt name = patient.addName();
+		name.addFamily("Shmoe");
+		StringDt given = name.addGiven();
+		given.setValue("Joe");
+		ExtensionDt ext2 = new ExtensionDt().setUrl("http://examples.com#givenext").setValue(new StringDt("given"));
+		given.addUndeclaredExtension(ext2);
+
+		StringDt given2 = name.addGiven();
+		given2.setValue("Shmoe");
+		ExtensionDt given2ext = new ExtensionDt().setUrl("http://examples.com#givenext_parent");
+		given2.addUndeclaredExtension(given2ext);
+		ExtensionDt givenExtChild = new ExtensionDt();
+		givenExtChild.setUrl("http://examples.com#givenext_child").setValue(new StringDt("CHILD"));
+		given2ext.addUndeclaredExtension(givenExtChild);
+		// END SNIPPET: resourceStringExtension
+
+		// START SNIPPET: subExtension
+		ExtensionDt parent = new ExtensionDt().setUrl("http://example.com#parent");
+		patient.addUndeclaredExtension(parent);
+
+		ExtensionDt child1 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value1"));
+		parent.addUndeclaredExtension(child1);
+
+		ExtensionDt child2 = new ExtensionDt().setUrl("http://example.com#child").setValue(new StringDt("value1"));
+		parent.addUndeclaredExtension(child2);
+		// END SNIPPET: subExtension
+
+		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info(output);
+
+		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
+		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
+		assertThat(
+				enc,
+				containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+	}
+
 	
 	@Test
 	public void testEncodeNonContained() {

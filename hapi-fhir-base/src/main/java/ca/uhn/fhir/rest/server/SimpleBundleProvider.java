@@ -23,18 +23,19 @@ package ca.uhn.fhir.rest.server;
 import java.util.Collections;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
-	private List<IResource> myList;
+	private List<IBaseResource> myList;
 	
-	public SimpleBundleProvider(List<IResource> theList) {
+	public SimpleBundleProvider(List<IBaseResource> theList) {
 		myList = theList;
 	}
 
-	public SimpleBundleProvider(IResource theResource) {
+	public SimpleBundleProvider(IBaseResource theResource) {
 		myList = Collections.singletonList(theResource);
 	}
 
@@ -46,7 +47,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	@Override
-	public List<IResource> getResources(int theFromIndex, int theToIndex) {
+	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		return myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
 	}
 

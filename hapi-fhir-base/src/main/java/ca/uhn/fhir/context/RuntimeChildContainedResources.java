@@ -49,13 +49,11 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		assert BaseContainedDt.class.isAssignableFrom(theType) || List.class.isAssignableFrom(theType);
 		return myElem;
 	}
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theType) {
-		assert BaseContainedDt.class.isAssignableFrom(theType) || List.class.isAssignableFrom(theType);
 		return getElementName();
 	}
 

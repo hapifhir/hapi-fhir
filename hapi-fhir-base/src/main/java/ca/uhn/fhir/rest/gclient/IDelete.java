@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.gclient;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.primitive.IdDt;
 
 /*
  * #%L
@@ -27,7 +28,7 @@ public interface IDelete {
 
 	IDeleteTyped resource(IResource theResource);
 	
-	IDeleteTyped resourceById(IdDt theId);
+	IDeleteTyped resourceById(IIdType theId);
 	
 	IDeleteTyped resourceById(String theResourceType, String theLogicalId);
 

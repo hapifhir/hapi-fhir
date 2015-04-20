@@ -22,7 +22,8 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.List;
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 public interface IBundleProvider {
@@ -37,7 +38,7 @@ public interface IBundleProvider {
 	 * @param theToIndex The high index (exclusive) to return
 	 * @return A list of resources. The size of this list must be at least <code>theToIndex - theFromIndex</code>.
 	 */
-	List<IResource> getResources(int theFromIndex, int theToIndex);
+	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
 	
 	/**
 	 * Optionally may be used to signal a preferred page size to the server, e.g. because

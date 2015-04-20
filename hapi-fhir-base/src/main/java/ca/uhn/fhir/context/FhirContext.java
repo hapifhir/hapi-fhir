@@ -27,12 +27,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -77,8 +79,9 @@ public class FhirContext {
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private HapiLocalizer myLocalizer = new HapiLocalizer();
-	private volatile Map<String, RuntimeResourceDefinition> myNameToElementDefinition = Collections.emptyMap();
-	private Map<String, Class<? extends IBaseResource>> myNameToResourceType;
+	private volatile Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinition = Collections.emptyMap();
+	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
+	private volatile Map<String, Class<? extends IBaseResource>> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
@@ -136,6 +139,14 @@ public class FhirContext {
 		return getLocalizer().getMessage(FhirContext.class, "unknownResourceName", theResourceName, theVersion);
 	}
 
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 */
+	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
+		return myNameToElementDefinition.get(theElementName);
+	}
+	
 	/**
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
@@ -241,7 +252,7 @@ public class FhirContext {
 
 		Validate.notBlank(resourceName, "Resource name must not be blank");
 
-		RuntimeResourceDefinition retVal = myNameToElementDefinition.get(resourceName);
+		RuntimeResourceDefinition retVal = myNameToResourceDefinition.get(resourceName);
 
 		if (retVal == null) {
 			Class<? extends IBaseResource> clazz = myNameToResourceType.get(resourceName.toLowerCase());
@@ -401,10 +412,14 @@ public class FhirContext {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}
 
-		Map<String, RuntimeResourceDefinition> nameToElementDefinition = new HashMap<String, RuntimeResourceDefinition>();
+		Map<String, BaseRuntimeElementDefinition<?>> nameToElementDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		nameToElementDefinition.putAll(myNameToElementDefinition);
-		nameToElementDefinition.putAll(scanner.getNameToResourceDefinitions());
+		nameToElementDefinition.putAll(scanner.getNameToElementDefinitions());
 
+		Map<String, RuntimeResourceDefinition> nameToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
+		nameToResourceDefinition.putAll(myNameToResourceDefinition);
+		nameToResourceDefinition.putAll(scanner.getNameToResourceDefinition());
+		
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
@@ -416,6 +431,7 @@ public class FhirContext {
 		myNameToElementDefinition = nameToElementDefinition;
 		myClassToElementDefinition = classToElementDefinition;
 		myIdToResourceDefinition = idToElementDefinition;
+		myNameToResourceDefinition = nameToResourceDefinition;
 
 		myNameToResourceType = scanner.getNameToResourceType();
 

@@ -105,8 +105,10 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 				return getImplementingClass().newInstance();
 			} else if (theArgument instanceof IValueSetEnumBinder) {
 				return getImplementingClass().getConstructor(IValueSetEnumBinder.class).newInstance(theArgument);
-			} else {
+			} else if (theArgument instanceof IBaseEnumFactory) {
 				return getImplementingClass().getConstructor(IBaseEnumFactory.class).newInstance(theArgument);
+			} else {
+				return getImplementingClass().getConstructor(theArgument.getClass()).newInstance(theArgument);
 			}
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);

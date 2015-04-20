@@ -3,10 +3,12 @@ package ca.uhn.fhir.android;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -56,7 +58,7 @@ public class BuiltJarIT {
 	 * Android does not like duplicate entries in the JAR
 	 */
 	@Test
-	public void testJarForDuplicates() throws Exception {
+	public void testJarContents() throws Exception {
 		String wildcard = "hapi-fhir-android-*.jar";
 		Collection<File> files = FileUtils.listFiles(new File("target"), new WildcardFileFilter(wildcard), null);
 		if (files.isEmpty()) {
@@ -67,6 +69,11 @@ public class BuiltJarIT {
 			ourLog.info("Testing file: {}", file);
 
 			ZipFile zip = new ZipFile(file);
+			
+			int totalClasses = 0;
+			int totalMethods = 0;
+			TreeSet<ClassMethodCount> topMethods = new TreeSet<ClassMethodCount>();
+			
 			try {
 				Set<String> names = new HashSet<String>();
 				for (Enumeration<? extends ZipEntry> iter = zip.entries(); iter.hasMoreElements();) {
@@ -75,9 +82,28 @@ public class BuiltJarIT {
 					if (!names.add(nextName)) {
 						throw new Exception("File " + file + " contains duplicate contents: " + nextName);
 					}
+					
+					if (nextName.contains("$") == false) {
+						if (nextName.endsWith(".class")) {
+							String className = nextName.replace("/", ".").replace(".class", "");
+							try {
+							Class<?> clazz = Class.forName(className);
+							int methodCount = clazz.getMethods().length;
+							topMethods.add(new ClassMethodCount(className, methodCount));
+							totalClasses++;
+							totalMethods += methodCount;
+							} catch (NoClassDefFoundError e) {
+								// ignore
+							} catch (ClassNotFoundException e) {
+								// ignore
+							}
+						}
+					}
 				}
 				
 				ourLog.info("File {} contains {} entries", file, names.size());
+				ourLog.info("Total classes {} - Total methods {}", totalClasses, totalMethods);
+				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(topMethods.size() - 10, topMethods.size()));
 				
 			} finally {
 				zip.close();
@@ -85,4 +111,42 @@ public class BuiltJarIT {
 		}
 	}
 
+	private static class ClassMethodCount implements Comparable<ClassMethodCount> {
+
+		private String myClassName;
+		private int myMethodCount;
+		
+		public ClassMethodCount(String theClassName, int theMethodCount) {
+			myClassName = theClassName;
+			myMethodCount = theMethodCount;
+		}
+
+		@Override
+		public String toString() {
+			return myClassName + "[" + myMethodCount + "]";
+		}
+
+		@Override
+		public int compareTo(ClassMethodCount theO) {
+			return myMethodCount - theO.myMethodCount;
+		}
+
+		public String getClassName() {
+			return myClassName;
+		}
+
+		public void setClassName(String theClassName) {
+			myClassName = theClassName;
+		}
+
+		public int getMethodCount() {
+			return myMethodCount;
+		}
+
+		public void setMethodCount(int theMethodCount) {
+			myMethodCount = theMethodCount;
+		}
+		
+	}
+	
 }

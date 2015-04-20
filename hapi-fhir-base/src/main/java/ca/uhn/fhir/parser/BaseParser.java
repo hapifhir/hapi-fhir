@@ -66,6 +66,7 @@ public abstract class BaseParser implements IParser {
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
 	private String myServerBaseUrl;
+	private boolean myStripVersionsFromReferences = true;
 	private boolean mySuppressNarratives;
 
 	public BaseParser(FhirContext theContext) {
@@ -137,7 +138,6 @@ public abstract class BaseParser implements IParser {
 
 	}
 
-	
 	protected void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
 		containResourcesForEncoding(contained, theResource, theResource);
@@ -157,17 +157,27 @@ public abstract class BaseParser implements IParser {
 						reference = "#" + containedId.getValue();
 					}
 				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
-					reference = theRef.getResource().getId().getValue();
+					if (isStripVersionsFromReferences()) {
+						reference = theRef.getResource().getId().toVersionless().getValue();
+					} else {
+						reference = theRef.getResource().getId().getValue();
+					}
 				}
 			}
 			return reference;
 		} else {
 			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
-				String reference = ref.toUnqualifiedVersionless().getValue();
-				return reference;
+				if (isStripVersionsFromReferences()) {
+					return ref.toUnqualifiedVersionless().getValue();
+				} else {
+					return ref.toUnqualified().getValue();
+				}
 			} else {
-				String reference = ref.toVersionless().getValue();
-				return reference;
+				if (isStripVersionsFromReferences()) {
+					return ref.toVersionless().getValue();
+				} else {
+					return ref.getValue();
+				}
 			}
 		}
 	}
@@ -245,7 +255,13 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected boolean isChildContained(BaseRuntimeElementDefinition<?> childDef, boolean theIncludedResource) {
-		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false && theIncludedResource == false;
+		return (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && getContainedResources().isEmpty() == false
+				&& theIncludedResource == false;
+	}
+
+	@Override
+	public boolean isStripVersionsFromReferences() {
+		return myStripVersionsFromReferences;
 	}
 
 	@Override
@@ -267,7 +283,7 @@ public abstract class BaseParser implements IParser {
 			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
 			if (base != null && base.size() > 0) {
 				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
-				IResource res = ((IResource) retVal);
+				IBaseResource res = ((IBaseResource) retVal);
 				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
 			}
 
@@ -287,11 +303,11 @@ public abstract class BaseParser implements IParser {
 
 						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
 						if (entryResources != null && entryResources.size() > 0) {
-							IResource res = (IResource) entryResources.get(0);
+							IBaseResource res = (IBaseResource) entryResources.get(0);
 							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
 							String versionIdPart = res.getId().getVersionIdPart();
-							if (isBlank(versionIdPart)) {
-								versionIdPart = ResourceMetadataKeyEnum.VERSION.get(res);
+							if (isBlank(versionIdPart) && res instanceof IResource) {
+								versionIdPart = ResourceMetadataKeyEnum.VERSION.get((IResource) res);
 							}
 
 							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
@@ -332,6 +348,12 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public IParser setServerBaseUrl(String theUrl) {
 		myServerBaseUrl = isNotBlank(theUrl) ? theUrl : null;
+		return this;
+	}
+
+	@Override
+	public IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences) {
+		myStripVersionsFromReferences = theStripVersionsFromReferences;
 		return this;
 	}
 

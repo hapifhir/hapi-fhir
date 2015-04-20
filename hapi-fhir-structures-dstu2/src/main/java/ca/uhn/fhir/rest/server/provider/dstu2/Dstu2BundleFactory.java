@@ -31,9 +31,11 @@ import java.util.UUID;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -63,7 +65,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
+	public void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {
 		if (myBundle == null) {
 			myBundle = new Bundle();
 		}
@@ -71,13 +73,14 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		List<IResource> includedResources = new ArrayList<IResource>();
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 
-		for (IResource next : theResult) {
+		for (IBaseResource next : theResult) {
 			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add(next.getId());
+				addedResourceIds.add((IdDt) next.getId());
 			}
 		}
 
-		for (IResource next : theResult) {
+		for (IBaseResource nextBaseRes : theResult) {
+			IResource next = (IResource) nextBaseRes;
 
 			Set<String> containedIds = new HashSet<String>();
 			for (IResource nextContained : next.getContained().getContainedResources()) {
@@ -197,7 +200,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
-		List<IResource> resourceList;
+		List<IBaseResource> resourceList;
 		if (theServer.getPagingProvider() == null) {
 			numToReturn = theResult.size();
 			resourceList = theResult.getResources(0, numToReturn);
@@ -225,7 +228,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 
-		for (IResource next : resourceList) {
+		for (IBaseResource next : resourceList) {
 			if (next.getId() == null || next.getId().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
@@ -234,7 +237,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
-			for (IResource nextRes : resourceList) {
+			for (IBaseResource nextRes : resourceList) {
 				RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(nextRes);
 				if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
 					RestfulServerUtils.addProfileToBundleEntry(theServer.getFhirContext(), nextRes, theServerBase);
@@ -242,7 +245,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 
-		addResourcesToBundle(resourceList, theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
+		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
 
 		if (theServer.getPagingProvider() != null) {
@@ -273,7 +276,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<IResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
@@ -285,7 +288,8 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
 
 		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-			for (IResource next : theResources) {
+			for (IBaseResource nextBaseRes : theResources) {
+				IResource next = (IResource)nextBaseRes;
 				Entry nextEntry = myBundle.addEntry();
 
 				nextEntry.setResource(next);
@@ -308,18 +312,18 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
-	private void addResourcesForSearch(List<IResource> theResult) {
-		List<IResource> includedResources = new ArrayList<IResource>();
-		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
+	private void addResourcesForSearch(List<IBaseResource> theResult) {
+		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
+		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 
-		for (IResource next : theResult) {
+		for (IBaseResource next : theResult) {
 			if (next.getId().isEmpty() == false) {
 				addedResourceIds.add(next.getId());
 			}
 		}
 
-		for (IResource next : theResult) {
-
+		for (IBaseResource nextBaseRes : theResult) {
+			IResource next = (IResource)nextBaseRes;
 			Set<String> containedIds = new HashSet<String>();
 			for (IResource nextContained : next.getContained().getContainedResources()) {
 				if (nextContained.getId().isEmpty() == false) {
@@ -383,19 +387,19 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		/*
 		 * Actually add the resources to the bundle
 		 */
-		for (IResource next : includedResources) {
-			myBundle.addEntry().setResource(next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
+		for (IBaseResource next : includedResources) {
+			myBundle.addEntry().setResource((IResource) next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
 		}
 	}
 
 	@Override
-	public void initializeWithBundleResource(IResource theBundle) {
+	public void initializeWithBundleResource(IBaseResource theBundle) {
 		myBundle = (Bundle) theBundle;
 	}
 
 	@Override
-	public List<IResource> toListOfResources() {
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
+	public List<IBaseResource> toListOfResources() {
+		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (Entry next : myBundle.getEntry()) {
 			if (next.getResource()!=null) {
 				retVal.add(next.getResource());

@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
@@ -43,7 +45,7 @@ public class BundleProviders {
 		final InstantDt published = InstantDt.withCurrentTime();
 		return new IBundleProvider() {
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 				return Collections.emptyList();
 			}
 
@@ -64,11 +66,11 @@ public class BundleProviders {
 		};
 	}
 
-	public static IBundleProvider newList(IResource theResource) {
+	public static IBundleProvider newList(IBaseResource theResource) {
 		return new SimpleBundleProvider(theResource);
 	}
 
-	public static IBundleProvider newList(List<IResource> theResources) {
+	public static IBundleProvider newList(List<IBaseResource> theResources) {
 		return new SimpleBundleProvider(theResources);
 	}
 }

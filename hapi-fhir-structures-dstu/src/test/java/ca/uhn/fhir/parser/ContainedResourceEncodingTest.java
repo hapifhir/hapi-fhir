@@ -1,11 +1,12 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -191,7 +191,7 @@ public class ContainedResourceEncodingTest {
         observation.setPerformer(performers);
         
         
-        List<IResource> list = new ArrayList<IResource>();
+        List<IBaseResource> list = new ArrayList<IBaseResource>();
 		list.add(dr);
 		
 		IVersionSpecificBundleFactory factory = ctx.newBundleFactory();
@@ -233,7 +233,7 @@ public class ContainedResourceEncodingTest {
         observation.setPerformer(performers);
         
         
-        List<IResource> list = new ArrayList<IResource>();
+        List<IBaseResource> list = new ArrayList<IBaseResource>();
 		list.add(dr);
 
 		IVersionSpecificBundleFactory factory = ctx.newBundleFactory();

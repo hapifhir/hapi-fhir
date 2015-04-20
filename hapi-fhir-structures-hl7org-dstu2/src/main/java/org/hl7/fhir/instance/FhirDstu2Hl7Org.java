@@ -38,6 +38,7 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.dstu2hl7org.Dstu2Hl7OrgBundleFactory;
 
 public class FhirDstu2Hl7Org implements IFhirVersion {
 
@@ -109,7 +110,7 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 
 	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
-		throw new UnsupportedOperationException();
+		return new Dstu2Hl7OrgBundleFactory(theContext);
 	}
 
 }

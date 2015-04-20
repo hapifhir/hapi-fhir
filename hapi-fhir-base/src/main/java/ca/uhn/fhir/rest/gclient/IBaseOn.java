@@ -21,8 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import org.hl7.fhir.instance.model.IBaseResource;
-
-import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IBaseOn<T> {
 
@@ -43,6 +42,6 @@ public interface IBaseOn<T> {
 	 * 
 	 * @throws IllegalArgumentException If <code>theId</code> does not contain at least a resource type and ID 
 	 */
-	T onInstance(IdDt theId);
+	T onInstance(IIdType theId);
 
 }

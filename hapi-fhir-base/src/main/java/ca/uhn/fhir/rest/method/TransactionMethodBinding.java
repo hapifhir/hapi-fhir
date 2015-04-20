@@ -20,13 +20,14 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -117,7 +118,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			return createTransactionInvocation(bundle, context);
 		} else {
 			@SuppressWarnings("unchecked")
-			List<IResource> resources = (List<IResource>) theArgs[myTransactionParamIndex];
+			List<IBaseResource> resources = (List<IBaseResource>) theArgs[myTransactionParamIndex];
 			return createTransactionInvocation(resources, context);
 		}
 	}
@@ -161,10 +162,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		 * " entries, but server method response contained " + retVal.size() + " entries (must be the same)"); } }
 		 */
 
-		List<IResource> retResources = retVal.getResources(0, retVal.size());
+		List<IBaseResource> retResources = retVal.getResources(0, retVal.size());
 		for (int i = 0; i < retResources.size(); i++) {
 			IdDt oldId = oldIds.get(retResources.get(i));
-			IResource newRes = retResources.get(i);
+			IBaseResource newRes = retResources.get(i);
 			if (newRes.getId() == null || newRes.getId().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
@@ -172,8 +173,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			}
 
 			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.equals(newRes.getId())) {
-					newRes.getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
+				if (!oldId.equals(newRes.getId()) && newRes instanceof IResource) {
+					((IResource)newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}
@@ -194,7 +195,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return new HttpPostClientInvocation(theContext, theBundle);
 	}
 
-	public static BaseHttpClientInvocation createTransactionInvocation(List<IResource> theResources, FhirContext theContext) {
+	public static BaseHttpClientInvocation createTransactionInvocation(List<IBaseResource> theResources, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 

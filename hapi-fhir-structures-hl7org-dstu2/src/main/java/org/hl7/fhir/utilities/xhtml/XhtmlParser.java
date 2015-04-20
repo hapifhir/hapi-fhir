@@ -919,9 +919,10 @@ private boolean elementIsOk(String name) throws Exception {
       throw new Exception("Unable to Parse HTML - does not start with tag. Found "+peekChar()+descLoc());
     readChar();
     String n = readName().toLowerCase();
-    readToTagEnd();
     XhtmlNode result = new XhtmlNode(NodeType.Element);
     result.setName(n);
+    parseAttributes(result);
+    readToTagEnd();
     unwindPoint = null;
     List<XhtmlNode> p = new ArrayList<XhtmlNode>();
     parseElementInner(result, p);

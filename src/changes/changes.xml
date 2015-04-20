@@ -130,6 +130,12 @@
 				JPA server failed to index resources containing ContactPointDt elements with
 				populated values (e.g. Patient.telecom). Thanks to Mohammad Jafari for reporting!
 			</action>
+			<action type="add">
+				Add a new configuration method on the parsers, 
+				<![CDATA[<code>setStripVersionsFromReferences(boolean)</code>]]> which
+				configures the parser to preserve versions in resource reference links when
+				encoding. By default, these are removed.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

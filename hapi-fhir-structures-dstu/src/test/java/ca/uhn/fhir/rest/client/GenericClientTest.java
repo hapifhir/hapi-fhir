@@ -687,7 +687,7 @@ public class GenericClientTest {
 		Bundle response = client.search()
 				.forResource(Patient.class)
 				.encodedJson()
-				.revinclude(Provenance.INCLUDE_TARGET)
+				.revInclude(Provenance.INCLUDE_TARGET)
 				.execute();
 		//@formatter:on
 

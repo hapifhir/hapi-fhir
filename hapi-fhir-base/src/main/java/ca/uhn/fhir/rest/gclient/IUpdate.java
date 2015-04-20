@@ -20,11 +20,11 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 public interface IUpdate {
 
-	IUpdateTyped resource(IResource theResource);
+	IUpdateTyped resource(IBaseResource theResource);
 
 	IUpdateTyped resource(String theResourceBody);
 

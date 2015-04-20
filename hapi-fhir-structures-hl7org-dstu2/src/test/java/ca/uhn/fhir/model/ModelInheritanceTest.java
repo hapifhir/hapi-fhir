@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.List_;
 import org.hl7.fhir.instance.model.Meta;
 import org.hl7.fhir.instance.model.Narrative;
+import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.PrimitiveType;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
@@ -43,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICoding;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
@@ -197,6 +199,11 @@ public class ModelInheritanceTest {
     @Test
     public void testReference() {
         assertTrue(IReference.class.isAssignableFrom(Reference.class));
+    }
+
+    @Test
+    public void testParameters() {
+        assertTrue(IBaseParameters.class.isAssignableFrom(Parameters.class));
     }
 
     @Test

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
@@ -285,6 +286,9 @@ public class XhtmlNode implements IBaseXhtml {
   }
 
 	public String getValueAsString() {
+		if (isEmpty()) {
+			return null;
+		}
 		try {
 			return new XhtmlComposer().compose(this);
 		} catch (Exception e) {
@@ -295,9 +299,30 @@ public class XhtmlNode implements IBaseXhtml {
 
 	@Override
 	public void setValueAsString(String theValue) throws IllegalArgumentException {
+		this.Attributes = null;
+		this.childNodes = null;
+		this.content = null;
+		this.name = null;
+		this.nodeType= null;
+		if (theValue == null) {
+			return;
+		}
+		
+		String val = theValue.trim();
+		if (StringUtils.isBlank(theValue)) {
+			return;
+		}
+		
+		if (!val.startsWith("<")) {
+			val = "<div>" + val + "</div>";
+		}
+		if (val.startsWith("<?") && val.endsWith("?>")) {
+			return;
+		}
+
 		try {
 			// TODO: this is ugly
-			XhtmlNode fragment = new XhtmlParser().parseFragment(theValue);
+			XhtmlNode fragment = new XhtmlParser().parseFragment(val);
 			this.Attributes = fragment.Attributes;
 			this.childNodes = fragment.childNodes;
 			this.content = fragment.content;

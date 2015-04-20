@@ -54,7 +54,7 @@ public class ClientServerValidationTestDstu2 {
 	@Test
 	public void testServerReturnsAppropriateVersionForDstu2_040() throws Exception {
 		Conformance conf = new Conformance();
-		conf.setFhirVersion("0.4.0");
+		conf.setFhirVersion("0.5.0");
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

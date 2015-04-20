@@ -23,8 +23,9 @@ package ca.uhn.fhir.rest.server;
 import java.util.List;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
@@ -34,7 +35,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
  */
 public interface IVersionSpecificBundleFactory {
 
-	void addResourcesToBundle(List<IResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
+	void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
 
 	void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType);
 
@@ -43,12 +44,12 @@ public interface IVersionSpecificBundleFactory {
 
 	Bundle getDstu1Bundle();
 
-	IResource getResourceBundle();
+	IBaseResource getResourceBundle();
 
-	void initializeBundleFromResourceList(String theAuthor, List<IResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
+	void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
 
-	void initializeWithBundleResource(IResource theResource);
+	void initializeWithBundleResource(IBaseResource theResource);
 
-	List<IResource> toListOfResources();
+	List<IBaseResource> toListOfResources();
 
 }

@@ -1,7 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -356,7 +360,7 @@ public class OperationServerTest {
 		public IBundleProvider opInstanceReturnsBundleProvider() {
 			ourLastMethod = "$OP_INSTANCE_BUNDLE_PROVIDER";
 
-			List<IResource> resources = new ArrayList<IResource>();
+			List<IBaseResource> resources = new ArrayList<IBaseResource>();
 			for (int i =0; i < 100;i++) {
 				Patient p = new Patient();
 				p.setId("Patient/" + i);

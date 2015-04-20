@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -49,7 +53,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.Request;
@@ -72,13 +75,13 @@ public class RestfulServerUtils {
 		return count;
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
 			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
 		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IdDt fullId = theResource.getId().withServerBase(theServerBase, resName);
+			IIdType fullId = theResource.getId().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
@@ -130,24 +133,31 @@ public class RestfulServerUtils {
 
 		theServer.addHeadersToResponse(theHttpResponse);
 
-		InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get(theResource);
-		if (lastUpdated != null && lastUpdated.isEmpty() == false) {
-			theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
-		}
-
-		TagList list = (TagList) theResource.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
-		if (list != null) {
-			for (Tag tag : list) {
-				if (StringUtils.isNotBlank(tag.getTerm())) {
-					theHttpResponse.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+		if (theResource instanceof IResource) {
+			InstantDt lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
+			if (lastUpdated != null && lastUpdated.isEmpty() == false) {
+				theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated.getValue()));
+			}
+	
+			TagList list = (TagList) ((IResource)theResource).getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
+			if (list != null) {
+				for (Tag tag : list) {
+					if (StringUtils.isNotBlank(tag.getTerm())) {
+						theHttpResponse.addHeader(Constants.HEADER_CATEGORY, tag.toHeaderValue());
+					}
 				}
+			}
+		} else {
+			Date lastUpdated = ((IAnyResource)theResource).getMeta().getLastUpdated();
+			if (lastUpdated != null) {
+				theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated));
 			}
 		}
 
 		Writer writer = getWriter(theHttpResponse, theRespondGzip);
 		try {
-			if (theNarrativeMode == RestfulServer.NarrativeModeEnum.ONLY) {
-				writer.append(theResource.getText().getDiv().getValueAsString());
+			if (theNarrativeMode == RestfulServer.NarrativeModeEnum.ONLY && theResource instanceof IResource) {
+				writer.append(((IResource)theResource).getText().getDiv().getValueAsString());
 			} else {
 				IParser parser = getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
 				parser.setServerBaseUrl(theServerBase);
@@ -267,18 +277,19 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static void addProfileToBundleEntry(FhirContext theContext, IResource theResource, String theServerBase) {
-
-		TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
-		if (tl == null) {
-			tl = new TagList();
-			ResourceMetadataKeyEnum.TAG_LIST.put(theResource, tl);
-		}
-
-		RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
-		String profile = nextDef.getResourceProfile(theServerBase);
-		if (isNotBlank(profile)) {
-			tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
+	public static void addProfileToBundleEntry(FhirContext theContext, IBaseResource theResource, String theServerBase) {
+		if (theResource instanceof IResource) {
+			TagList tl = ResourceMetadataKeyEnum.TAG_LIST.get((IResource) theResource);
+			if (tl == null) {
+				tl = new TagList();
+				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) theResource, tl);
+			}
+	
+			RuntimeResourceDefinition nextDef = theContext.getResourceDefinition(theResource);
+			String profile = nextDef.getResourceProfile(theServerBase);
+			if (isNotBlank(profile)) {
+				tl.add(new Tag(Tag.HL7_ORG_PROFILE_TAG, profile, null));
+			}
 		}
 	}
 
@@ -402,14 +413,14 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
 			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
 		int stausCode = 200;
 		RestfulServerUtils.streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip,
 				theServerBase);
 	}
 
-	public static void validateResourceListNotNull(List<IResource> theResourceList) {
+	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
 			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
 		}

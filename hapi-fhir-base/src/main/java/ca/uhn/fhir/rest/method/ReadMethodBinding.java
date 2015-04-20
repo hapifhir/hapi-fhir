@@ -205,8 +205,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
 			String ifNoneMatch = ((Request)theRequest).getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
-				List<IResource> responseResources = retVal.getResources(0, 1);
-				IResource responseResource = responseResources.get(0);
+				List<IBaseResource> responseResources = retVal.getResources(0, 1);
+				IBaseResource responseResource = responseResources.get(0);
 				
 				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
 				if (responseResource.getId() != null && responseResource.getId().hasVersionIdPart()) {

@@ -2,6 +2,8 @@ package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import ca.uhn.fhir.model.api.TagList;
+
 /*
  * #%L
  * HAPI FHIR - Core Library

@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-public interface ISort {
+public interface ISort<T> {
 
-	IQuery ascending(IParam theParam);
+	IQuery<T> ascending(IParam theParam);
 
-	IQuery defaultOrder(IParam theParam);
+	IQuery<T> defaultOrder(IParam theParam);
 	
-	IQuery descending(IParam theParam);
+	IQuery<T> descending(IParam theParam);
 
 }

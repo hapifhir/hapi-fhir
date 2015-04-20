@@ -1,8 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +38,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,7 +101,7 @@ public class RestfulServerMethodTest {
 	@Test
 	public void testCreateBundleDoesntCreateDoubleEntries() {
 		
-		List<IResource> resources = new ArrayList<IResource>();
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		
 		Patient p = new Patient();
 		p.setId("Patient/1");

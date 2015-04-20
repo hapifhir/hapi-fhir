@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 
 /**
@@ -177,5 +176,29 @@ public interface IParser {
 	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setServerBaseUrl(String theUrl);
+
+	/**
+	 * If set to <code>true<code> (which is the default), resource references containing a version 
+	 * will have the version removed when the resource is encoded. This is generally good behaviour because
+	 * in most situations, references from one resource to another should be to the resource by ID, not
+	 * by ID and version. In some cases though, it may be desirable to preserve the version in resource
+	 * links. In that case, this value should be set to <code>false</code>.
+	 * 
+	 * @param theStripVersionsFromReferences Set this to <code>false<code> to prevent the parser from removing
+	 * resource versions from references.
+	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
+	 */
+	IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences);
+	
+	/**
+	 * If set to <code>true<code> (which is the default), resource references containing a version 
+	 * will have the version removed when the resource is encoded. This is generally good behaviour because
+	 * in most situations, references from one resource to another should be to the resource by ID, not
+	 * by ID and version. In some cases though, it may be desirable to preserve the version in resource
+	 * links. In that case, this value should be set to <code>false</code>.
+	 * 
+	 * @return Returns the parser instance's configuration setting for stripping versions from resource references when encoding. Default is <code>true</code>.
+	 */
+	boolean isStripVersionsFromReferences();
 
 }

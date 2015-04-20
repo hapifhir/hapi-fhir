@@ -106,7 +106,6 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 			retVal.add(("/dt/" + version + "/attachment.xml"));
 			retVal.add(("/dt/" + version + "/contactpoint.xml"));
 			retVal.add(("/dt/" + version + "/elementdefinition.xml"));
-			retVal.add(("/dt/" + version + "/reference.xml"));
 			retVal.add(("/dt/" + version + "/timing.xml"));
 			retVal.add(("/dt/" + version + "/signature.xml"));
 		}

@@ -20,15 +20,17 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.IBaseResource;
+
+import ca.uhn.fhir.model.api.Bundle;
 
 
 public interface IUntypedQuery {
 
-	IQuery forAllResources();
+	IQuery<Bundle> forAllResources();
 
-	IQuery forResource(String theResourceName);
+	IQuery<Bundle> forResource(String theResourceName);
 
-	IQuery forResource(Class<? extends IResource> theClass);
+	IQuery<Bundle> forResource(Class<? extends IBaseResource> theClass);
 	
 }

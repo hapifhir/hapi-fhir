@@ -1,8 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +24,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -284,7 +290,7 @@ public class PagingTest {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
-		List<IResource> retVal = new ArrayList<IResource>();
+		List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 10; i++) {
 			Patient patient = new Patient();
 			patient.setId("" + i);

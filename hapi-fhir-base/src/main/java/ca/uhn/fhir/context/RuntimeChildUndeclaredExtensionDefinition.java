@@ -141,13 +141,21 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 			myDatatypeToDefinition.put(type, next.getValue());
 		}
 
-		// Resource Reference
-		myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), "valueResource");
+		/*
+		 * Resource reference - The correct name is 'valueReference', but 
+		 * we allow for valueResource because some incorrect parsers may use this
+		 */
+		addReferenceBinding(theContext, theClassToElementDefinitions, "valueResource");
+		addReferenceBinding(theContext, theClassToElementDefinitions, "valueReference");
+	}
+
+	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
+		myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition("valueResource", types);
+		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types);
 		def.sealAndInitialize(theContext, theClassToElementDefinitions);
-		myAttributeNameToDefinition.put("valueResource", def);
+		myAttributeNameToDefinition.put(value, def);
 		myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
 		myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
 	}

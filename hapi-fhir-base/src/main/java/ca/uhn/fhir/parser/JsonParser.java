@@ -358,13 +358,14 @@ public class JsonParser extends BaseParser implements IParser {
 		switch (theChildDef.getChildType()) {
 		case ID_DATATYPE: {
 			IIdType value = (IIdType) theNextValue;
-			if (isBlank(value.getIdPart())) {
+			String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
+			if (isBlank(encodedValue)) {
 				break;
 			}
 			if (theChildName != null) {
-				theWriter.write(theChildName, value.getIdPart());
+				theWriter.write(theChildName, encodedValue);
 			} else {
-				theWriter.write(value.getIdPart());
+				theWriter.write(encodedValue);
 			}
 			break;
 		}
@@ -410,8 +411,8 @@ public class JsonParser extends BaseParser implements IParser {
 			} else {
 				theWriter.writeStartObject();
 			}
-			if (theNextValue instanceof ExtensionDt) {
-				theWriter.write("url", ((ExtensionDt) theNextValue).getUrlAsString());
+			if (theNextValue instanceof IBaseExtension) {
+				theWriter.write("url", ((IBaseExtension<?>) theNextValue).getUrl());
 			}
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theNextValue, theWriter, childCompositeDef, theIsSubElementWithinResource);
 			theWriter.writeEnd();
@@ -871,7 +872,7 @@ public class JsonParser extends BaseParser implements IParser {
 				IBaseHasExtensions element = (IBaseHasExtensions) theElement;
 				List<? extends IBaseExtension<?>> ext = element.getExtension();
 				for (IBaseExtension<?> next : ext) {
-					if (next == null || next.isEmpty()) {
+					if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 						continue;
 					}
 					extensions.add(new HeldExtension(next, false));
@@ -1050,11 +1051,17 @@ public class JsonParser extends BaseParser implements IParser {
 			if ("resourceType".equals(nextName)) {
 				continue;
 			} else if ("id".equals(nextName)) {
+				if (theObject.isNull(nextName)) {
+					continue;
+				}
 				elementId = theObject.getString(nextName);
 				if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 					continue;
 				}
 			} else if ("_id".equals(nextName)) {
+				if (theObject.isNull(nextName)) {
+					continue;
+				}
 				// _id is incorrect, but some early examples in the FHIR spec used it
 				elementId = theObject.getString(nextName);
 				continue;
@@ -1082,8 +1089,8 @@ public class JsonParser extends BaseParser implements IParser {
 			IBase object = (IBase) theState.getObject();
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setElementSpecificId(elementId);
-			} else if (object instanceof IResource) {
-				((IResource) object).setId(new IdDt(elementId));
+			} else if (object instanceof IBaseResource) {
+				((IBaseResource) object).getId().setValue(elementId);
 			}
 		}
 	}
@@ -1196,31 +1203,35 @@ public class JsonParser extends BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
-		JsonReader reader = Json.createReader(theReader);
-		JsonObject object = reader.readObject();
-
-		JsonValue resourceTypeObj = object.get("resourceType");
-		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
-		String resourceType = ((JsonString) resourceTypeObj).getString();
-
-		RuntimeResourceDefinition def;
-		if (theResourceType != null) {
-			def = myContext.getResourceDefinition(theResourceType);
-		} else {
-			def = myContext.getResourceDefinition(resourceType);
+		try {
+			JsonReader reader = Json.createReader(theReader);
+			JsonObject object = reader.readObject();
+	
+			JsonValue resourceTypeObj = object.get("resourceType");
+			assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
+			String resourceType = ((JsonString) resourceTypeObj).getString();
+	
+			RuntimeResourceDefinition def;
+			if (theResourceType != null) {
+				def = myContext.getResourceDefinition(theResourceType);
+			} else {
+				def = myContext.getResourceDefinition(resourceType);
+			}
+	
+			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
+			state.enteringNewElement(null, def.getName());
+	
+			parseChildren(object, state);
+	
+			state.endingElement();
+	
+			@SuppressWarnings("unchecked")
+			T retVal = (T) state.getObject();
+	
+			return retVal;
+		} catch (JsonParsingException e) {
+			throw new DataFormatException("Failed to parse JSON: " + e.getMessage(), e);
 		}
-
-		ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true);
-		state.enteringNewElement(null, def.getName());
-
-		parseChildren(object, state);
-
-		state.endingElement();
-
-		@SuppressWarnings("unchecked")
-		T retVal = (T) state.getObject();
-
-		return retVal;
 	}
 
 	@Override

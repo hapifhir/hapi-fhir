@@ -38,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -64,7 +63,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private String myIfNoneExistString;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
-	private final List<IResource> myResources;
+	private final List<IBaseResource> myResources;
 	private final TagList myTagList;
 	private final String myUrlPath;
 
@@ -104,7 +103,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;

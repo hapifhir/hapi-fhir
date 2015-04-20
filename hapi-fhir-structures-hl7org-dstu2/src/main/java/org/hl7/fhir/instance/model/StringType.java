@@ -72,15 +72,6 @@ public class StringType extends PrimitiveType<String> {
 		return getValue();
 	}
 
-	/**
-	 * Returns <code>true</code> if this datatype has no extensions, and has either a <code>null</code> value or an empty ("") value.
-	 */
-	@Override
-	public boolean isEmpty() {
-		boolean retVal = super.isEmpty() && StringUtils.isBlank(getValue());
-		return retVal;
-	}
-
 	@Override
 	protected String parse(String theValue) {
 		return theValue;

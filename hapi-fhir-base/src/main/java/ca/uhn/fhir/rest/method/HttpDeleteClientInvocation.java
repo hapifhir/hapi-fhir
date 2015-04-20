@@ -25,8 +25,8 @@ import java.util.Map;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
@@ -35,7 +35,7 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 	private String myUrlPath;
 	private Map<String, List<String>> myParams;
 
-	public HttpDeleteClientInvocation(IdDt theId) {
+	public HttpDeleteClientInvocation(IIdType theId) {
 		super();
 		myUrlPath = theId.toUnqualifiedVersionless().getValue();
 	}

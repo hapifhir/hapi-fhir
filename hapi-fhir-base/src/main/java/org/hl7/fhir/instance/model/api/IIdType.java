@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -54,5 +56,17 @@ public interface IIdType {
 	boolean hasVersionIdPart();
 
 	String getVersionIdPart();
+
+	IIdType toUnqualified();
+
+	boolean hasResourceType();
+
+	IIdType withResourceType(String theResName);
+
+	String getResourceType();
+
+	IIdType withServerBase(String theServerBase, String theResourceName);
+
+	boolean isAbsolute();
 
 }

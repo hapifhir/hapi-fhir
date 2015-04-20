@@ -43,15 +43,17 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.FhirTerser;
 
 public class RestfulClientFactory implements IRestfulClientFactory {
 
@@ -267,26 +269,34 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myHttpClient = null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void validateServerBase(String theServerBase, HttpClient theHttpClient) {
 
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
 		client.setDontValidateConformance(true);
 		
-		BaseConformance conformance;
+		IBaseResource conformance;
 		try {
-			conformance = client.conformance();
+			@SuppressWarnings("rawtypes")
+			Class implementingClass = myContext.getResourceDefinition("Conformance").getImplementingClass();
+			conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 		} catch (FhirClientConnectionException e) {
 			throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "failedToRetrieveConformance", theServerBase + Constants.URL_TOKEN_METADATA), e);
 		}
 
-		String serverFhirVersionString = conformance.getFhirVersionElement().getValueAsString();
+		FhirTerser t = myContext.newTerser();
+		String serverFhirVersionString = null;
+		Object value = t.getSingleValueOrNull(conformance, "fhirVersion");
+		if (value instanceof IPrimitiveType) {
+			serverFhirVersionString = ((IPrimitiveType<?>) value).getValueAsString();
+		}
 		FhirVersionEnum serverFhirVersionEnum = null;
 		if (StringUtils.isBlank(serverFhirVersionString)) {
 			// we'll be lenient and accept this
 		} else {
 			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
-			} else if (serverFhirVersionString.startsWith("0.4")) {
+			} else if (serverFhirVersionString.startsWith("0.4") || serverFhirVersionString.startsWith("0.5")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
 			} else {
 				// we'll be lenient and accept this

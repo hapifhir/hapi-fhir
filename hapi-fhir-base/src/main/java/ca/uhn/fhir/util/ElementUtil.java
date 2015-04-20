@@ -26,6 +26,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.model.api.ICompositeElement;
+import ca.uhn.fhir.model.api.IElement;
 
 public class ElementUtil {
 
@@ -50,6 +51,19 @@ public class ElementUtil {
 	}
 
 	public static boolean isEmpty(IBase... theElements) {
+		if (theElements == null) {
+			return true;
+		}
+		for (int i = 0; i < theElements.length; i++) {
+			IBase next = theElements[i];
+			if (next != null && !next.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isEmpty(IElement... theElements) {
 		if (theElements == null) {
 			return true;
 		}

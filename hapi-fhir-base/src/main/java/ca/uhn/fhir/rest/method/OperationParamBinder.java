@@ -35,6 +35,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -51,6 +52,7 @@ class OperationParamBinder implements IParameter {
 
 	private final String myName;
 	private Class<?> myParameterType;
+	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
 	private final String myOperationName;
 
@@ -72,30 +74,36 @@ class OperationParamBinder implements IParameter {
 		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
 		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
-		addClientParameter(theSourceClientArgument, theTargetResource, paramChild, paramChildElem);
+		addClientParameter(theContext, theSourceClientArgument, theTargetResource, paramChild, paramChildElem);
 	}
 
-	private void addClientParameter(Object theSourceClientArgument, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
+	private void addClientParameter(FhirContext theContext, Object theSourceClientArgument, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
 		if (theSourceClientArgument instanceof IBaseResource) {
-			IBase parameter = createParameterRepetition(theTargetResource, paramChild, paramChildElem);
+			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem);
 			paramChildElem.getChildByName("resource").getMutator().addValue(parameter, (IBaseResource) theSourceClientArgument);
 		} else if (theSourceClientArgument instanceof IBaseDatatype) {
-			IBase parameter = createParameterRepetition(theTargetResource, paramChild, paramChildElem);
+			IBase parameter = createParameterRepetition(theContext, theTargetResource, paramChild, paramChildElem);
 			paramChildElem.getChildByName("value[x]").getMutator().addValue(parameter, (IBaseDatatype) theSourceClientArgument);
 		} else if (theSourceClientArgument instanceof Collection) {
 			Collection<?> collection = (Collection<?>) theSourceClientArgument;
 			for (Object next : collection) {
-				addClientParameter(next, theTargetResource, paramChild, paramChildElem);
+				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem);
 			}
 		} else {
 			throw new IllegalArgumentException("Don't know how to handle value of type " + theSourceClientArgument.getClass() + " for paramater " + myName);
 		}
 	}
 
-	private IBase createParameterRepetition(IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
+	private IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
-		paramChildElem.getChildByName("name").getMutator().addValue(parameter, new StringDt(myName));
+		IPrimitiveType<?> value;
+		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+			value = (IPrimitiveType<?>) theContext.getElementDefinition("string").newInstance(myName);
+		} else {
+			value = new StringDt(myName);
+		}
+		paramChildElem.getChildByName("name").getMutator().addValue(parameter, value);
 		return parameter;
 	}
 

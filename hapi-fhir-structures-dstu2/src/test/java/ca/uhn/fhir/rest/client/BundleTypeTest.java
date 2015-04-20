@@ -19,6 +19,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -64,7 +65,7 @@ public class BundleTypeTest {
 		p1.addIdentifier().setSystem("urn:system").setValue("value");
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
-		client.transaction().withResources(Arrays.asList((IResource) p1)).execute();
+		client.transaction().withResources(Arrays.asList((IBaseResource) p1)).execute();
 
 		HttpUriRequest value = capt.getValue();
 

@@ -101,6 +101,7 @@ class ModelScanner {
 	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
 	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 	private FhirVersionEnum myVersion;
+	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IElement>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
@@ -338,6 +339,7 @@ class ModelScanner {
 			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
+		myNameToElementDefinitions.put(resourceDef.getName(), resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef);
 	}
 
@@ -654,6 +656,7 @@ class ModelScanner {
 			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass);
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
+		myNameToElementDefinitions.put(resourceName, resourceDef);
 
 		return resourceName;
 	}
@@ -808,6 +811,14 @@ class ModelScanner {
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
 		}
+	}
+
+	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {
+		return myNameToElementDefinitions;
+	}
+
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
+		return myNameToResourceDefinitions;
 	}
 
 }

@@ -42,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -1682,7 +1683,7 @@ class ParserState<T> {
 			switch (target.getChildType()) {
 			case COMPOSITE_DATATYPE: {
 				BaseRuntimeElementCompositeDefinition<?> compositeTarget = (BaseRuntimeElementCompositeDefinition<?>) target;
-				ICompositeDatatype newChildInstance = (ICompositeDatatype) compositeTarget.newInstance();
+				ICompositeType newChildInstance = (ICompositeType) compositeTarget.newInstance();
 				myExtension.setValue(newChildInstance);
 				ElementCompositeState newState = new ElementCompositeState(getPreResourceState(), compositeTarget, newChildInstance);
 				push(newState);
@@ -1714,6 +1715,9 @@ class ParserState<T> {
 			case UNDECL_EXT:
 			case EXTENSION_DECLARED:
 			case CONTAINED_RESOURCES:
+			case CONTAINED_RESOURCE_LIST:
+			case ID_DATATYPE:
+			case PRIMITIVE_XHTML_HL7ORG:
 				break;
 			}
 		}
@@ -1951,6 +1955,17 @@ class ParserState<T> {
 			super.wereBack();
 			if (myTarget == null) {
 				myObject = (T) getCurrentElement();
+			}
+			
+			if (getCurrentElement() instanceof IDomainResource) {
+				IDomainResource elem = (IDomainResource) getCurrentElement();
+				String resourceName = myContext.getResourceDefinition(elem).getName();
+				String versionId = elem.getMeta().getVersionId();
+				if (StringUtils.isNotBlank(versionId)) {
+				elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
+				} else {
+					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart());
+				}
 			}
 		}
 

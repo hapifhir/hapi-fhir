@@ -45,7 +45,6 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -237,12 +236,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			for (Object nextParameter : parameters) {
-				StringDt nextNameDt = (StringDt) t.getSingleValueOrNull((IBase) nextParameter, "name");
+				IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
 				if (nextNameDt == null || nextNameDt.isEmpty()) {
 					ourLog.warn("Ignoring input parameter with no value in Parameters.parameter.name in operation client invocation");
 					continue;
 				}
-				String nextName = nextNameDt.getValue();
+				String nextName = nextNameDt.getValueAsString();
 				if (!params.containsKey(nextName)) {
 					params.put(nextName, new ArrayList<String>());
 				}

@@ -30,4 +30,8 @@ public interface IMetaType extends ICompositeType {
 
 	IMetaType setLastUpdated(Date theHeaderDateValue);
 
+	Date getLastUpdated();
+
+	String getVersionId();
+
 }

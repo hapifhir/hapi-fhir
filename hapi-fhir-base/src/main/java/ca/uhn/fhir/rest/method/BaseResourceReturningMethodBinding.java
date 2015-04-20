@@ -255,7 +255,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		case BUNDLE: {
 
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
-				IResource resource;
+				IBaseResource resource;
 				if (resultObj instanceof IBundleProvider) {
 					IBundleProvider result = (IBundleProvider) resultObj;
 					resource = result.getResources(0, 1).get(0);
@@ -326,7 +326,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				throw new InternalErrorException("Method returned multiple resources");
 			}
 
-			IResource resource = result.getResources(0, 1).get(0);
+			IBaseResource resource = result.getResources(0, 1).get(0);
 
 			for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = theServer.getInterceptors().get(i);

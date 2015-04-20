@@ -458,11 +458,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 		switch (childDef.getChildType()) {
 		case ID_DATATYPE: {
-			IIdType pd = (IIdType) nextValue;
-			String value = pd.getIdPart();
+			IIdType value = (IIdType) nextValue;
+			String encodedValue = "id".equals(childName) ? value.getIdPart() : value.getValue();
 			if (value != null) {
 				theEventWriter.writeStartElement(childName);
-				theEventWriter.writeAttribute("value", value);
+				theEventWriter.writeAttribute("value", encodedValue);
 				encodeExtensionsIfPresent(theResource, theEventWriter, nextValue, theIncludedResource);
 				theEventWriter.writeEndElement();
 			}
@@ -494,7 +494,7 @@ public class XmlParser extends BaseParser implements IParser {
 			IReference ref = (IReference) nextValue;
 			if (!ref.isEmpty()) {
 				theEventWriter.writeStartElement(childName);
-				encodeResourceReferenceToStreamWriter(theEventWriter, ref);
+				encodeResourceReferenceToStreamWriter(theEventWriter, ref, theResource, theIncludedResource);
 				theEventWriter.writeEndElement();
 			}
 			break;
@@ -674,9 +674,11 @@ public class XmlParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IReference theRef) throws XMLStreamException {
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
 		String reference = determineReferenceText(theRef);
 
+		encodeExtensionsIfPresent(theResource, theEventWriter, theRef, theIncludedResource);
+		
 		if (StringUtils.isNotBlank(reference)) {
 			theEventWriter.writeStartElement(RESREF_REFERENCE);
 			theEventWriter.writeAttribute("value", reference);
@@ -890,7 +892,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (IBaseExtension<?> next : theExtensions) {
-			if (next == null) {
+			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;
 			}
 

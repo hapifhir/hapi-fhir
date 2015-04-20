@@ -186,15 +186,15 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 			
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
-				List<IResource> retVal = resources.getResources(theFromIndex, theToIndex);
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
 				int index = theFromIndex;
-				for (IResource nextResource : retVal) {
+				for (IBaseResource nextResource : retVal) {
 					if (nextResource.getId() == null || isBlank(nextResource.getId().getIdPart())) {
 						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 					}
-					if (isBlank(nextResource.getId().getVersionIdPart())) {
-						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
+					if (isBlank(nextResource.getId().getVersionIdPart()) && nextResource instanceof IResource) {
+						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
 						}

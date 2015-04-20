@@ -58,6 +58,28 @@ public class JsonParserDstu2Test {
 		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 	}
 
+	
+	@Test
+	public void testEncodingNullExtension() {
+		Patient p = new Patient();
+		ExtensionDt extension = new ExtensionDt(false, "http://foo#bar");
+		p.addUndeclaredExtension(extension);
+		String str = ourCtx.newJsonParser().encodeResourceToString(p);
+
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+		extension.setValue(new StringDt());
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+		extension.setValue(new StringDt(""));
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+	}
+
 	/**
 	 * See #144 and #146
 	 */

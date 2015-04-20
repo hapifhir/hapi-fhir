@@ -149,14 +149,14 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	 *            The version ID ("e.g. "456")
 	 */
 	public IdDt(String theResourceType, String theId, String theVersionId) {
-		this(null,theResourceType,theId,theVersionId);
+		this(null, theResourceType, theId, theVersionId);
 	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param theBaseUrl
-	 * 	The server base URL (e.g. "http://example.com/fhir")
+	 *            The server base URL (e.g. "http://example.com/fhir")
 	 * @param theResourceType
 	 *            The resource type (e.g. "Patient")
 	 * @param theId
@@ -201,14 +201,12 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
 	}
 
-
-	
 	@Override
 	public boolean equals(Object theArg0) {
 		if (!(theArg0 instanceof IdDt)) {
 			return false;
 		}
-		IdDt id = (IdDt)theArg0;
+		IdDt id = (IdDt) theArg0;
 		return StringUtils.equals(getValueAsString(), id.getValueAsString());
 	}
 
@@ -231,9 +229,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	}
 
 	/**
-	 * Returns only the logical ID part of this ID. For example, given the ID
-	 * "http://example,.com/fhir/Patient/123/_history/456", this method would
-	 * return "123".
+	 * Returns only the logical ID part of this ID. For example, given the ID "http://example,.com/fhir/Patient/123/_history/456", this method would return "123".
 	 */
 	public String getIdPart() {
 		return myUnqualifiedId;
@@ -282,19 +278,19 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 			StringBuilder b = new StringBuilder();
 			if (isNotBlank(myBaseUrl)) {
 				b.append(myBaseUrl);
-				if (myBaseUrl.charAt(myBaseUrl.length()-1)!='/') {
+				if (myBaseUrl.charAt(myBaseUrl.length() - 1) != '/') {
 					b.append('/');
 				}
 			}
-			
+
 			if (isNotBlank(myResourceType)) {
 				b.append(myResourceType);
 			}
-			
+
 			if (b.length() > 0) {
 				b.append('/');
 			}
-			
+
 			b.append(myUnqualifiedId);
 			if (isNotBlank(myUnqualifiedVersionId)) {
 				b.append('/');
@@ -408,10 +404,10 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 			myUnqualifiedId = null;
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
-		} else if (theValue.charAt(0)== '#') {
+		} else if (theValue.charAt(0) == '#') {
 			myValue = theValue;
 			myUnqualifiedId = theValue;
-			myUnqualifiedVersionId=null;
+			myUnqualifiedVersionId = null;
 			myResourceType = null;
 			myHaveComponentParts = true;
 		} else {
@@ -470,9 +466,8 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	}
 
 	/**
-	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one 
-	 * is present in this IdDt. For example, if this IdDt contains the ID "http://foo/Patient/1",
-	 * this method will return a new IdDt containing ID "Patient/1". 
+	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one is present in this IdDt. For example, if this IdDt contains the ID "http://foo/Patient/1", this method will
+	 * return a new IdDt containing ID "Patient/1".
 	 */
 	public IdDt toUnqualified() {
 		return new IdDt(getResourceType(), getIdPart(), getVersionIdPart());
@@ -552,7 +547,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		} else if (theResouce instanceof IResource) {
 			((IResource) theResouce).setId(new IdDt(getValue()));
 		} else if (theResouce instanceof IAnyResource) {
-			((IAnyResource) theResouce).setId(getIdPart());
+			((IAnyResource) theResouce).setId(getValue());
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
@@ -564,11 +559,15 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	public static IdDt of(IBaseResource theResouce) {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
-		} else if (theResouce instanceof IResource) {
-			return ((IResource) theResouce).getId();
-		} else if (theResouce instanceof IAnyResource) {
-			// TODO: implement
-			throw new UnsupportedOperationException();
+		} else if (theResouce instanceof IBaseResource) {
+			IIdType retVal = ((IBaseResource) theResouce).getId();
+			if (retVal == null) {
+				return null;
+			} else if (retVal instanceof IdDt) {
+				return (IdDt) retVal;
+			} else {
+				return new IdDt(retVal.getValue());
+			}
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}

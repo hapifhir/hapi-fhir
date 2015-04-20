@@ -510,9 +510,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (response instanceof IResource) {
 			return BundleProviders.newList((IResource) response);
 		} else if (response instanceof Collection) {
-			List<IResource> retVal = new ArrayList<IResource>();
+			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 			for (Object next : ((Collection<?>) response)) {
-				retVal.add((IResource) next);
+				retVal.add((IBaseResource) next);
 			}
 			return BundleProviders.newList(retVal);
 		} else {

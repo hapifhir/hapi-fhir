@@ -78,12 +78,13 @@ SPAN.headerValue {
 }
 
 SPAN.includeCheckContainer {
-	margin-top: 6px;
-	margin-bottom: 6px;
+	margin-top: 2px;
+	margin-bottom: 2px;
 	margin-right: 0px;
-	margin-left: 15px;
+	margin-left: 2px;
 	white-space: nowrap;
 	line-height: 35px;
+	display: inline-block;
 }
 
 SPAN.includeCheckCheck {

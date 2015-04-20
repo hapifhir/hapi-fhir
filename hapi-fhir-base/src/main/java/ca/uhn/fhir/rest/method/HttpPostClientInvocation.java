@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
@@ -48,7 +47,7 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theTagList, theUrlExtension);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, List<IResource> theResources, BundleTypeEnum theBundleType) {
+	public HttpPostClientInvocation(FhirContext theContext, List<IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
 	}
 

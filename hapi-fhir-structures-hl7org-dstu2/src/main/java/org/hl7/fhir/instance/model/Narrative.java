@@ -292,7 +292,8 @@ public class Narrative extends Element implements INarrative {
    */
   public void setDivAsString(String theString) throws Exception {
     if (StringUtils.isNotBlank(theString)) {
-      div = new XhtmlParser().parseFragment(theString);
+      div = new XhtmlNode();
+      div.setValueAsString(theString);
     } else {
       div = null;
     }
@@ -300,7 +301,7 @@ public class Narrative extends Element implements INarrative {
 
   public String getDivAsString() throws Exception {
     if (div != null && !div.isEmpty()) {
-      return new XhtmlComposer().compose(div);
+      return div.getValueAsString();
     } else {
       return null;
     }

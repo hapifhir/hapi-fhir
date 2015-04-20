@@ -1,23 +1,33 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
-import ca.uhn.fhir.rest.server.BundleInclusionRule;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.*;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.resource.Specimen;
+import ca.uhn.fhir.rest.server.BundleInclusionRule;
 
 public class Dstu2BundleFactoryTest {
     private static FhirContext ourCtx;
-    private List<IResource> myResourceList;
+    private List<IBaseResource> myResourceList;
     private Dstu2BundleFactory myBundleFactory;
 
     @BeforeClass
@@ -68,7 +78,7 @@ public class Dstu2BundleFactoryTest {
         specimen1.setSubject(new ResourceReferenceDt(patient));
         specimen1.getCollection().setCollector(new ResourceReferenceDt(practitioner));
 
-        myResourceList = Arrays.asList(new IResource[]{diagnosticReport});
+        myResourceList = Arrays.asList(new IBaseResource[]{diagnosticReport});
 
         myBundleFactory = new Dstu2BundleFactory(ourCtx);
     }
