@@ -49,13 +49,14 @@ import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 import javax.json.stream.JsonParsingException;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
@@ -88,13 +89,12 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.base.resource.BaseBinary;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
@@ -102,10 +102,6 @@ import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
-/**
- * This class is the FHIR JSON parser/encoder. Users should not interact with this
- * class directly, but should use {@link FhirContext#newJsonParser()} to get an instance.
- */
 public class JsonParser extends BaseParser implements IParser {
 
 	private static final Set<String> BUNDLE_TEXTNODE_CHILDREN_DSTU1;
@@ -302,9 +298,9 @@ public class JsonParser extends BaseParser implements IParser {
 				// IResource nextResource = nextEntry.getResource();
 			}
 
-			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
+			if (nextEntry.getTransactionOperation().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
 				theEventWriter.writeStartObject("transaction");
-				writeOptionalTagWithTextNode(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
+				writeOptionalTagWithTextNode(theEventWriter, "operation", nextEntry.getTransactionOperation().getValue());
 				writeOptionalTagWithTextNode(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEnd();
 			}
@@ -456,7 +452,7 @@ public class JsonParser extends BaseParser implements IParser {
 		case RESOURCE:
 			IBaseResource resource = (IBaseResource) theNextValue;
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
-			encodeResourceToJsonStreamWriter(def, resource, theWriter, theChildName, false);
+			encodeResourceToJsonStreamWriter(def, resource, theWriter, theChildName, true);
 			break;
 		case UNDECL_EXT:
 		default:
@@ -631,12 +627,12 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
-			boolean theContainedResource) throws IOException {
+			boolean theIsSubElementWithinResource) throws IOException {
 		String resourceId = null;
 		if (theResource instanceof IResource) {
 			IResource res = (IResource) theResource;
 			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
-				if (theContainedResource) {
+				if (theIsSubElementWithinResource) {
 					resourceId = res.getId().getIdPart();
 				} else if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 					resourceId = res.getId().getIdPart();
@@ -644,17 +640,17 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		} else if (theResource instanceof IAnyResource) {
 			IAnyResource res = (IAnyResource) theResource;
-			if (theContainedResource && StringUtils.isNotBlank(res.getId())) {
+			if (theIsSubElementWithinResource && StringUtils.isNotBlank(res.getId())) {
 				resourceId = res.getId();
 			}
 		}
 
-		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
+		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theIsSubElementWithinResource, resourceId);
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
-			boolean theContainedResource, String theResourceId) throws IOException {
-		if (!theContainedResource) {
+			boolean theIsSubElementWithinResource, String theResourceId) throws IOException {
+		if (!theIsSubElementWithinResource) {
 			super.containResourcesForEncoding(theResource);
 		}
 
@@ -673,64 +669,55 @@ public class JsonParser extends BaseParser implements IParser {
 
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1) && theResource instanceof IResource) {
 			IResource resource = (IResource) theResource;
-
-			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-			IdDt resourceId = resource.getId();
-			String versionIdPart = resourceId.getVersionIdPart();
-			if (isBlank(versionIdPart)) {
-				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
-			}
-			List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
-			List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
-			TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(resource);
-			if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, profiles) == false) {
+			//Object securityLabelRawObj =
+			List<BaseCodingDt> securityLabels = (List<BaseCodingDt>) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.SECURITY_LABELS);
+			if (!ElementUtil.isEmpty(resource.getId().getVersionIdPart(), ResourceMetadataKeyEnum.UPDATED.get(resource))
+					|| (securityLabels != null && !securityLabels.isEmpty())) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", resource.getId().getVersionIdPart());
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", ResourceMetadataKeyEnum.UPDATED.get(resource));
-				
-				if (profiles != null && profiles.isEmpty()==false) {
-					theEventWriter.writeStartArray("profile");
-					for (IdDt profile : profiles) {
-						if (profile != null && isNotBlank(profile.getValue())) {
-							theEventWriter.write(profile.getValue());
-						}
-					}
-					theEventWriter.writeEnd();
-				}
 
-				if (securityLabels.isEmpty()==false) {
-					theEventWriter.writeStartArray("security");
-					for (BaseCodingDt securityLabel : securityLabels) {
-						theEventWriter.writeStartObject();
-						BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
-						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, def.getChildren(), theContainedResource);
-						theEventWriter.writeEnd();
+				if (securityLabels != null) {
+					if (!securityLabels.isEmpty()) {
+						theEventWriter.writeStartArray("security");
+
+						for (BaseCodingDt securityLabel : securityLabels) {
+							theEventWriter.writeStartObject();
+
+							UriDt system = securityLabel.getSystemElement();
+							if (system != null && !system.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "system", system.getValueAsString());
+
+							CodeDt code = securityLabel.getCodeElement();
+
+							if (code != null && !code.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "code", code.getValueAsString());
+
+							StringDt display = securityLabel.getDisplayElement();
+							if (display != null && !display.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "display", display.getValueAsString());
+
+							/*todo: handle version
+							StringDt version = securityLabel.getVersion();
+							if (version != null && ! version.isEmpty())
+								writeOptionalTagWithTextNode(theEventWriter, "version", version.getValueAsString());
+                            */
+							theEventWriter.writeEnd(); //end the individual security label
+						}
+						theEventWriter.writeEnd(); //end security labels array
 					}
-					theEventWriter.writeEnd();
-				}
-				
-				if (tags != null && tags.isEmpty()==false) {
-					theEventWriter.writeStartArray("tag");
-					for (Tag tag : tags) {
-						theEventWriter.writeStartObject();
-						writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
-						writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());
-						writeOptionalTagWithTextNode(theEventWriter, "display", tag.getLabel());
-						theEventWriter.writeEnd();
-					}
-					theEventWriter.writeEnd();
 				}
 
 				theEventWriter.writeEnd(); //end meta
 			}
 		}
 
-		if (theResource instanceof IBaseBinary) {
-			IBaseBinary bin = (IBaseBinary) theResource;
+		if (theResource instanceof BaseBinary) {
+			BaseBinary bin = (BaseBinary) theResource;
 			theEventWriter.write("contentType", bin.getContentType());
 			theEventWriter.write("content", bin.getContentAsBase64());
 		} else {
-			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theContainedResource);
+			encodeCompositeElementToStreamWriter(theResDef, theResource, theResource, theEventWriter, resDef, theIsSubElementWithinResource);
 		}
 
 		theEventWriter.writeEnd();

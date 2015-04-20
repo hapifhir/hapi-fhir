@@ -1674,7 +1674,7 @@ class ParserState<T> {
 
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState,BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
+		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
 			super(thePreResourceState, theDef, codingDt);
 		}
 
@@ -1716,7 +1716,7 @@ class ParserState<T> {
 					securityLabels = new ArrayList<BaseCodingDt>();
 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 				}
-				BaseCodingDt securityLabel= myContext.getVersion().newCodingDt();
+				BaseCodingDt securityLabel = myContext.getVersion().newCodingDt();
 				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
 				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
 				securityLabels.add(securityLabel);
