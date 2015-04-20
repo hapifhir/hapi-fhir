@@ -134,7 +134,7 @@
 						</goals>
 						<configuration>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<!--<minimizeJar>true</minimizeJar>-->
+							<!-- <minimizeJar>true</minimizeJar>-->
 							<artifactSet>
 								<includes>
 									<include>commons-codec:commons-codec</include>
@@ -147,7 +147,7 @@
 									<include>javax.xml.stream:stax-api</include>
 									<include>javax.servlet:javax.servlet-api</include>
 									<include>org.codehaus.woodstox:stax2-api</include>
-									<include>org.slf4j:slf4j*</include>
+									<!-- <include>org.slf4j:slf4j*</include>  -->
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
 									<include>org.glassfish:javax.json</include>

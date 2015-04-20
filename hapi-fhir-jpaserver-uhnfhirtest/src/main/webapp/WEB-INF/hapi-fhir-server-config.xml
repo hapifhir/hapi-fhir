@@ -24,6 +24,11 @@
 	<util:list id="myServerInterceptors">
 		<ref bean="myLoggingInterceptor"/>
 	</util:list>
+	
+	<!-- 
+	Do some fancy logging to create a nice access log that has details
+	about each incoming request.
+	-->
 	<bean id="myLoggingInterceptor" class="ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor">
 		<property name="loggerName" value="fhirtest.access"/>
 		<property name="messageFormat"

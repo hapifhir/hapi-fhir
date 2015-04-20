@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +25,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.ServerBaseTest.DummyProvider;
 import ca.uhn.fhir.util.RandomServerPortProvider;
 
 public class IncomingRequestAddressStrategyTest {
@@ -99,8 +98,32 @@ public class IncomingRequestAddressStrategyTest {
 
 		startServer(port, contextPath, servletPath);
 
+		httpGet("http://localhost:" + port + "/ctx");
+		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
+
+		httpGet("http://localhost:" + port + "/ctx/");
+		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
+
+		httpGet("http://localhost:" + port + "/ctx/Patient?_pretty=true");
+		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
+
+		httpGet("http://localhost:" + port + "/ctx/Patient/123/_history/222");
+		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
+
 		httpGet("http://localhost:" + port);
 		assertEquals(null, ourLastBase);
+		
+	}
+
+	@Test
+	public void testUnderJettyWithContextPathServletRootContextOnly() throws Exception {
+		int port = RandomServerPortProvider.findFreePort();
+
+		String contextPath = "/ctx";
+		String servletPath = "/";
+
+		startServer(port, contextPath, servletPath);
+		ourStrategy.setServletPath("");
 
 		httpGet("http://localhost:" + port + "/ctx");
 		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
@@ -113,6 +136,37 @@ public class IncomingRequestAddressStrategyTest {
 
 		httpGet("http://localhost:" + port + "/ctx/Patient/123/_history/222");
 		assertEquals("http://localhost:" + port + "/ctx/", ourLastBase);
+
+		httpGet("http://localhost:" + port);
+		assertEquals(null, ourLastBase);
+		
+	}
+
+	
+	@Test
+	public void testUnderJettyWithContextPathServletRoot2() throws Exception {
+		int port = RandomServerPortProvider.findFreePort();
+
+		String contextPath = "/ctx";
+		String servletPath = "/foo/bar/*"; // not /* but still this should work
+
+		startServer(port, contextPath, servletPath);
+
+		httpGet("http://localhost:" + port + "/ctx/foo/bar/Patient?_pretty=true");
+		assertEquals("http://localhost:" + port + "/ctx/foo/bar", ourLastBase);
+		
+		httpGet("http://localhost:" + port + "/ctx/foo/bar");
+		assertEquals("http://localhost:" + port + "/ctx/foo/bar", ourLastBase);
+
+		httpGet("http://localhost:" + port + "/ctx/foo/bar/");
+		assertEquals("http://localhost:" + port + "/ctx/foo/bar", ourLastBase);
+
+		httpGet("http://localhost:" + port + "/ctx/foo/bar/Patient/123/_history/222");
+		assertEquals("http://localhost:" + port + "/ctx/foo/bar", ourLastBase);
+
+		httpGet("http://localhost:" + port);
+		assertEquals(null, ourLastBase);
+		
 	}
 
 	@Test
@@ -168,6 +222,9 @@ public class IncomingRequestAddressStrategyTest {
 
 		@Override
 		protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
+			
+//			ourLog.info("Ctx: {}", theReq.)
+			
 			ourLastBase = ourStrategy.determineServerBase(getServletContext(), theReq);
 			theResp.setContentType("text/plain");
 			theResp.getWriter().append("Success");

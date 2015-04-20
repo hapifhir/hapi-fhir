@@ -7,18 +7,16 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu1;
+import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
+import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -26,7 +24,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -165,18 +163,12 @@ public class TestRestfulServer extends RestfulServer {
 		setPagingProvider(new FifoMemoryPagingProvider(10));
 
 		/*
-		 * Do some fancy logging to create a nice access log that has details
-		 * about each incoming request. 
+		 * Load interceptors for the server from Spring (these are defined in hapi-fhir-server-config.xml
 		 */
 		List<IServerInterceptor> interceptorBeans = myAppCtx.getBean("myServerInterceptors", List.class);
-		for (IServerInterceptor interceptor : interceptorBeans)
+		for (IServerInterceptor interceptor : interceptorBeans) {
 			this.registerInterceptor(interceptor);
-
-		/*LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
-		loggingInterceptor.setLoggerName("fhirtest.access");
-		loggingInterceptor.setMessageFormat("Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]");
-		this.registerInterceptor(loggingInterceptor);
-		*/
+		}
 
 	}
 
