@@ -468,7 +468,7 @@ public class XmlParserDstu2Test {
 		//@formatter:on
 		
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
-		assertEquals(htmlNoNs, p.getText().getDiv().getValueAsString());
+		assertEquals(htmlNs, p.getText().getDiv().getValueAsString());
 	}
 	
 	/**

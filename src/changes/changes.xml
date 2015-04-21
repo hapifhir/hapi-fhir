@@ -136,6 +136,16 @@
 				configures the parser to preserve versions in resource reference links when
 				encoding. By default, these are removed.
 			</action>
+			<action type="fix" issue="155" dev="wdebeau1">
+				Terser's IModelVisitor now supplies to the path to the element. This is
+				an API change, but I don't think there are many users of the IModelVisitor yet.
+				Please let us know if this is a big hardship and we can find an alternate way
+				of making this change.
+			</action>
+			<action type="fix">
+				Prevent server from returning a Content-Location header for search
+				response when using the DSTU2 bundle format
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

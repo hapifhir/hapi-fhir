@@ -4,7 +4,6 @@
    <link rel="self" href="http://localhost:8888/fhir/context/Patient?_pretty=true&amp;_include=Patient.managingOrganization&amp;_pretty=true"/>
    <link rel="fhir-base" href="http://localhost:8888/fhir/context"/>
    <os:totalResults xmlns:os="http://a9.com/-/spec/opensearch/1.1/">2</os:totalResults>
-   <published>2014-06-22T21:37:05-04:00</published>
    <author>
       <name>HAPI FHIR Server</name>
    </author>

@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -59,7 +59,7 @@ public class PatientResourceProvider implements IResourceProvider {
 		patient.getIdentifier().get(0).setValue("00002");
 		patient.addName().addFamily("Test");
 		patient.getName().get(0).addGiven("PatientOne");
-		patient.setGender(AdministrativeGenderCodesEnum.F);
+		patient.setGender(AdministrativeGenderEnum.FEMALE);
 
 		LinkedList<Patient> list = new LinkedList<Patient>();
 		list.add(patient);

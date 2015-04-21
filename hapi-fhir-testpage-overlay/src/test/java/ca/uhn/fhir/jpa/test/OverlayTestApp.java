@@ -8,6 +8,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -129,7 +130,7 @@ public class OverlayTestApp {
 			client.create(p1);
 
 			List<IResource> resources = restServerDstu1.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(OverlayTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
-			client.transaction(resources);
+			client.transaction(new ArrayList<IBaseResource>(resources));
 
 			client.create(p1);
 			client.create(p1);

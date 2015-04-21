@@ -32,7 +32,7 @@ public interface ITransaction {
 	/**
 	 * Use a list of resources as the transaction input
 	 */
-	ITransactionTyped<List<IBaseResource>> withResources(List<IBaseResource> theResources);
+	ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources);
 	
 	/**
 	 * Use a DSTU1 Bundle (Atom) as the transaction input

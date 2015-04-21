@@ -28,6 +28,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 
+import java.util.List;
+
 /**
  * @see FhirTerser#visit(IBaseResource, IModelVisitor)
  */
@@ -39,7 +41,7 @@ public interface IModelVisitor {
 	 * @param theChildDefinition May be null if this is a root element
 	 * @param theDefinition
 	 */
-	void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
+	void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition);
 
 	/**
 	 * 
@@ -48,7 +50,7 @@ public interface IModelVisitor {
 	 * @param theDefinition
 	 * @param theNextExt
 	 */
-	void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt);
+	void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt);
 
 	
 	

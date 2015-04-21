@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.persistence.TypedQuery;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -241,9 +242,9 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 						if (bundle.size() > configuredMax) {
 							oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
 						}
-						List<IResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
-						for (IResource next : resourcesToAdd) {
-							searchBundle.addEntry().setResource(next);
+						List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
+						for (IBaseResource next : resourcesToAdd) {
+							searchBundle.addEntry().setResource((IResource) next);
 						}
 
 						response.addEntry().setResource(searchBundle);

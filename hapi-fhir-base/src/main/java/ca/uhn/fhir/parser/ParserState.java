@@ -683,8 +683,6 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
 				push(new AtomEntryState(myInstance, myResourceType));
-			} else if (theLocalPart.equals("published")) {
-				push(new AtomPrimitiveState(myInstance.getPublished()));
 			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
@@ -900,7 +898,7 @@ class ParserState<T> {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else {
-					((IResource)myInstance).setId(new IdDt(theValue));
+					((IResource) myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
@@ -1393,7 +1391,7 @@ class ParserState<T> {
 					res.getId().setValue('#' + res.getId().getIdPart());
 				}
 			}
-			
+
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(preResCurrentElement);
 			def.getChildByName("contained").getMutator().addValue(preResCurrentElement, res);
@@ -1496,6 +1494,7 @@ class ParserState<T> {
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
+
 		public BaseRuntimeElementCompositeDefinition<?> getDefinition() {
 			return myDefinition;
 		}
@@ -1623,8 +1622,8 @@ class ParserState<T> {
 					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
-				ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
-				push(state);
+					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
+					push(state);
 				}
 				return;
 			}
@@ -1729,10 +1728,9 @@ class ParserState<T> {
 
 	}
 
-
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState,BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
+		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
 			super(thePreResourceState, theDef, codingDt);
 		}
 
@@ -1740,7 +1738,6 @@ class ParserState<T> {
 		public void endingElement() throws DataFormatException {
 			pop();
 		}
-
 
 	}
 
@@ -1761,8 +1758,8 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("versionId")) {
 				push(new MetaVersionElementState(getPreResourceState(), myMap));
-//			} else if (theLocalPart.equals("profile")) {
-//				
+				// } else if (theLocalPart.equals("profile")) {
+				//
 			} else if (theLocalPart.equals("lastUpdated")) {
 				InstantDt updated = new InstantDt();
 				push(new PrimitiveState(getPreResourceState(), updated));
@@ -1774,7 +1771,7 @@ class ParserState<T> {
 					securityLabels = new ArrayList<BaseCodingDt>();
 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 				}
-				BaseCodingDt securityLabel= myContext.getVersion().newCodingDt();
+				BaseCodingDt securityLabel = myContext.getVersion().newCodingDt();
 				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
 				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
 				securityLabels.add(securityLabel);
@@ -1903,23 +1900,20 @@ class ParserState<T> {
 			if (myEntry == null) {
 				myObject = (T) getCurrentElement();
 			}
-			
+
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
-//				if (isNotBlank(entryBaseUrl)) {
-//					nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-//				} else {
-					nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
-//				}
+				// if (isNotBlank(entryBaseUrl)) {
+				// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+				// } else {
+				nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
+				// }
 			}
 
-
 		}
-
-		
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
@@ -1927,9 +1921,9 @@ class ParserState<T> {
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
-				if (myMutator != null) {
-					myMutator.addValue(myTarget, getCurrentElement());
-				}
+			if (myMutator != null) {
+				myMutator.addValue(myTarget, getCurrentElement());
+			}
 		}
 
 	}
@@ -1956,13 +1950,15 @@ class ParserState<T> {
 			if (myTarget == null) {
 				myObject = (T) getCurrentElement();
 			}
-			
+
 			if (getCurrentElement() instanceof IDomainResource) {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
 				String resourceName = myContext.getResourceDefinition(elem).getName();
 				String versionId = elem.getMeta().getVersionId();
-				if (StringUtils.isNotBlank(versionId)) {
-				elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
+				if (StringUtils.isBlank(elem.getId().getIdPart())) {
+					// Resource has no ID
+				} else if (StringUtils.isNotBlank(versionId)) {
+					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
 				} else {
 					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart());
 				}
@@ -2063,12 +2059,12 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
-			
+
 			FhirTerser terser = myContext.newTerser();
 			terser.visit(myInstance, new IModelVisitor() {
 
 				@Override
-				public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 					if (theElement instanceof BaseResourceReferenceDt) {
 						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
 						String ref = nextRef.getReference().getValue();
@@ -2082,7 +2078,7 @@ class ParserState<T> {
 								}
 							}
 						}
-					}else					if (theElement instanceof IReference) {
+					} else if (theElement instanceof IReference) {
 						IReference nextRef = (IReference) theElement;
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
@@ -2099,8 +2095,8 @@ class ParserState<T> {
 				}
 
 				@Override
-				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-					acceptElement(theNextExt.getValue(), null, null);
+				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+					acceptElement(theNextExt.getValue(), null, null, null);
 				}
 			});
 
@@ -2132,7 +2128,7 @@ class ParserState<T> {
 				}
 
 			}
-			
+
 		}
 
 	}
@@ -2547,13 +2543,12 @@ class ParserState<T> {
 			// TODO: this is not very efficient
 			String value = getDt().getValueAsString();
 			myHl7OrgDatatype.setValueAsString(value);
-			
+
 			super.doPop();
 		}
-		
-		
+
 	}
-	
+
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
@@ -2583,7 +2578,7 @@ class ParserState<T> {
 		protected void doPop() {
 			pop();
 		}
-		
+
 		@Override
 		public void endingElement() throws DataFormatException {
 			if (myJsonMode) {

@@ -133,6 +133,11 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
+	protected BundleTypeEnum getResponseBundleType() {
+		return BundleTypeEnum.SEARCHSET;
+	}
+
+	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.BUNDLE;
 	}
@@ -289,13 +294,9 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 
 	}
 
-	public void setResourceType(Class<? extends IResource> resourceType) {
-		this.myDeclaredResourceType = resourceType;
-	}
-
 	@Override
-	public String toString() {
-		return getMethod().toString();
+	protected boolean isAddContentLocationHeader() {
+		return false;
 	}
 
 	private List<String> processWhitelistAndBlacklist(List<String> theQualifiedNames, Set<String> theQualifierWhitelist, Set<String> theQualifierBlacklist) {
@@ -311,6 +312,15 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			retVal.add(next);
 		}
 		return retVal;
+	}
+
+	public void setResourceType(Class<? extends IResource> resourceType) {
+		this.myDeclaredResourceType = resourceType;
+	}
+
+	@Override
+	public String toString() {
+		return getMethod().toString();
 	}
 
 	public static BaseHttpClientInvocation createSearchInvocation(FhirContext theContext, String theResourceName, Map<String, List<String>> theParameters, IdDt theId, String theCompartmentName,
@@ -471,11 +481,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			myDotQualifier = theDotQualifier;
 		}
 
-	}
-
-	@Override
-	protected BundleTypeEnum getResponseBundleType() {
-		return BundleTypeEnum.SEARCHSET;
 	}
 
 }

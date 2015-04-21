@@ -782,13 +782,13 @@ public class JsonParserTest {
 
 	private void parseAndEncode(String name) throws IOException {
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name));
-		ourLog.info(msg);
+//		ourLog.info(msg);
 
 		IParser p = ourCtx.newJsonParser();
 		Profile res = p.parseResource(Profile.class, msg);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
-		ourLog.info(encoded);
+//		ourLog.info(encoded);
 
 		JSON expected = JSONSerializer.toJSON(msg.trim());
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1219,7 +1219,6 @@ public class JsonParserTest {
 		Bundle b = new Bundle();
 
 		InstantDt pub = InstantDt.withCurrentTime();
-		b.setPublished(pub);
 		Thread.sleep(2);
 
 		Patient p1 = new Patient();
@@ -1245,7 +1244,6 @@ public class JsonParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
-		strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
 		strings.addAll(Arrays.asList("this is the summary"));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));

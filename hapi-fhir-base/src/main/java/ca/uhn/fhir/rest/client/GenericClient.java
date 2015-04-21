@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -1413,7 +1412,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
-			IClientResponseHandler binding;
+			IClientResponseHandler<? extends IBase> binding;
 			if (myReturnBundleType != null) {
 				binding = new ResourceResponseHandler(myReturnBundleType, null);
 			} else {
@@ -1581,8 +1580,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myBundle = theResources;
 		}
 
-		public TransactionExecutable(List<IBaseResource> theResources) {
-			myResources = theResources;
+		public TransactionExecutable(List<? extends IBaseResource> theResources) {
+			myResources = new ArrayList<IBaseResource>(theResources);
 		}
 
 		public TransactionExecutable(IBaseBundle theBundle) {
@@ -1619,7 +1618,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public ITransactionTyped<List<IBaseResource>> withResources(List<IBaseResource> theResources) {
+		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
 			return new TransactionExecutable<List<IBaseResource>>(theResources);
 		}

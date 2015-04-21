@@ -76,10 +76,10 @@ public class RestfulServerUtils {
 	}
 
 	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase) throws IOException {
+			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase, boolean theAddContentLocationHeader) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
-		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
+		if (theAddContentLocationHeader && theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
 			IIdType fullId = theResource.getId().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
@@ -413,12 +413,12 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
-		int stausCode = 200;
-		RestfulServerUtils.streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip,
-				theServerBase);
-	}
+//	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+//			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
+//		int stausCode = 200;
+//		RestfulServerUtils.streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip,
+//				theServerBase);
+//	}
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {

@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -444,12 +443,12 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			@Override
-			public List<IResource> getResources(final int theFromIndex, final int theToIndex) {
+			public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
 				final StopWatch timer = new StopWatch();
 				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-				return template.execute(new TransactionCallback<List<IResource>>() {
+				return template.execute(new TransactionCallback<List<IBaseResource>>() {
 					@Override
-					public List<IResource> doInTransaction(TransactionStatus theStatus) {
+					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
 						List<BaseHasResource> resEntities = Lists.newArrayList();
 
 						List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
@@ -471,7 +470,7 @@ public abstract class BaseFhirDao implements IDao {
 							resEntities = resEntities.subList(0, limit);
 						}
 
-						ArrayList<IResource> retVal = new ArrayList<IResource>();
+						ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 						for (BaseHasResource next : resEntities) {
 							RuntimeResourceDefinition type;
 							try {
@@ -514,7 +513,7 @@ public abstract class BaseFhirDao implements IDao {
 		return true;
 	}
 
-	protected List<IResource> loadResourcesById(Set<IdDt> theIncludePids) {
+	protected List<IBaseResource> loadResourcesById(Set<IdDt> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
 		for (IdDt next : theIncludePids) {
 			if (next.isIdPartValidLong()) {
@@ -528,6 +527,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 		}
 
+		if (pids.isEmpty()) {
+			return new ArrayList<IBaseResource>();
+		}
+		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
@@ -538,7 +541,7 @@ public abstract class BaseFhirDao implements IDao {
 		// }
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (ResourceTable next : q.getResultList()) {
 			IResource resource = (IResource) toResource(next);
 			retVal.add(resource);

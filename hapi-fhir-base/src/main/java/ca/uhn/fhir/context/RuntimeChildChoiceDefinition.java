@@ -85,29 +85,34 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		for (Class<? extends IBase> next : myChoiceTypes) {
 
 			String elementName;
-			String alternateElementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				alternateElementName = getElementName() + "Reference";
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
 				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+				
+				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
+				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
+				
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
 			}
 
 			myNameToChildDefinition.put(elementName, nextDef);
-			if (alternateElementName != null) {
-				myNameToChildDefinition.put(alternateElementName, nextDef);
-			}
 			
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
 				myDatatypeToElementDefinition.put(refType, nextDef);
-				alternateElementName = getElementName() + "Reference";
+				
+				String alternateElementName;
+				if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+					alternateElementName = getElementName() + "Resource";
+				} else {
+					alternateElementName = getElementName() + "Reference";
+				}
 				myDatatypeToElementName.put(refType, alternateElementName);
 			}
 			

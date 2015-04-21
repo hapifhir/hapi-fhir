@@ -314,7 +314,6 @@ public class XmlParserTest {
 		b.getCategories().addTag("http://hl7.org/fhir/tag", "http://hl7.org/fhir/tag/message", "Message");
 
 		InstantDt pub = InstantDt.withCurrentTime();
-		b.setPublished(pub);
 		Thread.sleep(2);
 
 		Patient p1 = new Patient();
@@ -340,7 +339,6 @@ public class XmlParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
-		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.add("<category term=\"http://hl7.org/fhir/tag/message\" label=\"Message\" scheme=\"http://hl7.org/fhir/tag\"/>");
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</Patient>", "<summary type=\"xhtml\">", "<div", "</entry>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>", "</entry>"));
@@ -380,7 +378,6 @@ public class XmlParserTest {
 		b.getCategories().addTag("http://hl7.org/fhir/tag", "http://hl7.org/fhir/tag/message", "Message");
 
 		InstantDt pub = InstantDt.withCurrentTime();
-		b.setPublished(pub);
 		Thread.sleep(2);
 
 		Patient p1 = new Patient();
@@ -406,7 +403,6 @@ public class XmlParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
-		strings.addAll(Arrays.asList("<published>", pub.getValueAsString(), "</published>"));
 		strings.add("<category term=\"http://hl7.org/fhir/tag/message\" label=\"Message\" scheme=\"http://hl7.org/fhir/tag\"/>");
 		strings.addAll(Arrays.asList("<entry>", "<id>1</id>", "</Patient>", "<summary type=\"xhtml\">", "<div", "</entry>"));
 		strings.addAll(Arrays.asList("<entry>", "<id>2</id>", "<link rel=\"alternate\" href=\"http://foo/bar\"/>", "<link rel=\"search\" href=\"http://foo/bar/search\"/>", "</entry>"));

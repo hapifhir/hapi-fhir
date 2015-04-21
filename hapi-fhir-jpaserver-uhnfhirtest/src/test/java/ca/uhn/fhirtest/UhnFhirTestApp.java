@@ -1,10 +1,12 @@
 package ca.uhn.fhirtest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -65,7 +67,8 @@ public class UhnFhirTestApp {
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
 			client.create(p1);
 
-			List<IResource> resources = ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
+			List<IBaseResource> resources;
+			resources = new ArrayList<IBaseResource>(ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources());
 			client.transaction(resources);
 
 //			for (int i = 0; i < 1000; i++) {

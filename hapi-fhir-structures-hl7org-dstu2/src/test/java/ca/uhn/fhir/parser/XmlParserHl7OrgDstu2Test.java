@@ -1062,7 +1062,7 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
 		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
-		assertEquals("<div>John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -1197,6 +1197,8 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient1 = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 		String encoded1 = ourCtx.newXmlParser().encodeResourceToString(patient1);
 
+		ourLog.info(encoded1);
+		
 		Diff d = new Diff(new StringReader(msg), new StringReader(encoded1));
 		assertTrue(d.toString(), d.identical());
 

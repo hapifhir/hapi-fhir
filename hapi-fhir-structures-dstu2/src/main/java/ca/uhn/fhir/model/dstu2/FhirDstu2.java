@@ -105,7 +105,7 @@ public class FhirDstu2 implements IFhirVersion {
 	public Class<? extends BaseContainedDt> getContainedType() {
 		return ContainedDt.class;
 	}
-	
+
 	@Override
 	public BaseCodingDt newCodingDt() {
 		return new CodingDt();

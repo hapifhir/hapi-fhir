@@ -490,7 +490,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase());
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
 		}
 	}
 

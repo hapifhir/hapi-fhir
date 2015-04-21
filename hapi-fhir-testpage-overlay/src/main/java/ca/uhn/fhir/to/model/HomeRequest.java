@@ -49,7 +49,9 @@ public class HomeRequest {
 		}
 
 		if (retVal.contains("${serverBase}")) {
-			String base = new IncomingRequestAddressStrategy().determineServerBase(theRequest.getServletContext(), theRequest);
+			IncomingRequestAddressStrategy strategy = new IncomingRequestAddressStrategy();
+			strategy.setServletPath("");
+			String base = strategy.determineServerBase(theRequest.getServletContext(), theRequest);
 			if (base.endsWith("/")) {
 				base = base.substring(0, base.length() - 1);
 			}

@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -262,9 +263,9 @@ public class FhirSystemDaoDstu2Test {
 		IBundleProvider history = ourPatientDao.history(id, null);
 		assertEquals(2, history.size());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)).getValue());
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(1, 1).get(0)));
 
 	}
 
@@ -769,9 +770,9 @@ public class FhirSystemDaoDstu2Test {
 
 	static void doDeleteEverything(IFhirSystemDao<Bundle> systemDao) {
 		IBundleProvider all = systemDao.history(null);
-		List<IResource> allRes = all.getResources(0, all.size());
-		for (IResource iResource : allRes) {
-			if (ResourceMetadataKeyEnum.DELETED_AT.get(iResource) == null) {
+		List<IBaseResource> allRes = all.getResources(0, all.size());
+		for (IBaseResource iResource : allRes) {
+			if (ResourceMetadataKeyEnum.DELETED_AT.get((IResource) iResource) == null) {
 				ourLog.info("Deleting: {}", iResource.getId());
 				
 				Bundle b = new Bundle();

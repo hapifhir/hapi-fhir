@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -453,8 +454,8 @@ public class FhirResourceDaoDstu2Test {
 
 		IBundleProvider history = ourPatientDao.history(null);
 		assertEquals(4 + initialHistory, history.size());
-		List<IResource> resources = history.getResources(0, 4);
-		assertNotNull(resources.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
+		List<IBaseResource> resources = history.getResources(0, 4);
+		assertNotNull(((IResource) resources.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
 
 		try {
 			ourPatientDao.delete(id2);
@@ -534,9 +535,9 @@ public class FhirResourceDaoDstu2Test {
 		IBundleProvider history = ourPatientDao.history(id, null);
 		assertEquals(2, history.size());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)).getValue());
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(1, 1).get(0)));
 
 	}
 
@@ -879,7 +880,7 @@ public class FhirResourceDaoDstu2Test {
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = ourOrganizationDao.search(map);
 		assertEquals(2, resultsP.size());
-		List<IResource> results = resultsP.getResources(0, resultsP.size());
+		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());
 		assertEquals(Organization.class, results.get(0).getClass());
 		assertEquals(Patient.class, results.get(1).getClass());
@@ -2162,15 +2163,15 @@ public class FhirResourceDaoDstu2Test {
 
 		assertEquals(2, historyBundle.size());
 
-		List<IResource> history = historyBundle.getResources(0, 2);
+		List<IBaseResource> history = historyBundle.getResources(0, 2);
 		assertEquals("1", history.get(1).getId().getVersionIdPart());
 		assertEquals("2", history.get(0).getId().getVersionIdPart());
-		assertEquals(published, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(published, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(updated, history.get(1).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals(published, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
+		assertEquals(published, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
+		assertEquals(updated, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(updated2, history.get(0).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals(published2, ((IResource)history.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
+		assertEquals(updated2, ((IResource)history.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
 
 	}
@@ -2313,8 +2314,8 @@ public class FhirResourceDaoDstu2Test {
 
 	private List<IdDt> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IdDt> retVal = new ArrayList<IdDt>();
-		for (IResource next : theFound.getResources(0, theFound.size())) {
-			retVal.add(next.getId().toUnqualifiedVersionless());
+		for (IBaseResource next : theFound.getResources(0, theFound.size())) {
+			retVal.add((IdDt) next.getId().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -2353,9 +2354,9 @@ public class FhirResourceDaoDstu2Test {
 		
 		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
 		ourLog.info("Initial size: " + value.size());
-		for (IResource next : value.getResources(0, value.size())) {
+		for (IBaseResource next : value.getResources(0, value.size())) {
 			ourLog.info("Deleting: {}", next.getId());
-			ourDeviceDao.delete(next.getId());
+			ourDeviceDao.delete((IdDt) next.getId());
 		}
 
 		value = ourDeviceDao.search(new SearchParameterMap());
@@ -2365,7 +2366,7 @@ public class FhirResourceDaoDstu2Test {
 		}
 		assertEquals(0, value.size());
 
-		List<IResource> res = value.getResources(0, 0);
+		List<IBaseResource> res = value.getResources(0, 0);
 		assertTrue(res.isEmpty());
 
 	}

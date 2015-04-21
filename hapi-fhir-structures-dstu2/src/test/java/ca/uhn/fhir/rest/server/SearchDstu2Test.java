@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +49,7 @@ public class SearchDstu2Test {
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
 
