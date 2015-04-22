@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world.
  */
 @DatatypeDef(name="Address")
-public class Address extends Type implements ICompositeType {
+public class AddressType extends Type implements ICompositeType {
 
     public enum AddressUse {
         /**
@@ -202,7 +202,7 @@ P.O. Box number, delivery hints, and similar address information.
 
     private static final long serialVersionUID = -470351694L;
 
-    public Address() {
+    public AddressType() {
       super();
     }
 
@@ -229,7 +229,7 @@ P.O. Box number, delivery hints, and similar address information.
     /**
      * @param value {@link #use} (The purpose of this address.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
-    public Address setUseElement(Enumeration<AddressUse> value) { 
+    public AddressType setUseElement(Enumeration<AddressUse> value) { 
       this.use = value;
       return this;
     }
@@ -244,7 +244,7 @@ P.O. Box number, delivery hints, and similar address information.
     /**
      * @param value The purpose of this address.
      */
-    public Address setUse(AddressUse value) { 
+    public AddressType setUse(AddressUse value) { 
       if (value == null)
         this.use = null;
       else {
@@ -278,7 +278,7 @@ P.O. Box number, delivery hints, and similar address information.
     /**
      * @param value {@link #text} (A full text representation of the address.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
      */
-    public Address setTextElement(StringType value) { 
+    public AddressType setTextElement(StringType value) { 
       this.text = value;
       return this;
     }
@@ -293,7 +293,7 @@ P.O. Box number, delivery hints, and similar address information.
     /**
      * @param value A full text representation of the address.
      */
-    public Address setText(String value) { 
+    public AddressType setText(String value) { 
       if (Utilities.noString(value))
         this.text = null;
       else {
@@ -340,7 +340,7 @@ P.O. Box number, delivery hints, and similar address information.)
      * @param value {@link #line} (This component contains the house number, apartment number, street name, street direction, 
 P.O. Box number, delivery hints, and similar address information.)
      */
-    public Address addLine(String value) { //1
+    public AddressType addLine(String value) { //1
       StringType t = new StringType();
       t.setValue(value);
       if (this.line == null)
@@ -385,7 +385,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value {@link #city} (The name of the city, town, village or other community or delivery center.). This is the underlying object with id, value and extensions. The accessor "getCity" gives direct access to the value
      */
-    public Address setCityElement(StringType value) { 
+    public AddressType setCityElement(StringType value) { 
       this.city = value;
       return this;
     }
@@ -400,7 +400,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value The name of the city, town, village or other community or delivery center.
      */
-    public Address setCity(String value) { 
+    public AddressType setCity(String value) { 
       if (Utilities.noString(value))
         this.city = null;
       else {
@@ -434,7 +434,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value {@link #state} (Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).). This is the underlying object with id, value and extensions. The accessor "getState" gives direct access to the value
      */
-    public Address setStateElement(StringType value) { 
+    public AddressType setStateElement(StringType value) { 
       this.state = value;
       return this;
     }
@@ -449,7 +449,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      */
-    public Address setState(String value) { 
+    public AddressType setState(String value) { 
       if (Utilities.noString(value))
         this.state = null;
       else {
@@ -483,7 +483,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value {@link #postalCode} (A postal code designating a region defined by the postal service.). This is the underlying object with id, value and extensions. The accessor "getPostalCode" gives direct access to the value
      */
-    public Address setPostalCodeElement(StringType value) { 
+    public AddressType setPostalCodeElement(StringType value) { 
       this.postalCode = value;
       return this;
     }
@@ -498,7 +498,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value A postal code designating a region defined by the postal service.
      */
-    public Address setPostalCode(String value) { 
+    public AddressType setPostalCode(String value) { 
       if (Utilities.noString(value))
         this.postalCode = null;
       else {
@@ -532,7 +532,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value {@link #country} (Country - a nation as commonly understood or generally accepted.). This is the underlying object with id, value and extensions. The accessor "getCountry" gives direct access to the value
      */
-    public Address setCountryElement(StringType value) { 
+    public AddressType setCountryElement(StringType value) { 
       this.country = value;
       return this;
     }
@@ -547,7 +547,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value Country - a nation as commonly understood or generally accepted.
      */
-    public Address setCountry(String value) { 
+    public AddressType setCountry(String value) { 
       if (Utilities.noString(value))
         this.country = null;
       else {
@@ -577,7 +577,7 @@ P.O. Box number, delivery hints, and similar address information.)
     /**
      * @param value {@link #period} (Time period when address was/is in use.)
      */
-    public Address setPeriod(Period value) { 
+    public AddressType setPeriod(Period value) { 
       this.period = value;
       return this;
     }
@@ -594,8 +594,8 @@ P.O. Box number, delivery hints, and similar address information.)
         childrenList.add(new Property("period", "Period", "Time period when address was/is in use.", 0, java.lang.Integer.MAX_VALUE, period));
       }
 
-      public Address copy() {
-        Address dst = new Address();
+      public AddressType copy() {
+        AddressType dst = new AddressType();
         copyValues(dst);
         dst.use = use == null ? null : use.copy();
         dst.text = text == null ? null : text.copy();
@@ -612,7 +612,7 @@ P.O. Box number, delivery hints, and similar address information.)
         return dst;
       }
 
-      protected Address typedCopy() {
+      protected AddressType typedCopy() {
         return copy();
       }
 
@@ -620,9 +620,9 @@ P.O. Box number, delivery hints, and similar address information.)
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof Address))
+        if (!(other instanceof AddressType))
           return false;
-        Address o = (Address) other;
+        AddressType o = (AddressType) other;
         return compareDeep(use, o.use, true) && compareDeep(text, o.text, true) && compareDeep(line, o.line, true)
            && compareDeep(city, o.city, true) && compareDeep(state, o.state, true) && compareDeep(postalCode, o.postalCode, true)
            && compareDeep(country, o.country, true) && compareDeep(period, o.period, true);
@@ -632,9 +632,9 @@ P.O. Box number, delivery hints, and similar address information.)
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof Address))
+        if (!(other instanceof AddressType))
           return false;
-        Address o = (Address) other;
+        AddressType o = (AddressType) other;
         return compareValues(use, o.use, true) && compareValues(text, o.text, true) && compareValues(line, o.line, true)
            && compareValues(city, o.city, true) && compareValues(state, o.state, true) && compareValues(postalCode, o.postalCode, true)
            && compareValues(country, o.country, true);

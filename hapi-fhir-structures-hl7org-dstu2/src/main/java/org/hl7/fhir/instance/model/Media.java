@@ -228,9 +228,9 @@ public class Media extends DomainResource {
     /**
      * The actual content of the media - inline or by direct reference to the media source file.
      */
-    @Child(name = "content", type = {Attachment.class}, order = 12, min = 1, max = 1)
+    @Child(name = "content", type = {AttachmentType.class}, order = 12, min = 1, max = 1)
     @Description(shortDefinition="Actual Media - reference or data", formalDefinition="The actual content of the media - inline or by direct reference to the media source file." )
-    protected Attachment content;
+    protected AttachmentType content;
 
     private static final long serialVersionUID = 1930988698L;
 
@@ -238,7 +238,7 @@ public class Media extends DomainResource {
       super();
     }
 
-    public Media(Enumeration<MediaType> type, Attachment content) {
+    public Media(Enumeration<MediaType> type, AttachmentType content) {
       super();
       this.type = type;
       this.content = content;
@@ -731,12 +731,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #content} (The actual content of the media - inline or by direct reference to the media source file.)
      */
-    public Attachment getContent() { 
+    public AttachmentType getContent() { 
       if (this.content == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.content");
         else if (Configuration.doAutoCreate())
-          this.content = new Attachment(); // cc
+          this.content = new AttachmentType(); // cc
       return this.content;
     }
 
@@ -747,7 +747,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #content} (The actual content of the media - inline or by direct reference to the media source file.)
      */
-    public Media setContent(Attachment value) { 
+    public Media setContent(AttachmentType value) { 
       this.content = value;
       return this;
     }

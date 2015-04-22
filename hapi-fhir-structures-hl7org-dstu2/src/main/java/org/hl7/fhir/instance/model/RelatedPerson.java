@@ -195,16 +195,16 @@ public class RelatedPerson extends DomainResource {
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {Address.class}, order = 6, min = 0, max = 1)
+    @Child(name = "address", type = {AddressType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
-    protected Address address;
+    protected AddressType address;
 
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {Attachment.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {AttachmentType.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
-    protected List<Attachment> photo;
+    protected List<AttachmentType> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
@@ -428,12 +428,12 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public Address getAddress() { 
+    public AddressType getAddress() { 
       if (this.address == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create RelatedPerson.address");
         else if (Configuration.doAutoCreate())
-          this.address = new Address(); // cc
+          this.address = new AddressType(); // cc
       return this.address;
     }
 
@@ -444,7 +444,7 @@ public class RelatedPerson extends DomainResource {
     /**
      * @param value {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public RelatedPerson setAddress(Address value) { 
+    public RelatedPerson setAddress(AddressType value) { 
       this.address = value;
       return this;
     }
@@ -452,16 +452,16 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #photo} (Image of the person.)
      */
-    public List<Attachment> getPhoto() { 
+    public List<AttachmentType> getPhoto() { 
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       return this.photo;
     }
 
     public boolean hasPhoto() { 
       if (this.photo == null)
         return false;
-      for (Attachment item : this.photo)
+      for (AttachmentType item : this.photo)
         if (!item.isEmpty())
           return true;
       return false;
@@ -471,10 +471,10 @@ public class RelatedPerson extends DomainResource {
      * @return {@link #photo} (Image of the person.)
      */
     // syntactic sugar
-    public Attachment addPhoto() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addPhoto() { //3
+      AttachmentType t = new AttachmentType();
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       this.photo.add(t);
       return t;
     }
@@ -535,8 +535,8 @@ public class RelatedPerson extends DomainResource {
         dst.gender = gender == null ? null : gender.copy();
         dst.address = address == null ? null : address.copy();
         if (photo != null) {
-          dst.photo = new ArrayList<Attachment>();
-          for (Attachment i : photo)
+          dst.photo = new ArrayList<AttachmentType>();
+          for (AttachmentType i : photo)
             dst.photo.add(i.copy());
         };
         dst.period = period == null ? null : period.copy();

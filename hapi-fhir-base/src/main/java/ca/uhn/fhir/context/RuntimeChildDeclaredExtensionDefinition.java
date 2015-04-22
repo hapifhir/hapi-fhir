@@ -32,9 +32,9 @@ import java.util.Set;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
@@ -48,7 +48,8 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	private String myExtensionUrl;
 	private boolean myModifier;
 	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToChildExtension;
-	private Object myInstanceConstructorArguments;
+	private volatile Object myInstanceConstructorArguments;
+	private Class<?> myEnumerationType;
 
 	/**
 	 * @param theBoundTypeBinder
@@ -57,7 +58,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	 * @param theDefinedLocally
 	 *            See {@link Extension#definedLocally()}
 	 */
-	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IBase> theChildType, IValueSetEnumBinder<Enum<?>> theBoundTypeBinder)
+	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl, Class<? extends IBase> theChildType, Object theBoundTypeBinder)
 			throws ConfigurationException {
 		super(theField, theChild, theDescriptionAnnotation, theElementName);
 		assert isNotBlank(theExtensionUrl);
@@ -70,7 +71,16 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 
 	@Override
 	public Object getInstanceConstructorArguments() {
-		return myInstanceConstructorArguments;
+		Object retVal = myInstanceConstructorArguments;
+		if (retVal == null && myEnumerationType != null) {
+			retVal = RuntimeChildPrimitiveEnumerationDatatypeDefinition.toEnumFactory(myEnumerationType);
+			myInstanceConstructorArguments = retVal;
+		}
+		return retVal;
+	}
+
+	public void setEnumerationType(Class<?> theEnumerationType) {
+		myEnumerationType = theEnumerationType;
 	}
 
 	@Override
@@ -147,7 +157,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myUrlToChildExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
-
+		
 		BaseRuntimeElementDefinition<?> elementDef = theClassToElementDefinitions.get(myChildType);
 		if (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
 			myDatatypeChildName = "value" + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);

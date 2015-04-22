@@ -76,6 +76,7 @@ public class XmlParserTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 
+
 	/**
 	 * see #144 and #146
 	 */

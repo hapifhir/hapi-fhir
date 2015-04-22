@@ -246,7 +246,7 @@ public class ResourceFactory extends Factory {
         if ("Meta".equals(name))
             return new Meta();
         if ("Address".equals(name))
-            return new Address();
+            return new AddressType();
         if ("Reference".equals(name))
             return new Reference();
         if ("Quantity".equals(name))
@@ -254,7 +254,7 @@ public class ResourceFactory extends Factory {
         if ("Period".equals(name))
             return new Period();
         if ("Attachment".equals(name))
-            return new Attachment();
+            return new AttachmentType();
         if ("Duration".equals(name))
             return new Duration();
         if ("Count".equals(name))

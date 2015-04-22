@@ -29,16 +29,18 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.dstu2hl7org.Dstu2Hl7OrgBundleFactory;
 
 /**
  * Initially contributed by Alexander Kley for bug #29
  */
-public class ContainedResourceEncodingTest {
+public class ContainedResourceEncodingDstu2Hl7OrgTest {
 
-	private static Logger logger = LoggerFactory.getLogger(ContainedResourceEncodingTest.class);
+	private static Logger logger = LoggerFactory.getLogger(ContainedResourceEncodingDstu2Hl7OrgTest.class);
 
-	private FhirContext ctx;
+	private FhirContext ourCtx;
 
 	private Composition comp;
 
@@ -57,7 +59,7 @@ public class ContainedResourceEncodingTest {
 		initPatient();
 		initAuthor();
 		initComposition();
-		this.ctx = new FhirContext();
+		this.ourCtx = new FhirContext();
 
 	}
 
@@ -115,9 +117,9 @@ public class ContainedResourceEncodingTest {
 		/**
 		 * This works fine, although patient instance is modifing from encoder
 		 */
-		final String expectedPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
+		final String expectedPatientXml = this.ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
 		logger.debug("[xmlEncoding] first encoding: {}", expectedPatientXml);
-		final String actualPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
+		final String actualPatientXml = this.ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
 		// second encoding - xml is corrupt - i.e.: patient content 4 times! should be the same as after first encoding!
 		logger.debug("[xmlEncoding] second encoding: {}", actualPatientXml);
 
@@ -129,7 +131,7 @@ public class ContainedResourceEncodingTest {
 	@Test
 	public void testComposition() {
 
-		IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
+		IParser parser = this.ourCtx.newXmlParser().setPrettyPrint(true);
 		
 		assertEquals(0, this.comp.getContained().size());
 		
@@ -194,10 +196,13 @@ public class ContainedResourceEncodingTest {
         
         List<IBaseResource> list = new ArrayList<IBaseResource>();
 		list.add(dr);
-		Bundle bundle = null; // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+
+		Dstu2Hl7OrgBundleFactory bf = new Dstu2Hl7OrgBundleFactory(ourCtx);
+		bf.initializeBundleFromResourceList("Author", list, "http://foo", "http://foo", 100, BundleTypeEnum.COLLECTION);
+		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) bf.getResourceBundle(); // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
         
-        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
-        String xml = parser.encodeBundleToString(bundle);
+        IParser parser = this.ourCtx.newXmlParser().setPrettyPrint(true);
+        String xml = parser.encodeResourceToString(bundle);
         Assert.assertTrue(xml.contains("Mueller"));
         
 	}
@@ -231,12 +236,15 @@ public class ContainedResourceEncodingTest {
         observation.getPerformer().addAll(performers);
         
         
-        List<IAnyResource> list = new ArrayList<IAnyResource>();
+        List<IBaseResource> list = new ArrayList<IBaseResource>();
 		list.add(dr);
-		Bundle bundle = null; // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
+		
+		Dstu2Hl7OrgBundleFactory bf = new Dstu2Hl7OrgBundleFactory(ourCtx);
+		bf.initializeBundleFromResourceList("Author", list, "http://foo", "http://foo", 100, BundleTypeEnum.COLLECTION);
+		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) bf.getResourceBundle(); // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
         
-        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
-        String xml = parser.encodeBundleToString(bundle);
+        IParser parser = this.ourCtx.newXmlParser().setPrettyPrint(true);
+        String xml = parser.encodeResourceToString(bundle);
         Assert.assertTrue(xml.contains("Mueller"));
         
 	}

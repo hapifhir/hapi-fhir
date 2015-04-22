@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -62,7 +63,7 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 				}
 			}
 			
-			if (IResource.class.isAssignableFrom(next) || IDatatype.class.isAssignableFrom(next) || IBaseDatatype.class.isAssignableFrom(next)) {
+			if (IResource.class.isAssignableFrom(next) || IDatatype.class.isAssignableFrom(next) || IBaseDatatype.class.isAssignableFrom(next) || IReference.class.isAssignableFrom(next)) {
 				choiceTypes.add(next);
 			}
 		}

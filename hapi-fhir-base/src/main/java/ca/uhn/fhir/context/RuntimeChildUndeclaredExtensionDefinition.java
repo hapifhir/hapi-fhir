@@ -31,6 +31,7 @@ import java.util.Set;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IReference;
 
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
@@ -70,7 +71,9 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		return myDatatypeToDefinition.get(theType);
+		Class<? extends IBase> type = theType;
+//		if (IReference.type)
+		return myDatatypeToDefinition.get(type);
 	}
 
 	@Override
@@ -117,6 +120,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
+		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
@@ -124,8 +128,13 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				// System.out.println();
 				// }
 
+				myDatatypeToDefinition.put(next.getImplementingClass(), next);
+
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
 					String attrName = createExtensionChildName(next);
+					if (datatypeAttributeNameToDefinition.containsKey(attrName)) {
+						throw new ConfigurationException("More than one child matches attribute name " + attrName);
+					}
 					datatypeAttributeNameToDefinition.put(attrName, next);
 					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);
 					myDatatypeToAttributeName.put(next.getImplementingClass(), attrName);
@@ -135,13 +144,12 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		myAttributeNameToDefinition = datatypeAttributeNameToDefinition;
 
-		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
-			@SuppressWarnings("unchecked")
-			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
-			myDatatypeToDefinition.put(type, next.getValue());
-		}
+//		for (Entry<String, BaseRuntimeElementDefinition<?>> next : myAttributeNameToDefinition.entrySet()) {
+//			@SuppressWarnings("unchecked")
+//			Class<? extends IDatatype> type = (Class<? extends IDatatype>) next.getValue().getImplementingClass();
+//			myDatatypeToDefinition.put(type, next.getValue());
+//		}
 
 		/*
 		 * Resource reference - The correct name is 'valueReference' in DSTU2 and 'valueResource' in DSTU1

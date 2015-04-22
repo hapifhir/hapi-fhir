@@ -915,6 +915,9 @@ public class XmlParser extends BaseParser implements IParser {
 					}
 				} else {
 					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					}
 				}
 				encodeChildElementToStreamWriter(theResource, theWriter, value, childName, childDef, null, theIncludedResource);
 			}

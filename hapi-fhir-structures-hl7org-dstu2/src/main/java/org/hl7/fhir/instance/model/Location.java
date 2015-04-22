@@ -461,9 +461,9 @@ public class Location extends DomainResource {
     /**
      * Physical location.
      */
-    @Child(name = "address", type = {Address.class}, order = 5, min = 0, max = 1)
+    @Child(name = "address", type = {AddressType.class}, order = 5, min = 0, max = 1)
     @Description(shortDefinition="Physical location", formalDefinition="Physical location." )
-    protected Address address;
+    protected AddressType address;
 
     /**
      * Physical form of the location, e.g. building, room, vehicle, road.
@@ -708,12 +708,12 @@ public class Location extends DomainResource {
     /**
      * @return {@link #address} (Physical location.)
      */
-    public Address getAddress() { 
+    public AddressType getAddress() { 
       if (this.address == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Location.address");
         else if (Configuration.doAutoCreate())
-          this.address = new Address(); // cc
+          this.address = new AddressType(); // cc
       return this.address;
     }
 
@@ -724,7 +724,7 @@ public class Location extends DomainResource {
     /**
      * @param value {@link #address} (Physical location.)
      */
-    public Location setAddress(Address value) { 
+    public Location setAddress(AddressType value) { 
       this.address = value;
       return this;
     }

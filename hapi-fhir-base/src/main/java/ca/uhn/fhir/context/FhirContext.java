@@ -27,14 +27,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -509,6 +507,13 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns all element definitions (resources, datatypes, etc.)
+	 */
+	public Collection<BaseRuntimeElementDefinition<?>> getElementDefinitions() {
+		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
 
 }

@@ -1,16 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -21,6 +12,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.BeforeClass;
@@ -53,6 +45,7 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -70,6 +63,27 @@ public class XmlParserDstu2Test {
 		XMLUnit.setIgnoreAttributeOrder(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreWhitespace(true);
+	}
+
+	@Test
+	public void testEncodeExtensionWithResourceContent() {
+		IParser parser = ourCtx.newXmlParser();
+
+		Patient patient = new Patient();
+		patient.addAddress().setUse(AddressUseEnum.HOME);
+		patient.addUndeclaredExtension(false, "urn:foo", new ResourceReferenceDt("Organization/123"));
+
+		String val = parser.encodeResourceToString(patient);
+		ourLog.info(val);
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
+
+		Patient actual = parser.parseResource(Patient.class, val);
+		assertEquals(AddressUseEnum.HOME, patient.getAddress().get(0).getUse());
+		List<ExtensionDt> ext = actual.getUndeclaredExtensions();
+		assertEquals(1, ext.size());
+		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
+		assertEquals("Organization/123", ref.getReference().getValue());
+
 	}
 
 	@Test

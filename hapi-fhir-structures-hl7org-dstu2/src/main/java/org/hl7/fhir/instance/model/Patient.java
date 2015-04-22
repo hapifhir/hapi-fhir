@@ -258,9 +258,9 @@ public class Patient extends DomainResource {
         /**
          * Address for the contact person.
          */
-        @Child(name="address", type={Address.class}, order=4, min=0, max=1)
+        @Child(name="address", type={AddressType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Address for the contact person", formalDefinition="Address for the contact person." )
-        protected Address address;
+        protected AddressType address;
 
         /**
          * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
@@ -381,12 +381,12 @@ public class Patient extends DomainResource {
         /**
          * @return {@link #address} (Address for the contact person.)
          */
-        public Address getAddress() { 
+        public AddressType getAddress() { 
           if (this.address == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ContactComponent.address");
             else if (Configuration.doAutoCreate())
-              this.address = new Address(); // cc
+              this.address = new AddressType(); // cc
           return this.address;
         }
 
@@ -397,7 +397,7 @@ public class Patient extends DomainResource {
         /**
          * @param value {@link #address} (Address for the contact person.)
          */
-        public ContactComponent setAddress(Address value) { 
+        public ContactComponent setAddress(AddressType value) { 
           this.address = value;
           return this;
         }
@@ -940,9 +940,9 @@ public class Patient extends DomainResource {
     /**
      * Addresses for the individual.
      */
-    @Child(name = "address", type = {Address.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {AddressType.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Addresses for the individual", formalDefinition="Addresses for the individual." )
-    protected List<Address> address;
+    protected List<AddressType> address;
 
     /**
      * This field contains a patient's most recent marital (civil) status.
@@ -961,9 +961,9 @@ public class Patient extends DomainResource {
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {Attachment.class}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {AttachmentType.class}, order = 9, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
-    protected List<Attachment> photo;
+    protected List<AttachmentType> photo;
 
     /**
      * A contact party (e.g. guardian, partner, friend) for the patient.
@@ -1258,16 +1258,16 @@ public class Patient extends DomainResource {
     /**
      * @return {@link #address} (Addresses for the individual.)
      */
-    public List<Address> getAddress() { 
+    public List<AddressType> getAddress() { 
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       return this.address;
     }
 
     public boolean hasAddress() { 
       if (this.address == null)
         return false;
-      for (Address item : this.address)
+      for (AddressType item : this.address)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1277,10 +1277,10 @@ public class Patient extends DomainResource {
      * @return {@link #address} (Addresses for the individual.)
      */
     // syntactic sugar
-    public Address addAddress() { //3
-      Address t = new Address();
+    public AddressType addAddress() { //3
+      AddressType t = new AddressType();
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       this.address.add(t);
       return t;
     }
@@ -1349,16 +1349,16 @@ public class Patient extends DomainResource {
     /**
      * @return {@link #photo} (Image of the person.)
      */
-    public List<Attachment> getPhoto() { 
+    public List<AttachmentType> getPhoto() { 
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       return this.photo;
     }
 
     public boolean hasPhoto() { 
       if (this.photo == null)
         return false;
-      for (Attachment item : this.photo)
+      for (AttachmentType item : this.photo)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1368,10 +1368,10 @@ public class Patient extends DomainResource {
      * @return {@link #photo} (Image of the person.)
      */
     // syntactic sugar
-    public Attachment addPhoto() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addPhoto() { //3
+      AttachmentType t = new AttachmentType();
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       this.photo.add(t);
       return t;
     }
@@ -1661,15 +1661,15 @@ public class Patient extends DomainResource {
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         dst.deceased = deceased == null ? null : deceased.copy();
         if (address != null) {
-          dst.address = new ArrayList<Address>();
-          for (Address i : address)
+          dst.address = new ArrayList<AddressType>();
+          for (AddressType i : address)
             dst.address.add(i.copy());
         };
         dst.maritalStatus = maritalStatus == null ? null : maritalStatus.copy();
         dst.multipleBirth = multipleBirth == null ? null : multipleBirth.copy();
         if (photo != null) {
-          dst.photo = new ArrayList<Attachment>();
-          for (Attachment i : photo)
+          dst.photo = new ArrayList<AttachmentType>();
+          for (AttachmentType i : photo)
             dst.photo.add(i.copy());
         };
         if (contact != null) {

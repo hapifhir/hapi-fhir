@@ -444,16 +444,16 @@ public class Person extends DomainResource {
     /**
      * One or more addresses for the person.
      */
-    @Child(name = "address", type = {Address.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {AddressType.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="One or more addresses for the person", formalDefinition="One or more addresses for the person." )
-    protected List<Address> address;
+    protected List<AddressType> address;
 
     /**
      * An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.
      */
-    @Child(name = "photo", type = {Attachment.class}, order = 6, min = 0, max = 1)
+    @Child(name = "photo", type = {AttachmentType.class}, order = 6, min = 0, max = 1)
     @Description(shortDefinition="Image of the Person", formalDefinition="An image that can be displayed as a thumbnail of the person to enhance the identification of the individual." )
-    protected Attachment photo;
+    protected AttachmentType photo;
 
     /**
      * The Organization that is the custodian of the person record.
@@ -678,16 +678,16 @@ public class Person extends DomainResource {
     /**
      * @return {@link #address} (One or more addresses for the person.)
      */
-    public List<Address> getAddress() { 
+    public List<AddressType> getAddress() { 
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       return this.address;
     }
 
     public boolean hasAddress() { 
       if (this.address == null)
         return false;
-      for (Address item : this.address)
+      for (AddressType item : this.address)
         if (!item.isEmpty())
           return true;
       return false;
@@ -697,10 +697,10 @@ public class Person extends DomainResource {
      * @return {@link #address} (One or more addresses for the person.)
      */
     // syntactic sugar
-    public Address addAddress() { //3
-      Address t = new Address();
+    public AddressType addAddress() { //3
+      AddressType t = new AddressType();
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       this.address.add(t);
       return t;
     }
@@ -708,12 +708,12 @@ public class Person extends DomainResource {
     /**
      * @return {@link #photo} (An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.)
      */
-    public Attachment getPhoto() { 
+    public AttachmentType getPhoto() { 
       if (this.photo == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Person.photo");
         else if (Configuration.doAutoCreate())
-          this.photo = new Attachment(); // cc
+          this.photo = new AttachmentType(); // cc
       return this.photo;
     }
 
@@ -724,7 +724,7 @@ public class Person extends DomainResource {
     /**
      * @param value {@link #photo} (An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.)
      */
-    public Person setPhoto(Attachment value) { 
+    public Person setPhoto(AttachmentType value) { 
       this.photo = value;
       return this;
     }
@@ -883,8 +883,8 @@ public class Person extends DomainResource {
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         if (address != null) {
-          dst.address = new ArrayList<Address>();
-          for (Address i : address)
+          dst.address = new ArrayList<AddressType>();
+          for (AddressType i : address)
             dst.address.add(i.copy());
         };
         dst.photo = photo == null ? null : photo.copy();

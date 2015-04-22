@@ -1,8 +1,9 @@
 package ca.uhn.fhir.model;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.AddressType;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Base;
 import org.hl7.fhir.instance.model.Binary;
@@ -32,6 +33,7 @@ import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -56,7 +58,10 @@ import org.hl7.fhir.instance.model.api.IReference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 
 public class ModelInheritanceTest {
     /*
@@ -83,6 +88,20 @@ public class ModelInheritanceTest {
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
 	@Test
+	public void testDatatypeNames() {
+		for (BaseRuntimeElementDefinition<?> next : ourCtx.getElementDefinitions()) {
+			if (next instanceof BaseRuntimeElementCompositeDefinition || next instanceof RuntimePrimitiveDatatypeDefinition) {
+				String name = next.getImplementingClass().getName();
+				if (name.endsWith(".Enumeration")) {
+					continue;
+				}
+				assertThat(name, endsWith("Type"));
+				
+			}
+		}
+	}
+	
+	@Test
 	public void testList() {
 		assertEquals("List", ourCtx.getResourceDefinition(List_.class).getName());
 	}
@@ -92,7 +111,7 @@ public class ModelInheritanceTest {
      */
     @Test
     public void testAddress() {
-        assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
+        assertTrue(ICompositeType.class.isAssignableFrom(AddressType.class));
     }
 
     @Test
@@ -155,6 +174,9 @@ public class ModelInheritanceTest {
     @Test
     public void testEnumeration() {
         assertTrue(IBaseEnumeration.class.isAssignableFrom(Enumeration.class));
+        
+        DatatypeDef def = Enumeration.class.getAnnotation(DatatypeDef.class);
+        assertTrue(def.isSpecialization());
     }
 
     /**

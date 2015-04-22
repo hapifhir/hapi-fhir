@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * For referring to data content defined in other formats.
  */
 @DatatypeDef(name="Attachment")
-public class Attachment extends Type implements ICompositeType {
+public class AttachmentType extends Type implements ICompositeType {
 
     /**
      * Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
@@ -94,7 +94,7 @@ public class Attachment extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 483430116L;
 
-    public Attachment() {
+    public AttachmentType() {
       super();
     }
 
@@ -121,7 +121,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #contentType} (Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.). This is the underlying object with id, value and extensions. The accessor "getContentType" gives direct access to the value
      */
-    public Attachment setContentTypeElement(CodeType value) { 
+    public AttachmentType setContentTypeElement(CodeType value) { 
       this.contentType = value;
       return this;
     }
@@ -136,7 +136,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.
      */
-    public Attachment setContentType(String value) { 
+    public AttachmentType setContentType(String value) { 
       if (Utilities.noString(value))
         this.contentType = null;
       else {
@@ -170,7 +170,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #language} (The human language of the content. The value can be any valid value according to BCP 47.). This is the underlying object with id, value and extensions. The accessor "getLanguage" gives direct access to the value
      */
-    public Attachment setLanguageElement(CodeType value) { 
+    public AttachmentType setLanguageElement(CodeType value) { 
       this.language = value;
       return this;
     }
@@ -185,7 +185,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value The human language of the content. The value can be any valid value according to BCP 47.
      */
-    public Attachment setLanguage(String value) { 
+    public AttachmentType setLanguage(String value) { 
       if (Utilities.noString(value))
         this.language = null;
       else {
@@ -219,7 +219,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #data} (The actual data of the attachment - a sequence of bytes. In XML, represented using base64.). This is the underlying object with id, value and extensions. The accessor "getData" gives direct access to the value
      */
-    public Attachment setDataElement(Base64BinaryType value) { 
+    public AttachmentType setDataElement(Base64BinaryType value) { 
       this.data = value;
       return this;
     }
@@ -234,7 +234,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value The actual data of the attachment - a sequence of bytes. In XML, represented using base64.
      */
-    public Attachment setData(byte[] value) { 
+    public AttachmentType setData(byte[] value) { 
       if (value == null)
         this.data = null;
       else {
@@ -268,7 +268,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #url} (An alternative location where the data can be accessed.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
-    public Attachment setUrlElement(UriType value) { 
+    public AttachmentType setUrlElement(UriType value) { 
       this.url = value;
       return this;
     }
@@ -283,7 +283,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value An alternative location where the data can be accessed.
      */
-    public Attachment setUrl(String value) { 
+    public AttachmentType setUrl(String value) { 
       if (Utilities.noString(value))
         this.url = null;
       else {
@@ -317,7 +317,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #size} (The number of bytes of data that make up this attachment.). This is the underlying object with id, value and extensions. The accessor "getSize" gives direct access to the value
      */
-    public Attachment setSizeElement(IntegerType value) { 
+    public AttachmentType setSizeElement(IntegerType value) { 
       this.size = value;
       return this;
     }
@@ -332,7 +332,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value The number of bytes of data that make up this attachment.
      */
-    public Attachment setSize(int value) { 
+    public AttachmentType setSize(int value) { 
         if (this.size == null)
           this.size = new IntegerType();
         this.size.setValue(value);
@@ -362,7 +362,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #hash} (The calculated hash of the data using SHA-1. Represented using base64.). This is the underlying object with id, value and extensions. The accessor "getHash" gives direct access to the value
      */
-    public Attachment setHashElement(Base64BinaryType value) { 
+    public AttachmentType setHashElement(Base64BinaryType value) { 
       this.hash = value;
       return this;
     }
@@ -377,7 +377,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value The calculated hash of the data using SHA-1. Represented using base64.
      */
-    public Attachment setHash(byte[] value) { 
+    public AttachmentType setHash(byte[] value) { 
       if (value == null)
         this.hash = null;
       else {
@@ -411,7 +411,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value {@link #title} (A label or set of text to display in place of the data.). This is the underlying object with id, value and extensions. The accessor "getTitle" gives direct access to the value
      */
-    public Attachment setTitleElement(StringType value) { 
+    public AttachmentType setTitleElement(StringType value) { 
       this.title = value;
       return this;
     }
@@ -426,7 +426,7 @@ public class Attachment extends Type implements ICompositeType {
     /**
      * @param value A label or set of text to display in place of the data.
      */
-    public Attachment setTitle(String value) { 
+    public AttachmentType setTitle(String value) { 
       if (Utilities.noString(value))
         this.title = null;
       else {
@@ -448,8 +448,8 @@ public class Attachment extends Type implements ICompositeType {
         childrenList.add(new Property("title", "string", "A label or set of text to display in place of the data.", 0, java.lang.Integer.MAX_VALUE, title));
       }
 
-      public Attachment copy() {
-        Attachment dst = new Attachment();
+      public AttachmentType copy() {
+        AttachmentType dst = new AttachmentType();
         copyValues(dst);
         dst.contentType = contentType == null ? null : contentType.copy();
         dst.language = language == null ? null : language.copy();
@@ -461,7 +461,7 @@ public class Attachment extends Type implements ICompositeType {
         return dst;
       }
 
-      protected Attachment typedCopy() {
+      protected AttachmentType typedCopy() {
         return copy();
       }
 
@@ -469,9 +469,9 @@ public class Attachment extends Type implements ICompositeType {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof Attachment))
+        if (!(other instanceof AttachmentType))
           return false;
-        Attachment o = (Attachment) other;
+        AttachmentType o = (AttachmentType) other;
         return compareDeep(contentType, o.contentType, true) && compareDeep(language, o.language, true)
            && compareDeep(data, o.data, true) && compareDeep(url, o.url, true) && compareDeep(size, o.size, true)
            && compareDeep(hash, o.hash, true) && compareDeep(title, o.title, true);
@@ -481,9 +481,9 @@ public class Attachment extends Type implements ICompositeType {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof Attachment))
+        if (!(other instanceof AttachmentType))
           return false;
-        Attachment o = (Attachment) other;
+        AttachmentType o = (AttachmentType) other;
         return compareValues(contentType, o.contentType, true) && compareValues(language, o.language, true)
            && compareValues(data, o.data, true) && compareValues(url, o.url, true) && compareValues(size, o.size, true)
            && compareValues(hash, o.hash, true) && compareValues(title, o.title, true);

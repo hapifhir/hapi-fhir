@@ -745,9 +745,9 @@ public class Practitioner extends DomainResource {
     /**
      * The postal address where the practitioner can be found or visited or to which mail can be delivered.
      */
-    @Child(name = "address", type = {Address.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {AddressType.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where practitioner can be found/visited", formalDefinition="The postal address where the practitioner can be found or visited or to which mail can be delivered." )
-    protected List<Address> address;
+    protected List<AddressType> address;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
@@ -766,9 +766,9 @@ public class Practitioner extends DomainResource {
   /**
    * Image of the person.
    */
-  @Child(name = "photo", type = {Attachment.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+  @Child(name = "photo", type = {AttachmentType.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
   @Description(shortDefinition = "Image of the person", formalDefinition = "Image of the person.")
-  protected List<Attachment> photo;
+  protected List<AttachmentType> photo;
 
   /**
    * The list of Roles/Organizations that the Practitioner is associated with.
@@ -884,16 +884,16 @@ public class Practitioner extends DomainResource {
     /**
      * @return {@link #address} (The postal address where the practitioner can be found or visited or to which mail can be delivered.)
      */
-    public List<Address> getAddress() { 
+    public List<AddressType> getAddress() { 
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       return this.address;
     }
 
     public boolean hasAddress() { 
       if (this.address == null)
         return false;
-      for (Address item : this.address)
+      for (AddressType item : this.address)
         if (!item.isEmpty())
           return true;
       return false;
@@ -903,10 +903,10 @@ public class Practitioner extends DomainResource {
      * @return {@link #address} (The postal address where the practitioner can be found or visited or to which mail can be delivered.)
      */
     // syntactic sugar
-    public Address addAddress() { //3
-      Address t = new Address();
+    public AddressType addAddress() { //3
+      AddressType t = new AddressType();
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       this.address.add(t);
       return t;
     }
@@ -1012,16 +1012,16 @@ public class Practitioner extends DomainResource {
     /**
      * @return {@link #photo} (Image of the person.)
      */
-    public List<Attachment> getPhoto() { 
+    public List<AttachmentType> getPhoto() { 
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       return this.photo;
     }
 
     public boolean hasPhoto() { 
       if (this.photo == null)
         return false;
-      for (Attachment item : this.photo)
+      for (AttachmentType item : this.photo)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1031,10 +1031,10 @@ public class Practitioner extends DomainResource {
      * @return {@link #photo} (Image of the person.)
      */
     // syntactic sugar
-    public Attachment addPhoto() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addPhoto() { //3
+      AttachmentType t = new AttachmentType();
       if (this.photo == null)
-        this.photo = new ArrayList<Attachment>();
+        this.photo = new ArrayList<AttachmentType>();
       this.photo.add(t);
       return t;
     }
@@ -1158,15 +1158,15 @@ public class Practitioner extends DomainResource {
             dst.telecom.add(i.copy());
         };
         if (address != null) {
-          dst.address = new ArrayList<Address>();
-          for (Address i : address)
+          dst.address = new ArrayList<AddressType>();
+          for (AddressType i : address)
             dst.address.add(i.copy());
         };
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         if (photo != null) {
-          dst.photo = new ArrayList<Attachment>();
-          for (Attachment i : photo)
+          dst.photo = new ArrayList<AttachmentType>();
+          for (AttachmentType i : photo)
             dst.photo.add(i.copy());
         }
         ;

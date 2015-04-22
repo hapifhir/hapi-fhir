@@ -56,7 +56,7 @@ public class SupportingDocumentation extends DomainResource {
         /**
          * The attached content.
          */
-        @Child(name="content", type={Attachment.class}, order=2, min=1, max=1)
+        @Child(name="content", type={AttachmentType.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Content", formalDefinition="The attached content." )
         protected Type content;
 
@@ -143,10 +143,10 @@ public class SupportingDocumentation extends DomainResource {
         /**
          * @return {@link #content} (The attached content.)
          */
-        public Attachment getContentAttachment() throws Exception { 
-          if (!(this.content instanceof Attachment))
+        public AttachmentType getContentAttachment() throws Exception { 
+          if (!(this.content instanceof AttachmentType))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
-          return (Attachment) this.content;
+          return (AttachmentType) this.content;
         }
 
         public boolean hasContent() { 
