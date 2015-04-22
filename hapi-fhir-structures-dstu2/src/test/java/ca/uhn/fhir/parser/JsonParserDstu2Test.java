@@ -13,12 +13,14 @@ import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -28,6 +30,7 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
@@ -79,6 +82,42 @@ public class JsonParserDstu2Test {
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
+	}
+	
+	
+	@Test
+	public void testEncodeBundleOldBundleNoText() {
+
+		Bundle b = new Bundle();
+		
+		BundleEntry e = b.addEntry();
+		e.setResource(new Patient());
+		b.addCategory("scheme", "term", "label");
+
+		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, not(containsString("text")));
+
+		b = new FhirContext().newJsonParser().parseBundle(val);
+		assertEquals(1, b.getEntries().size());
+
+	}
+
+	@Test
+	public void testEncodeBundleNewBundleNoText() {
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.getText().getDiv();
+		
+		Entry e = b.addEntry();
+		e.setResource(new Patient());
+
+		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		ourLog.info(val);
+
+		assertThat(val, not(containsString("text")));
+
 	}
 
 	/**

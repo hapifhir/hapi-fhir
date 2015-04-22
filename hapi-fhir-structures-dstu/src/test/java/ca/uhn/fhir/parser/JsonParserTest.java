@@ -601,6 +601,7 @@ public class JsonParserTest {
 	public void testEncodeBundleCategory() {
 
 		Bundle b = new Bundle();
+		
 		BundleEntry e = b.addEntry();
 		e.setResource(new Patient());
 		b.addCategory("scheme", "term", "label");
@@ -609,6 +610,7 @@ public class JsonParserTest {
 		ourLog.info(val);
 
 		assertThat(val, StringContains.containsString("\"category\":[{\"term\":\"term\",\"label\":\"label\",\"scheme\":\"scheme\"}]"));
+		assertThat(val, not(containsString("text")));
 
 		b = new FhirContext().newJsonParser().parseBundle(val);
 		assertEquals(1, b.getEntries().size());
@@ -620,6 +622,7 @@ public class JsonParserTest {
 
 	}
 
+	
 	@Test
 	public void testEncodeBundleEntryCategory() {
 
