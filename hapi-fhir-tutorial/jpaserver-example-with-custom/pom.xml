@@ -111,13 +111,8 @@
 		</dependency>
 
 		<!-- Used to provide JSON support in non-FHIR services -->
-		<!-- 
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
-		-->
+		<!-- <dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-mapper-asl</artifactId> 
+			<version>1.9.13</version> </dependency> -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
@@ -133,7 +128,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.5.2</version>
 		</dependency>
-		
+
 		<!-- This example uses Derby embedded database. If you are using another 
 			database such as Mysql or Oracle, you may omit the following dependencies 
 			and replace them with an appropriate database client dependency for your 
@@ -154,7 +149,20 @@
 			<version>10.11.1.1</version>
 		</dependency>
 
-
+		<!-- Testing -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>java-hamcrest</artifactId>
+			<version>2.0.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
