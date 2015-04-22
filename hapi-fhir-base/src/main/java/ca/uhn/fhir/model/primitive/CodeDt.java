@@ -45,6 +45,11 @@ public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Com
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return isBlank(getValueAsString());
+	}
+
+	@Override
 	public int compareTo(CodeDt theCode) {
 		if (theCode == null) {
 			return 1;

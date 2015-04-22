@@ -48,6 +48,11 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 		// nothing
 	}
 
+	@Override
+	public boolean isEmpty() {
+		return super.isEmpty() && (getValue() == null || getValue().isEmpty());
+	}
+
 	/**
 	 * Constructor which accepts a string code
 	 * 

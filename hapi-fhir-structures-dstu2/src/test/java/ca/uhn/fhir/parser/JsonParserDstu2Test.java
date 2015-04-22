@@ -108,14 +108,18 @@ public class JsonParserDstu2Test {
 	public void testEncodeBundleNewBundleNoText() {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		b.getText().getDiv();
+//		b.getText().setDiv("<div>aaa</div>");
+		b.getText().getStatus().setValueAsString("");;
 		
 		Entry e = b.addEntry();
 		e.setResource(new Patient());
 
 		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
+		assertThat(val, not(containsString("text")));
 
+		val = new FhirContext().newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
+		ourLog.info(val);
 		assertThat(val, not(containsString("text")));
 
 	}
