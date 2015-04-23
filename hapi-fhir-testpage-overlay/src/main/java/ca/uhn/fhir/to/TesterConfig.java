@@ -9,15 +9,21 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.util.ITestingUiClientFactory;
 
 public class TesterConfig {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);
 
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
 
-	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
+	private ITestingUiClientFactory myClientFactory;
 	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
 	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
+
+	public ITestingUiClientFactory getClientFactory() {
+		return myClientFactory;
+	}
 
 	public boolean getDebugTemplatesMode() {
 		return true;
@@ -33,6 +39,10 @@ public class TesterConfig {
 
 	public LinkedHashMap<String, String> getIdToServerName() {
 		return myIdToServerName;
+	}
+
+	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
+		myClientFactory = theClientFactory;
 	}
 
 	@Required

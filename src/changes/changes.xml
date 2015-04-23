@@ -144,6 +144,12 @@
 				JPA server (uhnfhirtest.uhn.ca) sometimes included an empty
 				"text" element in Bundles being returned.
 			</action>
+			<action type="add" issue="162">
+				Add a framework for the Web Tester UI to allow its internal FHIR client to 
+				be configured (e.g. to add an authorization interceptor so that it adds
+				credentials to client requests it makes). Thanks to Harsha Kumara for
+				the suggestion!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
