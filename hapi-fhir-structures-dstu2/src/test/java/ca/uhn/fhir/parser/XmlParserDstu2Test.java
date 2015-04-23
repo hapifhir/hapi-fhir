@@ -54,6 +54,7 @@ public class XmlParserDstu2Test {
 		XMLUnit.setIgnoreWhitespace(true);
 	}
 
+	
 	/**
 	 * see #144 and #146
 	 */
