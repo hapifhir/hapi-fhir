@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "code")
 public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Comparable<CodeDt> {
@@ -46,7 +45,7 @@ public class CodeDt extends BasePrimitive<String> implements ICodedDatatype, Com
 
 	@Override
 	public boolean isEmpty() {
-		return isBlank(getValueAsString());
+		return super.isBaseEmpty() && isBlank(getValueAsString());
 	}
 
 	@Override

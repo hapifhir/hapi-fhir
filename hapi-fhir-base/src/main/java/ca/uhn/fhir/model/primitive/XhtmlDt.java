@@ -50,7 +50,7 @@ public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
 	@Override
 	public boolean isEmpty() {
-		return super.isEmpty() && (getValue() == null || getValue().isEmpty());
+		return super.isBaseEmpty() && (getValue() == null || getValue().isEmpty());
 	}
 
 	/**

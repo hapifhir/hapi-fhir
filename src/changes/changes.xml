@@ -140,6 +140,10 @@
 				Prevent server from returning a Content-Location header for search
 				response when using the DSTU2 bundle format
 			</action>
+			<action type="fix">
+				JPA server (uhnfhirtest.uhn.ca) sometimes included an empty
+				"text" element in Bundles being returned.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

@@ -28,6 +28,7 @@ import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.YEAR;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -64,7 +65,9 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final FastDateFormat ourYearMonthDayTimeZoneFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssZZ");
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthNoDashesFormat = FastDateFormat.getInstance("yyyyMM");
-	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
+	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
+    private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
+    private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
 	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
 
 	static {
@@ -89,7 +92,55 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private boolean myTimeZoneZulu = false;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDt.class);
 
-	/**
+    /**
+     * Returns a human readable version of this date/time using the system local format.
+     * <p>
+     * <b>Note on time zones:</b> This method renders the value using the time zone
+     * that is contained within the value. For example, if this date object contains the
+     * value "2012-01-05T12:00:00-08:00", the human display will be rendered as "12:00:00"
+     * even if the application is being executed on a system in a different time zone. If
+     * this behaviour is not what you want, use {@link #toHumanDisplayLocalTimezone()}
+     * instead.
+     * </p>
+     */
+    public String toHumanDisplay() {
+            TimeZone tz = getTimeZone();
+			Calendar value = tz != null ? Calendar.getInstance(tz) : Calendar.getInstance();
+            value.setTime(getValue());
+            
+			switch (getPrecision()) {
+            case YEAR:
+            case MONTH:
+            case DAY:
+                    return ourHumanDateFormat.format(value);
+            case MILLI:
+            case SECOND:
+            default:
+                    return ourHumanDateTimeFormat.format(value);
+            }
+    }
+	
+    /**
+     * Returns a human readable version of this date/time using the system local format,
+     * converted to the local timezone if neccesary.
+     * 
+     * @see #toHumanDisplay() for a method which does not convert the time to the local
+     * timezone before rendering it.
+     */
+    public String toHumanDisplayLocalTimezone() {
+		switch (getPrecision()) {
+        case YEAR:
+        case MONTH:
+        case DAY:
+                return ourHumanDateFormat.format(getValue());
+        case MILLI:
+        case SECOND:
+        default:
+                return ourHumanDateTimeFormat.format(getValue());
+        }
+    }
+
+    /**
 	 * Constructor
 	 */
 	public BaseDateTimeDt() {

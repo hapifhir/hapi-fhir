@@ -274,6 +274,20 @@ public class ResourceProviderDstu2Test {
 	}
 
 	@Test
+	public void testSearchBundleDoesntIncludeTextElement() throws Exception {
+		HttpGet read = new HttpGet(ourServerBase + "/Patient?_format=json");
+		CloseableHttpResponse response = ourHttpClient.execute(read);
+		try {
+			String text = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(text);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(text, not(containsString("\"text\",\"type\"")));
+		} finally {
+			response.close();
+		}
+	}
+	
+	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
