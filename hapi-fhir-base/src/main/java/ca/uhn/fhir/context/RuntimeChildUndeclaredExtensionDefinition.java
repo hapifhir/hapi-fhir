@@ -131,9 +131,24 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
+					String qualifiedName = next.getImplementingClass().getName();
+					
+					/*
+					 * We don't want user-defined custom datatypes ending up overriding the built in
+					 * types here. It would probably be better for there to be a way for
+					 * a datatype to indicate via its annotation that it's a built in
+					 * type.
+					 */
+					if (!qualifiedName.startsWith("ca.uhn.fhir.model")) {
+						if (!qualifiedName.startsWith("org.hl7.fhir.instance.model")) {
+							continue;
+						}
+					}
+					
 					String attrName = createExtensionChildName(next);
 					if (datatypeAttributeNameToDefinition.containsKey(attrName)) {
-						throw new ConfigurationException("More than one child matches attribute name " + attrName);
+						BaseRuntimeElementDefinition<?> existing = datatypeAttributeNameToDefinition.get(attrName);
+						throw new ConfigurationException("More than one child of " + getElementName() + " matches attribute name " + attrName + ". Found [" + existing.getImplementingClass().getName() + "] and [" + next.getImplementingClass().getName() + "]");
 					}
 					datatypeAttributeNameToDefinition.put(attrName, next);
 					datatypeAttributeNameToDefinition.put(attrName.toLowerCase(), next);

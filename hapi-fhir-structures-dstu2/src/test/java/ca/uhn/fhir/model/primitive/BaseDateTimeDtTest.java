@@ -15,12 +15,21 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
 public class BaseDateTimeDtTest {
 	private SimpleDateFormat myDateInstantParser;
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtTest.class);
+	
 	@Before
 	public void before() {
 		myDateInstantParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	}
 
+	@Test
+	public void testToHumanDisplay() {
+		DateTimeDt dt = new DateTimeDt("2012-01-05T12:00:00-08:00");
+		String human = dt.toHumanDisplay();
+		ourLog.info(human);
+		assertEquals("Jan 5, 2012 12:00:00 PM", human);
+	}
+	
 	/**
 	 * See HAPI #101 - https://github.com/jamesagnew/hapi-fhir/issues/101
 	 */

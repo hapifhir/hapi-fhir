@@ -505,7 +505,7 @@ public class JsonParser extends BaseParser implements IParser {
 				if (gen != null) {
 					BaseNarrativeDt<?> narr = ((IResource) theResource).getText();
 					gen.generateNarrative(theResDef.getResourceProfile(), theResource, narr);
-					if (narr != null) {
+					if (narr != null && !narr.isEmpty()) {
 						RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 						String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 						BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);

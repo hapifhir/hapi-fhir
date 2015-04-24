@@ -1618,7 +1618,7 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
-				if (myInstance instanceof IResource) {
+				if (myInstance instanceof IResource || myInstance instanceof IElement) {
 					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
@@ -1897,7 +1897,7 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			if (myEntry == null) {
+			if (myEntry == null && myMutator == null) {
 				myObject = (T) getCurrentElement();
 			}
 
