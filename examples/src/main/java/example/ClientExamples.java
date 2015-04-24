@@ -34,6 +34,22 @@ public class ClientExamples {
    }
 
    @SuppressWarnings("unused")
+   public void createTimeouts() {
+      // START SNIPPET: timeouts
+      FhirContext ctx = new FhirContext();
+
+      // Set how long to try and establish the initial TCP connection (in ms)
+      ctx.getRestfulClientFactory().setConnectTimeout(20 * 1000);
+      
+      // Set how long to block for individual read/write operations (in ms)
+      ctx.getRestfulClientFactory().setSocketTimeout(20 * 1000);
+      
+      // Create the client
+      IGenericClient genericClient = ctx.newRestfulGenericClient("http://localhost:9999/fhir");
+      // END SNIPPET: timeouts
+   }
+
+   @SuppressWarnings("unused")
    public void createSecurity() {
       // START SNIPPET: security
       // Create a context and get the client factory so it can be configured
