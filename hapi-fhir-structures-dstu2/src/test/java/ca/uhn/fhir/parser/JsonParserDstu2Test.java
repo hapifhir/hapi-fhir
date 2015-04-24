@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
@@ -37,6 +38,8 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
@@ -62,6 +65,36 @@ public class JsonParserDstu2Test {
 	}
 
 	/**
+	 * See #163
+	 */
+	@Test
+	public void testParseResourceType() {
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+
+		// Patient
+		Patient patient = new Patient();
+		String patientId = UUID.randomUUID().toString();
+		patient.setId(new IdDt("Patient", patientId));
+		patient.addName().addGiven("John").addFamily("Smith");
+		patient.setGender(AdministrativeGenderEnum.MALE);
+		patient.setBirthDate(new DateDt("1987-04-16"));
+
+		// Bundle
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		bundle.setType(BundleTypeEnum.COLLECTION);
+		bundle.addEntry().setResource(patient);
+
+		String bundleText = jsonParser.encodeResourceToString(bundle);
+		ourLog.info(bundleText);
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
+		Patient reincarnatedPatient = reincarnatedBundle.getAllPopulatedChildElementsOfType(Patient.class).get(0); 
+		
+		assertEquals("Patient", patient.getId().getResourceType());
+		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
+	}
+
+	/**
 	 * See #144 and #146
 	 */
 	@Test
@@ -73,7 +106,7 @@ public class JsonParserDstu2Test {
 		obsv.setStatus(ObservationStatusEnum.FINAL);
 		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
-		
+
 		DiagnosticReport report = new DiagnosticReport();
 		report.getContained().getContainedResources().add(obsv);
 		report.addResult().setResource(obsv);
@@ -83,13 +116,12 @@ public class JsonParserDstu2Test {
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
 	}
-	
-	
+
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
 		Bundle b = new Bundle();
-		
+
 		BundleEntry e = b.addEntry();
 		e.setResource(new Patient());
 		b.addCategory("scheme", "term", "label");
@@ -109,8 +141,9 @@ public class JsonParserDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		b.getText().setDiv("");
-		b.getText().getStatus().setValueAsString("");;
-		
+		b.getText().getStatus().setValueAsString("");
+		;
+
 		Entry e = b.addEntry();
 		e.setResource(new Patient());
 
@@ -136,10 +169,10 @@ public class JsonParserDstu2Test {
 		obsv.setStatus(ObservationStatusEnum.FINAL);
 		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
-		
+
 		DiagnosticReport report = new DiagnosticReport();
 		report.getContained().getContainedResources().add(obsv);
-		
+
 		obsv.setId("#123");
 		report.addResult().setReference("#123");
 
@@ -518,10 +551,10 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
-		
+
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
 		assertEquals("#med", p.getMedication().getReference().getValue());
-		
+
 		Medication m = (Medication) p.getMedication().getResource();
 		assertNotNull(m);
 		assertEquals("#med", m.getId().getValue());
@@ -537,7 +570,6 @@ public class JsonParserDstu2Test {
 		assertThat(reencoded, containsString("contained"));
 	}
 
-	
 	@Test
 	public void testParseAndEncodeBundle() throws Exception {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
@@ -563,7 +595,7 @@ public class JsonParserDstu2Test {
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
 		assertSame(p.getMedication().getResource(), m);
-		
+
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
 
@@ -587,7 +619,7 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
-		
+
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
@@ -603,7 +635,6 @@ public class JsonParserDstu2Test {
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
 		assertEquals("Medication/example", p.getMedication().getReference().getValue());
 		assertSame(p.getMedication().getResource(), m);
-
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);

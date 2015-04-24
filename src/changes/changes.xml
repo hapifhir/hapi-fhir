@@ -150,6 +150,11 @@
 				credentials to client requests it makes). Thanks to Harsha Kumara for
 				the suggestion!
 			</action>
+			<action type="fix" issue="163">
+				Fix regression in early 1.0 builds where resource type sometimes does not get 
+				populated in a resource ID when the resource is parsed. Thanks to
+				Nick Peterson for reporting, and for providing a test case!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
