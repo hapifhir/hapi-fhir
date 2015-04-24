@@ -1569,12 +1569,12 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
-				if (myInstance instanceof IResource) {
+				if (myInstance instanceof IResource || myInstance instanceof IElement) {
 					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
-				ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
-				push(state);
+					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
+					push(state);
 				}
 				return;
 			}
@@ -1842,7 +1842,7 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			if (myEntry == null) {
+			if (myEntry == null && myMutator == null) {
 				myObject = (T) getCurrentElement();
 			}
 			
