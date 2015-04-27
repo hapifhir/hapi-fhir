@@ -155,6 +155,10 @@
 				populated in a resource ID when the resource is parsed. Thanks to
 				Nick Peterson for reporting, and for providing a test case!
 			</action>
+			<action type="add">
+				Allow fluent/generic client users to execute a transaction using a raw string (containing a bundle resource)
+				as input instead of a Bundle resource class instance.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

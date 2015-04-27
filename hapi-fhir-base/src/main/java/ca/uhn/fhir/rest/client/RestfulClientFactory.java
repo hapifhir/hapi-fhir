@@ -135,7 +135,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 	
 	@Override
-	public ServerValidationModeEnum getServerValidationModeEnum() {
+	public ServerValidationModeEnum getServerValidationMode() {
 		return myServerValidationMode;
 	}
 
@@ -256,7 +256,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+	public void setServerValidationMode(ServerValidationModeEnum theServerValidationMode) {
 		Validate.notNull(theServerValidationMode, "theServerValidationMode may not be null");
 		myServerValidationMode = theServerValidationMode;
 	}
@@ -302,6 +302,16 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 				throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
 			}
 		}
+	}
+
+	@Override
+	public ServerValidationModeEnum getServerValidationModeEnum() {
+		return getServerValidationMode();
+	}
+
+	@Override
+	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+		setServerValidationMode(theServerValidationMode);
 	}
 
 }

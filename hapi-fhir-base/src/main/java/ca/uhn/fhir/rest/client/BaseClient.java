@@ -369,7 +369,7 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * This method is an internal part of the HAPI API andmay change, use with caution. If you 
+	 * This method is an internal part of the HAPI API and may change, use with caution. If you 
 	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
 	 */
 	public void setDontValidateConformance(boolean theDontValidateConformance) {

@@ -198,4 +198,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 
+	public static BaseHttpClientInvocation createTransactionInvocation(String theRawBundle, FhirContext theContext) {
+		return new HttpPostClientInvocation(theContext, theRawBundle, true, "");
+	}
+
 }
