@@ -11,8 +11,8 @@ fieldset[disabled].btn {
 
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
-  padding-top: 50px;
-  overflow-x: hidden;
+	padding-top: 50px;
+	overflow-x: hidden;
 }
 
 .clientCodeBox
@@ -144,6 +144,7 @@ PRE.resultBodyPre {
 	background-color: transparent;
 	overflow: visible;
 	/*white-space: normal;*/
+	white-space: pre-wrap;
 }
 
 /*
@@ -151,16 +152,16 @@ PRE.resultBodyPre {
  */
 
 .sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
 }
 
 body .syntaxhighlighter .line {
-        white-space: pre-wrap !important; /* make code wrap */
+	white-space: pre-wrap !important; /* make code wrap */
 }
 
 .syntaxhighlight {
-    white-space: pre-wrap;
+	white-space: pre-wrap;
 }
 
 /*
@@ -216,14 +217,14 @@ body .syntaxhighlighter .line {
   padding: 20px;
 }
 @media (min-width: 768px) {
-  .main {
-  	padding-top: 10px;
-    padding-right: 10px;
-    padding-left: 10px;
-  }
+	.main {
+		padding-top: 10px;
+		padding-right: 10px;
+		padding-left: 10px;
+	}
 }
 .main .page-header {
-  margin-top: 0;
+	margin-top: 0;
 }
 
 .navBarButtonLabel {
@@ -235,18 +236,18 @@ body .syntaxhighlighter .line {
  */
 
 .placeholders {
-  margin-bottom: 30px;
-  text-align: center;
+	margin-bottom: 30px;
+	text-align: center;
 }
 .placeholders h4 {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 .placeholder {
-  margin-bottom: 20px;
+	margin-bottom: 20px;
 }
 .placeholder img {
-  display: inline-block;
-  border-radius: 50%;
+	display: inline-block;
+	border-radius: 50%;
 }
 
 DIV.queryParameter {

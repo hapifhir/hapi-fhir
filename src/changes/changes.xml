@@ -164,6 +164,10 @@
 				enter partial dates, or dates without times, or even test out invalid date
 				options.
 			</action>
+			<action type="fix" issue="36">
+				Make BaseElement#getUndeclaredExtensions() and BaseElement#getUndeclaredExtensions() return
+				a mutable list so that it is possible to delete extensions from a resource instance.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
