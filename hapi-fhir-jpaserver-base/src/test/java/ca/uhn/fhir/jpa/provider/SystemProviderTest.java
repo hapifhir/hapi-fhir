@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -19,8 +17,6 @@ import ca.uhn.fhir.jpa.rp.dstu.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.PatientResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -30,7 +26,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class SystemProviderTest {
 
-	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTest.class);
 	private static Server ourServer;
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static FhirContext ourCtx;
@@ -41,8 +37,8 @@ public class SystemProviderTest {
 
 		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes);
-		String response = ourClient.transaction().withBundle(bundle).execute();
-		
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
 	}
 	
 	

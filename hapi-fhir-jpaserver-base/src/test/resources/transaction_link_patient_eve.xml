@@ -6,7 +6,7 @@
             <Patient>
                 <!-- PID|||555-44-4444||EVERYWOMAN^EVE^E^^^^L|JONES|19620320|F|||153 FERNWOOD DR.^
                     ^STATESVILLE^OH^35292||(206)3345232|(206)752-121||||AC555444444||67-A4335^OH^20030520 -->
-                <id value="555-44-4444"/>
+                <id value="a555-44-4444"/>
                 <extension url="http://ihe.net/ITI-78/Profile/pdqm#mothersMaidenName">
                     <valueHumanName>
                         <family value="Jones"/>
@@ -62,8 +62,8 @@
             </Patient>
         </resource>
         <transaction>
-            <method code="PUT"/>
-            <url value="Patient/555-44-4444"/>
+            <method value="PUT"/>
+            <url value="Patient/a555-44-4444"/>
         </transaction>
     </entry>
     <entry>
@@ -88,7 +88,7 @@
                 </managingOrganization>
                 <link>
                     <other>
-                        <reference value="Patient/555-44-4444"/>
+                        <reference value="Patient/a555-44-4444"/>
                     </other>
                     <type value="replace"/>
                 </link>
@@ -96,8 +96,19 @@
             </Patient>
         </resource>
         <transaction>
-            <method code="PUT"/>
+            <method value="PUT"/>
             <url value="Patient/temp6789"/>
+        </transaction>
+    </entry>
+    <entry>
+        <resource>
+            <Organization>
+                <id value="GHH"/>
+            </Organization>
+        </resource>
+        <transaction>
+            <method value="PUT"/>
+            <url value="Organization/GHH"/>
         </transaction>
     </entry>
 </Bundle>

@@ -1875,7 +1875,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				if (Character.isDigit(theResource.getId().getIdPart().charAt(0))) {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
-				return doCreate(theResource, null, true);
+				return doCreate(theResource, null, thePerformIndexing);
 			}
 		}
 

@@ -159,6 +159,11 @@
 				Allow fluent/generic client users to execute a transaction using a raw string (containing a bundle resource)
 				as input instead of a Bundle resource class instance.
 			</action>
+			<action type="fix">
+				Disable date validation in the web tester UI, so that it is possible to 
+				enter partial dates, or dates without times, or even test out invalid date
+				options.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

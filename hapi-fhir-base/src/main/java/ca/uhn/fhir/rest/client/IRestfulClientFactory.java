@@ -75,6 +75,7 @@ public interface IRestfulClientFactory {
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead
 	 */
+	@Deprecated
 	ServerValidationModeEnum getServerValidationModeEnum();
 
 	/**
@@ -168,6 +169,7 @@ public interface IRestfulClientFactory {
 	/**
 	 * @deprecated Use {@link #setServerValidationMode(ServerValidationModeEnum)} instead. This method was incorrectly named.
 	 */
+	@Deprecated
 	void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode);
 
 	/**
