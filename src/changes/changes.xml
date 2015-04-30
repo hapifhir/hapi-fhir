@@ -168,6 +168,15 @@
 				Make BaseElement#getUndeclaredExtensions() and BaseElement#getUndeclaredExtensions() return
 				a mutable list so that it is possible to delete extensions from a resource instance.
 			</action>
+			<action type="fix" issue="168">
+				Server conformance statement check in clients (this is the check
+				where the first time a given FhirContext is used to access a given server
+				base URL, it will first check the server's Conformance statement to ensure
+				that it supports the correct version of FHIR) now uses any 
+				registered client interceptors. In addition, IGenericClient now has a method
+				"forceConformanceCheck()" which manually triggers this check. Thanks to
+				Doug Martin for reporting and suggesting!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

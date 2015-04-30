@@ -140,7 +140,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		super(theHttpClient, theServerBase, theFactory);
 		myContext = theContext;
 	}
-
+	
 	@Override
 	public BaseConformance conformance() {
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
@@ -154,6 +154,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance, null);
 		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
+	}
+
+	@Override
+	public void forceConformanceCheck() {
+		super.forceConformanceCheck();
 	}
 
 	@Override
