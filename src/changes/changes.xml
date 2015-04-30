@@ -185,7 +185,7 @@
 			</action>
 			<action type="add" issue="164">
 				Improve error message when a user tries to perform a create/update with an invalid
-				or missing Content-Type header.
+				or missing Content-Type header. Thanks to wanghaisheng for reporting!
 			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
