@@ -27,7 +27,7 @@
 		-->
 	</bean>
 
-	<bean id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
 		<property name="persistenceUnitName" value="FHIR_UT" />
 		<property name="jpaVendorAdapter">
@@ -41,7 +41,7 @@
 	</bean>
 
 	<bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="myEntityManagerFactory" />
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
 
 	<tx:annotation-driven transaction-manager="myTxManager" />

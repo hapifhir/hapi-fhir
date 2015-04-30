@@ -56,7 +56,7 @@
 	</bean>
 	-->
 
-	<bean  depends-on="dbServer" id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	<bean  depends-on="dbServer" id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />
 		<property name="persistenceUnitName" value="FHIR_UT" />

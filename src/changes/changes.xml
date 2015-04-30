@@ -177,6 +177,12 @@
 				"forceConformanceCheck()" which manually triggers this check. Thanks to
 				Doug Martin for reporting and suggesting!
 			</action>
+			<action type="add" issue="167">
+				Rename the Spring Bean definition for the JPA server EntityManager from
+				"myEntityManagerFactory" to just "entityManagerFactory" as this is the
+				default bean name expected in other parts of the Spring framework. 
+				Thanks to Mohammad Jafari for the suggestion!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
