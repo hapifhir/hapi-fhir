@@ -147,7 +147,30 @@ public class GenericClientTest {
 
 	}
 
+	@Test
+	public void testMissing() throws Exception {
 
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return (new ReaderInputStream(new StringReader(getPatientFeedWithOneResult()), Charset.forName("UTF-8")));
+			}});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		
+		client.search().forResource("Patient").where(Patient.NAME.isMissing(true)).execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Amissing=true", capt.getValue().getRequestLine().getUri());
+		
+		client.search().forResource("Patient").where(Patient.NAME.isMissing(false)).execute();
+		assertEquals("http://example.com/fhir/Patient?name%3Amissing=false", capt.getValue().getRequestLine().getUri());
+	}
+	
 	@Test
 	public void testCreateWithStringAutoDetectsEncoding() throws Exception {
 

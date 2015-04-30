@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 /**
  * Date parameter type for use in fluent client interfaces
  */
-public class DateClientParam implements IParam {
+public class DateClientParam  extends BaseClientParam implements IParam {
 
 	private String myParamName;
 

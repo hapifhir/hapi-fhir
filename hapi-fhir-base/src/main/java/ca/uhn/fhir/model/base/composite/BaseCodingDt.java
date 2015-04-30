@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.TokenParam;
 
 public abstract class BaseCodingDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
@@ -171,5 +172,29 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	 */
 	public abstract BaseCodingDt setSystem(String theUri);
 
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public Boolean getMissing() {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link TokenParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
 
 }

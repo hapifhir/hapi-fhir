@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;
 /**
  * Token parameter type for use in fluent client interfaces
  */
-public class QuantityClientParam implements IParam {
+public class QuantityClientParam extends BaseClientParam  implements IParam {
 
 	private String myParamName;
 

@@ -26,54 +26,75 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * Base class for RESTful operation parameter types
  */
-public class BaseParam implements IQueryParameterType {
+abstract class BaseParam implements IQueryParameterType {
 
-	private Boolean  myMissing;
-	
+	private Boolean myMissing;
+
 	/**
-	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
-	 * instead of a normal value 
+	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
 	 */
+	@Override
 	public Boolean getMissing() {
 		return myMissing;
 	}
 
-	
-	
 	@Override
-	public String getQueryParameterQualifier() {
+	public final String getQueryParameterQualifier() {
 		if (myMissing != null) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
-		return null;
+		return doGetQueryParameterQualifier();
 	}
 
+	abstract String doGetQueryParameterQualifier();
 
+	abstract String doGetValueAsQueryToken();
+	
 	@Override
-	public String getValueAsQueryToken() {
+	public final String getValueAsQueryToken() {
 		if (myMissing != null) {
-			return myMissing ? "true" : "false";
+			return myMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE;
 		}
-		return null;
+		return doGetValueAsQueryToken();
 	}
-
-
 
 	/**
-	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
-	 * instead of a normal value 
+	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale instead of a normal value
 	 */
+	@Override
 	public void setMissing(Boolean theMissing) {
 		myMissing = theMissing;
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
+	public final void setValueAsQueryToken(String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_MISSING.equals(theQualifier)) {
 			myMissing = "true".equals(theValue);
 		} else {
 			myMissing = null;
+			doSetValueAsQueryToken(theQualifier, theValue);
 		}
 	}
 
+	abstract void doSetValueAsQueryToken(String theQualifier, String theValue);
+
+	static class ComposableBaseParam extends BaseParam{
+
+		@Override
+		String doGetQueryParameterQualifier() {
+			return null;
+		}
+
+		@Override
+		String doGetValueAsQueryToken() {
+			return null;
+		}
+
+		@Override
+		void doSetValueAsQueryToken(String theQualifier, String theValue) {
+			// nothing
+		}
+		
+	}
+	
 }

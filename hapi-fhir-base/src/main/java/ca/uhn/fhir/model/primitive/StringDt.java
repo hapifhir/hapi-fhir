@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.rest.param.StringParam;
 
 @DatatypeDef(name = "string")
 public class StringDt extends BasePrimitive<String> implements IQueryParameterType {
@@ -120,6 +121,30 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	@Override
 	protected String encode(String theValue) {
 		return theValue;
+	}
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public Boolean getMissing() {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 
 }

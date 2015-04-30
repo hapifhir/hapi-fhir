@@ -47,6 +47,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
@@ -72,6 +73,7 @@ import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -141,6 +143,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	private String mySecondaryPrimaryKeyParamName;
 
 	private Set<Long> addPredicateComposite(RuntimeSearchParam theParamDef, Set<Long> thePids, List<? extends IQueryParameterType> theNextAnd) {
+		// TODO: fail if missing is set for a composite query
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
@@ -178,6 +182,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			return thePids;
 		}
 
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myParamsDate");
+		}
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceIndexedSearchParamDate> from = cq.from(ResourceIndexedSearchParamDate.class);
@@ -185,6 +193,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
+			if (addPredicateMissingFalseIfPresent(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+
 			IQueryParameterType params = nextOr;
 			Predicate p = createPredicateDate(builder, from, params);
 			codePredicates.add(p);
@@ -204,50 +216,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		return new HashSet<Long>(q.getResultList());
 	}
-
-	private Predicate addPredicateDateFromRange(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, DateRangeParam theRange) {
-		Date lowerBound = theRange.getLowerBoundAsInstant();
-		Date upperBound = theRange.getUpperBoundAsInstant();
-
-		Predicate lb = null;
-		if (lowerBound != null) {
-			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueLow"), lowerBound);
-			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueHigh"), lowerBound);
-			lb = theBuilder.or(gt, lt);
-
-			// Predicate gin = builder.isNull(from.get("myValueLow"));
-			// Predicate lbo = builder.or(gt, gin);
-			// Predicate lin = builder.isNull(from.get("myValueHigh"));
-			// Predicate hbo = builder.or(lt, lin);
-			// lb = builder.and(lbo, hbo);
-		}
-
-		Predicate ub = null;
-		if (upperBound != null) {
-			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueLow"), upperBound);
-			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueHigh"), upperBound);
-			ub = theBuilder.or(gt, lt);
-
-			// Predicate gin = builder.isNull(from.get("myValueLow"));
-			// Predicate lbo = builder.or(gt, gin);
-			// Predicate lin = builder.isNull(from.get("myValueHigh"));
-			// Predicate ubo = builder.or(lt, lin);
-			// ub = builder.and(ubo, lbo);
-
-		}
-
-		if (lb != null && ub != null) {
-			return (theBuilder.and(lb, ub));
-		} else if (lb != null) {
-			return (lb);
-		} else {
-			return (ub);
-		}
-	}
-
-	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
-	// IQueryParameterType> theList) {
-	// }
 
 	private Set<Long> addPredicateId(Set<Long> theExistingPids, Set<Long> thePids) {
 		if (thePids == null || thePids.isEmpty()) {
@@ -272,6 +240,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 		return found;
 	}
+
+	// private Set<Long> addPredicateComposite(String theParamName, Set<Long> thePids, List<? extends
+	// IQueryParameterType> theList) {
+	// }
 
 	private Set<Long> addPredicateLanguage(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
 		if (theList == null || theList.isEmpty()) {
@@ -323,6 +295,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			return thePids;
 		}
 
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myParamsNumber");
+		}
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceIndexedSearchParamNumber> from = cq.from(ResourceIndexedSearchParamNumber.class);
@@ -332,6 +308,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
+			if (addPredicateMissingFalseIfPresent(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+			
 			if (params instanceof NumberParam) {
 				NumberParam param = (NumberParam) params;
 
@@ -385,9 +365,29 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private Set<Long> addPredicateParamMissing(Set<Long> thePids, String joinName) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+		Join<Object, Object> join = from.join(joinName, JoinType.LEFT);
+		if (thePids.size() > 0) {
+			Predicate inPids = (from.get("myId").in(thePids));
+			cq.where(builder.and(inPids, join.isNull()));
+		} else {
+			cq.where(join.isNull());
+		}
+		TypedQuery<Long> q = myEntityManager.createQuery(cq);
+		return new HashSet<Long>(q.getResultList());
+	}
+
 	private Set<Long> addPredicateQuantity(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
+		}
+		
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myParamsQuantity");
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -399,6 +399,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
+			if (addPredicateMissingFalseIfPresent(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+			
 			String systemValue;
 			String unitsValue;
 			QuantityCompararatorEnum cmpValue;
@@ -500,6 +504,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			return pidsToRetain;
 		}
 
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myResourceLinks");
+		}
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceLink> from = cq.from(ResourceLink.class);
@@ -510,6 +518,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType params = nextOr;
 
+			if (addPredicateMissingFalseIfPresentForResourceLink(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+			
 			if (params instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) params;
 
@@ -594,6 +606,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			return thePids;
 		}
 
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myParamsString");
+		}
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceIndexedSearchParamString> from = cq.from(ResourceIndexedSearchParamString.class);
@@ -602,7 +618,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType theParameter = nextOr;
-
+			if (addPredicateMissingFalseIfPresent(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+			
 			Predicate singleCode = createPredicateString(theParameter, theParamName, builder, from);
 			codePredicates.add(singleCode);
 		}
@@ -622,9 +641,39 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private boolean addPredicateMissingFalseIfPresent(String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+		boolean missingFalse = false;
+		if (nextOr.getMissing() != null) {
+			if (nextOr.getMissing().booleanValue() == true) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
+			}
+			Predicate singleCode = from.get("myId").isNotNull();
+			codePredicates.add(singleCode);
+			missingFalse = true;
+		}
+		return missingFalse;
+	}
+
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+		boolean missingFalse = false;
+		if (nextOr.getMissing() != null) {
+			if (nextOr.getMissing().booleanValue() == true) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
+			}
+			Predicate singleCode = from.get("mySourceResource").isNotNull();
+			codePredicates.add(singleCode);
+			missingFalse = true;
+		}
+		return missingFalse;
+	}
+
 	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
+		}
+
+		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
+			return addPredicateParamMissing(thePids, "myParamsToken");
 		}
 
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
@@ -641,6 +690,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				}
 			}
 
+			if (addPredicateMissingFalseIfPresent(theParamName, from, codePredicates, nextOr)) {
+				continue;
+			}
+			
 			Predicate singleCode = createPredicateToken(nextOr, theParamName, builder, from);
 			codePredicates.add(singleCode);
 		}
@@ -759,18 +812,58 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				DateRangeParam range = new DateRangeParam(date);
-				p = addPredicateDateFromRange(theBuilder, theFrom, range);
+				p = createPredicateDateFromRange(theBuilder, theFrom, range);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
 			}
 		} else if (theParam instanceof DateRangeParam) {
 			DateRangeParam range = (DateRangeParam) theParam;
-			p = addPredicateDateFromRange(theBuilder, theFrom, range);
+			p = createPredicateDateFromRange(theBuilder, theFrom, range);
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
 		return p;
+	}
+
+	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, DateRangeParam theRange) {
+		Date lowerBound = theRange.getLowerBoundAsInstant();
+		Date upperBound = theRange.getUpperBoundAsInstant();
+
+		Predicate lb = null;
+		if (lowerBound != null) {
+			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueLow"), lowerBound);
+			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.<Date> get("myValueHigh"), lowerBound);
+			lb = theBuilder.or(gt, lt);
+
+			// Predicate gin = builder.isNull(from.get("myValueLow"));
+			// Predicate lbo = builder.or(gt, gin);
+			// Predicate lin = builder.isNull(from.get("myValueHigh"));
+			// Predicate hbo = builder.or(lt, lin);
+			// lb = builder.and(lbo, hbo);
+		}
+
+		Predicate ub = null;
+		if (upperBound != null) {
+			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueLow"), upperBound);
+			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.<Date> get("myValueHigh"), upperBound);
+			ub = theBuilder.or(gt, lt);
+
+			// Predicate gin = builder.isNull(from.get("myValueLow"));
+			// Predicate lbo = builder.or(gt, gin);
+			// Predicate lin = builder.isNull(from.get("myValueHigh"));
+			// Predicate ubo = builder.or(lt, lin);
+			// ub = builder.and(ubo, lbo);
+
+		}
+
+		if (lb != null && ub != null) {
+			return (theBuilder.and(lb, ub));
+		} else if (lb != null) {
+			return (lb);
+		} else {
+			return (ub);
+		}
 	}
 
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
@@ -1166,7 +1259,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		}
 
 		HashSet<Long> pidsToInclude = new HashSet<Long>();
-		
+
 		for (Include nextInclude : theRevIncludes) {
 			boolean matchAll = "*".equals(nextInclude.getValue());
 			if (matchAll) {
@@ -1208,7 +1301,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				}
 			}
 		}
-		
+
 		theMatches.addAll(pidsToInclude);
 	}
 
@@ -1532,9 +1625,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						/*
-						 * Load _include resources - Note that _revincludes are handled differently
-						 * than _include ones, as they are counted towards the total count and paged,
-						 * so they are loaded outside the bundle provider
+						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as they are counted towards the total count and paged, so they are loaded
+						 * outside the bundle provider
 						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IdDt> previouslyLoadedPids = new HashSet<IdDt>();

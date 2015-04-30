@@ -185,9 +185,17 @@
 			</action>
 			<action type="add" issue="164">
 				Improve error message when a user tries to perform a create/update with an invalid
-				or missing Content-Type header. Thanks to wanghaisheng for reporting!
+				or missing Content-Type header. Thanks to wanghaisheng for reporting! (This was
+				actually a three part bug, so the following two fixes also reference this
+				bug number)
 			</action>
-		</release>
+			<action type="add" issue="164">
+				Add support for :missing qualifier in generic/fluent client.
+			</action>
+			<action type="add" issue="164">
+				Add support for :missing qualifier in JPA server.
+			</action>
+					</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
 				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 
