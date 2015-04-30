@@ -183,6 +183,10 @@
 				default bean name expected in other parts of the Spring framework. 
 				Thanks to Mohammad Jafari for the suggestion!
 			</action>
+			<action type="add" issue="164">
+				Improve error message when a user tries to perform a create/update with an invalid
+				or missing Content-Type header.
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

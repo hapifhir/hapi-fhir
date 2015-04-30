@@ -195,9 +195,18 @@ public class RestfulServerUtils {
 	}
 
 	public static EncodingEnum determineRequestEncoding(Request theReq) {
+		EncodingEnum retVal = determineRequestEncodingNoDefault(theReq);
+		if (retVal != null) {
+			return retVal;
+		}
+		return EncodingEnum.XML;
+	}
+
+	public static EncodingEnum determineRequestEncodingNoDefault(Request theReq) {
+		EncodingEnum retVal = null;
 		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
+			while (acceptValues.hasMoreElements() && retVal == null) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();
 				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
 					for (String nextPart : nextAcceptHeaderValue.split(",")) {
@@ -209,15 +218,15 @@ public class RestfulServerUtils {
 							nextPart = nextPart.substring(0, scIdx);
 						}
 						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
 						if (retVal != null) {
-							return retVal;
+							break;
 						}
 					}
 				}
 			}
 		}
-		return EncodingEnum.XML;
+		return retVal;
 	}
 
 	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {

@@ -581,7 +581,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		protected IResource parseResourceBody(String theResourceBody) {
-			EncodingEnum encoding = determineRawEncoding(theResourceBody);
+			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new InvalidRequestException("FHIR client can't determine resource encoding");
 			}
@@ -596,24 +596,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return (T) this;
 		}
 
-	}
-
-	/**
-	 * Returns null if encoding can't be determined
-	 */
-	private static EncodingEnum determineRawEncoding(String theResourceBody) {
-		EncodingEnum encoding = null;
-		for (int i = 0; i < theResourceBody.length() && encoding == null; i++) {
-			switch (theResourceBody.charAt(i)) {
-			case '<':
-				encoding = EncodingEnum.XML;
-				break;
-			case '{':
-				encoding = EncodingEnum.JSON;
-				break;
-			}
-		}
-		return encoding;
 	}
 	
 	private final class BundleResponseHandler implements IClientResponseHandler<Bundle> {
@@ -1579,7 +1561,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		public TransactionExecutable(String theBundle) {
 			myRawBundle = theBundle;
-			myRawBundleEncoding = determineRawEncoding(myRawBundle);
+			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
 			if (myRawBundleEncoding == null) {
 				throw new IllegalArgumentException("Can not determine encoding of raw resource body");
 			}
@@ -1603,7 +1585,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				 * If the user has explicitly requested a given encoding, we may need to reencode the raw string
 				 */
 				if (getParamEncoding() != null) {
-					if (determineRawEncoding(myRawBundle) != getParamEncoding()) {
+					if (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
 						IResource parsed = parseResourceBody(myRawBundle);
 						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
 					}

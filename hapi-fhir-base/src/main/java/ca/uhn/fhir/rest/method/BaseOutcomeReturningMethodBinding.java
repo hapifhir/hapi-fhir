@@ -20,9 +20,12 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -32,6 +35,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
 
@@ -52,6 +56,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
@@ -64,7 +69,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName()
+						+ " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -100,8 +106,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected abstract BaseHttpClientInvocation createClientInvocation(Object[] theArgs, IResource resource);
 
 	/**
-	 * For servers, this method will match only incoming requests that match the given operation, or which have no
-	 * operation in the URL if this method returns null.
+	 * For servers, this method will match only incoming requests that match the given operation, or which have no operation in the URL if this method returns null.
 	 */
 	protected abstract String getMatchingOperation();
 
@@ -125,7 +130,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	}
 
 	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+			BaseServerResponseException {
 		switch (theResponseStatusCode) {
 		case Constants.STATUS_HTTP_200_OK:
 		case Constants.STATUS_HTTP_201_CREATED:
@@ -195,7 +201,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		switch (getResourceOperationType()) {
 		case CREATE:
 			if (response == null) {
-				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
+				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName()
+						+ " returned null, which is not allowed for create operation");
 			}
 			if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
@@ -269,10 +276,40 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	 * @throws IOException
 	 */
 	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
+
+		Reader requestReader;
+		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
+		if (encoding == null) {
+			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			if (ctValue != null) {
+				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
+					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "invalidContentTypeInRequest", ctValue, getResourceOrSystemOperationType());
+					throw new InvalidRequestException(msg);
+				}
+			}
+			if (isBlank(ctValue)) {
+				/*
+				 * If the client didn't send a content type, try to guess
+				 */
+				requestReader = theRequest.getServletRequest().getReader();
+				String body = IOUtils.toString(requestReader);
+				encoding = MethodUtil.detectEncodingNoDefault(body);
+				if (encoding == null) {
+					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "noContentTypeInRequest", getResourceOrSystemOperationType());
+					throw new InvalidRequestException(msg);
+				} else {
+					requestReader = new StringReader(body);
+				}
+			} else {
+				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "invalidContentTypeInRequest", ctValue, getResourceOrSystemOperationType());
+				throw new InvalidRequestException(msg);
+			}
+		} else {
+			requestReader = theRequest.getServletRequest().getReader();
+		}
+
 		IParser parser = encoding.newParser(getContext());
-		BufferedReader requestReader = theRequest.getServletRequest().getReader();
-		
+
 		Class<? extends IBaseResource> wantedResourceType = requestContainsResourceType();
 		IResource retVal;
 		if (wantedResourceType != null) {
@@ -294,20 +331,20 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected boolean requestContainsResource() {
 		return true;
 	}
-	
+
 	/**
-	 * Subclasses may override to provide a specific resource type that this method wants
-	 * as a parameter
+	 * Subclasses may override to provide a specific resource type that this method wants as a parameter
 	 */
 	protected Class<? extends IBaseResource> requestContainsResourceType() {
 		return null;
 	}
 
-	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, Request theRequest) throws IOException {
+	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, Request theRequest)
+			throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 
 		theServer.addHeadersToResponse(theResponse);
-		
+
 		if (theE.getOperationOutcome() != null) {
 			theResponse.setContentType(theEncodingNotNull.getResourceContentType());
 			IParser parser = theEncodingNotNull.newParser(theServer.getFhirContext());

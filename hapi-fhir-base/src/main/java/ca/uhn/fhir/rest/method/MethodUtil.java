@@ -248,15 +248,26 @@ public class MethodUtil {
 	}
 
 	public static EncodingEnum detectEncoding(String theBody) {
-		for (int i = 0; i < theBody.length(); i++) {
+		EncodingEnum retVal = detectEncodingNoDefault(theBody);
+		if (retVal == null) {
+		retVal = EncodingEnum.XML;
+		}
+		return retVal;
+	}
+
+	public static EncodingEnum detectEncodingNoDefault(String theBody) {
+		EncodingEnum retVal = null;
+		for (int i = 0; i < theBody.length() && retVal == null; i++) {
 			switch (theBody.charAt(i)) {
 				case '<':
-					return EncodingEnum.XML;
+					retVal = EncodingEnum.XML;
+					break;
 				case '{':
-					return EncodingEnum.JSON;
+					retVal = EncodingEnum.JSON;
+					break;
 			}
 		}
-		return EncodingEnum.XML;
+		return retVal;
 	}
 
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
