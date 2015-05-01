@@ -10,7 +10,10 @@
 	<logger name="org.eclipse" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.apache" additivity="false" level="debug">
+	<logger name="org.apache" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="org.thymeleaf" additivity="false" level="warn">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

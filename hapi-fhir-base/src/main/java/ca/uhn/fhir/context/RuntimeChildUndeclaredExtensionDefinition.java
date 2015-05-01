@@ -143,14 +143,22 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 		/*
 		 * Resource reference - The correct name is 'valueReference', but 
-		 * we allow for valueResource because some incorrect parsers may use this
+		 * we allow for valueResource because some incorrect parsers may use this. 
+		 * valueResource was the correct name in DSTU1. We put the correct name
+		 * second so that it gets stored as the appropriate name for the
+		 * reference datatype. 
 		 */
 		addReferenceBinding(theContext, theClassToElementDefinitions, "valueResource");
 		addReferenceBinding(theContext, theClassToElementDefinitions, "valueReference");
 	}
 
 	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
-		myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
+		if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1) && "valueReference".equals(value)) {
+			// This changed between DSTU1 and DSTU2 so don't store the DSTU2 name here
+		} else {
+			myDatatypeToAttributeName.put(theContext.getVersion().getResourceReferenceType(), value);
+		}
+		
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types);

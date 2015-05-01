@@ -82,6 +82,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
+		String referenceChildName = theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1) ? "Resource" : "Reference";
+		
 		for (Class<? extends IBase> next : myChoiceTypes) {
 
 			String elementName;
@@ -89,7 +91,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				alternateElementName = getElementName() + "Reference";
+				alternateElementName = getElementName() + referenceChildName;
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
@@ -107,7 +109,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
 				myDatatypeToElementDefinition.put(refType, nextDef);
-				alternateElementName = getElementName() + "Reference";
+				alternateElementName = getElementName() + referenceChildName;
 				myDatatypeToElementName.put(refType, alternateElementName);
 			}
 			
