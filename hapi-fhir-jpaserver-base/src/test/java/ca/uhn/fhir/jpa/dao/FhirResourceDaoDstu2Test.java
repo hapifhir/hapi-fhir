@@ -86,6 +86,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+@SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2Test {
 
 	private static ClassPathXmlApplicationContext ourCtx;
@@ -2307,9 +2308,9 @@ public class FhirResourceDaoDstu2Test {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
-		return (List<T>) theSearch.getResources(0, theSearch.size());
+	@SuppressWarnings({ "rawtypes" })
+	private List toList(IBundleProvider theSearch) {
+		return theSearch.getResources(0, theSearch.size());
 	}
 
 	private List<IdDt> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
@@ -2325,7 +2326,6 @@ public class FhirResourceDaoDstu2Test {
 		ourCtx.close();
 	}
 
-	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");

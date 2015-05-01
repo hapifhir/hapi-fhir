@@ -38,24 +38,18 @@ public class ResourceFactory extends Factory {
             return new Appointment();
         if ("ReferralRequest".equals(name))
             return new ReferralRequest();
-        if ("OralHealthClaim".equals(name))
-            return new OralHealthClaim();
         if ("DocumentManifest".equals(name))
             return new DocumentManifest();
         if ("Goal".equals(name))
             return new Goal();
         if ("EnrollmentRequest".equals(name))
             return new EnrollmentRequest();
-        if ("FamilyHistory".equals(name))
-            return new FamilyHistory();
         if ("Medication".equals(name))
             return new Medication();
         if ("Subscription".equals(name))
             return new Subscription();
         if ("DocumentReference".equals(name))
             return new DocumentReference();
-        if ("SecurityEvent".equals(name))
-            return new SecurityEvent();
         if ("Parameters".equals(name))
             return new Parameters();
         if ("Conformance".equals(name))
@@ -84,8 +78,6 @@ public class ResourceFactory extends Factory {
             return new Supply();
         if ("ImagingStudy".equals(name))
             return new ImagingStudy();
-        if ("Profile".equals(name))
-            return new Profile();
         if ("DeviceComponent".equals(name))
             return new DeviceComponent();
         if ("Encounter".equals(name))
@@ -98,34 +90,20 @@ public class ResourceFactory extends Factory {
             return new Communication();
         if ("OrderResponse".equals(name))
             return new OrderResponse();
-        if ("StatusResponse".equals(name))
-            return new StatusResponse();
-        if ("VisionClaim".equals(name))
-            return new VisionClaim();
         if ("DeviceUseStatement".equals(name))
             return new DeviceUseStatement();
-        if ("Reversal".equals(name))
-            return new Reversal();
         if ("MessageHeader".equals(name))
             return new MessageHeader();
-        if ("PharmacyClaim".equals(name))
-            return new PharmacyClaim();
         if ("ImmunizationRecommendation".equals(name))
             return new ImmunizationRecommendation();
-        if ("Other".equals(name))
-            return new Other();
         if ("BodySite".equals(name))
             return new BodySite();
         if ("Provenance".equals(name))
             return new Provenance();
         if ("Questionnaire".equals(name))
             return new Questionnaire();
-        if ("ProfessionalClaim".equals(name))
-            return new ProfessionalClaim();
         if ("ExplanationOfBenefit".equals(name))
             return new ExplanationOfBenefit();
-        if ("InstitutionalClaim".equals(name))
-            return new InstitutionalClaim();
         if ("Specimen".equals(name))
             return new Specimen();
         if ("AllergyIntolerance".equals(name))
@@ -182,12 +160,8 @@ public class ResourceFactory extends Factory {
             return new MedicationStatement();
         if ("CommunicationRequest".equals(name))
             return new CommunicationRequest();
-        if ("PendedRequest".equals(name))
-            return new PendedRequest();
         if ("Basic".equals(name))
             return new Basic();
-        if ("StatusRequest".equals(name))
-            return new StatusRequest();
         if ("ClaimResponse".equals(name))
             return new ClaimResponse();
         if ("EligibilityRequest".equals(name))
@@ -200,16 +174,10 @@ public class ResourceFactory extends Factory {
             return new ImagingObjectSelection();
         if ("HealthcareService".equals(name))
             return new HealthcareService();
-        if ("CarePlan2".equals(name))
-            return new CarePlan2();
         if ("DataElement".equals(name))
             return new DataElement();
-        if ("ClinicalAssessment".equals(name))
-            return new ClinicalAssessment();
         if ("QuestionnaireAnswers".equals(name))
             return new QuestionnaireAnswers();
-        if ("Readjudicate".equals(name))
-            return new Readjudicate();
         if ("NutritionOrder".equals(name))
             return new NutritionOrder();
         if ("PaymentReconciliation".equals(name))
@@ -226,16 +194,10 @@ public class ResourceFactory extends Factory {
             return new Patient();
         if ("Coverage".equals(name))
             return new Coverage();
-        if ("ExtensionDefinition".equals(name))
-            return new ExtensionDefinition();
         if ("NamingSystem".equals(name))
             return new NamingSystem();
         if ("Schedule".equals(name))
             return new Schedule();
-        if ("SupportingDocumentation".equals(name))
-            return new SupportingDocumentation();
-        if ("Alert".equals(name))
-            return new Alert();
         if ("Location".equals(name))
             return new Location();
         else

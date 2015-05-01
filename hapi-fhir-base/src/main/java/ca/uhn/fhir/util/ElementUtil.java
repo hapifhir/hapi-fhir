@@ -90,40 +90,39 @@ public class ElementUtil {
 	}
 
 	/**
-	 * @param theType Can be null
+	 * Note that this method does not work on HL7.org structures
 	 */
-	@SuppressWarnings("unused")
-	public static <T extends IBase> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
-		throw new UnsupportedOperationException();
-//		ArrayList<T> retVal = new ArrayList<T>();
-//		for (Object next : theElements) {
-//			if (next == null) {
-//				continue;
-//			}else if (next instanceof IBase) {
-//				addElement(retVal, (IBase) next, theType);
-//			} else if (next instanceof List) {
-//				for (Object nextElement : ((List<?>)next)) {
-//					if (!(nextElement instanceof IBase)) {
-//						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
-//					}
-//					addElement(retVal, (IBase) nextElement, theType);
-//				}
-//			} else {
-//				throw new IllegalArgumentException("Found element of "+next.getClass());
-//			}
-//			
-//		}
-//		return retVal;
+	public static <T extends IElement> List<T> allPopulatedChildElements(Class<T> theType, Object... theElements) {
+		ArrayList<T> retVal = new ArrayList<T>();
+		for (Object next : theElements) {
+			if (next == null) {
+				continue;
+			}else if (next instanceof IElement) {
+				addElement(retVal, (IElement) next, theType);
+			} else if (next instanceof List) {
+				for (Object nextElement : ((List<?>)next)) {
+					if (!(nextElement instanceof IBase)) {
+						throw new IllegalArgumentException("Found element of "+nextElement.getClass());
+					}
+					addElement(retVal, (IElement) nextElement, theType);
+				}
+			} else {
+				throw new IllegalArgumentException("Found element of "+next.getClass());
+			}
+			
+		}
+		return retVal;
 	}
 
-//	@SuppressWarnings("unchecked")
-//	private static <T extends IBase> void addElement(ArrayList<T> retVal, IBase next, Class<T> theType) {
-//		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
-//			retVal.add((T) next);
-//		}
-//		if (next instanceof ICompositeElement) {
-//			retVal.addAll(((ICompositeElement) next).getAllPopulatedChildElementsOfType(theType));
-//		}
-//	}
+	@SuppressWarnings("unchecked")
+	private static <T extends IElement> void addElement(ArrayList<T> retVal, IElement next, Class<T> theType) {
+		if (theType == null|| theType.isAssignableFrom(next.getClass())) {
+			retVal.add((T) next);
+		}
+		if (next instanceof ICompositeElement) {
+			ICompositeElement iCompositeElement = (ICompositeElement) next;
+			retVal.addAll(iCompositeElement.getAllPopulatedChildElementsOfType(theType));
+		}
+	}
 	
 }

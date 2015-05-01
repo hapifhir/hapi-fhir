@@ -2543,7 +2543,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * Original request resource referrence.
      */
-    @Child(name = "request", type = {OralHealthClaim.class, PharmacyClaim.class, VisionClaim.class, ProfessionalClaim.class, InstitutionalClaim.class}, order = 1, min = 0, max = 1)
+    @Child(name = "request", type = {}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource referrence." )
     protected Reference request;
 

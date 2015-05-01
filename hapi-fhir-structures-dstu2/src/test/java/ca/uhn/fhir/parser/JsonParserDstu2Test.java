@@ -110,7 +110,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(bundleText);
 		
 		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
-		Patient reincarnatedPatient = reincarnatedBundle.getAllPopulatedChildElementsOfType(Patient.class).get(0); 
+		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource(); 
 		
 		assertEquals("Patient", patient.getId().getResourceType());
 		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());

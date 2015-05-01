@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model;
+package org.hl7.fhir.instance.model.api;
 
 /*
  * #%L
@@ -55,7 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * Interface to be implemented by all built-in FHIR enumerations (i.e. the
  * actual FHIR-defined Java Enum will implement this interface) 
  */
-public interface FhirEnum {
+public interface IFhirEnum {
 
   /**
    * Get the XML/JSON representation for an enumerated value

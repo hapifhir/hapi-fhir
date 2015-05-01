@@ -20,30 +20,27 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>${servlet_api_version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
+		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon</artifactId> 
+			<version>8.7</version> </dependency> -->
+
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3_min</artifactId>
+			<version>1.1.4c</version>
+		</dependency>
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
-			<artifactId>saxon</artifactId>
-			<version>8.7</version>
+			<artifactId>Saxon-HE</artifactId>
+			<version>9.6.0-4</version>
 		</dependency>
-		
-	<dependency>
-		<groupId>xpp3</groupId>
-		<artifactId>xpp3_min</artifactId>
-		<version>1.1.4c</version>
-	</dependency>
-	<dependency>
-		<groupId>net.sf.saxon</groupId>
-		<artifactId>Saxon-HE</artifactId>
-		<version>9.6.0-4</version>
-	</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -94,13 +91,13 @@
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
 			<version>${jetty_version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback_version}</version>
@@ -120,18 +117,18 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-schematron</artifactId>
-		    <version>${phloc_schematron_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-commons</artifactId>
-		    <version>${phloc_commons_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+			<version>${phloc_commons_version}</version>
 			<scope>test</scope>
 		</dependency>
-        
+
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -184,27 +181,13 @@
 			<version>${guava_version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-jwt</artifactId>
-		    <version>1.0.2.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
-		-->		
-		
+		<!-- <dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-web</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-config</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-jwt</artifactId> 
+			<version>1.0.2.RELEASE</version> <scope>test</scope> </dependency> -->
+
 	</dependencies>
 
 	<build>

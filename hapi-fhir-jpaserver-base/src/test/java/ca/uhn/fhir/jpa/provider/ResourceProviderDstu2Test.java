@@ -119,7 +119,7 @@ public class ResourceProviderDstu2Test {
 
 	@Test
 	public void testCreateResourceWithNumericId() throws IOException {
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1777\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-02-25T15:47:48Z\"/></meta></Patient>";
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
