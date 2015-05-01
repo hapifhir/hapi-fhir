@@ -130,6 +130,12 @@
 				JPA server failed to index resources containing ContactPointDt elements with
 				populated values (e.g. Patient.telecom). Thanks to Mohammad Jafari for reporting!
 			</action>
+			<action type="add">
+				Add a new configuration method on the parsers, 
+				<![CDATA[<code>setStripVersionsFromReferences(boolean)</code>]]> which
+				configures the parser to preserve versions in resource reference links when
+				encoding. By default, these are removed.
+			</action>
 			<action type="fix" issue="155" dev="wdebeau1">
 				Terser's IModelVisitor now supplies to the path to the element. This is
 				an API change, but I don't think there are many users of the IModelVisitor yet.

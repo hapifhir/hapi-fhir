@@ -171,9 +171,9 @@ public class Organization extends DomainResource {
         /**
          * Visiting or postal addresses for the contact.
          */
-        @Child(name="address", type={Address.class}, order=4, min=0, max=1)
+        @Child(name="address", type={AddressType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Visiting or postal addresses for the contact", formalDefinition="Visiting or postal addresses for the contact." )
-        protected Address address;
+        protected AddressType address;
 
         /**
          * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
@@ -269,12 +269,12 @@ public class Organization extends DomainResource {
         /**
          * @return {@link #address} (Visiting or postal addresses for the contact.)
          */
-        public Address getAddress() { 
+        public AddressType getAddress() { 
           if (this.address == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create OrganizationContactComponent.address");
             else if (Configuration.doAutoCreate())
-              this.address = new Address(); // cc
+              this.address = new AddressType(); // cc
           return this.address;
         }
 
@@ -285,7 +285,7 @@ public class Organization extends DomainResource {
         /**
          * @param value {@link #address} (Visiting or postal addresses for the contact.)
          */
-        public OrganizationContactComponent setAddress(Address value) { 
+        public OrganizationContactComponent setAddress(AddressType value) { 
           this.address = value;
           return this;
         }
@@ -423,9 +423,9 @@ public class Organization extends DomainResource {
     /**
      * An address for the organization.
      */
-    @Child(name = "address", type = {Address.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {AddressType.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
-    protected List<Address> address;
+    protected List<AddressType> address;
 
     /**
      * The organization of which this organization forms a part.
@@ -607,16 +607,16 @@ public class Organization extends DomainResource {
     /**
      * @return {@link #address} (An address for the organization.)
      */
-    public List<Address> getAddress() { 
+    public List<AddressType> getAddress() { 
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       return this.address;
     }
 
     public boolean hasAddress() { 
       if (this.address == null)
         return false;
-      for (Address item : this.address)
+      for (AddressType item : this.address)
         if (!item.isEmpty())
           return true;
       return false;
@@ -626,10 +626,10 @@ public class Organization extends DomainResource {
      * @return {@link #address} (An address for the organization.)
      */
     // syntactic sugar
-    public Address addAddress() { //3
-      Address t = new Address();
+    public AddressType addAddress() { //3
+      AddressType t = new AddressType();
       if (this.address == null)
-        this.address = new ArrayList<Address>();
+        this.address = new ArrayList<AddressType>();
       this.address.add(t);
       return t;
     }
@@ -833,8 +833,8 @@ public class Organization extends DomainResource {
             dst.telecom.add(i.copy());
         };
         if (address != null) {
-          dst.address = new ArrayList<Address>();
-          for (Address i : address)
+          dst.address = new ArrayList<AddressType>();
+          for (AddressType i : address)
             dst.address.add(i.copy());
         };
         dst.partOf = partOf == null ? null : partOf.copy();

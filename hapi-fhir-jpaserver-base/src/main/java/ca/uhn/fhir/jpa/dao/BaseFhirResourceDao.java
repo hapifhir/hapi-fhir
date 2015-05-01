@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -1076,7 +1075,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 			@Override
 			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-				ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+				List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 				if (theFromIndex == 0 && current != null) {
 					retVal.add(current);
 				}

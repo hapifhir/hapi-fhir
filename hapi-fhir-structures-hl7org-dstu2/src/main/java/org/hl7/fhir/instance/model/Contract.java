@@ -957,9 +957,9 @@ public class Contract extends DomainResource {
     /**
      * Legally binding contract.
      */
-    @Child(name = "binding", type = {Attachment.class}, order = 21, min = 0, max = 1)
+    @Child(name = "binding", type = {AttachmentType.class}, order = 21, min = 0, max = 1)
     @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding contract." )
-    protected Attachment binding;
+    protected AttachmentType binding;
 
     /**
      * Relevant time/time-period when applicable.
@@ -971,9 +971,9 @@ public class Contract extends DomainResource {
     /**
      * Friendly Human readable form (might be a reference to the UI used to capture the contract).
      */
-    @Child(name = "friendly", type = {Attachment.class}, order = 23, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "friendly", type = {AttachmentType.class}, order = 23, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Human readable contract text", formalDefinition="Friendly Human readable form (might be a reference to the UI used to capture the contract)." )
-    protected List<Attachment> friendly;
+    protected List<AttachmentType> friendly;
 
     /**
      * Relevant time/time-period when applicable.
@@ -985,9 +985,9 @@ public class Contract extends DomainResource {
     /**
      * Legal text in Human readable form.
      */
-    @Child(name = "legal", type = {Attachment.class}, order = 25, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "legal", type = {AttachmentType.class}, order = 25, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Legal contract text", formalDefinition="Legal text in Human readable form." )
-    protected List<Attachment> legal;
+    protected List<AttachmentType> legal;
 
     /**
      * Relevant time/time-period when applicable.
@@ -999,9 +999,9 @@ public class Contract extends DomainResource {
     /**
      * Computable Policy rules (e.g. XACML, DKAL, SecPal).
      */
-    @Child(name = "rule", type = {Attachment.class}, order = 27, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "rule", type = {AttachmentType.class}, order = 27, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Computable contract text", formalDefinition="Computable Policy rules (e.g. XACML, DKAL, SecPal)." )
-    protected List<Attachment> rule;
+    protected List<AttachmentType> rule;
 
     /**
      * Relevant time/time-period when applicable.
@@ -1781,12 +1781,12 @@ public class Contract extends DomainResource {
     /**
      * @return {@link #binding} (Legally binding contract.)
      */
-    public Attachment getBinding() { 
+    public AttachmentType getBinding() { 
       if (this.binding == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Contract.binding");
         else if (Configuration.doAutoCreate())
-          this.binding = new Attachment(); // cc
+          this.binding = new AttachmentType(); // cc
       return this.binding;
     }
 
@@ -1797,7 +1797,7 @@ public class Contract extends DomainResource {
     /**
      * @param value {@link #binding} (Legally binding contract.)
      */
-    public Contract setBinding(Attachment value) { 
+    public Contract setBinding(AttachmentType value) { 
       this.binding = value;
       return this;
     }
@@ -1854,16 +1854,16 @@ public class Contract extends DomainResource {
     /**
      * @return {@link #friendly} (Friendly Human readable form (might be a reference to the UI used to capture the contract).)
      */
-    public List<Attachment> getFriendly() { 
+    public List<AttachmentType> getFriendly() { 
       if (this.friendly == null)
-        this.friendly = new ArrayList<Attachment>();
+        this.friendly = new ArrayList<AttachmentType>();
       return this.friendly;
     }
 
     public boolean hasFriendly() { 
       if (this.friendly == null)
         return false;
-      for (Attachment item : this.friendly)
+      for (AttachmentType item : this.friendly)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1873,10 +1873,10 @@ public class Contract extends DomainResource {
      * @return {@link #friendly} (Friendly Human readable form (might be a reference to the UI used to capture the contract).)
      */
     // syntactic sugar
-    public Attachment addFriendly() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addFriendly() { //3
+      AttachmentType t = new AttachmentType();
       if (this.friendly == null)
-        this.friendly = new ArrayList<Attachment>();
+        this.friendly = new ArrayList<AttachmentType>();
       this.friendly.add(t);
       return t;
     }
@@ -1933,16 +1933,16 @@ public class Contract extends DomainResource {
     /**
      * @return {@link #legal} (Legal text in Human readable form.)
      */
-    public List<Attachment> getLegal() { 
+    public List<AttachmentType> getLegal() { 
       if (this.legal == null)
-        this.legal = new ArrayList<Attachment>();
+        this.legal = new ArrayList<AttachmentType>();
       return this.legal;
     }
 
     public boolean hasLegal() { 
       if (this.legal == null)
         return false;
-      for (Attachment item : this.legal)
+      for (AttachmentType item : this.legal)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1952,10 +1952,10 @@ public class Contract extends DomainResource {
      * @return {@link #legal} (Legal text in Human readable form.)
      */
     // syntactic sugar
-    public Attachment addLegal() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addLegal() { //3
+      AttachmentType t = new AttachmentType();
       if (this.legal == null)
-        this.legal = new ArrayList<Attachment>();
+        this.legal = new ArrayList<AttachmentType>();
       this.legal.add(t);
       return t;
     }
@@ -2012,16 +2012,16 @@ public class Contract extends DomainResource {
     /**
      * @return {@link #rule} (Computable Policy rules (e.g. XACML, DKAL, SecPal).)
      */
-    public List<Attachment> getRule() { 
+    public List<AttachmentType> getRule() { 
       if (this.rule == null)
-        this.rule = new ArrayList<Attachment>();
+        this.rule = new ArrayList<AttachmentType>();
       return this.rule;
     }
 
     public boolean hasRule() { 
       if (this.rule == null)
         return false;
-      for (Attachment item : this.rule)
+      for (AttachmentType item : this.rule)
         if (!item.isEmpty())
           return true;
       return false;
@@ -2031,10 +2031,10 @@ public class Contract extends DomainResource {
      * @return {@link #rule} (Computable Policy rules (e.g. XACML, DKAL, SecPal).)
      */
     // syntactic sugar
-    public Attachment addRule() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addRule() { //3
+      AttachmentType t = new AttachmentType();
       if (this.rule == null)
-        this.rule = new ArrayList<Attachment>();
+        this.rule = new ArrayList<AttachmentType>();
       this.rule.add(t);
       return t;
     }
@@ -2200,20 +2200,20 @@ public class Contract extends DomainResource {
         dst.binding = binding == null ? null : binding.copy();
         dst.bindingDateTime = bindingDateTime == null ? null : bindingDateTime.copy();
         if (friendly != null) {
-          dst.friendly = new ArrayList<Attachment>();
-          for (Attachment i : friendly)
+          dst.friendly = new ArrayList<AttachmentType>();
+          for (AttachmentType i : friendly)
             dst.friendly.add(i.copy());
         };
         dst.friendlyDateTime = friendlyDateTime == null ? null : friendlyDateTime.copy();
         if (legal != null) {
-          dst.legal = new ArrayList<Attachment>();
-          for (Attachment i : legal)
+          dst.legal = new ArrayList<AttachmentType>();
+          for (AttachmentType i : legal)
             dst.legal.add(i.copy());
         };
         dst.legalDateTime = legalDateTime == null ? null : legalDateTime.copy();
         if (rule != null) {
-          dst.rule = new ArrayList<Attachment>();
-          for (Attachment i : rule)
+          dst.rule = new ArrayList<AttachmentType>();
+          for (AttachmentType i : rule)
             dst.rule.add(i.copy());
         };
         dst.ruleDateTime = ruleDateTime == null ? null : ruleDateTime.copy();

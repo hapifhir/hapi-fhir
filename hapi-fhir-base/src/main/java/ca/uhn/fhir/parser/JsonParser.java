@@ -553,7 +553,7 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
 
-				if (childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES && theContainedResource) {
+				if ((childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES||childDef.getChildType()==ChildTypeEnum.CONTAINED_RESOURCE_LIST) && theContainedResource) {
 					continue;
 				}
 
@@ -1181,31 +1181,30 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void parseExtensionInDstu2Style(boolean theModifier, ParserState<?> theState, String theParentExtensionUrl, String theExtensionUrl, JsonArray theValues) {
-		String extUrl = UrlUtil.constructAbsoluteUrl(theParentExtensionUrl, theExtensionUrl);
-		theState.enteringNewElementExtension(null, extUrl, theModifier);
-
-		for (int extIdx = 0; extIdx < theValues.size(); extIdx++) {
-			JsonObject nextExt = theValues.getJsonObject(extIdx);
-			for (String nextKey : nextExt.keySet()) {
-				// if (nextKey.startsWith("value") && nextKey.length() > 5 &&
-				// myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(nextKey) != null) {
-				JsonValue jsonVal = nextExt.get(nextKey);
-				if (jsonVal.getValueType() == ValueType.ARRAY) {
-					/*
-					 * Extension children which are arrays are sub-extensions. Any other value type should be treated as
-					 * a value.
-					 */
-					JsonArray arrayValue = (JsonArray) jsonVal;
-					parseExtensionInDstu2Style(theModifier, theState, extUrl, nextKey, arrayValue);
-				} else {
-					parseChildren(theState, nextKey, jsonVal, null, null);
-				}
-			}
-		}
-
-		theState.endingElement();
-	}
+	// private void parseExtensionInDstu2Style(boolean theModifier, ParserState<?> theState, String theParentExtensionUrl, String theExtensionUrl, JsonArray theValues) {
+	// String extUrl = UrlUtil.constructAbsoluteUrl(theParentExtensionUrl, theExtensionUrl);
+	// theState.enteringNewElementExtension(null, extUrl, theModifier);
+	//
+	// for (int extIdx = 0; extIdx < theValues.size(); extIdx++) {
+	// JsonObject nextExt = theValues.getJsonObject(extIdx);
+	// for (String nextKey : nextExt.keySet()) {
+	// // if (nextKey.startsWith("value") && nextKey.length() > 5 &&
+	// // myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(nextKey) != null) {
+	// JsonValue jsonVal = nextExt.get(nextKey);
+	// if (jsonVal.getValueType() == ValueType.ARRAY) {
+	// /*
+	// * Extension children which are arrays are sub-extensions. Any other value type should be treated as a value.
+	// */
+	// JsonArray arrayValue = (JsonArray) jsonVal;
+	// parseExtensionInDstu2Style(theModifier, theState, extUrl, nextKey, arrayValue);
+	// } else {
+	// parseChildren(theState, nextKey, jsonVal, null, null);
+	// }
+	// }
+	// }
+	//
+	// theState.endingElement();
+	// }
 
 	@Override
 	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {

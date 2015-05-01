@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.instance.model.Attachment;
+import org.hl7.fhir.instance.model.AttachmentType;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Patient;
@@ -19,7 +19,7 @@ public class MyObservationWithExtensions extends Patient {
 	
 	@Extension(url = "urn:patientext:att", definedLocally = false, isModifier = false)
 	@Child(name = "extAtt", order = 0)
-	private Attachment myExtAtt;
+	private AttachmentType myExtAtt;
 
 	@Extension(url = "urn:patientext:moreext", definedLocally = false, isModifier = false)
 	@Child(name = "moreExt", order = 1)
@@ -29,7 +29,7 @@ public class MyObservationWithExtensions extends Patient {
 	@Child(name = "modExt", order = 2)
 	private DateType myModExt;
 
-	public Attachment getExtAtt() {
+	public AttachmentType getExtAtt() {
 		return myExtAtt;
 	}
 
@@ -49,7 +49,7 @@ public class MyObservationWithExtensions extends Patient {
 		myModExt = theModExt;
 	}
 
-	public void setExtAtt(Attachment theExtAtt) {
+	public void setExtAtt(AttachmentType theExtAtt) {
 		myExtAtt = theExtAtt;
 	}
 

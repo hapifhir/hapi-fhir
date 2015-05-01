@@ -82,34 +82,37 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myDatatypeToElementName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
-		String referenceChildName = theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1) ? "Resource" : "Reference";
-		
 		for (Class<? extends IBase> next : myChoiceTypes) {
 
 			String elementName;
-			String alternateElementName = null;
 			BaseRuntimeElementDefinition<?> nextDef;
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-				alternateElementName = getElementName() + referenceChildName;
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
 				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
 				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+				
+				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);
+				myNameToChildDefinition.put(getElementName() + "Resource", nextDef);
+				
 			} else {
 				nextDef = theClassToElementDefinitions.get(next);
 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
 			}
 
 			myNameToChildDefinition.put(elementName, nextDef);
-			if (alternateElementName != null) {
-				myNameToChildDefinition.put(alternateElementName, nextDef);
-			}
 			
 			if (IBaseResource.class.isAssignableFrom(next)) {
 				Class<? extends IBase> refType = theContext.getVersion().getResourceReferenceType();
 				myDatatypeToElementDefinition.put(refType, nextDef);
-				alternateElementName = getElementName() + referenceChildName;
+				
+				String alternateElementName;
+				if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+					alternateElementName = getElementName() + "Resource";
+				} else {
+					alternateElementName = getElementName() + "Reference";
+				}
 				myDatatypeToElementName.put(refType, alternateElementName);
 			}
 			

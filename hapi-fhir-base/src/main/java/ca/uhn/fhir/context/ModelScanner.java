@@ -536,12 +536,17 @@ class ModelScanner {
 				 */
 				Class<? extends IBase> et = (Class<? extends IBase>) nextElementType;
 
-				IValueSetEnumBinder<Enum<?>> binder = null;
+				Object binder = null;
 				if (BoundCodeDt.class.isAssignableFrom(nextElementType) || IBoundCodeableConcept.class.isAssignableFrom(nextElementType)) {
 					binder = getBoundCodeBinder(next);
 				}
 
 				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et, binder);
+				
+				if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
+					def.setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfField(next));
+				}
+				
 				orderMap.put(order, def);
 				if (IBase.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IBase>) nextElementType);

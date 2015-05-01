@@ -314,7 +314,7 @@ public class FhirTerser {
 		case CONTAINED_RESOURCE_LIST:
 			if (theElement != null) {
 				BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-				visit(theElement, null, theChildDefinition, def, theCallback);
+				visit(theElement, pathToElement, null, def, theCallback);
 			}
 			break;
 		}

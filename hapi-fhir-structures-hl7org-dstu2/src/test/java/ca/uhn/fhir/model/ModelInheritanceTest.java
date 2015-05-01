@@ -1,8 +1,12 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.endsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
-import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.AddressType;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Base;
 import org.hl7.fhir.instance.model.Binary;
@@ -32,11 +36,12 @@ import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDecimalDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -45,18 +50,21 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IMetaType;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 
 public class ModelInheritanceTest {
     /*
@@ -83,6 +91,20 @@ public class ModelInheritanceTest {
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
 	@Test
+	public void testDatatypeNames() {
+		for (BaseRuntimeElementDefinition<?> next : ourCtx.getElementDefinitions()) {
+			if (next instanceof BaseRuntimeElementCompositeDefinition || next instanceof RuntimePrimitiveDatatypeDefinition) {
+				String name = next.getImplementingClass().getName();
+				if (name.endsWith(".Enumeration")) {
+					continue;
+				}
+				assertThat(name, endsWith("Type"));
+				
+			}
+		}
+	}
+	
+	@Test
 	public void testList() {
 		assertEquals("List", ourCtx.getResourceDefinition(List_.class).getName());
 	}
@@ -92,7 +114,7 @@ public class ModelInheritanceTest {
      */
     @Test
     public void testAddress() {
-        assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
+        assertTrue(ICompositeType.class.isAssignableFrom(AddressType.class));
     }
 
     @Test
@@ -155,6 +177,9 @@ public class ModelInheritanceTest {
     @Test
     public void testEnumeration() {
         assertTrue(IBaseEnumeration.class.isAssignableFrom(Enumeration.class));
+        
+        DatatypeDef def = Enumeration.class.getAnnotation(DatatypeDef.class);
+        assertTrue(def.isSpecialization());
     }
 
     /**

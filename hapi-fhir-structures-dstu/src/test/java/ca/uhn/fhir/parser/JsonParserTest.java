@@ -785,13 +785,13 @@ public class JsonParserTest {
 
 	private void parseAndEncode(String name) throws IOException {
 		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream(name));
-		ourLog.info(msg);
+//		ourLog.info(msg);
 
 		IParser p = ourCtx.newJsonParser();
 		Profile res = p.parseResource(Profile.class, msg);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
-		ourLog.info(encoded);
+//		ourLog.info(encoded);
 
 		JSON expected = JSONSerializer.toJSON(msg.trim());
 		JSON actual = JSONSerializer.toJSON(encoded.trim());

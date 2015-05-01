@@ -5,6 +5,7 @@ import java.util.List;
 
 import ca.uhn.example.provider.OrganizationResourceProvider;
 import ca.uhn.example.provider.PatientResourceProvider;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -23,6 +24,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 	 */
 	@Override
 	public void initialize() {
+		setFhirContext(FhirContext.forDstu2());// Support DSTU2
 		
 		/*
 		 * Two resource providers are defined. Each one handles a specific

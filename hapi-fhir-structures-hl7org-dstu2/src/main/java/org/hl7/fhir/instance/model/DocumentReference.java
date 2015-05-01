@@ -691,9 +691,9 @@ public class DocumentReference extends DomainResource {
     /**
      * The document or url to the document along with critical metadata to prove content has integrity.
      */
-    @Child(name = "content", type = {Attachment.class}, order = 17, min = 1, max = Child.MAX_UNLIMITED)
+    @Child(name = "content", type = {AttachmentType.class}, order = 17, min = 1, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where to access the document", formalDefinition="The document or url to the document along with critical metadata to prove content has integrity." )
-    protected List<Attachment> content;
+    protected List<AttachmentType> content;
 
     /**
      * The clinical context in which the document was prepared.
@@ -1356,16 +1356,16 @@ public class DocumentReference extends DomainResource {
     /**
      * @return {@link #content} (The document or url to the document along with critical metadata to prove content has integrity.)
      */
-    public List<Attachment> getContent() { 
+    public List<AttachmentType> getContent() { 
       if (this.content == null)
-        this.content = new ArrayList<Attachment>();
+        this.content = new ArrayList<AttachmentType>();
       return this.content;
     }
 
     public boolean hasContent() { 
       if (this.content == null)
         return false;
-      for (Attachment item : this.content)
+      for (AttachmentType item : this.content)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1375,10 +1375,10 @@ public class DocumentReference extends DomainResource {
      * @return {@link #content} (The document or url to the document along with critical metadata to prove content has integrity.)
      */
     // syntactic sugar
-    public Attachment addContent() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addContent() { //3
+      AttachmentType t = new AttachmentType();
       if (this.content == null)
-        this.content = new ArrayList<Attachment>();
+        this.content = new ArrayList<AttachmentType>();
       this.content.add(t);
       return t;
     }
@@ -1471,8 +1471,8 @@ public class DocumentReference extends DomainResource {
             dst.confidentiality.add(i.copy());
         };
         if (content != null) {
-          dst.content = new ArrayList<Attachment>();
-          for (Attachment i : content)
+          dst.content = new ArrayList<AttachmentType>();
+          for (AttachmentType i : content)
             dst.content.add(i.copy());
         };
         dst.context = context == null ? null : context.copy();

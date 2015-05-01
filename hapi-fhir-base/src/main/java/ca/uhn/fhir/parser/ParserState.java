@@ -898,7 +898,7 @@ class ParserState<T> {
 				if (myInstance instanceof IIdentifiableElement) {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else {
-					((IResource)myInstance).setId(new IdDt(theValue));
+					((IResource) myInstance).setId(new IdDt(theValue));
 				}
 			} else if ("contentType".equals(theName)) {
 				myInstance.setContentType(theValue);
@@ -1391,7 +1391,7 @@ class ParserState<T> {
 					res.getId().setValue('#' + res.getId().getIdPart());
 				}
 			}
-			
+
 			IBaseResource preResCurrentElement = getPreResourceState().getCurrentElement();
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(preResCurrentElement);
 			def.getChildByName("contained").getMutator().addValue(preResCurrentElement, res);
@@ -1494,6 +1494,7 @@ class ParserState<T> {
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
+
 		public BaseRuntimeElementCompositeDefinition<?> getDefinition() {
 			return myDefinition;
 		}
@@ -1727,7 +1728,6 @@ class ParserState<T> {
 
 	}
 
-
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
 		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
@@ -1738,7 +1738,6 @@ class ParserState<T> {
 		public void endingElement() throws DataFormatException {
 			pop();
 		}
-
 
 	}
 
@@ -1759,8 +1758,8 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if (theLocalPart.equals("versionId")) {
 				push(new MetaVersionElementState(getPreResourceState(), myMap));
-//			} else if (theLocalPart.equals("profile")) {
-//				
+				// } else if (theLocalPart.equals("profile")) {
+				//
 			} else if (theLocalPart.equals("lastUpdated")) {
 				InstantDt updated = new InstantDt();
 				push(new PrimitiveState(getPreResourceState(), updated));
@@ -1901,23 +1900,20 @@ class ParserState<T> {
 			if (myEntry == null && myMutator == null) {
 				myObject = (T) getCurrentElement();
 			}
-			
+
 			IResource nextResource = (IResource) getCurrentElement();
 			String version = ResourceMetadataKeyEnum.VERSION.get(nextResource);
 			String resourceName = myContext.getResourceDefinition(nextResource).getName();
 			String bundleIdPart = nextResource.getId().getIdPart();
 			if (isNotBlank(bundleIdPart)) {
-//				if (isNotBlank(entryBaseUrl)) {
-//					nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
-//				} else {
-					nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
-//				}
+				// if (isNotBlank(entryBaseUrl)) {
+				// nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+				// } else {
+				nextResource.setId(new IdDt(null, resourceName, bundleIdPart, version));
+				// }
 			}
 
-
 		}
-
-		
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
@@ -1925,9 +1921,9 @@ class ParserState<T> {
 			if (myEntry != null) {
 				myEntry.setResource((IResource) getCurrentElement());
 			}
-				if (myMutator != null) {
-					myMutator.addValue(myTarget, getCurrentElement());
-				}
+			if (myMutator != null) {
+				myMutator.addValue(myTarget, getCurrentElement());
+			}
 		}
 
 	}
@@ -1954,13 +1950,13 @@ class ParserState<T> {
 			if (myTarget == null) {
 				myObject = (T) getCurrentElement();
 			}
-			
+
 			if (getCurrentElement() instanceof IDomainResource) {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
 				String resourceName = myContext.getResourceDefinition(elem).getName();
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getId().getIdPart())) {
-					// nothing
+					// Resource has no ID
 				} else if (StringUtils.isNotBlank(versionId)) {
 					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
 				} else {
@@ -2063,7 +2059,7 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			final boolean bundle = "Bundle".equals(myContext.getResourceDefinition(myInstance).getName());
-			
+
 			FhirTerser terser = myContext.newTerser();
 			terser.visit(myInstance, new IModelVisitor() {
 
@@ -2132,7 +2128,7 @@ class ParserState<T> {
 				}
 
 			}
-			
+
 		}
 
 	}
@@ -2547,13 +2543,12 @@ class ParserState<T> {
 			// TODO: this is not very efficient
 			String value = getDt().getValueAsString();
 			myHl7OrgDatatype.setValueAsString(value);
-			
+
 			super.doPop();
 		}
-		
-		
+
 	}
-	
+
 	private class XhtmlState extends BaseState {
 		private int myDepth;
 		private XhtmlDt myDt;
@@ -2583,7 +2578,7 @@ class ParserState<T> {
 		protected void doPop() {
 			pop();
 		}
-		
+
 		@Override
 		public void endingElement() throws DataFormatException {
 			if (myJsonMode) {

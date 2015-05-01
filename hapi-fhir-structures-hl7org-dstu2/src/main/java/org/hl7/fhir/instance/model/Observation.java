@@ -1026,7 +1026,7 @@ public class Observation extends DomainResource {
     /**
      * The information determined as a result of making the observation, if the information has a simple value.
      */
-    @Child(name = "value", type = {Quantity.class, CodeableConcept.class, Attachment.class, Ratio.class, DateTimeType.class, Period.class, SampledData.class, StringType.class, TimeType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "value", type = {Quantity.class, CodeableConcept.class, AttachmentType.class, Ratio.class, DateTimeType.class, Period.class, SampledData.class, StringType.class, TimeType.class}, order = 1, min = 0, max = 1)
     @Description(shortDefinition="Actual result", formalDefinition="The information determined as a result of making the observation, if the information has a simple value." )
     protected Type value;
 
@@ -1240,10 +1240,10 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public Attachment getValueAttachment() throws Exception { 
-      if (!(this.value instanceof Attachment))
+    public AttachmentType getValueAttachment() throws Exception { 
+      if (!(this.value instanceof AttachmentType))
         throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
-      return (Attachment) this.value;
+      return (AttachmentType) this.value;
     }
 
     /**

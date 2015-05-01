@@ -42,15 +42,21 @@ public class RuntimeChildPrimitiveEnumerationDatatypeDefinition extends RuntimeC
 	public Object getInstanceConstructorArguments() {
 		Object retVal = myBinder;
 		if (retVal == null) {
-			Class<?> clazz;
-			String className = myEnumerationType.getName() + "EnumFactory";
-			try {
-				clazz = Class.forName(className);
-				retVal = clazz.newInstance();
-				myBinder = retVal;
-			} catch (Exception e) {
-				throw new ConfigurationException("Failed to instantiate " + className, e);
-			}
+			retVal = toEnumFactory(myEnumerationType);
+			myBinder = retVal;
+		}
+		return retVal;
+	}
+
+	static Object toEnumFactory(Class<?> theEnumerationType) {
+		Class<?> clazz;
+		String className = theEnumerationType.getName() + "EnumFactory";
+		Object retVal;
+		try {
+			clazz = Class.forName(className);
+			retVal = clazz.newInstance();
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to instantiate " + className, e);
 		}
 		return retVal;
 	}

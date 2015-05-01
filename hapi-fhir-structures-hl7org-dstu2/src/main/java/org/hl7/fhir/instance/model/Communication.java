@@ -164,7 +164,7 @@ public class Communication extends DomainResource {
         /**
          * An individual message part for multi-part messages.
          */
-        @Child(name="content", type={StringType.class, Attachment.class}, order=1, min=1, max=1)
+        @Child(name="content", type={StringType.class, AttachmentType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Message part content", formalDefinition="An individual message part for multi-part messages." )
         protected Type content;
 
@@ -198,10 +198,10 @@ public class Communication extends DomainResource {
         /**
          * @return {@link #content} (An individual message part for multi-part messages.)
          */
-        public Attachment getContentAttachment() throws Exception { 
-          if (!(this.content instanceof Attachment))
+        public AttachmentType getContentAttachment() throws Exception { 
+          if (!(this.content instanceof AttachmentType))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
-          return (Attachment) this.content;
+          return (AttachmentType) this.content;
         }
 
         /**

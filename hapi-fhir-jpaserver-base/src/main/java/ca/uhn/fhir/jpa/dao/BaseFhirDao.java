@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -529,6 +528,10 @@ public abstract class BaseFhirDao implements IDao {
 			}
 		}
 
+		if (pids.isEmpty()) {
+			return new ArrayList<IBaseResource>();
+		}
+		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);

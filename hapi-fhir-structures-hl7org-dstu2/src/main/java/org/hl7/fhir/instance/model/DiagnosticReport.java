@@ -517,9 +517,9 @@ public class DiagnosticReport extends DomainResource {
     /**
      * Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.
      */
-    @Child(name = "presentedForm", type = {Attachment.class}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "presentedForm", type = {AttachmentType.class}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Entire Report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
-    protected List<Attachment> presentedForm;
+    protected List<AttachmentType> presentedForm;
 
     private static final long serialVersionUID = -1237974006L;
 
@@ -1174,16 +1174,16 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @return {@link #presentedForm} (Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.)
      */
-    public List<Attachment> getPresentedForm() { 
+    public List<AttachmentType> getPresentedForm() { 
       if (this.presentedForm == null)
-        this.presentedForm = new ArrayList<Attachment>();
+        this.presentedForm = new ArrayList<AttachmentType>();
       return this.presentedForm;
     }
 
     public boolean hasPresentedForm() { 
       if (this.presentedForm == null)
         return false;
-      for (Attachment item : this.presentedForm)
+      for (AttachmentType item : this.presentedForm)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1193,10 +1193,10 @@ public class DiagnosticReport extends DomainResource {
      * @return {@link #presentedForm} (Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent.)
      */
     // syntactic sugar
-    public Attachment addPresentedForm() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addPresentedForm() { //3
+      AttachmentType t = new AttachmentType();
       if (this.presentedForm == null)
-        this.presentedForm = new ArrayList<Attachment>();
+        this.presentedForm = new ArrayList<AttachmentType>();
       this.presentedForm.add(t);
       return t;
     }
@@ -1266,8 +1266,8 @@ public class DiagnosticReport extends DomainResource {
             dst.codedDiagnosis.add(i.copy());
         };
         if (presentedForm != null) {
-          dst.presentedForm = new ArrayList<Attachment>();
-          for (Attachment i : presentedForm)
+          dst.presentedForm = new ArrayList<AttachmentType>();
+          for (AttachmentType i : presentedForm)
             dst.presentedForm.add(i.copy());
         };
         return dst;

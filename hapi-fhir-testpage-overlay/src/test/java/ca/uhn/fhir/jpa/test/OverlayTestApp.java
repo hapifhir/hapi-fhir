@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;

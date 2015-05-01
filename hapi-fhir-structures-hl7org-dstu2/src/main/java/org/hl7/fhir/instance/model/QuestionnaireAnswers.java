@@ -746,7 +746,7 @@ public class QuestionnaireAnswers extends DomainResource {
         /**
          * The answer (or one of the answers) provided by the respondant to the question.
          */
-        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order = 1, min = 0, max = 1)
+        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, AttachmentType.class, Coding.class, Quantity.class}, order = 1, min = 0, max = 1)
         @Description(shortDefinition = "Single-valued answer to the question", formalDefinition = "The answer (or one of the answers) provided by the respondant to the question.")
         protected Type value;
 
@@ -847,10 +847,10 @@ public class QuestionnaireAnswers extends DomainResource {
       /**
        * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
        */
-        public Attachment getValueAttachment() throws Exception { 
-          if (!(this.value instanceof Attachment))
+        public AttachmentType getValueAttachment() throws Exception { 
+          if (!(this.value instanceof AttachmentType))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
-          return (Attachment) this.value;
+          return (AttachmentType) this.value;
         }
 
       /**

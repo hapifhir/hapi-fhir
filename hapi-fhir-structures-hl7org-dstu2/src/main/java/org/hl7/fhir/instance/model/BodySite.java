@@ -421,9 +421,9 @@ public class BodySite extends DomainResource {
     /**
      * Image or images used to identify a location.
      */
-    @Child(name = "image", type = {Attachment.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "image", type = {AttachmentType.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
     @Description(shortDefinition="Attached images", formalDefinition="Image or images used to identify a location." )
-    protected List<Attachment> image;
+    protected List<AttachmentType> image;
 
     private static final long serialVersionUID = -11708151L;
 
@@ -567,16 +567,16 @@ public class BodySite extends DomainResource {
     /**
      * @return {@link #image} (Image or images used to identify a location.)
      */
-    public List<Attachment> getImage() { 
+    public List<AttachmentType> getImage() { 
       if (this.image == null)
-        this.image = new ArrayList<Attachment>();
+        this.image = new ArrayList<AttachmentType>();
       return this.image;
     }
 
     public boolean hasImage() { 
       if (this.image == null)
         return false;
-      for (Attachment item : this.image)
+      for (AttachmentType item : this.image)
         if (!item.isEmpty())
           return true;
       return false;
@@ -586,10 +586,10 @@ public class BodySite extends DomainResource {
      * @return {@link #image} (Image or images used to identify a location.)
      */
     // syntactic sugar
-    public Attachment addImage() { //3
-      Attachment t = new Attachment();
+    public AttachmentType addImage() { //3
+      AttachmentType t = new AttachmentType();
       if (this.image == null)
-        this.image = new ArrayList<Attachment>();
+        this.image = new ArrayList<AttachmentType>();
       this.image.add(t);
       return t;
     }
@@ -619,8 +619,8 @@ public class BodySite extends DomainResource {
         };
         dst.description = description == null ? null : description.copy();
         if (image != null) {
-          dst.image = new ArrayList<Attachment>();
-          for (Attachment i : image)
+          dst.image = new ArrayList<AttachmentType>();
+          for (AttachmentType i : image)
             dst.image.add(i.copy());
         };
         return dst;

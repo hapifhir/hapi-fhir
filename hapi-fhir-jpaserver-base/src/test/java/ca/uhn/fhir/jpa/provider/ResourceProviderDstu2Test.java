@@ -26,6 +26,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -126,12 +127,7 @@ public class ResourceProviderDstu2Test {
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), startsWith(ourServerBase + "/Patient/"));
-			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), endsWith("/_history/1"));
-			assertThat(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue(), not(containsString("1777")));
-
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}
@@ -466,7 +462,7 @@ public class ResourceProviderDstu2Test {
 		// NB this does not get used- The paging provider has its own limits built in
 		ourDaoConfig.setHardSearchLimit(100);
 
-		List<IResource> resources = new ArrayList<IResource>();
+		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
 			org.setName("rpdstu2_testCountParam_01");

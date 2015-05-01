@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

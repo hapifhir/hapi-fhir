@@ -1,9 +1,8 @@
 package ca.uhn.example.provider;
 
 import ca.uhn.example.model.MyOrganization;
-import ca.uhn.example.model.MyOrganization.EmergencyContact;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.valueset.ContactUseEnum;
+import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointUseEnum;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -51,9 +50,9 @@ public class OrganizationResourceProvider implements IResourceProvider {
 		
 		MyOrganization retVal = new MyOrganization();
 		retVal.setId("1");
-		retVal.addIdentifier("urn:example:orgs", "FooOrganization");
+		retVal.addIdentifier().setSystem("urn:example:orgs").setValue("FooOrganization");
 		retVal.addAddress().addLine("123 Fake Street").setCity("Toronto");
-		retVal.addTelecom().setUse(ContactUseEnum.WORK).setValue("1-888-123-4567");
+		retVal.addTelecom().setUse(ContactPointUseEnum.WORK).setValue("1-888-123-4567");
 		
 		// Populate the first, primitive extension
 		retVal.setBillingCode(new CodeDt("00102-1"));
@@ -61,7 +60,7 @@ public class OrganizationResourceProvider implements IResourceProvider {
 		// The second extension is repeatable and takes a block type
 		MyOrganization.EmergencyContact contact = new MyOrganization.EmergencyContact();
 		contact.setActive(new BooleanDt(true));
-		contact.setContact(new ContactDt());
+		contact.setContact(new ContactPointDt());
 		retVal.getEmergencyContact().add(contact);
 		
 		return retVal;

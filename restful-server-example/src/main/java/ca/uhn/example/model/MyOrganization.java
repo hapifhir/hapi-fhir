@@ -3,7 +3,6 @@ package ca.uhn.example.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.uhn.fhir.model.api.BaseElement;
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IExtension;
@@ -12,8 +11,8 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.dstu.composite.ContactDt;
-import ca.uhn.fhir.model.dstu.resource.Organization;
+import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
+import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.util.ElementUtil;
@@ -115,7 +114,7 @@ public class MyOrganization extends Organization {
 		@Description(shortDefinition = "Contains the actual contact details")
 		@Extension(url = "http://foo#emergencyContactContact", isModifier = false, definedLocally = true)
 		@Child(name = "contact")
-		private ContactDt myContact;
+		private ContactPointDt myContact;
 
 		/* *****************************
 		 * Getters and setters
@@ -132,14 +131,14 @@ public class MyOrganization extends Organization {
 			myActive = theActive;
 		}
 
-		public ContactDt getContact() {
+		public ContactPointDt getContact() {
 			if (myContact == null) {
-				myContact = new ContactDt();
+				myContact = new ContactPointDt();
 			}
 			return myContact;
 		}
 
-		public void setContact(ContactDt theContact) {
+		public void setContact(ContactPointDt theContact) {
 			myContact = theContact;
 		}
 
