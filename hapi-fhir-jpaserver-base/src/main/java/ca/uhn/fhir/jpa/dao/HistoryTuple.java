@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 class HistoryTuple implements Comparable<HistoryTuple> {
 
 	private Long myId;
@@ -62,6 +65,15 @@ class HistoryTuple implements Comparable<HistoryTuple> {
 
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("id", myId);
+		b.append("history", myIsHistory);
+		b.append("updated", myUpdated);
+		return b.build();
 	}
 
 }
