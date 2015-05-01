@@ -220,7 +220,7 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
 	@Deprecated
 	@Override
 	public Boolean getMissing() {
-		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		return null;
 	}
 
 	/**

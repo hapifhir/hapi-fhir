@@ -70,6 +70,7 @@ abstract class BaseParam implements IQueryParameterType {
 	public final void setValueAsQueryToken(String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_MISSING.equals(theQualifier)) {
 			myMissing = "true".equals(theValue);
+			doSetValueAsQueryToken(null, null);
 		} else {
 			myMissing = null;
 			doSetValueAsQueryToken(theQualifier, theValue);

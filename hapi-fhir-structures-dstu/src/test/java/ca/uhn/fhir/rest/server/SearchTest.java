@@ -286,7 +286,7 @@ public class SearchTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 		assertEquals(400, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("<details value=\"Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. This is required for &quot;CREATE&quot; operation\"/>"));
+		assertThat(responseContent, containsString("<details value=\"Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>"));
 	}
 
 	/**
@@ -473,7 +473,9 @@ public class SearchTest {
 			patient.addIdentifier("system", "identifier123");
 			if (theParam != null) {
 				patient.addName().addFamily("id" + theParam.getValue());
-				patient.addName().addFamily("name" + theName.getValue());
+				if (theName != null) {
+					patient.addName().addFamily("name" + theName.getValue());
+				}
 			}
 			retVal.add(patient);
 			return retVal;

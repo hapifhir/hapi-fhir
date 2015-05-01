@@ -182,7 +182,7 @@ public abstract class BaseCodingDt extends BaseIdentifiableElement implements IC
 	@Deprecated
 	@Override
 	public Boolean getMissing() {
-		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		return null;
 	}
 
 	/**

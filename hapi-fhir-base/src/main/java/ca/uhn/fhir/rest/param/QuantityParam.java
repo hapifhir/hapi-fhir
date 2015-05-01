@@ -144,15 +144,11 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		return super.getQueryParameterQualifier();
+		return null;
 	}
 
 	@Override
 	String doGetValueAsQueryToken() {
-		if (super.getMissing() != null) {
-			return super.getValueAsQueryToken();
-		}
-
 		StringBuilder b = new StringBuilder();
 		if (myApproximate) {
 			b.append('~');
@@ -178,11 +174,6 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	@Override
 	void doSetValueAsQueryToken(String theQualifier, String theValue) {
 		clear();
-
-		super.setValueAsQueryToken(theQualifier, theValue);
-		if (getMissing() != null) {
-			return;
-		}
 
 		if (theValue == null) {
 			return;

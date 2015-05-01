@@ -132,7 +132,7 @@ public class StringDt extends BasePrimitive<String> implements IQueryParameterTy
 	@Deprecated
 	@Override
 	public Boolean getMissing() {
-		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+		return null;
 	}
 
 	/**

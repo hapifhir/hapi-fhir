@@ -1582,7 +1582,7 @@ public class FhirResourceDaoDstu2Test {
 			QuantityParam param = new QuantityParam();
 			param.setMissing(false);
 			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1591,7 +1591,7 @@ public class FhirResourceDaoDstu2Test {
 			QuantityParam param = new QuantityParam();
 			param.setMissing(true);
 			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -1618,7 +1618,7 @@ public class FhirResourceDaoDstu2Test {
 			TokenParam param = new TokenParam();
 			param.setMissing(false);
 			params.put(Observation.SP_CODE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1627,7 +1627,7 @@ public class FhirResourceDaoDstu2Test {
 			TokenParam param = new TokenParam();
 			param.setMissing(true);
 			params.put(Observation.SP_CODE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -2422,36 +2422,36 @@ public class FhirResourceDaoDstu2Test {
 	@Test
 	public void testUpdateMaintainsSearchParams() throws InterruptedException {
 		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsAAA");
-		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsAAA");
+		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2AAA");
+		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2AAA");
 		IdDt p1id = ourPatientDao.create(p1).getId();
 
 		Patient p2 = new Patient();
-		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsBBB");
-		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsBBB");
+		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2BBB");
+		p2.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		ourPatientDao.create(p2).getId();
 
-		Set<Long> ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
+		Set<Long> ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
 		// Update the name
-		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsBBB");
+		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");
 		MethodOutcome update2 = ourPatientDao.update(p1);
 		IdDt p1id2 = update2.getId();
 
-		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsAAA"));
+		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(0, ids.size());
 
-		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsBBB"));
+		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB"));
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
 		p1 = ourPatientDao.read(p1id);
-		assertEquals("testUpdateMaintainsSearchParamsAAA", p1.getNameFirstRep().getGivenAsSingleString());
+		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getNameFirstRep().getGivenAsSingleString());
 
 		p1 = ourPatientDao.read(p1id2);
-		assertEquals("testUpdateMaintainsSearchParamsBBB", p1.getNameFirstRep().getGivenAsSingleString());
+		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getNameFirstRep().getGivenAsSingleString());
 
 	}
 
