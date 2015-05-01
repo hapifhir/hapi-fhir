@@ -368,6 +368,13 @@ public class FhirContext {
 		return new FhirTerser(this);
 	}
 
+	/**
+	 * Create a new validator instance.
+	 * <p>
+	 * Note on thread safety: Validators are thread safe, you may use a single validator 
+	 * in multiple threads. (This is in contrast to parsers)
+	 * </p>
+	 */
 	public FhirValidator newValidator() {
 		return new FhirValidator(this);
 	}

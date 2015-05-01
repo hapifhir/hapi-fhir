@@ -601,6 +601,7 @@ public class JsonParserTest {
 	public void testEncodeBundleCategory() {
 
 		Bundle b = new Bundle();
+		
 		BundleEntry e = b.addEntry();
 		e.setResource(new Patient());
 		b.addCategory("scheme", "term", "label");
@@ -609,6 +610,7 @@ public class JsonParserTest {
 		ourLog.info(val);
 
 		assertThat(val, StringContains.containsString("\"category\":[{\"term\":\"term\",\"label\":\"label\",\"scheme\":\"scheme\"}]"));
+		assertThat(val, not(containsString("text")));
 
 		b = new FhirContext().newJsonParser().parseBundle(val);
 		assertEquals(1, b.getEntries().size());
@@ -620,6 +622,7 @@ public class JsonParserTest {
 
 	}
 
+	
 	@Test
 	public void testEncodeBundleEntryCategory() {
 
@@ -1219,7 +1222,6 @@ public class JsonParserTest {
 		Bundle b = new Bundle();
 
 		InstantDt pub = InstantDt.withCurrentTime();
-		b.setPublished(pub);
 		Thread.sleep(2);
 
 		Patient p1 = new Patient();
@@ -1245,7 +1247,6 @@ public class JsonParserTest {
 		ourLog.info(bundleString);
 
 		List<String> strings = new ArrayList<String>();
-		strings.addAll(Arrays.asList("\"published\":\"" + pub.getValueAsString() + "\""));
 		strings.addAll(Arrays.asList("\"id\":\"1\""));
 		strings.addAll(Arrays.asList("this is the summary"));
 		strings.addAll(Arrays.asList("\"id\":\"2\"", "\"rel\":\"alternate\"", "\"href\":\"http://foo/bar\""));

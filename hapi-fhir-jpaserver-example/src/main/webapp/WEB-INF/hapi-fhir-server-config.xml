@@ -17,8 +17,22 @@
 	</bean>
 
 	<bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-		<property name="entityManagerFactory" ref="myEntityManagerFactory" />
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
 	<tx:annotation-driven transaction-manager="myTxManager" />
 
+	<util:list id="myServerInterceptors">
+		<ref bean="myLoggingInterceptor"/>
+	</util:list>
+	
+	<!-- 
+	Do some fancy logging to create a nice access log that has details
+	about each incoming request.
+	-->
+	<bean id="myLoggingInterceptor" class="ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor">
+		<property name="loggerName" value="fhirtest.access"/>
+		<property name="messageFormat"
+				  value="Path[${servletPath}] Source[${requestHeader.x-forwarded-for}] Operation[${operationType} ${idOrResourceName}] UA[${requestHeader.user-agent}] Params[${requestParameters}]"/>
+	</bean>
+	
 </beans>

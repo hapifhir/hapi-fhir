@@ -165,8 +165,10 @@
 
 				<h4>Search - Using HTTP POST</h4>
 				<p>
-					The FHIR specification allows the use of an HTTP POST to transmit a search to a server instead of using
-					an HTTP GET. With this style of search, the search parameters are included in the request body instead
+					The FHIR specification allows the use of an HTTP POST to transmit a search to a server instead of
+					using
+					an HTTP GET. With this style of search, the search parameters are included in the request body
+					instead
 					of the request URL, which can be useful if you need to transmit a search with a large number
 					of parameters.
 				</p>
@@ -176,7 +178,7 @@
 					case the client automatically switches to POST.
 				</p>
 				<p>
-					An alternate form of the search URL (using a URL ending with <code>_search</code>) was also
+					An alternate form of the search URL (using a URL ending with<code>_search</code>) was also
 					supported in FHIR DSTU1. This form is no longer valid in FHIR DSTU2, but HAPI retains support
 					for using this form in order to interoperate with servers which use it.
 				</p>
@@ -211,18 +213,18 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
-				
+
 				<h4>Conditional Creates</h4>
 				<p>
 					FHIR also specifies a type of update called "conditional create", where
 					a set of search parameters are provided and a new resource is only
-					created if no existing resource matches those parameters. See the 
-					FHIR specification for more information on conditional creation. 
+					created if no existing resource matches those parameters. See the
+					FHIR specification for more information on conditional creation.
 				</p>
 				<macro name="snippet">
-					<param name="id" value="updateConditional" />
+					<param name="id" value="updateConditional"/>
 					<param name="file"
-						value="examples/src/main/java/example/GenericClientExample.java" />
+						   value="examples/src/main/java/example/GenericClientExample.java"/>
 				</macro>
 			</subsection>			
 
@@ -276,7 +278,7 @@
 				</macro>
 				<h4>Conditional Deletes</h4>
 				<p>
-					Conditional deletions are also possible, which is a form where 
+					Conditional deletions are also possible, which is a form where
 					instead of deleting a resource using its logical ID, you specify
 					a set of search criteria and a single resource is deleted if
 					it matches that criteria. Note that this is not a mechanism
@@ -284,9 +286,9 @@
 					on conditional deletes and how they are used.
 				</p>
 				<macro name="snippet">
-					<param name="id" value="deleteConditional" />
+					<param name="id" value="deleteConditional"/>
 					<param name="file"
-						value="examples/src/main/java/example/GenericClientExample.java" />
+						   value="examples/src/main/java/example/GenericClientExample.java"/>
 				</macro>
 			</subsection>
 
@@ -305,19 +307,19 @@
 					<param name="file"
 						value="examples/src/main/java/example/GenericClientExample.java" />
 				</macro>
-				
+
 				<h4>Conditional Updates</h4>
 				<p>
 					FHIR also specifies a type of update called "conditional updates", where
 					insetad of using the logical ID of a resource to update, a set of
 					search parameters is provided. If a single resource matches that set of
-					parameters, that resource is updated. See the FHIR specification for 
+					parameters, that resource is updated. See the FHIR specification for
 					information on how conditional updates work.
 				</p>
 				<macro name="snippet">
-					<param name="id" value="updateConditional" />
+					<param name="id" value="updateConditional"/>
 					<param name="file"
-						value="examples/src/main/java/example/GenericClientExample.java" />
+						   value="examples/src/main/java/example/GenericClientExample.java"/>
 				</macro>
 
 				<h4>ETags and Resource Contention</h4>

@@ -46,7 +46,7 @@ public interface IVersionSpecificBundleFactory {
 
 	IBaseResource getResourceBundle();
 
-	void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
+	void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
 
 	void initializeWithBundleResource(IBaseResource theResource);
 

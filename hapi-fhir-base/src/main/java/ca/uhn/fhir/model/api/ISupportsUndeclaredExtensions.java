@@ -27,22 +27,28 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 public interface ISupportsUndeclaredExtensions extends IElement {
 	
 	/**
-	 * Returns a list containing all undeclared non-modifier extensions
+	 * Returns a list containing all undeclared non-modifier extensions. The returned list
+	 * is mutable, so it may be modified (e.g. to add or remove an extension).
 	 */
 	List<ExtensionDt> getUndeclaredExtensions();
 
 	/**
-	 * Returns a list containing all undeclared extensions (modifier and non-modifier) by extension URL
+	 * Returns an <b>immutable</b> list containing all undeclared extensions (modifier and non-modifier) by extension URL
+	 * 
+	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove extensions
 	 */
 	List<ExtensionDt> getUndeclaredExtensionsByUrl(String theUrl);
 
 	/**
-	 * Returns an <b>immutable</b> list containing all extensions (modifier and non-modifier)
+	 * Returns an <b>immutable</b> list containing all extensions (modifier and non-modifier).
+	 * 
+	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove extensions
 	 */
 	List<ExtensionDt> getAllUndeclaredExtensions();
 
 	/**
-	 * Returns a list containing all undeclared modifier extensions
+	 * Returns a list containing all undeclared modifier extensions. The returned list
+	 * is mutable, so it may be modified (e.g. to add or remove an extension).
 	 */
 	List<ExtensionDt> getUndeclaredModifierExtensions();
 	
@@ -65,6 +71,8 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	
 	/**
 	 * Adds an extension to this object
+	 * 
+	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove extensions
 	 */
 	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl, IBaseDatatype theValue);
 
@@ -72,6 +80,8 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	 * Adds an extension to this object. This method is intended for use when
 	 * an extension is being added which will contain child extensions, as opposed to
 	 * a datatype.
+	 * 
+	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove extensions
 	 */
 	ExtensionDt addUndeclaredExtension(boolean theIsModifier, String theUrl);
 

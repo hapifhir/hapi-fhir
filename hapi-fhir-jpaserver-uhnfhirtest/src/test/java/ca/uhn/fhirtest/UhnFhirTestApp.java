@@ -66,7 +66,7 @@ public class UhnFhirTestApp {
 			client.create(p1);
 
 			List<IResource> resources = ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
-			client.transaction(resources);
+			client.transaction().withResources(resources).execute();
 
 //			for (int i = 0; i < 1000; i++) {
 //				

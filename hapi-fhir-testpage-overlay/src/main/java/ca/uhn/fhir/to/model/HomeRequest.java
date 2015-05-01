@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
+import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.to.Controller;
@@ -49,7 +50,9 @@ public class HomeRequest {
 		}
 
 		if (retVal.contains("${serverBase}")) {
-			String base = new IncomingRequestAddressStrategy().determineServerBase(theRequest.getServletContext(), theRequest);
+			IncomingRequestAddressStrategy strategy = new IncomingRequestAddressStrategy();
+			strategy.setServletPath("");
+			String base = strategy.determineServerBase(theRequest.getServletContext(), theRequest);
 			if (base.endsWith("/")) {
 				base = base.substring(0, base.length() - 1);
 			}
@@ -108,6 +111,8 @@ public class HomeRequest {
 	}
 
 	public GenericClient newClient(HttpServletRequest theRequest, FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
+		theContext.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		
 		GenericClient retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
 		retVal.setKeepResponses(true);
 

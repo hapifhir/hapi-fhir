@@ -12,6 +12,7 @@ Servers/
 *.log*
 nohup.out
 .DS_Store
+*.orig
 
 # Vagrant stuff.
 .vagrant

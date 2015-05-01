@@ -85,8 +85,7 @@ public class GenericClientTest {
 				"<title/>\n" + 
 				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
 				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
+				"<author>\n" +
 				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
 				"</author>\n" + 
 				"<entry>\n" + 
@@ -132,7 +131,7 @@ public class GenericClientTest {
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] { new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22") });
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "/Patient/44/_history/22")});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
@@ -141,14 +140,14 @@ public class GenericClientTest {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		MethodOutcome resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
 		assertTrue(resp.getCreated());
-		
+
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
 		assertNull(resp.getCreated());
-		
+
 	}
-	
-	
+
+
 	@Test
 	public void testCreateWithStringAutoDetectsEncoding() throws Exception {
 

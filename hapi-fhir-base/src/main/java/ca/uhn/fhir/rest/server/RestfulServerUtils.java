@@ -76,10 +76,10 @@ public class RestfulServerUtils {
 	}
 
 	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase) throws IOException {
+			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase, boolean theAddContentLocationHeader) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
-		if (theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
+		if (theAddContentLocationHeader && theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
 			IIdType fullId = theResource.getId().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
@@ -205,9 +205,18 @@ public class RestfulServerUtils {
 	}
 
 	public static EncodingEnum determineRequestEncoding(Request theReq) {
+		EncodingEnum retVal = determineRequestEncodingNoDefault(theReq);
+		if (retVal != null) {
+			return retVal;
+		}
+		return EncodingEnum.XML;
+	}
+
+	public static EncodingEnum determineRequestEncodingNoDefault(Request theReq) {
+		EncodingEnum retVal = null;
 		Enumeration<String> acceptValues = theReq.getServletRequest().getHeaders(Constants.HEADER_CONTENT_TYPE);
 		if (acceptValues != null) {
-			while (acceptValues.hasMoreElements()) {
+			while (acceptValues.hasMoreElements() && retVal == null) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();
 				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
 					for (String nextPart : nextAcceptHeaderValue.split(",")) {
@@ -219,15 +228,15 @@ public class RestfulServerUtils {
 							nextPart = nextPart.substring(0, scIdx);
 						}
 						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
+						retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
 						if (retVal != null) {
-							return retVal;
+							break;
 						}
 					}
 				}
 			}
 		}
-		return EncodingEnum.XML;
+		return retVal;
 	}
 
 	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
@@ -413,12 +422,12 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
-			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
-		int stausCode = 200;
-		RestfulServerUtils.streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip,
-				theServerBase);
-	}
+//	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint,
+//			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, boolean theRespondGzip, String theServerBase) throws IOException {
+//		int stausCode = 200;
+//		RestfulServerUtils.streamResponseAsResource(theServer, theHttpResponse, theResource, theResponseEncoding, thePrettyPrint, theRequestIsBrowser, theNarrativeMode, stausCode, theRespondGzip,
+//				theServerBase);
+//	}
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {

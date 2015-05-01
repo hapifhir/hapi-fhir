@@ -53,6 +53,8 @@ import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -471,6 +473,38 @@ public class XmlParserDstu2Test {
 		assertEquals(htmlNoNs, p.getText().getDiv().getValueAsString());
 	}
 	
+
+	/**
+	 * See #163
+	 */
+	@Test
+	public void testParseResourceType() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		// Patient
+		Patient patient = new Patient();
+		String patientId = UUID.randomUUID().toString();
+		patient.setId(new IdDt("Patient", patientId));
+		patient.addName().addGiven("John").addFamily("Smith");
+		patient.setGender(AdministrativeGenderEnum.MALE);
+		patient.setBirthDate(new DateDt("1987-04-16"));
+
+		// Bundle
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		bundle.setType(BundleTypeEnum.COLLECTION);
+		bundle.addEntry().setResource(patient);
+
+		String bundleText = xmlParser.encodeResourceToString(bundle);
+		ourLog.info(bundleText);
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = xmlParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
+		Patient reincarnatedPatient = reincarnatedBundle.getAllPopulatedChildElementsOfType(Patient.class).get(0); 
+		
+		assertEquals("Patient", patient.getId().getResourceType());
+		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
+	}
+
+
 	/**
 	 * Thanks to Alexander Kley!
 	 */

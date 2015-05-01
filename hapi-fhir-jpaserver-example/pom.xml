@@ -2,22 +2,25 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- 
-	Note: HAPI projects use the Sonatype OSS parent project to
-	facilitate deployment to the global Maven repos.
+	Note: HAPI projects use the "hapi-fhir" POM as their base to provide
+	easy management.
 	 
 	You do not need to use this in your own projects, so the 
 	"parent" tag and it's contents below may be removed if you
 	are using this file as a basis for your own project.
 	-->
+	<!-- 
 	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
+	-->
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-jpaserver-example</artifactId>
-	<version>0.9-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR JPA Server - Example</name>
@@ -228,7 +231,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
-					<skip>false</skip>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
     		

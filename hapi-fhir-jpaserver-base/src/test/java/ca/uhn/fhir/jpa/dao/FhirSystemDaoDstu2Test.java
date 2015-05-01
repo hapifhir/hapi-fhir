@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -11,9 +12,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,10 +26,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.provider.SystemProviderTest;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -94,6 +100,30 @@ public class FhirSystemDaoDstu2Test {
 
 	}
 
+	@Test
+	public void testTransactionFromBundle() throws Exception {
+
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve.xml");
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = ourFhirContext.newXmlParser().parseResource(Bundle.class, bundleStr);
+		
+		Bundle resp = ourSystemDao.transaction(bundle);
+		
+		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		OperationOutcome oo = (OperationOutcome) resp.getEntry().get(0).getResource();
+		assertThat(oo.getIssue().get(0).getDetailsElement().getValue(), containsString("Transaction completed"));
+		
+		assertThat(resp.getEntry().get(1).getTransactionResponse().getLocation(), startsWith("Patient/a555-44-4444/_history/"));
+		assertThat(resp.getEntry().get(2).getTransactionResponse().getLocation(), startsWith("Patient/temp6789/_history/"));
+		assertThat(resp.getEntry().get(3).getTransactionResponse().getLocation(), startsWith("Organization/GHH/_history/"));
+		
+		Patient p = ourPatientDao.read(new IdDt("Patient/a555-44-4444/_history/1"));
+		assertEquals("Patient/temp6789", p.getLink().get(0).getOther().getReference().getValue());
+	}
+
+	
+	
 	@Test
 	public void testTransactionReadAndSearch() {
 		String methodName = "testTransactionReadAndSearch";
@@ -262,9 +292,9 @@ public class FhirSystemDaoDstu2Test {
 		IBundleProvider history = ourPatientDao.history(id, null);
 		assertEquals(2, history.size());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 0).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 0).get(0)).getValue());
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(1, 1).get(0)));
 
 	}
 
@@ -769,9 +799,9 @@ public class FhirSystemDaoDstu2Test {
 
 	static void doDeleteEverything(IFhirSystemDao<Bundle> systemDao) {
 		IBundleProvider all = systemDao.history(null);
-		List<IResource> allRes = all.getResources(0, all.size());
-		for (IResource iResource : allRes) {
-			if (ResourceMetadataKeyEnum.DELETED_AT.get(iResource) == null) {
+		List<IBaseResource> allRes = all.getResources(0, all.size());
+		for (IBaseResource iResource : allRes) {
+			if (ResourceMetadataKeyEnum.DELETED_AT.get((IResource) iResource) == null) {
 				ourLog.info("Deleting: {}", iResource.getId());
 				
 				Bundle b = new Bundle();

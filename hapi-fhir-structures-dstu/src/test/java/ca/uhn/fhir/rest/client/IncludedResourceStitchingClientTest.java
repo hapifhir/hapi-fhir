@@ -114,8 +114,7 @@ public class IncludedResourceStitchingClientTest {
 				"   <link rel=\"self\" href=\"http://localhost:49782/Patient?_query=declaredExtInclude&amp;_pretty=true\"/>\n" + 
 				"   <link rel=\"fhir-base\" href=\"http://localhost:49782\"/>\n" + 
 				"   <os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>\n" + 
-				"   <published>2014-08-12T10:22:19.097-04:00</published>\n" + 
-				"   <author>\n" + 
+				"   <author>\n" +
 				"      <name>HAPI FHIR Server</name>\n" + 
 				"   </author>\n" + 
 				"   <entry>\n" + 
@@ -192,8 +191,7 @@ public class IncludedResourceStitchingClientTest {
 				"   <link rel=\"self\" href=\"http://localhost:49627/Patient?_query=extInclude&amp;_pretty=true\"/>\n" + 
 				"   <link rel=\"fhir-base\" href=\"http://localhost:49627\"/>\n" + 
 				"   <os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>\n" + 
-				"   <published>2014-08-05T15:22:08.512-04:00</published>\n" + 
-				"   <author>\n" + 
+				"   <author>\n" +
 				"      <name>HAPI FHIR Server</name>\n" + 
 				"   </author>\n" + 
 				"   <entry>\n" + 

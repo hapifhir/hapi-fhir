@@ -3,6 +3,8 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
@@ -74,30 +76,30 @@ public class GenericClientExample {
          // END SNIPPET: create
       }
       {
-         Patient patient = new Patient();
-         // START SNIPPET: createConditional
-         // One form
-         MethodOutcome outcome = client.create()
-            .resource(patient)
-            .conditionalByUrl("Patient?identifier=system%7C00001")
-            .execute();
+          Patient patient = new Patient();
+          // START SNIPPET: createConditional
+          // One form
+          MethodOutcome outcome = client.create()
+                  .resource(patient)
+                  .conditionalByUrl("Patient?identifier=system%7C00001")
+                  .execute();
 
-         // Another form
-         MethodOutcome outcome2 = client.create()
-            .resource(patient)
-            .conditional()
-            .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
-            .execute();
-         
-         // This will return true if the server responded with an HTTP 201 created,
-         // otherwise it will return null.
-         Boolean created = outcome.getCreated();
-         
-         // The ID of the created, or the pre-existing resource
-         IdDt id = outcome.getId();
-         // END SNIPPET: createConditional
+          // Another form
+          MethodOutcome outcome2 = client.create()
+                  .resource(patient)
+                  .conditional()
+                  .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+                  .execute();
+
+          // This will return true if the server responded with an HTTP 201 created,
+          // otherwise it will return null.
+          Boolean created = outcome.getCreated();
+
+          // The ID of the created, or the pre-existing resource
+          IdDt id = outcome.getId();
+          // END SNIPPET: createConditional
       }
-      {
+       {
          // START SNIPPET: update
          Patient patient = new Patient();
          // ..populate the patient object..
@@ -125,21 +127,21 @@ public class GenericClientExample {
          // END SNIPPET: update
       }
       {
-         Patient patient = new Patient();
-         // START SNIPPET: updateConditional
-         client.update()
-            .resource(patient)
-            .conditionalByUrl("Patient?identifier=system%7C00001")
-            .execute();
-   
-         client.update()
-            .resource(patient)
-            .conditional()
-            .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
-            .execute();
-         // END SNIPPET: updateConditional
+          Patient patient = new Patient();
+          // START SNIPPET: updateConditional
+          client.update()
+                  .resource(patient)
+                  .conditionalByUrl("Patient?identifier=system%7C00001")
+                  .execute();
+
+          client.update()
+                  .resource(patient)
+                  .conditional()
+                  .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+                  .execute();
+          // END SNIPPET: updateConditional
       }
-      {
+       {
          // START SNIPPET: etagupdate
          // First, let's retrive the latest version of a resource
          // from the server
@@ -176,26 +178,26 @@ public class GenericClientExample {
       }
       {
          // START SNIPPET: delete
-         BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
+          BaseOperationOutcome resp = client.delete().resourceById(new IdDt("Patient", "1234")).execute();
 
          // outcome may be null if the server didn't return one
-         if (resp != null) {
-            OperationOutcome outcome = (OperationOutcome) resp;
+          if (resp != null) {
+              OperationOutcome outcome = (OperationOutcome) resp;
             System.out.println(outcome.getIssueFirstRep().getDetailsElement().getValue());
          }
          // END SNIPPET: delete
       }
-      {
-         // START SNIPPET: deleteConditional
-         client.delete()
-               .resourceConditionalByUrl("Patient?identifier=system%7C00001")
-               .execute();
-         
-         client.delete()
-               .resourceConditionalByType("Patient")
-               .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
-               .execute();
-         // END SNIPPET: deleteConditional
+       {
+           // START SNIPPET: deleteConditional
+           client.delete()
+                   .resourceConditionalByUrl("Patient?identifier=system%7C00001")
+                   .execute();
+
+           client.delete()
+                   .resourceConditionalByType("Patient")
+                   .where(Patient.IDENTIFIER.exactly().systemAndIdentifier("system", "00001"))
+                   .execute();
+           // END SNIPPET: deleteConditional
       }
       {
          // START SNIPPET: search
@@ -273,7 +275,7 @@ public class GenericClientExample {
          // .. populate this list - note that you can also pass in a populated
          // Bundle if you want to create one manually ..
 
-         List<IResource> response = client.transaction().withResources(resources).execute();
+         List<IBaseResource> response = client.transaction().withResources(resources).execute();
          // END SNIPPET: transaction
       }
 

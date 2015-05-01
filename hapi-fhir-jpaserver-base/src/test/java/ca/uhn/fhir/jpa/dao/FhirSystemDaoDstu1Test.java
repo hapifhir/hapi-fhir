@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -93,7 +95,7 @@ public class FhirSystemDaoDstu1Test {
         IBundleProvider values = ourSystemDao.history(start);
         assertEquals(4, values.size());
 
-        List<IResource> res = values.getResources(0, 4);
+        List<IBaseResource> res = values.getResources(0, 4);
         assertEquals(newpid3, res.get(0).getId());
         assertEquals(newpid2, res.get(1).getId());
         assertEquals(newpid, res.get(2).getId());
@@ -146,7 +148,7 @@ public class FhirSystemDaoDstu1Test {
         IBundleProvider patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
         assertEquals(1, obsResults.size());
 
-        IdDt foundPatientId = patResults.getResources(0, 1).get(0).getId();
+        IIdType foundPatientId = patResults.getResources(0, 1).get(0).getId();
         ResourceReferenceDt subject = obs.getSubject();
         assertEquals(foundPatientId.getIdPart(), subject.getReference().getIdPart());
 
@@ -371,7 +373,7 @@ public class FhirSystemDaoDstu1Test {
 		 */
 
         res = new ArrayList<IResource>();
-        List<IResource> existing = results.getResources(0, 3);
+        List<IBaseResource> existing = results.getResources(0, 3);
 
         p1 = new Patient();
         p1.setId(existing.get(0).getId());
@@ -391,7 +393,7 @@ public class FhirSystemDaoDstu1Test {
 
         IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
         assertEquals(1, results2.size());
-        List<IResource> existing2 = results2.getResources(0, 1);
+        List<IBaseResource> existing2 = results2.getResources(0, 1);
         assertEquals(existing2.get(0).getId(), existing.get(2).getId());
 
     }

@@ -56,6 +56,7 @@ import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -660,12 +661,12 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private List<IResource> addResourcesAsIncludesById(List<IResource> theListToPopulate, Set<IdDt> includePids, List<IResource> resources) {
+	private List<IBaseResource> addResourcesAsIncludesById(List<IBaseResource> theListToPopulate, Set<? extends IIdType> includePids, List<IBaseResource> resources) {
 		if (!includePids.isEmpty()) {
 			ourLog.info("Loading {} included resources", includePids.size());
 			resources = loadResourcesById(includePids);
-			for (IResource next : resources) {
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(next, BundleEntrySearchModeEnum.INCLUDE);
+			for (IBaseResource next : resources) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) next, BundleEntrySearchModeEnum.INCLUDE);
 			}
 			theListToPopulate.addAll(resources);
 		}
@@ -1000,7 +1001,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return tags;
 	}
 
-	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IResource theResource, RuntimeResourceDefinition theResourceDef);
+	protected abstract List<Object> getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef);
 
 	public Class<T> getResourceType() {
 		return myResourceType;
@@ -1074,8 +1075,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
-				ArrayList<IResource> retVal = new ArrayList<IResource>();
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+				ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 				if (theFromIndex == 0 && current != null) {
 					retVal.add(current);
 				}
@@ -1128,7 +1129,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return retVal;
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IResource> theResourceListToPopulate, BundleEntrySearchModeEnum theBundleEntryStatus) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, BundleEntrySearchModeEnum theBundleEntryStatus) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1520,15 +1521,15 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 
 			@Override
-			public List<IResource> getResources(final int theFromIndex, final int theToIndex) {
+			public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
 				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-				return template.execute(new TransactionCallback<List<IResource>>() {
+				return template.execute(new TransactionCallback<List<IBaseResource>>() {
 					@Override
-					public List<IResource> doInTransaction(TransactionStatus theStatus) {
+					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
 						List<Long> pidsSubList = pids.subList(theFromIndex, theToIndex);
 
 						// Execute the query and make sure we return distinct results
-						List<IResource> retVal = new ArrayList<IResource>();
+						List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						/*
@@ -1537,19 +1538,19 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						 * so they are loaded outside the bundle provider
 						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
-							Set<IdDt> previouslyLoadedPids = new HashSet<IdDt>();
-							for (IResource next : retVal) {
+							Set<IIdType> previouslyLoadedPids = new HashSet<IIdType>();
+							for (IBaseResource next : retVal) {
 								previouslyLoadedPids.add(next.getId().toUnqualifiedVersionless());
 							}
 
 							Set<IdDt> includePids = new HashSet<IdDt>();
-							List<IResource> resources = retVal;
+							List<IBaseResource> resources = retVal;
 							do {
 								includePids.clear();
 
 								FhirTerser t = getContext().newTerser();
 								for (Include next : theParams.getIncludes()) {
-									for (IResource nextResource : resources) {
+									for (IBaseResource nextResource : resources) {
 										RuntimeResourceDefinition def = getContext().getResourceDefinition(nextResource);
 										List<Object> values = getIncludeValues(t, next, nextResource, def);
 
@@ -1875,7 +1876,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				if (Character.isDigit(theResource.getId().getIdPart().charAt(0))) {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
-				return doCreate(theResource, null, true);
+				return doCreate(theResource, null, thePerformIndexing);
 			}
 		}
 

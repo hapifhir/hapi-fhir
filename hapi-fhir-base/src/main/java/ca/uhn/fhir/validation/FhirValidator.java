@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -199,10 +200,10 @@ public class FhirValidator {
      * @return the results of validation
      * @since 0.7
      */
-    public ValidationResult validateWithResult(IResource theResource) {
+    public ValidationResult validateWithResult(IBaseResource theResource) {
         Validate.notNull(theResource, "theResource must not be null");
 
-        ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, theResource);
+        ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, (IResource) theResource);
 
         for (IValidator next : myValidators) {
             next.validateResource(ctx);

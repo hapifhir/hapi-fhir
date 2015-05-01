@@ -20,6 +20,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu.resource.Medication;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
@@ -84,6 +85,23 @@ public class Dstu1BundleFactoryTest {
         myResourceList = Arrays.asList(new IBaseResource[]{diagnosticReport});
 
         myBundleFactory = new Dstu1BundleFactory(ourCtx);
+    }
+
+    @Test
+    public void whenMedicationHasIngredients_include_shouldIncludeThem() throws Exception {
+        Medication medication = new Medication();
+        medication.setName("Main Medication");
+        medication.setId("Medication/1");
+        Medication ingredientMedication = new Medication();
+        ingredientMedication.setName("Ingredient");
+        ingredientMedication.setId("Medication/2");
+        Medication.ProductIngredient ingredient = new Medication.ProductIngredient();
+        ingredient.setItem(new ResourceReferenceDt(ingredientMedication));
+        medication.getProduct().getIngredient().add(ingredient);
+
+        myResourceList = Arrays.asList(new IBaseResource[]{medication});
+        Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes("Medication.product.ingredient.item"));
+        assertEquals(2, bundle.getEntries().size());
     }
 
     @Test

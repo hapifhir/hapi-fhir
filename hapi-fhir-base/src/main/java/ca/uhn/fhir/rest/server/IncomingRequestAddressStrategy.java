@@ -30,10 +30,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 
+	private String myServletPath;
+
 	@Override
 	public String determineServerBase(ServletContext theServletContext, HttpServletRequest theRequest) {
 		String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
-		String servletPath = StringUtils.defaultString(theRequest.getServletPath());
+		
+		String servletPath;
+		if (myServletPath != null) {
+			servletPath = myServletPath;
+		} else {
+			servletPath = StringUtils.defaultString(theRequest.getServletPath());
+		}
+		
 		StringBuffer requestUrl = theRequest.getRequestURL();
 		String servletContextPath = "";
 		if (theServletContext != null) {
@@ -48,7 +57,9 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 		}
 
 		int startOfPath = requestUrl.indexOf("//");
-		if (startOfPath != -1 && (startOfPath + 2) < requestUrl.length()) {
+		int requestUrlLength = requestUrl.length();
+
+		if (startOfPath != -1 && (startOfPath + 2) < requestUrlLength) {
 			startOfPath = requestUrl.indexOf("/", startOfPath + 2);
 		}
 		if (startOfPath == -1) {
@@ -56,9 +67,9 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 		}
 
 		int contextIndex;
-		if (servletPath.length() == 0) {
+		if (servletPath.length() == 0 || servletPath.equals("/")) {
 			if (requestPath.length() == 0) {
-				contextIndex = requestUrl.length();
+				contextIndex = requestUrlLength;
 			} else {
 				contextIndex = requestUrl.indexOf(requestPath, startOfPath);
 			}
@@ -68,8 +79,30 @@ public class IncomingRequestAddressStrategy implements IServerAddressStrategy {
 
 		String fhirServerBase;
 		int length = contextIndex + servletPath.length();
+		if (length > requestUrlLength) {
+			length = requestUrlLength;
+		}
 		fhirServerBase = requestUrl.substring(0, length);
 		return fhirServerBase;
+	}
+
+	/**
+	 * If set to a non-null value (default is <code>null</code>), this address strategy assumes that the FHIR endpoint is deployed to the given servlet path within the context. This is useful in some
+	 * deployments where it isn't obvious to the servlet which part of the path is actually the root path to reach the servlet.
+	 * <p>
+	 * Example values could be:
+	 * <ul>
+	 * <li>null</li>
+	 * <li>/</li>
+	 * <li>/base</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * <b>Wildcards are not supported!</b>
+	 * </p>
+	 */
+	public void setServletPath(String theServletPath) {
+		myServletPath = theServletPath;
 	}
 
 }

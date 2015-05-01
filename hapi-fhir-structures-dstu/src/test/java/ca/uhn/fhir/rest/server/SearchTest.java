@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -38,10 +40,13 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
@@ -233,6 +238,75 @@ public class SearchTest {
 		assertEquals("IDAAA (identifier123)", bundle.getEntries().get(0).getTitle().getValue());
 	}
 
+	/**
+	 * See #164
+	 */
+	@Test
+	public void testSearchByPostWithParamsInBodyAndUrl() throws Exception {
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient/_search?name=Central");
+
+		// add parameters to the post method
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair("_id", "aaa"));
+
+		UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
+		filePost.setEntity(sendentity);
+
+		HttpResponse status = ourClient.execute(filePost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+		assertEquals(1, bundle.getEntries().size());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("idaaa", p.getName().get(0).getFamilyAsSingleString());
+		assertEquals("nameCentral", p.getName().get(1).getFamilyAsSingleString());
+
+	}
+
+	/**
+	 * See #164
+	 */
+	@Test
+	public void testSearchByPostWithInvalidPostUrl() throws Exception {
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with _search
+
+		// add parameters to the post method
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair("_id", "aaa"));
+
+		UrlEncodedFormEntity sendentity = new UrlEncodedFormEntity(parameters, "UTF-8");
+		filePost.setEntity(sendentity);
+
+		HttpResponse status = ourClient.execute(filePost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<details value=\"Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. This is required for &quot;CREATE&quot; operation\"/>"));
+	}
+
+	/**
+	 * See #164
+	 */
+	@Test
+	public void testSearchByPostWithMissingContentType() throws Exception {
+		HttpPost filePost = new HttpPost("http://localhost:" + ourPort + "/Patient?name=Central"); // should end with _search
+
+		HttpEntity sendentity = new ByteArrayEntity(new byte[] {1,2,3,4} );
+		filePost.setEntity(sendentity);
+
+		HttpResponse status = ourClient.execute(filePost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("<details value=\"No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>"));
+	}
+
 	@Test
 	public void testSearchCompartment() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/fooCompartment");
@@ -354,6 +428,14 @@ public class SearchTest {
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+		/**
+		 * Only needed for #164
+		 */
+		@Create
+		public MethodOutcome create(@ResourceParam Patient thePatient) {
+			throw new IllegalArgumentException();
+		}
+		
 		@Search(compartmentName = "fooCompartment")
 		public List<Patient> compartment(@IdParam IdDt theId) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
@@ -383,7 +465,7 @@ public class SearchTest {
 
 
 		@Search
-		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam) {
+		public List<Patient> findPatient(@RequiredParam(name = "_id") StringParam theParam, @OptionalParam(name="name") StringParam theName) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
 			Patient patient = new Patient();
@@ -391,6 +473,7 @@ public class SearchTest {
 			patient.addIdentifier("system", "identifier123");
 			if (theParam != null) {
 				patient.addName().addFamily("id" + theParam.getValue());
+				patient.addName().addFamily("name" + theName.getValue());
 			}
 			retVal.add(patient);
 			return retVal;

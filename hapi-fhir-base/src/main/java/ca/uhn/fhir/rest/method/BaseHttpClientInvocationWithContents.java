@@ -37,6 +37,7 @@ import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.FhirValidator;
 
 /**
  * @author James Agnew
@@ -63,7 +65,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private String myIfNoneExistString;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
-	private final List<IBaseResource> myResources;
+	private final List<? extends IBaseResource> myResources;
 	private final TagList myTagList;
 	private final String myUrlPath;
 
@@ -103,7 +105,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;
@@ -270,7 +272,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 				}
 			} else if (myContents != null) {
 				contents = myContents;
-				if (myContentsIsBundle) {
+				if (myContentsIsBundle && myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 					contentType = encoding.getBundleContentType();
 				} else {
 					contentType = encoding.getResourceContentType();

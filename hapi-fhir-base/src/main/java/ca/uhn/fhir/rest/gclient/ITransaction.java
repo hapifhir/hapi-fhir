@@ -32,7 +32,7 @@ public interface ITransaction {
 	/**
 	 * Use a list of resources as the transaction input
 	 */
-	ITransactionTyped<List<IBaseResource>> withResources(List<IBaseResource> theResources);
+	ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources);
 	
 	/**
 	 * Use a DSTU1 Bundle (Atom) as the transaction input
@@ -44,9 +44,9 @@ public interface ITransaction {
 	 */
 	<T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundleResource);
 
-	// *****
-	// TODO: add withString version
-	// If we add a withString version, make sure to auto-detect content type!
-	// *****
-	
+	/**
+	 * Use the given raw text (should be a Bundle resource) as the transaction input
+	 */
+	ITransactionTyped<String> withBundle(String theBundle);
+
 }

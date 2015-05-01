@@ -54,6 +54,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -444,12 +445,12 @@ public abstract class BaseFhirDao implements IDao {
 			}
 
 			@Override
-			public List<IResource> getResources(final int theFromIndex, final int theToIndex) {
+			public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
 				final StopWatch timer = new StopWatch();
 				TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-				return template.execute(new TransactionCallback<List<IResource>>() {
+				return template.execute(new TransactionCallback<List<IBaseResource>>() {
 					@Override
-					public List<IResource> doInTransaction(TransactionStatus theStatus) {
+					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
 						List<BaseHasResource> resEntities = Lists.newArrayList();
 
 						List<HistoryTuple> tupleSubList = tuples.subList(theFromIndex, theToIndex);
@@ -471,7 +472,7 @@ public abstract class BaseFhirDao implements IDao {
 							resEntities = resEntities.subList(0, limit);
 						}
 
-						ArrayList<IResource> retVal = new ArrayList<IResource>();
+						ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 						for (BaseHasResource next : resEntities) {
 							RuntimeResourceDefinition type;
 							try {
@@ -503,7 +504,7 @@ public abstract class BaseFhirDao implements IDao {
 		};
 	}
 
-	protected boolean isValidPid(IdDt theId) {
+	protected boolean isValidPid(IIdType theId) {
 		String idPart = theId.getIdPart();
 		for (int i = 0; i < idPart.length(); i++) {
 			char nextChar = idPart.charAt(i);
@@ -514,9 +515,9 @@ public abstract class BaseFhirDao implements IDao {
 		return true;
 	}
 
-	protected List<IResource> loadResourcesById(Set<IdDt> theIncludePids) {
+	protected List<IBaseResource> loadResourcesById(Set<? extends IIdType> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
-		for (IdDt next : theIncludePids) {
+		for (IIdType next : theIncludePids) {
 			if (next.isIdPartValidLong()) {
 				pids.add(next.getIdPartAsLong());
 			} else {
@@ -538,7 +539,7 @@ public abstract class BaseFhirDao implements IDao {
 		// }
 		TypedQuery<ResourceTable> q = myEntityManager.createQuery(cq);
 
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (ResourceTable next : q.getResultList()) {
 			IResource resource = (IResource) toResource(next);
 			retVal.add(resource);
@@ -956,7 +957,7 @@ public abstract class BaseFhirDao implements IDao {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
 
-	protected Long translateForcedIdToPid(IdDt theId) {
+	protected Long translateForcedIdToPid(IIdType theId) {
 		if (isValidPid(theId)) {
 			return theId.getIdPartAsLong();
 		} else {

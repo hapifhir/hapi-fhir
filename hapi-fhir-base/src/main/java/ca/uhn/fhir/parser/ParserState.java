@@ -683,8 +683,6 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			if ("entry".equals(theLocalPart) && verifyNamespace(XmlParser.ATOM_NS, theNamespaceURI)) {
 				push(new AtomEntryState(myInstance, myResourceType));
-			} else if (theLocalPart.equals("published")) {
-				push(new AtomPrimitiveState(myInstance.getPublished()));
 			} else if (theLocalPart.equals("title")) {
 				push(new AtomPrimitiveState(myInstance.getTitle()));
 			} else if ("id".equals(theLocalPart)) {
@@ -1619,12 +1617,12 @@ class ParserState<T> {
 				return;
 			}
 			case RESOURCE: {
-				if (myInstance instanceof IResource) {
+				if (myInstance instanceof IResource || myInstance instanceof IElement) {
 					ParserState<T>.PreResourceStateHapi state = new PreResourceStateHapi(myInstance, child.getMutator(), null);
 					push(state);
 				} else {
-				ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
-				push(state);
+					ParserState<T>.PreResourceStateHl7Org state = new PreResourceStateHl7Org(myInstance, child.getMutator(), null);
+					push(state);
 				}
 				return;
 			}
@@ -1732,7 +1730,7 @@ class ParserState<T> {
 
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState,BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
+		public SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, BaseCodingDt codingDt) {
 			super(thePreResourceState, theDef, codingDt);
 		}
 
@@ -1774,7 +1772,7 @@ class ParserState<T> {
 					securityLabels = new ArrayList<BaseCodingDt>();
 					myMap.put(ResourceMetadataKeyEnum.SECURITY_LABELS, securityLabels);
 				}
-				BaseCodingDt securityLabel= myContext.getVersion().newCodingDt();
+				BaseCodingDt securityLabel = myContext.getVersion().newCodingDt();
 				BaseRuntimeElementCompositeDefinition<?> codinfDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(securityLabel.getClass());
 				push(new SecurityLabelElementStateHapi(getPreResourceState(), codinfDef, securityLabel));
 				securityLabels.add(securityLabel);
@@ -1900,7 +1898,7 @@ class ParserState<T> {
 		@Override
 		public void wereBack() {
 			super.wereBack();
-			if (myEntry == null) {
+			if (myEntry == null && myMutator == null) {
 				myObject = (T) getCurrentElement();
 			}
 			
@@ -2068,7 +2066,7 @@ class ParserState<T> {
 			terser.visit(myInstance, new IModelVisitor() {
 
 				@Override
-				public void acceptElement(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
 					if (theElement instanceof BaseResourceReferenceDt) {
 						BaseResourceReferenceDt nextRef = (BaseResourceReferenceDt) theElement;
 						String ref = nextRef.getReference().getValue();
@@ -2099,8 +2097,8 @@ class ParserState<T> {
 				}
 
 				@Override
-				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
-					acceptElement(theNextExt.getValue(), null, null);
+				public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+					acceptElement(theNextExt.getValue(), null, null, null);
 				}
 			});
 

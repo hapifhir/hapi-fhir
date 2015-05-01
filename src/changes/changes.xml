@@ -130,6 +130,63 @@
 				JPA server failed to index resources containing ContactPointDt elements with
 				populated values (e.g. Patient.telecom). Thanks to Mohammad Jafari for reporting!
 			</action>
+			<action type="fix" issue="155" dev="wdebeau1">
+				Terser's IModelVisitor now supplies to the path to the element. This is
+				an API change, but I don't think there are many users of the IModelVisitor yet.
+				Please let us know if this is a big hardship and we can find an alternate way
+				of making this change.
+			</action>
+			<action type="fix">
+				Prevent server from returning a Content-Location header for search
+				response when using the DSTU2 bundle format
+			</action>
+			<action type="fix">
+				JPA server (uhnfhirtest.uhn.ca) sometimes included an empty
+				"text" element in Bundles being returned.
+			</action>
+			<action type="add" issue="162">
+				Add a framework for the Web Tester UI to allow its internal FHIR client to 
+				be configured (e.g. to add an authorization interceptor so that it adds
+				credentials to client requests it makes). Thanks to Harsha Kumara for
+				the suggestion!
+			</action>
+			<action type="fix" issue="163">
+				Fix regression in early 1.0 builds where resource type sometimes does not get 
+				populated in a resource ID when the resource is parsed. Thanks to
+				Nick Peterson for reporting, and for providing a test case!
+			</action>
+			<action type="add">
+				Allow fluent/generic client users to execute a transaction using a raw string (containing a bundle resource)
+				as input instead of a Bundle resource class instance.
+			</action>
+			<action type="fix">
+				Disable date validation in the web tester UI, so that it is possible to 
+				enter partial dates, or dates without times, or even test out invalid date
+				options.
+			</action>
+			<action type="fix" issue="36">
+				Make BaseElement#getUndeclaredExtensions() and BaseElement#getUndeclaredExtensions() return
+				a mutable list so that it is possible to delete extensions from a resource instance.
+			</action>
+			<action type="fix" issue="168">
+				Server conformance statement check in clients (this is the check
+				where the first time a given FhirContext is used to access a given server
+				base URL, it will first check the server's Conformance statement to ensure
+				that it supports the correct version of FHIR) now uses any 
+				registered client interceptors. In addition, IGenericClient now has a method
+				"forceConformanceCheck()" which manually triggers this check. Thanks to
+				Doug Martin for reporting and suggesting!
+			</action>
+			<action type="add" issue="167">
+				Rename the Spring Bean definition for the JPA server EntityManager from
+				"myEntityManagerFactory" to just "entityManagerFactory" as this is the
+				default bean name expected in other parts of the Spring framework. 
+				Thanks to Mohammad Jafari for the suggestion!
+			</action>
+			<action type="add" issue="164">
+				Improve error message when a user tries to perform a create/update with an invalid
+				or missing Content-Type header. Thanks to wanghaisheng for reporting!
+			</action>
 			<action type="add">
 				Add a new configuration method on the parsers, 
 				<![CDATA[<code>setStripVersionsFromReferences(boolean)</code>]]> which

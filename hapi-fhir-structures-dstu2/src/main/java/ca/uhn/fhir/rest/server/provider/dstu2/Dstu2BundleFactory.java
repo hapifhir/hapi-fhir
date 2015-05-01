@@ -276,7 +276,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
@@ -312,7 +312,7 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
-	private void addResourcesForSearch(List<IBaseResource> theResult) {
+	private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
 		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 

@@ -129,7 +129,7 @@ public class OverlayTestApp {
 			client.create(p1);
 
 			List<IResource> resources = restServerDstu1.getFhirContext().newJsonParser().parseBundle(IOUtils.toString(OverlayTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
-			client.transaction(resources);
+			client.transaction().withResources(resources).execute();
 
 			client.create(p1);
 			client.create(p1);

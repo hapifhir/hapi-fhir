@@ -102,8 +102,7 @@ public class ClientTest {
 				"<title/>\n" + 
 				"<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" + 
 				"<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" + 
-				"<published>2014-03-11T16:35:07-04:00</published>\n" + 
-				"<author>\n" + 
+				"<author>\n" +
 				"<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" + 
 				"</author>\n" + 
 				"<entry>\n" + 
@@ -301,7 +300,6 @@ public class ClientTest {
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
 				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
 				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
-				+ "<published>2014-04-13T18:24:50-04:00</published>"
 				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
 				+ "<entry><title>Patient 222</title><id>222</id>"
 				+ "<updated>"+date1.getValueAsString()+"</updated>"
@@ -374,7 +372,6 @@ public class ClientTest {
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
 				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
 				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
-				+ "<published>2014-04-13T18:24:50-04:00</published>"
 				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
 				+ "<entry><title>Patient 222</title><id>222</id>"
 				+ "<updated>"+date1.getValueAsString()+"</updated>"
@@ -446,7 +443,6 @@ public class ClientTest {
 		String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id>"
 				+ "<link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/>"
 				+ "<link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults>"
-				+ "<published>2014-04-13T18:24:50-04:00</published>"
 				+ "<author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author>"
 				+ "<entry><title>Patient 222</title><id>222</id>"
 				+ "<updated>"+date1.getValueAsString()+"</updated>"
@@ -511,7 +507,7 @@ public class ClientTest {
 	public void testHistoryWithParams() throws Exception {
 
 		//@formatter:off
-		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><published>2014-04-13T18:24:50-04:00</published><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
+		final String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title/><id>6c1d93be-027f-468d-9d47-f826cd15cf42</id><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history\"/><link rel=\"fhir-base\" href=\"http://localhost:51698\"/><os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">2</os:totalResults><author><name>ca.uhn.fhir.rest.method.HistoryMethodBinding</name></author><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:20.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/1\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"OlderFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry><entry><title>Patient 222</title><id>222</id><updated>1969-12-31T19:00:30.000-05:00</updated><published>1969-12-31T19:00:10.000-05:00</published><link rel=\"self\" href=\"http://localhost:51698/Patient/222/_history/2\"/><content type=\"text/xml\"><Patient xmlns=\"http://hl7.org/fhir\"><identifier><use value=\"official\"/><system value=\"urn:hapitest:mrns\"/><value value=\"00001\"/></identifier><name><family value=\"NewerFamily\"/><given value=\"PatientOne\"/></name><gender><text value=\"M\"/></gender></Patient></content></entry></feed>";
 		//@formatter:on
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -44,13 +46,32 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
+		
+		assertThat(responseContent, not(containsString("text")));
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
+	@Test
+	public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithRef&_format=json");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		
+		assertThat(responseContent, not(containsString("text")));
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
+		String ref = patient.getManagingOrganization().getReference().getValue();
+		assertEquals("Organization/555", ref);
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
+	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -66,7 +87,6 @@ public class SearchDstu2Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);

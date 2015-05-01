@@ -21,6 +21,11 @@
 				<value>example , DSTU1 , Restful Server Example , http://localhost:8080/fhir</value>
 			</list>
 		</property>
+		
+		<!--
+		Add a property for the client factory if one is needed 
+		<property name="clientFactory"><bean class="com.example.AuthorizingTesterUiClientFactory"/></property>
+		-->
 	</bean>
 	
 	<!-- A FhirContext bean is also required -->

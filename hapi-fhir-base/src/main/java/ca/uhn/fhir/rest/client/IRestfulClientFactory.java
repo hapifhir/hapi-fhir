@@ -73,14 +73,22 @@ public interface IRestfulClientFactory {
 	HttpClient getHttpClient();
 
 	/**
+	 * @deprecated Use {@link #getServerValidationMode()} instead
+	 */
+	@Deprecated
+	ServerValidationModeEnum getServerValidationModeEnum();
+
+	/**
 	 * Gets the server validation mode for any clients created from this factory. Server 
 	 * validation involves the client requesting the server's conformance statement
 	 * to determine whether the server is appropriate for the given client. 
 	 * <p>
 	 * The default value for this setting is defined by {@link #DEFAULT_SERVER_VALIDATION_MODE}
 	 * </p>
+	 * 
+	 * @since 1.0
 	 */
-	ServerValidationModeEnum getServerValidationModeEnum();
+	ServerValidationModeEnum getServerValidationMode();
 
 	/**
 	 * Gets the socket timeout, in milliseconds. This is the SO_TIMEOUT time, which is the amount of time that a
@@ -159,14 +167,22 @@ public interface IRestfulClientFactory {
 	void setProxyCredentials(String theUsername, String thePassword);
 
 	/**
+	 * @deprecated Use {@link #setServerValidationMode(ServerValidationModeEnum)} instead. This method was incorrectly named.
+	 */
+	@Deprecated
+	void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode);
+
+	/**
 	 * Sets the server validation mode for any clients created from this factory. Server 
 	 * validation involves the client requesting the server's conformance statement
 	 * to determine whether the server is appropriate for the given client. 
 	 * <p>
 	 * The default value for this setting is defined by {@link #DEFAULT_SERVER_VALIDATION_MODE}
 	 * </p>
+	 * 
+	 * @since 1.0
 	 */
-	void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode);
+	void setServerValidationMode(ServerValidationModeEnum theServerValidationMode);
 
 	/**
 	 * Sets the socket timeout, in milliseconds. This is the SO_TIMEOUT time, which is the amount of time that a

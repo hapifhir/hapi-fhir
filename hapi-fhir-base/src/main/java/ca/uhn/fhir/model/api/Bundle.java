@@ -293,6 +293,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		return myLinkSelf;
 	}
 
+	/*
 	public InstantDt getPublished() {
 		InstantDt retVal = (InstantDt) getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
 		if (retVal == null) {
@@ -301,6 +302,7 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		}
 		return retVal;
 	}
+	*/
 
 	/**
 	 * Retrieves a resource from a bundle given its logical ID.
@@ -394,9 +396,11 @@ public class Bundle extends BaseBundle /* implements IElement */{
 		myCategories = theCategories;
 	}
 
+	/*
 	public void setPublished(InstantDt thePublished) {
 		getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, thePublished);
 	}
+	/*
 
 	public void setType(BoundCodeDt<BundleTypeEnum> theType) {
 		myType = theType;

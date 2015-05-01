@@ -326,7 +326,8 @@
 								                $('#resource-history-datetime').datetimepicker({
 								                	sideBySide: true,
 								                	use24hours: true,
-								                	showToday: true
+								                	showToday: true,
+								                	keepInvalid: true
 								                });
 								            });
 								            $('#resource-history-btn').click(
@@ -432,7 +433,7 @@
 													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
 													var body = $('#resource-create-body').val();
 													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
-													$("#outerForm").attr("action", "create").submit();
+													$("#outerForm").attr("action", "create").attr("method", "POST").submit();
 												});		
 											$( document ).ready(function() {
 												if ($('#resource-create-id').val() != "") {
@@ -498,7 +499,7 @@
 													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-create-id', value: id }));
 													var body = $('#resource-update-body').val();
 													btn.append($('<input />', { type: 'hidden', name: 'resource-create-body', value: body }));
-													$("#outerForm").attr("action", "update").submit();
+													$("#outerForm").attr("action", "update").attr("method", "POST").submit();
 												});		
 											$( document ).ready(function() {
 												if ($('#resource-update-id').val() != "") {
@@ -549,7 +550,7 @@
 													btn.button('loading');
 													var body = $('#resource-validate-body').val();
 													btn.append($('<input />', { type: 'hidden', name: 'resource-validate-body', value: body }));
-													$("#outerForm").attr("action", "validate").submit();
+													$("#outerForm").attr("action", "validate").attr("method", "POST").submit();
 												});								            
 								        </script>								        
 								    </div>

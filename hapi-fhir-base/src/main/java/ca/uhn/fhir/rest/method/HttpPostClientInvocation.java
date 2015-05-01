@@ -47,7 +47,7 @@ public class HttpPostClientInvocation extends BaseHttpClientInvocationWithConten
 		super(theContext, theTagList, theUrlExtension);
 	}
 
-	public HttpPostClientInvocation(FhirContext theContext, List<IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public HttpPostClientInvocation(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		super(theContext, theResources, theBundleType);
 	}
 

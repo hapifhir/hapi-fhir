@@ -12,6 +12,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
@@ -31,10 +32,11 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ClientServerValidationTestDstu2 {
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientServerValidationTestDstu2.class);
 	private FhirContext myCtx;
 	private HttpClient myHttpClient;
@@ -65,20 +67,21 @@ public class ClientServerValidationTestDstu2 {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				if (myFirstResponse) {
-					myFirstResponse=false;
+					myFirstResponse = false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
 				} else {
 					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())), Charset.forName("UTF-8"));
 				}
-			}});
+			}
+		});
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
-		
-		// don't load the conformance until the first time the client is actually used 
-		assertTrue(myFirstResponse); 
+
+		// don't load the conformance until the first time the client is actually used
+		assertTrue(myFirstResponse);
 		client.read(new UriDt("http://foo/Patient/123"));
 		assertFalse(myFirstResponse);
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
@@ -102,20 +105,21 @@ public class ClientServerValidationTestDstu2 {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				if (myFirstResponse) {
-					myFirstResponse=false;
+					myFirstResponse = false;
 					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
 				} else {
 					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(new Patient())), Charset.forName("UTF-8"));
 				}
-			}});
+			}
+		});
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
-		
-		// don't load the conformance until the first time the client is actually used 
-		assertTrue(myFirstResponse); 
+
+		// don't load the conformance until the first time the client is actually used
+		assertTrue(myFirstResponse);
 		client.read(new UriDt("http://foo/Patient/123"));
 		assertFalse(myFirstResponse);
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
@@ -139,7 +143,7 @@ public class ClientServerValidationTestDstu2 {
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 			fail();
@@ -151,4 +155,95 @@ public class ClientServerValidationTestDstu2 {
 			assertThat(out, containsString(want));
 		}
 	}
+
+	@Test
+	public void testClientUsesInterceptors() throws Exception {
+		Conformance conf = new Conformance();
+		conf.setFhirVersion("0.5.0");
+		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				if (myFirstResponse) {
+					myFirstResponse = false;
+					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
+				} else {
+					Patient resource = new Patient();
+					resource.addName().addFamily().setValue("FAM");
+					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)), Charset.forName("UTF-8"));
+				}
+			}
+		});
+
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+		client.registerInterceptor(new BasicAuthInterceptor("USER", "PASS"));
+		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
+		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
+		
+		assertEquals(2, capt.getAllValues().size());
+		
+		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
+		assertNotNull(auth);
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
+		assertNotNull(auth);
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+	}
+
+	@Test
+	public void testForceConformanceCheck() throws Exception {
+		Conformance conf = new Conformance();
+		conf.setFhirVersion("0.5.0");
+		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				if (myFirstResponse) {
+					myFirstResponse = false;
+					return new ReaderInputStream(new StringReader(confResource), Charset.forName("UTF-8"));
+				} else {
+					Patient resource = new Patient();
+					resource.addName().addFamily().setValue("FAM");
+					return new ReaderInputStream(new StringReader(myCtx.newXmlParser().encodeResourceToString(resource)), Charset.forName("UTF-8"));
+				}
+			}
+		});
+
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		
+		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
+		client.registerInterceptor(new BasicAuthInterceptor("USER", "PASS"));
+		
+		client.forceConformanceCheck();
+
+		assertEquals(1, capt.getAllValues().size());
+
+		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
+		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
+		
+		assertEquals(2, capt.getAllValues().size());
+		
+		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
+		assertNotNull(auth);
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
+		assertNotNull(auth);
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+	}
+
 }

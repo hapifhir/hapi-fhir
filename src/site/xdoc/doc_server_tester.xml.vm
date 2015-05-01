@@ -170,6 +170,43 @@
 			</subsection>
 			
 		</section>
+
+		<section name="Authorization">
+			
+			<p>
+				The testing UI uses its own client to talk to your FHIR server. In other words, there are no
+				special "hooks" which the tested uses to retrieve data from your server, it acts as an HTTP client
+				just like any other client.
+			</p>
+			
+			<p>
+				This does mean that if your server has any authorization requirements, you will need to configure the
+				tester UI to meet those requirements. For example, if your server has been configured to require
+				a HTTP Basic Auth header (e.g. <code>Authorization: Basic VVNFUjpQQVNT</code>) you need to 
+				configure the tester UI to send those credentials across when it is acting as 
+				a FHIR client.
+			</p>
+			
+			<p>
+				This is done by providing your own implementation of the <code>ITestingUiClientFactory</code>
+				interface. This interface takes in some details about the incoming request and produces
+				a client.
+			</p>
+
+			<p>
+				The following example shows an implementation of the client factory which registers
+				an authorization interceptor with hardcoded credentials.
+			</p>
+			<macro name="snippet">
+				<param name="file" value="restful-server-example/src/main/webapp/WEB-INF/hapi-fhir-tester-config.xml" />
+			</macro>
+			
+			<p>
+				This client factory is then registered with the TesterConfig in the <code>hapi-fhir-tester-config.xml</code>
+				file, as shown above.
+			</p>
+
+		</section>
 		
 	</body>
 

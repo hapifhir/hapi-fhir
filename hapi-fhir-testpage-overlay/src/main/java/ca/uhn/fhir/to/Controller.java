@@ -1203,7 +1203,7 @@ public class Controller {
 
 	private String parseNarrative(HomeRequest theRequest, EncodingEnum theCtEnum, String theResultBody) {
 		try {
-			IResource resource = theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
+			IResource resource = (IResource) theCtEnum.newParser(getContext(theRequest)).parseResource(theResultBody);
 			String retVal = resource.getText().getDiv().getValueAsString();
 			return StringUtils.defaultString(retVal);
 		} catch (Exception e) {

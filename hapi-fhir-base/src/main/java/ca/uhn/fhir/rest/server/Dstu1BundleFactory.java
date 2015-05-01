@@ -203,8 +203,6 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
 		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
 
-		myBundle.setPublished(theResult.getPublished());
-	
 		if (theServer.getPagingProvider() != null) {
 			int limit;
 			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
@@ -230,10 +228,6 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		
 		if (myBundle.getBundleId().isEmpty()) {
 			myBundle.getBundleId().setValue(UUID.randomUUID().toString());
-		}
-		
-		if (myBundle.getPublished().isEmpty()) {
-			myBundle.getPublished().setToCurrentTimeInLocalTimeZone();
 		}
 		
 		if (myBundle.getLinkBase().isEmpty()) {
@@ -264,12 +258,11 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 		
 		myBundle.getAuthorName().setValue(theAuthor);
 		myBundle.getBundleId().setValue(UUID.randomUUID().toString());
-		myBundle.getPublished().setToCurrentTimeInLocalTimeZone();
 		myBundle.getLinkBase().setValue(theServerBase);
 		myBundle.getLinkSelf().setValue(theCompleteUrl);
 		myBundle.getType().setValueAsEnum(theBundleType);

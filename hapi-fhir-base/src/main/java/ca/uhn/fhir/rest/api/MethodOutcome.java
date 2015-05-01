@@ -135,7 +135,7 @@ public class MethodOutcome {
 	}
 
 	/**
-	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are 
+	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are
 	 * returned to client instances, if the server has responded with an HTTP 201 Created.
 	 */
 	public Boolean getCreated() {
