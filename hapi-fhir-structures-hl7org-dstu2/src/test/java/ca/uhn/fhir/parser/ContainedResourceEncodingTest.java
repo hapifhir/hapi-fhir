@@ -3,7 +3,9 @@ package ca.uhn.fhir.parser;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.CodeableConcept;
@@ -29,7 +31,11 @@ import org.slf4j.LoggerFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.server.BundleInclusionRule;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.provider.dstu2hl7org.Dstu2Hl7OrgBundleFactory;
 
 /**
  * Initially contributed by Alexander Kley for bug #29
@@ -38,26 +44,26 @@ public class ContainedResourceEncodingTest {
 
 	private static Logger logger = LoggerFactory.getLogger(ContainedResourceEncodingTest.class);
 
-	private FhirContext ctx;
-
-	private Composition comp;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ContainedResourceEncodingTest.class);
 
 	private Practitioner author;
 
-	private Patient patient;
+	private Composition comp;
+
+	private FhirContext ctx;
 
 	private final String patFamName1 = "FirstFamilyName";
 
 	private final String patGivName1 = "FirstGivenName";
 
-	@Before
-	public void initTest() {
-		logger.info("[initTest]");
+	private Patient patient;
 
-		initPatient();
-		initAuthor();
-		initComposition();
-		this.ctx = new FhirContext();
+	private void initAuthor() {
+		this.author = new Practitioner();
+		this.author.setId((UUID.randomUUID().toString()));
+		this.author.addIdentifier().setSystem("DoctorID").setValue("4711");
+		this.author.addPractitionerRole().getRole().addCoding().setCode("doctor");
+		this.author.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
 
 	}
 
@@ -99,40 +105,109 @@ public class ContainedResourceEncodingTest {
 
 	}
 
-	private void initAuthor() {
-		this.author = new Practitioner();
-		this.author.setId((UUID.randomUUID().toString()));
-		this.author.addIdentifier().setSystem("DoctorID").setValue("4711");
-		this.author.addPractitionerRole().getRole().addCoding().setCode("doctor");
-		this.author.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
+	@Before
+	public void initTest() {
+		logger.info("[initTest]");
+
+		initPatient();
+		initAuthor();
+		initComposition();
+		this.ctx = new FhirContext();
 
 	}
 
 	@Test
-	public void testPatient() {
-		logger.debug("[xmlEncoding] encode resource to xml.");
+	public void testBundleWithContained() {
 
-		/**
-		 * This works fine, although patient instance is modifing from encoder
-		 */
-		final String expectedPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
-		logger.debug("[xmlEncoding] first encoding: {}", expectedPatientXml);
-		final String actualPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
-		// second encoding - xml is corrupt - i.e.: patient content 4 times! should be the same as after first encoding!
-		logger.debug("[xmlEncoding] second encoding: {}", actualPatientXml);
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(("123"));
 
-		Assert.assertEquals(expectedPatientXml.length(), actualPatientXml.length());
-		Assert.assertArrayEquals(expectedPatientXml.getBytes(), actualPatientXml.getBytes());
+		Observation observation = new Observation();
+
+		CodeableConcept obsName = new CodeableConcept();
+		obsName.setText("name");
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
+
+		Practitioner p = new Practitioner();
+		p.setId((UUID.randomUUID().toString()));
+		p.addIdentifier().setSystem("DoctorID").setValue("4711");
+		p.addPractitionerRole().getRole().setText("Doctor");
+		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
+
+		performer.setResource(p);
+		performers.add(performer);
+		observation.getPerformer().addAll(performers);
+
+		List<IBaseResource> list = new ArrayList<IBaseResource>();
+		list.add(dr);
+
+		Dstu2Hl7OrgBundleFactory builder = new Dstu2Hl7OrgBundleFactory(ctx);
+		Set<Include> inc2 = Collections.emptySet();
+		builder.addResourcesToBundle(list, BundleTypeEnum.TRANSACTION, "http://foo", BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE, inc2);
+		IBaseResource bundle = builder.getResourceBundle();
+
+		IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
+		String xml = parser.encodeResourceToString(bundle);
+		ourLog.info(xml);
+		Assert.assertTrue(xml.contains("Mueller"));
 
 	}
-	
+
+	@Test
+	public void testBundleWithContainedWithNoIdDt() {
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("123");
+
+		Observation observation = new Observation();
+
+		CodeableConcept obsName = new CodeableConcept();
+		obsName.setText("name");
+		observation.setCode(obsName);
+
+		Reference result = dr.addResult();
+		result.setResource(observation);
+
+		ArrayList<Reference> performers = new ArrayList<Reference>();
+		Reference performer = new Reference();
+
+		Practitioner p = new Practitioner();
+		// no idDt on practitioner p
+		p.addIdentifier().setSystem("DoctorID").setValue("4711");
+		p.addPractitionerRole().getRole().setText("Doctor");
+		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
+
+		performer.setResource(p);
+		performers.add(performer);
+		observation.getPerformer().addAll(performers);
+
+		List<IBaseResource> list = new ArrayList<IBaseResource>();
+		list.add(dr);
+
+		Dstu2Hl7OrgBundleFactory builder = new Dstu2Hl7OrgBundleFactory(ctx);
+		Set<Include> inc2 = Collections.emptySet();
+		builder.addResourcesToBundle(list, BundleTypeEnum.TRANSACTION, "http://foo", BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE, inc2);
+		IBaseResource bundle = builder.getResourceBundle();
+
+		IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
+		String xml = parser.encodeResourceToString(bundle);
+		Assert.assertTrue(xml.contains("Mueller"));
+
+	}
+
 	@Test
 	public void testComposition() {
 
 		IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
-		
+
 		assertEquals(0, this.comp.getContained().size());
-		
+
 		/**
 		 * This doesn't works, secund encoding creates corrupt xml
 		 */
@@ -161,84 +236,23 @@ public class ContainedResourceEncodingTest {
 		Assert.assertArrayEquals(expectedCompXml.getBytes(), actualCompXml.getBytes());
 
 	}
-	
-	
+
 	@Test
-	public void testBundleWithContained() {	
-		
-		DiagnosticReport dr = new DiagnosticReport();
-		dr.setId(("123"));
-		
-		Observation observation = new Observation();
-		 
-        CodeableConcept obsName = new CodeableConcept();
-        obsName.setText("name");
-		observation.setCode(obsName);
+	public void testPatient() {
+		logger.debug("[xmlEncoding] encode resource to xml.");
 
-		Reference result = dr.addResult();
-		result.setResource(observation);
+		/**
+		 * This works fine, although patient instance is modifing from encoder
+		 */
+		final String expectedPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
+		logger.debug("[xmlEncoding] first encoding: {}", expectedPatientXml);
+		final String actualPatientXml = this.ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(this.patient);
+		// second encoding - xml is corrupt - i.e.: patient content 4 times! should be the same as after first encoding!
+		logger.debug("[xmlEncoding] second encoding: {}", actualPatientXml);
 
-		ArrayList<Reference> performers = new ArrayList<Reference>();
-		Reference performer = new Reference();
-        
-        Practitioner p = new Practitioner();
-		p.setId((UUID.randomUUID().toString()));
-		p.addIdentifier().setSystem("DoctorID").setValue("4711");
-		p.addPractitionerRole().getRole().setText("Doctor");
-		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
-        
-        performer.setResource(p);
-        performers.add(performer);
-        observation.getPerformer().addAll(performers);
-        
-        
-        List<IBaseResource> list = new ArrayList<IBaseResource>();
-		list.add(dr);
-		Bundle bundle = null; // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
-        
-        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
-        String xml = parser.encodeBundleToString(bundle);
-        Assert.assertTrue(xml.contains("Mueller"));
-        
-	}
-	
-	@Test
-	public void testBundleWithContainedWithNoIdDt() {	
-		
-		DiagnosticReport dr = new DiagnosticReport();
-		dr.setId("123");
-		
-		Observation observation = new Observation();
-		 
-        CodeableConcept obsName = new CodeableConcept();
-        obsName.setText("name");
-		observation.setCode(obsName);
+		Assert.assertEquals(expectedPatientXml.length(), actualPatientXml.length());
+		Assert.assertArrayEquals(expectedPatientXml.getBytes(), actualPatientXml.getBytes());
 
-		Reference result = dr.addResult();
-		result.setResource(observation);
-
-		ArrayList<Reference> performers = new ArrayList<Reference>();
-		Reference performer = new Reference();
-        
-        Practitioner p = new Practitioner();
-		// no idDt on practitioner p
-		p.addIdentifier().setSystem("DoctorID").setValue("4711");
-		p.addPractitionerRole().getRole().setText("Doctor");
-		p.setName(new HumanName().addFamily("Mueller").addGiven("Klaus").addPrefix("Prof. Dr."));
-        
-        performer.setResource(p);
-        performers.add(performer);
-        observation.getPerformer().addAll(performers);
-        
-        
-        List<IAnyResource> list = new ArrayList<IAnyResource>();
-		list.add(dr);
-		Bundle bundle = null; // RestfulServer.createBundleFromResourceList(new FhirContext(), null, list, null, null, 0);
-        
-        IParser parser = this.ctx.newXmlParser().setPrettyPrint(true);
-        String xml = parser.encodeBundleToString(bundle);
-        Assert.assertTrue(xml.contains("Mueller"));
-        
 	}
 
 }

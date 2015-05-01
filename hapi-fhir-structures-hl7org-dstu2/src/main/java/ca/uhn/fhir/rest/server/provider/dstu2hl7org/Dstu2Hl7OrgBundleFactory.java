@@ -99,15 +99,15 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 
-            List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
+			List<ResourceReferenceInfo> references = myContext.newTerser().getAllResourceReferences(next);
 			do {
 				List<IBaseResource> addedResourcesThisPass = new ArrayList<IBaseResource>();
 
-                for (ResourceReferenceInfo nextRefInfo : references) {
-                    if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
-                        continue;
+				for (ResourceReferenceInfo nextRefInfo : references) {
+					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
+						continue;
 
-                    IBaseResource nextRes = (IBaseResource) nextRefInfo.getResourceReference().getResource();
+					IBaseResource nextRes = (IBaseResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
 							if (containedIds.contains(nextRes.getId().getValue())) {
@@ -130,22 +130,22 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 					}
 				}
 
-                includedResources.addAll(addedResourcesThisPass);
+				includedResources.addAll(addedResourcesThisPass);
 
 				// Linked resources may themselves have linked resources
-                references = new ArrayList<ResourceReferenceInfo>();
+				references = new ArrayList<ResourceReferenceInfo>();
 				for (IBaseResource iResource : addedResourcesThisPass) {
-                    List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
+					List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
 					references.addAll(newReferences);
 				}
 			} while (references.isEmpty() == false);
 
 			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
-			
-//			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);
-//			if (searchMode != null) {
-//				entry.getSearch().getModeElement().setValue(searchMode.getCode());
-//			}
+
+			// BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(next);
+			// if (searchMode != null) {
+			// entry.getSearch().getModeElement().setValue(searchMode.getCode());
+			// }
 		}
 
 		/*
@@ -157,7 +157,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 	}
 
-    @Override
+	@Override
 	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType) {
 
 		if (myBundle.getId().isEmpty()) {
@@ -194,7 +194,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
+	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
+			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
@@ -252,11 +253,13 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 			if (searchId != null) {
 				if (theOffset + numToReturn < theResult.size()) {
-					myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+					myBundle.addLink().setRelation(Constants.LINK_NEXT)
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - limit);
-					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
+							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
 				}
 			}
 		}
@@ -273,7 +276,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
+			BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
@@ -286,7 +290,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
 			for (IBaseResource nextBaseRes : theResources) {
-				IBaseResource next = (IBaseResource)nextBaseRes;
+				IBaseResource next = (IBaseResource) nextBaseRes;
 				BundleEntryComponent nextEntry = myBundle.addEntry();
 
 				nextEntry.setResource((Resource) next);
@@ -309,7 +313,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
-	private void addResourcesForSearch(List<IBaseResource> theResult) {
+	private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
 		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 
@@ -320,7 +324,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		for (IBaseResource nextBaseRes : theResult) {
-			IDomainResource next = (IDomainResource)nextBaseRes;
+			IDomainResource next = (IDomainResource) nextBaseRes;
 			Set<String> containedIds = new HashSet<String>();
 			for (IBaseResource nextContained : next.getContained()) {
 				if (nextContained.getId().isEmpty() == false) {
@@ -388,7 +392,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	public List<IBaseResource> toListOfResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
 		for (BundleEntryComponent next : myBundle.getEntry()) {
-			if (next.getResource()!=null) {
+			if (next.getResource() != null) {
 				retVal.add(next.getResource());
 			} else if (next.getTransactionResponse().getLocationElement().isEmpty() == false) {
 				IdType id = new IdType(next.getTransactionResponse().getLocation());

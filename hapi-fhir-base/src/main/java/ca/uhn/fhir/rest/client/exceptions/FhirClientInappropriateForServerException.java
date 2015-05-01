@@ -27,19 +27,19 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * communicate with a server which is a valid FHIR server but is incompatible
  * with this client for some reason.
  */
-public class FhirClientInnapropriateForServerException extends BaseServerResponseException {
+public class FhirClientInappropriateForServerException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;
 
-	public FhirClientInnapropriateForServerException(Throwable theCause) {
+	public FhirClientInappropriateForServerException(Throwable theCause) {
 		super(0, theCause);
 	}
 
-	public FhirClientInnapropriateForServerException(String theMessage, Throwable theCause) {
+	public FhirClientInappropriateForServerException(String theMessage, Throwable theCause) {
 		super(0, theMessage, theCause);
 	}
 
-	public FhirClientInnapropriateForServerException(String theMessage) {
+	public FhirClientInappropriateForServerException(String theMessage) {
 		super(0, theMessage);
 	}
 

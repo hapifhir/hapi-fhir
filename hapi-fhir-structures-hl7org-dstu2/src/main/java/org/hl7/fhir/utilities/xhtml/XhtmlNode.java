@@ -85,6 +85,9 @@ public class XhtmlNode implements IBaseXhtml {
   }
 
   public List<XhtmlNode> getChildNodes() {
+	  if (childNodes == null) {
+		  childNodes = new ArrayList<XhtmlNode>();
+	  }
     return childNodes;
   }
 

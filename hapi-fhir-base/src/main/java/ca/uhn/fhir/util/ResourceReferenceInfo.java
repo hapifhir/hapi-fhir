@@ -20,79 +20,82 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IReference;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 /**
  * Created by Bill de Beaubien on 2/26/2015.
  */
 public class ResourceReferenceInfo {
-    private String myOwningResource;
-    private String myName;
-    private BaseResourceReferenceDt myResource;
+	private String myOwningResource;
+	private String myName;
+	private IReference myResource;
 
-    public ResourceReferenceInfo(IBaseResource theOwningResource, List<String> thePathToElement, BaseResourceReferenceDt theResource) {
-        myOwningResource = theOwningResource.getClass().getAnnotation(ResourceDef.class).name();
-        myResource = theResource;
-        if (thePathToElement != null && !thePathToElement.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            thePathToElement.iterator();
-            for (Iterator<String> iterator = thePathToElement.iterator(); iterator.hasNext(); ) {
-                sb.append(iterator.next());
-                if (iterator.hasNext())
-                    sb.append(".");
-            }
-            myName = sb.toString();
-        } else {
-            myName = null;
-        }
-    }
+	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IReference theElement) {
 
-    @Override
-    public String toString() {
-        ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        b.append("name", myName);
-        b.append("resource", myResource.getReference());
-        return b.build();
-    }
+		myOwningResource = theContext.getResourceDefinition(theOwningResource).getName();
 
-    public String getName() {
-        return myName;
-    }
+		myResource = theElement;
+		if (thePathToElement != null && !thePathToElement.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			thePathToElement.iterator();
+			for (Iterator<String> iterator = thePathToElement.iterator(); iterator.hasNext();) {
+				sb.append(iterator.next());
+				if (iterator.hasNext())
+					sb.append(".");
+			}
+			myName = sb.toString();
+		} else {
+			myName = null;
+		}
+	}
 
-    public BaseResourceReferenceDt getResourceReference() {
-        return myResource;
-    }
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("name", myName);
+		b.append("resource", myResource.getReference());
+		return b.build();
+	}
 
-    public boolean matchesIncludeSet(Set<Include> theIncludes) {
-        if (theIncludes == null)
-            return false;
-        for (Include include : theIncludes) {
-            if (matchesInclude(include))
-                return true;
-        }
-        return false;
-    }
+	public String getName() {
+		return myName;
+	}
 
-    public boolean matchesInclude(Include theInclude) {
-        if (theInclude.getValue().equals("*")) {
-            return true;
-        }
-        if (theInclude.getValue().indexOf(':') != -1) {
-            // DSTU2 style
-            return (theInclude.getValue().equals(myOwningResource + ':' + myName));
-        } else {
-            // DSTU1 style
-            return (theInclude.getValue().equals(myOwningResource + '.' + myName));
-        }
-    }
+	public IReference getResourceReference() {
+		return myResource;
+	}
+
+	public boolean matchesIncludeSet(Set<Include> theIncludes) {
+		if (theIncludes == null)
+			return false;
+		for (Include include : theIncludes) {
+			if (matchesInclude(include))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean matchesInclude(Include theInclude) {
+		if (theInclude.getValue().equals("*")) {
+			return true;
+		}
+		if (theInclude.getValue().indexOf(':') != -1) {
+			// DSTU2 style
+			return (theInclude.getValue().equals(myOwningResource + ':' + myName));
+		} else {
+			// DSTU1 style
+			return (theInclude.getValue().equals(myOwningResource + '.' + myName));
+		}
+	}
 }

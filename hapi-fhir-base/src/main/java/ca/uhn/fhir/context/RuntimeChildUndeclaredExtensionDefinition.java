@@ -156,8 +156,11 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types);
 		def.sealAndInitialize(theContext, theClassToElementDefinitions);
 		myAttributeNameToDefinition.put(value, def);
+		
 		myDatatypeToDefinition.put(BaseResourceReferenceDt.class, def);
-		myDatatypeToDefinition.put(theContext.getVersion().getResourceReferenceType(), def);
+		
+		Class<? extends IBase> versionReferenceType = theContext.getVersion().getResourceReferenceType();
+		myDatatypeToDefinition.put(versionReferenceType, def);
 	}
 
 	public static String createExtensionChildName(BaseRuntimeElementDefinition<?> next) {

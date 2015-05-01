@@ -22,9 +22,10 @@ package org.hl7.fhir.instance.model.api;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.ICompositeType;
 import org.hl7.fhir.instance.model.IPrimitiveType;
 
-public interface IReference extends IBase {
+public interface IReference extends ICompositeType {
 
 	IBaseResource getResource();
 

@@ -484,7 +484,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testParseNarrative() throws Exception {
 		//@formatter:off
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
-		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">"); 
+		String htmlNs = fixDivNodeText(htmlNoNs); 
 		String res= "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 				"   <id value=\"1333\"/>\n" + 
 				"   <text>\n" + 
@@ -494,7 +494,14 @@ public class XmlParserHl7OrgDstu2Test {
 		//@formatter:on
 		
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
-		assertEquals(htmlNoNs, p.getText().getDivAsString());
+		assertEquals(htmlNs, p.getText().getDivAsString());
+	}
+
+	private String fixDivNodeText(String htmlNoNs) {
+		return htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">");
+	}
+	private String fixDivNodeTextJson(String htmlNoNs) {
+		return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
 	}
 	
 	@Test
@@ -841,7 +848,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueResource><reference value=\"Organization/123\"/></valueResource></extension>"));
+		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
@@ -1062,7 +1069,7 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
 		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
-		assertEquals("<div>John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);
@@ -1197,6 +1204,9 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient1 = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 		String encoded1 = ourCtx.newXmlParser().encodeResourceToString(patient1);
 
+		ourLog.info("Expected: {}", msg);
+		ourLog.info("Actual:   {}", encoded1);
+		
 		Diff d = new Diff(new StringReader(msg), new StringReader(encoded1));
 		assertTrue(d.toString(), d.identical());
 
@@ -1492,8 +1502,8 @@ public class XmlParserHl7OrgDstu2Test {
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
 		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;");
-		String act = actual.toString();
+		String exp = fixDivNodeTextJson(expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;"));
+		String act = fixDivNodeTextJson(actual.toString());
 
 		ourLog.info("Expected: {}", exp);
 		ourLog.info("Actual  : {}", act);

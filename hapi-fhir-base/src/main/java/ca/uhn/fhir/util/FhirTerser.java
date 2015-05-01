@@ -127,8 +127,8 @@ public class FhirTerser {
                 if (theElement == null || theElement.isEmpty()) {
                     return;
                 }
-                if (BaseResourceReferenceDt.class.isAssignableFrom(theElement.getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theElement));
+                if (IReference.class.isAssignableFrom(theElement.getClass())) {
+                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IReference)theElement));
                 }
             }
 
@@ -136,7 +136,7 @@ public class FhirTerser {
             public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
                                                   ExtensionDt theNextExt) {
                 if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
+                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
                 }
             }
         });

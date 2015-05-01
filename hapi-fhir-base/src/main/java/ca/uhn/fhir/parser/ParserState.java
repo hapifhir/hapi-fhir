@@ -1959,8 +1959,10 @@ class ParserState<T> {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
 				String resourceName = myContext.getResourceDefinition(elem).getName();
 				String versionId = elem.getMeta().getVersionId();
-				if (StringUtils.isNotBlank(versionId)) {
-				elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
+				if (StringUtils.isBlank(elem.getId().getIdPart())) {
+					// nothing
+				} else if (StringUtils.isNotBlank(versionId)) {
+					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
 				} else {
 					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart());
 				}

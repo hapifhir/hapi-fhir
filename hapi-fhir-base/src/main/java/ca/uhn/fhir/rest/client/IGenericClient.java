@@ -35,7 +35,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientInnapropriateForServerException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.IDelete;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
@@ -116,7 +116,7 @@ public interface IGenericClient extends IRestfulClient {
 	 * 
 	 * @throws FhirClientConnectionException
 	 *             if the conformance statement cannot be read, or if the client
-	 * @throws FhirClientInnapropriateForServerException
+	 * @throws FhirClientInappropriateForServerException
 	 *             If the conformance statement indicates that the server is inappropriate for this client (e.g. it implements the wrong version of FHIR)
 	 */
 	void forceConformanceCheck() throws FhirClientConnectionException;

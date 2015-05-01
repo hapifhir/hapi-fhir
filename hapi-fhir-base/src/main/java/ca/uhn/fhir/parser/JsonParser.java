@@ -678,7 +678,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		} else if (theResource instanceof IAnyResource) {
 			IAnyResource res = (IAnyResource) theResource;
-			if (theContainedResource && StringUtils.isNotBlank(res.getId().getIdPart())) {
+			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getId().getIdPart())) {
 				resourceId = res.getId().getIdPart();
 			}
 		}
