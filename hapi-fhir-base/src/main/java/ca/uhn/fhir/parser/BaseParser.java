@@ -40,10 +40,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -94,8 +94,8 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 		} else if (theTarget instanceof IDomainResource) {
-			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
-			for (IAnyResource next : containedResources) {
+			List<? extends IRiResource> containedResources = ((IDomainResource) theTarget).getContained();
+			for (IRiResource next : containedResources) {
 				String nextId = next.getId().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
 					if (!nextId.startsWith("#")) {
@@ -113,8 +113,8 @@ public abstract class BaseParser implements IParser {
 		}
 
 		{
-			List<IReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IReference.class);
-			for (IReference next : allElements) {
+			List<IBaseReference> allElements = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+			for (IBaseReference next : allElements) {
 				IBaseResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
@@ -144,7 +144,7 @@ public abstract class BaseParser implements IParser {
 		myContainedResources = contained;
 	}
 
-	protected String determineReferenceText(IReference theRef) {
+	protected String determineReferenceText(IBaseReference theRef) {
 		IIdType ref = theRef.getReference();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();

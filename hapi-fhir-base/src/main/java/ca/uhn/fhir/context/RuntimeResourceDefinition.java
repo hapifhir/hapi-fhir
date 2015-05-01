@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -58,7 +58,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		
 		try {
 			IBaseResource instance = theClass.newInstance();
-			if (instance instanceof IAnyResource) {
+			if (instance instanceof IRiResource) {
 				myStructureVersion = FhirVersionEnum.DSTU2_HL7ORG;
 			} else {
 				myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();

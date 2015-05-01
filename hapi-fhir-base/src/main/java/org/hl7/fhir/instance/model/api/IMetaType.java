@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.ICompositeType;
 
 public interface IMetaType extends ICompositeType {
 
-	ICoding addTag();
+	IBaseCoding addTag();
 
 	IMetaType setLastUpdated(Date theHeaderDateValue);
 

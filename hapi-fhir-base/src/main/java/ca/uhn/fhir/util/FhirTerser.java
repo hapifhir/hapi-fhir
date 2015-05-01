@@ -30,7 +30,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -127,8 +127,8 @@ public class FhirTerser {
                 if (theElement == null || theElement.isEmpty()) {
                     return;
                 }
-                if (IReference.class.isAssignableFrom(theElement.getClass())) {
-                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IReference)theElement));
+                if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
+                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IBaseReference)theElement));
                 }
             }
 
@@ -243,7 +243,7 @@ public class FhirTerser {
 			// These are primitive types
 			break;
 		case RESOURCE_REF:
-			IReference resRefDt = (IReference) theElement;
+			IBaseReference resRefDt = (IBaseReference) theElement;
 			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
@@ -353,7 +353,7 @@ public class FhirTerser {
 			// These are primitive types, so we don't need to visit their children
 			break;
 		case RESOURCE_REF:
-			IReference resRefDt = (IReference) theElement;
+			IBaseReference resRefDt = (IBaseReference) theElement;
 			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {

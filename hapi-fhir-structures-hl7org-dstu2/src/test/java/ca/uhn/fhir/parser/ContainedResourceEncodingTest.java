@@ -21,7 +21,7 @@ import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.Patient.AdministrativeGender;
 import org.hl7.fhir.instance.model.Practitioner;
 import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

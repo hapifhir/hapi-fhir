@@ -55,7 +55,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * Interface to be implemented by all built-in FHIR enumerations (i.e. the
  * actual FHIR-defined Java Enum will implement this interface) 
  */
-public interface IFhirEnum {
+public interface IBaseFhirEnum {
 
   /**
    * Get the XML/JSON representation for an enumerated value

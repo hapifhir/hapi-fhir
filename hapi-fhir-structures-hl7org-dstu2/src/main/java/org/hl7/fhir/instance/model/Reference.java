@@ -37,14 +37,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.utilities.Utilities;
 /**
  * A reference from one resource to another.
  */
 @DatatypeDef(name="Reference")
-public class Reference extends Type implements IReference, ICompositeType {
+public class Reference extends Type implements IBaseReference, ICompositeType {
 
 
     /**
@@ -57,7 +57,7 @@ public class Reference extends Type implements IReference, ICompositeType {
     /**
      * Constructor
      */
-    public Reference(IAnyResource theResource) {
+    public Reference(IRiResource theResource) {
         this.resource = theResource;
     }
 

@@ -40,10 +40,10 @@ import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -93,7 +93,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			IDomainResource next = (IDomainResource) nextBaseRes;
 
 			Set<String> containedIds = new HashSet<String>();
-			for (IAnyResource nextContained : next.getContained()) {
+			for (IRiResource nextContained : next.getContained()) {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}
@@ -332,11 +332,11 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 
-			List<IReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IReference.class);
+			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
 			do {
 				List<IBaseResource> addedResourcesThisPass = new ArrayList<IBaseResource>();
 
-				for (IReference nextRef : references) {
+				for (IBaseReference nextRef : references) {
 					IBaseResource nextRes = (IBaseResource) nextRef.getResource();
 					if (nextRes != null) {
 						if (nextRes.getId().hasIdPart()) {
@@ -361,9 +361,9 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 				}
 
 				// Linked resources may themselves have linked resources
-				references = new ArrayList<IReference>();
+				references = new ArrayList<IBaseReference>();
 				for (IBaseResource iResource : addedResourcesThisPass) {
-					List<IReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IReference.class);
+					List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
 					references.addAll(newReferences);
 				}
 

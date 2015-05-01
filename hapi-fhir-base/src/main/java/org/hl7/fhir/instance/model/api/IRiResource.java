@@ -20,22 +20,16 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.ICompositeType;
-import org.hl7.fhir.instance.model.IPrimitiveType;
 
-public interface IReference extends ICompositeType {
+public interface IRiResource extends IBaseResource {
 
-	IBaseResource getResource();
+	IIdType getId();
 
-	void setResource(IBaseResource theResource);
+	IRiResource setId(String theId);
 
-	IIdType getReference();
+	IIdType getIdElement();
 
-	IReference setReference(String theReference);
-
-	IBase setDisplay(String theValue);
-
-	IPrimitiveType<String> getDisplayElement();
+	IMetaType getMeta();
+	
 }

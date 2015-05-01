@@ -20,12 +20,22 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-public interface ICoding {
+import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.ICompositeType;
+import org.hl7.fhir.instance.model.IPrimitiveType;
 
-	ICoding setSystem(String theScheme);
+public interface IBaseReference extends ICompositeType {
 
-	ICoding setCode(String theTerm);
+	IBaseResource getResource();
 
-	ICoding setDisplay(String theLabel);
+	void setResource(IBaseResource theResource);
 
+	IIdType getReference();
+
+	IBaseReference setReference(String theReference);
+
+	IBase setDisplay(String theValue);
+
+	IPrimitiveType<String> getDisplayElement();
 }

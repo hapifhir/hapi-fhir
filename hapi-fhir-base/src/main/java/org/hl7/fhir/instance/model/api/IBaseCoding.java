@@ -20,16 +20,12 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+public interface IBaseCoding {
 
-public interface IAnyResource extends IBaseResource {
+	IBaseCoding setSystem(String theScheme);
 
-	IIdType getId();
+	IBaseCoding setCode(String theTerm);
 
-	IAnyResource setId(String theId);
+	IBaseCoding setDisplay(String theLabel);
 
-	IIdType getIdElement();
-
-	IMetaType getMeta();
-	
 }

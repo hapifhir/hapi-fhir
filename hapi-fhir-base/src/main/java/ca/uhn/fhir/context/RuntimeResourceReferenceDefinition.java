@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -55,7 +55,7 @@ public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefini
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
 		myResourceTypeToDefinition = new HashMap<Class<? extends IBaseResource>, RuntimeResourceDefinition>();
 		for (Class<? extends IBaseResource> next : myResourceTypes) {
-			if (next.equals(IResource.class) || next.equals(IAnyResource.class) || next.equals(IBaseResource.class)) {
+			if (next.equals(IResource.class) || next.equals(IRiResource.class) || next.equals(IBaseResource.class)) {
 				continue;
 			}
 			RuntimeResourceDefinition definition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);

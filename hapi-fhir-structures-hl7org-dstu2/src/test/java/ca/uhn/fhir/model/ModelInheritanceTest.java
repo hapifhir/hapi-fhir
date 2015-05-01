@@ -32,7 +32,7 @@ import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
@@ -46,13 +46,13 @@ import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.ICoding;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IDatatypeElement;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IMetaType;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
@@ -132,7 +132,7 @@ public class ModelInheritanceTest {
 
     @Test
     public void testCoding() {
-        assertTrue(ICoding.class.isAssignableFrom(Coding.class));
+        assertTrue(IBaseCoding.class.isAssignableFrom(Coding.class));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ModelInheritanceTest {
 
     @Test
     public void testReference() {
-        assertTrue(IReference.class.isAssignableFrom(Reference.class));
+        assertTrue(IBaseReference.class.isAssignableFrom(Reference.class));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class ModelInheritanceTest {
 
     @Test
     public void testResource() {
-        assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
+        assertTrue(IRiResource.class.isAssignableFrom(Resource.class));
     }
 
     @Test

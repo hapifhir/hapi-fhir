@@ -27,7 +27,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
@@ -39,9 +39,9 @@ import ca.uhn.fhir.model.api.annotation.ResourceDef;
 public class ResourceReferenceInfo {
 	private String myOwningResource;
 	private String myName;
-	private IReference myResource;
+	private IBaseReference myResource;
 
-	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IReference theElement) {
+	public ResourceReferenceInfo(FhirContext theContext, IBaseResource theOwningResource, List<String> thePathToElement, IBaseReference theElement) {
 
 		myOwningResource = theContext.getResourceDefinition(theOwningResource).getName();
 
@@ -72,7 +72,7 @@ public class ResourceReferenceInfo {
 		return myName;
 	}
 
-	public IReference getResourceReference() {
+	public IBaseReference getResourceReference() {
 		return myResource;
 	}
 

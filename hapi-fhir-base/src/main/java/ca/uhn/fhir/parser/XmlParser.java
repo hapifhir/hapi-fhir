@@ -50,7 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -60,7 +60,7 @@ import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -490,7 +490,7 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			IReference ref = (IReference) nextValue;
+			IBaseReference ref = (IBaseReference) nextValue;
 			if (!ref.isEmpty()) {
 				theEventWriter.writeStartElement(childName);
 				encodeResourceReferenceToStreamWriter(theEventWriter, ref, theResource, theIncludedResource);
@@ -673,7 +673,7 @@ public class XmlParser extends BaseParser implements IParser {
 		return retVal;
 	}
 
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IBaseReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
 		String reference = determineReferenceText(theRef);
 
 		encodeExtensionsIfPresent(theResource, theEventWriter, theRef, theIncludedResource);
@@ -751,7 +751,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		} else {
 			// HL7 structs
-			IAnyResource resource = (IAnyResource) theResource;
+			IRiResource resource = (IRiResource) theResource;
 			if (StringUtils.isNotBlank(resource.getId().getIdPart())) {
 				resourceId = resource.getId().getIdPart();
 			}
@@ -773,7 +773,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		if (theResource instanceof IAnyResource) {
+		if (theResource instanceof IRiResource) {
 			
 			// HL7.org Structures
 			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);

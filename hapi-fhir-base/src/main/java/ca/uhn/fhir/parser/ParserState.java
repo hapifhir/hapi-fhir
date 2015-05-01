@@ -43,7 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
@@ -1483,8 +1483,8 @@ class ParserState<T> {
 
 	private BaseState createResourceReferenceState(ParserState<T>.PreResourceState thePreResourceState, IBase newChildInstance) {
 		BaseState newState;
-		if (newChildInstance instanceof IReference) {
-			newState = new ResourceReferenceStateHl7Org(thePreResourceState, (IReference) newChildInstance);
+		if (newChildInstance instanceof IBaseReference) {
+			newState = new ResourceReferenceStateHl7Org(thePreResourceState, (IBaseReference) newChildInstance);
 		} else {
 			newState = new ResourceReferenceStateHapi(thePreResourceState, (BaseResourceReferenceDt) newChildInstance);
 		}
@@ -1699,7 +1699,7 @@ class ParserState<T> {
 				ICompositeType newChildInstance = (ICompositeType) newResourceReferenceDt(getPreResourceState().myInstance);
 				myExtension.setValue(newChildInstance);
 				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-					ParserState<T>.ResourceReferenceStateHl7Org newState = new ResourceReferenceStateHl7Org(getPreResourceState(), (IReference) newChildInstance);
+					ParserState<T>.ResourceReferenceStateHl7Org newState = new ResourceReferenceStateHl7Org(getPreResourceState(), (IBaseReference) newChildInstance);
 					push(newState);
 				} else {
 					ResourceReferenceStateHapi newState = new ResourceReferenceStateHapi(getPreResourceState(), (BaseResourceReferenceDt) newChildInstance);
@@ -2082,8 +2082,8 @@ class ParserState<T> {
 								}
 							}
 						}
-					}else					if (theElement instanceof IReference) {
-						IReference nextRef = (IReference) theElement;
+					}else					if (theElement instanceof IBaseReference) {
+						IBaseReference nextRef = (IBaseReference) theElement;
 						String ref = nextRef.getReference().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
@@ -2236,10 +2236,10 @@ class ParserState<T> {
 
 	private class ResourceReferenceStateHl7Org extends BaseState {
 
-		private IReference myInstance;
+		private IBaseReference myInstance;
 		private ResourceReferenceSubState mySubState;
 
-		public ResourceReferenceStateHl7Org(PreResourceState thePreResourceState, IReference theInstance) {
+		public ResourceReferenceStateHl7Org(PreResourceState thePreResourceState, IBaseReference theInstance) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			mySubState = ResourceReferenceSubState.INITIAL;
@@ -2297,7 +2297,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IReference getCurrentElement() {
+		protected IBaseReference getCurrentElement() {
 			return myInstance;
 		}
 

@@ -37,12 +37,12 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.ICoding;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 /**
  * A reference to a code defined by a terminology system.
  */
 @DatatypeDef(name="Coding")
-public class Coding extends Type implements ICoding, ICompositeType {
+public class Coding extends Type implements IBaseCoding, ICompositeType {
 
     /**
      * The identification of the code system that defines the meaning of the symbol in the code.

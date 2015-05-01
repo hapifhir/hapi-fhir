@@ -54,7 +54,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.IBase;
 import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -64,7 +64,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -420,7 +420,7 @@ public class JsonParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			IReference referenceDt = (IReference) theNextValue;
+			IBaseReference referenceDt = (IBaseReference) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -676,8 +676,8 @@ public class JsonParser extends BaseParser implements IParser {
 					resourceId = res.getId().getIdPart();
 				}
 			}
-		} else if (theResource instanceof IAnyResource) {
-			IAnyResource res = (IAnyResource) theResource;
+		} else if (theResource instanceof IRiResource) {
+			IRiResource res = (IRiResource) theResource;
 			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getId().getIdPart())) {
 				resourceId = res.getId().getIdPart();
 			}

@@ -36,14 +36,14 @@ import java.util.List;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IRiResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.Utilities;
 /**
  * Base Resource for everything.
  */
 @ResourceDef(name="Resource", profile="http://hl7.org/fhir/Profile/Resource")
-public abstract class Resource extends Base implements IAnyResource {
+public abstract class Resource extends Base implements IRiResource {
 
     /**
      * The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
