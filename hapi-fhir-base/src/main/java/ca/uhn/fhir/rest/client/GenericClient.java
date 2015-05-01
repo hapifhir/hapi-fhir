@@ -1418,7 +1418,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
-			IClientResponseHandler binding;
+			IClientResponseHandler<? extends IBase> binding;
 			if (myReturnBundleType != null) {
 				binding = new ResourceResponseHandler(myReturnBundleType, null);
 			} else {

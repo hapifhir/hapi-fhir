@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.IBase;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -47,7 +48,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 
-public class Bundle extends BaseBundle /* implements IElement */{
+public class Bundle extends BaseBundle implements IBase /* implements IElement */{
 
 	private ResourceMetadataMap myResourceMetadata;
 	private BoundCodeDt<BundleTypeEnum> myType;
