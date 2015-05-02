@@ -342,7 +342,7 @@ public class ResourceProviderDstu2Test {
 			//@formatter:on
 
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
-			ourLog.info(list.toString());
+			ourLog.info(methodName + ": " + list.toString());
 			assertThat(list, containsInRelativeOrder(orgNotMissing));
 			assertThat(list, not(containsInRelativeOrder(orgMissing)));
 		}
@@ -357,7 +357,7 @@ public class ResourceProviderDstu2Test {
 			//@formatter:on
 
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
-			ourLog.info(list.toString());
+			ourLog.info(methodName + ": " + list.toString());
 			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
 			assertThat(list, containsInRelativeOrder(orgMissing));
 		}
