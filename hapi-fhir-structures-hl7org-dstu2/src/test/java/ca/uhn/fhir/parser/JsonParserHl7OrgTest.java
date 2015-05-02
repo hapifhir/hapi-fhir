@@ -27,8 +27,8 @@ import org.custommonkey.xmlunit.Diff;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.AddressType;
-import org.hl7.fhir.instance.model.AddressType.AddressUse;
+import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
@@ -457,7 +457,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.setFoo(new AddressType().addLine("line1"));
+		patient.setFoo(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -465,7 +465,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -722,7 +722,7 @@ public class JsonParserHl7OrgTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new AddressType().addLine("line1"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -730,7 +730,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -1246,13 +1246,13 @@ public class JsonParserHl7OrgTest {
 		
 		@Child(order = 0, name = "foo")
 		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private AddressType myFoo;
+		private Address myFoo;
 
-		public AddressType getFoo() {
+		public Address getFoo() {
 			return myFoo;
 		}
 
-		public void setFoo(AddressType theFoo) {
+		public void setFoo(Address theFoo) {
 			myFoo = theFoo;
 		}
 

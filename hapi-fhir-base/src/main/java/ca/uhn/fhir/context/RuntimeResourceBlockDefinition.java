@@ -24,8 +24,8 @@ import org.hl7.fhir.instance.model.IBase;
 
 public class RuntimeResourceBlockDefinition extends BaseRuntimeElementCompositeDefinition<IBase> {
 
-	public RuntimeResourceBlockDefinition(String theName, Class<? extends IBase> theImplementingClass) {
-		super(theName, theImplementingClass);
+	public RuntimeResourceBlockDefinition(String theName, Class<? extends IBase> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
 	}
 
 	@Override

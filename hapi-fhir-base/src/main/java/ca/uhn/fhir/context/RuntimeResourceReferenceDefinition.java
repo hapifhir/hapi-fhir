@@ -38,9 +38,10 @@ public class RuntimeResourceReferenceDefinition extends BaseRuntimeElementDefini
 
 	/**
 	 * Constructor
+	 * @param theStandardType 
 	 */
-	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IBaseResource>> theResourceTypes) {
-		super(theName, BaseResourceReferenceDt.class);
+	public RuntimeResourceReferenceDefinition(String theName, List<Class<? extends IBaseResource>> theResourceTypes, boolean theStandardType) {
+		super(theName, BaseResourceReferenceDt.class, theStandardType);
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
 			throw new ConfigurationException("Element '" + theName + "' has no resource types noted");
 		}

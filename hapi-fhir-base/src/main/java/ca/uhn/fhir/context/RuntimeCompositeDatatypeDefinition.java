@@ -31,8 +31,8 @@ public class RuntimeCompositeDatatypeDefinition extends BaseRuntimeElementCompos
 
 	private boolean mySpecialization;
 
-	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass) {
-		super(theDef.name(), theImplementingClass);
+	public RuntimeCompositeDatatypeDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType) {
+		super(theDef.name(), theImplementingClass, theStandardType);
 		
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {

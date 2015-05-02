@@ -166,7 +166,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 				myDatatypeChildName = "valueResource";
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
-				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
+				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types, false);
 			} else {
 				myChildDef = elementDef;
 			}

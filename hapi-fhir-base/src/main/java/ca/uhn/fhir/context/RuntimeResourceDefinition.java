@@ -50,8 +50,8 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return myStructureVersion;
 	}
 
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation) {
-		super(theResourceName, theClass);
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType) {
+		super(theResourceName, theClass, theStandardType);
 		myContext= theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();

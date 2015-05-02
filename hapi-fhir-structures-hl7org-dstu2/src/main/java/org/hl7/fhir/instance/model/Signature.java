@@ -1,0 +1,307 @@
+package org.hl7.fhir.instance.model;
+
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted provided that the following conditions are met:
+  
+   * Redistributions of source code must retain the above copyright notice, this 
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice, 
+     this list of conditions and the following disclaimer in the documentation 
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to 
+     endorse or promote products derived from this software without specific 
+     prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+  POSSIBILITY OF SUCH DAMAGE.
+  
+*/
+
+// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+
+import java.util.*;
+
+import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+/**
+ * An XML digital signature along with supporting context.
+ */
+@DatatypeDef(name="Signature")
+public class Signature extends Type {
+
+    /**
+     * An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.
+     */
+    @Child(name ="type", type={Coding.class}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Indication of the reason the entity signed the object(s)", formalDefinition="An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document." )
+    protected List<Coding> type;
+
+    /**
+     * When the digital signature was signed.
+     */
+    @Child(name ="when", type={InstantType.class}, order=1, min=1, max=1)
+    @Description(shortDefinition="When the signature was created", formalDefinition="When the digital signature was signed." )
+    protected InstantType when;
+
+    /**
+     * A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).
+     */
+    @Child(name ="who", type={UriType.class, Practitioner.class, RelatedPerson.class, Patient.class}, order=2, min=1, max=1)
+    @Description(shortDefinition="Who signed the signature", formalDefinition="A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key)." )
+    protected Type who;
+
+    /**
+     * The base64 encoding of the XML-Signature.
+     */
+    @Child(name ="blob", type={Base64BinaryType.class}, order=3, min=1, max=1)
+    @Description(shortDefinition="The actual XML Dig-Sig", formalDefinition="The base64 encoding of the XML-Signature." )
+    protected Base64BinaryType blob;
+
+    private static final long serialVersionUID = 1072581988L;
+
+    public Signature() {
+      super();
+    }
+
+    public Signature(InstantType when, Type who, Base64BinaryType blob) {
+      super();
+      this.when = when;
+      this.who = who;
+      this.blob = blob;
+    }
+
+    /**
+     * @return {@link #type} (An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.)
+     */
+    public List<Coding> getType() { 
+      if (this.type == null)
+        this.type = new ArrayList<Coding>();
+      return this.type;
+    }
+
+    public boolean hasType() { 
+      if (this.type == null)
+        return false;
+      for (Coding item : this.type)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #type} (An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.)
+     */
+    // syntactic sugar
+    public Coding addType() { //3
+      Coding t = new Coding();
+      if (this.type == null)
+        this.type = new ArrayList<Coding>();
+      this.type.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Signature addType(Coding t) { //3
+      if (t == null)
+        return this;
+      if (this.type == null)
+        this.type = new ArrayList<Coding>();
+      this.type.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #when} (When the digital signature was signed.). This is the underlying object with id, value and extensions. The accessor "getWhen" gives direct access to the value
+     */
+    public InstantType getWhenElement() { 
+      if (this.when == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Signature.when");
+        else if (Configuration.doAutoCreate())
+          this.when = new InstantType(); // bb
+      return this.when;
+    }
+
+    public boolean hasWhenElement() { 
+      return this.when != null && !this.when.isEmpty();
+    }
+
+    public boolean hasWhen() { 
+      return this.when != null && !this.when.isEmpty();
+    }
+
+    /**
+     * @param value {@link #when} (When the digital signature was signed.). This is the underlying object with id, value and extensions. The accessor "getWhen" gives direct access to the value
+     */
+    public Signature setWhenElement(InstantType value) { 
+      this.when = value;
+      return this;
+    }
+
+    /**
+     * @return When the digital signature was signed.
+     */
+    public Date getWhen() { 
+      return this.when == null ? null : this.when.getValue();
+    }
+
+    /**
+     * @param value When the digital signature was signed.
+     */
+    public Signature setWhen(Date value) { 
+        if (this.when == null)
+          this.when = new InstantType();
+        this.when.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
+     */
+    public Type getWho() { 
+      return this.who;
+    }
+
+    /**
+     * @return {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
+     */
+    public UriType getWhoUriType() throws Exception { 
+      if (!(this.who instanceof UriType))
+        throw new Exception("Type mismatch: the type UriType was expected, but "+this.who.getClass().getName()+" was encountered");
+      return (UriType) this.who;
+    }
+
+    /**
+     * @return {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
+     */
+    public Reference getWhoReference() throws Exception { 
+      if (!(this.who instanceof Reference))
+        throw new Exception("Type mismatch: the type Reference was expected, but "+this.who.getClass().getName()+" was encountered");
+      return (Reference) this.who;
+    }
+
+    public boolean hasWho() { 
+      return this.who != null && !this.who.isEmpty();
+    }
+
+    /**
+     * @param value {@link #who} (A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).)
+     */
+    public Signature setWho(Type value) { 
+      this.who = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #blob} (The base64 encoding of the XML-Signature.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
+     */
+    public Base64BinaryType getBlobElement() { 
+      if (this.blob == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Signature.blob");
+        else if (Configuration.doAutoCreate())
+          this.blob = new Base64BinaryType(); // bb
+      return this.blob;
+    }
+
+    public boolean hasBlobElement() { 
+      return this.blob != null && !this.blob.isEmpty();
+    }
+
+    public boolean hasBlob() { 
+      return this.blob != null && !this.blob.isEmpty();
+    }
+
+    /**
+     * @param value {@link #blob} (The base64 encoding of the XML-Signature.). This is the underlying object with id, value and extensions. The accessor "getBlob" gives direct access to the value
+     */
+    public Signature setBlobElement(Base64BinaryType value) { 
+      this.blob = value;
+      return this;
+    }
+
+    /**
+     * @return The base64 encoding of the XML-Signature.
+     */
+    public byte[] getBlob() { 
+      return this.blob == null ? null : this.blob.getValue();
+    }
+
+    /**
+     * @param value The base64 encoding of the XML-Signature.
+     */
+    public Signature setBlob(byte[] value) { 
+        if (this.blob == null)
+          this.blob = new Base64BinaryType();
+        this.blob.setValue(value);
+      return this;
+    }
+
+      protected void listChildren(List<Property> childrenList) {
+        super.listChildren(childrenList);
+        childrenList.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("when", "instant", "When the digital signature was signed.", 0, java.lang.Integer.MAX_VALUE, when));
+        childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient)", "A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).", 0, java.lang.Integer.MAX_VALUE, who));
+        childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the XML-Signature.", 0, java.lang.Integer.MAX_VALUE, blob));
+      }
+
+      public Signature copy() {
+        Signature dst = new Signature();
+        copyValues(dst);
+        if (type != null) {
+          dst.type = new ArrayList<Coding>();
+          for (Coding i : type)
+            dst.type.add(i.copy());
+        };
+        dst.when = when == null ? null : when.copy();
+        dst.who = who == null ? null : who.copy();
+        dst.blob = blob == null ? null : blob.copy();
+        return dst;
+      }
+
+      protected Signature typedCopy() {
+        return copy();
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof Signature))
+          return false;
+        Signature o = (Signature) other;
+        return compareDeep(type, o.type, true) && compareDeep(when, o.when, true) && compareDeep(who, o.who, true)
+           && compareDeep(blob, o.blob, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof Signature))
+          return false;
+        Signature o = (Signature) other;
+        return compareValues(when, o.when, true) && compareValues(blob, o.blob, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (type == null || type.isEmpty()) && (when == null || when.isEmpty())
+           && (who == null || who.isEmpty()) && (blob == null || blob.isEmpty());
+      }
+
+
+}
+

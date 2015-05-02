@@ -68,9 +68,9 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 		if (BaseContainedDt.class.isAssignableFrom(actualType)) {
 			@SuppressWarnings("unchecked")
 			Class<? extends BaseContainedDt> type = (Class<? extends BaseContainedDt>) actualType;
-			myElem = new RuntimeElemContainedResources(type);
+			myElem = new RuntimeElemContainedResources(type, false);
 		} else if (List.class.isAssignableFrom(actualType)) {
-			myElem = new RuntimeElemContainedResourceList(IBaseResource.class);
+			myElem = new RuntimeElemContainedResourceList(IBaseResource.class, false);
 		} else {
 			throw new ConfigurationException("Fhir Version definition returned invalid contained type: " + actualType);
 		}

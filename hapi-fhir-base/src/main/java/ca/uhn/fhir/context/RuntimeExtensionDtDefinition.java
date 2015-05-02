@@ -34,8 +34,8 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 
 	private List<BaseRuntimeChildDefinition> myChildren;
 
-	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass) {
-		super(theDef, theImplementingClass);
+	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType) {
+		super(theDef, theImplementingClass, theStandardType);
 	}
 
 	@Override

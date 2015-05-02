@@ -27,8 +27,8 @@ import org.hl7.fhir.instance.model.IBaseResource;
  */
 public class RuntimeElemContainedResourceList extends BaseRuntimeElementDefinition<IBaseResource> {
 
-	public RuntimeElemContainedResourceList(Class<IBaseResource> theClass) {
-		super("contained", theClass);
+	public RuntimeElemContainedResourceList(Class<IBaseResource> theClass, boolean theStandardType) {
+		super("contained", theClass, theStandardType);
 	}
 
 	@Override

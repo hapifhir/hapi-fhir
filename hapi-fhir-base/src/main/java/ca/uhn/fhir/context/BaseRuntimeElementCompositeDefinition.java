@@ -37,8 +37,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
 	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
 
-	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass) {
-		super(theName, theImplementingClass);
+	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
 	}
 
 	public void addChild(BaseRuntimeChildDefinition theNext) {

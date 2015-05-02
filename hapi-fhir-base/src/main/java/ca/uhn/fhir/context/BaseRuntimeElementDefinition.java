@@ -35,25 +35,32 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
-	private String myName;
-	private Class<? extends T> myImplementingClass;
+	private final String myName;
+	private final Class<? extends T> myImplementingClass;
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
+	private final boolean myStandardType;
 
-	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass) {
+	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
 		assert StringUtils.isNotBlank(theName);
 		assert theImplementingClass != null;
 
-		myName = theName;
-		
+		String name = theName;
 		// TODO: remove this and fix for the model
-		if (myName.endsWith("Dt")) {
-			myName = myName.substring(0, myName.length() - 2);
+		if (name.endsWith("Dt")) {
+			name = name.substring(0, name.length() - 2);
 		}
 		
+		
+		myName = name;
+		myStandardType = theStandardType;
 		myImplementingClass = theImplementingClass;
+	}
+
+	public boolean isStandardType() {
+		return myStandardType;
 	}
 
 	@Override

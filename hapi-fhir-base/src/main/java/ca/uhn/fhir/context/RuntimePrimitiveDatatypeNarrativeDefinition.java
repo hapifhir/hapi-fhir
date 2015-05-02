@@ -28,8 +28,8 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeElementDefinition<XhtmlDt> {
 
-	public RuntimePrimitiveDatatypeNarrativeDefinition(String theName, Class<XhtmlDt> theImplementingClass) {
-		super(theName, theImplementingClass);
+	public RuntimePrimitiveDatatypeNarrativeDefinition(String theName, Class<XhtmlDt> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
 	}
 
 	@Override

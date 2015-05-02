@@ -90,7 +90,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
-				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
+				nextDef = new RuntimeResourceReferenceDefinition(elementName, types, false);
 				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
 				
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);

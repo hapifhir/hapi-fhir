@@ -270,22 +270,7 @@ public class FhirTerser {
 						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
 
 						if (childElementDef == null) {
-							StringBuilder b = new StringBuilder();
-							b.append("Found value of type[");
-							b.append(nextValue.getClass().getSimpleName());
-							b.append("] which is not valid for field[");
-							b.append(nextChild.getElementName());
-							b.append("] in ");
-							b.append(childDef.getName());
-							b.append(" - Valid types: ");
-							for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext();) {
-								BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
-								b.append(childByName.getImplementingClass().getSimpleName());
-								if (iter.hasNext()) {
-									b.append(", ");
-								}
-							}
-							throw new DataFormatException(b.toString());
+							childElementDef = myContext.getElementDefinition(nextValue.getClass()); 
 						}
 
 						if (nextChild instanceof RuntimeChildDirectResource) {

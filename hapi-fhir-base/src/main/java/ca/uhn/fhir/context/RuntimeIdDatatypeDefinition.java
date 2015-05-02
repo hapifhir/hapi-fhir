@@ -26,8 +26,8 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition implements IRuntimeDatatypeDefinition {
 
-	public RuntimeIdDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass) {
-		super(theDef, theImplementingClass);
+	public RuntimeIdDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
+		super(theDef, theImplementingClass, theStandardType);
 	}
 
 	@Override

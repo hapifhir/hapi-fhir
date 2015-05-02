@@ -34,8 +34,8 @@ public class RuntimePrimitiveDatatypeDefinition extends BaseRuntimeElementDefini
 
 	private boolean mySpecialization;
 
-	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass) {
-		super(theDef.name(), theImplementingClass);
+	public RuntimePrimitiveDatatypeDefinition(DatatypeDef theDef, Class<? extends IPrimitiveType<?>> theImplementingClass, boolean theStandardType) {
+		super(theDef.name(), theImplementingClass, theStandardType);
 		
 		String resourceName = theDef.name();
 		if (isBlank(resourceName)) {

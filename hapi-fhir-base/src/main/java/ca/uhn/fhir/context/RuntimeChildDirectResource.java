@@ -43,7 +43,7 @@ public class RuntimeChildDirectResource extends BaseRuntimeDeclaredChildDefiniti
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		return new RuntimeElementDirectResource();
+		return new RuntimeElementDirectResource(false);
 	}
 
 	@SuppressWarnings("unchecked")

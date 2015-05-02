@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import org.hl7.fhir.instance.model.AddressType;
+import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.Base;
 import org.hl7.fhir.instance.model.Binary;
@@ -95,7 +95,23 @@ public class ModelInheritanceTest {
 		for (BaseRuntimeElementDefinition<?> next : ourCtx.getElementDefinitions()) {
 			if (next instanceof BaseRuntimeElementCompositeDefinition || next instanceof RuntimePrimitiveDatatypeDefinition) {
 				String name = next.getImplementingClass().getName();
+				// TODO: these are all badly named 
 				if (name.endsWith(".Enumeration")) {
+					continue;
+				}
+				if (name.endsWith(".Reference")) {
+					continue;
+				}
+				if (name.endsWith(".Extension")) {
+					continue;
+				}
+				if (name.endsWith(".Attachment")) {
+					continue;
+				}
+				if (name.endsWith(".Period")) {
+					continue;
+				}
+				if (name.endsWith(".Address")) {
 					continue;
 				}
 				assertThat(name, endsWith("Type"));
@@ -114,7 +130,7 @@ public class ModelInheritanceTest {
      */
     @Test
     public void testAddress() {
-        assertTrue(ICompositeType.class.isAssignableFrom(AddressType.class));
+        assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
     }
 
     @Test
