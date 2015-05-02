@@ -31,7 +31,7 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 /**
  * Token parameter type for use in fluent client interfaces
  */
-public class TokenClientParam implements IParam {
+public class TokenClientParam extends BaseClientParam  implements IParam {
 
 	private String myParamName;
 

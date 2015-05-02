@@ -45,32 +45,24 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public String toString() {
+	String doGetQueryParameterQualifier() {
+		return null;
+	}
+
+	@Override
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
-		b.append(getClass().getSimpleName());
-		b.append("[");
 		if (myQuantity.getComparatorElement().isEmpty() == false) {
 			b.append(myQuantity.getComparatorElement().getValue());
 		}
 		if (myQuantity.getValueElement().isEmpty() == false) {
 			b.append(myQuantity.getValueElement().toString());
 		}
-		b.append("]");
 		return b.toString();
 	}
-
-	public QuantityCompararatorEnum getComparator() {
-		return myQuantity.getComparatorElement().getValueAsEnum();
-	}
-	
-	public BigDecimal getValue() {
-		return myQuantity.getValueElement().getValue();
-	}
-	
 	
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		super.setValueAsQueryToken(theQualifier, theValue);
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
 		if (getMissing() != null && isBlank(theValue)) {
 			return;
 		}
@@ -91,26 +83,29 @@ public class NumberParam extends BaseParam implements IQueryParameterType {
 			myQuantity.setValue(new BigDecimal(theValue));
 		}
 	}
+	
+	
+	public QuantityCompararatorEnum getComparator() {
+		return myQuantity.getComparatorElement().getValueAsEnum();
+	}
+
+	public BigDecimal getValue() {
+		return myQuantity.getValueElement().getValue();
+	}
 
 	@Override
-	public String getValueAsQueryToken() {
-		if (getMissing() != null) {
-			return super.getQueryParameterQualifier();
-		}
-		
+	public String toString() {
 		StringBuilder b = new StringBuilder();
+		b.append(getClass().getSimpleName());
+		b.append("[");
 		if (myQuantity.getComparatorElement().isEmpty() == false) {
 			b.append(myQuantity.getComparatorElement().getValue());
 		}
 		if (myQuantity.getValueElement().isEmpty() == false) {
 			b.append(myQuantity.getValueElement().toString());
 		}
+		b.append("]");
 		return b.toString();
-	}
-
-	@Override
-	public String getQueryParameterQualifier() {
-		return super.getQueryParameterQualifier();
 	}
 
 }

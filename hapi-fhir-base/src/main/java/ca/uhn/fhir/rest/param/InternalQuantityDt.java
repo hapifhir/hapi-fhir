@@ -414,6 +414,16 @@ class InternalQuantityDt
 		return this; 
 	}
 
+	@Override
+	public Boolean getMissing() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException();
+	}
+
  
 
 

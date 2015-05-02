@@ -42,21 +42,30 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		if (getMissing() != null) {
-			return super.getQueryParameterQualifier();
-		} else {
-			return null;
-		}
+	String doGetQueryParameterQualifier() {
+		return null;
+	}
+
+	@Override
+	String doGetValueAsQueryToken() {
+		return ParameterUtil.escape(myValue);
+	}
+
+	@Override
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+		myValue = ParameterUtil.unescape(theValue);
 	}
 
 	public String getValue() {
 		return myValue;
 	}
 
-	@Override
-	public String getValueAsQueryToken() {
-		return ParameterUtil.escape(myValue);
+	public StringDt getValueAsStringDt() {
+		return new StringDt(myValue);
+	}
+
+	public UriDt getValueAsUriDt() {
+		return new UriDt(myValue);
 	}
 
 	public String getValueNotNull() {
@@ -72,23 +81,10 @@ public class UriParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		myValue = ParameterUtil.unescape(theValue);
-	}
-
-	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("value", getValue());
 		return builder.toString();
-	}
-
-	public StringDt getValueAsStringDt() {
-		return new StringDt(myValue);
-	}
-
-	public UriDt getValueAsUriDt() {
-		return new UriDt(myValue);
 	}
 
 }

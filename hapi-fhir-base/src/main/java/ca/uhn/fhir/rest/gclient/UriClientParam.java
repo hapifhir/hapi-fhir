@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 /**
  *
  */
-public class UriClientParam implements IParam {
+public class UriClientParam extends BaseClientParam  implements IParam {
 
 	//TODO: handle :above and :below
 	

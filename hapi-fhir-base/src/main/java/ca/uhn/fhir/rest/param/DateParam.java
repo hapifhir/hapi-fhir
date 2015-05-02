@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class DateParam extends DateTimeDt implements IQueryParameterType, IQueryParameterOr<DateParam> {
 
 	private QuantityCompararatorEnum myComparator;
-	private BaseParam myBase=new BaseParam();
+	private BaseParam myBase=new BaseParam.ComposableBaseParam();
 
 	/**
 	 * Constructor
@@ -189,6 +189,16 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 
 	public DateTimeDt getValueAsDateTimeDt() {
 		return new DateTimeDt(getValueAsString());
+	}
+
+	@Override
+	public Boolean getMissing() {
+		return myBase.getMissing();
+	}
+
+	@Override
+	public void setMissing(Boolean theMissing) {
+		myBase.setMissing(theMissing);
 	}
 
 }

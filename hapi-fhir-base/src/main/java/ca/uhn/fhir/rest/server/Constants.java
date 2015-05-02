@@ -124,6 +124,8 @@ public class Constants {
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
+	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
+	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

@@ -365,6 +365,16 @@ public class InternalCodingDt extends BaseCodingDt implements ICompositeDatatype
 		return getDisplay();
 	}
 
+	@Override
+	public Boolean getMissing() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException();
+	}
+
   
 
 

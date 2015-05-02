@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.gclient;
 /**
  * Composite parameter type for use in fluent client interfaces
  */
-public class CompositeClientParam<A extends IParam, B extends IParam> implements IParam {
+public class CompositeClientParam<A extends IParam, B extends IParam> extends BaseClientParam implements IParam {
 
 	private String myName;
 

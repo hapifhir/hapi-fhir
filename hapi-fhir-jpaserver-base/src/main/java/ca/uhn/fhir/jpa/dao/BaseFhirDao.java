@@ -425,16 +425,14 @@ public abstract class BaseFhirDao implements IDao {
 
 		// Get list of IDs
 		searchHistoryCurrentVersion(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		searchHistoryHistory(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		// Sort merged list
 		Collections.sort(tuples, Collections.reverseOrder());
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated()) : tuples.toString();
 
 		return new IBundleProvider() {
 

@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -282,7 +283,7 @@ public class ResourceProviderDstu2Test {
 			response.close();
 		}
 	}
-	
+
 	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
@@ -311,6 +312,59 @@ public class ResourceProviderDstu2Test {
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	}
+
+	@Test
+	public void testSearchWithMissing() throws Exception {
+		String methodName = "testSearchWithMissing";
+
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		org.setName(methodName + "name");
+		IdDt orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+		org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		IdDt orgMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+		{
+			//@formatter:off
+			Bundle found = ourClient
+					.search()
+					.forResource(Organization.class)
+					.where(Organization.NAME.isMissing(false))
+					.prettyPrint()
+					.execute();
+			//@formatter:on
+
+			List<IdDt> list = toIdListUnqualifiedVersionless(found);
+			ourLog.info(methodName + ": " + list.toString());
+			assertThat(list, containsInRelativeOrder(orgNotMissing));
+			assertThat(list, not(containsInRelativeOrder(orgMissing)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient
+					.search()
+					.forResource(Organization.class)
+					.where(Organization.NAME.isMissing(true))
+					.prettyPrint()
+					.execute();
+			//@formatter:on
+
+			List<IdDt> list = toIdListUnqualifiedVersionless(found);
+			ourLog.info(methodName + ": " + list.toString());
+			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
+			assertThat(list, containsInRelativeOrder(orgMissing));
+		}
+	}
+
+	private List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
+		List<IdDt> list = new ArrayList<IdDt>();
+		for (BundleEntry next : found.getEntries()) {
+			list.add(next.getResource().getId().toUnqualifiedVersionless());
+		}
+		return list;
 	}
 
 	@Test
@@ -688,7 +742,8 @@ public class ResourceProviderDstu2Test {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -786,7 +841,8 @@ public class ResourceProviderDstu2Test {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
+				.encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 

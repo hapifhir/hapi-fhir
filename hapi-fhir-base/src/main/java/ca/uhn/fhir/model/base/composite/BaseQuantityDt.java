@@ -33,6 +33,8 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.StringParam;
 
 public abstract class BaseQuantityDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
@@ -208,4 +210,30 @@ public abstract class BaseQuantityDt extends BaseIdentifiableElement implements 
      * </p> 
 	 */
 	public abstract DecimalDt getValueElement();
+	
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link QuantityParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public Boolean getMissing() {
+		return null;
+	}
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link QuantityParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
+
+	
 }

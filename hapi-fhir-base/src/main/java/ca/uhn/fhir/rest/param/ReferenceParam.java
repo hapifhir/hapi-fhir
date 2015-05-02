@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 public class ReferenceParam extends IdDt implements IQueryParameterType {
 
 	private String myChain;
-	private BaseParam myBase=new BaseParam();
+	private BaseParam myBase=new BaseParam.ComposableBaseParam();
 
 	public ReferenceParam() {
 	}
@@ -204,6 +204,16 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		QuantityParam retVal = new QuantityParam();
 		retVal.setValueAsQueryToken(null, getValueAsQueryToken());
 		return retVal;
+	}
+
+	@Override
+	public Boolean getMissing() {
+		return myBase.getMissing();
+	}
+
+	@Override
+	public void setMissing(Boolean theMissing) {
+		myBase.setMissing(theMissing);
 	}
 
 }
