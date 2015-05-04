@@ -366,24 +366,31 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	private Set<Long> addPredicateParamMissing(Set<Long> thePids, String joinName, String theParamName, Class<? extends BaseResourceIndexedSearchParam> theParamTable) {
+		String resourceType = getContext().getResourceDefinition(getResourceType()).getName();
+		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.select(from.get("myId").as(Long.class));
-		
+
 		Subquery<Long> subQ = cq.subquery(Long.class);
 		Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable); 
 		subQ.select(subQfrom.get("myResourcePid").as(Long.class));
-		subQ.where(builder.equal(subQfrom.get("myParamName"), theParamName));
-		
+		Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
+		Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), resourceType);
+		subQ.where(builder.and(subQtype, subQname));
+
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), resourceType);
 		
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(inPids, joinPredicate));
+			cq.where(builder.and(inPids, typePredicate, joinPredicate));
 		} else {
-			cq.where(joinPredicate);
+			cq.where(builder.and(typePredicate, joinPredicate));
 		}
+		
+		ourLog.info("Adding :missing qualifier for parameter '{}'", theParamName);
 		
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		List<Long> resultList = q.getResultList();
