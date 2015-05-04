@@ -114,6 +114,7 @@ public class Constants {
 	public static final int STATUS_HTTP_304_NOT_MODIFIED = 304;
 	public static final int STATUS_HTTP_400_BAD_REQUEST = 400;
 	public static final int STATUS_HTTP_401_CLIENT_UNAUTHORIZED = 401;
+	public static final int STATUS_HTTP_403_FORBIDDEN= 403;
 	public static final int STATUS_HTTP_404_NOT_FOUND = 404;
 	public static final int STATUS_HTTP_405_METHOD_NOT_ALLOWED = 405;
 	public static final int STATUS_HTTP_409_CONFLICT = 409;
