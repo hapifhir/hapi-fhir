@@ -50,6 +50,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		registerExceptionType(PreconditionFailedException.STATUS_CODE, PreconditionFailedException.class);
 		registerExceptionType(ResourceVersionConflictException.STATUS_CODE, ResourceVersionConflictException.class);
 		registerExceptionType(UnprocessableEntityException.STATUS_CODE, UnprocessableEntityException.class);
+		registerExceptionType(ForbiddenOperationException.STATUS_CODE, ForbiddenOperationException.class);
 	}
 
 	private List<String> myAdditionalMessages = null;
