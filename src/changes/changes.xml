@@ -207,6 +207,11 @@
 				configures the parser to preserve versions in resource reference links when
 				encoding. By default, these are removed.
 			</action>
+			<action type="add" due-to="joel-costigliola" issue="171">
+				Add an exception for RESTful clients/servers to represent the
+				HTTP 403 Forbidden status code. Thanks to Joel Costigliola for
+				the patch!
+			</action>
 		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">

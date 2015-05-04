@@ -137,6 +137,11 @@
 			<name>Mohammad Jafari</name>
 			<organization>Edmond Scientific Company</organization>
 		</developer>
+		<developer>
+			<id>joel-costigliola</id>
+			<name>Joel Costigliola</name>
+			<organization>JCOS-Technologies</organization>
+		</developer>
 	</developers>
 
 	<licenses>
