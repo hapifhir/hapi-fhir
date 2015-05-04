@@ -355,7 +355,7 @@ public class ResourceProviderDstu2Test {
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + ": " + list.toString());
 			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
-			assertThat(list, containsInRelativeOrder(orgMissing));
+			assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 		}
 	}
 

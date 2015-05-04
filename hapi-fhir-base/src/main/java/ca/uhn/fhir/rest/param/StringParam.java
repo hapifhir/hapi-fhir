@@ -106,6 +106,9 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		if (myExact) {
 			builder.append("exact", myExact);
 		}
+		if (getMissing() != null) {
+			builder.append("missing", getMissing().booleanValue());
+		}
 		return builder.toString();
 	}
 
